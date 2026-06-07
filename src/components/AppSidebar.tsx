@@ -2,7 +2,7 @@ import { LayoutDashboard, Search, Check, Plus } from '@/components/icons';
 import { Clock3, ChevronDown, ChevronRight, Lock } from 'lucide-react';
 import { usePlatformLogo } from '@/hooks/usePlatformLogo';
 import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
-import { UserUtilityActions } from '@/components/layout/UserUtilityActions';
+import { AppUtilityBar } from '@/components/layout/AppUtilityBar';
 import { SidebarCollapsibleSection } from '@/components/sidebar/SidebarCollapsibleSection';
 import { SidebarNavCommandPalette } from '@/components/sidebar/SidebarNavCommandPalette';
 import { SidebarPersonaSwitch } from '@/components/sidebar/SidebarPersonaSwitch';
@@ -329,11 +329,7 @@ export function AppSidebar({ hideUtilityActions = false }: AppSidebarProps) {
 
   return (
     <>
-      {!hideUtilityActions && (
-        <div className="fixed top-3 right-3 z-[60] pointer-events-auto">
-          <UserUtilityActions variant="floating" />
-        </div>
-      )}
+      {!hideUtilityActions && <AppUtilityBar />}
       <div
         className="[&_[data-sidebar=sidebar]]:!text-white [&_[data-sidebar=menu-button]]:!text-white [&_[data-sidebar=menu-button]_*]:!text-white [&_[data-sidebar=group-label]]:!text-white [&_[data-sidebar=group-label]_*]:!text-white"
         style={

@@ -64,9 +64,9 @@ vi.mock('@/components/sidebar/SidebarNavCommandPalette', () => ({
   SidebarNavCommandPalette: () => null,
 }));
 
-vi.mock('@/components/layout/UserUtilityActions', () => ({
-  UserUtilityActions: () => (
-    <div>
+vi.mock('@/components/layout/AppUtilityBar', () => ({
+  AppUtilityBar: () => (
+    <div data-testid="app-utility-bar">
       <button type="button" aria-label="Langue : Français">
         FR
       </button>

@@ -31,8 +31,8 @@ interface LanguageSwitcherProps {
   className?: string;
   buttonClassName?: string;
   variant?: 'default' | 'ghost' | 'outline';
-  /** `nav` : icône compacte pour la topnav sombre (sans Select blanc) */
-  display?: 'default' | 'nav';
+  /** `nav` = topnav sombre | `shell` = barre utilitaire zone contenu */
+  display?: 'default' | 'nav' | 'shell';
   showLabel?: boolean;
   /**
    * État contrôlé d'ouverture du menu
@@ -131,6 +131,57 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
       {showLabel && <span className="hidden sm:inline">{currentLanguage.name}</span>}
     </span>
   );
+
+  const shellBtnClass =
+    'h-9 min-h-9 shrink-0 gap-1.5 rounded-lg border-0 bg-transparent px-2 sm:px-2.5 shadow-none text-muted-foreground hover:text-foreground hover:bg-accent/60';
+
+  // Shell : compact premium pour barre utilitaire (fond clair)
+  if (display === 'shell' && !isMobile) {
+    return (
+      <DropdownMenu open={open} onOpenChange={handleOpenChange}>
+        <DropdownMenuTrigger asChild>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className={cn(shellBtnClass, buttonClassName)}
+            aria-label={`Changer la langue (actuelle : ${currentLanguage.name})`}
+            disabled={isChanging}
+          >
+            {isChanging ? (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <Globe className="h-4 w-4 shrink-0" aria-hidden="true" />
+            )}
+            <span className="text-base leading-none" aria-hidden="true">
+              {currentLanguage.flag}
+            </span>
+            <span className="hidden sm:inline text-sm font-medium uppercase">
+              {currentLanguage.code}
+            </span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="min-w-[10rem]">
+          {AVAILABLE_LANGUAGES.map(lang => (
+            <DropdownMenuItem
+              key={lang.code}
+              onClick={() => changeLanguage(lang.code)}
+              className={cn(
+                'gap-2 cursor-pointer min-h-[44px]',
+                currentLanguage.code === lang.code && 'bg-accent'
+              )}
+            >
+              <span className="text-lg">{lang.flag}</span>
+              <span>{lang.name}</span>
+              {currentLanguage.code === lang.code && (
+                <span className="ml-auto text-xs text-muted-foreground">✓</span>
+              )}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  }
 
   // Topnav : menu déroulant sans SelectTrigger (évite le fond blanc)
   if (display === 'nav' && !isMobile) {
