@@ -385,16 +385,6 @@ const menuSections = [
         icon: DollarSign,
       },
       {
-        title: 'Méthodes de paiement',
-        url: '/dashboard/payment-methods',
-        icon: Wallet,
-      },
-      {
-        title: 'Connexions paiement',
-        url: '/dashboard/payment-connections',
-        icon: Link2,
-      },
-      {
         title: 'Commandes Avancées',
         url: '/dashboard/advanced-orders',
         icon: MessageSquare,
@@ -415,7 +405,7 @@ const menuSections = [
         icon: Calendar,
       },
       {
-        title: 'Réservations Récurrentes (Services)',
+        title: 'Séries récurrentes (par client)',
         url: '/dashboard/services/recurring-bookings',
         icon: Repeat,
       },
@@ -430,7 +420,7 @@ const menuSections = [
         icon: Calendar,
       },
       {
-        title: 'Réservations Récurrentes',
+        title: 'Abonnements récurrents (boutique)',
         url: '/dashboard/recurring-bookings',
         icon: Repeat,
       },
@@ -836,11 +826,6 @@ const menuSections = [
         icon: Bell,
       },
       {
-        title: 'IA Recommandations',
-        url: '/admin/ai-settings',
-        icon: Brain,
-      },
-      {
         title: 'Rejoindre la communauté',
         url: '/community',
         icon: Users,
@@ -968,7 +953,7 @@ const adminMenuSections = [
         icon: Calendar,
       },
       {
-        title: 'Réservations Récurrentes (Vendeur)',
+        title: 'Abonnements récurrents (boutique)',
         url: '/dashboard/recurring-bookings',
         icon: Repeat,
       },
@@ -1238,18 +1223,33 @@ const MAX_RECENT_ITEMS = 2;
 
 const DEFAULT_OPEN_SECTION_LABELS = new Set(['Principal', 'Administration']);
 
-const sectionContainsPath = (section: { items: { url: string }[] }, pathname: string): boolean =>
-  section.items.some(
-    item =>
-      pathname === item.url || (item.url !== '/dashboard' && pathname.startsWith(`${item.url}/`))
-  );
+/** Match exact pathname (optional ?query on item url). Avoids parent/child highlight collisions. */
+const isNavItemActive = (itemUrl: string, pathname: string, search: string): boolean => {
+  const [itemPath, itemQuery = ''] = itemUrl.split('?');
+  if (pathname !== itemPath) return false;
+  if (!itemQuery) return true;
+  const normalizedSearch = search.startsWith('?') ? search.slice(1) : search;
+  return normalizedSearch === itemQuery;
+};
+
+const parseNavTo = (url: string): string | { pathname: string; search: string } => {
+  const [pathname, query = ''] = url.split('?');
+  return query ? { pathname, search: `?${query}` } : url;
+};
+
+const sectionContainsPath = (
+  section: { items: { url: string }[] },
+  pathname: string,
+  search: string
+): boolean => section.items.some(item => isNavItemActive(item.url, pathname, search));
 
 const buildDefaultCollapsedSections = (
   sections: typeof menuSections,
-  pathname: string
+  pathname: string,
+  search: string
 ): string[] => {
   const openLabels = new Set(DEFAULT_OPEN_SECTION_LABELS);
-  const activeLabel = sections.find(s => sectionContainsPath(s, pathname))?.label;
+  const activeLabel = sections.find(s => sectionContainsPath(s, pathname, search))?.label;
   if (activeLabel) openLabels.add(activeLabel);
   return sections.map(s => s.label).filter(label => !openLabels.has(label));
 };
@@ -1361,12 +1361,10 @@ export function AppSidebar() {
   const allCurrentEntries = useMemo(() => flattenSections(activeSections), [activeSections]);
 
   const currentNavItem = useMemo(() => {
-    return allCurrentEntries.find(
-      item =>
-        location.pathname === item.url ||
-        (item.url !== '/dashboard' && location.pathname.startsWith(`${item.url}/`))
+    return allCurrentEntries.find(item =>
+      isNavItemActive(item.url, location.pathname, location.search)
     );
-  }, [allCurrentEntries, location.pathname]);
+  }, [allCurrentEntries, location.pathname, location.search]);
 
   useEffect(() => {
     try {
@@ -1392,8 +1390,10 @@ export function AppSidebar() {
   useEffect(() => {
     if (!prefsHydrated) return;
     if (localStorage.getItem(COLLAPSED_SECTIONS_KEY) !== null) return;
-    setCollapsedSections(buildDefaultCollapsedSections(activeSections, location.pathname));
-  }, [prefsHydrated, activeSections, location.pathname]);
+    setCollapsedSections(
+      buildDefaultCollapsedSections(activeSections, location.pathname, location.search)
+    );
+  }, [prefsHydrated, activeSections, location.pathname, location.search]);
 
   useEffect(() => {
     if (!prefsHydrated) return;
@@ -1402,12 +1402,14 @@ export function AppSidebar() {
   }, [prefsHydrated, stores.length]);
 
   useEffect(() => {
-    const activeLabel = activeSections.find(s => sectionContainsPath(s, location.pathname))?.label;
+    const activeLabel = activeSections.find(s =>
+      sectionContainsPath(s, location.pathname, location.search)
+    )?.label;
     if (!activeLabel) return;
     setCollapsedSections(prev =>
       prev.includes(activeLabel) ? prev.filter(l => l !== activeLabel) : prev
     );
-  }, [location.pathname, activeSections]);
+  }, [location.pathname, location.search, activeSections]);
 
   useEffect(() => {
     if (!prefsHydrated) return;
@@ -1829,8 +1831,11 @@ export function AppSidebar() {
                           <SidebarMenuItem key={`${section.label}-${item.title}-${item.url}`}>
                             <SidebarMenuButton asChild tooltip={item.title}>
                               <NavLink
-                                to={item.url}
-                                end={item.url === '/dashboard'}
+                                to={parseNavTo(item.url)}
+                                end
+                                isActive={() =>
+                                  isNavItemActive(item.url, location.pathname, location.search)
+                                }
                                 className={({ isActive }) =>
                                   `transition-all duration-200 group relative flex items-center ${
                                     isActive ? NAV_LINK_ACTIVE : NAV_LINK_INACTIVE
@@ -1907,7 +1912,11 @@ export function AppSidebar() {
                           <SidebarMenuItem key={`${section.label}-${item.title}-${item.url}`}>
                             <SidebarMenuButton asChild tooltip={item.title}>
                               <NavLink
-                                to={item.url}
+                                to={parseNavTo(item.url)}
+                                end
+                                isActive={() =>
+                                  isNavItemActive(item.url, location.pathname, location.search)
+                                }
                                 className={({ isActive }) =>
                                   `transition-all duration-200 ${
                                     isActive ? NAV_LINK_ACTIVE : NAV_LINK_INACTIVE

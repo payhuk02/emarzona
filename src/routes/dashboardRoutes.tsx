@@ -363,8 +363,8 @@ export const dashboardRoutes = (
     {pr('/dashboard/digital-products/bundles', DigitalBundlesManagement)}
     {pr('/dashboard/digital-products/bundles/create', CreateBundle)}
     {pr('/dashboard/my-licenses', MyLicenses)}
+    {pr('/dashboard/license-management', LicenseManagement)}
     {pr('/dashboard/licenses/manage/:id', LicenseManagement)}
-    {pr('/dashboard/license-management', MyLicenses)}
     {pr('/dashboard/digital/analytics/:productId', DigitalProductAnalytics)}
     {pr('/dashboard/digital/updates', DigitalProductUpdatesDashboard)}
     {pr('/dashboard/digital/updates/:productId', DigitalProductUpdatesDashboard)}
