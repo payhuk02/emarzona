@@ -10,6 +10,7 @@ import {
   CommandSeparator,
 } from '@/components/ui/command';
 import type { SidebarNavEntry } from './sidebar-nav-shared';
+import { recordNavClick } from '@/hooks/useNavigationAnalytics';
 
 interface SidebarNavCommandPaletteProps {
   entries: SidebarNavEntry[];
@@ -29,6 +30,7 @@ export function SidebarNavCommandPalette({
 
   const handleSelect = useCallback(
     (url: string) => {
+      recordNavClick(url);
       setOpen(false);
       navigate(url);
     },

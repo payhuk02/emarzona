@@ -1,5 +1,6 @@
 import { Plus } from '@/components/icons';
 import { isNavItemActive } from '@/config/navigation.helpers';
+import { isNavFeatureEnabled } from '@/lib/navigation/feature-flags';
 import type {
   FlatNavEntry,
   NavItem,
@@ -13,6 +14,8 @@ export type RawNavItem = {
   title: string;
   url: string;
   icon: NavItem['icon'];
+  /** Optional client feature flag key (see lib/navigation/feature-flags) */
+  featureFlag?: string;
 };
 
 export type RawNavSection = {
@@ -123,15 +126,17 @@ function resolveTier(url: string, sectionLabel: string): NavTier {
 export function enrichNavSections(sections: RawNavSection[]): NavSection[] {
   return sections.map(section => ({
     label: section.label,
-    items: section.items.map(item => {
-      const path = item.url.split('?')[0];
-      return {
-        ...item,
-        personas: resolvePersonas(item.url, section.label),
-        tier: resolveTier(item.url, section.label),
-        createGroup: CREATE_PATHS.has(path),
-      };
-    }),
+    items: section.items
+      .filter(item => isNavFeatureEnabled(item.featureFlag))
+      .map(item => {
+        const path = item.url.split('?')[0];
+        return {
+          ...item,
+          personas: resolvePersonas(item.url, section.label),
+          tier: resolveTier(item.url, section.label),
+          createGroup: CREATE_PATHS.has(path),
+        };
+      }),
   }));
 }
 
