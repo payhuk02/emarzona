@@ -245,14 +245,29 @@ const menuSections = [
         icon: Package,
       },
       {
-        title: 'Créer un Produit',
-        url: '/dashboard/products/new',
-        icon: Package,
+        title: 'Créer un produit digital',
+        url: '/dashboard/products/new/digital',
+        icon: Download,
       },
       {
-        title: 'Créer un Cours',
+        title: 'Créer un produit physique',
+        url: '/dashboard/products/new/physical',
+        icon: ShoppingBag,
+      },
+      {
+        title: 'Créer un service',
+        url: '/dashboard/products/new/service',
+        icon: Calendar,
+      },
+      {
+        title: 'Créer un cours',
         url: '/dashboard/courses/new',
         icon: GraduationCap,
+      },
+      {
+        title: "Créer une œuvre d'artiste",
+        url: '/dashboard/products/new/artist',
+        icon: Camera,
       },
       {
         title: 'Mes Cours (Vendeur)',

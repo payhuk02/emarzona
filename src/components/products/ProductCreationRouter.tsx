@@ -146,6 +146,13 @@ export const ProductCreationRouter = ({
   }, [navigate]);
 
   /**
+   * Synchroniser le type sélectionné quand l'URL change (navigation sidebar)
+   */
+  useEffect(() => {
+    setSelectedType(initialProductType || null);
+  }, [initialProductType]);
+
+  /**
    * Logging on mount
    */
   useEffect(() => {
@@ -253,9 +260,3 @@ export const ProductCreationRouter = ({
     </Suspense>
   );
 };
-
-
-
-
-
-
