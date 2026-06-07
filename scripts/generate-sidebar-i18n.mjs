@@ -61,8 +61,26 @@ sections.creer = 'Créer';
 sections.emails = 'Emails';
 sections.clients = 'Clients';
 sections.commandes = 'Commandes';
+sections.reservations = 'Réservations';
+sections.inventaire = 'Inventaire';
+sections.expeditions = 'Expéditions';
+sections.boutique = 'Boutique';
+sections.promotions = 'Promotions';
+sections.cours = 'Cours';
+sections.affiliation = 'Affiliation';
+sections.portail_digital = 'Portail Digital';
+sections.portail_physique = 'Portail Physique';
+sections.parametres = 'Paramètres';
 
-const fr = { sidebar: { sections, contextGroups: contextGroupsFr, items } };
+const extraContextGroupsFr = {
+  commandes_clients: 'Commandes & Clients',
+  services_reservations: 'Services & Réservations',
+  logistique_inventaire: 'Logistique & Inventaire',
+  optimisation: 'Optimisation',
+  produits_physiques: 'Produits Physiques',
+};
+
+Object.assign(contextGroupsFr, extraContextGroupsFr);
 const contextGroupsEn = {
   integrations: 'Integrations',
   webhooks: 'Webhooks',
@@ -82,7 +100,27 @@ const enSections = {
   emails: 'Emails',
   clients: 'Customers',
   commandes: 'Orders',
+  reservations: 'Bookings',
+  inventaire: 'Inventory',
+  expeditions: 'Shipping',
+  boutique: 'Store',
+  promotions: 'Promotions',
+  cours: 'Courses',
+  affiliation: 'Affiliate',
+  portail_digital: 'Digital Portal',
+  portail_physique: 'Physical Portal',
+  parametres: 'Settings',
 };
+
+Object.assign(contextGroupsEn, {
+  commandes_clients: 'Orders & Customers',
+  services_reservations: 'Services & Bookings',
+  logistique_inventaire: 'Logistics & Inventory',
+  optimisation: 'Optimization',
+  produits_physiques: 'Physical Products',
+});
+
+const fr = { sidebar: { sections, contextGroups: contextGroupsFr, items } };
 
 const en = {
   sidebar: {
@@ -103,6 +141,11 @@ const contextGroupsEs = {
   email_marketing: 'Email marketing',
   croissance: 'Crecimiento',
   other: 'Otros',
+  commandes_clients: 'Pedidos y clientes',
+  services_reservations: 'Servicios y reservas',
+  logistique_inventaire: 'Logística e inventario',
+  optimisation: 'Optimización',
+  produits_physiques: 'Productos físicos',
 };
 
 const contextGroupsDe = {
@@ -116,6 +159,11 @@ const contextGroupsDe = {
   email_marketing: 'E-Mail-Marketing',
   croissance: 'Wachstum',
   other: 'Sonstige',
+  commandes_clients: 'Bestellungen & Kunden',
+  services_reservations: 'Services & Buchungen',
+  logistique_inventaire: 'Logistik & Inventar',
+  optimisation: 'Optimierung',
+  produits_physiques: 'Physische Produkte',
 };
 
 const contextGroupsPt = {
@@ -129,6 +177,11 @@ const contextGroupsPt = {
   email_marketing: 'Email marketing',
   croissance: 'Crescimento',
   other: 'Outros',
+  commandes_clients: 'Pedidos e clientes',
+  services_reservations: 'Serviços e reservas',
+  logistique_inventaire: 'Logística e inventário',
+  optimisation: 'Otimização',
+  produits_physiques: 'Produtos físicos',
 };
 
 const es = { sidebar: { ...en.sidebar, contextGroups: contextGroupsEs } };

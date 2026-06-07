@@ -1,41 +1,24 @@
 import type { TFunction } from 'i18next';
 import { enrichNavSections, filterNavSections } from '@/config/navigation.enrich';
-import { translateNavSections } from '@/config/navigation.i18n';
+import { translateNavItemTitle, translateNavSections } from '@/config/navigation.i18n';
+import { PHASE6_CONTEXT_CONFIGS } from '@/config/navigation.context.phase6';
+import { SETTINGS_CONTEXT_CONFIG } from '@/config/navigation.context.settings';
+import type {
+  ContextSidebarConfig,
+  ContextSidebarNavGroup,
+  ContextSidebarNavResult,
+  StaticContextNavItem,
+} from '@/config/navigation.context.types';
 import { userMenuSections } from '@/config/navigation.menus';
-import type { NavItem, NavSection } from '@/config/navigation.types';
+import type { NavItem, NavSection, SidebarPersona } from '@/config/navigation.types';
 
-export type ContextSidebarGroupConfig = {
-  groupKey: string;
-  /** French fallback label */
-  defaultLabel: string;
-  paths: string[];
-};
-
-export type ContextSidebarConfig = {
-  id: string;
-  sectionKey: string;
-  rootPath: string;
-  ariaLabel: string;
-  /** Breadcrumb root label override key (sidebar.sections.*) */
-  breadcrumbSectionKey?: string;
-  includePaths?: string[];
-  excludePaths?: string[];
-  groups?: ContextSidebarGroupConfig[];
-  collapsibleGroups?: boolean;
-};
-
-export type ContextSidebarNavGroup = {
-  groupKey: string;
-  label: string;
-  items: NavItem[];
-};
-
-export type ContextSidebarNavResult = {
-  sectionLabel: string;
-  rootPath: string;
-  items: NavItem[];
-  groups: ContextSidebarNavGroup[] | null;
-};
+export type {
+  ContextSidebarConfig,
+  ContextSidebarGroupConfig,
+  ContextSidebarNavGroup,
+  ContextSidebarNavResult,
+  StaticContextNavItem,
+} from '@/config/navigation.context.types';
 
 export const CONTEXT_SIDEBAR_CONFIGS = {
   finance: {
@@ -193,6 +176,8 @@ export const CONTEXT_SIDEBAR_CONFIGS = {
       '/dashboard/payments',
     ],
   },
+  settings: SETTINGS_CONTEXT_CONFIG,
+  ...PHASE6_CONTEXT_CONFIGS,
 } as const satisfies Record<string, ContextSidebarConfig>;
 
 export type ContextSidebarConfigId = keyof typeof CONTEXT_SIDEBAR_CONFIGS;
@@ -249,8 +234,48 @@ function buildGroups(
   return groups;
 }
 
+function collectSectionItems(sections: NavSection[], config: ContextSidebarConfig): NavItem[] {
+  const keys = [config.sectionKey, ...(config.additionalSectionKeys ?? [])];
+  const seen = new Set<string>();
+  const items: NavItem[] = [];
+
+  for (const key of keys) {
+    const section = sections.find(s => s.sectionKey === key);
+    if (!section) continue;
+    for (const item of section.items) {
+      if (seen.has(item.url)) continue;
+      seen.add(item.url);
+      items.push(item);
+    }
+  }
+
+  return items;
+}
+
+function staticItemsToNavItems(staticItems: StaticContextNavItem[]): NavItem[] {
+  return staticItems.map(item => ({
+    title: item.title,
+    url: item.url,
+    icon: item.icon,
+    personas: ['seller'] as SidebarPersona[],
+    tier: 'extended' as const,
+  }));
+}
+
+export function getContextNavSections(): NavSection[] {
+  return enrichNavSections(userMenuSections);
+}
+
+export function getNavSectionsForPersona(persona: SidebarPersona = 'seller'): NavSection[] {
+  return filterNavSections(enrichNavSections(userMenuSections), persona, { sidebarOnly: false });
+}
+
 export function getSellerNavSections(): NavSection[] {
-  return filterNavSections(enrichNavSections(userMenuSections), 'seller', { sidebarOnly: false });
+  return getNavSectionsForPersona('seller');
+}
+
+export function getBuyerNavSections(): NavSection[] {
+  return getNavSectionsForPersona('buyer');
 }
 
 export function resolveContextSidebarNav(
@@ -258,13 +283,40 @@ export function resolveContextSidebarNav(
   config: ContextSidebarConfig,
   t: TFunction
 ): ContextSidebarNavResult {
+  if (config.staticItems?.length) {
+    const items = config.staticItems.map(item => ({
+      ...staticItemsToNavItems([item])[0],
+      title: translateNavItemTitle({ title: item.title, url: item.url }, t),
+    }));
+    const breadcrumbKey = config.breadcrumbSectionKey ?? config.sectionKey;
+    return {
+      sectionLabel: t(`sidebar.sections.${breadcrumbKey}`, { defaultValue: 'Paramètres' }),
+      rootPath: config.rootPath,
+      items,
+      groups: null,
+    };
+  }
+
+  const sectionItems = collectSectionItems(sections, config);
   const section = sections.find(s => s.sectionKey === config.sectionKey);
-  if (!section) {
+  if (!section && sectionItems.length === 0) {
     return { sectionLabel: '', rootPath: config.rootPath, items: [], groups: null };
   }
 
-  const filteredItems = filterItemsByPaths(section.items, config);
-  const [translated] = translateNavSections([{ ...section, items: filteredItems }], t);
+  const filteredItems = filterItemsByPaths(sectionItems, config);
+  const supplement = config.supplementStaticItems?.length
+    ? staticItemsToNavItems(config.supplementStaticItems)
+    : [];
+  const mergedItems = [
+    ...filteredItems,
+    ...supplement.filter(s => !filteredItems.some(f => f.url === s.url)),
+  ];
+  const pseudoSection: NavSection = {
+    label: section?.label ?? config.sectionKey,
+    sectionKey: config.sectionKey,
+    items: mergedItems,
+  };
+  const [translated] = translateNavSections([pseudoSection], t);
 
   const breadcrumbKey = config.breadcrumbSectionKey ?? config.sectionKey;
   const sectionLabel = t(`sidebar.sections.${breadcrumbKey}`, {

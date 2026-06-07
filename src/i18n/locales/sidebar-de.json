@@ -21,7 +21,17 @@
       "creer": "Create",
       "emails": "Emails",
       "clients": "Customers",
-      "commandes": "Orders"
+      "commandes": "Orders",
+      "reservations": "Bookings",
+      "inventaire": "Inventory",
+      "expeditions": "Shipping",
+      "boutique": "Store",
+      "promotions": "Promotions",
+      "cours": "Courses",
+      "affiliation": "Affiliate",
+      "portail_digital": "Digital Portal",
+      "portail_physique": "Physical Portal",
+      "parametres": "Settings"
     },
     "contextGroups": {
       "integrations": "Integrationen",
@@ -33,7 +43,12 @@
       "clients_promotions": "Kunden & Aktionen",
       "email_marketing": "E-Mail-Marketing",
       "croissance": "Wachstum",
-      "other": "Sonstige"
+      "other": "Sonstige",
+      "commandes_clients": "Bestellungen & Kunden",
+      "services_reservations": "Services & Buchungen",
+      "logistique_inventaire": "Logistik & Inventar",
+      "optimisation": "Optimierung",
+      "produits_physiques": "Physische Produkte"
     },
     "items": {
       "dashboard": "Dashboard",

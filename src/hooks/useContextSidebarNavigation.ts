@@ -1,17 +1,14 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  getSellerNavSections,
+  getContextNavSections,
   resolveContextSidebarNav,
   type ContextSidebarConfig,
 } from '@/config/navigation.context';
 
 export function useContextSidebarNavigation(config: ContextSidebarConfig) {
   const { t } = useTranslation();
-  const sellerSections = useMemo(() => getSellerNavSections(), []);
+  const sections = useMemo(() => getContextNavSections(), []);
 
-  return useMemo(
-    () => resolveContextSidebarNav(sellerSections, config, t),
-    [sellerSections, config, t]
-  );
+  return useMemo(() => resolveContextSidebarNav(sections, config, t), [sections, config, t]);
 }
