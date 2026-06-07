@@ -73,6 +73,7 @@ import {
   Activity,
   WifiOff,
   HardDrive,
+  Lock,
   MessageSquare as LucideMessageSquare,
 } from 'lucide-react';
 import { usePlatformLogo } from '@/hooks/usePlatformLogo';
@@ -101,6 +102,13 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAdmin } from '@/hooks/useAdmin';
 import { useStoreContext } from '@/contexts/StoreContext';
+import { useStorePhysicalAccess } from '@/hooks/billing/useStorePhysicalAccess';
+import {
+  hasPhysicalFeatureAccess,
+  requiredPlanForFeature,
+  type PhysicalPlanSlug,
+} from '@/lib/billing/physical-plan-capabilities';
+import { requiredPhysicalFeatureForPath } from '@/lib/billing/physical-route-capabilities';
 import { logger } from '@/lib/logger';
 import { Check, Plus } from '@/components/icons';
 
@@ -200,11 +208,6 @@ const menuSections = [
         icon: Bell,
       },
       {
-        title: 'Mes Notifications',
-        url: '/notifications',
-        icon: Bell,
-      },
-      {
         title: 'Mes Téléchargements',
         url: '/account/downloads',
         icon: Download,
@@ -223,16 +226,6 @@ const menuSections = [
         title: 'Mes Cours',
         url: '/account/courses',
         icon: GraduationCap,
-      },
-      {
-        title: 'Gamification',
-        url: '/dashboard/gamification',
-        icon: Trophy,
-      },
-      {
-        title: 'Ma Watchlist Enchères',
-        url: '/dashboard/auctions/watchlist',
-        icon: Heart,
       },
     ],
   },
@@ -310,7 +303,7 @@ const menuSections = [
         icon: Layers,
       },
       {
-        title: 'Mes Licences',
+        title: 'Mes licences achetées',
         url: '/dashboard/my-licenses',
         icon: Key,
       },
@@ -343,6 +336,11 @@ const menuSections = [
         title: 'Enchères Artistes',
         url: '/dashboard/auctions',
         icon: Gavel,
+      },
+      {
+        title: 'Ma Watchlist Enchères',
+        url: '/dashboard/auctions/watchlist',
+        icon: Heart,
       },
       {
         title: 'Portfolios',
@@ -455,18 +453,8 @@ const menuSections = [
         icon: Warehouse,
       },
       {
-        title: 'Inventaire (raccourci)',
-        url: '/inventory',
-        icon: Warehouse,
-      },
-      {
         title: 'Expéditions',
         url: '/dashboard/shipping',
-        icon: Truck,
-      },
-      {
-        title: 'Expéditions (raccourci)',
-        url: '/shipping',
         icon: Truck,
       },
       {
@@ -685,6 +673,11 @@ const menuSections = [
         icon: TrendingUp,
       },
       {
+        title: 'Gamification',
+        url: '/dashboard/gamification',
+        icon: Trophy,
+      },
+      {
         title: 'Affiliation Boutique',
         url: '/dashboard/store-affiliates',
         icon: TrendingUp,
@@ -799,6 +792,11 @@ const menuSections = [
         title: 'Cartes Cadeaux',
         url: '/dashboard/gift-cards',
         icon: Gift,
+      },
+      {
+        title: 'Centre de notifications',
+        url: '/notifications',
+        icon: Bell,
       },
     ],
   },
@@ -1237,6 +1235,14 @@ const parseNavTo = (url: string): string | { pathname: string; search: string } 
   return query ? { pathname, search: `?${query}` } : url;
 };
 
+const getNavItemPath = (url: string) => url.split('?')[0];
+
+const isNavItemPlanLocked = (url: string, planSlug: string | null) => {
+  const feature = requiredPhysicalFeatureForPath(getNavItemPath(url));
+  if (!feature) return false;
+  return !hasPhysicalFeatureAccess(planSlug as PhysicalPlanSlug, feature);
+};
+
 const sectionContainsPath = (
   section: { items: { url: string }[] },
   pathname: string,
@@ -1343,6 +1349,7 @@ export function AppSidebar() {
     canCreateStore,
     loading: storesLoading,
   } = useStoreContext();
+  const { planSlug } = useStorePhysicalAccess(selectedStoreId);
   const platformLogo = usePlatformLogo();
   const isCollapsed = state === 'collapsed';
   // Détecte si on est sur une page admin
@@ -1486,6 +1493,20 @@ export function AppSidebar() {
 
   const expandAllSections = () => {
     setCollapsedSections([]);
+  };
+
+  const handleLockedNavClick = (itemTitle: string, itemUrl: string) => {
+    const feature = requiredPhysicalFeatureForPath(getNavItemPath(itemUrl));
+    const requiredPlan = feature
+      ? requiredPlanForFeature(feature).replace('physical_', '').toUpperCase()
+      : 'SUPÉRIEUR';
+    toast({
+      title: 'Fonctionnalité verrouillée',
+      description: `${itemTitle} requiert le plan ${requiredPlan}.`,
+    });
+    navigate('/dashboard/billing/physical', {
+      state: { blockedPath: getNavItemPath(itemUrl), requiredFeature: feature, requiredPlan },
+    });
   };
 
   const handleLogout = async () => {
@@ -1827,6 +1848,39 @@ export function AppSidebar() {
                         }
 
                         // Menu items normaux
+                        const isPlanLocked =
+                          showUserMenu && isNavItemPlanLocked(item.url, planSlug);
+
+                        if (isPlanLocked) {
+                          return (
+                            <SidebarMenuItem key={`${section.label}-${item.title}-${item.url}`}>
+                              <SidebarMenuButton
+                                tooltip={`${item.title} — plan supérieur requis`}
+                                onClick={() => handleLockedNavClick(item.title, item.url)}
+                                className={`${NAV_LINK_INACTIVE} opacity-75 transition-all duration-200 group relative flex items-center`}
+                              >
+                                <IconComponent
+                                  className="h-4 w-4 flex-shrink-0"
+                                  aria-hidden="true"
+                                />
+                                {!isCollapsed ? (
+                                  <>
+                                    <span className="flex-1 font-medium">{item.title}</span>
+                                    <Lock
+                                      className="h-3 w-3 flex-shrink-0 opacity-80"
+                                      aria-hidden="true"
+                                    />
+                                  </>
+                                ) : (
+                                  <span className="sr-only">
+                                    {item.title} — plan supérieur requis
+                                  </span>
+                                )}
+                              </SidebarMenuButton>
+                            </SidebarMenuItem>
+                          );
+                        }
+
                         return (
                           <SidebarMenuItem key={`${section.label}-${item.title}-${item.url}`}>
                             <SidebarMenuButton asChild tooltip={item.title}>
