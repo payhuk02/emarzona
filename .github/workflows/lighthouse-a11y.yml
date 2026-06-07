@@ -1,0 +1,73 @@
+name: Lighthouse A11y Layouts
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 3 * * *' # every day at 03:00 UTC
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'src/components/layout/**'
+      - 'src/components/accessibility/**'
+      - 'src/components/AppSidebar.tsx'
+      - 'src/styles/app-premium.css'
+      - 'src/index.css'
+      - 'scripts/lighthouse-a11y-layouts.mjs'
+      - '.github/workflows/lighthouse-a11y.yml'
+
+jobs:
+  lighthouse-a11y:
+    name: Lighthouse accessibility (layouts)
+    timeout-minutes: 25
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Setup environment variables
+        run: |
+          echo "VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_TEST_URL || secrets.VITE_SUPABASE_URL || 'https://mock.supabase.co' }}" >> $GITHUB_ENV
+          echo "VITE_SUPABASE_PUBLISHABLE_KEY=${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'mock-key' }}" >> $GITHUB_ENV
+          echo "VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'mock-key' }}" >> $GITHUB_ENV
+          echo "LIGHTHOUSE_BASE_URL=http://localhost:4173" >> $GITHUB_ENV
+          echo "LH_REQUIRE_AUTH=1" >> $GITHUB_ENV
+          echo "LH_A11Y_MIN=0.85" >> $GITHUB_ENV
+
+      - name: Build application
+        run: npm run build
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_TEST_URL || secrets.VITE_SUPABASE_URL || 'https://mock.supabase.co' }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'mock-key' }}
+
+      - name: Start preview server
+        run: npm run preview -- --host 127.0.0.1 --port 4173 &
+        env:
+          NODE_OPTIONS: --max-old-space-size=2048
+
+      - name: Run Lighthouse a11y audit (authenticated)
+        run: npm run audit:lighthouse:a11y
+        env:
+          E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
+          E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
+
+      - name: Upload Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-a11y-reports
+          path: reports/lighthouse-a11y/
+          retention-days: 30

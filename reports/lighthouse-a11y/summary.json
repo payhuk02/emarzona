@@ -1,0 +1,35 @@
+[
+  {
+    "route": "/dashboard/products",
+    "layout": "MainLayout",
+    "score": 0.92,
+    "displayedUrl": "http://127.0.0.1:4173/login",
+    "authenticated": false,
+    "skipLink": null,
+    "mainLandmark": 1,
+    "ariaValid": 1,
+    "colorContrast": 1
+  },
+  {
+    "route": "/dashboard",
+    "layout": "AppPageShell",
+    "score": 0.92,
+    "displayedUrl": "http://127.0.0.1:4173/login",
+    "authenticated": false,
+    "skipLink": null,
+    "mainLandmark": 1,
+    "ariaValid": 1,
+    "colorContrast": 1
+  },
+  {
+    "route": "/login",
+    "layout": "Auth",
+    "score": 0.92,
+    "displayedUrl": "http://127.0.0.1:4173/login",
+    "authenticated": false,
+    "skipLink": null,
+    "mainLandmark": 1,
+    "ariaValid": 1,
+    "colorContrast": 1
+  }
+]

@@ -498,6 +498,7 @@ const Auth = () => {
         </div>
 
         <Card
+          id="main-content"
           className="app-premium-auth-card shadow-large"
           role="main"
           aria-labelledby="auth-title"

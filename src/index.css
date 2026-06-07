@@ -33,7 +33,7 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 220 40% 10%; /* Plus foncé pour meilleur contraste */
 
-    --primary: 217 91% 60%; /* Bleu moderne #3B82F6 (inspiré Linear, Stripe) */
+    --primary: 217 91% 52%; /* Bleu #2563EB — contraste WCAG AA 4.5:1 avec texte blanc */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 0 0% 96%; /* Gris très clair moderne */
@@ -50,7 +50,7 @@ All colors MUST be HSL.
 
     --border: 0 0% 90%; /* Gris clair moderne */
     --input: 0 0% 90%; /* Gris clair moderne */
-    --ring: 217 91% 60%; /* Bleu moderne */
+    --ring: 217 91% 52%; /* Bleu moderne */
 
     --radius: 0.5rem; /* 8px - Border radius moderne et cohérent */
 

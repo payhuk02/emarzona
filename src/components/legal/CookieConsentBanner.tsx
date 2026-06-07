@@ -38,7 +38,7 @@ export const CookieConsentBanner = () => {
   useEffect(() => {
     // Vérifier si l'utilisateur a déjà donné son consentement
     const hasConsent = localStorage.getItem('cookieConsentGiven');
-    
+
     if (!hasConsent && !currentPreferences) {
       // Afficher le banner après 2 secondes
       const timer = setTimeout(() => {
@@ -49,7 +49,7 @@ export const CookieConsentBanner = () => {
   }, [currentPreferences]);
 
   const handleAcceptAll = async () => {
-    const  allAccepted: Partial<CookiePreferences> = {
+    const allAccepted: Partial<CookiePreferences> = {
       necessary: true,
       functional: true,
       analytics: true,
@@ -66,7 +66,7 @@ export const CookieConsentBanner = () => {
   };
 
   const handleRejectAll = async () => {
-    const  allRejected: Partial<CookiePreferences> = {
+    const allRejected: Partial<CookiePreferences> = {
       necessary: true, // Obligatoire
       functional: false,
       analytics: false,
@@ -108,11 +108,11 @@ export const CookieConsentBanner = () => {
                     🍪 Nous utilisons des cookies
                   </h3>
                   <p className="text-sm text-gray-600">
-                    Nous utilisons des cookies pour améliorer votre expérience, 
-                    analyser notre trafic et personnaliser le contenu. 
-                    Vous pouvez accepter tous les cookies ou les personnaliser.{' '}
-                    <a 
-                      href="/legal/cookies" 
+                    Nous utilisons des cookies pour améliorer votre expérience, analyser notre
+                    trafic et personnaliser le contenu. Vous pouvez accepter tous les cookies ou les
+                    personnaliser.{' '}
+                    <a
+                      href="/legal/cookies"
                       className="text-blue-600 hover:underline"
                       target="_blank"
                     >
@@ -149,7 +149,7 @@ export const CookieConsentBanner = () => {
               <Button
                 size="sm"
                 onClick={handleAcceptAll}
-                className="whitespace-nowrap"
+                className="whitespace-nowrap bg-blue-700 text-white hover:bg-blue-800"
               >
                 <Check className="w-4 h-4 mr-2" />
                 Tout accepter
@@ -175,13 +175,12 @@ export const CookieConsentBanner = () => {
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
                   <Label className="font-semibold">Cookies nécessaires</Label>
-                  <span className="text-xs bg-gray-100 px-2 py-0.5 rounded">
-                    Toujours actifs
-                  </span>
+                  <span className="text-xs bg-gray-100 px-2 py-0.5 rounded">Toujours actifs</span>
                 </div>
                 <p className="text-sm text-gray-600">
-                  Ces cookies sont essentiels au fonctionnement du site et ne peuvent pas être désactivés. 
-                  Ils permettent la navigation et l'utilisation des fonctionnalités de base.
+                  Ces cookies sont essentiels au fonctionnement du site et ne peuvent pas être
+                  désactivés. Ils permettent la navigation et l'utilisation des fonctionnalités de
+                  base.
                 </p>
               </div>
               <Switch checked={true} disabled />
@@ -192,15 +191,13 @@ export const CookieConsentBanner = () => {
               <div className="flex-1">
                 <Label className="font-semibold mb-1 block">Cookies fonctionnels</Label>
                 <p className="text-sm text-gray-600">
-                  Ces cookies permettent d'améliorer votre expérience en mémorisant vos préférences 
+                  Ces cookies permettent d'améliorer votre expérience en mémorisant vos préférences
                   (langue, thème, etc.).
                 </p>
               </div>
               <Switch
                 checked={preferences.functional}
-                onCheckedChange={(checked) =>
-                  setPreferences({ ...preferences, functional: checked })
-                }
+                onCheckedChange={checked => setPreferences({ ...preferences, functional: checked })}
               />
             </div>
 
@@ -209,15 +206,13 @@ export const CookieConsentBanner = () => {
               <div className="flex-1">
                 <Label className="font-semibold mb-1 block">Cookies analytics</Label>
                 <p className="text-sm text-gray-600">
-                  Ces cookies nous permettent de mesurer l'audience et d'améliorer notre site 
-                  en analysant comment vous l'utilisez.
+                  Ces cookies nous permettent de mesurer l'audience et d'améliorer notre site en
+                  analysant comment vous l'utilisez.
                 </p>
               </div>
               <Switch
                 checked={preferences.analytics}
-                onCheckedChange={(checked) =>
-                  setPreferences({ ...preferences, analytics: checked })
-                }
+                onCheckedChange={checked => setPreferences({ ...preferences, analytics: checked })}
               />
             </div>
 
@@ -226,39 +221,25 @@ export const CookieConsentBanner = () => {
               <div className="flex-1">
                 <Label className="font-semibold mb-1 block">Cookies marketing</Label>
                 <p className="text-sm text-gray-600">
-                  Ces cookies sont utilisés pour afficher des publicités pertinentes 
-                  et mesurer l'efficacité de nos campagnes.
+                  Ces cookies sont utilisés pour afficher des publicités pertinentes et mesurer
+                  l'efficacité de nos campagnes.
                 </p>
               </div>
               <Switch
                 checked={preferences.marketing}
-                onCheckedChange={(checked) =>
-                  setPreferences({ ...preferences, marketing: checked })
-                }
+                onCheckedChange={checked => setPreferences({ ...preferences, marketing: checked })}
               />
             </div>
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t">
-            <Button
-              variant="outline"
-              onClick={() => setShowSettings(false)}
-            >
+            <Button variant="outline" onClick={() => setShowSettings(false)}>
               Annuler
             </Button>
-            <Button onClick={handleSavePreferences}>
-              Sauvegarder mes préférences
-            </Button>
+            <Button onClick={handleSavePreferences}>Sauvegarder mes préférences</Button>
           </div>
         </DialogContent>
       </Dialog>
     </>
   );
 };
-
-
-
-
-
-
-

@@ -21,6 +21,7 @@ import { useBehavioralAnalytics } from '@/hooks/useBehavioralAnalytics';
 
 import React, { Suspense, lazy, useEffect } from 'react';
 import { logger } from '@/lib/logger';
+import { SkipLink } from '@/components/accessibility/SkipLink';
 
 // Lazy-loaded non-critical components
 const PerformanceOptimizer = lazy(() =>
@@ -62,9 +63,6 @@ const PlatformPopupMessage = lazy(() =>
   }))
 );
 
-const SkipLink = lazy(() =>
-  import('@/components/accessibility/SkipLink').then(m => ({ default: m.SkipLink }))
-);
 const DynamicFavicon = lazy(() =>
   import('@/components/seo/DynamicFavicon').then(m => ({ default: m.DynamicFavicon }))
 );
@@ -265,8 +263,8 @@ const AppContent = () => {
         )}
         showDialog
       >
+        <SkipLink />
         <Suspense fallback={null}>
-          <SkipLink />
           <DynamicFavicon />
         </Suspense>
         <Suspense fallback={null}>
