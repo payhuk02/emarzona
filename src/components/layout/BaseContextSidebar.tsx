@@ -3,64 +3,37 @@
  * Gère desktop (fixed) et mobile (drawer + barre horizontale en bas) avec animations fluides
  */
 
-import { ReactNode, isValidElement, Children, useMemo, useEffect, useState } from 'react';
+import { ReactNode, useMemo, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Menu, Search, Clock3, Pin, ChevronDown } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Breadcrumb, BreadcrumbItem } from './Breadcrumb';
 import { ContextSidebarNavItem } from './ContextSidebarNavItem';
 import { cn } from '@/lib/utils';
 import { useSidebar } from '@/components/ui/sidebar';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { logger } from '@/lib/logger';
+import type { LucideIcon } from 'lucide-react';
+
+export type ContextQuickNavItem = {
+  label: string;
+  path: string;
+  icon: LucideIcon;
+  isActive?: boolean;
+};
 
 interface BaseContextSidebarProps {
   breadcrumbItems: BreadcrumbItem[];
+  quickNavItems: ContextQuickNavItem[];
   children: ReactNode;
   className?: string;
   triggerClassName?: string;
 }
 
-interface ExtractedNavItem {
-  label: string;
-  path: string;
-  icon: React.ComponentType<{ className?: string }>;
-}
-
 const PINNED_CONTEXT_NAV_KEY = 'contextSidebarPinnedUrls';
 const RECENT_CONTEXT_NAV_KEY = 'contextSidebarRecentUrls';
 const MAX_RECENT_ITEMS = 5;
-
-/**
- * Fonction récursive pour extraire les ContextSidebarNavItem des enfants
- * Détecte les items par leurs props (label, path, icon)
- */
-const extractNavItems = (children: ReactNode): ExtractedNavItem[] => {
-  const items: ExtractedNavItem[] = [];
-
-  Children.forEach(children, child => {
-    if (isValidElement(child)) {
-      const props = (child.props || {}) as {
-        label?: string;
-        path?: string;
-        icon?: React.ComponentType<{ className?: string }>;
-        children?: ReactNode;
-      };
-
-      // Si c'est un ContextSidebarNavItem (a les props label, path, icon)
-      if (props.label && props.path && props.icon) {
-        items.push({ label: props.label, path: props.path, icon: props.icon });
-      }
-      // Si c'est un nav ou un autre conteneur, on extrait ses enfants
-      else if (props.children) {
-        const nestedItems = extractNavItems(props.children);
-        items.push(...nestedItems);
-      }
-    }
-  });
-
-  return items;
-};
 
 /**
  * Composant de base pour toutes les sidebars contextuelles
@@ -70,31 +43,22 @@ const extractNavItems = (children: ReactNode): ExtractedNavItem[] => {
  */
 export const BaseContextSidebar = ({
   breadcrumbItems,
+  quickNavItems,
   children,
   className = '',
   triggerClassName = '',
 }: BaseContextSidebarProps) => {
+  const { t } = useTranslation();
   const { setOpenMobile } = useSidebar();
   const navigate = useNavigate();
-  const location = useLocation();
   const [navSearch, setNavSearch] = useState('');
   const [pinnedUrls, setPinnedUrls] = useState<string[]>([]);
   const [recentUrls, setRecentUrls] = useState<string[]>([]);
   const [quickNavOpen, setQuickNavOpen] = useState(false);
 
-  // Mémoriser les items de navigation pour éviter les re-renders inutiles
-  const navItems = useMemo(() => {
-    return extractNavItems(children);
-  }, [children]);
-
   const currentNavItem = useMemo(
-    () =>
-      navItems.find(
-        item =>
-          location.pathname === item.path ||
-          (item.path !== '/dashboard' && location.pathname.startsWith(`${item.path}/`))
-      ) ?? null,
-    [location.pathname, navItems]
+    () => quickNavItems.find(item => item.isActive) ?? null,
+    [quickNavItems]
   );
 
   useEffect(() => {
@@ -136,24 +100,29 @@ export const BaseContextSidebar = ({
   };
 
   const pinnedItems = useMemo(
-    () => navItems.filter(item => pinnedUrls.includes(item.path)),
-    [navItems, pinnedUrls]
+    () => quickNavItems.filter(item => pinnedUrls.includes(item.path)),
+    [quickNavItems, pinnedUrls]
   );
   const recentItems = useMemo(
     () =>
       recentUrls
-        .map(url => navItems.find(item => item.path === url))
-        .filter((item): item is ExtractedNavItem => Boolean(item))
+        .map(url => quickNavItems.find(item => item.path === url))
+        .filter((item): item is ContextQuickNavItem => Boolean(item))
         .filter(item => !pinnedUrls.includes(item.path)),
-    [recentUrls, navItems, pinnedUrls]
+    [recentUrls, quickNavItems, pinnedUrls]
   );
   const searchResults = useMemo(() => {
     const query = navSearch.trim().toLowerCase();
     if (!query) return [];
-    return navItems
+    return quickNavItems
       .filter(item => `${item.label} ${item.path}`.toLowerCase().includes(query))
       .slice(0, 8);
-  }, [navSearch, navItems]);
+  }, [navSearch, quickNavItems]);
+
+  const quickNavLabel = t('sidebar.context.quickNav', { defaultValue: 'Navigation rapide' });
+  const searchPlaceholder = t('sidebar.context.searchPlaceholder', {
+    defaultValue: 'Rechercher...',
+  });
 
   // Desktop: Sidebar fixe
   const desktopSidebar = (
@@ -172,7 +141,6 @@ export const BaseContextSidebar = ({
       aria-label="Navigation contextuelle"
     >
       <div className="p-3 lg:p-4 space-y-3 lg:space-y-4 min-w-0">
-        {/* Breadcrumb horizontal en haut */}
         <Breadcrumb items={breadcrumbItems} />
 
         <div className="space-y-2.5 pb-2 lg:pb-3 border-b border-white/10">
@@ -182,7 +150,7 @@ export const BaseContextSidebar = ({
             className="lg:hidden w-full flex items-center justify-between py-1 text-[10px] uppercase tracking-[0.14em] text-white/75 font-bold"
             aria-expanded={quickNavOpen}
           >
-            <span>Navigation rapide</span>
+            <span>{quickNavLabel}</span>
             <ChevronDown
               className={cn('h-3.5 w-3.5 transition-transform', quickNavOpen && 'rotate-180')}
             />
@@ -193,7 +161,7 @@ export const BaseContextSidebar = ({
               htmlFor="context-sidebar-search"
               className="hidden lg:block text-[10px] uppercase tracking-[0.14em] text-white/75 font-bold"
             >
-              Navigation rapide
+              {quickNavLabel}
             </label>
             <div className="relative">
               <Search className="h-4 w-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-white/50 pointer-events-none" />
@@ -201,9 +169,9 @@ export const BaseContextSidebar = ({
                 id="context-sidebar-search"
                 value={navSearch}
                 onChange={e => setNavSearch(e.target.value)}
-                placeholder="Rechercher..."
+                placeholder={searchPlaceholder}
                 className="h-8 lg:h-9 pl-8 text-sm bg-white/10 border-white/15 text-white placeholder:text-white/50 focus-visible:ring-white/30"
-                aria-label="Rechercher dans la navigation contextuelle"
+                aria-label={searchPlaceholder}
               />
             </div>
             {searchResults.length > 0 && (
@@ -242,8 +210,8 @@ export const BaseContextSidebar = ({
             >
               <Pin className="h-3.5 w-3.5 mr-1.5" />
               {currentNavItem && pinnedUrls.includes(currentNavItem.path)
-                ? 'Désépingler'
-                : 'Épingler'}
+                ? t('sidebar.context.unpin', { defaultValue: 'Désépingler' })
+                : t('sidebar.context.pin', { defaultValue: 'Épingler' })}
             </Button>
             {currentNavItem && (
               <span className="text-[11px] text-blue-100/70 truncate min-w-0 max-w-[7rem] lg:max-w-[9rem]">
@@ -257,7 +225,7 @@ export const BaseContextSidebar = ({
               {pinnedItems.length > 0 && (
                 <div className="space-y-1">
                   <p className="text-[11px] uppercase tracking-wide text-blue-100/70 font-semibold">
-                    Épinglés
+                    {t('sidebar.context.pinned', { defaultValue: 'Épinglés' })}
                   </p>
                   {pinnedItems.slice(0, 4).map(item => (
                     <Button
@@ -277,7 +245,7 @@ export const BaseContextSidebar = ({
                 <div className="space-y-1">
                   <p className="text-[11px] uppercase tracking-wide text-blue-100/70 font-semibold flex items-center gap-1">
                     <Clock3 className="h-3 w-3" />
-                    Récents
+                    {t('sidebar.context.recent', { defaultValue: 'Récents' })}
                   </p>
                   {recentItems.slice(0, 3).map(item => (
                     <Button
@@ -297,13 +265,11 @@ export const BaseContextSidebar = ({
           )}
         </div>
 
-        {/* Contenu de la sidebar */}
         <div className="space-y-1">{children}</div>
       </div>
     </aside>
   );
 
-  // Mobile: Hamburger pour ouvrir la sidebar principale (AppSidebar)
   const mobileHamburger = (
     <Button
       variant="outline"
@@ -326,11 +292,8 @@ export const BaseContextSidebar = ({
     </Button>
   );
 
-  // Mobile: Barre de navigation horizontale fixe en bas
-  // Toujours visible si des items existent (même après navigation)
-  // Utilise useMemo pour éviter les re-renders inutiles
   const mobileBottomNav = useMemo(() => {
-    if (navItems.length === 0) return null;
+    if (quickNavItems.length === 0) return null;
 
     return (
       <nav
@@ -339,7 +302,7 @@ export const BaseContextSidebar = ({
           'bg-background border-t border-border',
           'shadow-[0_-2px_8px_rgba(0,0,0,0.1)]',
           'safe-area-bottom',
-          'context-bottom-nav' // Classe spécifique pour éviter le CSS global
+          'context-bottom-nav'
         )}
         role="navigation"
         aria-label="Navigation contextuelle mobile"
@@ -352,15 +315,15 @@ export const BaseContextSidebar = ({
           zIndex: 110,
         }}
       >
-        {/* Scroll horizontal pour les items de navigation */}
         <div className="overflow-x-auto scrollbar-hide">
           <div className="flex items-center justify-start gap-0.5 px-1 py-1.5 min-h-[56px]">
-            {navItems.map(item => (
+            {quickNavItems.map(item => (
               <ContextSidebarNavItem
                 key={`mobile-context-${item.path}`}
                 label={item.label}
                 path={item.path}
-                icon={item.icon as import('lucide-react').LucideIcon}
+                icon={item.icon}
+                isActive={item.isActive}
                 horizontal
               />
             ))}
@@ -368,7 +331,7 @@ export const BaseContextSidebar = ({
         </div>
       </nav>
     );
-  }, [navItems]);
+  }, [quickNavItems]);
 
   return (
     <>

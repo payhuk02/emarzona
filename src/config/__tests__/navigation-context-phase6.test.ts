@@ -23,10 +23,12 @@ describe('context sidebar Phase 6', () => {
   it('resolves sales sidebar with grouped ventes items', () => {
     const nav = resolveContextSidebarNav(sections, PHASE6_CONTEXT_CONFIGS.sales, mockT as never);
     expect(nav.groups).not.toBeNull();
-    expect(nav.groups!.length).toBeGreaterThanOrEqual(5);
+    expect(nav.groups!.length).toBeGreaterThanOrEqual(6);
     const paths = nav.items.map(i => i.url.split('?')[0]);
     expect(paths).toContain('/dashboard/suppliers');
+    expect(paths).toContain('/dashboard/taxes');
     expect(paths).toContain('/dashboard/payment-methods');
+    expect(paths).toContain('/dashboard/payments-customers');
   });
 
   it('resolves bookings from ventes section including new service routes', () => {
@@ -40,7 +42,22 @@ describe('context sidebar Phase 6', () => {
     const nav = resolveContextSidebarNav(sections, PHASE6_CONTEXT_CONFIGS.account, mockT as never);
     const paths = nav.items.map(i => i.url.split('?')[0]);
     expect(paths).toContain('/account/profile');
+    expect(paths).toContain('/account/warranties');
+    expect(paths).toContain('/account/bookings');
     expect(paths).toContain('/dashboard/gamification');
+    expect(nav.groups!.find(g => g.groupKey === 'other')).toBeUndefined();
+  });
+
+  it('resolves physical portal with full physical ops links', () => {
+    const nav = resolveContextSidebarNav(
+      sections,
+      PHASE6_CONTEXT_CONFIGS.physicalPortal,
+      mockT as never
+    );
+    const paths = nav.items.map(i => i.url.split('?')[0]);
+    expect(paths).toContain('/dashboard/physical-lots');
+    expect(paths).toContain('/dashboard/physical-preorders');
+    expect(paths).toContain('/account/returns');
   });
 
   it('resolves settings tabs as static items', () => {

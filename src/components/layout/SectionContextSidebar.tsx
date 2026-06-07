@@ -4,6 +4,7 @@
 
 import { useMemo, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { BaseContextSidebar } from '@/components/layout/BaseContextSidebar';
 import { ContextSidebarNavItem } from '@/components/layout/ContextSidebarNavItem';
@@ -71,6 +72,7 @@ type SectionContextSidebarProps = {
 };
 
 export function SectionContextSidebar({ config }: SectionContextSidebarProps) {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -91,6 +93,17 @@ export function SectionContextSidebar({ config }: SectionContextSidebarProps) {
     { label: activeItem?.title ?? nav.sectionLabel },
   ];
 
+  const quickNavItems = useMemo(
+    () =>
+      nav.items.map(item => ({
+        label: item.title,
+        path: item.url,
+        icon: item.icon,
+        isActive: isItemActive(item, location.pathname, location.search, config, activeTab),
+      })),
+    [nav.items, location.pathname, location.search, config, activeTab]
+  );
+
   const handleItemClick = (item: NavItem) => {
     if (config.enablePlanLock) {
       const path = getNavItemPath(item.url);
@@ -98,10 +111,17 @@ export function SectionContextSidebar({ config }: SectionContextSidebarProps) {
       if (feature && !hasPhysicalFeatureAccess(planSlug as PhysicalPlanSlug, feature)) {
         const planLabel = requiredPlanLabelForPath(path);
         toast({
-          title: 'Fonctionnalité verrouillée',
+          title: t('sidebar.context.planLockTitle', { defaultValue: 'Fonctionnalité verrouillée' }),
           description: planLabel
-            ? `${item.title} requiert le plan ${planLabel}.`
-            : `${item.title} nécessite un plan supérieur.`,
+            ? t('sidebar.context.planLockRequiresPlan', {
+                defaultValue: '{{item}} requiert le plan {{plan}}.',
+                item: item.title,
+                plan: planLabel,
+              })
+            : t('sidebar.context.planLockRequiresUpgrade', {
+                defaultValue: '{{item}} nécessite un plan supérieur.',
+                item: item.title,
+              }),
         });
         navigate('/dashboard/billing/physical');
         closeMobileSidebar();
@@ -120,10 +140,12 @@ export function SectionContextSidebar({ config }: SectionContextSidebarProps) {
         return feature ? !hasPhysicalFeatureAccess(planSlug as PhysicalPlanSlug, feature) : false;
       })();
 
+    const upgradeSuffix = t('sidebar.context.upgradeSuffix', { defaultValue: '(upgrade)' });
+
     return (
       <ContextSidebarNavItem
         key={item.url}
-        label={locked ? `${item.title} (upgrade)` : item.title}
+        label={locked ? `${item.title} ${upgradeSuffix}` : item.title}
         path={locked ? '/dashboard/billing/physical' : item.url}
         icon={item.icon}
         isActive={isItemActive(item, location.pathname, location.search, config, activeTab)}
@@ -133,7 +155,7 @@ export function SectionContextSidebar({ config }: SectionContextSidebarProps) {
   };
 
   return (
-    <BaseContextSidebar breadcrumbItems={breadcrumbItems}>
+    <BaseContextSidebar breadcrumbItems={breadcrumbItems} quickNavItems={quickNavItems}>
       <nav className="space-y-1" aria-label={config.ariaLabel}>
         {nav.groups ? (
           <div

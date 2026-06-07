@@ -7,28 +7,13 @@
 import { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import { TopNavigationBar } from './TopNavigationBar';
-import { SettingsSidebar } from './SettingsSidebar';
-import { EmailsSidebar } from './EmailsSidebar';
-import { ProductsSidebar } from './ProductsSidebar';
-import { OrdersSidebar } from './OrdersSidebar';
-import { CustomersSidebar } from './CustomersSidebar';
-import { AnalyticsSidebar } from './AnalyticsSidebar';
-import { AccountSidebar } from './AccountSidebar';
-import { SalesSidebar } from './SalesSidebar';
-import { FinanceSidebar } from './FinanceSidebar';
-import { MarketingSidebar } from './MarketingSidebar';
-import { SystemsSidebar } from './SystemsSidebar';
-import { StoreSidebar } from './StoreSidebar';
-import { BookingsSidebar } from './BookingsSidebar';
-import { InventorySidebar } from './InventorySidebar';
-import { ShippingSidebar } from './ShippingSidebar';
-import { PromotionsSidebar } from './PromotionsSidebar';
-import { CoursesSidebar } from './CoursesSidebar';
-import { AffiliateSidebar } from './AffiliateSidebar';
-import { DigitalPortalSidebar } from './DigitalPortalSidebar';
-import { PhysicalPortalSidebar } from './PhysicalPortalSidebar';
+import { ConfigContextSidebar } from './SectionContextSidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { SidebarProvider } from '@/components/ui/sidebar';
+import {
+  CONTEXT_SIDEBAR_LAYOUT_TYPES,
+  getContextSidebarConfigId,
+} from '@/config/contextSidebar.registry';
 import { cn } from '@/lib/utils';
 
 export type LayoutType =
@@ -177,83 +162,8 @@ export const MainLayout = ({ children, layoutType, showTopNav = true }: MainLayo
   const location = useLocation();
   const detectedType = layoutType || detectLayoutType(location.pathname);
 
-  // Déterminer quelle sidebar contextuelle afficher (en plus de AppSidebar)
-  const renderContextSidebar = () => {
-    switch (detectedType) {
-      // Sidebars existantes
-      case 'settings':
-        return <SettingsSidebar />;
-      case 'emails':
-        return <EmailsSidebar />;
-      case 'products':
-        return <ProductsSidebar />;
-      case 'orders':
-        return <OrdersSidebar />;
-      case 'customers':
-        return <CustomersSidebar />;
-      case 'analytics':
-        return <AnalyticsSidebar />;
-      case 'account':
-        return <AccountSidebar />;
-      case 'sales':
-        return <SalesSidebar />;
-      case 'finance':
-        return <FinanceSidebar />;
-      case 'marketing':
-        return <MarketingSidebar />;
-      case 'systems':
-        return <SystemsSidebar />;
-
-      // Nouvelles sidebars
-      case 'store':
-        return <StoreSidebar />;
-      case 'bookings':
-        return <BookingsSidebar />;
-      case 'inventory':
-        return <InventorySidebar />;
-      case 'shipping':
-        return <ShippingSidebar />;
-      case 'promotions':
-        return <PromotionsSidebar />;
-      case 'courses':
-        return <CoursesSidebar />;
-      case 'affiliate':
-        return <AffiliateSidebar />;
-      case 'digital-portal':
-        return <DigitalPortalSidebar />;
-      case 'physical-portal':
-        return <PhysicalPortalSidebar />;
-
-      case 'default':
-      case 'minimal':
-      default:
-        return null; // Pas de sidebar contextuelle, seulement AppSidebar
-    }
-  };
-
-  // Déterminer si on doit ajouter une marge pour la sidebar fixe
-  const hasFixedSidebar = [
-    'settings',
-    'emails',
-    'products',
-    'orders',
-    'customers',
-    'analytics',
-    'account',
-    'sales',
-    'finance',
-    'marketing',
-    'systems',
-    'store',
-    'bookings',
-    'inventory',
-    'shipping',
-    'promotions',
-    'courses',
-    'affiliate',
-    'digital-portal',
-    'physical-portal',
-  ].includes(detectedType);
+  const contextConfigId = getContextSidebarConfigId(detectedType);
+  const hasFixedSidebar = CONTEXT_SIDEBAR_LAYOUT_TYPES.includes(detectedType);
 
   return (
     <SidebarProvider>
@@ -280,7 +190,7 @@ export const MainLayout = ({ children, layoutType, showTopNav = true }: MainLayo
           )}
 
           {/* Sidebar Contextuelle - Remplace AppSidebar quand présente (stable et statique) */}
-          {renderContextSidebar()}
+          {contextConfigId && <ConfigContextSidebar configId={contextConfigId} />}
 
           {/* Main Content */}
           <main

@@ -7,23 +7,9 @@ export { Breadcrumb } from './Breadcrumb';
 export type { BreadcrumbItem } from './Breadcrumb';
 export { ContextualNavBar } from './ContextualNavBar';
 export type { ContextualNavItem } from './ContextualNavBar';
-export { SettingsSidebar } from './SettingsSidebar';
-export { EmailsSidebar } from './EmailsSidebar';
-export { ProductsSidebar } from './ProductsSidebar';
-export { OrdersSidebar } from './OrdersSidebar';
-export { CustomersSidebar } from './CustomersSidebar';
-export { AnalyticsSidebar } from './AnalyticsSidebar';
-export { AccountSidebar } from './AccountSidebar';
-export { SalesSidebar } from './SalesSidebar';
-export { FinanceSidebar } from './FinanceSidebar';
-export { MarketingSidebar } from './MarketingSidebar';
-export { SystemsSidebar } from './SystemsSidebar';
+export { BaseContextSidebar } from './BaseContextSidebar';
+export type { ContextQuickNavItem } from './BaseContextSidebar';
+export { ContextSidebarNavItem } from './ContextSidebarNavItem';
+export { ConfigContextSidebar, SectionContextSidebar } from './SectionContextSidebar';
 export { MainLayout } from './MainLayout';
 export type { LayoutType } from './MainLayout';
-
-
-
-
-
-
-
