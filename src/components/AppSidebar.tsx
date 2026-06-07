@@ -81,7 +81,18 @@ import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { PremiumLangSwitcher } from '@/components/landing/premium/PremiumLangSwitcher';
 import { SidebarCollapsibleSection } from '@/components/sidebar/SidebarCollapsibleSection';
 import { SidebarNavCommandPalette } from '@/components/sidebar/SidebarNavCommandPalette';
+import { SidebarPersonaSwitch } from '@/components/sidebar/SidebarPersonaSwitch';
 import { NAV_LINK_ACTIVE, NAV_LINK_INACTIVE } from '@/components/sidebar/sidebar-nav-shared';
+import {
+  DEFAULT_OPEN_SECTION_LABELS,
+  enrichNavSections,
+  filterNavSections,
+  flattenNavSections,
+  sectionContainsPath,
+} from '@/config/navigation.enrich';
+import { getNavItemPath, isNavItemActive, parseNavTo } from '@/config/navigation.helpers';
+import type { NavSection, SidebarPersona } from '@/config/navigation.types';
+import { useSidebarPersona } from '@/hooks/useSidebarPersona';
 import { useState, useEffect, useMemo } from 'react';
 import React from 'react';
 import {
@@ -1219,51 +1230,25 @@ const COLLAPSED_SECTIONS_KEY = 'sidebarCollapsedSections';
 const STORES_EXPANDED_KEY = 'sidebarStoresExpanded';
 const MAX_RECENT_ITEMS = 2;
 
-const DEFAULT_OPEN_SECTION_LABELS = new Set(['Principal', 'Administration']);
-
-/** Match exact pathname (optional ?query on item url). Avoids parent/child highlight collisions. */
-const isNavItemActive = (itemUrl: string, pathname: string, search: string): boolean => {
-  const [itemPath, itemQuery = ''] = itemUrl.split('?');
-  if (pathname !== itemPath) return false;
-  if (!itemQuery) return true;
-  const normalizedSearch = search.startsWith('?') ? search.slice(1) : search;
-  return normalizedSearch === itemQuery;
-};
-
-const parseNavTo = (url: string): string | { pathname: string; search: string } => {
-  const [pathname, query = ''] = url.split('?');
-  return query ? { pathname, search: `?${query}` } : url;
-};
-
-const getNavItemPath = (url: string) => url.split('?')[0];
-
 const isNavItemPlanLocked = (url: string, planSlug: string | null) => {
   const feature = requiredPhysicalFeatureForPath(getNavItemPath(url));
   if (!feature) return false;
   return !hasPhysicalFeatureAccess(planSlug as PhysicalPlanSlug, feature);
 };
 
-const sectionContainsPath = (
-  section: { items: { url: string }[] },
-  pathname: string,
-  search: string
-): boolean => section.items.some(item => isNavItemActive(item.url, pathname, search));
-
 const buildDefaultCollapsedSections = (
-  sections: typeof menuSections,
+  sections: NavSection[],
   pathname: string,
   search: string
 ): string[] => {
   const openLabels = new Set(DEFAULT_OPEN_SECTION_LABELS);
+  sections.forEach(s => {
+    if (s.defaultOpen) openLabels.add(s.label);
+  });
   const activeLabel = sections.find(s => sectionContainsPath(s, pathname, search))?.label;
   if (activeLabel) openLabels.add(activeLabel);
   return sections.map(s => s.label).filter(label => !openLabels.has(label));
 };
-
-const flattenSections = (sections: typeof menuSections) =>
-  sections.flatMap(section =>
-    section.items.map(item => ({ ...item, sectionLabel: section.label }))
-  );
 
 // Composant Logo avec fallback en cas d'erreur
 const LogoImageWithFallback = ({ src, className }: { src: string; className?: string }) => {
@@ -1352,8 +1337,7 @@ export function AppSidebar() {
   const { planSlug } = useStorePhysicalAccess(selectedStoreId);
   const platformLogo = usePlatformLogo();
   const isCollapsed = state === 'collapsed';
-  // Détecte si on est sur une page admin
-  const isOnAdminPage = location.pathname.startsWith('/admin');
+  const { persona, setPersona } = useSidebarPersona(isAdmin);
   const [commandOpen, setCommandOpen] = useState(false);
   const [pinnedUrls, setPinnedUrls] = useState<string[]>([]);
   const [recentUrls, setRecentUrls] = useState<string[]>([]);
@@ -1361,11 +1345,43 @@ export function AppSidebar() {
   const [prefsHydrated, setPrefsHydrated] = useState(false);
   const [storesMenuOpen, setStoresMenuOpen] = useState(false);
 
-  const showAdminMenu = isAdmin && isOnAdminPage;
-  const showUserMenu = !showAdminMenu;
-  const activeSections = showAdminMenu ? adminMenuSections : menuSections;
+  const enrichedUserSections = useMemo(() => enrichNavSections(menuSections), []);
 
-  const allCurrentEntries = useMemo(() => flattenSections(activeSections), [activeSections]);
+  const showAdminMenu = isAdmin && persona === 'admin';
+  const showUserMenu = !showAdminMenu;
+
+  const sidebarUserSections = useMemo(() => {
+    const navPersona = persona === 'buyer' ? 'buyer' : 'seller';
+    return filterNavSections(enrichedUserSections, navPersona, { sidebarOnly: true });
+  }, [enrichedUserSections, persona]);
+
+  const activeSections = showAdminMenu ? enrichNavSections(adminMenuSections) : sidebarUserSections;
+
+  const commandPaletteSections = useMemo(() => {
+    if (showAdminMenu) return enrichNavSections(adminMenuSections);
+    const navPersona = persona === 'buyer' ? 'buyer' : 'seller';
+    return filterNavSections(enrichedUserSections, navPersona, { sidebarOnly: false });
+  }, [showAdminMenu, enrichedUserSections, persona]);
+
+  const allCurrentEntries = useMemo(() => flattenNavSections(activeSections), [activeSections]);
+
+  const navCommandEntries = useMemo(
+    () =>
+      flattenNavSections(commandPaletteSections).map(entry => ({
+        title: entry.title,
+        url: entry.url,
+        icon: entry.icon,
+        sectionLabel: entry.sectionLabel,
+      })),
+    [commandPaletteSections]
+  );
+
+  const handlePersonaChange = (next: SidebarPersona) => {
+    setPersona(next);
+    if (next === 'admin' && isAdmin) navigate('/admin');
+    else if (next === 'buyer') navigate('/account');
+    else navigate('/dashboard');
+  };
 
   const currentNavItem = useMemo(() => {
     return allCurrentEntries.find(item =>
@@ -1474,17 +1490,6 @@ export function AppSidebar() {
         .filter(item => !pinnedUrls.includes(item.url))
         .slice(0, MAX_RECENT_ITEMS),
     [allCurrentEntries, recentUrls, pinnedUrls]
-  );
-
-  const navCommandEntries = useMemo(
-    () =>
-      flattenSections(activeSections).map(entry => ({
-        title: entry.title,
-        url: entry.url,
-        icon: entry.icon,
-        sectionLabel: entry.sectionLabel,
-      })),
-    [activeSections]
   );
 
   const collapseAllSections = () => {
@@ -1618,6 +1623,12 @@ export function AppSidebar() {
               </button>
             )}
           </div>
+          <SidebarPersonaSwitch
+            persona={persona === 'admin' && !isAdmin ? 'seller' : persona}
+            isAdmin={isAdmin}
+            isCollapsed={isCollapsed}
+            onPersonaChange={handlePersonaChange}
+          />
           {!isCollapsed && (
             <div className="mt-2 flex items-center justify-between gap-2 flex-wrap">
               <Button
