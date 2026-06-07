@@ -12,14 +12,17 @@ export type NavItem = {
   personas: SidebarPersona[];
   tier: NavTier;
   /** Wizard / create shortcuts grouped under section « Créer » */
+  adminOnly?: boolean;
   createGroup?: boolean;
 };
 
 export type NavSection = {
   label: string;
+  /** Stable key for collapse prefs / i18n (language-independent) */
+  sectionKey: string;
   items: NavItem[];
   /** Section ouverte par défaut au premier chargement */
   defaultOpen?: boolean;
 };
 
-export type FlatNavEntry = NavItem & { sectionLabel: string };
+export type FlatNavEntry = NavItem & { sectionLabel: string; sectionKey: string };

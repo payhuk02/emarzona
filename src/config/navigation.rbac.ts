@@ -1,0 +1,41 @@
+import { canAccessAdminPath } from '@/lib/admin/admin-route-permissions';
+import type { NavSection } from '@/config/navigation.types';
+
+const getNavPath = (url: string) => url.split('?')[0];
+
+/**
+ * Admin sidebar: RBAC on /admin/* routes; vendor shortcut links (/dashboard/*) visible to all admins.
+ */
+export function filterAdminNavSectionsByRbac(
+  sections: NavSection[],
+  can: (key: string) => boolean,
+  isSuperAdmin: boolean
+): NavSection[] {
+  return sections
+    .map(section => ({
+      ...section,
+      items: section.items.filter(item => {
+        const path = getNavPath(item.url);
+        if (path.startsWith('/dashboard') || path === '/collections') return true;
+        if (path.startsWith('/admin')) {
+          return canAccessAdminPath(path, can, isSuperAdmin);
+        }
+        return true;
+      }),
+    }))
+    .filter(section => section.items.length > 0);
+}
+
+/** Seller nav: hide items that require platform admin (future-proof). */
+export function filterSellerNavSectionsByAccess(
+  sections: NavSection[],
+  options: { isPlatformAdmin: boolean }
+): NavSection[] {
+  if (options.isPlatformAdmin) return sections;
+  return sections
+    .map(section => ({
+      ...section,
+      items: section.items.filter(item => !item.adminOnly),
+    }))
+    .filter(section => section.items.length > 0);
+}

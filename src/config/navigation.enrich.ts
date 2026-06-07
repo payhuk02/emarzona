@@ -1,4 +1,5 @@
 import { Plus } from '@/components/icons';
+import { sectionLabelToKey } from '@/config/navigation.i18n';
 import { isNavItemActive } from '@/config/navigation.helpers';
 import { isNavFeatureEnabled } from '@/lib/navigation/feature-flags';
 import type {
@@ -16,6 +17,8 @@ export type RawNavItem = {
   icon: NavItem['icon'];
   /** Optional client feature flag key (see lib/navigation/feature-flags) */
   featureFlag?: string;
+  /** Visible only to platform admins in seller persona */
+  adminOnly?: boolean;
 };
 
 export type RawNavSection = {
@@ -74,7 +77,22 @@ export const SELLER_PRIMARY_PATHS = new Set([
   '/dashboard/domain',
 ]);
 
-const BUYER_PUBLIC_PATHS = new Set(['/marketplace', '/auctions', '/community']);
+const BUYER_PUBLIC_PATHS = new Set(['/marketplace', '/auctions']);
+
+/** Public/discovery URLs excluded from seller navigation (Phase 4 cleanup). */
+export const SELLER_EXCLUDED_PATHS = new Set([
+  '/digital/search',
+  '/digital/compare',
+  '/products/compare',
+  '/collections',
+  '/recommendations',
+  '/discover',
+  '/trending',
+  '/recommendations/history-based',
+  '/personalization/quiz',
+  '/personalization/recommendations',
+  '/community',
+]);
 
 function resolvePersonas(url: string, sectionLabel: string): SidebarPersona[] {
   const path = url.split('?')[0];
@@ -88,6 +106,10 @@ function resolvePersonas(url: string, sectionLabel: string): SidebarPersona[] {
   }
 
   if (path.startsWith('/admin')) return ['admin'];
+
+  if (SELLER_EXCLUDED_PATHS.has(path)) {
+    return ['buyer'];
+  }
 
   if (BUYER_PUBLIC_PATHS.has(path)) return ['seller', 'buyer'];
 
@@ -109,7 +131,7 @@ function resolvePersonas(url: string, sectionLabel: string): SidebarPersona[] {
     path.startsWith('/products/compare') ||
     path === '/collections'
   ) {
-    return ['seller'];
+    return ['buyer'];
   }
 
   return ['seller'];
@@ -126,6 +148,7 @@ function resolveTier(url: string, sectionLabel: string): NavTier {
 export function enrichNavSections(sections: RawNavSection[]): NavSection[] {
   return sections.map(section => ({
     label: section.label,
+    sectionKey: sectionLabelToKey(section.label),
     items: section.items
       .filter(item => isNavFeatureEnabled(item.featureFlag))
       .map(item => {
@@ -175,6 +198,7 @@ function splitCreateSection(sections: NavSection[]): NavSection[] {
 
   const createSection: NavSection = {
     label: 'Créer',
+    sectionKey: 'creer',
     items: createItems,
     defaultOpen: true,
   };
@@ -216,11 +240,15 @@ export function filterNavSections(
 
 export function flattenNavSections(sections: NavSection[]): FlatNavEntry[] {
   return sections.flatMap(section =>
-    section.items.map(item => ({ ...item, sectionLabel: section.label }))
+    section.items.map(item => ({
+      ...item,
+      sectionLabel: section.label,
+      sectionKey: section.sectionKey,
+    }))
   );
 }
 
-export const DEFAULT_OPEN_SECTION_LABELS = new Set(['Principal', 'Administration', 'Créer']);
+export const DEFAULT_OPEN_SECTION_KEYS = new Set(['principal', 'administration', 'creer']);
 
 export function sectionContainsPath(
   section: { items: { url: string }[] },

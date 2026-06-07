@@ -65,6 +65,11 @@ jobs:
         env:
           CI: true
 
+      - name: Run navigation tests
+        run: npm run test:navigation
+        env:
+          CI: true
+
       - name: Check coverage thresholds
         run: |
           # Vérifier que la couverture respecte les seuils (80% lines, 80% functions, 75% branches, 80% statements)

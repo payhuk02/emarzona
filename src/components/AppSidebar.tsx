@@ -8,16 +8,14 @@ import { SidebarNavCommandPalette } from '@/components/sidebar/SidebarNavCommand
 import { SidebarPersonaSwitch } from '@/components/sidebar/SidebarPersonaSwitch';
 import { NAV_LINK_ACTIVE, NAV_LINK_INACTIVE } from '@/components/sidebar/sidebar-nav-shared';
 import {
-  DEFAULT_OPEN_SECTION_LABELS,
-  enrichNavSections,
-  filterNavSections,
+  DEFAULT_OPEN_SECTION_KEYS,
   flattenNavSections,
   sectionContainsPath,
 } from '@/config/navigation.enrich';
-import { adminMenuSections, userMenuSections } from '@/config/navigation.menus';
 import { getNavItemPath, isNavItemActive, parseNavTo } from '@/config/navigation.helpers';
 import type { NavSection, SidebarPersona } from '@/config/navigation.types';
 import { useSidebarPersona } from '@/hooks/useSidebarPersona';
+import { useSidebarNavigation } from '@/hooks/useSidebarNavigation';
 import { recordNavClick, sortEntriesByNavFrequency } from '@/hooks/useNavigationAnalytics';
 import { useState, useEffect, useMemo } from 'react';
 import React from 'react';
@@ -64,13 +62,13 @@ const buildDefaultCollapsedSections = (
   pathname: string,
   search: string
 ): string[] => {
-  const openLabels = new Set(DEFAULT_OPEN_SECTION_LABELS);
+  const openKeys = new Set(DEFAULT_OPEN_SECTION_KEYS);
   sections.forEach(s => {
-    if (s.defaultOpen) openLabels.add(s.label);
+    if (s.defaultOpen) openKeys.add(s.sectionKey);
   });
-  const activeLabel = sections.find(s => sectionContainsPath(s, pathname, search))?.label;
-  if (activeLabel) openLabels.add(activeLabel);
-  return sections.map(s => s.label).filter(label => !openLabels.has(label));
+  const activeKey = sections.find(s => sectionContainsPath(s, pathname, search))?.sectionKey;
+  if (activeKey) openKeys.add(activeKey);
+  return sections.map(s => s.sectionKey).filter(key => !openKeys.has(key));
 };
 
 // Composant Logo avec fallback en cas d'erreur
@@ -168,23 +166,14 @@ export function AppSidebar() {
   const [prefsHydrated, setPrefsHydrated] = useState(false);
   const [storesMenuOpen, setStoresMenuOpen] = useState(false);
 
-  const enrichedUserSections = useMemo(() => enrichNavSections(userMenuSections), []);
-
   const showAdminMenu = isAdmin && persona === 'admin';
   const showUserMenu = !showAdminMenu;
 
-  const sidebarUserSections = useMemo(() => {
-    const navPersona = persona === 'buyer' ? 'buyer' : 'seller';
-    return filterNavSections(enrichedUserSections, navPersona, { sidebarOnly: true });
-  }, [enrichedUserSections, persona]);
-
-  const activeSections = showAdminMenu ? enrichNavSections(adminMenuSections) : sidebarUserSections;
-
-  const commandPaletteSections = useMemo(() => {
-    if (showAdminMenu) return enrichNavSections(adminMenuSections);
-    const navPersona = persona === 'buyer' ? 'buyer' : 'seller';
-    return filterNavSections(enrichedUserSections, navPersona, { sidebarOnly: false });
-  }, [showAdminMenu, enrichedUserSections, persona]);
+  const { activeSections, commandPaletteSections } = useSidebarNavigation({
+    persona,
+    isPlatformAdmin: isAdmin,
+    showAdminMenu,
+  });
 
   const allCurrentEntries = useMemo(() => flattenNavSections(activeSections), [activeSections]);
 
@@ -248,12 +237,12 @@ export function AppSidebar() {
   }, [prefsHydrated, stores.length]);
 
   useEffect(() => {
-    const activeLabel = activeSections.find(s =>
+    const activeKey = activeSections.find(s =>
       sectionContainsPath(s, location.pathname, location.search)
-    )?.label;
-    if (!activeLabel) return;
+    )?.sectionKey;
+    if (!activeKey) return;
     setCollapsedSections(prev =>
-      prev.includes(activeLabel) ? prev.filter(l => l !== activeLabel) : prev
+      prev.includes(activeKey) ? prev.filter(k => k !== activeKey) : prev
     );
   }, [location.pathname, location.search, activeSections]);
 
@@ -283,11 +272,9 @@ export function AppSidebar() {
     });
   }, [currentNavItem?.url]);
 
-  const toggleSectionCollapse = (sectionLabel: string) => {
+  const toggleSectionCollapse = (sectionKey: string) => {
     setCollapsedSections(prev =>
-      prev.includes(sectionLabel)
-        ? prev.filter(label => label !== sectionLabel)
-        : [...prev, sectionLabel]
+      prev.includes(sectionKey) ? prev.filter(key => key !== sectionKey) : [...prev, sectionKey]
     );
   };
 
@@ -561,7 +548,7 @@ export function AppSidebar() {
           {/* Menu Items - Organisé par sections */}
           {showUserMenu &&
             activeSections.map((section, sectionIndex) => (
-              <React.Fragment key={section.label}>
+              <React.Fragment key={section.sectionKey}>
                 {isCollapsed && sectionIndex > 0 && (
                   <div
                     className="app-sidebar-rail-separator mx-auto my-1 h-px w-6 bg-white/15"
@@ -570,8 +557,8 @@ export function AppSidebar() {
                 )}
                 <SidebarCollapsibleSection
                   label={section.label}
-                  isOpen={isCollapsed || !collapsedSections.includes(section.label)}
-                  onToggle={() => toggleSectionCollapse(section.label)}
+                  isOpen={isCollapsed || !collapsedSections.includes(section.sectionKey)}
+                  onToggle={() => toggleSectionCollapse(section.sectionKey)}
                   hideHeader={isCollapsed}
                 >
                   <SidebarGroupContent>
@@ -585,7 +572,7 @@ export function AppSidebar() {
 
                         // Menu spécial pour "Tableau de bord" avec sous-menu des boutiques - STATIQUE (toujours ouvert)
                         if (
-                          item.title === 'Tableau de bord' &&
+                          getNavItemPath(item.url) === '/dashboard' &&
                           !storesLoading &&
                           stores.length > 0
                         ) {
@@ -776,7 +763,7 @@ export function AppSidebar() {
           {/* Admin Menu Items - Organisé par sections */}
           {showAdminMenu &&
             activeSections.map((section, sectionIndex) => (
-              <React.Fragment key={section.label}>
+              <React.Fragment key={section.sectionKey}>
                 {isCollapsed && sectionIndex > 0 && (
                   <div
                     className="app-sidebar-rail-separator mx-auto my-1 h-px w-6 bg-white/15"
@@ -785,8 +772,8 @@ export function AppSidebar() {
                 )}
                 <SidebarCollapsibleSection
                   label={section.label}
-                  isOpen={isCollapsed || !collapsedSections.includes(section.label)}
-                  onToggle={() => toggleSectionCollapse(section.label)}
+                  isOpen={isCollapsed || !collapsedSections.includes(section.sectionKey)}
+                  onToggle={() => toggleSectionCollapse(section.sectionKey)}
                   hideHeader={isCollapsed}
                 >
                   <SidebarGroupContent>
