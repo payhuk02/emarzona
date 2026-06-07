@@ -63,9 +63,9 @@ async function auditRoute(route) {
     'lighthouse',
     url,
     '--only-categories=accessibility',
-    '--form-factor=desktop',
+    '--preset=desktop',
     '--quiet',
-    '--chrome-flags=--headless',
+    '--chrome-flags=--headless=new',
     `--output=json`,
     `--output-path=${outPath}`,
   ]);
