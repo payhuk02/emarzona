@@ -16,6 +16,9 @@ import translationDE from './locales/de.json';
 import translationPT from './locales/pt.json';
 import sidebarFR from './locales/sidebar-fr.json';
 import sidebarEN from './locales/sidebar-en.json';
+import sidebarES from './locales/sidebar-es.json';
+import sidebarDE from './locales/sidebar-de.json';
+import sidebarPT from './locales/sidebar-pt.json';
 import landingPremiumFR from './locales/landing-premium/fr.json';
 import landingPremiumEN from './locales/landing-premium/en.json';
 import landingPremiumES from './locales/landing-premium/es.json';
@@ -31,13 +34,13 @@ const resources = {
     translation: { ...translationEN, ...sidebarEN, landingPremium: landingPremiumEN },
   },
   es: {
-    translation: { ...translationES, ...sidebarEN, landingPremium: landingPremiumES },
+    translation: { ...translationES, ...sidebarES, landingPremium: landingPremiumES },
   },
   de: {
-    translation: { ...translationDE, ...sidebarEN, landingPremium: landingPremiumDE },
+    translation: { ...translationDE, ...sidebarDE, landingPremium: landingPremiumDE },
   },
   pt: {
-    translation: { ...translationPT, ...sidebarEN, landingPremium: landingPremiumPT },
+    translation: { ...translationPT, ...sidebarPT, landingPremium: landingPremiumPT },
   },
 };
 

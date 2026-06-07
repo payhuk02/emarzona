@@ -24,16 +24,16 @@
       "commandes": "Orders"
     },
     "contextGroups": {
-      "integrations": "Integrations",
+      "integrations": "Integraciones",
       "webhooks": "Webhooks",
-      "programmes": "Programs",
-      "gestion": "Management",
-      "produits_digitaux": "Digital Products",
-      "analytics_digitaux": "Analytics",
-      "clients_promotions": "Customers & Promotions",
-      "email_marketing": "Email Marketing",
-      "croissance": "Growth",
-      "other": "Other"
+      "programmes": "Programas",
+      "gestion": "Gestión",
+      "produits_digitaux": "Productos digitales",
+      "analytics_digitaux": "Analítica",
+      "clients_promotions": "Clientes y promociones",
+      "email_marketing": "Email marketing",
+      "croissance": "Crecimiento",
+      "other": "Otros"
     },
     "items": {
       "dashboard": "Dashboard",

@@ -18,7 +18,22 @@
       "croissance": "Croissance",
       "analytics_monitoring": "Analytics & Monitoring",
       "securite_support": "Sécurité & Support",
-      "creer": "Créer"
+      "creer": "Créer",
+      "emails": "Emails",
+      "clients": "Clients",
+      "commandes": "Commandes"
+    },
+    "contextGroups": {
+      "integrations": "Intégrations",
+      "webhooks": "Webhooks",
+      "programmes": "Programmes",
+      "gestion": "Gestion",
+      "produits_digitaux": "Produits Digitaux",
+      "analytics_digitaux": "Analytics",
+      "clients_promotions": "Clients & Promotions",
+      "email_marketing": "Email Marketing",
+      "croissance": "Croissance",
+      "other": "Autres"
     },
     "items": {
       "dashboard": "Tableau de bord",

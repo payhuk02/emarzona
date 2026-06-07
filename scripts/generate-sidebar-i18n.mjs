@@ -44,15 +44,96 @@ while ((m = sectionRe.exec(source))) {
 }
 void lastIndex;
 
-const fr = { sidebar: { sections, items } };
+const contextGroupsFr = {
+  integrations: 'Intégrations',
+  webhooks: 'Webhooks',
+  programmes: 'Programmes',
+  gestion: 'Gestion',
+  produits_digitaux: 'Produits Digitaux',
+  analytics_digitaux: 'Analytics',
+  clients_promotions: 'Clients & Promotions',
+  email_marketing: 'Email Marketing',
+  croissance: 'Croissance',
+  other: 'Autres',
+};
+
+sections.creer = 'Créer';
+sections.emails = 'Emails';
+sections.clients = 'Clients';
+sections.commandes = 'Commandes';
+
+const fr = { sidebar: { sections, contextGroups: contextGroupsFr, items } };
+const contextGroupsEn = {
+  integrations: 'Integrations',
+  webhooks: 'Webhooks',
+  programmes: 'Programs',
+  gestion: 'Management',
+  produits_digitaux: 'Digital Products',
+  analytics_digitaux: 'Analytics',
+  clients_promotions: 'Customers & Promotions',
+  email_marketing: 'Email Marketing',
+  croissance: 'Growth',
+  other: 'Other',
+};
+
+const enSections = {
+  ...Object.fromEntries(Object.entries(sections).map(([k, v]) => [k, translateSectionEn(v)])),
+  creer: 'Create',
+  emails: 'Emails',
+  clients: 'Customers',
+  commandes: 'Orders',
+};
+
 const en = {
   sidebar: {
-    sections: Object.fromEntries(
-      Object.entries(sections).map(([k, v]) => [k, translateSectionEn(v)])
-    ),
+    sections: enSections,
+    contextGroups: contextGroupsEn,
     items: Object.fromEntries(Object.entries(items).map(([k, v]) => [k, translateItemEn(v)])),
   },
 };
+
+const contextGroupsEs = {
+  integrations: 'Integraciones',
+  webhooks: 'Webhooks',
+  programmes: 'Programas',
+  gestion: 'Gestión',
+  produits_digitaux: 'Productos digitales',
+  analytics_digitaux: 'Analítica',
+  clients_promotions: 'Clientes y promociones',
+  email_marketing: 'Email marketing',
+  croissance: 'Crecimiento',
+  other: 'Otros',
+};
+
+const contextGroupsDe = {
+  integrations: 'Integrationen',
+  webhooks: 'Webhooks',
+  programmes: 'Programme',
+  gestion: 'Verwaltung',
+  produits_digitaux: 'Digitale Produkte',
+  analytics_digitaux: 'Analysen',
+  clients_promotions: 'Kunden & Aktionen',
+  email_marketing: 'E-Mail-Marketing',
+  croissance: 'Wachstum',
+  other: 'Sonstige',
+};
+
+const contextGroupsPt = {
+  integrations: 'Integrações',
+  webhooks: 'Webhooks',
+  programmes: 'Programas',
+  gestion: 'Gestão',
+  produits_digitaux: 'Produtos digitais',
+  analytics_digitaux: 'Análises',
+  clients_promotions: 'Clientes e promoções',
+  email_marketing: 'Email marketing',
+  croissance: 'Crescimento',
+  other: 'Outros',
+};
+
+const es = { sidebar: { ...en.sidebar, contextGroups: contextGroupsEs } };
+const de = { sidebar: { ...en.sidebar, contextGroups: contextGroupsDe } };
+const pt = { sidebar: { ...en.sidebar, contextGroups: contextGroupsPt } };
 
 function translateSectionEn(label) {
   const map = {
@@ -121,6 +202,9 @@ function translateItemEn(title) {
 
 fs.writeFileSync('src/i18n/locales/sidebar-fr.json', `${JSON.stringify(fr, null, 2)}\n`);
 fs.writeFileSync('src/i18n/locales/sidebar-en.json', `${JSON.stringify(en, null, 2)}\n`);
+fs.writeFileSync('src/i18n/locales/sidebar-es.json', `${JSON.stringify(es, null, 2)}\n`);
+fs.writeFileSync('src/i18n/locales/sidebar-de.json', `${JSON.stringify(de, null, 2)}\n`);
+fs.writeFileSync('src/i18n/locales/sidebar-pt.json', `${JSON.stringify(pt, null, 2)}\n`);
 console.log(
   `Generated sidebar locales: ${Object.keys(sections).length} sections, ${Object.keys(items).length} items`
 );
