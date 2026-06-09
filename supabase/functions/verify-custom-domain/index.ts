@@ -174,6 +174,32 @@ serve(async req => {
           } else {
             console.log(`Domaine ${domain} ajouté au projet Vercel avec succès.`);
           }
+
+          // 2. Vérifier le statut exact chez Vercel
+          const verifyRes = await fetch(
+            `https://api.vercel.com/v9/projects/${vercelProjectId}/domains/${domain}`,
+            {
+              headers: {
+                Authorization: `Bearer ${vercelToken}`,
+              },
+            }
+          );
+
+          if (verifyRes.ok) {
+            const domainInfo = await verifyRes.json();
+            if (!domainInfo.verified) {
+              const reason =
+                domainInfo.verification?.map((v: any) => v.reason).join(', ') ||
+                'CNAME manquant ou en cours de propagation DNS';
+              updateData.error_message = `Vercel Info : En attente de configuration DNS (${reason})`;
+              updateData.ssl_status = 'pending';
+            } else {
+              updateData.error_message = null;
+              updateData.ssl_status = 'active';
+            }
+          } else {
+            console.error('Failed to get domain info from Vercel');
+          }
         } catch (vErr) {
           console.error('Failed to call Vercel API:', vErr);
         }

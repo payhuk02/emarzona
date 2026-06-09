@@ -43,6 +43,7 @@ export interface MonerooCheckoutData {
   description?: string;
   customer_email?: string;
   customer_name?: string;
+  customer_phone?: string;
   return_url: string;
   cancel_url?: string;
   metadata?: Record<string, unknown>;

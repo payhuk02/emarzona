@@ -26,7 +26,9 @@ interface CreateCheckoutData {
   description?: string;
   customer_email: string;
   customer_name?: string;
+  customer_phone?: string;
   return_url?: string;
+  cancel_url?: string;
   productId?: string;
   storeId?: string;
   orderId?: string;
@@ -174,6 +176,11 @@ function validateCreateCheckout(data: unknown): {
     return { valid: false, error: 'URL de retour invalide' };
   }
 
+  // Valider cancel_url (optionnel)
+  if (d.cancel_url && typeof d.cancel_url === 'string' && !isValidUrl(d.cancel_url)) {
+    return { valid: false, error: "URL d'annulation invalide" };
+  }
+
   // Valider productId et storeId (optionnels mais doivent être des UUID valides)
   if (d.productId && typeof d.productId === 'string' && !isValidUUID(d.productId)) {
     return { valid: false, error: 'productId doit être un UUID valide' };
@@ -199,7 +206,9 @@ function validateCreateCheckout(data: unknown): {
       description: d.description ? String(d.description).substring(0, 500) : undefined,
       customer_email: customerEmail,
       customer_name: d.customer_name ? String(d.customer_name).substring(0, 200) : undefined,
+      customer_phone: d.customer_phone ? String(d.customer_phone).substring(0, 50) : undefined,
       return_url: d.return_url ? String(d.return_url) : undefined,
+      cancel_url: d.cancel_url ? String(d.cancel_url) : undefined,
       productId: d.productId ? String(d.productId) : undefined,
       storeId: d.storeId ? String(d.storeId) : undefined,
       orderId: d.orderId ? String(d.orderId) : undefined,
@@ -797,8 +806,10 @@ serve(async req => {
             email: validatedData.customer_email,
             first_name: firstName,
             last_name: lastName,
+            ...(validatedData.customer_phone && { phone: validatedData.customer_phone }),
           },
           return_url: validatedData.return_url,
+          ...(validatedData.cancel_url && { cancel_url: validatedData.cancel_url }),
           metadata: metadata,
           // methods est optionnel
           ...(validatedData.methods && { methods: validatedData.methods }),

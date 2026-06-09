@@ -89,7 +89,6 @@
     "verify:all": "npm run verify:responsive && npm run audit:responsive",
     "verify:routes": "tsx scripts/verify-routes.ts",
     "analyze:bundle": "npm run build:analyze && node scripts/analyze-bundle-performance.js",
-    "analyze:bundle:quick": "node scripts/analyze-bundle-size.js",
     "check:bundle-budget": "node scripts/check-bundle-budget.mjs",
     "build:check": "npm run build && npm run check:bundle-budget",
     "monitor:bundle": "npm run build:check",

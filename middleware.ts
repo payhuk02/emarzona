@@ -297,6 +297,35 @@ async function resolveMeta(req: Request): Promise<Meta> {
   return { ...DEFAULT_META, url: `https://${host || 'emarzona.com'}${path}` };
 }
 
+// -- Cache System In-Memory --
+interface CacheEntry {
+  meta: Meta;
+  timestamp: number;
+}
+const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
+const MAX_CACHE_SIZE = 1000;
+const metaCache = new Map<string, CacheEntry>();
+
+async function resolveMetaCached(req: Request): Promise<Meta> {
+  const cacheKey = req.url;
+  const cached = metaCache.get(cacheKey);
+
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+    return cached.meta;
+  }
+
+  const meta = await resolveMeta(req);
+
+  // LRU simple : si on dépasse la taille max, on supprime le plus ancien
+  if (metaCache.size >= MAX_CACHE_SIZE) {
+    const firstKey = metaCache.keys().next().value;
+    if (firstKey) metaCache.delete(firstKey);
+  }
+
+  metaCache.set(cacheKey, { meta, timestamp: Date.now() });
+  return meta;
+}
+
 function escapeHtml(s: string): string {
   return s.replace(
     /[<>&"']/g,
@@ -373,7 +402,7 @@ export default async function middleware(req: Request): Promise<Response | undef
 
   try {
     const meta = await Promise.race<Meta>([
-      resolveMeta(req),
+      resolveMetaCached(req),
       new Promise<Meta>(resolve => setTimeout(() => resolve(DEFAULT_META), 1500)),
     ]);
     const html = await res.text();

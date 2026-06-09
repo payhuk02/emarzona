@@ -12,7 +12,9 @@ export interface CreateCheckoutData {
   description?: string;
   customer_email: string;
   customer_name?: string;
+  customer_phone?: string;
   return_url?: string;
+  cancel_url?: string;
   productId?: string;
   storeId?: string;
   metadata?: Record<string, unknown>;
@@ -88,7 +90,7 @@ function isValidAmount(amount: number, currency: string): { valid: boolean; erro
   }
 
   const limits = AMOUNT_LIMITS[currency] || AMOUNT_LIMITS.XOF;
-  
+
   if (amount < limits.min) {
     return { valid: false, error: `Le montant minimum est ${limits.min} ${currency}` };
   }
@@ -123,7 +125,11 @@ function isValidUrl(url: string): boolean {
 /**
  * Valide les données pour create_checkout
  */
-export function validateCreateCheckout(data: unknown): { valid: boolean; error?: string; validated?: CreateCheckoutData } {
+export function validateCreateCheckout(data: unknown): {
+  valid: boolean;
+  error?: string;
+  validated?: CreateCheckoutData;
+} {
   if (!data || typeof data !== 'object') {
     return { valid: false, error: 'Les données sont requises' };
   }
@@ -151,10 +157,10 @@ export function validateCreateCheckout(data: unknown): { valid: boolean; error?:
   // Valider customer_email
   const customerEmail = String(d.customer_email || '').trim();
   if (!customerEmail) {
-    return { valid: false, error: 'L\'email du client est requis' };
+    return { valid: false, error: "L'email du client est requis" };
   }
   if (!isValidEmail(customerEmail)) {
-    return { valid: false, error: 'Format d\'email invalide' };
+    return { valid: false, error: "Format d'email invalide" };
   }
 
   // Valider description (optionnel mais limité)
@@ -165,6 +171,11 @@ export function validateCreateCheckout(data: unknown): { valid: boolean; error?:
   // Valider return_url (optionnel)
   if (d.return_url && typeof d.return_url === 'string' && !isValidUrl(d.return_url)) {
     return { valid: false, error: 'URL de retour invalide' };
+  }
+
+  // Valider cancel_url (optionnel)
+  if (d.cancel_url && typeof d.cancel_url === 'string' && !isValidUrl(d.cancel_url)) {
+    return { valid: false, error: "URL d'annulation invalide" };
   }
 
   // Valider productId et storeId (optionnels mais doivent être des UUID valides)
@@ -188,7 +199,9 @@ export function validateCreateCheckout(data: unknown): { valid: boolean; error?:
       description: d.description ? String(d.description).substring(0, 500) : undefined,
       customer_email: customerEmail,
       customer_name: d.customer_name ? String(d.customer_name).substring(0, 200) : undefined,
+      customer_phone: d.customer_phone ? String(d.customer_phone).substring(0, 50) : undefined,
       return_url: d.return_url ? String(d.return_url) : undefined,
+      cancel_url: d.cancel_url ? String(d.cancel_url) : undefined,
       productId: d.productId ? String(d.productId) : undefined,
       storeId: d.storeId ? String(d.storeId) : undefined,
       metadata: d.metadata as Record<string, unknown> | undefined,
@@ -200,7 +213,11 @@ export function validateCreateCheckout(data: unknown): { valid: boolean; error?:
 /**
  * Valide les données pour refund_payment
  */
-export function validateRefundPayment(data: unknown): { valid: boolean; error?: string; validated?: RefundPaymentData } {
+export function validateRefundPayment(data: unknown): {
+  valid: boolean;
+  error?: string;
+  validated?: RefundPaymentData;
+} {
   if (!data || typeof data !== 'object') {
     return { valid: false, error: 'Les données sont requises' };
   }
@@ -241,7 +258,11 @@ export function validateRefundPayment(data: unknown): { valid: boolean; error?: 
 /**
  * Valide les données pour get_payment, verify_payment, cancel_payment
  */
-export function validatePaymentId(data: unknown): { valid: boolean; error?: string; paymentId?: string } {
+export function validatePaymentId(data: unknown): {
+  valid: boolean;
+  error?: string;
+  paymentId?: string;
+} {
   if (!data || typeof data !== 'object') {
     return { valid: false, error: 'Les données sont requises' };
   }
@@ -259,10 +280,3 @@ export function validatePaymentId(data: unknown): { valid: boolean; error?: stri
 
   return { valid: true, paymentId };
 }
-
-
-
-
-
-
-

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import type { LegalDocument } from '@/types/legal';
+import { sanitizeProductDescription } from '@/lib/html-sanitizer';
 
 interface LegalDocumentContentProps {
   document: LegalDocument | null | undefined;
@@ -14,7 +15,7 @@ export function LegalDocumentContent({ document, fallback }: LegalDocumentConten
     return (
       <article
         className="prose prose-blue max-w-none legal-document-from-db"
-        dangerouslySetInnerHTML={{ __html: document.content }}
+        dangerouslySetInnerHTML={{ __html: sanitizeProductDescription(document.content) }}
       />
     );
   }
