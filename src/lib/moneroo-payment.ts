@@ -11,6 +11,7 @@ import {
 import { Currency, isSupportedCurrency } from './currency-converter';
 import { MonerooCheckoutResponse } from './moneroo-types';
 import { validateAmount } from './moneroo-amount-validator';
+import { normalizePhoneForPayment } from './validation';
 import {
   sanitizeMonerooApiResponse,
   sanitizeMonerooCheckoutLog,
@@ -36,6 +37,26 @@ export interface PaymentOptions {
    */
   returnUrl?: string;
   cancelUrl?: string;
+}
+
+function toMonerooMetadataValue(value: unknown): string | undefined {
+  if (value === null || value === undefined || value === '') {
+    return undefined;
+  }
+  if (typeof value === 'string') {
+    return value;
+  }
+  if (typeof value === 'number' || typeof value === 'boolean') {
+    return String(value);
+  }
+  if (typeof value === 'object') {
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return undefined;
+    }
+  }
+  return String(value);
 }
 
 export interface RefundOptions {
@@ -268,21 +289,20 @@ export const initiateMonerooPayment = async (options: PaymentOptions) => {
       ...(orderId && { order_id: orderId }),
     };
 
-    // Ajouter les métadonnées personnalisées en filtrant les valeurs null/undefined
+    // Moneroo n'accepte que des chaînes dans metadata
     Object.entries(metadata || {}).forEach(([key, value]) => {
-      // Ne pas inclure null, undefined, ou chaînes vides
-      if (value !== null && value !== undefined && value !== '') {
-        // Si c'est null, ne pas l'inclure
-        if (typeof value === 'object' && value !== null) {
-          // Pour les objets, vérifier qu'ils ne sont pas vides
-          if (Object.keys(value).length > 0) {
-            cleanMetadata[key] = value;
-          }
-        } else {
-          cleanMetadata[key] = value;
-        }
+      const serialized = toMonerooMetadataValue(value);
+      if (serialized !== undefined) {
+        cleanMetadata[key] = serialized;
       }
     });
+
+    const normalizedPhone = customerPhone
+      ? normalizePhoneForPayment(
+          customerPhone,
+          typeof metadata.customerCountry === 'string' ? metadata.customerCountry : undefined
+        )
+      : undefined;
 
     const checkoutData: MonerooCheckoutData = {
       amount,
@@ -290,7 +310,7 @@ export const initiateMonerooPayment = async (options: PaymentOptions) => {
       description,
       customer_email: customerEmail,
       customer_name: customerName,
-      customer_phone: customerPhone,
+      customer_phone: normalizedPhone,
       return_url:
         returnUrl || `${window.location.origin}/checkout/success?transaction_id=${transaction.id}`,
       cancel_url:

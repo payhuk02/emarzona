@@ -13,6 +13,7 @@ import { useLCPPreload } from '@/hooks/useLCPPreload';
 import { generateProductUrl } from '@/lib/store-utils';
 import { redirectToPlatformLogin } from '@/lib/auth-routes';
 import { isSupportedCurrency, type Currency } from '@/lib/currency-converter';
+import { normalizePhoneForPayment } from '@/lib/validation';
 
 /** Client Supabase assoupli pour tables absentes du schéma généré */
 type LooseSupabaseClient = {
@@ -416,6 +417,7 @@ const Checkout = () => {
         const rawCurrency = (product.currency || 'XOF').trim();
         const finalCurrency: Currency = isSupportedCurrency(rawCurrency) ? rawCurrency : 'XOF';
         const customerName = `${formData.firstName} ${formData.lastName}`.trim();
+        const customerPhone = normalizePhoneForPayment(formData.phone, formData.country);
 
         // Vérification importante: s'assurer qu'on utilise bien le prix promo, pas le prix barré
         const promoPrice = product.promotional_price;
@@ -448,7 +450,7 @@ const Checkout = () => {
         const shippingAddress = {
           full_name: customerName,
           email: formData.email,
-          phone: formData.phone,
+          phone: customerPhone,
           address: formData.address,
           city: formData.city,
           country: formData.country,
@@ -470,7 +472,7 @@ const Checkout = () => {
             customerId: user.id,
             customerEmail: formData.email,
             customerName,
-            customerPhone: formData.phone,
+            customerPhone,
             totalAmount: finalPrice,
             currency: finalCurrency,
             shippingAddress,
@@ -489,7 +491,7 @@ const Checkout = () => {
           description: `Achat de ${product.name ? htmlToPlainText(product.name) : 'produit'}`,
           customerEmail: formData.email,
           customerName,
-          customerPhone: formData.phone,
+          customerPhone,
           metadata: {
             productName: product.name,
             storeSlug: store.slug || '',
@@ -498,7 +500,7 @@ const Checkout = () => {
             ...(orderNumber && { order_number: orderNumber }),
             ...(product.product_type && { productType: product.product_type }),
             ...(selectedVariant?.id && { variantId: selectedVariant.id }),
-            customerPhone: formData.phone,
+            customerPhone,
             customerAddress: formData.address,
             customerCity: formData.city,
             customerCountry: formData.country,
@@ -522,7 +524,7 @@ const Checkout = () => {
             await supabase.auth.updateUser({
               data: {
                 full_name: customerName,
-                phone: formData.phone,
+                phone: customerPhone,
                 address: formData.address,
                 city: formData.city,
                 country: formData.country,

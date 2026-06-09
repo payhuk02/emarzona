@@ -18,6 +18,45 @@ export const isValidPhone = (phone: string): boolean => {
   return phoneRegex.test(phone.replace(/\s/g, ''));
 };
 
+const COUNTRY_DIAL_CODES: Record<string, string> = {
+  'burkina faso': '226',
+  burkina: '226',
+  "côte d'ivoire": '225',
+  "cote d'ivoire": '225',
+  'ivory coast': '225',
+  senegal: '221',
+  mali: '223',
+  benin: '229',
+  togo: '228',
+  niger: '227',
+  ghana: '233',
+  nigeria: '234',
+  cameroun: '237',
+  cameroon: '237',
+};
+
+/**
+ * Normalise un numéro local vers le format international attendu par Moneroo.
+ */
+export const normalizePhoneForPayment = (phone: string, country?: string): string => {
+  const cleaned = phone.trim().replace(/\s/g, '');
+  if (!cleaned) return cleaned;
+
+  if (/^\+[1-9]\d{6,14}$/.test(cleaned)) {
+    return cleaned;
+  }
+
+  const digits = cleaned.replace(/\D/g, '');
+  const localDigits = digits.startsWith('0') ? digits.slice(1) : digits;
+  const dialCode = COUNTRY_DIAL_CODES[(country || 'burkina faso').toLowerCase().trim()] || '226';
+
+  if (localDigits.length >= 7) {
+    return `+${dialCode}${localDigits}`;
+  }
+
+  return cleaned.startsWith('+') ? cleaned : `+${dialCode}${localDigits}`;
+};
+
 /**
  * Sanitise une chaîne de caractères pour éviter les injections
  */
@@ -82,9 +121,3 @@ export const isValidUUID = (uuid: string): boolean => {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   return uuidRegex.test(uuid);
 };
-
-
-
-
-
-

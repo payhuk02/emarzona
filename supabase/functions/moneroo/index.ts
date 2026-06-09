@@ -125,6 +125,73 @@ function isValidUrl(url: string): boolean {
   }
 }
 
+const COUNTRY_DIAL_CODES: Record<string, string> = {
+  'burkina faso': '226',
+  burkina: '226',
+  "côte d'ivoire": '225',
+  "cote d'ivoire": '225',
+  'ivory coast': '225',
+  senegal: '221',
+  mali: '223',
+  benin: '229',
+  togo: '228',
+  niger: '227',
+  ghana: '233',
+  nigeria: '234',
+  cameroun: '237',
+  cameroon: '237',
+};
+
+function normalizePhoneForMoneroo(phone: string, country?: string): string {
+  const cleaned = phone.trim().replace(/\s/g, '');
+  if (!cleaned) return cleaned;
+
+  if (/^\+[1-9]\d{6,14}$/.test(cleaned)) {
+    return cleaned;
+  }
+
+  const digits = cleaned.replace(/\D/g, '');
+  const localDigits = digits.startsWith('0') ? digits.slice(1) : digits;
+  const dialCode = COUNTRY_DIAL_CODES[(country || 'burkina faso').toLowerCase().trim()] || '226';
+
+  if (localDigits.length >= 7) {
+    return `+${dialCode}${localDigits}`;
+  }
+
+  return cleaned.startsWith('+') ? cleaned : `+${dialCode}${localDigits}`;
+}
+
+/** Moneroo metadata accepts string values only */
+function sanitizeMonerooMetadata(raw: Record<string, unknown>): Record<string, string> {
+  const metadata: Record<string, string> = {};
+
+  Object.entries(raw).forEach(([key, value]) => {
+    if (value === null || value === undefined || value === '') {
+      return;
+    }
+
+    if (typeof value === 'string') {
+      metadata[key] = value;
+      return;
+    }
+
+    if (typeof value === 'number' || typeof value === 'boolean') {
+      metadata[key] = String(value);
+      return;
+    }
+
+    if (typeof value === 'object') {
+      try {
+        metadata[key] = JSON.stringify(value);
+      } catch {
+        console.warn(`[Moneroo Edge Function] Cannot serialize metadata.${key}, skipping`);
+      }
+    }
+  });
+
+  return metadata;
+}
+
 /**
  * Valide les données pour create_checkout
  */
@@ -756,33 +823,9 @@ serve(async req => {
         });
 
         // Construire metadata en incluant productId et storeId si présents
-        // L'API Moneroo exige metadata.product_id
-        // IMPORTANT: L'API Moneroo n'accepte que string, boolean ou integer dans metadata
-        // Il faut filtrer les valeurs null, undefined, et objets vides
+        // L'API Moneroo n'accepte que des chaînes dans metadata
         const rawMetadata = validatedData.metadata || {};
-        const metadata: Record<string, string | number | boolean> = {};
-
-        // Nettoyer les métadonnées : ne garder que les valeurs valides (string, number, boolean)
-        Object.entries(rawMetadata).forEach(([key, value]) => {
-          if (value !== null && value !== undefined && value !== '') {
-            // Convertir en type valide pour Moneroo
-            if (
-              typeof value === 'string' ||
-              typeof value === 'number' ||
-              typeof value === 'boolean'
-            ) {
-              metadata[key] = value;
-            } else if (typeof value === 'object') {
-              // Pour les objets, les convertir en string JSON
-              try {
-                metadata[key] = JSON.stringify(value);
-              } catch {
-                // Si la conversion échoue, ignorer cette clé
-                console.warn(`[Moneroo Edge Function] Cannot serialize metadata.${key}, skipping`);
-              }
-            }
-          }
-        });
+        const metadata = sanitizeMonerooMetadata(rawMetadata);
 
         // Ajouter productId à metadata si présent dans validatedData
         if (validatedData.productId) {
@@ -797,16 +840,34 @@ serve(async req => {
         // Utiliser les données validées (montant et devise déjà validés)
         const amount = validatedData.amount;
         const currency = validatedData.currency;
+        const description = validatedData.description?.trim() || 'Paiement Emarzona';
+
+        if (!validatedData.return_url) {
+          return new Response(
+            JSON.stringify({
+              error: 'Validation échouée',
+              message: 'return_url est requis pour initialiser un paiement Moneroo',
+            }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        const customerCountry =
+          (validatedData.metadata?.customerCountry as string | undefined) ||
+          (validatedData.metadata?.customer_country as string | undefined);
+        const customerPhone = validatedData.customer_phone
+          ? normalizePhoneForMoneroo(validatedData.customer_phone, customerCountry)
+          : undefined;
 
         body = {
           amount: amount, // Déjà validé et arrondi
           currency: currency,
-          description: validatedData.description,
+          description,
           customer: {
             email: validatedData.customer_email,
             first_name: firstName,
             last_name: lastName,
-            ...(validatedData.customer_phone && { phone: validatedData.customer_phone }),
+            ...(customerPhone && { phone: customerPhone }),
           },
           return_url: validatedData.return_url,
           ...(validatedData.cancel_url && { cancel_url: validatedData.cancel_url }),
@@ -1037,15 +1098,23 @@ serve(async req => {
     }
 
     if (!monerooResponse.ok) {
+      const monerooErrorMessage =
+        responseData?.message ||
+        responseData?.error ||
+        (typeof responseData?.errors === 'object'
+          ? JSON.stringify(responseData.errors)
+          : undefined) ||
+        "Erreur lors de l'appel à l'API Moneroo";
+
       console.error('Moneroo API error:', {
         status: monerooResponse.status,
         hasResponseData: !!responseData,
+        message: monerooErrorMessage,
       });
       return new Response(
         JSON.stringify({
           error: 'Erreur Moneroo API',
-          message:
-            responseData.message || responseData.error || "Erreur lors de l'appel à l'API Moneroo",
+          message: monerooErrorMessage,
           details: responseData,
           status: monerooResponse.status,
         }),

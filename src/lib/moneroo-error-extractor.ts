@@ -121,12 +121,49 @@ export async function extractErrorDetails(
 /**
  * Extrait le message détaillé depuis les détails d'erreur
  */
+function formatMonerooFieldErrors(errors: unknown): string | undefined {
+  if (!errors || typeof errors !== 'object') {
+    return undefined;
+  }
+
+  const parts = Object.entries(errors as Record<string, unknown>).flatMap(([field, value]) => {
+    if (Array.isArray(value)) {
+      return value.map(message => `${field}: ${String(message)}`);
+    }
+    if (typeof value === 'string') {
+      return [`${field}: ${value}`];
+    }
+    return [`${field}: ${JSON.stringify(value)}`];
+  });
+
+  return parts.length > 0 ? parts.join('; ') : undefined;
+}
+
 export function extractDetailedMessage(
   errorDetails: ExtractedErrorDetails,
   defaultMessage: string
 ): string {
-  if (errorDetails.message) {
+  if (
+    errorDetails.message &&
+    !errorDetails.message.includes('non-2xx') &&
+    !errorDetails.message.includes('Edge Function returned')
+  ) {
     return errorDetails.message;
+  }
+
+  const nestedDetails = errorDetails.details;
+  if (nestedDetails && typeof nestedDetails === 'object' && !Array.isArray(nestedDetails)) {
+    const detailsObj = nestedDetails as Record<string, unknown>;
+    const fieldErrors = formatMonerooFieldErrors(detailsObj.errors);
+    if (fieldErrors) {
+      return fieldErrors;
+    }
+    if (typeof detailsObj.message === 'string' && detailsObj.message) {
+      return detailsObj.message;
+    }
+    if (typeof detailsObj.error === 'string' && detailsObj.error) {
+      return detailsObj.error;
+    }
   }
 
   if (errorDetails.error) {
