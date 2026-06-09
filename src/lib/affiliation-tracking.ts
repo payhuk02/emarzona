@@ -2,6 +2,10 @@
  * Service de tracking d'affiliation
  * Gère les cookies d'affiliation et la création de commissions
  */
+import {
+  computeAffiliateCommissionBase,
+  computeOrderPlatformFeeAmount,
+} from '@/lib/billing/resolve-order-platform-fee';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from './logger';
 
@@ -263,8 +267,15 @@ export const createAffiliateCommission = async (
       .eq('id', storeId)
       .maybeSingle();
 
-    const platformFeeRate = Number(storeRow?.platform_fee_percent ?? 10) / 100;
-    const commissionBase = orderTotal * (1 - platformFeeRate);
+    const feePercent = Number(storeRow?.platform_fee_percent ?? 10);
+
+    const { data: orderItems } = await supabase
+      .from('order_items')
+      .select('product_type, total_price, quantity, unit_price')
+      .eq('order_id', orderId);
+
+    const platformFee = computeOrderPlatformFeeAmount(orderItems ?? [], feePercent);
+    const commissionBase = computeAffiliateCommissionBase(orderTotal, platformFee.feeAmount);
 
     let commissionAmount = 0;
     if (settings.commission_type === 'percentage') {

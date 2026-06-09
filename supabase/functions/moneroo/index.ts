@@ -161,7 +161,21 @@ function normalizePhoneForMoneroo(phone: string, country?: string): string {
   return cleaned.startsWith('+') ? cleaned : `+${dialCode}${localDigits}`;
 }
 
-/** Moneroo metadata accepts string values only */
+const MONEROO_METADATA_MAX_ITEMS = 10;
+const MONEROO_METADATA_PRIORITY = [
+  'transaction_id',
+  'store_id',
+  'product_id',
+  'order_id',
+  'userId',
+  'order_number',
+  'variantId',
+  'productType',
+  'purpose',
+  'plan_slug',
+];
+
+/** Moneroo metadata accepts string values only, max 10 keys */
 function sanitizeMonerooMetadata(raw: Record<string, unknown>): Record<string, string> {
   const metadata: Record<string, string> = {};
 
@@ -190,6 +204,38 @@ function sanitizeMonerooMetadata(raw: Record<string, unknown>): Record<string, s
   });
 
   return metadata;
+}
+
+function limitMonerooMetadata(metadata: Record<string, string>): Record<string, string> {
+  const limited: Record<string, string> = {};
+
+  for (const key of MONEROO_METADATA_PRIORITY) {
+    if (metadata[key] !== undefined) {
+      limited[key] = metadata[key];
+    }
+    if (Object.keys(limited).length >= MONEROO_METADATA_MAX_ITEMS) {
+      return limited;
+    }
+  }
+
+  for (const [key, value] of Object.entries(metadata)) {
+    if (limited[key] !== undefined) {
+      continue;
+    }
+    limited[key] = value;
+    if (Object.keys(limited).length >= MONEROO_METADATA_MAX_ITEMS) {
+      break;
+    }
+  }
+
+  if (Object.keys(metadata).length > MONEROO_METADATA_MAX_ITEMS) {
+    console.warn('[Moneroo Edge Function] Metadata truncated for Moneroo API limit', {
+      originalCount: Object.keys(metadata).length,
+      keptCount: Object.keys(limited).length,
+    });
+  }
+
+  return limited;
 }
 
 /**
@@ -825,17 +871,13 @@ serve(async req => {
         // Construire metadata en incluant productId et storeId si présents
         // L'API Moneroo n'accepte que des chaînes dans metadata
         const rawMetadata = validatedData.metadata || {};
-        const metadata = sanitizeMonerooMetadata(rawMetadata);
-
-        // Ajouter productId à metadata si présent dans validatedData
-        if (validatedData.productId) {
-          metadata.product_id = String(validatedData.productId);
-        }
-
-        // Ajouter storeId à metadata si présent dans validatedData
-        if (validatedData.storeId) {
-          metadata.store_id = String(validatedData.storeId);
-        }
+        const metadata = limitMonerooMetadata(
+          sanitizeMonerooMetadata({
+            ...rawMetadata,
+            ...(validatedData.productId ? { product_id: validatedData.productId } : {}),
+            ...(validatedData.storeId ? { store_id: validatedData.storeId } : {}),
+          })
+        );
 
         // Utiliser les données validées (montant et devise déjà validés)
         const amount = validatedData.amount;

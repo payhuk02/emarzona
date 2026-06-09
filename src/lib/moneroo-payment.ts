@@ -39,6 +39,8 @@ export interface PaymentOptions {
   cancelUrl?: string;
 }
 
+const MONEROO_METADATA_MAX_ITEMS = 10;
+
 function toMonerooMetadataValue(value: unknown): string | undefined {
   if (value === null || value === undefined || value === '') {
     return undefined;
@@ -57,6 +59,55 @@ function toMonerooMetadataValue(value: unknown): string | undefined {
     }
   }
   return String(value);
+}
+
+/** Moneroo API: max 10 metadata keys, strings only. Full metadata stays in our DB. */
+function buildMonerooApiMetadata(
+  customMetadata: Record<string, unknown>,
+  essentials: {
+    transactionId: string;
+    storeId: string;
+    productId?: string;
+    orderId?: string;
+    userId?: string;
+  }
+): Record<string, string> {
+  const merged: Record<string, unknown> = {
+    transaction_id: essentials.transactionId,
+    store_id: essentials.storeId,
+    ...(essentials.productId ? { product_id: essentials.productId } : {}),
+    ...(essentials.orderId ? { order_id: essentials.orderId } : {}),
+    ...(essentials.userId ? { userId: essentials.userId } : {}),
+  };
+
+  const optionalKeys = [
+    'order_number',
+    'variantId',
+    'productType',
+    'purpose',
+    'plan_slug',
+    'planSlug',
+  ] as const;
+
+  for (const key of optionalKeys) {
+    const value = customMetadata[key];
+    if (value !== undefined && value !== null && value !== '') {
+      merged[key] = value;
+    }
+  }
+
+  const result: Record<string, string> = {};
+  for (const [key, value] of Object.entries(merged)) {
+    const serialized = toMonerooMetadataValue(value);
+    if (serialized !== undefined) {
+      result[key] = serialized;
+    }
+    if (Object.keys(result).length >= MONEROO_METADATA_MAX_ITEMS) {
+      break;
+    }
+  }
+
+  return result;
 }
 
 export interface RefundOptions {
@@ -280,21 +331,13 @@ export const initiateMonerooPayment = async (options: PaymentOptions) => {
     // IMPORTANT: productId doit être passé directement dans data, pas seulement dans metadata
     // L'Edge Function l'extraira et l'ajoutera à metadata.product_id
 
-    // Nettoyer metadata : supprimer les valeurs null, undefined, et vides
-    // L'API Moneroo n'accepte que string, boolean ou integer dans metadata
-    const cleanMetadata: Record<string, unknown> = {
-      transaction_id: transaction.id,
-      store_id: storeId,
-      ...(productId && { product_id: productId }),
-      ...(orderId && { order_id: orderId }),
-    };
-
-    // Moneroo n'accepte que des chaînes dans metadata
-    Object.entries(metadata || {}).forEach(([key, value]) => {
-      const serialized = toMonerooMetadataValue(value);
-      if (serialized !== undefined) {
-        cleanMetadata[key] = serialized;
-      }
+    // Moneroo limite metadata à 10 clés — le détail reste dans transactions.metadata
+    const cleanMetadata = buildMonerooApiMetadata(metadata || {}, {
+      transactionId: transaction.id,
+      storeId,
+      productId,
+      orderId,
+      userId: currentUserId,
     });
 
     const normalizedPhone = customerPhone

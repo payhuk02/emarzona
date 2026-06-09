@@ -189,30 +189,14 @@ export async function assertOrderPaymentBeforeComplete(
   return tx.order_id;
 }
 
+import { resolveStoreDefaultFeePercent } from './order-platform-fee.ts';
+
+export { resolveOrderPlatformFee, resolveStoreDefaultFeePercent } from './order-platform-fee.ts';
+
+/** @deprecated Préférer resolveOrderPlatformFee(storeId, orderId) pour respecter le modèle C1. */
 export async function resolvePlatformFeePercent(
   supabase: SupabaseClient,
   storeId: string
 ): Promise<number> {
-  const { data: store } = await supabase
-    .from('stores')
-    .select('platform_fee_percent')
-    .eq('id', storeId)
-    .maybeSingle();
-
-  if (store?.platform_fee_percent != null) {
-    return Number(store.platform_fee_percent);
-  }
-
-  const { data: settings } = await supabase
-    .from('platform_settings')
-    .select('platform_commission_rate')
-    .not('platform_commission_rate', 'is', null)
-    .limit(1)
-    .maybeSingle();
-
-  if (settings?.platform_commission_rate != null) {
-    return Number(settings.platform_commission_rate);
-  }
-
-  return 10;
+  return resolveStoreDefaultFeePercent(supabase, storeId);
 }

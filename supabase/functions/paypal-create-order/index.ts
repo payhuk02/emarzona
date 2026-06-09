@@ -5,7 +5,7 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { buildCorsHeaders, jsonResponse } from '../_shared/cors.ts';
 import { createSupabaseAdmin } from '../_shared/supabase-admin.ts';
 import { computePayPalPlatformFee, createPayPalCheckoutOrder } from '../_shared/paypal-api.ts';
-import { resolvePlatformFeePercent } from '../_shared/complete-order-payment.ts';
+import { resolveOrderPlatformFee } from '../_shared/order-platform-fee.ts';
 
 interface CreateOrderBody {
   storeId: string;
@@ -62,9 +62,12 @@ serve(async req => {
       return jsonResponse({ error: 'PayPal Commerce is not active for this store' }, 400, origin);
     }
 
-    const feePercent = await resolvePlatformFeePercent(supabase, body.storeId);
-    const platformFee = computePayPalPlatformFee(body.amount, feePercent);
-    const applicationFeeAmount = parseFloat(platformFee);
+    const orderPlatformFee = await resolveOrderPlatformFee(supabase, body.storeId, body.orderId);
+    const platformFee = computePayPalPlatformFee(
+      orderPlatformFee.commissionableTotal,
+      orderPlatformFee.feePercent
+    );
+    const applicationFeeAmount = orderPlatformFee.feeAmount;
 
     const { data: transaction, error: txError } = await supabase
       .from('transactions')
@@ -83,7 +86,10 @@ serve(async req => {
         metadata: {
           ...body.metadata,
           paypal_commerce: true,
-          platform_fee_percent: feePercent,
+          platform_fee_percent: orderPlatformFee.feePercent,
+          platform_fee_amount: applicationFeeAmount,
+          commissionable_total: orderPlatformFee.commissionableTotal,
+          physical_total: orderPlatformFee.physicalTotal,
         },
       })
       .select('id')

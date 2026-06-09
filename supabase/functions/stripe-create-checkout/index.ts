@@ -5,7 +5,7 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { buildCorsHeaders, jsonResponse } from '../_shared/cors.ts';
 import { createSupabaseAdmin } from '../_shared/supabase-admin.ts';
 import { computeApplicationFee, stripeRequest, toStripeAmount } from '../_shared/stripe-api.ts';
-import { resolvePlatformFeePercent } from '../_shared/complete-order-payment.ts';
+import { resolveOrderPlatformFee } from '../_shared/order-platform-fee.ts';
 
 interface CheckoutBody {
   storeId: string;
@@ -63,8 +63,12 @@ serve(async req => {
       return jsonResponse({ error: 'Stripe Connect is not active for this store' }, 400, origin);
     }
 
-    const feePercent = await resolvePlatformFeePercent(supabase, body.storeId);
-    const applicationFee = computeApplicationFee(body.amount, currency, feePercent);
+    const platformFee = await resolveOrderPlatformFee(supabase, body.storeId, body.orderId);
+    const applicationFeeMinor = computeApplicationFee(
+      platformFee.commissionableTotal,
+      currency,
+      platformFee.feePercent
+    );
 
     const { data: transaction, error: txError } = await supabase
       .from('transactions')
@@ -79,11 +83,14 @@ serve(async req => {
         customer_name: body.customerName ?? null,
         payment_provider: 'stripe_connect',
         connected_account_id: connection.external_account_id,
-        application_fee_amount: Math.round(((body.amount * feePercent) / 100) * 100) / 100,
+        application_fee_amount: platformFee.feeAmount,
         metadata: {
           ...body.metadata,
           stripe_connect: true,
-          platform_fee_percent: feePercent,
+          platform_fee_percent: platformFee.feePercent,
+          platform_fee_amount: platformFee.feeAmount,
+          commissionable_total: platformFee.commissionableTotal,
+          physical_total: platformFee.physicalTotal,
         },
       })
       .select('id')
@@ -115,7 +122,7 @@ serve(async req => {
       'line_items[0][price_data][unit_amount]': String(amountMinor),
       'line_items[0][price_data][product_data][name]': body.description.slice(0, 120),
       'payment_intent_data[transfer_data][destination]': connection.external_account_id,
-      'payment_intent_data[application_fee_amount]': String(applicationFee),
+      'payment_intent_data[application_fee_amount]': String(applicationFeeMinor),
     };
 
     for (const [k, v] of Object.entries(metadataFlat)) {
