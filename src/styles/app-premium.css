@@ -161,15 +161,21 @@
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
 }
 
-/* Sidebar contextuelle */
+/* Sidebar contextuelle — fond blanc (aligné AppSidebar) */
 .landing-premium.app-premium .app-context-sidebar {
-  background: linear-gradient(180deg, #323878 0%, #282870 45%, #1e1e4a 100%) !important;
+  background: #ffffff !important;
+  border-color: hsl(var(--border)) !important;
+  color: hsl(var(--foreground)) !important;
 }
 
 .landing-premium.app-premium .app-context-sidebar input {
-  background: rgba(255, 255, 255, 0.08) !important;
-  border-color: rgba(255, 255, 255, 0.12) !important;
-  color: #fff !important;
+  background: hsl(var(--background)) !important;
+  border-color: hsl(var(--border)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.landing-premium.app-premium .app-context-sidebar input::placeholder {
+  color: hsl(var(--muted-foreground)) !important;
 }
 
 .landing-premium.app-premium .app-context-sidebar .overflow-x-auto,
@@ -330,24 +336,12 @@
   color: rgba(255, 255, 255, 0.7) !important;
 }
 
-/* Sidebars contextuelles (produits, commandes…) */
-.landing-premium.app-premium aside.fixed:not(.bottom-0),
-.landing-premium.app-premium nav.fixed:not(.bottom-0) {
-  background: linear-gradient(180deg, #121218 0%, #0a0a0c 100%) !important;
-  border-color: rgba(255, 255, 255, 0.08) !important;
-  color: #fff !important;
-}
-
-.landing-premium.app-premium aside.fixed:not(.bottom-0) a,
-.landing-premium.app-premium aside.fixed:not(.bottom-0) button,
-.landing-premium.app-premium aside.fixed:not(.bottom-0) span,
-.landing-premium.app-premium aside.fixed:not(.bottom-0) label,
-.landing-premium.app-premium aside.fixed:not(.bottom-0) p,
-.landing-premium.app-premium aside.fixed:not(.bottom-0) svg,
-.landing-premium.app-premium nav.fixed:not(.bottom-0) a,
-.landing-premium.app-premium nav.fixed:not(.bottom-0) button,
-.landing-premium.app-premium nav.fixed:not(.bottom-0) span {
-  color: #fff !important;
+/* Sidebars contextuelles legacy (fixed) — fond blanc */
+.landing-premium.app-premium aside.fixed.app-context-sidebar:not(.bottom-0),
+.landing-premium.app-premium aside.app-context-sidebar:not(.bottom-0) {
+  background: #ffffff !important;
+  border-color: hsl(var(--border)) !important;
+  color: hsl(var(--foreground)) !important;
 }
 
 /* Auth */
