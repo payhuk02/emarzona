@@ -176,6 +176,22 @@ describe('AppSidebar', () => {
     );
   });
 
+  it('should render an icon for the Paiements link', async () => {
+    mockLocation.pathname = '/dashboard/payments';
+    renderAppSidebar();
+
+    await waitFor(
+      () => {
+        const paymentsLinks = screen
+          .getAllByRole('link')
+          .filter(link => link.getAttribute('href') === '/dashboard/payments');
+        expect(paymentsLinks.length).toBeGreaterThan(0);
+        expect(paymentsLinks.some(link => link.querySelector('svg'))).toBe(true);
+      },
+      { timeout: 15_000 }
+    );
+  });
+
   it('should display store selection when user has multiple stores', async () => {
     renderAppSidebar();
 

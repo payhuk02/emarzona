@@ -13,6 +13,7 @@ import { ContextSidebarNavItem } from './ContextSidebarNavItem';
 import { cn } from '@/lib/utils';
 import { useSidebar } from '@/components/ui/sidebar';
 import { useNavigate } from 'react-router-dom';
+import { resolveNavItemIcon } from '@/config/navigation.icons';
 import { logger } from '@/lib/logger';
 
 type ContextNavIcon = ComponentType<{ className?: string }>;

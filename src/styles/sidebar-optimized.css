@@ -46,6 +46,19 @@
 [data-sidebar='sidebar'] svg:not([class*='text-orange']):not([class*='text-red']) {
   color: var(--sidebar-text-color);
   stroke: currentColor;
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+  display: inline-block;
+}
+
+.app-context-sidebar svg {
+  color: hsl(var(--foreground));
+  stroke: currentColor;
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+  display: inline-block;
 }
 
 [data-sidebar='sidebar'] [data-sidebar='group-label'] {

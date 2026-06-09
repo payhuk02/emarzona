@@ -1,5 +1,5 @@
 import { LayoutDashboard, Search, Check, Plus } from '@/components/icons';
-import { Clock3, ChevronDown, ChevronRight, Lock } from 'lucide-react';
+import { Circle, Clock3, ChevronDown, ChevronRight, Lock } from 'lucide-react';
 import { usePlatformLogo } from '@/hooks/usePlatformLogo';
 import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { SidebarCollapsibleSection } from '@/components/sidebar/SidebarCollapsibleSection';
@@ -12,6 +12,7 @@ import {
   sectionContainsPath,
 } from '@/config/navigation.enrich';
 import { getNavItemPath, isNavItemActive, parseNavTo } from '@/config/navigation.helpers';
+import { resolveNavItemIcon } from '@/config/navigation.icons';
 import type { NavSection, SidebarPersona } from '@/config/navigation.types';
 import { useSidebarPersona } from '@/hooks/useSidebarPersona';
 import { useSidebarNavigation } from '@/hooks/useSidebarNavigation';
@@ -476,7 +477,7 @@ export function AppSidebar() {
                     onClick={() => navigate(item.url)}
                     className="w-full justify-start h-7 px-2 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
                   >
-                    <item.icon className="h-3.5 w-3.5 mr-2" />
+                    <item.icon className="h-3.5 w-3.5 mr-2 shrink-0 stroke-[2]" />
                     <span className="truncate">{item.title}</span>
                   </Button>
                 ))}
@@ -498,7 +499,7 @@ export function AppSidebar() {
                     onClick={() => navigate(item.url)}
                     className="w-full justify-start h-7 px-2 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
                   >
-                    <item.icon className="h-3.5 w-3.5 mr-2" />
+                    <item.icon className="h-3.5 w-3.5 mr-2 shrink-0 stroke-[2]" />
                     <span className="truncate">{item.title}</span>
                   </Button>
                 ))}
@@ -528,10 +529,9 @@ export function AppSidebar() {
                 <SidebarGroupContent>
                   <SidebarMenu>
                     {section.items.map(item => {
-                      const IconComponent = item.icon;
-                      if (!IconComponent) {
+                      const IconComponent = resolveNavItemIcon(item.url, item.icon) ?? Circle;
+                      if (!item.icon) {
                         logger.warn(`Menu item missing icon: ${item.title}`);
-                        return null;
                       }
 
                       // Menu spécial pour "Tableau de bord" avec sous-menu des boutiques - STATIQUE (toujours ouvert)
@@ -554,7 +554,7 @@ export function AppSidebar() {
                             >
                               <NavLink to={item.url} end className="flex items-center gap-2 w-full">
                                 <IconComponent
-                                  className="h-4 w-4 flex-shrink-0"
+                                  className="h-4 w-4 shrink-0 stroke-[2]"
                                   aria-hidden="true"
                                 />
                                 {!isCollapsed && (
@@ -643,7 +643,10 @@ export function AppSidebar() {
                               onClick={() => handleLockedNavClick(item.title, item.url)}
                               className={`${NAV_LINK_INACTIVE} opacity-75 transition-all duration-200 group relative flex items-center`}
                             >
-                              <IconComponent className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+                              <IconComponent
+                                className="h-4 w-4 shrink-0 stroke-[2]"
+                                aria-hidden="true"
+                              />
                               {!isCollapsed ? (
                                 <>
                                   <span className="flex-1 font-medium">{item.title}</span>
@@ -675,7 +678,10 @@ export function AppSidebar() {
                                   : `transition-all duration-200 group relative flex items-center ${NAV_LINK_INACTIVE}`
                               }
                             >
-                              <IconComponent className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+                              <IconComponent
+                                className="h-4 w-4 shrink-0 stroke-[2]"
+                                aria-hidden="true"
+                              />
                               {!isCollapsed ? (
                                 <span className="flex-1 font-medium">{item.title}</span>
                               ) : (
@@ -733,10 +739,9 @@ export function AppSidebar() {
                 <SidebarGroupContent>
                   <SidebarMenu>
                     {section.items.map(item => {
-                      const IconComponent = item.icon;
-                      if (!IconComponent) {
+                      const IconComponent = resolveNavItemIcon(item.url, item.icon) ?? Circle;
+                      if (!item.icon) {
                         logger.warn(`Menu item missing icon: ${item.title}`);
-                        return null;
                       }
                       return (
                         <SidebarMenuItem key={`${section.label}-${item.title}-${item.url}`}>
@@ -751,7 +756,10 @@ export function AppSidebar() {
                                   : `transition-all duration-200 ${NAV_LINK_INACTIVE}`
                               }
                             >
-                              <IconComponent className="h-4 w-4" aria-hidden="true" />
+                              <IconComponent
+                                className="h-4 w-4 shrink-0 stroke-[2]"
+                                aria-hidden="true"
+                              />
                               {!isCollapsed ? (
                                 <span>{item.title}</span>
                               ) : (

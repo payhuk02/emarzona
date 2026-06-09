@@ -15,6 +15,7 @@ import {
   type ContextSidebarConfigId,
 } from '@/config/navigation.context';
 import { getNavItemPath, isNavItemActive } from '@/config/navigation.helpers';
+import { resolveNavItemIcon } from '@/config/navigation.icons';
 import type { NavItem } from '@/config/navigation.types';
 import { useStoreContext } from '@/contexts/StoreContext';
 import { useToast } from '@/hooks/use-toast';
@@ -98,7 +99,7 @@ export function SectionContextSidebar({ config }: SectionContextSidebarProps) {
       nav.items.map(item => ({
         label: item.title,
         path: item.url,
-        icon: item.icon,
+        icon: resolveNavItemIcon(item.url, item.icon),
         isActive: isItemActive(item, location.pathname, location.search, config, activeTab),
       })),
     [nav.items, location.pathname, location.search, config, activeTab]
@@ -147,7 +148,7 @@ export function SectionContextSidebar({ config }: SectionContextSidebarProps) {
         key={item.url}
         label={locked ? `${item.title} ${upgradeSuffix}` : item.title}
         path={locked ? '/dashboard/billing/physical' : item.url}
-        icon={item.icon}
+        icon={resolveNavItemIcon(item.url, item.icon)}
         isActive={isItemActive(item, location.pathname, location.search, config, activeTab)}
         onClick={() => handleItemClick(item)}
       />
