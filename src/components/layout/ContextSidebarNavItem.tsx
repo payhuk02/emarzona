@@ -87,20 +87,20 @@ export const ContextSidebarNavItem = ({
         'min-h-[40px] touch-manipulation',
         'group relative',
         isActive
-          ? 'bg-blue-600/45 text-white shadow-sm border-l-2 border-blue-200 pl-[calc(0.5rem-2px)] sm:pl-[calc(0.625rem-2px)]'
-          : 'text-blue-100/90 hover:bg-white/10 hover:text-white'
+          ? 'bg-sidebar-accent text-foreground shadow-sm border-l-2 border-primary pl-[calc(0.5rem-2px)] sm:pl-[calc(0.625rem-2px)]'
+          : 'text-muted-foreground hover:bg-sidebar-accent hover:text-foreground'
       )}
     >
       <Icon
         className={cn(
           'h-4 w-4 sm:h-4.5 sm:w-4.5 flex-shrink-0 transition-colors duration-200',
-          isActive ? 'text-white' : 'text-blue-100 group-hover:text-white'
+          isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'
         )}
       />
       <span className="truncate flex-1 min-w-0">{label}</span>
       {isActive && (
         <span
-          className="hidden sm:block h-1.5 w-1.5 shrink-0 rounded-full bg-blue-200"
+          className="hidden sm:block h-1.5 w-1.5 shrink-0 rounded-full bg-primary"
           aria-hidden="true"
         />
       )}

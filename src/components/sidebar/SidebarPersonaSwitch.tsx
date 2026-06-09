@@ -50,7 +50,7 @@ export function SidebarPersonaSwitch({
         'mt-2',
         isCollapsed
           ? 'flex flex-col gap-1 px-0.5'
-          : 'flex rounded-lg border border-white/12 p-0.5 bg-white/[0.04]'
+          : 'flex rounded-lg border border-border p-0.5 bg-muted/40'
       )}
       role="tablist"
       aria-label={t('sidebar.chrome.personaNavMode')}
@@ -71,8 +71,8 @@ export function SidebarPersonaSwitch({
               'flex items-center justify-center gap-1.5 rounded-md text-xs font-medium transition-all duration-200',
               isCollapsed ? 'h-8 w-full' : 'flex-1 h-8 px-2',
               isActive
-                ? 'bg-white/15 text-white shadow-sm'
-                : 'text-white/60 hover:bg-white/10 hover:text-white'
+                ? 'bg-sidebar-accent text-foreground shadow-sm'
+                : 'text-muted-foreground hover:bg-sidebar-accent hover:text-foreground'
             )}
           >
             <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden />

@@ -32,12 +32,12 @@ export function SidebarCollapsibleSection({
             aria-expanded={isOpen}
             aria-controls={`sidebar-section-${label.replace(/\s+/g, '-')}`}
           >
-            <span className="text-[10px] uppercase tracking-[0.14em] font-bold text-white/80">
+            <span className="text-[10px] uppercase tracking-[0.14em] font-bold text-muted-foreground">
               {label}
             </span>
             <ChevronDown
               className={cn(
-                'h-3.5 w-3.5 shrink-0 text-white/70 transition-transform duration-300 ease-out',
+                'h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform duration-300 ease-out',
                 !isOpen && '-rotate-90'
               )}
               aria-hidden

@@ -1,11 +1,11 @@
 import type { ComponentType } from 'react';
 
-/** Styles partagés navigation sidebar */
+/** Styles partagés navigation sidebar (thème clair) */
 export const NAV_LINK_ACTIVE =
-  '!text-white font-semibold border-l-[3px] border-[#d4af37] bg-white/[0.08] [&_*]:!text-white [&_svg]:!text-white [&_span]:!text-white';
+  '!text-foreground font-semibold border-l-[3px] border-primary bg-sidebar-accent [&_*]:!text-foreground [&_svg]:!text-foreground [&_span]:!text-foreground';
 
 export const NAV_LINK_INACTIVE =
-  '!text-white hover:bg-white/[0.08] hover:!text-white [&_svg]:!text-white [&_span]:!text-white opacity-90';
+  'text-muted-foreground hover:bg-sidebar-accent hover:!text-foreground [&_svg]:!text-muted-foreground hover:[&_svg]:!text-foreground [&_span]:!text-muted-foreground hover:[&_span]:!text-foreground';
 
 export type SidebarNavEntry = {
   title: string;

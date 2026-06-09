@@ -175,7 +175,7 @@ export function SectionContextSidebar({ config }: SectionContextSidebarProps) {
                           : [...prev, group.groupKey]
                       )
                     }
-                    className="w-full flex items-center justify-between px-2 py-1.5 text-[10px] sm:text-xs font-semibold text-white/70 uppercase tracking-wider border-b border-white/10 hover:text-white transition-colors"
+                    className="w-full flex items-center justify-between px-2 py-1.5 text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border hover:text-foreground transition-colors"
                     aria-expanded={!collapsedGroups.includes(group.groupKey)}
                   >
                     <span>{group.label}</span>
@@ -186,7 +186,7 @@ export function SectionContextSidebar({ config }: SectionContextSidebarProps) {
                     )}
                   </button>
                 ) : (
-                  <h3 className="px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-semibold text-blue-200/80 uppercase tracking-wider border-b border-blue-800/30">
+                  <h3 className="px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
                     {group.label}
                   </h3>
                 )}

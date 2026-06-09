@@ -130,13 +130,11 @@ export const BaseContextSidebar = ({
     <aside
       className={cn(
         'app-context-sidebar hidden md:flex md:flex-col shrink-0 w-[15rem] lg:w-60 xl:w-64 min-h-screen sticky top-0',
-        'border-r border-white/10',
-        'text-white',
+        'border-r border-border bg-background',
+        'text-foreground',
         'overflow-y-auto overflow-x-hidden z-40',
         'transition-all duration-300 ease-in-out',
-        'scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent',
-        'shadow-[4px_0_12px_rgba(0,0,0,0.15)]',
-        'backdrop-blur-sm',
+        'scrollbar-thin',
         className
       )}
       aria-label="Navigation contextuelle"
@@ -144,11 +142,11 @@ export const BaseContextSidebar = ({
       <div className="p-3 lg:p-4 space-y-3 lg:space-y-4 min-w-0">
         <Breadcrumb items={breadcrumbItems} />
 
-        <div className="space-y-2.5 pb-2 lg:pb-3 border-b border-white/10">
+        <div className="space-y-2.5 pb-2 lg:pb-3 border-b border-border">
           <button
             type="button"
             onClick={() => setQuickNavOpen(prev => !prev)}
-            className="lg:hidden w-full flex items-center justify-between py-1 text-[10px] uppercase tracking-[0.14em] text-white/75 font-bold"
+            className="lg:hidden w-full flex items-center justify-between py-1 text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-bold"
             aria-expanded={quickNavOpen}
           >
             <span>{quickNavLabel}</span>
@@ -160,18 +158,18 @@ export const BaseContextSidebar = ({
           <div className={cn('space-y-2.5', !quickNavOpen && 'hidden lg:block')}>
             <label
               htmlFor="context-sidebar-search"
-              className="hidden lg:block text-[10px] uppercase tracking-[0.14em] text-white/75 font-bold"
+              className="hidden lg:block text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-bold"
             >
               {quickNavLabel}
             </label>
             <div className="relative">
-              <Search className="h-4 w-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-white/50 pointer-events-none" />
+              <Search className="h-4 w-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
               <Input
                 id="context-sidebar-search"
                 value={navSearch}
                 onChange={e => setNavSearch(e.target.value)}
                 placeholder={searchPlaceholder}
-                className="h-8 lg:h-9 pl-8 text-sm bg-white/10 border-white/15 text-white placeholder:text-white/50 focus-visible:ring-white/30"
+                className="h-8 lg:h-9 pl-8 text-sm"
                 aria-label={searchPlaceholder}
               />
             </div>
@@ -186,7 +184,7 @@ export const BaseContextSidebar = ({
                       navigate(item.path);
                       setNavSearch('');
                     }}
-                    className="w-full justify-start h-7 px-2 text-xs text-blue-100 hover:bg-white/10 hover:text-white"
+                    className="w-full justify-start h-7 px-2 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
                   >
                     <item.icon className="h-3.5 w-3.5 mr-2" />
                     <span className="truncate">{item.label}</span>
@@ -207,7 +205,7 @@ export const BaseContextSidebar = ({
               size="sm"
               onClick={togglePinCurrentPage}
               disabled={!currentNavItem}
-              className="h-7 px-2 text-xs text-blue-100 hover:bg-white/10 hover:text-white"
+              className="h-7 px-2 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
             >
               <Pin className="h-3.5 w-3.5 mr-1.5" />
               {currentNavItem && pinnedUrls.includes(currentNavItem.path)
@@ -215,7 +213,7 @@ export const BaseContextSidebar = ({
                 : t('sidebar.context.pin', { defaultValue: 'Épingler' })}
             </Button>
             {currentNavItem && (
-              <span className="text-[11px] text-blue-100/70 truncate min-w-0 max-w-[7rem] lg:max-w-[9rem]">
+              <span className="text-[11px] text-muted-foreground truncate min-w-0 max-w-[7rem] lg:max-w-[9rem]">
                 {currentNavItem.label}
               </span>
             )}
@@ -225,7 +223,7 @@ export const BaseContextSidebar = ({
             <div className={cn('space-y-2', !quickNavOpen && 'hidden lg:block')}>
               {pinnedItems.length > 0 && (
                 <div className="space-y-1">
-                  <p className="text-[11px] uppercase tracking-wide text-blue-100/70 font-semibold">
+                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground font-semibold">
                     {t('sidebar.context.pinned', { defaultValue: 'Épinglés' })}
                   </p>
                   {pinnedItems.slice(0, 4).map(item => (
@@ -234,7 +232,7 @@ export const BaseContextSidebar = ({
                       variant="ghost"
                       size="sm"
                       onClick={() => navigate(item.path)}
-                      className="w-full justify-start h-7 px-2 text-xs text-blue-100 hover:bg-white/10 hover:text-white"
+                      className="w-full justify-start h-7 px-2 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
                     >
                       <item.icon className="h-3.5 w-3.5 mr-2" />
                       <span className="truncate">{item.label}</span>
@@ -244,7 +242,7 @@ export const BaseContextSidebar = ({
               )}
               {recentItems.length > 0 && (
                 <div className="space-y-1">
-                  <p className="text-[11px] uppercase tracking-wide text-blue-100/70 font-semibold flex items-center gap-1">
+                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground font-semibold flex items-center gap-1">
                     <Clock3 className="h-3 w-3" />
                     {t('sidebar.context.recent', { defaultValue: 'Récents' })}
                   </p>
@@ -254,7 +252,7 @@ export const BaseContextSidebar = ({
                       variant="ghost"
                       size="sm"
                       onClick={() => navigate(item.path)}
-                      className="w-full justify-start h-7 px-2 text-xs text-blue-100/90 hover:bg-white/10 hover:text-white"
+                      className="w-full justify-start h-7 px-2 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
                     >
                       <item.icon className="h-3.5 w-3.5 mr-2" />
                       <span className="truncate">{item.label}</span>

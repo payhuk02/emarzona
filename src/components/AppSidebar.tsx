@@ -329,7 +329,7 @@ export function AppSidebar() {
   return (
     <Sidebar
       collapsible="icon"
-      className="app-sidebar border-r border-white/10 transition-all duration-300"
+      className="app-sidebar border-r border-border transition-all duration-300"
     >
       <SidebarNavCommandPalette
         entries={navCommandEntries}
@@ -338,7 +338,7 @@ export function AppSidebar() {
       />
 
       {/* En-tête compact : logo + palette */}
-      <div className={cn('shrink-0 border-b border-white/10', isCollapsed ? 'p-2' : 'px-3 py-2.5')}>
+      <div className={cn('shrink-0 border-b border-border', isCollapsed ? 'p-2' : 'px-3 py-2.5')}>
         <div className="flex items-center gap-2 min-h-[2.75rem]">
           <Link
             to="/dashboard"
@@ -363,7 +363,7 @@ export function AppSidebar() {
             )}
             {!isCollapsed && (
               <span
-                className="hidden sm:inline text-lg font-extrabold tracking-tight text-white"
+                className="hidden sm:inline text-lg font-extrabold tracking-tight text-foreground"
                 style={{ fontFamily: 'Times New Roman, serif' }}
               >
                 Emarzona
@@ -374,7 +374,7 @@ export function AppSidebar() {
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 text-white hover:bg-white/10 shrink-0"
+              className="h-8 w-8 text-muted-foreground hover:bg-accent hover:text-foreground shrink-0"
               onClick={() => setCommandOpen(true)}
               aria-label={t('sidebar.chrome.searchAriaLabelCollapsed')}
             >
@@ -384,14 +384,14 @@ export function AppSidebar() {
             <button
               type="button"
               onClick={() => setCommandOpen(true)}
-              className="app-sidebar-command-trigger flex flex-1 items-center gap-2 h-9 rounded-lg border border-white/12 bg-white/[0.05] px-2.5 text-left text-sm text-white/70 hover:border-[#d4af37]/35 hover:bg-white/[0.08] hover:text-white transition-all duration-200 min-w-0"
+              className="app-sidebar-command-trigger flex flex-1 items-center gap-2 h-9 rounded-lg border border-border bg-muted/40 px-2.5 text-left text-sm text-muted-foreground hover:border-primary/40 hover:bg-accent hover:text-foreground transition-all duration-200 min-w-0"
               aria-label={t('sidebar.chrome.searchAriaLabel')}
             >
-              <Search className="h-4 w-4 shrink-0 text-white/50" aria-hidden />
+              <Search className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
               <span className="flex-1 truncate text-xs">
                 {t('sidebar.chrome.searchPlaceholder')}
               </span>
-              <kbd className="hidden lg:inline-flex h-5 items-center rounded border border-white/15 bg-white/5 px-1.5 text-[10px] font-medium text-white/50">
+              <kbd className="hidden lg:inline-flex h-5 items-center rounded border border-border bg-muted px-1.5 text-[10px] font-medium text-muted-foreground">
                 Ctrl+K
               </kbd>
             </button>
@@ -410,7 +410,7 @@ export function AppSidebar() {
               size="sm"
               onClick={togglePinForCurrentPage}
               disabled={!currentNavItem}
-              className="h-7 px-2 text-xs text-white/90 hover:bg-white/10 hover:text-white"
+              className="h-7 px-2 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
             >
               {currentNavItem && pinnedUrls.includes(currentNavItem.url)
                 ? t('sidebar.context.unpin')
@@ -421,7 +421,7 @@ export function AppSidebar() {
                 variant="ghost"
                 size="sm"
                 onClick={expandAllSections}
-                className="h-7 px-2 text-[10px] text-white/70 hover:text-white hover:bg-white/10"
+                className="h-7 px-2 text-[10px] text-muted-foreground hover:text-foreground hover:bg-accent"
               >
                 {t('sidebar.chrome.expandAll')}
               </Button>
@@ -429,7 +429,7 @@ export function AppSidebar() {
                 variant="ghost"
                 size="sm"
                 onClick={collapseAllSections}
-                className="h-7 px-2 text-[10px] text-white/70 hover:text-white hover:bg-white/10"
+                className="h-7 px-2 text-[10px] text-muted-foreground hover:text-foreground hover:bg-accent"
               >
                 {t('sidebar.chrome.collapseAll')}
               </Button>
@@ -440,7 +440,7 @@ export function AppSidebar() {
 
       {/* Épinglés en mode rail */}
       {isCollapsed && pinnedItems.length > 0 && (
-        <div className="app-sidebar-pinned-rail shrink-0 flex flex-col items-center gap-1 py-2 border-b border-white/10">
+        <div className="app-sidebar-pinned-rail shrink-0 flex flex-col items-center gap-1 py-2 border-b border-border">
           {pinnedItems.slice(0, 3).map(item => {
             const Icon = item.icon;
             return (
@@ -448,7 +448,7 @@ export function AppSidebar() {
                 key={`rail-pin-${item.url}`}
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-white hover:bg-white/10"
+                className="h-8 w-8 text-muted-foreground hover:bg-accent hover:text-foreground"
                 onClick={() => navigate(item.url)}
                 title={item.title}
                 aria-label={item.title}
@@ -461,10 +461,10 @@ export function AppSidebar() {
       )}
 
       {!isCollapsed && (pinnedItems.length > 0 || recentItems.length > 0) && (
-        <div className="shrink-0 px-3 py-2 border-b border-white/10 space-y-2">
+        <div className="shrink-0 px-3 py-2 border-b border-border space-y-2">
           {pinnedItems.length > 0 && (
             <div>
-              <p className="text-[11px] uppercase tracking-wide text-white font-semibold mb-1">
+              <p className="text-[11px] uppercase tracking-wide text-muted-foreground font-semibold mb-1">
                 {t('sidebar.chrome.pinnedAccess')}
               </p>
               <div className="space-y-1">
@@ -474,7 +474,7 @@ export function AppSidebar() {
                     variant="ghost"
                     size="sm"
                     onClick={() => navigate(item.url)}
-                    className="w-full justify-start h-7 px-2 text-xs text-white/90 hover:bg-white/10 hover:text-white"
+                    className="w-full justify-start h-7 px-2 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
                   >
                     <item.icon className="h-3.5 w-3.5 mr-2" />
                     <span className="truncate">{item.title}</span>
@@ -485,7 +485,7 @@ export function AppSidebar() {
           )}
           {recentItems.length > 0 && (
             <div>
-              <p className="text-[11px] uppercase tracking-wide text-white font-semibold mb-1 flex items-center gap-1">
+              <p className="text-[11px] uppercase tracking-wide text-muted-foreground font-semibold mb-1 flex items-center gap-1">
                 <Clock3 className="h-3 w-3" />
                 {t('sidebar.context.recent')}
               </p>
@@ -496,7 +496,7 @@ export function AppSidebar() {
                     variant="ghost"
                     size="sm"
                     onClick={() => navigate(item.url)}
-                    className="w-full justify-start h-7 px-2 text-xs text-white hover:bg-white/10 hover:text-white"
+                    className="w-full justify-start h-7 px-2 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
                   >
                     <item.icon className="h-3.5 w-3.5 mr-2" />
                     <span className="truncate">{item.title}</span>
@@ -515,7 +515,7 @@ export function AppSidebar() {
             <React.Fragment key={section.sectionKey}>
               {isCollapsed && sectionIndex > 0 && (
                 <div
-                  className="app-sidebar-rail-separator mx-auto my-1 h-px w-6 bg-white/15"
+                  className="app-sidebar-rail-separator mx-auto my-1 h-px w-6 bg-border"
                   role="separator"
                 />
               )}
@@ -566,7 +566,7 @@ export function AppSidebar() {
                               <button
                                 type="button"
                                 onClick={() => setStoresMenuOpen(open => !open)}
-                                className="ml-6 mt-1 flex w-[calc(100%-1.5rem)] items-center justify-between rounded-md px-2 py-1.5 text-xs font-medium text-white/80 hover:bg-white/[0.08] hover:text-white transition-colors"
+                                className="ml-6 mt-1 flex w-[calc(100%-1.5rem)] items-center justify-between rounded-md px-2 py-1.5 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
                                 aria-expanded={storesMenuOpen}
                               >
                                 <span>
@@ -586,7 +586,7 @@ export function AppSidebar() {
                                   storesMenuOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
                                 )}
                               >
-                                <div className="overflow-hidden min-h-0 space-y-1 border-l border-white/15 pl-2 mt-1">
+                                <div className="overflow-hidden min-h-0 space-y-1 border-l border-border pl-2 mt-1">
                                   {stores.map(store => (
                                     <Button
                                       key={store.id}
@@ -720,7 +720,7 @@ export function AppSidebar() {
             <React.Fragment key={section.sectionKey}>
               {isCollapsed && sectionIndex > 0 && (
                 <div
-                  className="app-sidebar-rail-separator mx-auto my-1 h-px w-6 bg-white/15"
+                  className="app-sidebar-rail-separator mx-auto my-1 h-px w-6 bg-border"
                   role="separator"
                 />
               )}

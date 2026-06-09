@@ -22,13 +22,13 @@ export const Breadcrumb = ({ items, className }: BreadcrumbProps) => {
     <nav
       aria-label="Breadcrumb"
       className={cn(
-        'flex items-center gap-1 sm:gap-1.5 text-xs text-slate-300 pb-2.5 sm:pb-3 border-b border-white/10 overflow-x-auto scrollbar-hide min-w-0',
+        'flex items-center gap-1 sm:gap-1.5 text-xs text-muted-foreground pb-2.5 sm:pb-3 border-b border-border overflow-x-auto scrollbar-hide min-w-0',
         className
       )}
     >
       <Link
         to="/dashboard"
-        className="flex items-center gap-1 hover:text-white transition-colors duration-200 p-1 rounded hover:bg-blue-900/30 flex-shrink-0"
+        className="flex items-center gap-1 hover:text-foreground transition-colors duration-200 p-1 rounded hover:bg-accent flex-shrink-0"
         aria-label="Retour au tableau de bord"
       >
         <Home className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -39,15 +39,15 @@ export const Breadcrumb = ({ items, className }: BreadcrumbProps) => {
 
         return (
           <div key={index} className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-            <ChevronRight className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-slate-400/60 flex-shrink-0" />
+            <ChevronRight className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-muted-foreground/60 flex-shrink-0" />
             {isLast ? (
-              <span className="text-blue-100 font-semibold whitespace-nowrap truncate max-w-[9rem] md:max-w-[11rem] lg:max-w-none">
+              <span className="text-foreground font-semibold whitespace-nowrap truncate max-w-[9rem] md:max-w-[11rem] lg:max-w-none">
                 {item.label}
               </span>
             ) : item.path ? (
               <Link
                 to={item.path}
-                className="hover:text-white transition-colors duration-200 px-1 py-0.5 rounded hover:bg-blue-900/30 whitespace-nowrap"
+                className="hover:text-foreground transition-colors duration-200 px-1 py-0.5 rounded hover:bg-accent whitespace-nowrap"
               >
                 {item.label}
               </Link>

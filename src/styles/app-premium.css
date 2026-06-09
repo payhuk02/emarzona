@@ -24,21 +24,21 @@
   --ring: 217 91% 53%;
   --radius: 0.75rem;
 
-  --sidebar-background: 240 8% 6%;
-  --sidebar-foreground: 0 0% 100%;
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 240 6% 7%;
   --sidebar-primary: 217 91% 58%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 240 6% 14%;
-  --sidebar-accent-foreground: 0 0% 100%;
-  --sidebar-border: 0 0% 100% / 0.08;
+  --sidebar-accent: 40 6% 96%;
+  --sidebar-accent-foreground: 240 6% 12%;
+  --sidebar-border: 240 6% 90%;
   --sidebar-ring: 217 91% 58%;
 }
 
-/* Sidebar — alignée sur sidebar-optimized (fond violet, texte blanc) */
+/* Sidebar — fond blanc aligné sur sidebar-optimized */
 .landing-premium.app-premium [data-sidebar='sidebar'] {
-  background: linear-gradient(180deg, #323878 0%, #282870 45%, #1a1a42 100%) !important;
-  border-color: rgba(255, 255, 255, 0.08) !important;
-  color: #fff !important;
+  background: #ffffff !important;
+  border-color: hsl(var(--sidebar-border)) !important;
+  color: hsl(var(--sidebar-foreground)) !important;
 }
 
 .landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='header'],
@@ -46,31 +46,16 @@
 .landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='content'],
 .landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='group'],
 .landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='group-content'] {
-  color: #fff !important;
-  border-color: rgba(255, 255, 255, 0.08);
+  color: hsl(var(--sidebar-foreground)) !important;
+  border-color: hsl(var(--sidebar-border));
 }
 
 .landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='group-label'] {
-  color: rgba(255, 255, 255, 0.75) !important;
+  color: hsl(var(--muted-foreground)) !important;
   font-size: 0.625rem;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-}
-
-.landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='menu-button'],
-.landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='menu-button'] span,
-.landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='menu-button'] svg,
-.landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='menu-sub-button'],
-.landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='menu-sub-button'] span,
-.landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='menu-sub-button'] svg,
-.landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='menu-badge'],
-.landing-premium.app-premium [data-sidebar='sidebar'] a,
-.landing-premium.app-premium [data-sidebar='sidebar'] button:not(.bg-primary),
-.landing-premium.app-premium [data-sidebar='sidebar'] label,
-.landing-premium.app-premium [data-sidebar='sidebar'] p,
-.landing-premium.app-premium [data-sidebar='sidebar'] span:not([class*='bg-']) {
-  color: #fff !important;
 }
 
 .landing-premium.app-premium
@@ -84,26 +69,26 @@
   [data-sidebar='sidebar']
   [data-sidebar='menu-button'][data-active='true']
   svg {
-  background: rgba(37, 99, 235, 0.28) !important;
-  color: #fff !important;
+  background: hsl(var(--sidebar-accent)) !important;
+  color: hsl(var(--sidebar-foreground)) !important;
   font-weight: 600;
 }
 
 .landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='menu-button']:hover,
 .landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='menu-button']:hover span,
 .landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='menu-button']:hover svg {
-  background: rgba(255, 255, 255, 0.08) !important;
-  color: #fff !important;
+  background: hsl(var(--sidebar-accent)) !important;
+  color: hsl(var(--sidebar-foreground)) !important;
 }
 
 .landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='input'] {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.12);
-  color: #fff !important;
+  background: hsl(var(--background));
+  border-color: hsl(var(--border));
+  color: hsl(var(--foreground)) !important;
 }
 
 .landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='input']::placeholder {
-  color: rgba(255, 255, 255, 0.55) !important;
+  color: hsl(var(--muted-foreground)) !important;
 }
 
 /* Barre supérieure dashboard */
@@ -295,8 +280,8 @@
 /* État actif premium — barre dorée */
 .landing-premium.app-premium [data-sidebar='sidebar'] [aria-current='page'] {
   border-left-width: 3px !important;
-  border-left-color: #d4af37 !important;
-  background: rgba(255, 255, 255, 0.08) !important;
+  border-left-color: hsl(var(--sidebar-primary)) !important;
+  background: hsl(var(--sidebar-accent)) !important;
 }
 
 /* Boutons primaires globaux */
