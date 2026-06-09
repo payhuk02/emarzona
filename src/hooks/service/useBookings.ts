@@ -21,9 +21,44 @@ const BOOKING_PRODUCT_FIELDS =
   'id, store_id, name, description, price, status, product_type, image_url, created_at, updated_at';
 const BOOKING_CUSTOMER_FIELDS = 'id, name, email, phone, user_id, created_at, updated_at';
 const BOOKING_STAFF_FIELDS =
-  'id, product_id, name, email, phone, role, specialties, is_available, created_at, updated_at';
+  'id, service_product_id, store_id, name, email, phone, role, is_active, created_at, updated_at';
 const BOOKING_SERVICE_FIELDS =
   'id, product_id, service_type, duration_minutes, location_type, location_address, meeting_url, timezone, requires_staff, max_participants, pricing_type, deposit_required, deposit_amount, deposit_type, allow_booking_cancellation, cancellation_deadline_hours, require_approval, buffer_time_before, buffer_time_after, max_bookings_per_day, advance_booking_days, total_bookings, total_completed_bookings, total_cancelled_bookings, total_revenue, average_rating, created_at, updated_at';
+
+const MY_BOOKINGS_SELECT = `
+  ${SERVICE_BOOKING_FIELDS},
+  product:products!product_id(
+    ${BOOKING_PRODUCT_FIELDS},
+    service:service_products(${BOOKING_SERVICE_FIELDS})
+  ),
+  staff:service_staff_members(${BOOKING_STAFF_FIELDS})
+`;
+
+type MyBookingProductRow = {
+  id: string;
+  name: string;
+  image_url?: string | null;
+  service?: Record<string, unknown> | null;
+};
+
+/** Flatten nested product.service for customer portal components. */
+export function mapMyBookingRows(data: unknown[]): ServiceBooking[] {
+  return data.map(row => {
+    const booking = row as ServiceBooking & { product?: MyBookingProductRow | null };
+    const product = booking.product;
+    if (!product) return booking;
+    const { service, ...productSummary } = product;
+    return {
+      ...booking,
+      product: {
+        id: productSummary.id,
+        name: productSummary.name,
+        image_url: productSummary.image_url,
+      },
+      service: service ?? undefined,
+    } as ServiceBooking & { service?: Record<string, unknown> };
+  });
+}
 
 export interface ServiceBooking {
   id: string;
@@ -119,20 +154,16 @@ export const useMyBookings = () => {
 
       const { data, error } = await supabase
         .from('service_bookings')
-        .select(
-          `
-          ${SERVICE_BOOKING_FIELDS},
-          product:products(${BOOKING_PRODUCT_FIELDS}),
-          service:service_products(${BOOKING_SERVICE_FIELDS}),
-          staff:service_staff_members(${BOOKING_STAFF_FIELDS})
-        `
-        )
+        .select(MY_BOOKINGS_SELECT)
         .eq('user_id', user.id)
         .order('scheduled_date', { ascending: true })
         .order('scheduled_start_time', { ascending: true });
 
-      if (error) throw error;
-      return data as ServiceBooking[];
+      if (error) {
+        logger.error('Failed to load my bookings', { error: error.message, code: error.code });
+        throw error;
+      }
+      return mapMyBookingRows(data ?? []);
     },
   });
 };
