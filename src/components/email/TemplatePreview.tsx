@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Smartphone, Monitor, Mail } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { sanitizeProductDescription } from '@/lib/html-sanitizer';
+import { SafeHTML } from '@/components/security/SafeHTML';
 
 interface TemplatePreviewProps {
   htmlContent: string;
@@ -125,8 +125,8 @@ export const TemplatePreview = ({
                 ...(viewMode === 'mobile' && { maxWidth: '375px' }),
               }}
             >
-              <div
-                dangerouslySetInnerHTML={{ __html: sanitizeProductDescription(processedHtml) }}
+              <SafeHTML
+                html={processedHtml}
                 style={{
                   width: viewMode === 'mobile' ? '375px' : '100%',
                   minHeight: '400px',

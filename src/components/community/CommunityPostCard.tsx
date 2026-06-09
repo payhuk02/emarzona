@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { formatDistanceToNow } from 'date-fns';
-import { sanitizeProductDescription } from '@/lib/html-sanitizer';
+import { SafeHTML } from '@/components/security/SafeHTML';
 import { fr } from 'date-fns/locale';
 import { 
   Heart, 
@@ -156,7 +156,7 @@ export function CommunityPostCard({
         
         <div className="prose prose-sm max-w-none dark:prose-invert text-sm sm:text-base">
           {post.content_type === 'markdown' ? (
-            <div dangerouslySetInnerHTML={{ __html: sanitizeProductDescription(post.content) }} />
+            <SafeHTML html={post.content} />
           ) : (
             <p className="whitespace-pre-wrap break-words">{post.content}</p>
           )}

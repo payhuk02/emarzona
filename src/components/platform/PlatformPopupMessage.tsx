@@ -17,8 +17,7 @@ import {
   usePlatformPopupMessages,
 } from '@/hooks/usePlatformPopupMessages';
 import type { PopupStyle } from '@/lib/admin/admin-broadcast-service';
-import { sanitizeProductDescription } from '@/lib/html-sanitizer';
-
+import { SafeHTML } from '@/components/security/SafeHTML';
 const styleConfig: Record<PopupStyle, { icon: typeof Info; badge: string; accent: string }> = {
   info: {
     icon: Info,
@@ -108,9 +107,9 @@ export function PlatformPopupMessage() {
           </div>
           <DialogTitle>{currentPopup.title}</DialogTitle>
           {looksLikeHtml(currentPopup.message) ? (
-            <div
+            <SafeHTML
+              html={currentPopup.message}
               className="text-left pt-2 text-sm text-muted-foreground prose prose-sm max-w-none dark:prose-invert"
-              dangerouslySetInnerHTML={{ __html: sanitizeProductDescription(currentPopup.message) }}
             />
           ) : (
             <DialogDescription className="text-left whitespace-pre-wrap pt-2">

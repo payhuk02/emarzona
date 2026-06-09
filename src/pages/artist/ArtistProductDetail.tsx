@@ -10,7 +10,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { ArtistPublicPageShell } from '@/components/artist/ArtistPublicPageShell';
-import { sanitizeProductDescription } from '@/lib/html-sanitizer';
+import { SafeHTML } from '@/components/security/SafeHTML';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -690,11 +690,9 @@ const ArtistProductDetail = () => {
                 <CardTitle>À propos de cette œuvre</CardTitle>
               </CardHeader>
               <CardContent>
-                <div
+                <SafeHTML
+                  html={product.description || ''}
                   className="bg-white dark:bg-white text-black dark:text-black prose max-w-none prose-headings:text-black dark:prose-headings:text-black prose-p:text-black dark:prose-p:text-black prose-a:text-primary prose-strong:text-black dark:prose-strong:text-black p-4 sm:p-6 rounded-lg"
-                  dangerouslySetInnerHTML={{
-                    __html: sanitizeProductDescription(product.description || ''),
-                  }}
                 />
               </CardContent>
             </Card>

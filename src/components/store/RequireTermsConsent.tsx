@@ -3,7 +3,7 @@
  */
 
 import { ReactNode, useState } from 'react';
-import { sanitizeProductDescription } from '@/lib/html-sanitizer';
+import { SafeHTML } from '@/components/security/SafeHTML';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -130,9 +130,9 @@ export const RequireTermsConsent = ({
           <div className="space-y-4 py-4">
             <div className="border rounded-lg p-4 bg-muted/50 max-h-[400px] overflow-y-auto">
               {currentTermsDoc?.content ? (
-                <div 
+                <SafeHTML
+                  html={currentTermsDoc.content}
                   className="prose prose-sm max-w-none"
-                  dangerouslySetInnerHTML={{ __html: sanitizeProductDescription(currentTermsDoc.content) }}
                 />
               ) : (
                 <p className="text-sm text-muted-foreground">

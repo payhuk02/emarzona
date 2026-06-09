@@ -9,6 +9,7 @@ import {
   validateOrderPaymentAmount,
 } from '../_shared/complete-order-payment.ts';
 import { applyPaymentRefund } from '../_shared/apply-payment-refund.ts';
+import { activatePhysicalSubscriptionFromWebhook } from '../_shared/physical-subscription-webhook.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': Deno.env.get('SITE_URL') || 'https://www.emarzona.com',
@@ -422,36 +423,24 @@ serve(async req => {
             console.error('Subscription plan not found for webhook:', planError);
           } else if (plan.applies_to_product_type !== 'physical') {
             console.error('Subscription plan not physical, ignoring:', plan.slug);
+          } else if (!transaction.store_id) {
+            console.error('Physical subscription webhook missing store_id', {
+              transaction_id: transaction.id,
+            });
           } else {
-            const now = new Date();
-            const periodEnd = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-
-            // Activer / mettre à jour la souscription boutique
-            await supabase
-              .from('store_platform_subscriptions')
-              .update({
-                plan_id: plan.id,
-                status: 'active',
-                billing_cycle: 'monthly',
-                mrr_amount: Number(plan.monthly_price ?? 0),
-                current_period_start: now.toISOString(),
-                current_period_end: periodEnd.toISOString(),
-                trial_ends_at: null,
-                payment_provider: 'moneroo_platform',
-                external_subscription_id: transaction.moneroo_transaction_id ?? null,
-                metadata: {
-                  last_transaction_id: transaction.id,
-                  last_moneroo_transaction_id: transaction.moneroo_transaction_id ?? null,
-                  activated_via: 'moneroo_webhook',
-                },
-                updated_at: now.toISOString(),
-              })
-              .eq('store_id', transaction.store_id);
+            const activation = await activatePhysicalSubscriptionFromWebhook(supabase, {
+              storeId: transaction.store_id,
+              plan,
+              transactionId: transaction.id,
+              monerooTransactionId: transaction.moneroo_transaction_id ?? null,
+            });
 
             console.log('Activated physical subscription for store', {
               store_id: transaction.store_id,
               plan: plan.slug,
               transaction_id: transaction.id,
+              subscription_id: activation.subscriptionId,
+              created: activation.created,
             });
           }
         }

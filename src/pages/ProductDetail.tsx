@@ -34,7 +34,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import StoreFooter from '@/components/storefront/StoreFooter';
-import { sanitizeProductDescription } from '@/lib/html-sanitizer';
+import { SafeHTML } from '@/components/security/SafeHTML';
 import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
 import { CountdownTimer } from '@/components/ui/countdown-timer';
@@ -1294,9 +1294,9 @@ const ProductDetails = () => {
                 <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-4 sm:mb-6 text-foreground">
                   Description
                 </h2>
-                <div
+                <SafeHTML
+                  html={product.description || ''}
                   className="product-description-content bg-card border border-border rounded-lg sm:rounded-xl p-4 sm:p-6 md:p-8 shadow-sm"
-                  dangerouslySetInnerHTML={{ __html: safeDescription }}
                 />
               </div>
             )}

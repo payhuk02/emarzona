@@ -6,7 +6,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { sanitizeProductDescription } from '@/lib/html-sanitizer';
+import { SafeHTML } from '@/components/security/SafeHTML';
 import {
   Palette,
   User,
@@ -432,9 +432,9 @@ export const ArtistPreview = ({ data }: ArtistPreviewProps) => {
             <CardTitle>Description</CardTitle>
           </CardHeader>
           <CardContent>
-            <div
+            <SafeHTML
+              html={data.description}
               className="prose prose-sm max-w-none"
-              dangerouslySetInnerHTML={{ __html: sanitizeProductDescription(data.description) }}
             />
           </CardContent>
         </Card>

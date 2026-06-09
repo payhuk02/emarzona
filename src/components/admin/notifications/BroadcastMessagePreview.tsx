@@ -8,6 +8,7 @@ import { resolveBroadcastBodies, type BroadcastEmailDesign } from '@/lib/admin/b
 import type { BroadcastChannel, PopupStyle } from '@/lib/admin/admin-broadcast-service';
 import { CHANNEL_OPTIONS } from '@/components/admin/notifications/broadcast-constants';
 import { Mail, Megaphone, MessageSquare } from 'lucide-react';
+import { SafeHTML } from '@/components/security/SafeHTML';
 
 const RichTextEditorPro = lazy(() =>
   import('@/components/ui/rich-text-editor-pro').then(m => ({ default: m.RichTextEditorPro }))
@@ -177,9 +178,9 @@ export function BroadcastMessagePreview({
                 )}
               >
                 <h3 className="font-bold text-lg mb-2">{title || 'Sans titre'}</h3>
-                <div
+                <SafeHTML
+                  html={bodyHtml}
                   className="text-sm text-muted-foreground prose prose-sm max-w-none"
-                  dangerouslySetInnerHTML={{ __html: bodyHtml }}
                 />
                 {actionUrl && actionLabel && (
                   <button type="button" className="mt-4 text-sm font-semibold text-primary">

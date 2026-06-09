@@ -38,6 +38,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/hooks/useStore';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
+import { SafeHTML } from '@/components/security/SafeHTML';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -437,9 +438,9 @@ const GenericPreview = ({ formData }: { formData: GenericProductFormData }) => {
             <CardTitle>Description</CardTitle>
           </CardHeader>
           <CardContent>
-            <div
+            <SafeHTML
+              html={formData.description}
               className="prose prose-sm max-w-none"
-              dangerouslySetInnerHTML={{ __html: sanitizeProductDescription(formData.description) }}
             />
           </CardContent>
         </Card>

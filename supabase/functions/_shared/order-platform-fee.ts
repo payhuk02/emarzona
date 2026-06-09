@@ -49,7 +49,9 @@ export async function loadOrderItemsForPlatformFee(
   const rows = items ?? [];
   const missingTypeProductIds = [
     ...new Set(
-      rows.filter(row => !row.product_type && row.product_id).map(row => row.product_id as string)
+      rows
+        .filter(row => !row.product_type && row.product_id)
+        .map(row => row.product_id as string)
     ),
   ];
 

@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { computeOrderPlatformFeeAmount, isCommissionableProductType } from '../platform-pricing.ts';
+import {
+  computeOrderPlatformFeeAmount,
+  isCommissionableProductType,
+} from '../platform-pricing.ts';
 
 describe('edge platform-pricing (C1)', () => {
   it('matches frontend rules for physical zero commission', () => {

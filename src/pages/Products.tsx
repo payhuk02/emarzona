@@ -60,7 +60,7 @@ import { ProductCardSkeleton } from '@/components/products/ProductCardSkeleton';
 import { Checkbox } from '@/components/ui/checkbox';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
-import { sanitizeProductDescription } from '@/lib/html-sanitizer';
+import { SafeHTML } from '@/components/security/SafeHTML';
 import {
   Sheet,
   SheetContent,
@@ -1367,7 +1367,8 @@ const Products = () => {
               {quickViewProduct.description && (
                 <div>
                   <h4 className="font-semibold mb-2">{t('products.description', 'Description')}</h4>
-                  <div
+                  <SafeHTML
+                    html={quickViewProduct.description}
                     className="prose prose-sm max-w-none 
                       text-foreground 
                       prose-headings:text-foreground 
@@ -1379,9 +1380,6 @@ const Products = () => {
                       prose-code:text-foreground
                       [&_*]:text-foreground"
                     style={{ color: 'inherit' }}
-                    dangerouslySetInnerHTML={{
-                      __html: sanitizeProductDescription(quickViewProduct.description),
-                    }}
                   />
                 </div>
               )}

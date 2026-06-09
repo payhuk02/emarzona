@@ -6,6 +6,7 @@ import { PremiumFooter } from '@/components/landing/premium/PremiumFooter';
 import { getPlatformMarketingPageBySlug } from '@/lib/admin/platformMarketingPagesConfig';
 import { usePlatformMarketingPage } from '@/hooks/usePlatformMarketingPage';
 import NotFound from '@/pages/NotFound';
+import { SafeHTML } from '@/components/security/SafeHTML';
 
 export default function PlatformMarketingPage() {
   const location = useLocation();
@@ -55,9 +56,10 @@ function PlatformMarketingPageContent({
           </div>
         </div>
         <div className="container mx-auto max-w-4xl px-4 py-10">
-          <article
+          <SafeHTML
+            html={body}
+            as="article"
             className="prose prose-invert max-w-none prose-a:text-[var(--lp-blue)] prose-headings:text-white"
-            dangerouslySetInnerHTML={{ __html: body }}
           />
         </div>
         <PremiumFooter />

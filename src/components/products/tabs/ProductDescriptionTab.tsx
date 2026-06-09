@@ -27,6 +27,7 @@ import {
 import { cn } from "@/lib/utils";
 import { sanitizeString } from "@/lib/validation";
 import { sanitizeProductDescription } from "@/lib/html-sanitizer";
+import { SafeHTML } from '@/components/security/SafeHTML';
 import React from "react";
 
 /**
@@ -588,9 +589,9 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
             </CardHeader>
             <CardContent>
               {previewMode ? (
-                <div 
+                <SafeHTML
+                  html={formData.description || ''}
                   className="prose max-w-none p-4 border rounded-lg bg-gray-50"
-                  dangerouslySetInnerHTML={{ __html: sanitizeProductDescription(formData.description || "") }}
                 />
               ) : (
                 <RichTextEditorPro

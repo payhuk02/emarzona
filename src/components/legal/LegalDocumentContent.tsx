@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
 import type { LegalDocument } from '@/types/legal';
-import { sanitizeProductDescription } from '@/lib/html-sanitizer';
-
+import { SafeHTML } from '@/components/security/SafeHTML';
 interface LegalDocumentContentProps {
   document: LegalDocument | null | undefined;
   fallback: ReactNode;
@@ -13,9 +12,10 @@ interface LegalDocumentContentProps {
 export function LegalDocumentContent({ document, fallback }: LegalDocumentContentProps) {
   if (document?.content?.trim()) {
     return (
-      <article
+      <SafeHTML
+        html={document.content}
+        as="article"
         className="prose prose-blue max-w-none legal-document-from-db"
-        dangerouslySetInnerHTML={{ __html: sanitizeProductDescription(document.content) }}
       />
     );
   }
