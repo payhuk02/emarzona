@@ -10,7 +10,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
+import { SelectItem } from '@/components/ui/select';
 import {
   Package,
   Edit,
@@ -23,7 +23,7 @@ import {
   Layers,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useInventory } from '@/hooks/physical/useInventory';
+import { useInventory } from '@/hooks/physical/useInventoryByPhysicalProduct';
 import type { PhysicalProduct } from '@/hooks/physical/usePhysicalProducts';
 import { LazyImage } from '@/components/ui/LazyImage';
 import { getImageAttributesForPreset } from '@/lib/image-transform';

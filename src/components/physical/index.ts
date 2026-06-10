@@ -21,6 +21,9 @@ export {
   StockBadge,
 } from './InventoryStockIndicator';
 
+export { InventoryStats } from './InventoryStats';
+export { LowStockAlert } from './LowStockAlert';
+
 // Shipping Components (NEW)
 export {
   ShippingInfoDisplay,
@@ -35,11 +38,7 @@ export type { PhysicalProduct, PhysicalProductsListProps } from './PhysicalProdu
 
 // Variant Manager (DAY 2)
 export { VariantManager } from './VariantManager';
-export type {
-  VariantOption,
-  ProductVariant,
-  VariantManagerProps,
-} from './VariantManager';
+export type { VariantOption, ProductVariant, VariantManagerProps } from './VariantManager';
 
 // Stock Movement History (DAY 3)
 export { StockMovementHistory } from './StockMovementHistory';
@@ -111,10 +110,3 @@ export type { InventoryDashboardProps } from './InventoryDashboard';
 // Shipping Dashboard (DAY 10)
 export { ShippingDashboard } from './ShippingDashboard';
 export type { ShippingDashboardProps } from './ShippingDashboard';
-
-
-
-
-
-
-
