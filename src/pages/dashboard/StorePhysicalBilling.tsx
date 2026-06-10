@@ -13,6 +13,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useStorePhysicalAccess } from '@/hooks/billing/useStorePhysicalAccess';
 import { useSubscriptionInvoices } from '@/hooks/billing/useSubscriptionInvoices';
+import { useSubscriptionBillingMandate } from '@/hooks/billing/useSubscriptionBillingMandate';
 import { initiateSubscriptionRenewalCheckout } from '@/lib/billing/subscription-renewal';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -28,7 +29,11 @@ export default function StorePhysicalBilling() {
   const { toast } = useToast();
   const access = useStorePhysicalAccess(store?.id);
   const { data: invoices = [], isLoading: invoicesLoading } = useSubscriptionInvoices(store?.id);
+  const { data: billingMandate } = useSubscriptionBillingMandate(store?.id);
   const [renewing, setRenewing] = useState(false);
+
+  const autoRenewEnabled = billingMandate?.mandate?.auto_renew_enabled ?? false;
+  const pendingCheckoutUrl = billingMandate?.pendingCheckout?.checkout_url ?? null;
 
   useEffect(() => {
     // Message contextuel en cas de redirection depuis un guard de route
@@ -99,43 +104,82 @@ export default function StorePhysicalBilling() {
       <PhysicalSubscriptionRequired storeId={store.id} />
 
       <div className="container mx-auto max-w-4xl px-4 pb-6 space-y-4">
+        {autoRenewEnabled && (
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Renouvellement automatique</CardTitle>
+              <CardDescription>
+                Votre profil de paiement Moneroo est enregistré. Un checkout pré-rempli sera généré
+                automatiquement avant chaque échéance — confirmez sur mobile money.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-wrap items-center gap-2">
+              <Badge variant="secondary">Auto-renouvellement actif</Badge>
+              {billingMandate?.mandate?.customer_email && (
+                <span className="text-xs text-muted-foreground">
+                  {billingMandate.mandate.customer_email}
+                </span>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Historique de facturation</CardTitle>
             <CardDescription>Factures d&apos;abonnement produits physiques</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            {access.status === 'past_due' && access.planSlug && (
-              <Button
-                disabled={renewing}
-                onClick={async () => {
-                  setRenewing(true);
-                  try {
-                    const {
-                      data: { user },
-                    } = await supabase.auth.getUser();
-                    if (!user?.email) throw new Error('Email requis');
-                    const url = await initiateSubscriptionRenewalCheckout(
-                      store.id,
-                      access.planSlug!,
-                      user.email,
-                      (user.user_metadata?.full_name as string | undefined) ?? undefined
-                    );
-                    window.location.href = url;
-                  } catch (e: unknown) {
-                    toast({
-                      title: 'Erreur',
-                      description: e instanceof Error ? e.message : 'Paiement impossible',
-                      variant: 'destructive',
-                    });
-                  } finally {
-                    setRenewing(false);
-                  }
-                }}
-              >
-                {renewing ? 'Redirection…' : 'Régulariser le paiement'}
-              </Button>
+            {pendingCheckoutUrl && (
+              <div className="rounded-md border border-primary/30 bg-primary/5 p-3 space-y-2">
+                <p className="text-sm font-medium">Paiement de renouvellement en attente</p>
+                <p className="text-xs text-muted-foreground">
+                  Un checkout Moneroo a été préparé automatiquement. Confirmez le paiement pour
+                  prolonger votre abonnement.
+                </p>
+                <Button asChild size="sm">
+                  <a href={pendingCheckoutUrl}>Confirmer le paiement Moneroo</a>
+                </Button>
+              </div>
             )}
+
+            {(access.status === 'past_due' || access.status === 'active') &&
+              access.planSlug &&
+              !pendingCheckoutUrl && (
+                <Button
+                  disabled={renewing}
+                  onClick={async () => {
+                    setRenewing(true);
+                    try {
+                      const {
+                        data: { user },
+                      } = await supabase.auth.getUser();
+                      if (!user?.email) throw new Error('Email requis');
+                      const url = await initiateSubscriptionRenewalCheckout(
+                        store.id,
+                        access.planSlug!,
+                        user.email,
+                        (user.user_metadata?.full_name as string | undefined) ?? undefined
+                      );
+                      window.location.href = url;
+                    } catch (e: unknown) {
+                      toast({
+                        title: 'Erreur',
+                        description: e instanceof Error ? e.message : 'Paiement impossible',
+                        variant: 'destructive',
+                      });
+                    } finally {
+                      setRenewing(false);
+                    }
+                  }}
+                >
+                  {renewing
+                    ? 'Redirection…'
+                    : access.status === 'past_due'
+                      ? 'Régulariser le paiement'
+                      : 'Renouveler maintenant'}
+                </Button>
+              )}
 
             {invoicesLoading ? (
               <p className="text-sm text-muted-foreground">Chargement…</p>

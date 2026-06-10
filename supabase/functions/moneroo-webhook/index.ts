@@ -9,7 +9,10 @@ import {
   validateOrderPaymentAmount,
 } from '../_shared/complete-order-payment.ts';
 import { applyPaymentRefund } from '../_shared/apply-payment-refund.ts';
-import { activatePhysicalSubscriptionFromWebhook } from '../_shared/physical-subscription-webhook.ts';
+import {
+  activatePhysicalSubscriptionFromWebhook,
+  billingCustomerFromTransaction,
+} from '../_shared/physical-subscription-webhook.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': Deno.env.get('SITE_URL') || 'https://www.emarzona.com',
@@ -419,10 +422,13 @@ serve(async req => {
         if (!transaction.order_id && purpose === 'physical_subscription_renewal' && invoiceId) {
           const { applyPhysicalSubscriptionRenewalFromWebhook } =
             await import('../_shared/physical-subscription-webhook.ts');
+          const billingCustomer = billingCustomerFromTransaction(transaction);
           const renewal = await applyPhysicalSubscriptionRenewalFromWebhook(supabase, {
             invoiceId: String(invoiceId),
             transactionId: transaction.id,
             monerooTransactionId: transaction.moneroo_transaction_id ?? null,
+            billingCustomer,
+            storeId: transaction.store_id ?? null,
           });
           console.log('Renewed physical subscription from invoice', {
             invoice_id: invoiceId,
@@ -450,6 +456,7 @@ serve(async req => {
               plan,
               transactionId: transaction.id,
               monerooTransactionId: transaction.moneroo_transaction_id ?? null,
+              billingCustomer: billingCustomerFromTransaction(transaction),
             });
 
             console.log('Activated physical subscription for store', {

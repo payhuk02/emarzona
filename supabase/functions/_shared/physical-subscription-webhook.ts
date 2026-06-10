@@ -9,11 +9,42 @@ export interface PhysicalVendorPlan {
   applies_to_product_type: string;
 }
 
+export interface BillingMandateCustomer {
+  email: string;
+  name?: string | null;
+  phone?: string | null;
+  country?: string | null;
+}
+
+export function billingCustomerFromTransaction(transaction: {
+  customer_email?: string | null;
+  customer_name?: string | null;
+  customer_phone?: string | null;
+  metadata?: Record<string, unknown> | null;
+}): BillingMandateCustomer | null {
+  const email = transaction.customer_email?.trim();
+  if (!email) return null;
+
+  const meta = transaction.metadata ?? {};
+  const country =
+    (typeof meta.customerCountry === 'string' && meta.customerCountry) ||
+    (typeof meta.customer_country === 'string' && meta.customer_country) ||
+    null;
+
+  return {
+    email,
+    name: transaction.customer_name ?? null,
+    phone: transaction.customer_phone ?? null,
+    country,
+  };
+}
+
 export interface ActivatePhysicalSubscriptionInput {
   storeId: string;
   plan: PhysicalVendorPlan;
   transactionId: string;
   monerooTransactionId?: string | null;
+  billingCustomer?: BillingMandateCustomer | null;
 }
 
 export interface ActivatePhysicalSubscriptionResult {
@@ -48,6 +79,7 @@ export async function activatePhysicalSubscriptionFromWebhook(
       last_moneroo_transaction_id: input.monerooTransactionId ?? null,
       activated_via: 'moneroo_webhook',
       activated_at: now.toISOString(),
+      auto_renew_enabled: true,
     },
     updated_at: now.toISOString(),
   };
@@ -70,6 +102,23 @@ export async function activatePhysicalSubscriptionFromWebhook(
     );
   }
 
+  if (input.billingCustomer?.email) {
+    const { error: mandateError } = await supabase.rpc('save_subscription_billing_mandate', {
+      p_subscription_id: data.id,
+      p_store_id: input.storeId,
+      p_customer_email: input.billingCustomer.email,
+      p_customer_name: input.billingCustomer.name ?? null,
+      p_customer_phone: input.billingCustomer.phone ?? null,
+      p_customer_country: input.billingCustomer.country ?? null,
+      p_moneroo_payment_id: input.monerooTransactionId ?? null,
+      p_auto_renew_enabled: true,
+    });
+
+    if (mandateError) {
+      console.warn('Failed to save billing mandate after activation:', mandateError.message);
+    }
+  }
+
   return {
     subscriptionId: data.id,
     created: !existing?.id,
@@ -80,6 +129,8 @@ export interface ApplySubscriptionRenewalInput {
   invoiceId: string;
   transactionId: string;
   monerooTransactionId?: string | null;
+  billingCustomer?: BillingMandateCustomer | null;
+  storeId?: string | null;
 }
 
 /**
@@ -99,5 +150,24 @@ export async function applyPhysicalSubscriptionRenewalFromWebhook(
     throw new Error(`subscription_renewal_failed: ${error.message} (invoice=${input.invoiceId})`);
   }
 
-  return { subscriptionId: String(data) };
+  const subscriptionId = String(data);
+
+  if (input.billingCustomer?.email && input.storeId) {
+    const { error: mandateError } = await supabase.rpc('save_subscription_billing_mandate', {
+      p_subscription_id: subscriptionId,
+      p_store_id: input.storeId,
+      p_customer_email: input.billingCustomer.email,
+      p_customer_name: input.billingCustomer.name ?? null,
+      p_customer_phone: input.billingCustomer.phone ?? null,
+      p_customer_country: input.billingCustomer.country ?? null,
+      p_moneroo_payment_id: input.monerooTransactionId ?? null,
+      p_auto_renew_enabled: true,
+    });
+
+    if (mandateError) {
+      console.warn('Failed to update billing mandate after renewal:', mandateError.message);
+    }
+  }
+
+  return { subscriptionId };
 }
