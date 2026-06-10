@@ -412,7 +412,24 @@ serve(async req => {
           (transaction?.metadata as Record<string, unknown> | null | undefined)?.plan_slug ||
           (metadata as Record<string, unknown> | null | undefined)?.plan_slug;
 
-        if (!transaction.order_id && purpose === 'physical_subscription' && planSlug) {
+        const invoiceId =
+          (transaction?.metadata as Record<string, unknown> | null | undefined)?.invoice_id ||
+          (metadata as Record<string, unknown> | null | undefined)?.invoice_id;
+
+        if (!transaction.order_id && purpose === 'physical_subscription_renewal' && invoiceId) {
+          const { applyPhysicalSubscriptionRenewalFromWebhook } =
+            await import('../_shared/physical-subscription-webhook.ts');
+          const renewal = await applyPhysicalSubscriptionRenewalFromWebhook(supabase, {
+            invoiceId: String(invoiceId),
+            transactionId: transaction.id,
+            monerooTransactionId: transaction.moneroo_transaction_id ?? null,
+          });
+          console.log('Renewed physical subscription from invoice', {
+            invoice_id: invoiceId,
+            subscription_id: renewal.subscriptionId,
+            transaction_id: transaction.id,
+          });
+        } else if (!transaction.order_id && purpose === 'physical_subscription' && planSlug) {
           const { data: plan, error: planError } = await supabase
             .from('platform_vendor_plans')
             .select('id, slug, monthly_price, currency, trial_days, applies_to_product_type')

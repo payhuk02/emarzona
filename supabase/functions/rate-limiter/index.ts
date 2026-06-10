@@ -1,15 +1,16 @@
 /**
  * Edge Function: Rate Limiter
- * Protection contre les abus et attaques DDoS
- *
- * Limites par défaut:
- * - Requêtes API: 100/minute par IP
- * - Authentification: 5/minute par IP
- * - Webhooks: 1000/minute par IP
+ * Fail-closed for payment/checkout when the log store is unavailable.
  */
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import {
+  enforceRateLimit,
+  getClientIp,
+  isFailClosedEndpoint,
+  RATE_LIMIT_PRESETS,
+} from '../_shared/rate-limit.ts';
 
 const defaultAllowedOrigin = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
 const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || defaultAllowedOrigin)
@@ -25,7 +26,7 @@ function resolveCorsOrigin(originHeader: string | null): string {
 function buildCorsHeaders(originHeader: string | null) {
   return {
     'Access-Control-Allow-Origin': resolveCorsOrigin(originHeader),
-    'Vary': 'Origin',
+    Vary: 'Origin',
     'Access-Control-Allow-Headers':
       'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
     'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
@@ -33,99 +34,9 @@ function buildCorsHeaders(originHeader: string | null) {
   };
 }
 
-interface RateLimitConfig {
-  maxRequests: number;
-  windowSeconds: number;
-}
-
-const RATE_LIMITS: Record<string, RateLimitConfig> = {
-  default: { maxRequests: 100, windowSeconds: 60 },
-  auth: { maxRequests: 5, windowSeconds: 60 },
-  webhook: { maxRequests: 1000, windowSeconds: 60 },
-  api: { maxRequests: 100, windowSeconds: 60 },
-  payment: { maxRequests: 20, windowSeconds: 60 },
-  upload: { maxRequests: 10, windowSeconds: 60 },
-  search: { maxRequests: 50, windowSeconds: 60 },
-  'product-creation': { maxRequests: 10, windowSeconds: 60 }, // 10 créations de produits par minute
-};
-
-/**
- * Extraire l'IP du client
- */
-function getClientIp(req: Request): string {
-  return (
-    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-    req.headers.get('x-real-ip') ||
-    'unknown'
-  );
-}
-
-/**
- * Vérifier si la limite est dépassée
- * Supporte à la fois IP et userId pour un rate limiting plus précis
- */
-async function checkRateLimit(
-  supabase: any,
-  ip: string,
-  endpoint: string,
-  config: RateLimitConfig,
-  userId?: string
-): Promise<{ allowed: boolean; remaining: number; resetAt: Date }> {
-  const now = new Date();
-  const windowStart = new Date(now.getTime() - config.windowSeconds * 1000);
-
-  // Construire la requête de comptage
-  let query = supabase
-    .from('rate_limit_log')
-    .select('id', { count: 'exact', head: true })
-    .eq('endpoint', endpoint)
-    .gte('created_at', windowStart.toISOString());
-
-  // Si userId est fourni, utiliser userId, sinon utiliser IP
-  if (userId) {
-    query = query.eq('user_id', userId);
-  } else {
-    query = query.eq('ip_address', ip);
-  }
-
-  const { count, error } = await query;
-
-  if (error) {
-    console.error('Error checking rate limit:', error);
-    return {
-      allowed: true,
-      remaining: config.maxRequests,
-      resetAt: new Date(now.getTime() + config.windowSeconds * 1000),
-    };
-  }
-
-  const requestCount = count || 0;
-  const allowed = requestCount < config.maxRequests;
-  const remaining = Math.max(0, config.maxRequests - requestCount);
-  const resetAt = new Date(now.getTime() + config.windowSeconds * 1000);
-
-  // Logger la requête si autorisée
-  if (allowed) {
-    const logData: any = {
-      ip_address: ip,
-      endpoint: endpoint,
-      created_at: now.toISOString(),
-    };
-
-    if (userId) {
-      logData.user_id = userId;
-    }
-
-    await supabase.from('rate_limit_log').insert(logData);
-  }
-
-  return { allowed, remaining, resetAt };
-}
-
-serve(async (req) => {
+serve(async req => {
   const corsHeaders = buildCorsHeaders(req.headers.get('origin'));
 
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, {
       status: 200,
@@ -141,9 +52,9 @@ serve(async (req) => {
 
     const { endpoint = 'default', userId } = await req.json();
     const ip = getClientIp(req);
-    const config = RATE_LIMITS[endpoint] || RATE_LIMITS.default;
+    const config = RATE_LIMIT_PRESETS[endpoint] || RATE_LIMIT_PRESETS.default;
 
-    const result = await checkRateLimit(supabase, ip, endpoint, config, userId);
+    const result = await enforceRateLimit(supabase, ip, endpoint, config, userId);
 
     const headers = {
       ...corsHeaders,
@@ -154,13 +65,18 @@ serve(async (req) => {
     };
 
     if (!result.allowed) {
+      const status = result.degraded && isFailClosedEndpoint(endpoint) ? 503 : 429;
       return new Response(
         JSON.stringify({
-          error: 'Rate limit exceeded',
-          message: `Too many requests. Please try again in ${config.windowSeconds} seconds.`,
+          error: status === 503 ? 'Rate limit service unavailable' : 'Rate limit exceeded',
+          message:
+            status === 503
+              ? 'Payment protection is temporarily unavailable. Please try again shortly.'
+              : `Too many requests. Please try again in ${config.windowSeconds} seconds.`,
           resetAt: result.resetAt,
+          degraded: result.degraded ?? false,
         }),
-        { status: 429, headers }
+        { status, headers }
       );
     }
 
@@ -169,6 +85,7 @@ serve(async (req) => {
         allowed: true,
         remaining: result.remaining,
         resetAt: result.resetAt,
+        limit: config.maxRequests,
       }),
       { status: 200, headers }
     );

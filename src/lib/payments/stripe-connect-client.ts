@@ -32,6 +32,7 @@ export interface StripeCheckoutParams {
   productId?: string;
   successUrl: string;
   cancelUrl: string;
+  checkoutToken?: string;
   metadata?: Record<string, unknown>;
 }
 
@@ -66,9 +67,15 @@ export async function startStripeConnectOnboarding(
 export async function createStripeConnectCheckout(
   params: StripeCheckoutParams
 ): Promise<StripeCheckoutResult> {
+  const checkoutToken =
+    params.checkoutToken ||
+    (typeof params.metadata?.checkout_token === 'string'
+      ? params.metadata.checkout_token
+      : undefined);
+
   const { data, error } = await supabase.functions.invoke<StripeCheckoutResult>(
     'stripe-create-checkout',
-    { body: params }
+    { body: { ...params, checkoutToken } }
   );
 
   if (error) {

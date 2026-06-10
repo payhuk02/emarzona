@@ -30,6 +30,7 @@ export interface PayPalCheckoutParams {
   productId?: string;
   successUrl: string;
   cancelUrl: string;
+  checkoutToken?: string;
   metadata?: Record<string, unknown>;
 }
 
@@ -60,9 +61,15 @@ export async function startPayPalPartnerOnboarding(
 export async function createPayPalCommerceCheckout(
   params: PayPalCheckoutParams
 ): Promise<PayPalCheckoutResult> {
+  const checkoutToken =
+    params.checkoutToken ||
+    (typeof params.metadata?.checkout_token === 'string'
+      ? params.metadata.checkout_token
+      : undefined);
+
   const { data, error } = await supabase.functions.invoke<PayPalCheckoutResult>(
     'paypal-create-order',
-    { body: params }
+    { body: { ...params, checkoutToken } }
   );
 
   if (error) {

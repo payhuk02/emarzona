@@ -97,6 +97,7 @@ export function useMediaErrorHandler(options: UseMediaErrorHandlerOptions) {
       if (storagePath) {
         // Nettoyer le storage_path pour s'assurer qu'il n'a pas de préfixe
         const cleanPath = storagePath
+          .replace(/^attachments:/, '')
           .replace(/^attachments\//, '')
           .replace(/^\/attachments\//, '')
           .replace(/^storage\/v1\/object\/public\/attachments\//, '')

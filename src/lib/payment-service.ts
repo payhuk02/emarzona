@@ -11,6 +11,8 @@ import { isSupportedCurrency, type Currency } from './currency-converter';
 import { isPaymentOrchestrationV2Enabled, createOrchestratedPayment } from './payments';
 import type { PaymentProviderCode } from '@/types/store-payment-connection';
 import { toast } from '@/hooks/use-toast';
+import { checkRateLimit } from './rate-limiter';
+import { extractCheckoutToken, withCheckoutTokenMetadata } from './checkout/checkout-access';
 
 /** Type checkout — `moneroo` legacy UI ; codes orchestrateur après migration UI */
 export type PaymentProvider = 'moneroo' | PaymentProviderCode;
@@ -27,6 +29,7 @@ export interface PaymentOptions {
   customerName?: string;
   customerPhone?: string;
   metadata?: Record<string, unknown>;
+  checkoutToken?: string;
   provider?: PaymentProvider;
 }
 
@@ -56,22 +59,60 @@ function toCheckoutProvider(provider: PaymentProviderCode): PaymentProvider {
 /**
  * Initie un paiement avec le provider spécifié (ou Moneroo par défaut)
  */
+async function resolvePaymentContext(options: PaymentOptions): Promise<PaymentOptions> {
+  const { supabase } = await import('@/integrations/supabase/client');
+  let checkoutToken = options.checkoutToken ?? extractCheckoutToken(options.metadata);
+
+  if (!checkoutToken && options.orderId) {
+    const { data: order } = await supabase
+      .from('orders')
+      .select('metadata')
+      .eq('id', options.orderId)
+      .maybeSingle();
+    checkoutToken = extractCheckoutToken(order?.metadata);
+  }
+
+  return {
+    ...options,
+    metadata: withCheckoutTokenMetadata(options.metadata, checkoutToken),
+    checkoutToken,
+  };
+}
+
 export const initiatePayment = async (options: PaymentOptions): Promise<PaymentResult> => {
+  const { supabase } = await import('@/integrations/supabase/client');
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const rate = await checkRateLimit('payment', user?.id);
+  if (!rate.allowed) {
+    return {
+      success: false,
+      transaction_id: '',
+      checkout_url: '',
+      provider: options.provider ?? 'moneroo',
+      error: rate.message || 'Trop de tentatives de paiement. Réessayez plus tard.',
+    };
+  }
+
+  const resolvedOptions = await resolvePaymentContext(options);
+
   if (isPaymentOrchestrationV2Enabled()) {
     try {
       const orchestrated = await createOrchestratedPayment({
-        storeId: options.storeId,
-        productId: options.productId,
-        orderId: options.orderId,
-        customerId: options.customerId,
-        amount: options.amount,
-        currency: options.currency,
-        description: options.description,
-        customerEmail: options.customerEmail,
-        customerName: options.customerName,
-        customerPhone: options.customerPhone,
-        metadata: options.metadata,
-        preferredProvider: toOrchestratorPreferred(options.provider),
+        storeId: resolvedOptions.storeId,
+        productId: resolvedOptions.productId,
+        orderId: resolvedOptions.orderId,
+        customerId: resolvedOptions.customerId,
+        amount: resolvedOptions.amount,
+        currency: resolvedOptions.currency,
+        description: resolvedOptions.description,
+        customerEmail: resolvedOptions.customerEmail,
+        customerName: resolvedOptions.customerName,
+        customerPhone: resolvedOptions.customerPhone,
+        metadata: resolvedOptions.metadata,
+        preferredProvider: toOrchestratorPreferred(resolvedOptions.provider),
       });
 
       return {
@@ -103,7 +144,7 @@ export const initiatePayment = async (options: PaymentOptions): Promise<PaymentR
       options.currency && isSupportedCurrency(options.currency) ? options.currency : 'XOF';
 
     const monerooResult = await initiateMonerooPayment({
-      ...options,
+      ...resolvedOptions,
       currency,
     });
 

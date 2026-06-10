@@ -3,6 +3,9 @@ import { createSupabaseUserClient } from './supabase-admin.ts';
 
 const TERMINAL_PAYMENT_STATUSES = new Set(['paid', 'completed', 'refunded', 'cancelled']);
 
+/** Guest checkout window without login (requires valid checkout_token). */
+export const CHECKOUT_GUEST_WINDOW_MS = 15 * 60 * 1000;
+
 export interface CheckoutOrderContext {
   orderId: string;
   storeId: string;
@@ -11,6 +14,8 @@ export interface CheckoutOrderContext {
   customerId: string | null;
   customerEmail: string | null;
   paymentStatus: string | null;
+  createdAt: string;
+  checkoutToken: string | null;
 }
 
 export async function loadCheckoutOrder(
@@ -20,7 +25,9 @@ export async function loadCheckoutOrder(
 ): Promise<CheckoutOrderContext | null> {
   const { data: order, error } = await supabase
     .from('orders')
-    .select('id, store_id, total_amount, currency, customer_id, customer_email, payment_status')
+    .select(
+      'id, store_id, total_amount, currency, customer_id, customer_email, payment_status, created_at, metadata'
+    )
     .eq('id', orderId)
     .eq('store_id', storeId)
     .maybeSingle();
@@ -32,6 +39,14 @@ export async function loadCheckoutOrder(
       ? parseFloat(order.total_amount)
       : Number(order.total_amount);
 
+  const metadata =
+    order.metadata && typeof order.metadata === 'object' && !Array.isArray(order.metadata)
+      ? (order.metadata as Record<string, unknown>)
+      : null;
+
+  const checkoutToken =
+    metadata && typeof metadata.checkout_token === 'string' ? metadata.checkout_token : null;
+
   return {
     orderId: order.id,
     storeId: order.store_id,
@@ -40,6 +55,8 @@ export async function loadCheckoutOrder(
     customerId: order.customer_id ?? null,
     customerEmail: order.customer_email ?? null,
     paymentStatus: order.payment_status ?? null,
+    createdAt: order.created_at,
+    checkoutToken,
   };
 }
 
@@ -48,16 +65,31 @@ export function isOrderPayable(paymentStatus: string | null): boolean {
   return !TERMINAL_PAYMENT_STATUSES.has(paymentStatus);
 }
 
+function isWithinGuestCheckoutWindow(createdAt: string): boolean {
+  const createdMs = new Date(createdAt).getTime();
+  if (Number.isNaN(createdMs)) return false;
+  return Date.now() - createdMs <= CHECKOUT_GUEST_WINDOW_MS;
+}
+
+function resolveCheckoutToken(req: Request, explicitToken?: string): string | null {
+  const fromArg = explicitToken?.trim();
+  if (fromArg) return fromArg;
+
+  const fromHeader = req.headers.get('x-checkout-token')?.trim();
+  return fromHeader || null;
+}
+
 /**
  * Validates checkout access: order exists, store matches, amount from DB, not already paid.
- * If Authorization is present, verifies the caller is the buyer or store owner.
+ * Unauthenticated callers must present a valid checkout_token within the guest window.
  */
 export async function authorizeCheckoutOrder(
   supabase: SupabaseClient,
   req: Request,
   orderId: string,
   storeId: string,
-  requestedAmount?: number
+  requestedAmount?: number,
+  checkoutToken?: string
 ): Promise<
   { ok: true; order: CheckoutOrderContext } | { ok: false; status: number; error: string }
 > {
@@ -79,17 +111,15 @@ export async function authorizeCheckoutOrder(
 
   const authHeader = req.headers.get('Authorization');
   if (!authHeader?.toLowerCase().startsWith('bearer ')) {
-    const createdCutoff = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
-    const { data: recent } = await supabase
-      .from('orders')
-      .select('id')
-      .eq('id', orderId)
-      .gte('created_at', createdCutoff)
-      .maybeSingle();
-
-    if (!recent) {
+    if (!isWithinGuestCheckoutWindow(order.createdAt)) {
       return { ok: false, status: 401, error: 'Authentication required for this order' };
     }
+
+    const providedToken = resolveCheckoutToken(req, checkoutToken);
+    if (!order.checkoutToken || !providedToken || providedToken !== order.checkoutToken) {
+      return { ok: false, status: 401, error: 'Invalid checkout session' };
+    }
+
     return { ok: true, order };
   }
 

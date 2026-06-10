@@ -75,3 +75,29 @@ export async function activatePhysicalSubscriptionFromWebhook(
     created: !existing?.id,
   };
 }
+
+export interface ApplySubscriptionRenewalInput {
+  invoiceId: string;
+  transactionId: string;
+  monerooTransactionId?: string | null;
+}
+
+/**
+ * Marks a renewal invoice paid and extends the subscription period.
+ */
+export async function applyPhysicalSubscriptionRenewalFromWebhook(
+  supabase: SupabaseClient,
+  input: ApplySubscriptionRenewalInput
+): Promise<{ subscriptionId: string }> {
+  const { data, error } = await supabase.rpc('mark_subscription_invoice_paid', {
+    p_invoice_id: input.invoiceId,
+    p_transaction_id: input.transactionId,
+    p_external_transaction_id: input.monerooTransactionId ?? null,
+  });
+
+  if (error) {
+    throw new Error(`subscription_renewal_failed: ${error.message} (invoice=${input.invoiceId})`);
+  }
+
+  return { subscriptionId: String(data) };
+}

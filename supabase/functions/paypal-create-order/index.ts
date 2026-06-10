@@ -19,6 +19,7 @@ interface CreateOrderBody {
   productId?: string;
   successUrl: string;
   cancelUrl: string;
+  checkoutToken?: string;
   metadata?: Record<string, unknown>;
 }
 
@@ -50,12 +51,19 @@ serve(async req => {
 
     const supabase = createSupabaseAdmin();
 
+    const checkoutToken =
+      body.checkoutToken ||
+      (typeof body.metadata?.checkout_token === 'string'
+        ? body.metadata.checkout_token
+        : undefined);
+
     const checkoutAuth = await authorizeCheckoutOrder(
       supabase,
       req,
       body.orderId,
       body.storeId,
-      body.amount
+      body.amount,
+      checkoutToken
     );
     if (!checkoutAuth.ok) {
       return jsonResponse({ error: checkoutAuth.error }, checkoutAuth.status, origin);

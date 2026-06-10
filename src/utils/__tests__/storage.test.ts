@@ -3,11 +3,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import {
-  getCorrectedFileUrl,
-  extractStoragePath,
-  isValidSupabaseStorageUrl,
-} from '../storage';
+import { getCorrectedFileUrl, extractStoragePath, isValidSupabaseStorageUrl } from '../storage';
 
 // Mock de l'environnement
 const mockSupabaseUrl = 'https://test.supabase.co';
@@ -22,7 +18,7 @@ describe('storage', () => {
     it('should correct a valid Supabase Storage URL', () => {
       const url = `${mockSupabaseUrl}/storage/v1/object/public/attachments/vendor-message-attachments/file.png`;
       const corrected = getCorrectedFileUrl(url);
-      
+
       expect(corrected).toContain('/storage/v1/object/public/attachments/');
       expect(corrected).toContain('vendor-message-attachments/file.png');
     });
@@ -30,7 +26,7 @@ describe('storage', () => {
     it('should handle URLs with encoded paths', () => {
       const url = `${mockSupabaseUrl}/storage/v1/object/public/attachments/vendor-message-attachments/file%20with%20spaces.png`;
       const corrected = getCorrectedFileUrl(url);
-      
+
       expect(corrected).toContain('vendor-message-attachments');
       expect(corrected).toContain('file');
     });
@@ -38,8 +34,10 @@ describe('storage', () => {
     it('should use storage_path when provided', () => {
       const storagePath = 'vendor-message-attachments/file.png';
       const corrected = getCorrectedFileUrl('', storagePath);
-      
-      expect(corrected).toBe(`${mockSupabaseUrl}/storage/v1/object/public/attachments/vendor-message-attachments/file.png`);
+
+      expect(corrected).toBe(
+        `${mockSupabaseUrl}/storage/v1/object/public/attachments/vendor-message-attachments/file.png`
+      );
     });
 
     it('should clean storage_path prefixes', () => {
@@ -47,7 +45,10 @@ describe('storage', () => {
         { input: 'attachments/file.png', expected: 'file.png' },
         { input: '/attachments/file.png', expected: 'file.png' },
         { input: 'storage/v1/object/public/attachments/file.png', expected: 'file.png' },
-        { input: `${mockSupabaseUrl}/storage/v1/object/public/attachments/file.png`, expected: 'file.png' },
+        {
+          input: `${mockSupabaseUrl}/storage/v1/object/public/attachments/file.png`,
+          expected: 'file.png',
+        },
       ];
 
       testCases.forEach(({ input, expected }) => {
@@ -56,17 +57,22 @@ describe('storage', () => {
       });
     });
 
-    it('should handle relative paths', () => {
+    it('should preserve relative attachment paths for private bucket signing', () => {
       const relativePath = 'vendor-message-attachments/file.png';
       const corrected = getCorrectedFileUrl(relativePath);
-      
-      expect(corrected).toBe(`${mockSupabaseUrl}/storage/v1/object/public/attachments/vendor-message-attachments/file.png`);
+
+      expect(corrected).toBe(relativePath);
+    });
+
+    it('should preserve canonical attachment refs', () => {
+      const ref = 'attachments:returns/u1/o1/photo.jpg';
+      expect(getCorrectedFileUrl(ref)).toBe(ref);
     });
 
     it('should encode path segments correctly', () => {
       const pathWithSpaces = 'folder with spaces/file name.png';
       const corrected = getCorrectedFileUrl('', pathWithSpaces);
-      
+
       expect(corrected).toContain('folder%20with%20spaces');
       expect(corrected).toContain('file%20name.png');
     });
@@ -75,7 +81,7 @@ describe('storage', () => {
       vi.unstubAllEnvs();
       const originalUrl = 'https://example.com/file.png';
       const corrected = getCorrectedFileUrl(originalUrl);
-      
+
       expect(corrected).toBe(originalUrl);
       vi.stubEnv('VITE_SUPABASE_URL', mockSupabaseUrl);
     });
@@ -83,7 +89,7 @@ describe('storage', () => {
     it('should handle URLs with trailing slashes in base URL', () => {
       vi.stubEnv('VITE_SUPABASE_URL', `${mockSupabaseUrl}/`);
       const corrected = getCorrectedFileUrl('', 'file.png');
-      
+
       // Vérifier qu'il n'y a pas de double slash après le protocole (https:// est normal)
       expect(corrected).not.toMatch(/https?:\/\/[^/]+\/\//);
       expect(corrected).toContain('/storage/v1/object/public/attachments/file.png');
@@ -93,7 +99,7 @@ describe('storage', () => {
     it('should return original URL as fallback', () => {
       const externalUrl = 'https://example.com/image.jpg';
       const corrected = getCorrectedFileUrl(externalUrl);
-      
+
       // Si l'URL ne correspond à aucun pattern, retourner l'originale
       expect(corrected).toBe(externalUrl);
     });
@@ -103,21 +109,21 @@ describe('storage', () => {
     it('should extract path from public URL', () => {
       const url = `${mockSupabaseUrl}/storage/v1/object/public/attachments/vendor-message-attachments/file.png`;
       const path = extractStoragePath(url);
-      
+
       expect(path).toBe('vendor-message-attachments/file.png');
     });
 
     it('should extract path from signed URL', () => {
       const url = `${mockSupabaseUrl}/storage/v1/object/sign/attachments/vendor-message-attachments/file.png?token=abc123`;
       const path = extractStoragePath(url);
-      
+
       expect(path).toBe('vendor-message-attachments/file.png');
     });
 
     it('should handle encoded paths', () => {
       const url = `${mockSupabaseUrl}/storage/v1/object/public/attachments/vendor-message-attachments/file%20with%20spaces.png`;
       const path = extractStoragePath(url);
-      
+
       expect(path).toBe('vendor-message-attachments/file with spaces.png');
     });
 
@@ -130,14 +136,14 @@ describe('storage', () => {
     it('should handle signed URLs without query params', () => {
       const url = `${mockSupabaseUrl}/storage/v1/object/sign/attachments/file.png`;
       const path = extractStoragePath(url);
-      
+
       expect(path).toBe('file.png');
     });
 
     it('should handle nested paths', () => {
       const url = `${mockSupabaseUrl}/storage/v1/object/public/attachments/folder1/folder2/file.png`;
       const path = extractStoragePath(url);
-      
+
       expect(path).toBe('folder1/folder2/file.png');
     });
   });
@@ -156,8 +162,11 @@ describe('storage', () => {
     it('should return false for invalid URLs', () => {
       expect(isValidSupabaseStorageUrl('')).toBe(false);
       expect(isValidSupabaseStorageUrl('https://example.com/file.png')).toBe(false);
-      expect(isValidSupabaseStorageUrl('not-a-url')).toBe(false);
       expect(isValidSupabaseStorageUrl('file:///path/to/file.png')).toBe(false);
+    });
+
+    it('should return true for canonical attachment refs', () => {
+      expect(isValidSupabaseStorageUrl('attachments:returns/u1/o1/a.jpg')).toBe(true);
     });
 
     it('should return false for non-HTTP URLs', () => {
@@ -165,10 +174,3 @@ describe('storage', () => {
     });
   });
 });
-
-
-
-
-
-
-

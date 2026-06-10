@@ -4,6 +4,7 @@
 
 // ✅ PHASE 2: Import logger pour remplacer console.*
 import { logger } from '@/lib/logger';
+import { extractAttachmentPath } from '@/lib/attachments/storage-ref';
 
 /**
  * Corrige et normalise une URL de fichier Supabase Storage
@@ -19,6 +20,10 @@ import { logger } from '@/lib/logger';
  * )
  */
 export function getCorrectedFileUrl(fileUrl: string, storagePath?: string): string {
+  if (fileUrl.startsWith('attachments:') || extractAttachmentPath(fileUrl)) {
+    return fileUrl;
+  }
+
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
   if (!supabaseUrl) {
     // ✅ PHASE 2: Remplacer console.error par logger
@@ -115,16 +120,15 @@ export function extractStoragePath(fileUrl: string): string | null {
  * Vérifie si une URL est une URL Supabase Storage valide
  */
 export function isValidSupabaseStorageUrl(url: string): boolean {
-  if (!url || !url.startsWith('http')) return false;
+  if (!url) return false;
+  if (url.startsWith('attachments:')) return true;
+
+  if (!url.startsWith('http')) {
+    return Boolean(extractAttachmentPath(url));
+  }
 
   return (
     url.includes('/storage/v1/object/public/attachments/') ||
     url.includes('/storage/v1/object/sign/attachments/')
   );
 }
-
-
-
-
-
-

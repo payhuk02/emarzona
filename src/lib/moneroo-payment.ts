@@ -87,6 +87,7 @@ function buildMonerooApiMetadata(
     'purpose',
     'plan_slug',
     'planSlug',
+    'invoice_id',
   ] as const;
 
   for (const key of optionalKeys) {

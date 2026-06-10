@@ -39,6 +39,11 @@ export async function createPayPalCommercePayment(
 
   const { successUrl, cancelUrl } = buildUrls();
 
+  const checkoutToken =
+    typeof request.metadata?.checkout_token === 'string'
+      ? request.metadata.checkout_token
+      : undefined;
+
   const result = await createPayPalCommerceCheckout({
     storeId: request.storeId,
     orderId: request.orderId,
@@ -50,6 +55,7 @@ export async function createPayPalCommercePayment(
     productId: request.productId,
     successUrl,
     cancelUrl,
+    checkoutToken,
     metadata: request.metadata,
   });
 

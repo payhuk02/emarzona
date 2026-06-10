@@ -30,7 +30,7 @@ export async function uploadReturnPhotos(
         compressImages: true,
         compressionOptions: { maxSizeMB: 1, maxWidthOrHeight: 1920 },
       });
-      urls.push(result.publicUrl);
+      urls.push(result.publicUrl || result.path);
     } catch (error) {
       logger.error('Return photo upload failed', { error, orderId, fileName: photo.name });
       throw error instanceof Error ? error : new Error('Échec du téléversement des photos');

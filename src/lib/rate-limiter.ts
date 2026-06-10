@@ -14,8 +14,11 @@ export type RateLimitEndpoint =
   | 'api'
   | 'webhook'
   | 'payment'
+  | 'checkout'
   | 'upload'
   | 'search';
+
+const FAIL_CLOSED_ENDPOINTS: ReadonlySet<RateLimitEndpoint> = new Set(['payment', 'checkout']);
 
 interface RateLimitResponse {
   allowed: boolean;
@@ -120,7 +123,6 @@ export async function checkRateLimit(
     if (error) {
       logger.error('[RateLimiter] Error:', error);
 
-      // Envoyer à Sentry pour monitoring
       Sentry.captureException(error, {
         tags: {
           component: 'rate-limiter',
@@ -131,15 +133,18 @@ export async function checkRateLimit(
         },
       });
 
-      // En cas d'erreur, autoriser par défaut (fail open) mais avec limite réduite
+      const failClosed = FAIL_CLOSED_ENDPOINTS.has(endpoint);
       const fallbackResponse: RateLimitResponse = {
-        allowed: true,
-        remaining: 10, // Limite réduite en cas d'erreur
-        limit: 10,
+        allowed: !failClosed,
+        remaining: failClosed ? 0 : 10,
+        limit: failClosed ? 0 : 10,
         resetAt: new Date(Date.now() + 60000).toISOString(),
+        message: failClosed
+          ? 'Protection paiement temporairement indisponible. Réessayez dans un instant.'
+          : undefined,
+        error: failClosed ? 'Rate limit service unavailable' : undefined,
       };
 
-      // Mettre en cache la réponse de fallback
       rateLimitCache[cacheKey] = {
         response: fallbackResponse,
         timestamp: Date.now(),
@@ -203,12 +208,16 @@ export async function checkRateLimit(
       },
     });
 
-    // En cas d'exception, autoriser par défaut mais avec limite réduite
+    const failClosed = FAIL_CLOSED_ENDPOINTS.has(endpoint);
     const fallbackResponse: RateLimitResponse = {
-      allowed: true,
-      remaining: 10,
-      limit: 10,
+      allowed: !failClosed,
+      remaining: failClosed ? 0 : 10,
+      limit: failClosed ? 0 : 10,
       resetAt: new Date(Date.now() + 60000).toISOString(),
+      message: failClosed
+        ? 'Protection paiement temporairement indisponible. Réessayez dans un instant.'
+        : undefined,
+      error: failClosed ? 'Rate limit service unavailable' : undefined,
     };
 
     rateLimitCache[cacheKey] = {

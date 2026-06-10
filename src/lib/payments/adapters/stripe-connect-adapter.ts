@@ -39,6 +39,11 @@ export async function createStripeConnectPayment(
 
   const { successUrl, cancelUrl } = buildUrls();
 
+  const checkoutToken =
+    typeof request.metadata?.checkout_token === 'string'
+      ? request.metadata.checkout_token
+      : undefined;
+
   const result = await createStripeConnectCheckout({
     storeId: request.storeId,
     orderId: request.orderId,
@@ -50,6 +55,7 @@ export async function createStripeConnectPayment(
     productId: request.productId,
     successUrl,
     cancelUrl,
+    checkoutToken,
     metadata: request.metadata,
   });
 

@@ -8,6 +8,9 @@ import { logger } from '@/lib/logger';
 import { validateFile } from '@/utils/fileValidation';
 import imageCompression from 'browser-image-compression';
 import { detectMediaType } from '@/utils/media-detection';
+import { toAttachmentStorageRef } from '@/lib/attachments/storage-ref';
+
+const PRIVATE_STORAGE_BUCKETS = new Set(['attachments', 'products']);
 
 // ─── Types ───────────────────────────────────────────────────
 
@@ -78,7 +81,10 @@ export function generateUniqueFileName(originalName: string): string {
 }
 
 async function ensureAuthenticated() {
-  const { data: { user }, error } = await supabase.auth.getUser();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
   if (!user || error) {
     throw new Error('Vous devez être connecté pour uploader des fichiers.');
   }
@@ -86,7 +92,10 @@ async function ensureAuthenticated() {
 }
 
 async function getSessionToken(): Promise<string> {
-  const { data: { session }, error } = await supabase.auth.getSession();
+  const {
+    data: { session },
+    error,
+  } = await supabase.auth.getSession();
   if (error || !session) {
     throw new Error('Non authentifié. Veuillez vous reconnecter.');
   }
@@ -184,7 +193,9 @@ async function verifyUploadedFile(
       // File stored as JSON — RLS issue
       try {
         await supabase.storage.from(bucket).remove([filePath]);
-      } catch { /* best effort cleanup */ }
+      } catch {
+        /* best effort cleanup */
+      }
       return { verified: false, isJson: true };
     }
 
@@ -200,13 +211,7 @@ export async function uploadSingleFileToStorage(
   file: File,
   config: UploadConfig
 ): Promise<UploadResult> {
-  const {
-    bucket = 'attachments',
-    folder,
-    maxRetries = 3,
-    retryDelay = 1000,
-    onProgress,
-  } = config;
+  const { bucket = 'attachments', folder, maxRetries = 3, retryDelay = 1000, onProgress } = config;
 
   // Validate
   const validation = validateFile(file, { maxSize: config.maxSize });
@@ -225,8 +230,9 @@ export async function uploadSingleFileToStorage(
     onProgress?.(20);
   }
 
-  const contentType = validation.detectedMimeType || fileToUpload.type || file.type || 'application/octet-stream';
-  
+  const contentType =
+    validation.detectedMimeType || fileToUpload.type || file.type || 'application/octet-stream';
+
   if (fileToUpload.size === 0) {
     throw new Error('File is empty (0 bytes)');
   }
@@ -254,7 +260,12 @@ export async function uploadSingleFileToStorage(
       onProgress?.(30);
 
       const uploadedPath = await uploadViaXHR(
-        bucket, filePath, fileToUpload, contentType, accessToken, onProgress
+        bucket,
+        filePath,
+        fileToUpload,
+        contentType,
+        accessToken,
+        onProgress
       );
 
       // Wait for propagation
@@ -274,14 +285,22 @@ export async function uploadSingleFileToStorage(
         logger.warn('File upload not verified but continuing', { path: uploadedPath });
       }
 
-      // Get public URL
-      const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(uploadedPath);
-
       onProgress?.(100);
+
+      let publicUrl: string;
+      if (PRIVATE_STORAGE_BUCKETS.has(bucket)) {
+        publicUrl =
+          bucket === 'attachments'
+            ? toAttachmentStorageRef(uploadedPath)
+            : `${bucket}:${uploadedPath}`;
+      } else {
+        const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(uploadedPath);
+        publicUrl = urlData.publicUrl;
+      }
 
       return {
         path: uploadedPath,
-        publicUrl: urlData.publicUrl,
+        publicUrl,
         signedUrl: null,
         fileName: file.name,
         mimeType: contentType,

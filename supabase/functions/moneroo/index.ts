@@ -7,6 +7,8 @@ import {
   sanitizeMonerooApiResponseLog,
   sanitizeMonerooRequestLog,
 } from '../_shared/payment-log-sanitize.ts';
+import { authorizeCheckoutOrder } from '../_shared/order-checkout-auth.ts';
+import { enforceRateLimit, getClientIp, RATE_LIMIT_PRESETS } from '../_shared/rate-limit.ts';
 
 // ============================================================================
 // VALIDATION - Intégrée directement pour le déploiement via Dashboard
@@ -480,6 +482,47 @@ async function resolveAuthorizedPaymentAmount(
     };
   }
 
+  if (purpose === 'physical_subscription_renewal') {
+    if (!supabaseUrl || !serviceKey) {
+      return {
+        valid: false,
+        error: 'Configuration serveur incomplète pour la validation du paiement',
+      };
+    }
+    const invoiceId = validated.metadata?.invoice_id as string | undefined;
+    if (!invoiceId) {
+      return { valid: false, error: 'invoice_id requis pour le renouvellement' };
+    }
+
+    const supabase = createClient(supabaseUrl, serviceKey);
+    const { data: invoice, error } = await supabase
+      .from('subscription_invoices')
+      .select('id, amount, currency, status, store_id')
+      .eq('id', invoiceId)
+      .maybeSingle();
+
+    if (error || !invoice) {
+      return { valid: false, error: 'Facture introuvable' };
+    }
+    if (invoice.status !== 'pending') {
+      return { valid: false, error: 'Facture déjà traitée' };
+    }
+    if (validated.storeId && invoice.store_id !== validated.storeId) {
+      return { valid: false, error: 'Boutique invalide pour cette facture' };
+    }
+
+    const expected = Math.round(Number(invoice.amount));
+    if (Math.round(validated.amount) !== expected) {
+      return { valid: false, error: 'Montant invalide pour cette facture' };
+    }
+
+    return {
+      valid: true,
+      amount: expected,
+      currency: (invoice.currency as string) || validated.currency,
+    };
+  }
+
   const needsDbLookup = !!(
     validated.productId ||
     (orderIdFromMeta && isValidUUID(String(orderIdFromMeta)))
@@ -787,6 +830,69 @@ serve(async req => {
         }
 
         const validatedData = validation.validated!;
+
+        const orderIdForAuth =
+          (validatedData.metadata?.order_id as string | undefined) ||
+          (validatedData.metadata?.orderId as string | undefined);
+
+        if (orderIdForAuth && validatedData.storeId) {
+          const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+          const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+          if (!supabaseUrl || !serviceKey) {
+            return new Response(
+              JSON.stringify({
+                error: 'Configuration serveur incomplète',
+                message: 'Impossible de valider la commande',
+              }),
+              { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
+
+          const rateLimit = await enforceRateLimit(
+            createClient(supabaseUrl, serviceKey),
+            getClientIp(req),
+            'checkout',
+            RATE_LIMIT_PRESETS.checkout
+          );
+          if (!rateLimit.allowed) {
+            return new Response(
+              JSON.stringify({
+                error: 'Trop de tentatives de paiement',
+                message: 'Veuillez patienter avant de réessayer.',
+              }),
+              {
+                status: rateLimit.degraded ? 503 : 429,
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+              }
+            );
+          }
+
+          const checkoutToken =
+            (validatedData.metadata?.checkout_token as string | undefined) ||
+            req.headers.get('x-checkout-token') ||
+            undefined;
+
+          const checkoutAuth = await authorizeCheckoutOrder(
+            createClient(supabaseUrl, serviceKey),
+            req,
+            orderIdForAuth,
+            validatedData.storeId,
+            validatedData.amount,
+            checkoutToken
+          );
+          if (!checkoutAuth.ok) {
+            return new Response(
+              JSON.stringify({
+                error: 'Accès checkout refusé',
+                message: checkoutAuth.error,
+              }),
+              {
+                status: checkoutAuth.status,
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+              }
+            );
+          }
+        }
 
         const amountResolution = await resolveAuthorizedPaymentAmount(validatedData);
         if (!amountResolution.valid) {
