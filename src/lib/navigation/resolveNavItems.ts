@@ -6,6 +6,7 @@ import {
   flattenNavSections,
 } from '@/config/navigation.enrich';
 import { getNavItemPath } from '@/config/navigation.helpers';
+import { resolveNavItemIcon } from '@/config/navigation.icons';
 import { translateNavSections } from '@/config/navigation.i18n';
 import { adminMenuSections, userMenuSections } from '@/config/navigation.menus';
 import {
@@ -101,7 +102,7 @@ function toResolvedNavItem(entry: FlatNavEntry): ResolvedNavItem {
     title: entry.title,
     url: entry.url,
     path,
-    icon: entry.icon,
+    icon: resolveNavItemIcon(entry.url, entry.icon),
   };
 }
 

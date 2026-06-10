@@ -143,7 +143,7 @@ const LogoImageWithFallback = ({ src, className }: { src: string; className?: st
 
 export function AppSidebar() {
   const { t } = useTranslation();
-  const { state } = useSidebar();
+  const { state, isMobile } = useSidebar();
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -157,7 +157,8 @@ export function AppSidebar() {
   } = useStoreContext();
   const { planSlug } = useStorePhysicalAccess(selectedStoreId);
   const platformLogo = usePlatformLogo();
-  const isCollapsed = state === 'collapsed';
+  /** Desktop rail only — mobile drawer always shows labels + icons */
+  const isCollapsed = state === 'collapsed' && !isMobile;
   const { persona, setPersona } = useSidebarPersona(isAdmin);
   const [commandOpen, setCommandOpen] = useState(false);
   const [pinnedUrls, setPinnedUrls] = useState<string[]>([]);
@@ -443,7 +444,7 @@ export function AppSidebar() {
       {isCollapsed && pinnedItems.length > 0 && (
         <div className="app-sidebar-pinned-rail shrink-0 flex flex-col items-center gap-1 py-2 border-b border-border">
           {pinnedItems.slice(0, 3).map(item => {
-            const Icon = item.icon;
+            const Icon = resolveNavItemIcon(item.url, item.icon);
             return (
               <Button
                 key={`rail-pin-${item.url}`}
@@ -469,18 +470,21 @@ export function AppSidebar() {
                 {t('sidebar.chrome.pinnedAccess')}
               </p>
               <div className="space-y-1">
-                {pinnedItems.slice(0, 5).map(item => (
-                  <Button
-                    key={`pin-${item.url}`}
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => navigate(item.url)}
-                    className="w-full justify-start h-7 px-2 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
-                  >
-                    <item.icon className="h-3.5 w-3.5 mr-2 shrink-0 stroke-[2]" />
-                    <span className="truncate">{item.title}</span>
-                  </Button>
-                ))}
+                {pinnedItems.slice(0, 5).map(item => {
+                  const PinIcon = resolveNavItemIcon(item.url, item.icon);
+                  return (
+                    <Button
+                      key={`pin-${item.url}`}
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => navigate(item.url)}
+                      className="w-full justify-start h-7 px-2 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
+                    >
+                      <PinIcon className="h-3.5 w-3.5 mr-2 shrink-0 stroke-[2]" />
+                      <span className="truncate">{item.title}</span>
+                    </Button>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -491,18 +495,21 @@ export function AppSidebar() {
                 {t('sidebar.context.recent')}
               </p>
               <div className="space-y-1">
-                {recentItems.slice(0, MAX_RECENT_ITEMS).map(item => (
-                  <Button
-                    key={`recent-${item.url}`}
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => navigate(item.url)}
-                    className="w-full justify-start h-7 px-2 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
-                  >
-                    <item.icon className="h-3.5 w-3.5 mr-2 shrink-0 stroke-[2]" />
-                    <span className="truncate">{item.title}</span>
-                  </Button>
-                ))}
+                {recentItems.slice(0, MAX_RECENT_ITEMS).map(item => {
+                  const RecentIcon = resolveNavItemIcon(item.url, item.icon);
+                  return (
+                    <Button
+                      key={`recent-${item.url}`}
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => navigate(item.url)}
+                      className="w-full justify-start h-7 px-2 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
+                    >
+                      <RecentIcon className="h-3.5 w-3.5 mr-2 shrink-0 stroke-[2]" />
+                      <span className="truncate">{item.title}</span>
+                    </Button>
+                  );
+                })}
               </div>
             </div>
           )}

@@ -7,6 +7,7 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import type { ComponentType } from 'react';
 import { Circle } from 'lucide-react';
+import { resolveNavItemIcon } from '@/config/navigation.icons';
 import { cn } from '@/lib/utils';
 
 type ContextNavIcon = ComponentType<{ className?: string }>;
@@ -35,7 +36,7 @@ export const ContextSidebarNavItem = ({
   onClick,
   horizontal = false,
 }: ContextSidebarNavItemProps) => {
-  const Icon = IconProp ?? Circle;
+  const Icon = resolveNavItemIcon(path, IconProp ?? undefined);
   const location = useLocation();
   const normalizedPath = path.split('?')[0];
   const isActive =

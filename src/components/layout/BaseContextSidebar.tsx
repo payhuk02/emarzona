@@ -176,21 +176,24 @@ export const BaseContextSidebar = ({
             </div>
             {searchResults.length > 0 && (
               <div className="mt-1 space-y-1 max-h-36 overflow-auto scrollbar-hide">
-                {searchResults.map(item => (
-                  <Button
-                    key={`search-${item.path}`}
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      navigate(item.path);
-                      setNavSearch('');
-                    }}
-                    className="w-full justify-start h-7 px-2 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
-                  >
-                    <item.icon className="h-3.5 w-3.5 mr-2" />
-                    <span className="truncate">{item.label}</span>
-                  </Button>
-                ))}
+                {searchResults.map(item => {
+                  const SearchIcon = resolveNavItemIcon(item.path, item.icon);
+                  return (
+                    <Button
+                      key={`search-${item.path}`}
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        navigate(item.path);
+                        setNavSearch('');
+                      }}
+                      className="w-full justify-start h-7 px-2 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
+                    >
+                      <SearchIcon className="h-3.5 w-3.5 mr-2" />
+                      <span className="truncate">{item.label}</span>
+                    </Button>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -227,18 +230,21 @@ export const BaseContextSidebar = ({
                   <p className="text-[11px] uppercase tracking-wide text-muted-foreground font-semibold">
                     {t('sidebar.context.pinned', { defaultValue: 'Épinglés' })}
                   </p>
-                  {pinnedItems.slice(0, 4).map(item => (
-                    <Button
-                      key={`pin-${item.path}`}
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => navigate(item.path)}
-                      className="w-full justify-start h-7 px-2 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
-                    >
-                      <item.icon className="h-3.5 w-3.5 mr-2" />
-                      <span className="truncate">{item.label}</span>
-                    </Button>
-                  ))}
+                  {pinnedItems.slice(0, 4).map(item => {
+                    const PinIcon = resolveNavItemIcon(item.path, item.icon);
+                    return (
+                      <Button
+                        key={`pin-${item.path}`}
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => navigate(item.path)}
+                        className="w-full justify-start h-7 px-2 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
+                      >
+                        <PinIcon className="h-3.5 w-3.5 mr-2" />
+                        <span className="truncate">{item.label}</span>
+                      </Button>
+                    );
+                  })}
                 </div>
               )}
               {recentItems.length > 0 && (
@@ -247,18 +253,21 @@ export const BaseContextSidebar = ({
                     <Clock3 className="h-3 w-3" />
                     {t('sidebar.context.recent', { defaultValue: 'Récents' })}
                   </p>
-                  {recentItems.slice(0, 3).map(item => (
-                    <Button
-                      key={`recent-${item.path}`}
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => navigate(item.path)}
-                      className="w-full justify-start h-7 px-2 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
-                    >
-                      <item.icon className="h-3.5 w-3.5 mr-2" />
-                      <span className="truncate">{item.label}</span>
-                    </Button>
-                  ))}
+                  {recentItems.slice(0, 3).map(item => {
+                    const RecentIcon = resolveNavItemIcon(item.path, item.icon);
+                    return (
+                      <Button
+                        key={`recent-${item.path}`}
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => navigate(item.path)}
+                        className="w-full justify-start h-7 px-2 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
+                      >
+                        <RecentIcon className="h-3.5 w-3.5 mr-2" />
+                        <span className="truncate">{item.label}</span>
+                      </Button>
+                    );
+                  })}
                 </div>
               )}
             </div>

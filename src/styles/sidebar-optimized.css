@@ -52,6 +52,18 @@
   display: inline-block;
 }
 
+/* Mobile drawer — keep menu icons visible (avoid collapsed-rail bleed) */
+[data-sidebar='sidebar'][data-mobile='true'] [data-sidebar='menu-button'] svg {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 1rem !important;
+  height: 1rem !important;
+  min-width: 1rem;
+  min-height: 1rem;
+  flex-shrink: 0;
+}
+
 .app-context-sidebar svg {
   color: hsl(var(--foreground));
   stroke: currentColor;
