@@ -15,6 +15,7 @@ import { useStorePhysicalAccess } from '@/hooks/billing/useStorePhysicalAccess';
 import { useSubscriptionInvoices } from '@/hooks/billing/useSubscriptionInvoices';
 import { useSubscriptionBillingMandate } from '@/hooks/billing/useSubscriptionBillingMandate';
 import { initiateSubscriptionRenewalCheckout } from '@/lib/billing/subscription-renewal';
+import { PhysicalPlanChangeSection } from '@/components/billing/PhysicalPlanChangeSection';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { formatCurrency } from '@/lib/utils';
@@ -53,12 +54,15 @@ export default function StorePhysicalBilling() {
   useEffect(() => {
     const success = searchParams.get('success');
     const cancel = searchParams.get('cancel');
+    const planChange = searchParams.get('plan_change');
     if (!success && !cancel) return;
 
     if (success) {
       toast({
-        title: 'Paiement reçu',
-        description: "Nous confirmons votre paiement. L'activation peut prendre quelques secondes.",
+        title: planChange ? 'Upgrade confirmé' : 'Paiement reçu',
+        description: planChange
+          ? 'Votre nouveau plan sera actif dans quelques secondes.'
+          : "Nous confirmons votre paiement. L'activation peut prendre quelques secondes.",
       });
       access.refresh();
     }
@@ -104,6 +108,15 @@ export default function StorePhysicalBilling() {
       <PhysicalSubscriptionRequired storeId={store.id} />
 
       <div className="container mx-auto max-w-4xl px-4 pb-6 space-y-4">
+        {access.planSlug && (
+          <PhysicalPlanChangeSection
+            storeId={store.id}
+            currentPlanSlug={access.planSlug}
+            subscriptionStatus={access.status}
+            onChanged={() => access.refresh()}
+          />
+        )}
+
         {autoRenewEnabled && (
           <Card>
             <CardHeader className="pb-2">

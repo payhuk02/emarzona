@@ -21,6 +21,12 @@ verify_jwt = true
 [functions.moneroo-webhook]
 verify_jwt = false
 
+[functions.process-subscription-renewals]
+verify_jwt = false
+
+[functions.process-subscription-dunning-emails]
+verify_jwt = false
+
 [functions.stripe-connect-webhook]
 verify_jwt = false
 

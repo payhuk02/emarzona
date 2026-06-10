@@ -482,6 +482,53 @@ async function resolveAuthorizedPaymentAmount(
     };
   }
 
+  if (purpose === 'physical_plan_change') {
+    if (!supabaseUrl || !serviceKey) {
+      return {
+        valid: false,
+        error: 'Configuration serveur incomplète pour la validation du paiement',
+      };
+    }
+    const invoiceId = validated.metadata?.invoice_id as string | undefined;
+    if (!invoiceId) {
+      return { valid: false, error: 'invoice_id requis pour le changement de plan' };
+    }
+
+    const supabase = createClient(supabaseUrl, serviceKey);
+    const { data: invoice, error } = await supabase
+      .from('subscription_invoices')
+      .select('id, amount, currency, status, store_id, metadata')
+      .eq('id', invoiceId)
+      .maybeSingle();
+
+    if (error || !invoice) {
+      return { valid: false, error: 'Facture introuvable' };
+    }
+    if (invoice.status !== 'pending') {
+      return { valid: false, error: 'Facture déjà traitée' };
+    }
+    const invoiceMeta = invoice.metadata as { plan_change?: boolean | string } | null;
+    const isPlanChangeInvoice =
+      invoiceMeta?.plan_change === true || invoiceMeta?.plan_change === 'true';
+    if (!isPlanChangeInvoice) {
+      return { valid: false, error: 'Facture invalide pour changement de plan' };
+    }
+    if (validated.storeId && invoice.store_id !== validated.storeId) {
+      return { valid: false, error: 'Boutique invalide pour cette facture' };
+    }
+
+    const expected = Math.round(Number(invoice.amount));
+    if (Math.round(validated.amount) !== expected) {
+      return { valid: false, error: 'Montant prorata invalide' };
+    }
+
+    return {
+      valid: true,
+      amount: expected,
+      currency: (invoice.currency as string) || validated.currency,
+    };
+  }
+
   if (purpose === 'physical_subscription_renewal') {
     if (!supabaseUrl || !serviceKey) {
       return {

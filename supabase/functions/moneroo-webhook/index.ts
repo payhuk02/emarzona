@@ -419,7 +419,24 @@ serve(async req => {
           (transaction?.metadata as Record<string, unknown> | null | undefined)?.invoice_id ||
           (metadata as Record<string, unknown> | null | undefined)?.invoice_id;
 
-        if (!transaction.order_id && purpose === 'physical_subscription_renewal' && invoiceId) {
+        if (!transaction.order_id && purpose === 'physical_plan_change' && invoiceId) {
+          const { applyPhysicalPlanChangeFromWebhook } =
+            await import('../_shared/physical-subscription-webhook.ts');
+          const planChange = await applyPhysicalPlanChangeFromWebhook(supabase, {
+            invoiceId: String(invoiceId),
+            transactionId: transaction.id,
+            monerooTransactionId: transaction.moneroo_transaction_id ?? null,
+          });
+          console.log('Applied physical plan change from invoice', {
+            invoice_id: invoiceId,
+            subscription_id: planChange.subscriptionId,
+            transaction_id: transaction.id,
+          });
+        } else if (
+          !transaction.order_id &&
+          purpose === 'physical_subscription_renewal' &&
+          invoiceId
+        ) {
           const { applyPhysicalSubscriptionRenewalFromWebhook } =
             await import('../_shared/physical-subscription-webhook.ts');
           const billingCustomer = billingCustomerFromTransaction(transaction);

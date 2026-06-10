@@ -171,3 +171,26 @@ export async function applyPhysicalSubscriptionRenewalFromWebhook(
 
   return { subscriptionId };
 }
+
+export interface ApplyPlanChangeInput {
+  invoiceId: string;
+  transactionId: string;
+  monerooTransactionId?: string | null;
+}
+
+export async function applyPhysicalPlanChangeFromWebhook(
+  supabase: SupabaseClient,
+  input: ApplyPlanChangeInput
+): Promise<{ subscriptionId: string }> {
+  const { data, error } = await supabase.rpc('mark_subscription_plan_change_invoice_paid', {
+    p_invoice_id: input.invoiceId,
+    p_transaction_id: input.transactionId,
+    p_external_transaction_id: input.monerooTransactionId ?? null,
+  });
+
+  if (error) {
+    throw new Error(`plan_change_failed: ${error.message} (invoice=${input.invoiceId})`);
+  }
+
+  return { subscriptionId: String(data) };
+}

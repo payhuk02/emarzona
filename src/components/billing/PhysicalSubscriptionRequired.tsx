@@ -9,7 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useStorePhysicalAccess } from '@/hooks/billing/useStorePhysicalAccess';
-import { PHYSICAL_PLAN_PRICES_XOF, PHYSICAL_TRIAL_DAYS } from '@/lib/billing/platform-pricing';
+import { PHYSICAL_TRIAL_DAYS } from '@/lib/billing/platform-pricing';
+import { PHYSICAL_PLAN_CARDS, physicalPlanLabel } from '@/lib/billing/physical-plan-display';
 import { formatCurrency } from '@/lib/utils';
 import { Package, Lock, Sparkles, ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
@@ -24,12 +25,6 @@ type PhysicalSubscriptionRequiredProps = {
   onBack?: () => void;
   compact?: boolean;
 };
-
-const PLAN_CARDS = [
-  { slug: 'physical_basic', label: 'Basic', price: PHYSICAL_PLAN_PRICES_XOF.basic },
-  { slug: 'physical_standard', label: 'Standard', price: PHYSICAL_PLAN_PRICES_XOF.standard },
-  { slug: 'physical_premium', label: 'Premium', price: PHYSICAL_PLAN_PRICES_XOF.premium },
-] as const;
 
 export function PhysicalSubscriptionRequired({
   storeId,
@@ -62,7 +57,7 @@ export function PhysicalSubscriptionRequired({
       case 'cancelled':
         return 'Abonnement annulé — réactivez un plan pour vendre des produits physiques.';
       case 'active':
-        return `Plan actif : ${access.planName ?? 'Physique'}`;
+        return `Plan actif : ${physicalPlanLabel(access.planSlug) || access.planName || 'Physique'}`;
       default:
         return 'Abonnement requis pour activer l’e-commerce produits physiques.';
     }
@@ -105,7 +100,7 @@ export function PhysicalSubscriptionRequired({
       )}
 
       <div className="grid gap-4 sm:grid-cols-3">
-        {PLAN_CARDS.map(plan => (
+        {PHYSICAL_PLAN_CARDS.map(plan => (
           <Card
             key={plan.slug}
             className={
@@ -117,7 +112,7 @@ export function PhysicalSubscriptionRequired({
                 <CardTitle className="text-base">{plan.label}</CardTitle>
                 {access.planSlug === plan.slug && <Badge variant="secondary">Plan actuel</Badge>}
               </div>
-              <CardDescription>Produits physiques</CardDescription>
+              <CardDescription>{plan.tagline}</CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-2xl font-bold">{formatCurrency(plan.price)}</p>
@@ -135,8 +130,8 @@ export function PhysicalSubscriptionRequired({
               <div>
                 <p className="font-medium text-sm">Activez votre abonnement physique</p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Consultez votre facturation ou contactez le support pour choisir un plan (7500 /
-                  12500 / 15000 XOF).
+                  Consultez votre facturation ou choisissez un plan Starter / Professional /
+                  Enterprise.
                 </p>
               </div>
             </div>
@@ -160,10 +155,11 @@ export function PhysicalSubscriptionRequired({
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-3">
-            {PLAN_CARDS.map(plan => (
+            {PHYSICAL_PLAN_CARDS.map(plan => (
               <Button
                 key={plan.slug}
                 variant={plan.slug === 'physical_standard' ? 'default' : 'outline'}
+                title={plan.tagline}
                 disabled={checkingOutSlug !== null}
                 onClick={async () => {
                   setCheckingOutSlug(plan.slug);
