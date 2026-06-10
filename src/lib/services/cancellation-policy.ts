@@ -7,6 +7,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
+import { refundPayment } from '@/lib/payments/refund-payment';
 
 // =====================================================
 // TYPES
@@ -172,17 +173,15 @@ export async function createServiceRefund(
   // Calculer le remboursement
   const calculation = await calculateServiceRefund(bookingId, cancellationReason, isEmergency);
 
-  // Récupérer les infos de la réservation
   const { data: booking, error: bookingError } = await supabase
     .from('service_bookings')
     .select(
       `
-      *,
-      products!inner (id, price, store_id),
-      orders:order_items!inner (
-        order_id,
-        orders!inner (id, total_amount)
-      )
+      id,
+      product_id,
+      payment_id,
+      amount_paid,
+      products!inner (id, price, store_id)
     `
     )
     .eq('id', bookingId)
@@ -192,16 +191,22 @@ export async function createServiceRefund(
     throw new Error('Booking not found');
   }
 
-  // Récupérer la politique
+  const { data: orderItem } = await supabase
+    .from('order_items')
+    .select('order_id, total_price, orders!inner(id, total_amount, payment_status)')
+    .eq('booking_id', bookingId)
+    .maybeSingle();
+
   const policy = await getServiceCancellationPolicy(booking.product_id);
 
-  // Récupérer le montant original depuis la commande ou le prix du service
-  const orderAmount = (booking.orders as { orders?: { total_amount?: number } }[] | null)?.[0]
-    ?.orders?.total_amount;
+  const orderRow = orderItem?.orders as { total_amount?: number } | null;
   const servicePrice = (booking.products as { price?: number } | null)?.price;
-  const originalAmount = orderAmount || servicePrice || 0;
+  const originalAmount =
+    Number(orderItem?.total_price ?? 0) ||
+    Number(orderRow?.total_amount ?? 0) ||
+    Number(booking.amount_paid ?? 0) ||
+    Number(servicePrice ?? 0);
 
-  // Créer le remboursement
   const { data: refund, error: refundError } = await supabase
     .from('service_cancellation_refunds')
     .insert({
@@ -217,7 +222,8 @@ export async function createServiceRefund(
       cancellation_reason: cancellationReason,
       is_emergency: isEmergency,
       emergency_reason: emergencyReason,
-      original_order_id: (booking.orders as { order_id?: string }[] | null)?.[0]?.order_id,
+      original_order_id: orderItem?.order_id ?? undefined,
+      original_payment_id: booking.payment_id ?? undefined,
       status: 'pending',
     })
     .select()
@@ -233,7 +239,7 @@ export async function createServiceRefund(
     policy?.auto_refund_enabled &&
     calculation.hours_before_service >= policy.auto_refund_minimum_hours
   ) {
-    await processServiceRefund(refund.id).catch( err => {
+    await processServiceRefund(refund.id).catch(err => {
       logger.warn('Error processing auto-refund', { error: err, refundId: refund.id });
     });
   }
@@ -276,12 +282,37 @@ export async function processServiceRefund(refundId: string): Promise<ServiceCan
   }
 
   try {
-    // Appeler l'API de remboursement (Moneroo ou PayDunya)
-    // TODO: Implémenter l'appel réel à l'API de paiement
+    if (refund.refund_method !== 'original_payment') {
+      const { data: manualRefund, error: manualError } = await supabase
+        .from('service_cancellation_refunds')
+        .update({
+          status: 'completed',
+          refund_transaction_id: `manual_${refund.refund_method}`,
+          completed_at: new Date().toISOString(),
+        })
+        .eq('id', refundId)
+        .select()
+        .single();
+
+      if (manualError) throw manualError;
+
+      await supabase
+        .from('service_bookings')
+        .update({
+          refund_issued: true,
+          refund_amount: refund.net_refund_amount,
+        })
+        .eq('id', refund.booking_id);
+
+      return manualRefund as ServiceCancellationRefund;
+    }
+
     const refundTransactionId = await processPaymentRefund(
-      refund.original_payment_id || '',
+      refund.booking_id,
+      refund.original_payment_id,
+      refund.original_order_id,
       refund.net_refund_amount,
-      refund.refund_method
+      refund.cancellation_reason
     );
 
     // Mettre à jour avec le succès
@@ -325,21 +356,93 @@ export async function processServiceRefund(refundId: string): Promise<ServiceCan
 }
 
 /**
- * Traite le remboursement via l'API de paiement
+ * Résout la transaction PSP puis déclenche le remboursement multi-provider.
  */
 async function processPaymentRefund(
-  paymentId: string,
+  bookingId: string,
+  paymentId: string | null | undefined,
+  orderId: string | null | undefined,
   amount: number,
-  method: string
+  reason?: string | null
 ): Promise<string> {
-  // TODO: Implémenter l'appel réel à Moneroo ou PayDunya
-  // Pour l'instant, retourner un ID fictif
-  logger.info('Processing payment refund', { paymentId, amount, method });
+  let transactionId: string | null = null;
 
-  // Simuler un délai
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  if (paymentId) {
+    const { data: byId } = await supabase
+      .from('transactions')
+      .select('id')
+      .eq('id', paymentId)
+      .eq('status', 'completed')
+      .maybeSingle();
 
-  return `refund_${Date.now()}`;
+    if (byId?.id) {
+      transactionId = byId.id;
+    } else {
+      const { data: byPaymentId } = await supabase
+        .from('transactions')
+        .select('id')
+        .eq('payment_id', paymentId)
+        .eq('status', 'completed')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      transactionId = byPaymentId?.id ?? null;
+    }
+  }
+
+  if (!transactionId && orderId) {
+    const { data: byOrder } = await supabase
+      .from('transactions')
+      .select('id')
+      .eq('order_id', orderId)
+      .eq('status', 'completed')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    transactionId = byOrder?.id ?? null;
+  }
+
+  if (!transactionId) {
+    const { data: orderItem } = await supabase
+      .from('order_items')
+      .select('order_id')
+      .eq('booking_id', bookingId)
+      .maybeSingle();
+
+    if (orderItem?.order_id) {
+      const { data: byBookingOrder } = await supabase
+        .from('transactions')
+        .select('id')
+        .eq('order_id', orderItem.order_id)
+        .eq('status', 'completed')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      transactionId = byBookingOrder?.id ?? null;
+    }
+  }
+
+  if (!transactionId) {
+    throw new Error('Aucune transaction payée trouvée pour ce remboursement');
+  }
+
+  logger.info('Processing service refund via PSP', {
+    bookingId,
+    transactionId,
+    amount,
+  });
+
+  const result = await refundPayment({
+    transactionId,
+    amount,
+    reason: reason || 'Service booking cancellation',
+  });
+
+  if (!result.success) {
+    throw new Error(result.error || 'Échec du remboursement PSP');
+  }
+
+  return result.refund_id || transactionId;
 }
 
 /**
@@ -367,7 +470,7 @@ export async function getStoreServiceRefunds(
   storeId: string,
   status?: string
 ): Promise<ServiceCancellationRefund[]> {
-  let  query= supabase
+  let query = supabase
     .from('service_cancellation_refunds')
     .select(
       `
@@ -393,9 +496,3 @@ export async function getStoreServiceRefunds(
 
   return (data || []) as ServiceCancellationRefund[];
 }
-
-
-
-
-
-

@@ -1,15 +1,5 @@
 /**
- * useEnrollments - Hook pour la gestion des inscriptions
- * 
- * Fournit toutes les opérations pour les inscriptions aux cours :
- * - Listing et filtrage
- * - Création et mise à jour
- * - Gestion du statut
- * - Suivi de la progression
- * - Gestion de l'accès
- * 
- * @author Emarzona Team
- * @date 29 Octobre 2025
+ * useEnrollments — gestion des inscriptions (table course_enrollments)
  */
 
 import { useState, useCallback } from 'react';
@@ -18,11 +8,31 @@ import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { EnrollmentStatus } from '@/components/courses/EnrollmentInfoDisplay';
 
-const ENROLLMENT_FIELDS = 'id, course_id, student_id, status, progress, completed_lessons, total_lessons, time_spent, enrolled_at, last_activity_at, expiry_date, amount_paid, payment_method, has_certificate, average_score, created_at, updated_at';
+const ENROLLMENT_FIELDS =
+  'id, course_id, product_id, user_id, order_id, status, enrollment_date, completion_date, progress_percentage, completed_lessons, total_lessons, last_accessed_at, last_accessed_lesson_id, total_watch_time_minutes, certificate_earned, certificate_url, certificate_issued_at, created_at, updated_at';
 
-/**
- * Interface pour une inscription
- */
+type CourseEnrollmentRow = {
+  id: string;
+  course_id: string;
+  product_id: string;
+  user_id: string;
+  order_id?: string | null;
+  status: string;
+  enrollment_date: string;
+  completion_date?: string | null;
+  progress_percentage?: number | null;
+  completed_lessons?: number | null;
+  total_lessons?: number | null;
+  last_accessed_at?: string | null;
+  total_watch_time_minutes?: number | null;
+  certificate_earned?: boolean | null;
+  certificate_url?: string | null;
+  created_at: string;
+  updated_at: string;
+  course?: { name?: string; total_lessons?: number } | null;
+  order?: { total_amount?: number | null; payment_status?: string | null } | null;
+};
+
 export interface Enrollment {
   id: string;
   course_id: string;
@@ -31,10 +41,10 @@ export interface Enrollment {
   student_name?: string;
   student_email?: string;
   status: EnrollmentStatus;
-  progress: number; // 0-100
+  progress: number;
   completed_lessons: number;
   total_lessons: number;
-  time_spent: number; // minutes
+  time_spent: number;
   enrolled_at: string;
   last_activity_at?: string;
   expiry_date?: string;
@@ -44,22 +54,19 @@ export interface Enrollment {
   average_score?: number;
   created_at: string;
   updated_at: string;
+  completed_at?: string;
 }
 
-/**
- * Données pour créer une inscription
- */
 export interface EnrollmentCreateData {
   course_id: string;
+  product_id: string;
   student_id: string;
-  amount_paid: number;
+  order_id?: string;
+  amount_paid?: number;
   payment_method?: string;
   expiry_date?: string;
 }
 
-/**
- * Données pour mettre à jour une inscription
- */
 export interface EnrollmentUpdateData {
   status?: EnrollmentStatus;
   progress?: number;
@@ -70,9 +77,6 @@ export interface EnrollmentUpdateData {
   average_score?: number;
 }
 
-/**
- * Filtres pour les inscriptions
- */
 export interface EnrollmentFilters {
   status?: EnrollmentStatus;
   course_id?: string;
@@ -80,22 +84,16 @@ export interface EnrollmentFilters {
   search?: string;
 }
 
-/**
- * Statistiques des inscriptions
- */
 export interface EnrollmentStats {
   total_enrollments: number;
   active_enrollments: number;
   completed_enrollments: number;
   total_revenue: number;
   avg_progress: number;
-  avg_completion_time: number; // jours
+  avg_completion_time: number;
   by_status: Record<EnrollmentStatus, number>;
 }
 
-/**
- * Événement de progression
- */
 export interface ProgressEvent {
   enrollment_id: string;
   lesson_id: string;
@@ -104,200 +102,207 @@ export interface ProgressEvent {
   score?: number;
 }
 
-/**
- * Hook useEnrollments
- */
+function mapEnrollmentRow(row: CourseEnrollmentRow): Enrollment {
+  return {
+    id: row.id,
+    course_id: row.course_id,
+    course_name: row.course?.name,
+    student_id: row.user_id,
+    status: row.status as EnrollmentStatus,
+    progress: Number(row.progress_percentage ?? 0),
+    completed_lessons: Number(row.completed_lessons ?? 0),
+    total_lessons: Number(row.total_lessons ?? row.course?.total_lessons ?? 0),
+    time_spent: Number(row.total_watch_time_minutes ?? 0),
+    enrolled_at: row.enrollment_date ?? row.created_at,
+    last_activity_at: row.last_accessed_at ?? undefined,
+    amount_paid: Number(row.order?.total_amount ?? 0),
+    has_certificate: Boolean(row.certificate_earned),
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+    completed_at: row.completion_date ?? undefined,
+  };
+}
+
+function buildEnrollmentStats(rows: Enrollment[]): EnrollmentStats {
+  const completed = rows.filter(e => e.status === 'completed' && e.completed_at);
+  const avgCompletionTime =
+    completed.length > 0
+      ? completed.reduce((sum, e) => {
+          const enrolled = new Date(e.enrolled_at).getTime();
+          const done = new Date(e.completed_at!).getTime();
+          return sum + (done - enrolled) / (1000 * 60 * 60 * 24);
+        }, 0) / completed.length
+      : 0;
+
+  const by_status = {} as Record<EnrollmentStatus, number>;
+  for (const enrollment of rows) {
+    by_status[enrollment.status] = (by_status[enrollment.status] || 0) + 1;
+  }
+
+  return {
+    total_enrollments: rows.length,
+    active_enrollments: rows.filter(e => e.status === 'active').length,
+    completed_enrollments: rows.filter(e => e.status === 'completed').length,
+    total_revenue: rows.reduce((sum, e) => sum + e.amount_paid, 0),
+    avg_progress: rows.length > 0 ? rows.reduce((sum, e) => sum + e.progress, 0) / rows.length : 0,
+    avg_completion_time: Math.round(avgCompletionTime),
+    by_status,
+  };
+}
+
 export const useEnrollments = () => {
   const queryClient = useQueryClient();
   const [filters, setFilters] = useState<EnrollmentFilters>({});
 
-  /**
-   * Récupérer toutes les inscriptions avec filtres
-   */
-  const { data: enrollments, isLoading, error, refetch } = useQuery({
+  const {
+    data: enrollments,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ['enrollments', filters],
     queryFn: async () => {
-      let  query= supabase
-        .from('enrollments')
-        .select(`
-          *,
-          courses!inner(name),
-          students:auth.users!inner(email, raw_user_meta_data)
-        `)
-        .order('created_at', { ascending: false });
+      let query = supabase
+        .from('course_enrollments')
+        .select(
+          `
+          ${ENROLLMENT_FIELDS},
+          course:courses!inner(name, total_lessons),
+          order:orders(total_amount, payment_status)
+        `
+        )
+        .order('enrollment_date', { ascending: false });
 
-      // Appliquer les filtres
-      if (filters.status) {
-        query = query.eq('status', filters.status);
-      }
-      if (filters.course_id) {
-        query = query.eq('course_id', filters.course_id);
-      }
-      if (filters.student_id) {
-        query = query.eq('student_id', filters.student_id);
-      }
+      if (filters.status) query = query.eq('status', filters.status);
+      if (filters.course_id) query = query.eq('course_id', filters.course_id);
+      if (filters.student_id) query = query.eq('user_id', filters.student_id);
+
+      const { data, error: fetchError } = await query;
+      if (fetchError) throw fetchError;
+
+      let rows = (data as CourseEnrollmentRow[]).map(mapEnrollmentRow);
       if (filters.search) {
-        query = query.or(`course_name.ilike.%${filters.search}%,student_name.ilike.%${filters.search}%`);
+        const term = filters.search.toLowerCase();
+        rows = rows.filter(e => e.course_name?.toLowerCase().includes(term));
       }
-
-      const { data, error } = await query;
-
-      if (error) throw error;
-      return (data || []) as Enrollment[];
+      return rows;
     },
   });
 
-  /**
-   * Récupérer une inscription par ID
-   */
   const useEnrollmentById = (enrollmentId: string) => {
     return useQuery({
       queryKey: ['enrollment', enrollmentId],
       queryFn: async () => {
-        const { data, error } = await supabase
-          .from('enrollments')
-          .select(`
-            *,
-            courses!inner(name, total_lessons),
-            students:auth.users!inner(email, raw_user_meta_data)
-          `)
+        const { data, error: fetchError } = await supabase
+          .from('course_enrollments')
+          .select(
+            `
+            ${ENROLLMENT_FIELDS},
+            course:courses!inner(name, total_lessons),
+            order:orders(total_amount, payment_status)
+          `
+          )
           .eq('id', enrollmentId)
           .single();
 
-        if (error) throw error;
-        return data as Enrollment;
+        if (fetchError) throw fetchError;
+        return mapEnrollmentRow(data as CourseEnrollmentRow);
       },
       enabled: !!enrollmentId,
     });
   };
 
-  /**
-   * Récupérer les inscriptions d'un cours
-   */
   const useEnrollmentsByCourse = (courseId: string) => {
     return useQuery({
       queryKey: ['enrollments-by-course', courseId],
       queryFn: async () => {
-        const { data, error } = await supabase
-          .from('enrollments')
-          .select(ENROLLMENT_FIELDS)
+        const { data, error: fetchError } = await supabase
+          .from('course_enrollments')
+          .select(`${ENROLLMENT_FIELDS}, course:courses!inner(name, total_lessons)`)
           .eq('course_id', courseId)
-          .order('enrolled_at', { ascending: false });
+          .order('enrollment_date', { ascending: false });
 
-        if (error) throw error;
-        return (data || []) as Enrollment[];
+        if (fetchError) throw fetchError;
+        return (data as CourseEnrollmentRow[]).map(mapEnrollmentRow);
       },
       enabled: !!courseId,
     });
   };
 
-  /**
-   * Récupérer les inscriptions d'un étudiant
-   */
   const useEnrollmentsByStudent = (studentId: string) => {
     return useQuery({
       queryKey: ['enrollments-by-student', studentId],
       queryFn: async () => {
-        const { data, error } = await supabase
-          .from('enrollments')
-          .select(`
-            *,
-            courses!inner(name, instructor_name, thumbnail_url)
-          `)
-          .eq('student_id', studentId)
-          .order('enrolled_at', { ascending: false });
+        const { data, error: fetchError } = await supabase
+          .from('course_enrollments')
+          .select(
+            `
+            ${ENROLLMENT_FIELDS},
+            course:courses!inner(name, total_lessons)
+          `
+          )
+          .eq('user_id', studentId)
+          .order('enrollment_date', { ascending: false });
 
-        if (error) throw error;
-        return (data || []) as Enrollment[];
+        if (fetchError) throw fetchError;
+        return (data as CourseEnrollmentRow[]).map(mapEnrollmentRow);
       },
       enabled: !!studentId,
     });
   };
 
-  /**
-   * Récupérer les statistiques (optimisé avec fonction SQL)
-   */
   const { data: stats } = useQuery({
     queryKey: ['enrollment-stats'],
     queryFn: async () => {
-      // Essayer d'abord la fonction SQL optimisée
       const { data: statsData, error: rpcError } = await supabase.rpc('get_enrollment_stats');
 
       if (!rpcError && statsData) {
-        // La fonction SQL retourne les stats directement
         return statsData as EnrollmentStats;
       }
 
-      // Fallback : calcul côté client si la fonction n'existe pas encore
-      logger.warn('get_enrollment_stats function not available, using client-side calculation', {
+      logger.warn('get_enrollment_stats unavailable, using client-side calculation', {
         error: rpcError?.message,
       });
 
-      const { data: allEnrollments, error } = await supabase
-        .from('enrollments')
-        .select(ENROLLMENT_FIELDS);
+      const { data, error: fetchError } = await supabase.from('course_enrollments').select(
+        `
+          ${ENROLLMENT_FIELDS},
+          course:courses(name),
+          order:orders(total_amount)
+        `
+      );
 
-      if (error) throw error;
-
-      const enrollments = (allEnrollments || []) as Enrollment[];
-
-      // Calculer les statistiques
-      const  stats: EnrollmentStats = {
-        total_enrollments: enrollments.length,
-        active_enrollments: enrollments.filter(e => e.status === 'active').length,
-        completed_enrollments: enrollments.filter(e => e.status === 'completed').length,
-        total_revenue: enrollments.reduce((sum, e) => sum + e.amount_paid, 0),
-        avg_progress:
-          enrollments.length > 0
-            ? enrollments.reduce((sum, e) => sum + e.progress, 0) / enrollments.length
-            : 0,
-        avg_completion_time: (() => {
-          // Calculate average completion time in days
-          const completed = enrollments.filter(e => e.status === 'completed' && e.completed_at);
-          if (completed.length === 0) return 0;
-          
-          const totalDays = completed.reduce((sum, e) => {
-            const enrolled = new Date(e.enrolled_at || e.created_at).getTime();
-            const completed = new Date(e.completed_at!).getTime();
-            const days = (completed - enrolled) / (1000 * 60 * 60 * 24);
-            return sum + days;
-          }, 0);
-          
-          return Math.round(totalDays / completed.length);
-        })(),
-        by_status: {} as Record<EnrollmentStatus, number>,
-      };
-
-      // Par statut
-      enrollments.forEach(enrollment => {
-        stats.by_status[enrollment.status] = (stats.by_status[enrollment.status] || 0) + 1;
-      });
-
-      return stats;
+      if (fetchError) throw fetchError;
+      return buildEnrollmentStats((data as CourseEnrollmentRow[]).map(mapEnrollmentRow));
     },
   });
 
-  /**
-   * Créer une inscription
-   */
   const createEnrollmentMutation = useMutation({
     mutationFn: async (enrollmentData: EnrollmentCreateData) => {
-      const { data, error } = await supabase
-        .from('enrollments')
+      const { data: lessons } = await supabase
+        .from('course_lessons')
+        .select('id')
+        .eq('course_id', enrollmentData.course_id);
+
+      const { data, error: insertError } = await supabase
+        .from('course_enrollments')
         .insert({
-          ...enrollmentData,
-          status: 'pending',
-          progress: 0,
+          course_id: enrollmentData.course_id,
+          product_id: enrollmentData.product_id,
+          user_id: enrollmentData.student_id,
+          order_id: enrollmentData.order_id,
+          status: 'active',
+          progress_percentage: 0,
           completed_lessons: 0,
-          time_spent: 0,
-          has_certificate: false,
-          enrolled_at: new Date().toISOString(),
+          total_lessons: lessons?.length ?? 0,
+          total_watch_time_minutes: 0,
+          certificate_earned: false,
         })
         .select()
         .single();
 
-      if (error) throw error;
-      return data as Enrollment;
+      if (insertError) throw insertError;
+      return mapEnrollmentRow(data as CourseEnrollmentRow);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['enrollments'] });
@@ -305,23 +310,25 @@ export const useEnrollments = () => {
     },
   });
 
-  /**
-   * Mettre à jour une inscription
-   */
   const updateEnrollmentMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: EnrollmentUpdateData }) => {
-      const { data, error } = await supabase
-        .from('enrollments')
+      const { data, error: updateError } = await supabase
+        .from('course_enrollments')
         .update({
-          ...updates,
+          status: updates.status,
+          progress_percentage: updates.progress,
+          completed_lessons: updates.completed_lessons,
+          total_watch_time_minutes: updates.time_spent,
+          last_accessed_at: updates.last_activity_at,
+          certificate_earned: updates.has_certificate,
           updated_at: new Date().toISOString(),
         })
         .eq('id', id)
         .select()
         .single();
 
-      if (error) throw error;
-      return data as Enrollment;
+      if (updateError) throw updateError;
+      return mapEnrollmentRow(data as CourseEnrollmentRow);
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['enrollments'] });
@@ -330,23 +337,21 @@ export const useEnrollments = () => {
     },
   });
 
-  /**
-   * Mettre à jour le statut d'une inscription
-   */
   const updateStatusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: EnrollmentStatus }) => {
-      const { data, error } = await supabase
-        .from('enrollments')
+      const { data, error: updateError } = await supabase
+        .from('course_enrollments')
         .update({
           status,
+          completion_date: status === 'completed' ? new Date().toISOString() : null,
           updated_at: new Date().toISOString(),
         })
         .eq('id', id)
         .select()
         .single();
 
-      if (error) throw error;
-      return data as Enrollment;
+      if (updateError) throw updateError;
+      return mapEnrollmentRow(data as CourseEnrollmentRow);
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['enrollments'] });
@@ -355,149 +360,136 @@ export const useEnrollments = () => {
     },
   });
 
-  /**
-   * Enregistrer la progression d'une leçon
-   */
   const recordProgressMutation = useMutation({
     mutationFn: async (progressEvent: ProgressEvent) => {
-      // Récupérer l'inscription actuelle
       const { data: enrollment, error: fetchError } = await supabase
-        .from('enrollments')
-        .select('*, courses!inner(total_lessons)')
+        .from('course_enrollments')
+        .select(`${ENROLLMENT_FIELDS}, course:courses!inner(total_lessons)`)
         .eq('id', progressEvent.enrollment_id)
         .single();
 
       if (fetchError) throw fetchError;
 
-      const newCompletedLessons = enrollment.completed_lessons + 1;
-      const totalLessons = enrollment.courses.total_lessons;
+      const row = enrollment as CourseEnrollmentRow;
+      const totalLessons = row.total_lessons ?? row.course?.total_lessons ?? 1;
+      const newCompletedLessons = Math.min(Number(row.completed_lessons ?? 0) + 1, totalLessons);
       const newProgress = Math.round((newCompletedLessons / totalLessons) * 100);
+      const newStatus = newProgress >= 100 ? 'completed' : row.status;
 
-      // Mettre à jour la progression
-      const { data, error } = await supabase
-        .from('enrollments')
+      const { data, error: updateError } = await supabase
+        .from('course_enrollments')
         .update({
           completed_lessons: newCompletedLessons,
-          progress: newProgress,
-          last_activity_at: new Date().toISOString(),
-          status: newProgress === 100 ? 'completed' : enrollment.status,
+          progress_percentage: newProgress,
+          last_accessed_at: progressEvent.completed_at,
+          last_accessed_lesson_id: progressEvent.lesson_id,
+          status: newStatus,
+          completion_date: newProgress >= 100 ? progressEvent.completed_at : row.completion_date,
+          updated_at: new Date().toISOString(),
         })
         .eq('id', progressEvent.enrollment_id)
         .select()
         .single();
 
-      if (error) throw error;
-
-      // Enregistrer l'événement de progression
-      await supabase.from('enrollment_events').insert({
-        enrollment_id: progressEvent.enrollment_id,
-        type: 'lesson_completed',
-        metadata: {
-          lesson_id: progressEvent.lesson_id,
-          lesson_title: progressEvent.lesson_title,
-          score: progressEvent.score,
-          progress_percentage: newProgress,
-        },
-      });
-
-      return data as Enrollment;
+      if (updateError) throw updateError;
+      return mapEnrollmentRow(data as CourseEnrollmentRow);
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['enrollments'] });
       queryClient.invalidateQueries({ queryKey: ['enrollment', variables.enrollment_id] });
       queryClient.invalidateQueries({ queryKey: ['enrollment-stats'] });
-      queryClient.invalidateQueries({ queryKey: ['enrollment-events'] });
     },
   });
 
-  /**
-   * Générer un certificat
-   */
   const generateCertificateMutation = useMutation({
     mutationFn: async (enrollmentId: string) => {
-      // Vérifier que le cours est terminé
       const { data: enrollment, error: fetchError } = await supabase
-        .from('enrollments')
+        .from('course_enrollments')
         .select(ENROLLMENT_FIELDS)
         .eq('id', enrollmentId)
         .single();
 
       if (fetchError) throw fetchError;
 
-      if (enrollment.progress < 100) {
+      const progress = Number((enrollment as CourseEnrollmentRow).progress_percentage ?? 0);
+      if (progress < 100) {
         throw new Error('Le cours doit être terminé pour générer un certificat');
       }
 
-      // Mettre à jour l'inscription
-      const { data, error } = await supabase
-        .from('enrollments')
+      const { data, error: updateError } = await supabase
+        .from('course_enrollments')
         .update({
-          has_certificate: true,
+          certificate_earned: true,
+          certificate_issued_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })
         .eq('id', enrollmentId)
         .select()
         .single();
 
-      if (error) throw error;
-
-      // Enregistrer l'événement
-      await supabase.from('enrollment_events').insert({
-        enrollment_id: enrollmentId,
-        type: 'certificate_issued',
-        metadata: {
-          certificate_id: `CERT-${enrollmentId}`,
-        },
-      });
-
-      return data as Enrollment;
+      if (updateError) throw updateError;
+      return mapEnrollmentRow(data as CourseEnrollmentRow);
     },
     onSuccess: (_, enrollmentId) => {
       queryClient.invalidateQueries({ queryKey: ['enrollments'] });
       queryClient.invalidateQueries({ queryKey: ['enrollment', enrollmentId] });
-      queryClient.invalidateQueries({ queryKey: ['enrollment-events'] });
     },
   });
 
-  /**
-   * Rembourser une inscription
-   */
   const refundEnrollmentMutation = useMutation({
     mutationFn: async ({ id, reason }: { id: string; reason?: string }) => {
-      const { data, error } = await supabase
-        .from('enrollments')
+      const { data: enrollment, error: fetchError } = await supabase
+        .from('course_enrollments')
+        .select(`${ENROLLMENT_FIELDS}, order_id`)
+        .eq('id', id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      const row = enrollment as CourseEnrollmentRow;
+      if (row.order_id) {
+        const { data: transaction } = await supabase
+          .from('transactions')
+          .select('id')
+          .eq('order_id', row.order_id)
+          .eq('status', 'completed')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (transaction?.id) {
+          const result = await import('@/lib/payments/refund-payment').then(m =>
+            m.refundPayment({
+              transactionId: transaction.id,
+              reason: reason || 'Course enrollment refund',
+            })
+          );
+          if (!result.success) {
+            throw new Error(result.error || 'Échec du remboursement');
+          }
+        }
+      }
+
+      const { data, error: updateError } = await supabase
+        .from('course_enrollments')
         .update({
-          status: 'refunded',
+          status: 'cancelled',
           updated_at: new Date().toISOString(),
         })
         .eq('id', id)
         .select()
         .single();
 
-      if (error) throw error;
-
-      // Enregistrer l'événement
-      await supabase.from('enrollment_events').insert({
-        enrollment_id: id,
-        type: 'refund_issued',
-        metadata: {
-          refund_reason: reason,
-          amount: data.amount_paid,
-          currency: 'EUR',
-        },
-      });
-
-      return data as Enrollment;
+      if (updateError) throw updateError;
+      return mapEnrollmentRow(data as CourseEnrollmentRow);
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['enrollments'] });
       queryClient.invalidateQueries({ queryKey: ['enrollment', variables.id] });
       queryClient.invalidateQueries({ queryKey: ['enrollment-stats'] });
-      queryClient.invalidateQueries({ queryKey: ['enrollment-events'] });
     },
   });
 
-  // Méthodes helpers
   const createEnrollment = useCallback(
     (data: EnrollmentCreateData) => createEnrollmentMutation.mutateAsync(data),
     [createEnrollmentMutation]
@@ -510,8 +502,7 @@ export const useEnrollments = () => {
   );
 
   const updateStatus = useCallback(
-    (id: string, status: EnrollmentStatus) =>
-      updateStatusMutation.mutateAsync({ id, status }),
+    (id: string, status: EnrollmentStatus) => updateStatusMutation.mutateAsync({ id, status }),
     [updateStatusMutation]
   );
 
@@ -531,17 +522,12 @@ export const useEnrollments = () => {
   );
 
   return {
-    // Data
     enrollments: enrollments || [],
     stats,
     isLoading,
     error,
-
-    // Filters
     filters,
     setFilters,
-
-    // Actions
     createEnrollment,
     updateEnrollment,
     updateStatus,
@@ -552,8 +538,6 @@ export const useEnrollments = () => {
     useEnrollmentById,
     useEnrollmentsByCourse,
     useEnrollmentsByStudent,
-
-    // Mutation states
     isCreating: createEnrollmentMutation.isPending,
     isUpdating: updateEnrollmentMutation.isPending,
     isRecordingProgress: recordProgressMutation.isPending,
@@ -563,10 +547,3 @@ export const useEnrollments = () => {
 };
 
 export default useEnrollments;
-
-
-
-
-
-
-

@@ -1,15 +1,17 @@
 /**
  * Service Availability Hooks
  * Date: 28 octobre 2025
- * 
+ *
  * React Query hooks for managing service availability and staff
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-const AVAILABILITY_SLOT_FIELDS = 'id, service_product_id, day_of_week, start_time, end_time, staff_member_id, is_active, created_at, updated_at';
-const STAFF_MEMBER_FIELDS = 'id, service_product_id, store_id, name, email, phone, role, avatar_url, bio, is_active, total_bookings, total_completed_bookings, average_rating, created_at, updated_at';
+const AVAILABILITY_SLOT_FIELDS =
+  'id, service_product_id, day_of_week, start_time, end_time, staff_member_id, is_active, created_at, updated_at';
+const STAFF_MEMBER_FIELDS =
+  'id, service_product_id, store_id, name, email, phone, role, avatar_url, bio, is_active, total_bookings, total_completed_bookings, average_rating, created_at, updated_at';
 
 export interface AvailabilitySlot {
   id: string;
@@ -50,10 +52,12 @@ export const useAvailabilitySlots = (serviceProductId?: string) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('service_availability_slots')
-        .select(`
+        .select(
+          `
           ${AVAILABILITY_SLOT_FIELDS},
           staff:service_staff_members(${STAFF_MEMBER_FIELDS})
-        `)
+        `
+        )
         .eq('service_product_id', serviceProductId!)
         .eq('is_active', true)
         .order('day_of_week', { ascending: true })
@@ -143,10 +147,7 @@ export const useDeleteAvailabilitySlot = () => {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('service_availability_slots')
-        .delete()
-        .eq('id', id);
+      const { error } = await supabase.from('service_availability_slots').delete().eq('id', id);
 
       if (error) throw error;
     },
@@ -232,10 +233,7 @@ export const useDeleteStaffMember = () => {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('service_staff_members')
-        .delete()
-        .eq('id', id);
+      const { error } = await supabase.from('service_staff_members').delete().eq('id', id);
 
       if (error) throw error;
     },
@@ -248,11 +246,7 @@ export const useDeleteStaffMember = () => {
 /**
  * Check if a time slot is available
  */
-export const useCheckSlotAvailability = (
-  serviceProductId: string,
-  date: string,
-  time: string
-) => {
+export const useCheckSlotAvailability = (serviceProductId: string, date: string, time: string) => {
   return useQuery({
     queryKey: ['slot-availability', serviceProductId, date, time],
     queryFn: async () => {
@@ -269,7 +263,7 @@ export const useCheckSlotAvailability = (
 
       if (slotsError) throw slotsError;
 
-      const matchingSlot = slots?.find((slot) => {
+      const matchingSlot = slots?.find(slot => {
         return time >= slot.start_time && time < slot.end_time;
       });
 
@@ -282,16 +276,14 @@ export const useCheckSlotAvailability = (
         .from('service_bookings')
         .select('participants_count')
         .eq('product_id', serviceProductId)
-        .eq('booking_date', date)
-        .eq('booking_time', time)
+        .eq('scheduled_date', date)
+        .eq('scheduled_start_time', time)
         .in('status', ['pending', 'confirmed']);
 
       if (bookingsError) throw bookingsError;
 
-      const totalParticipants = bookings?.reduce(
-        (sum, b) => sum + (b.participants_count || 1),
-        0
-      ) || 0;
+      const totalParticipants =
+        bookings?.reduce((sum, b) => sum + (b.participants_count || 1), 0) || 0;
 
       // Get max participants from service
       const { data: service, error: serviceError } = await supabase
@@ -346,9 +338,9 @@ export const useAvailableTimeSlots = (serviceProductId: string, date: string) =>
       // Get existing bookings for this date
       const { data: bookings, error: bookingsError } = await supabase
         .from('service_bookings')
-        .select('booking_time, participants_count')
+        .select('scheduled_start_time, participants_count')
         .eq('product_id', serviceProductId)
-        .eq('booking_date', date)
+        .eq('scheduled_date', date)
         .in('status', ['pending', 'confirmed']);
 
       if (bookingsError) throw bookingsError;
@@ -363,17 +355,18 @@ export const useAvailableTimeSlots = (serviceProductId: string, date: string) =>
       // Generate time slots
       const duration = service?.duration_minutes || 60;
       const maxParticipants = service?.max_participants || 1;
-      const  availableSlots: AvailableTimeSlot[] = [];
+      const availableSlots: AvailableTimeSlot[] = [];
 
-      slots.forEach((slot) => {
-        let  currentTime= slot.start_time;
+      slots.forEach(slot => {
+        let currentTime = slot.start_time;
         const endTime = slot.end_time;
 
         while (currentTime < endTime) {
           // Count participants for this time
-          const participantsAtThisTime = bookings
-            ?.filter((b) => b.booking_time === currentTime)
-            .reduce((sum, b) => sum + (b.participants_count || 1), 0) || 0;
+          const participantsAtThisTime =
+            bookings
+              ?.filter(b => b.scheduled_start_time === currentTime)
+              .reduce((sum, b) => sum + (b.participants_count || 1), 0) || 0;
 
           const availableSpots = maxParticipants - participantsAtThisTime;
 
@@ -399,10 +392,3 @@ export const useAvailableTimeSlots = (serviceProductId: string, date: string) =>
     enabled: !!serviceProductId && !!date,
   });
 };
-
-
-
-
-
-
-

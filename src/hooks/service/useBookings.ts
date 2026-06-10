@@ -16,7 +16,7 @@ import { createServiceRefund } from '@/lib/services/cancellation-policy';
 import { logger } from '@/lib/logger';
 
 const SERVICE_BOOKING_FIELDS =
-  'id, product_id, user_id, provider_id, scheduled_date, scheduled_start_time, scheduled_end_time, timezone, status, staff_member_id, participants_count, meeting_url, customer_notes, internal_notes, reminder_sent_at, reminder_sent, cancelled_at, cancellation_reason, completed_at, duration_minutes, created_at, updated_at';
+  'id, product_id, user_id, provider_id, scheduled_date, scheduled_start_time, scheduled_end_time, timezone, status, staff_member_id, participants_count, meeting_url, customer_notes, internal_notes, reminder_sent_at, reminder_sent, cancelled_at, cancellation_reason, completed_at, duration_minutes, amount_paid, payment_id, deposit_paid, created_at, updated_at';
 const BOOKING_PRODUCT_FIELDS =
   'id, store_id, name, description, price, status, product_type, image_url, created_at, updated_at';
 const BOOKING_CUSTOMER_FIELDS = 'id, name, email, phone, user_id, created_at, updated_at';
@@ -40,6 +40,30 @@ type MyBookingProductRow = {
   image_url?: string | null;
   service?: Record<string, unknown> | null;
 };
+
+type ServiceBookingRow = ServiceBooking & {
+  scheduled_date?: string;
+  scheduled_start_time?: string;
+  amount_paid?: number | null;
+  product?: { price?: number | null; name?: string; image_url?: string | null } | null;
+};
+
+/** Map DB row (scheduled_*) to UI aliases (booking_date, total_price). */
+export function mapServiceBookingRow(row: ServiceBookingRow): ServiceBooking {
+  const amountPaid = row.amount_paid != null ? Number(row.amount_paid) : null;
+  const productPrice = row.product?.price != null ? Number(row.product.price) : 0;
+
+  return {
+    ...row,
+    booking_date: row.scheduled_date ?? row.booking_date,
+    booking_time: row.scheduled_start_time ?? row.booking_time,
+    total_price: amountPaid ?? productPrice,
+  };
+}
+
+export function mapServiceBookingRows(data: unknown[]): ServiceBooking[] {
+  return (data as ServiceBookingRow[]).map(mapServiceBookingRow);
+}
 
 /** Flatten nested product.service for customer portal components. */
 export function mapMyBookingRows(data: unknown[]): ServiceBooking[] {
@@ -102,11 +126,11 @@ export const useServiceBookings = (productId?: string) => {
         `
         )
         .eq('product_id', productId!)
-        .order('booking_date', { ascending: true })
-        .order('booking_time', { ascending: true });
+        .order('scheduled_date', { ascending: true })
+        .order('scheduled_start_time', { ascending: true });
 
       if (error) throw error;
-      return data as ServiceBooking[];
+      return mapServiceBookingRows(data ?? []);
     },
     enabled: !!productId,
   });
@@ -129,12 +153,12 @@ export const useBookingsByDate = (productId: string, date: string) => {
         `
         )
         .eq('product_id', productId)
-        .eq('booking_date', date)
+        .eq('scheduled_date', date)
         .in('status', ['pending', 'confirmed'])
-        .order('booking_time', { ascending: true });
+        .order('scheduled_start_time', { ascending: true });
 
       if (error) throw error;
-      return data as ServiceBooking[];
+      return mapServiceBookingRows(data ?? []);
     },
     enabled: !!productId && !!date,
   });
@@ -185,7 +209,10 @@ export const useCreateBooking = () => {
       if (error) throw error;
 
       // 🆕 Envoyer les notifications et planifier les rappels
-      if (result && data.booking_date && data.booking_time) {
+      const bookingDate = data.scheduled_date ?? data.booking_date;
+      const bookingTime = data.scheduled_start_time ?? data.booking_time;
+
+      if (result && bookingDate && bookingTime) {
         try {
           // Récupérer les infos du produit et du client
           const [productResult, customerResult] = await Promise.all([
@@ -214,19 +241,14 @@ export const useCreateBooking = () => {
                 customer_name: customer.name || 'Client',
                 customer_email: customer.email || '',
                 customer_phone: customer.phone || undefined,
-                booking_date: data.booking_date,
-                booking_time: data.booking_time,
+                booking_date: bookingDate,
+                booking_time: bookingTime,
               },
               'confirmation'
             );
 
             // Planifier les rappels automatiques
-            await scheduleBookingReminders(
-              result.id,
-              data.booking_date,
-              data.booking_time,
-              preferences
-            );
+            await scheduleBookingReminders(result.id, bookingDate, bookingTime, preferences);
           }
         } catch (notificationError) {
           // Ne pas faire échouer la création si les notifications échouent
@@ -488,10 +510,10 @@ export const useUpcomingBookings = (productId?: string) => {
           staff:service_staff_members(${BOOKING_STAFF_FIELDS})
         `
         )
-        .gte('booking_date', today)
+        .gte('scheduled_date', today)
         .in('status', ['pending', 'confirmed'])
-        .order('booking_date', { ascending: true })
-        .order('booking_time', { ascending: true })
+        .order('scheduled_date', { ascending: true })
+        .order('scheduled_start_time', { ascending: true })
         .limit(10);
 
       if (productId) {
@@ -501,10 +523,24 @@ export const useUpcomingBookings = (productId?: string) => {
       const { data, error } = await query;
 
       if (error) throw error;
-      return data as ServiceBooking[];
+      return mapServiceBookingRows(data ?? []);
     },
   });
 };
+
+function resolveBookingRevenue(
+  booking: {
+    id: string;
+    amount_paid?: number | null;
+    product?: { price?: number | null } | null;
+  },
+  orderRevenueByBooking: Record<string, number>
+): number {
+  const fromOrder = orderRevenueByBooking[booking.id];
+  if (fromOrder != null) return fromOrder;
+  if (booking.amount_paid != null) return Number(booking.amount_paid);
+  return Number(booking.product?.price ?? 0);
+}
 
 /**
  * Get booking statistics
@@ -515,30 +551,56 @@ export const useBookingStats = (productId: string, startDate?: string, endDate?:
     queryFn: async () => {
       let query = supabase
         .from('service_bookings')
-        .select('status, total_price')
+        .select(
+          `
+          id,
+          status,
+          scheduled_date,
+          amount_paid,
+          product:products(price)
+        `
+        )
         .eq('product_id', productId);
 
       if (startDate) {
-        query = query.gte('booking_date', startDate);
+        query = query.gte('scheduled_date', startDate);
       }
       if (endDate) {
-        query = query.lte('booking_date', endDate);
+        query = query.lte('scheduled_date', endDate);
       }
 
       const { data, error } = await query;
 
       if (error) throw error;
 
+      const bookings = data ?? [];
+      const completedIds = bookings.filter(b => b.status === 'completed').map(b => b.id);
+      const orderRevenueByBooking: Record<string, number> = {};
+
+      if (completedIds.length > 0) {
+        const { data: orderItems } = await supabase
+          .from('order_items')
+          .select('booking_id, total_price, orders!inner(payment_status)')
+          .in('booking_id', completedIds)
+          .eq('orders.payment_status', 'paid');
+
+        for (const item of orderItems ?? []) {
+          if (item.booking_id && item.total_price != null) {
+            orderRevenueByBooking[item.booking_id] = Number(item.total_price);
+          }
+        }
+      }
+
       const stats = {
-        total: data.length,
-        pending: data.filter(b => b.status === 'pending').length,
-        confirmed: data.filter(b => b.status === 'confirmed').length,
-        completed: data.filter(b => b.status === 'completed').length,
-        cancelled: data.filter(b => b.status === 'cancelled').length,
-        noShow: data.filter(b => b.status === 'no_show').length,
-        revenue: data
+        total: bookings.length,
+        pending: bookings.filter(b => b.status === 'pending').length,
+        confirmed: bookings.filter(b => b.status === 'confirmed').length,
+        completed: bookings.filter(b => b.status === 'completed').length,
+        cancelled: bookings.filter(b => b.status === 'cancelled').length,
+        noShow: bookings.filter(b => b.status === 'no_show').length,
+        revenue: bookings
           .filter(b => b.status === 'completed')
-          .reduce((sum, b) => sum + (b.total_price || 0), 0),
+          .reduce((sum, b) => sum + resolveBookingRevenue(b, orderRevenueByBooking), 0),
       };
 
       return stats;

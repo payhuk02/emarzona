@@ -1,7 +1,7 @@
 /**
  * Service Product Analytics Dashboard
  * Date: 28 octobre 2025
- * 
+ *
  * Dashboard analytics professionnel pour services
  */
 
@@ -23,15 +23,14 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useMemo } from 'react';
 
-const SERVICE_BOOKING_FIELDS = 'id, product_id, status, booking_date, booking_time, total_price, participants_count';
+const UPCOMING_BOOKING_FIELDS =
+  'id, product_id, status, scheduled_date, scheduled_start_time, amount_paid, participants_count, product:products(price)';
 
 interface ServiceAnalyticsDashboardProps {
   serviceId: string;
 }
 
-const ServiceAnalyticsDashboard = ({
-  serviceId,
-}: ServiceAnalyticsDashboardProps) => {
+const ServiceAnalyticsDashboard = ({ serviceId }: ServiceAnalyticsDashboardProps) => {
   // Get booking stats for the last 30 days
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -53,11 +52,12 @@ const ServiceAnalyticsDashboard = ({
     queryFn: async () => {
       const { data, error } = await supabase
         .from('service_bookings')
-        .select(SERVICE_BOOKING_FIELDS)
+        .select(UPCOMING_BOOKING_FIELDS)
         .eq('product_id', serviceId)
         .eq('status', 'confirmed')
-        .gte('booking_date', today)
-        .order('booking_date', { ascending: true })
+        .gte('scheduled_date', today)
+        .order('scheduled_date', { ascending: true })
+        .order('scheduled_start_time', { ascending: true })
         .limit(100);
 
       if (error) throw error;
@@ -107,15 +107,16 @@ const ServiceAnalyticsDashboard = ({
     const completedBookingsPrices = bookings
       .filter(b => b.status === 'completed' && b.total_price)
       .map(b => b.total_price || 0);
-    const averageBookingValue = completedBookingsPrices.length > 0
-      ? completedBookingsPrices.reduce((sum, price) => sum + price, 0) / completedBookingsPrices.length
-      : 0;
+    const averageBookingValue =
+      completedBookingsPrices.length > 0
+        ? completedBookingsPrices.reduce((sum, price) => sum + price, 0) /
+          completedBookingsPrices.length
+        : 0;
 
     // Calculate occupancy rate (completed / total available slots)
     // This is a simplified calculation - could be enhanced with actual availability data
-    const occupancyRate = bookings.length > 0
-      ? Math.round((stats.completed / bookings.length) * 100)
-      : 0;
+    const occupancyRate =
+      bookings.length > 0 ? Math.round((stats.completed / bookings.length) * 100) : 0;
 
     return {
       totalBookings: stats.total,
@@ -135,7 +136,7 @@ const ServiceAnalyticsDashboard = ({
     return (
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map((i) => (
+          {[1, 2, 3, 4].map(i => (
             <Card key={i}>
               <CardHeader className="space-y-0 pb-2">
                 <Skeleton className="h-4 w-24 mb-2" />
@@ -162,9 +163,7 @@ const ServiceAnalyticsDashboard = ({
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalBookings}</div>
-            <p className="text-xs text-muted-foreground">
-              {stats.completedBookings} complétées
-            </p>
+            <p className="text-xs text-muted-foreground">{stats.completedBookings} complétées</p>
           </CardContent>
         </Card>
 
@@ -174,7 +173,9 @@ const ServiceAnalyticsDashboard = ({
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{Math.round(stats.revenue).toLocaleString()} XOF</div>
+            <div className="text-2xl font-bold">
+              {Math.round(stats.revenue).toLocaleString()} XOF
+            </div>
             <p className="text-xs text-muted-foreground">
               Moyenne: {Math.round(stats.averageBookingValue).toLocaleString()} XOF
             </p>
@@ -200,7 +201,9 @@ const ServiceAnalyticsDashboard = ({
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.averageRating > 0 ? stats.averageRating.toFixed(1) : 'N/A'}/5</div>
+            <div className="text-2xl font-bold">
+              {stats.averageRating > 0 ? stats.averageRating.toFixed(1) : 'N/A'}/5
+            </div>
             <p className="text-xs text-muted-foreground">
               {stats.averageRating > 0 ? 'Basé sur les avis clients' : 'Aucun avis pour le moment'}
             </p>
@@ -223,7 +226,7 @@ const ServiceAnalyticsDashboard = ({
               </div>
               <span className="text-sm font-bold">{stats.completedBookings}</span>
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <XCircle className="h-4 w-4 text-red-600" />
@@ -233,9 +236,10 @@ const ServiceAnalyticsDashboard = ({
                 <span className="text-sm font-bold">{stats.canceledBookings}</span>
                 {stats.canceledBookings > 0 && (
                   <Badge variant="destructive" className="text-xs">
-                    {stats.totalBookings > 0 
-                      ? Math.round((stats.canceledBookings / stats.totalBookings) * 100) 
-                      : 0}%
+                    {stats.totalBookings > 0
+                      ? Math.round((stats.canceledBookings / stats.totalBookings) * 100)
+                      : 0}
+                    %
                   </Badge>
                 )}
               </div>
@@ -256,14 +260,17 @@ const ServiceAnalyticsDashboard = ({
       <Card>
         <CardHeader>
           <CardTitle>Analytics Avancés</CardTitle>
-          <CardDescription>Graphiques et statistiques détaillées (en développement)</CardDescription>
+          <CardDescription>
+            Graphiques et statistiques détaillées (en développement)
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <BarChart3 className="h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">Fonctionnalité en cours de développement</h3>
             <p className="text-sm text-muted-foreground max-w-md">
-              Les graphiques de réservations, tendances de disponibilité et analytics détaillés seront bientôt disponibles.
+              Les graphiques de réservations, tendances de disponibilité et analytics détaillés
+              seront bientôt disponibles.
             </p>
           </div>
         </CardContent>
@@ -273,9 +280,3 @@ const ServiceAnalyticsDashboard = ({
 };
 
 export default ServiceAnalyticsDashboard;
-
-
-
-
-
-
