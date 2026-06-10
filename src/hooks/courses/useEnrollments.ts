@@ -7,6 +7,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { EnrollmentStatus } from '@/components/courses/EnrollmentInfoDisplay';
+import { enrollUserInCourse } from '@/lib/courses/enroll-user';
 
 const ENROLLMENT_FIELDS =
   'id, course_id, product_id, user_id, order_id, status, enrollment_date, completion_date, progress_percentage, completed_lessons, total_lessons, last_accessed_at, last_accessed_lesson_id, total_watch_time_minutes, certificate_earned, certificate_url, certificate_issued_at, created_at, updated_at';
@@ -279,29 +280,25 @@ export const useEnrollments = () => {
 
   const createEnrollmentMutation = useMutation({
     mutationFn: async (enrollmentData: EnrollmentCreateData) => {
-      const { data: lessons } = await supabase
-        .from('course_lessons')
-        .select('id')
-        .eq('course_id', enrollmentData.course_id);
+      const enrollmentId = await enrollUserInCourse({
+        courseId: enrollmentData.course_id,
+        orderId: enrollmentData.order_id ?? null,
+        userId: enrollmentData.student_id,
+      });
 
-      const { data, error: insertError } = await supabase
+      const { data, error: fetchError } = await supabase
         .from('course_enrollments')
-        .insert({
-          course_id: enrollmentData.course_id,
-          product_id: enrollmentData.product_id,
-          user_id: enrollmentData.student_id,
-          order_id: enrollmentData.order_id,
-          status: 'active',
-          progress_percentage: 0,
-          completed_lessons: 0,
-          total_lessons: lessons?.length ?? 0,
-          total_watch_time_minutes: 0,
-          certificate_earned: false,
-        })
-        .select()
+        .select(
+          `
+          ${ENROLLMENT_FIELDS},
+          course:courses!inner(name, total_lessons),
+          order:orders(total_amount, payment_status)
+        `
+        )
+        .eq('id', enrollmentId)
         .single();
 
-      if (insertError) throw insertError;
+      if (fetchError) throw fetchError;
       return mapEnrollmentRow(data as CourseEnrollmentRow);
     },
     onSuccess: () => {

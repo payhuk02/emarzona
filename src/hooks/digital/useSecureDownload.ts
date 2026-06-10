@@ -1,9 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { redeemDownloadToken } from '@/lib/digital/redeem-download';
+import { normalizeFileStorageRef } from '@/lib/digital/storage-ref';
 
-const DOWNLOAD_TOKEN_FIELDS = 'id, product_id, customer_id, license_id, version_id, token, file_url, file_name, file_size_mb, ip_address, max_downloads, current_downloads, expires_at, is_used, is_revoked, created_at, last_used_at';
-const DOWNLOAD_LOG_FIELDS = 'id, token_id, product_id, customer_id, ip_address, user_agent, bytes_downloaded, download_completed, download_duration_seconds, error_message, created_at';
+const DOWNLOAD_TOKEN_FIELDS =
+  'id, product_id, customer_id, license_id, version_id, token, file_url, file_name, file_size_mb, ip_address, max_downloads, current_downloads, expires_at, is_used, is_revoked, created_at, last_used_at';
+const DOWNLOAD_LOG_FIELDS =
+  'id, token_id, product_id, customer_id, ip_address, user_agent, bytes_downloaded, download_completed, download_duration_seconds, error_message, created_at';
 
 // ============================================================================
 // TYPES
@@ -86,7 +90,7 @@ export function useGenerateDownloadToken() {
     mutationFn: async (input: GenerateTokenInput) => {
       const { data, error } = await supabase.rpc('generate_download_token', {
         p_product_id: input.product_id,
-        p_file_url: input.file_url,
+        p_file_url: normalizeFileStorageRef(input.file_url),
         p_customer_id: input.customer_id || null,
         p_license_id: input.license_id || null,
         p_expires_hours: input.expires_hours || 1,
@@ -96,41 +100,51 @@ export function useGenerateDownloadToken() {
       return data as string; // Returns the token
     },
     onSuccess: (token, variables) => {
-      queryClient.invalidateQueries({ queryKey: downloadKeys.tokensByProduct(variables.product_id) });
-      
+      queryClient.invalidateQueries({
+        queryKey: downloadKeys.tokensByProduct(variables.product_id),
+      });
+
       toast({
         title: '🔐 Token généré !',
         description: 'Le lien de téléchargement sécurisé a été créé.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         variant: 'destructive',
         title: '❌ Erreur',
-        description: error.message || 'Impossible de générer le token.',
+        description: error instanceof Error ? error.message : 'Impossible de générer le token.',
       });
     },
   });
 }
 
 /**
- * Validate a download token
+ * Redeem a download token (consumes one download slot — do not poll).
  */
 export function useValidateDownloadToken(token: string | null) {
   return useQuery({
-    queryKey: [...downloadKeys.tokens(), 'validate', token],
+    queryKey: [...downloadKeys.tokens(), 'redeem', token],
     queryFn: async () => {
       if (!token) return null;
 
-      const { data, error } = await supabase.rpc('validate_download_token', {
-        p_token: token,
-      });
+      const result = await redeemDownloadToken(token);
+      if (!result.ok) {
+        return {
+          valid: false,
+          error: result.error.error,
+        } satisfies ValidateTokenResponse;
+      }
 
-      if (error) throw error;
-      return data as ValidateTokenResponse;
+      return {
+        valid: true,
+        file_url: result.data.signedUrl,
+        token_id: undefined,
+      } satisfies ValidateTokenResponse;
     },
     enabled: !!token,
-    staleTime: 0, // Always revalidate
+    staleTime: Infinity,
+    retry: false,
   });
 }
 
@@ -213,17 +227,17 @@ export function useRevokeDownloadToken() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: downloadKeys.tokens() });
-      
+
       toast({
         title: '✅ Token révoqué !',
         description: 'Le lien de téléchargement a été désactivé.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         variant: 'destructive',
         title: '❌ Erreur',
-        description: error.message || 'Impossible de révoquer le token.',
+        description: error instanceof Error ? error.message : 'Impossible de révoquer le token.',
       });
     },
   });
@@ -237,18 +251,20 @@ export function useLogDownload() {
 
   return useMutation({
     mutationFn: async (log: Partial<DownloadLog>) => {
-      const { error } = await supabase
-        .from('download_logs')
-        .insert([log]);
+      const { error } = await supabase.from('download_logs').insert([log]);
 
       if (error) throw error;
     },
     onSuccess: (_, variables) => {
       if (variables.product_id) {
-        queryClient.invalidateQueries({ queryKey: downloadKeys.logsByProduct(variables.product_id) });
+        queryClient.invalidateQueries({
+          queryKey: downloadKeys.logsByProduct(variables.product_id),
+        });
       }
       if (variables.customer_id) {
-        queryClient.invalidateQueries({ queryKey: downloadKeys.logsByCustomer(variables.customer_id) });
+        queryClient.invalidateQueries({
+          queryKey: downloadKeys.logsByCustomer(variables.customer_id),
+        });
       }
     },
   });
@@ -275,7 +291,8 @@ export function useDownloadAnalytics(productId: string) {
       const completedDownloads = logs.filter(log => log.download_completed).length;
       const failedDownloads = totalDownloads - completedDownloads;
       const totalBytes = logs.reduce((sum, log) => sum + (log.bytes_downloaded || 0), 0);
-      const averageDuration = logs.filter(log => log.download_duration_seconds)
+      const averageDuration = logs
+        .filter(log => log.download_duration_seconds)
         .reduce((sum, log, _, arr) => sum + (log.download_duration_seconds || 0) / arr.length, 0);
 
       // Last 7 days activity
@@ -307,11 +324,11 @@ export function useCreateSecureDownloadLink() {
   return useMutation({
     mutationFn: async (input: GenerateTokenInput) => {
       const token = await generateToken(input);
-      
+
       // Construct the download URL
       const baseUrl = window.location.origin;
       const downloadUrl = `${baseUrl}/download/${token}`;
-      
+
       return {
         token,
         downloadUrl,
@@ -320,10 +337,3 @@ export function useCreateSecureDownloadLink() {
     },
   });
 }
-
-
-
-
-
-
-

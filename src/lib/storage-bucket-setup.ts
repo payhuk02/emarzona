@@ -19,7 +19,7 @@ export async function createProductsBucketIfNeeded(): Promise<{
   try {
     // Vérifier d'abord si le bucket existe
     const { data: buckets, error: listError } = await supabase.storage.listBuckets();
-    
+
     if (listError) {
       logger.error('Error listing buckets', { error: listError });
       return {
@@ -29,9 +29,7 @@ export async function createProductsBucketIfNeeded(): Promise<{
       };
     }
 
-    const productsBucket = buckets?.find(
-      (b) => b.id === 'products' || b.name === 'products'
-    );
+    const productsBucket = buckets?.find(b => b.id === 'products' || b.name === 'products');
 
     if (productsBucket) {
       logger.info('Products bucket already exists', { bucket: productsBucket });
@@ -45,27 +43,30 @@ export async function createProductsBucketIfNeeded(): Promise<{
     // Tenter de créer le bucket (nécessite des permissions élevées)
     // Note: Cette méthode peut ne pas fonctionner avec les clés publiques
     // Dans ce cas, utilisez la migration SQL
-    const { data: newBucket, error: createError } = await supabase.storage.createBucket('products', {
-      public: true,
-      fileSizeLimit: 524288000, // 500 MB
-      allowedMimeTypes: [
-        'image/jpeg',
-        'image/jpg',
-        'image/png',
-        'image/webp',
-        'image/gif',
-        'image/svg+xml',
-        'application/pdf',
-        'application/zip',
-        'application/x-zip-compressed',
-        'audio/mpeg',
-        'audio/mp3',
-        'video/mp4',
-        'video/webm',
-        'application/epub+zip',
-        'text/plain',
-      ],
-    });
+    const { data: newBucket, error: createError } = await supabase.storage.createBucket(
+      'products',
+      {
+        public: false,
+        fileSizeLimit: 524288000, // 500 MB
+        allowedMimeTypes: [
+          'image/jpeg',
+          'image/jpg',
+          'image/png',
+          'image/webp',
+          'image/gif',
+          'image/svg+xml',
+          'application/pdf',
+          'application/zip',
+          'application/x-zip-compressed',
+          'audio/mpeg',
+          'audio/mp3',
+          'video/mp4',
+          'video/webm',
+          'application/epub+zip',
+          'text/plain',
+        ],
+      }
+    );
 
     if (createError) {
       logger.error('Error creating bucket', { error: createError });
@@ -92,10 +93,3 @@ export async function createProductsBucketIfNeeded(): Promise<{
     };
   }
 }
-
-
-
-
-
-
-

@@ -1,7 +1,7 @@
 /**
  * Download Protection & Security Utils
  * Date: 27 octobre 2025
- * 
+ *
  * Utilitaires de sécurité pour téléchargements
  */
 
@@ -66,10 +66,7 @@ export const checkDownloadRateLimit = async (
 /**
  * Verify file integrity using hash
  */
-export const verifyFileIntegrity = async (
-  file: File,
-  expectedHash: string
-): Promise<boolean> => {
+export const verifyFileIntegrity = async (file: File, expectedHash: string): Promise<boolean> => {
   try {
     const buffer = await file.arrayBuffer();
     const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
@@ -148,14 +145,15 @@ interface SignedUrlOptions {
 }
 
 /**
- * Generate secure signed URL for download
+ * @deprecated Use `useGenerateDownloadLink` (token + /download/:token) for buyer downloads.
+ * Vendor-only signed URLs may still work for store owners on the private `products` bucket.
  */
 export const generateSecureDownloadUrl = async (
   filePath: string,
   options: SignedUrlOptions = {}
 ): Promise<{ url: string; expiresAt: Date } | null> => {
   try {
-    const { expiresIn = 3600 } = options; // 1 hour default
+    const { expiresIn = 3600 } = options;
 
     const { data, error } = await supabase.storage
       .from('products')
@@ -185,7 +183,7 @@ export const getUserIP = async (): Promise<string> => {
     const response = await fetch('https://api.ipify.org?format=json');
     const data = await response.json();
     return data.ip;
-  } catch (error) {
+  } catch (_error) {
     return 'unknown';
   }
 };
@@ -193,9 +191,7 @@ export const getUserIP = async (): Promise<string> => {
 /**
  * Check if IP is suspicious (too many downloads from different IPs)
  */
-export const checkSuspiciousIPActivity = async (
-  userId: string
-): Promise<boolean> => {
+export const checkSuspiciousIPActivity = async (userId: string): Promise<boolean> => {
   try {
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
@@ -237,9 +233,7 @@ interface DownloadTrackingData {
 /**
  * Track download attempt
  */
-export const trackDownloadAttempt = async (
-  data: DownloadTrackingData
-): Promise<void> => {
+export const trackDownloadAttempt = async (data: DownloadTrackingData): Promise<void> => {
   try {
     await supabase.from('digital_product_downloads').insert({
       digital_product_id: data.digitalProductId,
@@ -266,9 +260,7 @@ export const trackDownloadAttempt = async (
 /**
  * Check for concurrent downloads
  */
-export const checkConcurrentDownloads = async (
-  userId: string
-): Promise<boolean> => {
+export const checkConcurrentDownloads = async (userId: string): Promise<boolean> => {
   try {
     const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
 
@@ -304,10 +296,3 @@ export const DownloadProtection = {
   trackDownload: trackDownloadAttempt,
   checkConcurrentDownloads,
 };
-
-
-
-
-
-
-

@@ -1,13 +1,16 @@
 /**
  * Digital Downloads Hooks - Professional
  * Date: 27 octobre 2025
+ *
+ * E11: Paid files are served via download tokens + /download/:token redemption
+ * (private `products` bucket — no direct signed URLs from the client).
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
-import { PAID_REVENUE_ELIGIBLE_STATUSES } from '@/lib/orders/order-status';
+import { normalizeFileStorageRef } from '@/lib/digital/storage-ref';
 
 const DIGITAL_DOWNLOAD_FIELDS =
   'id, digital_product_id, file_id, user_id, download_date, download_ip, download_country, user_agent, download_duration_seconds, download_success, license_key, file_version, created_at';
@@ -32,6 +35,21 @@ export interface DigitalDownload {
   created_at: string;
 }
 
+interface DigitalFileForDownload {
+  id: string;
+  name: string;
+  file_url: string;
+  file_size_mb?: number | null;
+  digital_product: {
+    id: string;
+    product_id: string;
+    product: {
+      id: string;
+      store_id: string;
+    } | null;
+  } | null;
+}
+
 // =====================================================
 // QUERY KEYS
 // =====================================================
@@ -43,6 +61,39 @@ export const downloadKeys = {
   userDownloads: (userId: string) => [...downloadKeys.all, 'user', userId] as const,
   productDownloads: (productId: string) => [...downloadKeys.all, 'product', productId] as const,
 };
+
+// =====================================================
+// HELPERS
+// =====================================================
+
+function mapDownloadTokenError(message: string): string {
+  if (message.includes('DOWNLOAD_ACCESS_DENIED') || message.includes('CUSTOMER_ACCESS_DENIED')) {
+    return "Accès non autorisé. Veuillez d'abord acheter ce produit.";
+  }
+  if (message.includes('PRODUCT_NOT_FOUND')) {
+    return 'Fichier introuvable.';
+  }
+  if (message.includes('UNAUTHORIZED')) {
+    return 'Vous devez être connecté pour télécharger ce fichier.';
+  }
+  return message;
+}
+
+async function resolveStoreCustomerId(storeId: string, email: string): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('customers')
+    .select('id')
+    .eq('store_id', storeId)
+    .eq('email', email)
+    .maybeSingle();
+
+  if (error) {
+    logger.error('Error resolving store customer for download', { error, storeId });
+    return null;
+  }
+
+  return data?.id ?? null;
+}
 
 // =====================================================
 // HOOKS - QUERIES
@@ -126,14 +177,13 @@ export const useDownloadAnalytics = (
 
       if (error) throw error;
 
-      // Calculate analytics
       const totalDownloads = data.length;
       const successfulDownloads = data.filter(d => d.download_success).length;
       const uniqueUsers = new Set(data.map(d => d.user_id)).size;
       const averageDuration =
-        data.reduce((sum, d) => sum + (d.download_duration_seconds || 0), 0) / totalDownloads;
+        data.reduce((sum, d) => sum + (d.download_duration_seconds || 0), 0) /
+        (totalDownloads || 1);
 
-      // Downloads by day
       const downloadsByDay = data.reduce(
         (acc, d) => {
           const date = new Date(d.download_date).toISOString().split('T')[0];
@@ -143,7 +193,6 @@ export const useDownloadAnalytics = (
         {} as Record<string, number>
       );
 
-      // Downloads by country
       const downloadsByCountry = data.reduce(
         (acc, d) => {
           const country = d.download_country || 'Unknown';
@@ -193,7 +242,6 @@ export const useTrackDownload = () => {
       } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      // Get user IP and location (simplified)
       const userAgent = navigator.userAgent;
 
       const { data: result, error } = await supabase
@@ -213,9 +261,7 @@ export const useTrackDownload = () => {
 
       if (error) throw error;
 
-      // Déclencher webhook pour téléchargement (en arrière-plan) - Système unifié
       if (result) {
-        // Récupérer le store_id depuis le produit digital
         supabase
           .from('digital_products')
           .select('product:products(store_id)')
@@ -233,7 +279,7 @@ export const useTrackDownload = () => {
                       product_id: data.digitalProductId,
                       customer_id: user.id,
                       license_key: data.licenseKey,
-                      download_url: result.download_url || '',
+                      download_url: '',
                       file_id: data.fileId,
                       file_version: data.fileVersion,
                     },
@@ -266,12 +312,11 @@ export const useTrackDownload = () => {
 };
 
 /**
- * Create secure download link with retry logic and enhanced error handling
+ * Mint a secure download token and return the redemption page URL (/download/:token).
  */
 export const useGenerateDownloadLink = () => {
   const { toast } = useToast();
 
-  // Retry function with exponential backoff
   const retryWithBackoff = async <T>(
     fn: () => Promise<T>,
     maxRetries: number = 3,
@@ -285,25 +330,17 @@ export const useGenerateDownloadLink = () => {
       } catch (_error: unknown) {
         lastError = _error instanceof Error ? _error : new Error(String(_error));
 
-        // Ne pas réessayer pour les erreurs d'authentification ou d'autorisation
         if (
           lastError.message?.includes('non autorisé') ||
           lastError.message?.includes('Not authenticated') ||
-          lastError.message?.includes('Accès non autorisé')
+          lastError.message?.includes('Accès non autorisé') ||
+          lastError.message?.includes('DOWNLOAD_ACCESS_DENIED')
         ) {
           throw lastError;
         }
 
-        // Calculer le délai avec backoff exponentiel
         const delay = baseDelay * Math.pow(2, attempt);
-
         if (attempt < maxRetries - 1) {
-          logger.debug(`Retrying download link generation (attempt ${attempt + 1}/${maxRetries})`, {
-            delay,
-            error: lastError.message,
-          });
-
-          // Attendre avant de réessayer
           await new Promise(resolve => setTimeout(resolve, delay));
         }
       }
@@ -313,193 +350,100 @@ export const useGenerateDownloadLink = () => {
   };
 
   return useMutation({
-    mutationFn: async (params: {
-      fileId: string;
-      expiresIn?: number; // seconds, default 3600 (1h)
-    }) => {
+    mutationFn: async (params: { fileId: string; expiresIn?: number; licenseId?: string }) => {
       return await retryWithBackoff(async () => {
         const {
           data: { user },
         } = await supabase.auth.getUser();
-        if (!user) throw new Error('Not authenticated');
+        if (!user?.email) throw new Error('Not authenticated');
 
-        // Get file info with retry
         const { data: file, error: fileError } = await supabase
           .from('digital_product_files')
-          .select('*, digital_product:digital_products (*)')
+          .select(
+            `
+            id,
+            name,
+            file_url,
+            file_size_mb,
+            digital_product:digital_products (
+              id,
+              product_id,
+              product:products (
+                id,
+                store_id
+              )
+            )
+          `
+          )
           .eq('id', params.fileId)
           .single();
 
-        if (fileError) {
+        if (fileError || !file) {
           logger.error('Error fetching file info', { error: fileError, fileId: params.fileId });
-          throw new Error(`Erreur lors de la récupération du fichier: ${fileError.message}`);
+          throw new Error(`Erreur lors de la récupération du fichier: ${fileError?.message}`);
         }
 
-        // ⚠️ CRITIQUE: Vérifier explicitement l'accès avec paiement confirmé
-        // Vérification par email
-        const { data: hasAccessByEmail, error: accessErrorByEmail } = await supabase
-          .from('order_items')
-          .select(
-            `
-          id,
-          orders!inner (
-            id,
-            payment_status,
-            status,
-            customers!inner (
-              id,
-              email
-            )
-          )
-        `
-          )
-          .eq('product_id', file.digital_product.product_id)
-          .eq('orders.payment_status', 'paid')
-          .in('orders.status', [...PAID_REVENUE_ELIGIBLE_STATUSES])
-          .eq('orders.customers.email', user.email)
-          .limit(1);
+        const typedFile = file as DigitalFileForDownload;
+        const productId = typedFile.digital_product?.product_id;
+        const storeId = typedFile.digital_product?.product?.store_id;
 
-        // Vérification alternative par customer_id pour plus de sécurité
-        let hasAccessByCustomer = null;
-        const { data: customer } = await supabase
-          .from('customers')
-          .select('id')
-          .eq('email', user.email)
-          .limit(1);
-
-        if (customer && customer.length > 0) {
-          const { data: hasAccessByCustomerId } = await supabase
-            .from('order_items')
-            .select(
-              `
-            id,
-            orders!inner (
-              id,
-              payment_status,
-              status,
-              customer_id
-            )
-          `
-            )
-            .eq('product_id', file.digital_product.product_id)
-            .eq('orders.payment_status', 'paid') // ⚠️ CRITIQUE: Paiement confirmé
-            .in('orders.status', [...PAID_REVENUE_ELIGIBLE_STATUSES])
-            .eq('orders.customer_id', customer[0].id)
-            .limit(1);
-
-          hasAccessByCustomer = hasAccessByCustomerId;
+        if (!productId || !storeId) {
+          throw new Error('Produit digital invalide');
         }
 
-        // Utiliser les résultats de l'une ou l'autre vérification
-        const hasAccess = hasAccessByEmail || hasAccessByCustomer;
-        const accessError = accessErrorByEmail;
-
-        if (accessError) {
-          logger.error('Error checking download access in useGenerateDownloadLink', {
-            error: accessError,
-            fileId: params.fileId,
-            userId: user.id,
-          });
-          throw new Error("Erreur lors de la vérification d'accès");
-        }
-
-        if (!hasAccess || hasAccess.length === 0) {
-          logger.warn('User attempted download without paid access', {
-            fileId: params.fileId,
-            userId: user.id,
-            userEmail: user.email,
-          });
+        const customerId = await resolveStoreCustomerId(storeId, user.email);
+        if (!customerId) {
           throw new Error("Accès non autorisé. Veuillez d'abord acheter ce produit.");
         }
 
-        // Vérification supplémentaire: s'assurer que le paiement est bien confirmé
-        const orderItem = hasAccess[0];
-        const paymentStatus = orderItem?.orders?.payment_status;
-        const orderStatus = orderItem?.orders?.status;
+        const expiresHours = Math.max(1, Math.ceil((params.expiresIn ?? 3600) / 3600));
+        const canonicalFileRef = normalizeFileStorageRef(typedFile.file_url);
 
-        if (paymentStatus !== 'paid' || orderStatus !== 'completed') {
-          logger.warn('User attempted download with unconfirmed payment', {
+        const { data: token, error: tokenError } = await supabase.rpc('generate_download_token', {
+          p_product_id: productId,
+          p_file_url: canonicalFileRef,
+          p_customer_id: customerId,
+          p_license_id: params.licenseId ?? null,
+          p_expires_hours: expiresHours,
+        });
+
+        if (tokenError || !token) {
+          const message = mapDownloadTokenError(tokenError?.message || 'Token generation failed');
+          logger.warn('Download token generation failed', {
             fileId: params.fileId,
             userId: user.id,
-            paymentStatus,
-            orderStatus,
+            error: tokenError?.message,
           });
-          throw new Error("Le paiement n'a pas été confirmé. Veuillez réessayer plus tard.");
+          throw new Error(message);
         }
 
-        // Generate signed URL with retry
-        let signedUrl = null;
-        let signError = null;
-        let attempts = 0;
-        const maxSignRetries = 3;
+        const downloadPageUrl = `${window.location.origin}/download/${token}`;
 
-        while (attempts < maxSignRetries && !signedUrl) {
-          const { data, error } = await supabase.storage
-            .from('products')
-            .createSignedUrl(file.file_url, params.expiresIn || 3600);
-
-          if (error) {
-            signError = error;
-            attempts++;
-
-            if (attempts < maxSignRetries) {
-              logger.debug(
-                `Retrying signed URL generation (attempt ${attempts}/${maxSignRetries})`,
-                {
-                  error: error.message,
-                }
-              );
-              await new Promise(resolve => setTimeout(resolve, 1000 * attempts));
-            }
-          } else {
-            signedUrl = data;
-          }
-        }
-
-        if (signError || !signedUrl) {
-          logger.error('Error generating signed URL after retries', {
-            error: signError,
-            fileId: params.fileId,
-            attempts,
-          });
-          throw new Error(
-            signError?.message ||
-              'Impossible de générer le lien de téléchargement. Veuillez réessayer.'
-          );
-        }
-
-        logger.info('Download link generated successfully', {
+        logger.info('Secure download token minted', {
           fileId: params.fileId,
-          fileName: file.name,
-          expiresIn: params.expiresIn || 3600,
+          productId,
+          expiresHours,
         });
 
         return {
-          url: signedUrl.signedUrl,
-          expiresAt: new Date(Date.now() + (params.expiresIn || 3600) * 1000).toISOString(),
-          fileName: file.name,
-          fileSize: file.file_size_mb,
+          url: downloadPageUrl,
+          token: String(token),
+          expiresAt: new Date(Date.now() + expiresHours * 3600 * 1000).toISOString(),
+          fileName: typedFile.name,
+          fileSize: typedFile.file_size_mb,
         };
       });
     },
-    staleTime: 30 * 60 * 1000, // Cache 30 minutes
-    gcTime: 60 * 60 * 1000, // Garder en cache 1 heure
-    retry: 2, // Retry automatique de React Query
-    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
+    retry: 2,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
     onError: (error: Error) => {
-      logger.error('Error generating download link', {
-        error: error.message,
-        stack: error.stack,
-      });
+      logger.error('Error generating download link', { error: error.message });
 
-      // Message d'erreur plus spécifique selon le type d'erreur
       let errorMessage = error.message;
       if (error.message.includes('non autorisé') || error.message.includes('Accès non autorisé')) {
         errorMessage = "Vous n'avez pas accès à ce fichier. Veuillez d'abord acheter ce produit.";
       } else if (error.message.includes('network') || error.message.includes('fetch')) {
         errorMessage = 'Erreur de connexion. Vérifiez votre connexion internet et réessayez.';
-      } else if (error.message.includes('timeout')) {
-        errorMessage = 'Le téléchargement a pris trop de temps. Veuillez réessayer.';
       }
 
       toast({
@@ -508,9 +452,6 @@ export const useGenerateDownloadLink = () => {
         variant: 'destructive',
         duration: 5000,
       });
-    },
-    onSuccess: () => {
-      logger.debug('Download link generated successfully');
     },
   });
 };

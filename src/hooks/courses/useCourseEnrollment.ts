@@ -3,7 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 import type { CourseEnrollment } from '@/types/courses';
-import { notifyCourseEnrollment, notifyLessonComplete, notifyCourseComplete } from '@/lib/notifications/helpers';
+import { notifyCourseEnrollment } from '@/lib/notifications/helpers';
+import { enrollUserInCourse } from '@/lib/courses/enroll-user';
 
 /**
  * Hook pour récupérer l'inscription d'un utilisateur à un cours
@@ -17,20 +18,24 @@ export const useCourseEnrollment = (courseId: string | undefined, userId?: strin
       if (!courseId) return null;
 
       // Récupérer l'utilisateur connecté si userId n'est pas fourni
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       const targetUserId = userId || user?.id;
 
       if (!targetUserId) return null;
 
       const { data, error } = await supabase
         .from('course_enrollments')
-        .select(`
+        .select(
+          `
           *,
           course:courses(
             *,
             product:products(*)
           )
-        `)
+        `
+        )
         .eq('course_id', courseId)
         .eq('user_id', targetUserId)
         .single();
@@ -58,20 +63,24 @@ export const useMyEnrollments = (userId?: string) => {
     queryKey: ['my-enrollments', userId],
     queryFn: async () => {
       // Récupérer l'utilisateur connecté si userId n'est pas fourni
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       const targetUserId = userId || user?.id;
 
       if (!targetUserId) return [];
 
       const { data, error } = await supabase
         .from('course_enrollments')
-        .select(`
+        .select(
+          `
           *,
           course:courses(
             *,
             product:products(*)
           )
-        `)
+        `
+        )
         .eq('user_id', targetUserId)
         .order('created_at', { ascending: false });
 
@@ -89,21 +98,23 @@ export const useCreateEnrollment = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ 
-      courseId, 
-      productId, 
+    mutationFn: async ({
+      courseId,
+      productId,
       orderId,
       courseName,
-      courseSlug
-    }: { 
-      courseId: string; 
-      productId: string; 
+      courseSlug,
+    }: {
+      courseId: string;
+      productId: string;
       orderId?: string;
       courseName?: string;
       courseSlug?: string;
     }) => {
       // Récupérer l'utilisateur connecté
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Utilisateur non connecté');
 
       // Vérifier si l'utilisateur est déjà inscrit
@@ -118,30 +129,20 @@ export const useCreateEnrollment = () => {
         throw new Error('Vous êtes déjà inscrit à ce cours');
       }
 
-      // Récupérer le nombre total de leçons du cours
-      const { data: lessons, error: lessonsError } = await supabase
-        .from('course_lessons')
-        .select('id')
-        .eq('course_id', courseId);
+      const enrollmentId = await enrollUserInCourse({
+        courseId,
+        orderId: orderId ?? null,
+        userId: user.id,
+      });
 
-      if (lessonsError) throw lessonsError;
-
-      // Créer l'inscription
       const { data, error } = await supabase
         .from('course_enrollments')
-        .insert({
-          course_id: courseId,
-          product_id: productId,
-          user_id: user.id,
-          order_id: orderId,
-          status: 'active',
-          total_lessons: lessons?.length || 0,
-        })
-        .select()
+        .select('*')
+        .eq('id', enrollmentId)
         .single();
 
       if (error) throw error;
-      
+
       // Créer notification d'enrollment
       if (courseName && courseSlug) {
         await notifyCourseEnrollment(user.id, courseName, courseSlug);
@@ -166,15 +167,22 @@ export const useCreateEnrollment = () => {
                 enrolled_at: data.enrollment_date || data.created_at,
               },
               product?.store_id
-            ).catch((err) => {
-              logger.error('Error in analytics tracking for course enrollment', { error: err, enrollmentId: data.id });
+            ).catch(err => {
+              logger.error('Error in analytics tracking for course enrollment', {
+                error: err,
+                enrollmentId: data.id,
+              });
             });
           })
-          .catch((err) => {
-            logger.error('Error in notification for course enrollment', { error: err, courseId, userId: targetUserId });
+          .catch(err => {
+            logger.error('Error in notification for course enrollment', {
+              error: err,
+              courseId,
+              userId: user.id,
+            });
           });
       });
-      
+
       return data as CourseEnrollment;
     },
     onSuccess: (_, variables) => {
@@ -185,10 +193,10 @@ export const useCreateEnrollment = () => {
         description: 'Vous êtes maintenant inscrit à ce cours.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
-        title: 'Erreur d\'inscription',
-        description: error.message,
+        title: "Erreur d'inscription",
+        description: error instanceof Error ? error.message : 'Erreur inconnue',
         variant: 'destructive',
       });
     },
@@ -203,11 +211,11 @@ export const useUpdateEnrollment = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ 
-      enrollmentId, 
-      updates 
-    }: { 
-      enrollmentId: string; 
+    mutationFn: async ({
+      enrollmentId,
+      updates,
+    }: {
+      enrollmentId: string;
       updates: Partial<CourseEnrollment>;
     }) => {
       const { data, error } = await supabase
@@ -220,14 +228,14 @@ export const useUpdateEnrollment = () => {
       if (error) throw error;
       return data as CourseEnrollment;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['course-enrollment', data.course_id] });
       queryClient.invalidateQueries({ queryKey: ['my-enrollments'] });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: 'Erreur',
-        description: error.message,
+        description: error instanceof Error ? error.message : 'Erreur inconnue',
         variant: 'destructive',
       });
     },
@@ -240,7 +248,7 @@ export const useUpdateEnrollment = () => {
  */
 export const useIsEnrolled = (courseId: string | undefined) => {
   const { data: enrollment, isLoading } = useCourseEnrollment(courseId);
-  
+
   return {
     isEnrolled: !!enrollment && enrollment.status === 'active',
     enrollment,
@@ -260,13 +268,15 @@ export const useCourseEnrollments = (courseId: string | undefined) => {
 
       const { data, error } = await supabase
         .from('course_enrollments')
-        .select(`
+        .select(
+          `
           *,
           user:auth.users(
             id,
             email
           )
-        `)
+        `
+        )
         .eq('course_id', courseId)
         .order('created_at', { ascending: false });
 
@@ -276,10 +286,3 @@ export const useCourseEnrollments = (courseId: string | undefined) => {
     enabled: !!courseId,
   });
 };
-
-
-
-
-
-
-

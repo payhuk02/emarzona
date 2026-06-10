@@ -1,11 +1,11 @@
 /**
  * Public download redemption page — /download/:token
- * Consumes a secure token server-side then triggers the file download.
+ * Consumes token server-side (Edge Function) then triggers file download.
  */
 
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { redeemDownloadToken } from '@/lib/digital/redeem-download';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, Download, AlertTriangle, CheckCircle2 } from 'lucide-react';
@@ -29,54 +29,37 @@ export default function SecureDownloadPage() {
     let cancelled = false;
 
     const redeem = async () => {
-      try {
-        const { data, error } = await supabase.rpc('validate_download_token', {
-          p_token: token,
-        });
+      const result = await redeemDownloadToken(token);
 
-        if (cancelled) return;
+      if (cancelled) return;
 
-        if (error) {
-          setState('error');
-          setErrorMessage(error.message);
-          return;
-        }
-
-        const result = data as {
-          valid?: boolean;
-          error?: string;
-          file_url?: string;
-        };
-
-        if (!result?.valid || !result.file_url) {
-          setState('error');
-          setErrorMessage(result?.error || 'Token invalide ou expiré.');
-          return;
-        }
-
-        const url = result.file_url;
-        setFileUrl(url);
-        const nameFromUrl = url.split('/').pop()?.split('?')[0];
-        if (nameFromUrl) setFileName(decodeURIComponent(nameFromUrl));
-
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = nameFromUrl || 'download';
-        link.target = '_blank';
-        link.rel = 'noopener noreferrer';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        setState('success');
-      } catch (err) {
-        if (cancelled) return;
+      if (!result.ok) {
         setState('error');
-        setErrorMessage(err instanceof Error ? err.message : 'Erreur de téléchargement');
+        setErrorMessage(result.error.error);
+        return;
       }
+
+      const { signedUrl, fileName: resolvedName } = result.data;
+      setFileUrl(signedUrl);
+      setFileName(resolvedName);
+
+      const link = document.createElement('a');
+      link.href = signedUrl;
+      link.download = resolvedName;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      setState('success');
     };
 
-    void redeem();
+    void redeem().catch(err => {
+      if (cancelled) return;
+      setState('error');
+      setErrorMessage(err instanceof Error ? err.message : 'Erreur de téléchargement');
+    });
 
     return () => {
       cancelled = true;
