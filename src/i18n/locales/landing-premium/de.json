@@ -183,11 +183,13 @@
     "title": "Sehr wettbewerbsfähige Tarife,",
     "titleHighlight": "nirgendwo sonst",
     "subtitle": "Ein Modell pro Produkttyp — Abo für physisch, Provision für den Rest.",
+    "physicalGroupLabel": "Abo für physische Produkte",
+    "commissionGroupLabel": "Digital, Services, Kurse & Kunst — ohne Abo",
     "footnote": "Beträge in CFA-Franc (XOF). 10 % Provision nur bei abgeschlossenen Verkäufen für digitale Produkte, Kurse, Services und Kunstwerke.",
     "periodMonth": "/ Monat",
     "periodSale": "pro Verkauf",
     "physicalBasic": {
-      "name": "Physisch — Basic",
+      "name": "Physisch — Starter",
       "badge": "1 Monat kostenlos testen",
       "desc": "Zum Start: physische Produkte verkaufen (Lager + Versand).",
       "features": [
@@ -199,11 +201,11 @@
       "cta": "1 Monat gratis testen"
     },
     "physicalStandard": {
-      "name": "Physisch — Standard",
+      "name": "Physisch — Professional",
       "badge": "Empfohlen",
       "desc": "Für wachsende Shops: mehr Bestellungen, weniger Fehler.",
       "features": [
-        "Alles aus Basic",
+        "Alles aus Starter",
         "Sendungsverfolgung",
         "Retouren (RMA) & Richtlinien",
         "CSV Import/Export Inventar",
@@ -212,17 +214,17 @@
       "cta": "Test starten"
     },
     "physicalPremium": {
-      "name": "Physisch — Premium",
-      "badge": "Fortgeschritten",
+      "name": "Physisch — Enterprise",
+      "badge": "Scale",
       "desc": "Für skalierte Ops: erweiterte Logistik, Optimierung und Automationen.",
       "features": [
-        "Alles aus Standard",
+        "Alles aus Professional",
         "Batch-Versand & Labels",
         "Chargen / Ablauf / FEFO",
         "Multi-Lager & Transfers",
         "Nachfrageprognose"
       ],
-      "cta": "Zu Premium"
+      "cta": "Zu Enterprise"
     },
     "commission": {
       "name": "Digital, Services, Kurse & Kunstwerke",

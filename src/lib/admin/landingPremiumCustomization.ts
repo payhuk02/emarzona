@@ -242,83 +242,93 @@ export const LANDING_PREMIUM_SECTIONS: LandingPremiumSection[] = [
       area('pricing.footnote', 'Note de bas de page', lp.pricing.footnote),
       text('pricing.periodMonth', 'Période — mois', lp.pricing.periodMonth),
       text('pricing.periodSale', 'Période — vente', lp.pricing.periodSale),
-      // Plans physiques (Basic/Standard/Premium)
+      text(
+        'pricing.physicalGroupLabel',
+        'Tarifs — libellé groupe physique',
+        lp.pricing.physicalGroupLabel ?? ''
+      ),
+      text(
+        'pricing.commissionGroupLabel',
+        'Tarifs — libellé commission',
+        lp.pricing.commissionGroupLabel ?? ''
+      ),
+      // Plans physiques (Starter/Professional/Enterprise)
       text(
         'pricing.physicalBasic.name',
-        'Physique Basic — nom',
+        'Physique Starter — nom',
         lp.pricing.physicalBasic?.name ?? ''
       ),
       text(
         'pricing.physicalBasic.badge',
-        'Physique Basic — badge',
+        'Physique Starter — badge',
         lp.pricing.physicalBasic?.badge ?? ''
       ),
       area(
         'pricing.physicalBasic.desc',
-        'Physique Basic — description',
+        'Physique Starter — description',
         lp.pricing.physicalBasic?.desc ?? ''
       ),
       text(
         'pricing.physicalBasic.cta',
-        'Physique Basic — CTA',
+        'Physique Starter — CTA',
         lp.pricing.physicalBasic?.cta ?? ''
       ),
       ...stringListFields(
         'pricing.physicalBasic.features',
         lp.pricing.physicalBasic?.features ?? [],
-        'Physique Basic — fonctionnalité'
+        'Physique Starter — fonctionnalité'
       ),
 
       text(
         'pricing.physicalStandard.name',
-        'Physique Standard — nom',
+        'Physique Professional — nom',
         lp.pricing.physicalStandard?.name ?? ''
       ),
       text(
         'pricing.physicalStandard.badge',
-        'Physique Standard — badge',
+        'Physique Professional — badge',
         lp.pricing.physicalStandard?.badge ?? ''
       ),
       area(
         'pricing.physicalStandard.desc',
-        'Physique Standard — description',
+        'Physique Professional — description',
         lp.pricing.physicalStandard?.desc ?? ''
       ),
       text(
         'pricing.physicalStandard.cta',
-        'Physique Standard — CTA',
+        'Physique Professional — CTA',
         lp.pricing.physicalStandard?.cta ?? ''
       ),
       ...stringListFields(
         'pricing.physicalStandard.features',
         lp.pricing.physicalStandard?.features ?? [],
-        'Physique Standard — fonctionnalité'
+        'Physique Professional — fonctionnalité'
       ),
 
       text(
         'pricing.physicalPremium.name',
-        'Physique Premium — nom',
+        'Physique Enterprise — nom',
         lp.pricing.physicalPremium?.name ?? ''
       ),
       text(
         'pricing.physicalPremium.badge',
-        'Physique Premium — badge',
+        'Physique Enterprise — badge',
         lp.pricing.physicalPremium?.badge ?? ''
       ),
       area(
         'pricing.physicalPremium.desc',
-        'Physique Premium — description',
+        'Physique Enterprise — description',
         lp.pricing.physicalPremium?.desc ?? ''
       ),
       text(
         'pricing.physicalPremium.cta',
-        'Physique Premium — CTA',
+        'Physique Enterprise — CTA',
         lp.pricing.physicalPremium?.cta ?? ''
       ),
       ...stringListFields(
         'pricing.physicalPremium.features',
         lp.pricing.physicalPremium?.features ?? [],
-        'Physique Premium — fonctionnalité'
+        'Physique Enterprise — fonctionnalité'
       ),
 
       // Plan commission (digital/services/cours/œuvres)

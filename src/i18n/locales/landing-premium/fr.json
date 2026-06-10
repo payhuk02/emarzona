@@ -188,46 +188,48 @@
     "title": "Des Tarifs très compétitifs,",
     "titleHighlight": "nulle part ailleurs",
     "subtitle": "Un modèle adapté à chaque type de produit — abonnement pour le physique, commission pour le reste.",
+    "physicalGroupLabel": "Abonnement produits physiques",
+    "commissionGroupLabel": "Digital, services, cours & œuvres — sans abonnement",
     "footnote": "Tous les montants sont en franc CFA (XOF). Commission de 10 % prélevée uniquement sur les ventes abouties pour les produits digitaux, cours, services et œuvres d'artistes.",
     "periodMonth": "/ mois",
     "periodSale": "par vente",
     "physicalBasic": {
-      "name": "Physique — Basic",
+      "name": "Physique — Starter",
       "badge": "1 mois d'essai gratuit",
-      "desc": "Pour démarrer la vente de produits physiques (stock + livraison).",
+      "desc": "Lancement e-commerce physique : stock, variantes et livraison.",
       "features": [
         "Vendre des produits physiques",
         "Gestion stock & variantes",
         "Zones & tarifs de livraison",
         "Essai gratuit 30 jours"
       ],
-      "cta": "Essayer 1 mois gratuit"
+      "cta": "Essayer Starter — 1 mois gratuit"
     },
     "physicalStandard": {
-      "name": "Physique — Standard",
+      "name": "Physique — Professional",
       "badge": "Recommandé",
-      "desc": "Pour les boutiques en croissance avec plus de commandes et moins d'erreurs.",
+      "desc": "Croissance : logistique, fournisseurs et analytics intégrés.",
       "features": [
-        "Tout Basic",
+        "Tout Starter",
         "Tracking expéditions",
         "Retours (RMA) & politiques",
         "Import/Export CSV inventaire",
         "Alertes stock"
       ],
-      "cta": "Démarrer l'essai"
+      "cta": "Démarrer Professional"
     },
     "physicalPremium": {
-      "name": "Physique — Premium",
-      "badge": "Avancé",
-      "desc": "Pour scaler les opérations (logistique avancée, optimisation et automatisations).",
+      "name": "Physique — Enterprise",
+      "badge": "Scale",
+      "desc": "Opérations avancées : entrepôts, lots, expédition groupée et prévisions.",
       "features": [
-        "Tout Standard",
+        "Tout Professional",
         "Batch shipping & étiquettes",
         "Lots / expiration / FEFO",
         "Multi-entrepôts & transferts",
         "Prévisions demande"
       ],
-      "cta": "Passer en Premium"
+      "cta": "Passer en Enterprise"
     },
     "commission": {
       "name": "Digital, services, cours & œuvres",

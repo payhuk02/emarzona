@@ -177,46 +177,48 @@
     "title": "Highly competitive rates,",
     "titleHighlight": "nowhere else",
     "subtitle": "A model for every product type — subscription for physical, commission for the rest.",
+    "physicalGroupLabel": "Physical products subscription",
+    "commissionGroupLabel": "Digital, services, courses & art — no subscription",
     "footnote": "All amounts in CFA franc (XOF). 10% commission only on completed sales for digital products, courses, services and artist works.",
     "periodMonth": "/ month",
     "periodSale": "per sale",
     "physicalBasic": {
-      "name": "Physical — Basic",
+      "name": "Physical — Starter",
       "badge": "1 month free trial",
-      "desc": "Start selling physical products (stock + shipping).",
+      "desc": "Launch physical e-commerce: inventory, variants and shipping.",
       "features": [
         "Sell physical products",
         "Stock & variant management",
         "Shipping zones & rates",
         "30-day free trial"
       ],
-      "cta": "Try 1 month free"
+      "cta": "Try Starter — 1 month free"
     },
     "physicalStandard": {
-      "name": "Physical — Standard",
+      "name": "Physical — Professional",
       "badge": "Recommended",
-      "desc": "For growing stores: more orders, fewer mistakes, better support load.",
+      "desc": "Growth tier: logistics, suppliers and built-in analytics.",
       "features": [
-        "Everything in Basic",
+        "Everything in Starter",
         "Shipping tracking",
         "Returns (RMA) & policies",
         "Inventory CSV import/export",
         "Stock alerts"
       ],
-      "cta": "Start trial"
+      "cta": "Start Professional"
     },
     "physicalPremium": {
-      "name": "Physical — Premium",
-      "badge": "Advanced",
-      "desc": "Scale operations with advanced logistics, optimization and automations.",
+      "name": "Physical — Enterprise",
+      "badge": "Scale",
+      "desc": "Advanced ops: warehouses, lots, batch shipping and forecasting.",
       "features": [
-        "Everything in Standard",
+        "Everything in Professional",
         "Batch shipping & labels",
         "Lots / expiration / FEFO",
         "Multi-warehouses & transfers",
         "Demand forecasting"
       ],
-      "cta": "Go Premium"
+      "cta": "Go Enterprise"
     },
     "commission": {
       "name": "Digital, services, courses & artist works",

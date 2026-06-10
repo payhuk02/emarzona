@@ -177,11 +177,13 @@
     "title": "Tarifas muito competitivas,",
     "titleHighlight": "em lado nenhum",
     "subtitle": "Um modelo por tipo de produto — subscrição para físico, comissão para o resto.",
+    "physicalGroupLabel": "Subscrição produtos físicos",
+    "commissionGroupLabel": "Digital, serviços, cursos e obras — sem subscrição",
     "footnote": "Valores em franco CFA (XOF). Comissão de 10 % apenas em vendas concluídas para produtos digitais, cursos, serviços e obras de artista.",
     "periodMonth": "/ mês",
     "periodSale": "por venda",
     "physicalBasic": {
-      "name": "Físico — Basic",
+      "name": "Físico — Starter",
       "badge": "1 mês de teste grátis",
       "desc": "Para começar a vender produtos físicos (stock + envio).",
       "features": [
@@ -193,11 +195,11 @@
       "cta": "Experimentar 1 mês grátis"
     },
     "physicalStandard": {
-      "name": "Físico — Standard",
+      "name": "Físico — Professional",
       "badge": "Recomendado",
       "desc": "Para lojas em crescimento: mais encomendas, menos erros.",
       "features": [
-        "Tudo do Basic",
+        "Tudo do Starter",
         "Tracking de envios",
         "Devoluções (RMA) e políticas",
         "Import/Export CSV inventário",
@@ -206,17 +208,17 @@
       "cta": "Iniciar teste"
     },
     "physicalPremium": {
-      "name": "Físico — Premium",
-      "badge": "Avançado",
+      "name": "Físico — Enterprise",
+      "badge": "Scale",
       "desc": "Para escalar operações com logística avançada e otimização.",
       "features": [
-        "Tudo do Standard",
+        "Tudo do Professional",
         "Envios em lote e etiquetas",
         "Lotes / expiração / FEFO",
         "Multi-armazéns e transferências",
         "Previsão de procura"
       ],
-      "cta": "Ir para Premium"
+      "cta": "Ir para Enterprise"
     },
     "commission": {
       "name": "Digital, serviços, cursos e obras de artista",

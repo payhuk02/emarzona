@@ -1,22 +1,116 @@
 import { Link } from 'react-router-dom';
-import { Check, Package, Layers } from 'lucide-react';
+import { Check, Package, Layers, Sparkles } from 'lucide-react';
 import { formatFcfa } from '@/lib/format/fcfa';
+import { PHYSICAL_PLAN_PRICES_XOF } from '@/lib/billing/platform-pricing';
 import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
 import { usePremiumReveal } from './usePremiumReveal';
 
-const planConfig = [
-  { key: 'physicalBasic' as const, icon: Package, highlight: false, price: 7_500 },
-  { key: 'physicalStandard' as const, icon: Package, highlight: true, price: 12_500 },
-  { key: 'physicalPremium' as const, icon: Package, highlight: false, price: 15_000 },
-  { key: 'commission' as const, icon: Layers, highlight: false, priceLabel: '10 %' },
-];
+const physicalPlans = [
+  {
+    key: 'physicalBasic' as const,
+    tier: '01',
+    highlight: false,
+    price: PHYSICAL_PLAN_PRICES_XOF.basic,
+  },
+  {
+    key: 'physicalStandard' as const,
+    tier: '02',
+    highlight: true,
+    price: PHYSICAL_PLAN_PRICES_XOF.standard,
+  },
+  {
+    key: 'physicalPremium' as const,
+    tier: '03',
+    highlight: false,
+    price: PHYSICAL_PLAN_PRICES_XOF.premium,
+  },
+] as const;
+
+function PricingCard({
+  planKey,
+  tier,
+  highlight,
+  price,
+  t,
+}: {
+  planKey: (typeof physicalPlans)[number]['key'];
+  tier: string;
+  highlight: boolean;
+  price: number;
+  t: ReturnType<typeof useLandingPremiumT>['t'];
+}) {
+  const features = t(`pricing.${planKey}.features`, { returnObjects: true }) as string[];
+
+  return (
+    <article
+      className={`lp-pricing-card relative flex h-full flex-col p-6 sm:p-7 ${
+        highlight ? 'lp-pricing-card--highlight' : ''
+      }`}
+    >
+      <span
+        className={`absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+          highlight
+            ? 'bg-[var(--lp-gold)] text-[#0a0a0c]'
+            : 'border border-[var(--lp-border-light)] bg-white text-[var(--lp-text-muted)]'
+        }`}
+      >
+        {t(`pricing.${planKey}.badge`)}
+      </span>
+
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-[var(--lp-gold)]/15 bg-[var(--lp-cream)]">
+          <Package className="h-5 w-5 text-[var(--lp-gold-deep)]" strokeWidth={1.5} />
+        </div>
+        <span className="lp-serif text-2xl text-[var(--lp-gold-deep)]/40">{tier}</span>
+      </div>
+
+      <h3 className="text-lg font-semibold text-[var(--lp-text)]">
+        {t(`pricing.${planKey}.name`)}
+      </h3>
+      <p className="mt-2 min-h-[2.75rem] text-sm leading-relaxed text-[var(--lp-text-muted)]">
+        {t(`pricing.${planKey}.desc`)}
+      </p>
+
+      <div className="mt-6 border-t border-[var(--lp-border-light)] pt-5">
+        <p className="lp-serif text-3xl text-[var(--lp-text)] sm:text-[2rem]">
+          {formatFcfa(price)}
+          <span className="text-base font-sans text-[var(--lp-text-muted)]">
+            {t('pricing.periodMonth')}
+          </span>
+        </p>
+      </div>
+
+      <ul className="mt-6 flex-1 space-y-2.5">
+        {features.map(f => (
+          <li key={f} className="flex items-start gap-2 text-sm text-[var(--lp-text)]">
+            <Check className="mt-0.5 h-4 w-4 shrink-0 text-[var(--lp-gold-deep)]" />
+            {f}
+          </li>
+        ))}
+      </ul>
+
+      <Link
+        to="/register"
+        className={`mt-8 inline-flex justify-center rounded-full py-3 text-sm font-semibold transition-transform active:scale-[0.98] ${
+          highlight ? 'lp-btn-primary text-white' : 'lp-btn-outline-light'
+        }`}
+      >
+        {t(`pricing.${planKey}.cta`)}
+      </Link>
+    </article>
+  );
+}
 
 export function PricingSection() {
   const { t } = useLandingPremiumT();
   const { ref, className } = usePremiumReveal();
 
+  const commissionFeatures = t('pricing.commission.features', {
+    returnObjects: true,
+  }) as string[];
+
   return (
-    <section id="tarifs" className="lp-section-pad lp-section-light">
+    <section id="tarifs" className="lp-section-pad lp-section-light lp-pricing-section">
       <div ref={ref} className={`mx-auto max-w-7xl px-4 sm:px-5 lg:px-8 lp-reveal ${className}`}>
         <div className="mx-auto max-w-2xl text-center">
           <p className="lp-eyebrow-light mx-auto mb-5">{t('pricing.eyebrow')}</p>
@@ -29,81 +123,78 @@ export function PricingSection() {
           </p>
         </div>
 
-        <div className="mx-auto mt-12 grid max-w-5xl gap-6 sm:mt-14 md:grid-cols-2">
-          {planConfig.map(plan => {
-            const features = t(`pricing.${plan.key}.features`, {
-              returnObjects: true,
-            }) as string[];
-            const period =
-              plan.key === 'commission' ? t('pricing.periodSale') : t('pricing.periodMonth');
+        <div className="mx-auto mt-12 max-w-6xl sm:mt-14">
+          <p className="mb-5 text-center text-xs font-semibold uppercase tracking-[0.2em] text-[var(--lp-text-muted)]">
+            {t('pricing.physicalGroupLabel')}
+          </p>
 
-            return (
-              <article
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+            {physicalPlans.map(plan => (
+              <PricingCard
                 key={plan.key}
-                className={`lp-pricing-card relative flex flex-col p-6 sm:p-8 ${
-                  plan.highlight ? 'lp-pricing-card--highlight' : ''
-                }`}
-              >
-                <span
-                  className={`absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
-                    plan.highlight
-                      ? 'bg-[var(--lp-gold)] text-[#0a0a0c]'
-                      : 'border border-[var(--lp-border-light)] bg-white text-[var(--lp-text-muted)]'
-                  }`}
-                >
-                  {t(`pricing.${plan.key}.badge`)}
-                </span>
+                planKey={plan.key}
+                tier={plan.tier}
+                highlight={plan.highlight}
+                price={plan.price}
+                t={t}
+              />
+            ))}
+          </div>
 
-                <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl border border-[var(--lp-gold)]/15 bg-[var(--lp-cream)]">
-                  <plan.icon className="h-5 w-5 text-[var(--lp-gold-deep)]" strokeWidth={1.5} />
+          <p className="mb-5 mt-12 text-center text-xs font-semibold uppercase tracking-[0.2em] text-[var(--lp-text-muted)]">
+            {t('pricing.commissionGroupLabel')}
+          </p>
+
+          <article className="lp-pricing-commission relative overflow-hidden rounded-2xl border border-[var(--lp-border-light)] bg-gradient-to-br from-[#0f0f12] via-[#15151c] to-[#1a1a24] p-6 text-white sm:p-8">
+            <div
+              className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full opacity-30 blur-3xl"
+              style={{ background: 'var(--lp-purple)' }}
+              aria-hidden
+            />
+            <div className="relative grid gap-6 lg:grid-cols-[auto_1fr_auto] lg:items-center lg:gap-8">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/5">
+                <Layers className="h-7 w-7 text-[var(--lp-gold-bright)]" strokeWidth={1.5} />
+              </div>
+
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/5 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[var(--lp-gold-bright)]">
+                    <Sparkles className="h-3 w-3" />
+                    {t('pricing.commission.badge')}
+                  </span>
                 </div>
-
-                <h3 className="text-lg font-semibold text-[var(--lp-text)]">
-                  {t(`pricing.${plan.key}.name`)}
+                <h3 className="mt-3 text-xl font-semibold sm:text-2xl">
+                  {t('pricing.commission.name')}
                 </h3>
-                <p className="mt-2 text-sm leading-relaxed text-[var(--lp-text-muted)]">
-                  {t(`pricing.${plan.key}.desc`)}
+                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/70">
+                  {t('pricing.commission.desc')}
                 </p>
-
-                <div className="mt-6">
-                  {plan.price !== undefined ? (
-                    <p className="lp-serif text-3xl text-[var(--lp-text)] sm:text-[2rem]">
-                      {formatFcfa(plan.price)}
-                      <span className="text-base font-sans text-[var(--lp-text-muted)]">
-                        {period}
-                      </span>
-                    </p>
-                  ) : (
-                    <p className="lp-serif text-3xl text-[var(--lp-text)] sm:text-[2rem]">
-                      {plan.priceLabel}
-                      <span className="text-base font-sans text-[var(--lp-text-muted)]">
-                        {' '}
-                        {period}
-                      </span>
-                    </p>
-                  )}
-                </div>
-
-                <ul className="mt-6 flex-1 space-y-2.5">
-                  {features.map(f => (
-                    <li key={f} className="flex items-start gap-2 text-sm text-[var(--lp-text)]">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-[var(--lp-gold-deep)]" />
+                <ul className="mt-4 grid gap-2 sm:grid-cols-2">
+                  {commissionFeatures.map(f => (
+                    <li key={f} className="flex items-start gap-2 text-sm text-white/90">
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-[var(--lp-gold-bright)]" />
                       {f}
                     </li>
                   ))}
                 </ul>
+              </div>
 
+              <div className="flex flex-col items-start gap-4 lg:items-end lg:text-right">
+                <p className="lp-serif text-4xl text-white">
+                  10 %
+                  <span className="block text-sm font-sans font-normal text-white/60">
+                    {t('pricing.periodSale')}
+                  </span>
+                </p>
                 <Link
                   to="/register"
-                  className={`mt-8 inline-flex justify-center rounded-full py-3 text-sm font-semibold ${
-                    plan.highlight ? 'lp-btn-primary text-white' : 'lp-btn-outline-light'
-                  }`}
+                  className="lp-btn-primary inline-flex w-full justify-center rounded-full px-8 py-3 text-sm font-semibold lg:w-auto"
                 >
-                  {t(`pricing.${plan.key}.cta`)}
+                  {t('pricing.commission.cta')}
                 </Link>
-              </article>
-            );
-          })}
+              </div>
+            </div>
+          </article>
         </div>
 
         <p className="mx-auto mt-8 max-w-2xl text-center text-xs leading-relaxed text-[var(--lp-text-muted)]">
