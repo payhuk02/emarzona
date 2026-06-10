@@ -7,6 +7,7 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { requireCronOrInternalAuth } from '../_shared/edge-auth-utils.ts';
 
 const defaultAllowedOrigin = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
 const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || defaultAllowedOrigin)
@@ -22,7 +23,7 @@ function resolveCorsOrigin(originHeader: string | null): string {
 function buildCorsHeaders(originHeader: string | null) {
   return {
     'Access-Control-Allow-Origin': resolveCorsOrigin(originHeader),
-    'Vary': 'Origin',
+    Vary: 'Origin',
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
   };
@@ -34,6 +35,9 @@ serve(async req => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
+
+  const authFailure = requireCronOrInternalAuth(req, corsHeaders);
+  if (authFailure) return authFailure;
 
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;

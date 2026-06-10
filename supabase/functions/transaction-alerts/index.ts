@@ -1,14 +1,15 @@
 /**
  * Edge Function: Transaction Alerts
  * Date: 1 Février 2025
- * 
+ *
  * Description: Monitoring et alertes pour les transactions (en attente > 24h, taux d'échec élevé, etc.)
- * 
+ *
  * Cron: Toutes les 6 heures (configuré dans Supabase Dashboard)
  */
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.58.0";
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
+import { requireCronOrInternalAuth } from '../_shared/edge-auth-utils.ts';
 
 const defaultAllowedOrigin = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
 const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || defaultAllowedOrigin)
@@ -24,7 +25,7 @@ function resolveCorsOrigin(originHeader: string | null): string {
 function buildCorsHeaders(originHeader: string | null) {
   return {
     'Access-Control-Allow-Origin': resolveCorsOrigin(originHeader),
-    'Vary': 'Origin',
+    Vary: 'Origin',
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
   };
@@ -95,12 +96,15 @@ async function sendAlert(
   }
 }
 
-serve(async (req) => {
+serve(async req => {
   const corsHeaders = buildCorsHeaders(req.headers.get('origin'));
 
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
+
+  const authFailure = requireCronOrInternalAuth(req, corsHeaders);
+  if (authFailure) return authFailure;
 
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -115,8 +119,8 @@ serve(async (req) => {
     if (!config.enabled) {
       console.log('⏸️  Transaction alerts is disabled');
       return new Response(
-        JSON.stringify({ 
-          success: true, 
+        JSON.stringify({
+          success: true,
           message: 'Transaction alerts is disabled',
           alerts: [],
         }),
@@ -140,12 +144,19 @@ serve(async (req) => {
     if (pendingError) {
       console.error('Error fetching pending transactions:', pendingError);
     } else if (pendingTransactions && pendingTransactions.length > 0) {
-      const totalAmount = pendingTransactions.reduce((sum, t) => sum + parseFloat(t.amount || '0'), 0);
-      
+      const totalAmount = pendingTransactions.reduce(
+        (sum, t) => sum + parseFloat(t.amount || '0'),
+        0
+      );
+
       await sendAlert(
         supabase,
         'pending_transactions',
-        pendingTransactions.length > 50 ? 'critical' : pendingTransactions.length > 20 ? 'high' : 'medium',
+        pendingTransactions.length > 50
+          ? 'critical'
+          : pendingTransactions.length > 20
+            ? 'high'
+            : 'medium',
         `${pendingTransactions.length} transactions en attente depuis plus de ${config.pendingThresholdHours}h`,
         {
           count: pendingTransactions.length,
@@ -156,7 +167,12 @@ serve(async (req) => {
 
       alerts.push({
         type: 'pending_transactions',
-        severity: pendingTransactions.length > 50 ? 'critical' : pendingTransactions.length > 20 ? 'high' : 'medium',
+        severity:
+          pendingTransactions.length > 50
+            ? 'critical'
+            : pendingTransactions.length > 20
+              ? 'high'
+              : 'medium',
         message: `${pendingTransactions.length} transactions en attente depuis plus de ${config.pendingThresholdHours}h`,
         count: pendingTransactions.length,
       });
@@ -241,22 +257,20 @@ serve(async (req) => {
 
     console.log('✅ Transaction alerts job completed:', summary);
 
-    return new Response(
-      JSON.stringify(summary),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify(summary), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   } catch (error: any) {
     console.error('❌ Error in transaction alerts job:', error);
     return new Response(
-      JSON.stringify({ 
-        success: false, 
+      JSON.stringify({
+        success: false,
         error: error.message || 'Unknown error',
       }),
-      { 
+      {
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );
   }
 });
-

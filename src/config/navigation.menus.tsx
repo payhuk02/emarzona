@@ -364,6 +364,11 @@ export const userMenuSections = [
         icon: Calendar,
       },
       {
+        title: 'Catalogue Services',
+        url: '/dashboard/services',
+        icon: Calendar,
+      },
+      {
         title: 'Calendrier Services',
         url: '/dashboard/services/calendar',
         icon: Calendar,
@@ -467,6 +472,11 @@ export const userMenuSections = [
         title: 'Entrepôts',
         url: '/dashboard/warehouses',
         icon: Building2,
+      },
+      {
+        title: 'Produits Physiques',
+        url: '/dashboard/physical-products',
+        icon: Package,
       },
       {
         title: 'Gestion Stocks Produits Physiques',

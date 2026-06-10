@@ -40,7 +40,7 @@ export function SecureDownloadButton({
 }: SecureDownloadButtonProps) {
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadSuccess, setDownloadSuccess] = useState(false);
-  
+
   const { mutateAsync: generateToken } = useGenerateDownloadToken();
   const { mutate: logDownload } = useLogDownload();
   const { toast } = useToast();
@@ -59,20 +59,10 @@ export function SecureDownloadButton({
         expires_hours: expiresHours,
       });
 
-      // Step 2: Create download link
+      // Step 2: Redeem token via secure download route (atomic server-side validation)
       const downloadStartTime = Date.now();
-      
-      // Create temporary anchor element to trigger download
-      const link = document.createElement('a');
-      link.href = fileUrl;
-      link.download = fileName || 'download';
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-      
-      // Trigger download
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const downloadUrl = `${window.location.origin}/download/${token}`;
+      window.open(downloadUrl, '_blank', 'noopener,noreferrer');
 
       // Step 3: Log the download
       const downloadEndTime = Date.now();
@@ -96,23 +86,21 @@ export function SecureDownloadButton({
 
       // Reset success state after 3 seconds
       setTimeout(() => setDownloadSuccess(false), 3000);
+    } catch (_error: unknown) {
+      const errMsg = _error instanceof Error ? _error.message : String(_error);
+      logger.error('Download error', { error: errMsg, productId, fileUrl });
 
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error('Download error', { error: errorMessage, productId, fileUrl });
-      
-      // Log the failed download
       logDownload({
         product_id: productId,
         customer_id: customerId,
         download_completed: false,
-        error_message: error.message,
+        error_message: errMsg,
       });
 
       toast({
         variant: 'destructive',
         title: '❌ Erreur de téléchargement',
-        description: error.message || 'Impossible de générer le lien sécurisé.',
+        description: errMsg || 'Impossible de générer le lien sécurisé.',
       });
     } finally {
       setIsDownloading(false);
@@ -157,7 +145,12 @@ export function SecureDownloadButton({
  */
 export function SecureDownloadIconButton(props: Omit<SecureDownloadButtonProps, 'children'>) {
   return (
-    <SecureDownloadButton {...props} size="icon" variant="ghost" aria-label={`Télécharger ${props.fileName || 'le fichier'}`}>
+    <SecureDownloadButton
+      {...props}
+      size="icon"
+      variant="ghost"
+      aria-label={`Télécharger ${props.fileName || 'le fichier'}`}
+    >
       <Download className="h-4 w-4" />
     </SecureDownloadButton>
   );
@@ -166,7 +159,9 @@ export function SecureDownloadIconButton(props: Omit<SecureDownloadButtonProps, 
 /**
  * Large prominent download button
  */
-export function SecureDownloadLargeButton(props: Omit<SecureDownloadButtonProps, 'size' | 'children'>) {
+export function SecureDownloadLargeButton(
+  props: Omit<SecureDownloadButtonProps, 'size' | 'children'>
+) {
   return (
     <SecureDownloadButton {...props} size="lg" className="w-full gap-3">
       <Download className="h-5 w-5" />
@@ -175,10 +170,3 @@ export function SecureDownloadLargeButton(props: Omit<SecureDownloadButtonProps,
     </SecureDownloadButton>
   );
 }
-
-
-
-
-
-
-

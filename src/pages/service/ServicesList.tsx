@@ -75,7 +75,7 @@ export const ServicesList = () => {
           </div>
 
           <Button
-            onClick={() => navigate('/products/create?type=service')}
+            onClick={() => navigate('/dashboard/products/new/service')}
             size="sm"
             className="text-xs sm:text-sm"
           >
@@ -101,13 +101,13 @@ export const ServicesList = () => {
           <ServicesGrid
             services={[]}
             loading={true}
-            onEdit={id => navigate(`/dashboard/services/${id}/edit`)}
+            onEdit={id => navigate(`/dashboard/products/${id}/edit`)}
             onDelete={id => setDeleteServiceId(id)}
           />
         ) : (filteredServices?.length || 0) > 50 ? (
           <ServicesListVirtualized
             services={filteredServices || []}
-            onEdit={id => navigate(`/dashboard/services/${id}/edit`)}
+            onEdit={id => navigate(`/dashboard/products/${id}/edit`)}
             onDelete={id => setDeleteServiceId(id)}
             showActions={true}
             itemHeight={300}
@@ -117,7 +117,7 @@ export const ServicesList = () => {
           <ServicesGrid
             services={filteredServices || []}
             loading={false}
-            onEdit={id => navigate(`/dashboard/services/${id}/edit`)}
+            onEdit={id => navigate(`/dashboard/products/${id}/edit`)}
             onDelete={id => setDeleteServiceId(id)}
           />
         )}

@@ -118,7 +118,10 @@ const PhysicalProductCardComponent = ({ product, onEdit, onDelete }: PhysicalPro
               'aria-label': `Actions pour ${product.name || product.id}`,
             }}
           >
-            <SelectItem value="edit" onSelect={() => onEdit?.(product.id)}>
+            <SelectItem
+              value="edit"
+              onSelect={() => onEdit?.(product.product_id || product.product?.id || product.id)}
+            >
               <Edit className="h-4 w-4 mr-2" />
               Modifier
             </SelectItem>

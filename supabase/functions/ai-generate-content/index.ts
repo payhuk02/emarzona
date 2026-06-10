@@ -5,7 +5,7 @@
  * Response: { shortDescription, longDescription, features[], metaTitle, metaDescription, keywords[] }
  */
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { requireAuthenticatedUser } from '../_shared/edge-auth-utils.ts';
 
 const defaultAllowedOrigin = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
 const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || defaultAllowedOrigin)
@@ -21,15 +21,18 @@ function resolveCorsOrigin(originHeader: string | null): string {
 function buildCorsHeaders(originHeader: string | null) {
   return {
     'Access-Control-Allow-Origin': resolveCorsOrigin(originHeader),
-    'Vary': 'Origin',
-    'Access-Control-Allow-Headers':
-      'authorization, x-client-info, apikey, content-type',
+    Vary: 'Origin',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
   };
 }
 
 function buildPrompt(p: any, language = 'fr') {
-  const types: Record<string, string> = { digital: 'numérique', physical: 'physique', service: 'service' };
+  const types: Record<string, string> = {
+    digital: 'numérique',
+    physical: 'physique',
+    service: 'service',
+  };
   return `Génère du contenu e-commerce SEO en ${language} pour ce produit:
 - Nom: ${p.name}
 - Type: ${types[p.type] || p.type}
@@ -48,20 +51,23 @@ serve(async (req: Request) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const authResult = await requireAuthenticatedUser(req, corsHeaders);
+  if (authResult instanceof Response) return authResult;
+
   try {
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
-      return new Response(
-        JSON.stringify({ error: 'LOVABLE_API_KEY non configurée' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-      );
+      return new Response(JSON.stringify({ error: 'LOVABLE_API_KEY non configurée' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     const { productInfo, language } = await req.json();
     if (!productInfo?.name || !productInfo?.type) {
       return new Response(
         JSON.stringify({ error: 'productInfo.name et productInfo.type requis' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -79,8 +85,11 @@ serve(async (req: Request) => {
 
     if (config?.enabled === false || config?.provider === 'templates') {
       return new Response(
-        JSON.stringify({ error: 'AI generator disabled — use template fallback', useTemplates: true }),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+        JSON.stringify({
+          error: 'AI generator disabled — use template fallback',
+          useTemplates: true,
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -89,26 +98,43 @@ serve(async (req: Request) => {
     const temperature = typeof config?.temperature === 'number' ? config.temperature : 0.7;
     const maxTokens = typeof config?.maxTokens === 'number' ? config.maxTokens : 2000;
 
-    const tools = [{
-      type: 'function',
-      function: {
-        name: 'output_product_content',
-        description: 'Retourne le contenu structuré du produit',
-        parameters: {
-          type: 'object',
-          properties: {
-            shortDescription: { type: 'string', description: '120-150 caractères, accrocheuse' },
-            longDescription: { type: 'string', description: '250-400 mots, structurée, SEO' },
-            features: { type: 'array', items: { type: 'string' }, description: '5-8 points clés' },
-            metaTitle: { type: 'string', description: '50-60 caractères' },
-            metaDescription: { type: 'string', description: '150-160 caractères avec CTA' },
-            keywords: { type: 'array', items: { type: 'string' }, description: '10 mots-clés pertinents' },
+    const tools = [
+      {
+        type: 'function',
+        function: {
+          name: 'output_product_content',
+          description: 'Retourne le contenu structuré du produit',
+          parameters: {
+            type: 'object',
+            properties: {
+              shortDescription: { type: 'string', description: '120-150 caractères, accrocheuse' },
+              longDescription: { type: 'string', description: '250-400 mots, structurée, SEO' },
+              features: {
+                type: 'array',
+                items: { type: 'string' },
+                description: '5-8 points clés',
+              },
+              metaTitle: { type: 'string', description: '50-60 caractères' },
+              metaDescription: { type: 'string', description: '150-160 caractères avec CTA' },
+              keywords: {
+                type: 'array',
+                items: { type: 'string' },
+                description: '10 mots-clés pertinents',
+              },
+            },
+            required: [
+              'shortDescription',
+              'longDescription',
+              'features',
+              'metaTitle',
+              'metaDescription',
+              'keywords',
+            ],
+            additionalProperties: false,
           },
-          required: ['shortDescription', 'longDescription', 'features', 'metaTitle', 'metaDescription', 'keywords'],
-          additionalProperties: false,
         },
       },
-    }];
+    ];
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -130,45 +156,44 @@ serve(async (req: Request) => {
     });
 
     if (response.status === 429) {
-      return new Response(
-        JSON.stringify({ error: 'Limite de requêtes atteinte.' }),
-        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-      );
+      return new Response(JSON.stringify({ error: 'Limite de requêtes atteinte.' }), {
+        status: 429,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
     if (response.status === 402) {
-      return new Response(
-        JSON.stringify({ error: 'Crédits IA épuisés.' }),
-        { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-      );
+      return new Response(JSON.stringify({ error: 'Crédits IA épuisés.' }), {
+        status: 402,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
     if (!response.ok) {
       const t = await response.text();
       console.error('AI gateway error', response.status, t);
-      return new Response(
-        JSON.stringify({ error: 'Échec génération' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-      );
+      return new Response(JSON.stringify({ error: 'Échec génération' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     const data = await response.json();
     const toolCall = data?.choices?.[0]?.message?.tool_calls?.[0];
     if (!toolCall?.function?.arguments) {
-      return new Response(
-        JSON.stringify({ error: 'Réponse IA invalide' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-      );
+      return new Response(JSON.stringify({ error: 'Réponse IA invalide' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     const content = JSON.parse(toolCall.function.arguments);
-    return new Response(
-      JSON.stringify({ content, model }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-    );
+    return new Response(JSON.stringify({ content, model }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   } catch (error) {
     console.error('ai-generate-content error', error);
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : 'Erreur inconnue' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });

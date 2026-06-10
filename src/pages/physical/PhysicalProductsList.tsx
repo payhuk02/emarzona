@@ -106,7 +106,7 @@ export const PhysicalProductsList = () => {
             <p className="text-muted-foreground mt-1">Gérez votre inventaire et vos expéditions</p>
           </div>
 
-          <Button onClick={() => navigate('/products/create?type=physical')}>
+          <Button onClick={() => navigate('/dashboard/products/new/physical')}>
             <Plus className="h-4 w-4 mr-2" />
             Nouveau produit
           </Button>

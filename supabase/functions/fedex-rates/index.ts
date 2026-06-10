@@ -9,6 +9,7 @@ import {
   fedexMockDisabledError,
   hasFedexApiCredentials,
 } from '../_shared/fedex-policy.ts';
+import { requireAuthenticatedUser } from '../_shared/edge-auth-utils.ts';
 
 const defaultAllowedOrigin = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
 const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || defaultAllowedOrigin)
@@ -210,6 +211,9 @@ serve(async req => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
+
+  const authResult = await requireAuthenticatedUser(req, corsHeaders);
+  if (authResult instanceof Response) return authResult;
 
   try {
     const body = (await req.json()) as RateRequestBody;

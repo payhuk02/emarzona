@@ -6,6 +6,7 @@ import { buildCorsHeaders, jsonResponse } from '../_shared/cors.ts';
 import { createSupabaseAdmin } from '../_shared/supabase-admin.ts';
 import { computePayPalPlatformFee, createPayPalCheckoutOrder } from '../_shared/paypal-api.ts';
 import { resolveOrderPlatformFee } from '../_shared/order-platform-fee.ts';
+import { authorizeCheckoutOrder } from '../_shared/order-checkout-auth.ts';
 
 interface CreateOrderBody {
   storeId: string;
@@ -48,7 +49,20 @@ serve(async req => {
     }
 
     const supabase = createSupabaseAdmin();
-    const currency = body.currency.toUpperCase();
+
+    const checkoutAuth = await authorizeCheckoutOrder(
+      supabase,
+      req,
+      body.orderId,
+      body.storeId,
+      body.amount
+    );
+    if (!checkoutAuth.ok) {
+      return jsonResponse({ error: checkoutAuth.error }, checkoutAuth.status, origin);
+    }
+
+    const authorizedAmount = checkoutAuth.order.amount;
+    const currency = checkoutAuth.order.currency;
 
     const { data: connection, error: connError } = await supabase
       .from('store_payment_connections')
@@ -75,7 +89,7 @@ serve(async req => {
         store_id: body.storeId,
         order_id: body.orderId,
         product_id: body.productId ?? null,
-        amount: body.amount,
+        amount: authorizedAmount,
         currency,
         status: 'pending',
         customer_email: body.customerEmail,
@@ -107,7 +121,7 @@ serve(async req => {
     const successWithParams = `${body.successUrl}${successSep}order_id=${body.orderId}&transaction_id=${transaction.id}&provider=paypal`;
 
     const paypalOrder = await createPayPalCheckoutOrder({
-      amount: body.amount,
+      amount: authorizedAmount,
       currency,
       description: body.description,
       merchantId: connection.external_account_id,

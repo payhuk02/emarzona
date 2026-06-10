@@ -203,7 +203,7 @@ serve(async req => {
     const { data: transaction, error: findError } = await supabase
       .from('transactions')
       .select(
-        'id,status,order_id,payment_id,amount,currency,customer_id,payment_provider,payment_method,moneroo_payment_method,moneroo_transaction_id,webhook_attempts,customer_email,customer_name'
+        'id,status,order_id,store_id,payment_id,amount,currency,customer_id,payment_provider,payment_method,moneroo_payment_method,moneroo_transaction_id,webhook_attempts,customer_email,customer_name,metadata'
       )
       .eq('moneroo_transaction_id', transaction_id)
       .single();

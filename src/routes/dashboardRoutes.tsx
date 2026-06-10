@@ -177,6 +177,8 @@ const AbandonedCartsManagement = lazyPage(
 );
 const TaxManagement = lazyPage(() => import('@/pages/dashboard/TaxManagement'));
 const DigitalProductsList = lazyPage(() => import('@/pages/digital/DigitalProductsList'));
+const PhysicalProductsList = lazyPage(() => import('@/pages/physical/PhysicalProductsList'));
+const ServicesList = lazyPage(() => import('@/pages/service/ServicesList'));
 const MyDownloads = lazyPage(() => import('@/pages/digital/MyDownloads'));
 const DigitalBundlesManagement = lazyPage(
   () => import('@/pages/dashboard/DigitalBundlesManagement')
@@ -307,6 +309,7 @@ export const dashboardRoutes = (
     />
 
     {/* Physical Products */}
+    {pr('/dashboard/physical-products', PhysicalProductsList)}
     {pr('/dashboard/physical-inventory', PhysicalInventoryManagement)}
     {pr('/dashboard/physical-promotions', PhysicalPromotions)}
     {pr('/dashboard/physical-analytics', PhysicalProductsAnalytics)}
@@ -371,6 +374,7 @@ export const dashboardRoutes = (
     {pr('/dashboard/digital/products/:productId/versions', DigitalProductVersionsManagement)}
 
     {/* Services */}
+    {pr('/dashboard/services', ServicesList)}
     {pr('/dashboard/services/staff-availability', StaffAvailabilityCalendar)}
     {pr('/dashboard/services/calendar', ServiceCalendarManagement)}
     {pr('/dashboard/services/calendar/:serviceId', ServiceCalendarManagement)}

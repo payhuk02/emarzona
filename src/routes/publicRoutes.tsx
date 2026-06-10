@@ -54,6 +54,7 @@ const DigitalProductsCompare = lazyPage(() =>
 );
 const SharedWishlist = lazyPage(() => import('@/pages/customer/SharedWishlist'));
 const BundleDetail = lazyPage(() => import('@/pages/digital/BundleDetail'));
+const SecureDownloadPage = lazyPage(() => import('@/pages/digital/SecureDownloadPage'));
 const ProductsCompare = lazyPage(() => import('@/pages/ProductsCompare'));
 const PhysicalProductDetail = lazyPage(() => import('@/pages/physical/PhysicalProductDetail'));
 const ServiceDetail = lazyPage(() => import('@/pages/service/ServiceDetail'));
@@ -233,6 +234,7 @@ export const publicRoutes = (
     <Route path="/digital/search" element={<DigitalProductsSearch />} />
     <Route path="/digital/compare" element={<DigitalProductsCompare />} />
     <Route path="/products/compare" element={<ProductsCompare />} />
+    <Route path="/download/:token" element={<SecureDownloadPage />} />
     <Route path="/digital/:productId" element={<DigitalProductDetail />} />
     <Route path="/wishlist/shared/:token" element={<SharedWishlist />} />
     <Route path="/bundles/:bundleId" element={<BundleDetail />} />

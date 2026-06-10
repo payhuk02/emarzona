@@ -12,7 +12,7 @@ import { StoreEarnings } from '@/types/store-withdrawals';
 import { logger } from '@/lib/logger';
 
 const STORE_EARNINGS_FIELDS =
-  'id, store_id, available_balance, pending_balance, total_earned, total_withdrawn, total_refunded, last_calculated_at, created_at, updated_at';
+  'id, store_id, total_revenue, total_withdrawn, available_balance, platform_commission_rate, total_platform_commission, last_calculated_at, created_at, updated_at';
 
 export const useStoreEarnings = (storeId: string | undefined) => {
   const [earnings, setEarnings] = useState<StoreEarnings | null>(null);

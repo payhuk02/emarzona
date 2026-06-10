@@ -6,6 +6,7 @@ import { buildCorsHeaders, jsonResponse } from '../_shared/cors.ts';
 import { createSupabaseAdmin } from '../_shared/supabase-admin.ts';
 import { computeApplicationFee, stripeRequest, toStripeAmount } from '../_shared/stripe-api.ts';
 import { resolveOrderPlatformFee } from '../_shared/order-platform-fee.ts';
+import { authorizeCheckoutOrder } from '../_shared/order-checkout-auth.ts';
 
 interface CheckoutBody {
   storeId: string;
@@ -48,8 +49,21 @@ serve(async req => {
     }
 
     const supabase = createSupabaseAdmin();
-    const currency = body.currency.toUpperCase();
-    const amountMinor = toStripeAmount(body.amount, currency);
+
+    const checkoutAuth = await authorizeCheckoutOrder(
+      supabase,
+      req,
+      body.orderId,
+      body.storeId,
+      body.amount
+    );
+    if (!checkoutAuth.ok) {
+      return jsonResponse({ error: checkoutAuth.error }, checkoutAuth.status, origin);
+    }
+
+    const authorizedAmount = checkoutAuth.order.amount;
+    const currency = checkoutAuth.order.currency;
+    const amountMinor = toStripeAmount(authorizedAmount, currency);
 
     const { data: connection, error: connError } = await supabase
       .from('store_payment_connections')
@@ -76,7 +90,7 @@ serve(async req => {
         store_id: body.storeId,
         order_id: body.orderId,
         product_id: body.productId ?? null,
-        amount: body.amount,
+        amount: authorizedAmount,
         currency,
         status: 'pending',
         customer_email: body.customerEmail,

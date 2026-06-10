@@ -4,9 +4,10 @@
  * Description: Nettoie automatiquement les commandes multi-stores orphelines
  */
 
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.58.0";
+import 'https://deno.land/x/xhr@0.1.0/mod.ts';
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
+import { requireCronOrInternalAuth } from '../_shared/edge-auth-utils.ts';
 
 const defaultAllowedOrigin = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
 const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || defaultAllowedOrigin)
@@ -22,18 +23,21 @@ function resolveCorsOrigin(originHeader: string | null): string {
 function buildCorsHeaders(originHeader: string | null) {
   return {
     'Access-Control-Allow-Origin': resolveCorsOrigin(originHeader),
-    'Vary': 'Origin',
+    Vary: 'Origin',
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
   };
 }
 
-serve(async (req) => {
+serve(async req => {
   const corsHeaders = buildCorsHeaders(req.headers.get('origin'));
 
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
+
+  const authFailure = requireCronOrInternalAuth(req, corsHeaders);
+  if (authFailure) return authFailure;
 
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -51,7 +55,9 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Starting cleanup of orphaned multi-store orders (threshold: ${hoursThreshold} hours)...`);
+    console.log(
+      `Starting cleanup of orphaned multi-store orders (threshold: ${hoursThreshold} hours)...`
+    );
 
     // 1. Nettoyer les commandes orphelines générales
     const { data: cleanupResult, error: cleanupError } = await supabase.rpc(
@@ -68,7 +74,9 @@ serve(async (req) => {
     const cleanedOrderItems = cleanupResult?.[0]?.cleaned_order_items_count || 0;
     const cleanedTransactions = cleanupResult?.[0]?.cleaned_transactions_count || 0;
 
-    console.log(`Cleaned ${cleanedOrders} orphaned orders, ${cleanedOrderItems} order items, ${cleanedTransactions} transactions`);
+    console.log(
+      `Cleaned ${cleanedOrders} orphaned orders, ${cleanedOrderItems} order items, ${cleanedTransactions} transactions`
+    );
 
     // 2. Vérifier et nettoyer les groupes incomplets
     const { data: incompleteGroupsResult, error: incompleteGroupsError } = await supabase.rpc(
@@ -112,10 +120,3 @@ serve(async (req) => {
     );
   }
 });
-
-
-
-
-
-
-

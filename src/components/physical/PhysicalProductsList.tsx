@@ -10,7 +10,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import {
   Select,
   SelectContent,
@@ -34,7 +33,7 @@ import {
   TrendingUp,
   TrendingDown,
 } from 'lucide-react';
-import { usePhysicalProducts } from '@/hooks/physical/usePhysicalProducts';
+import { usePhysicalProducts, type PhysicalProduct } from '@/hooks/physical/usePhysicalProducts';
 import { CompactStockIndicator } from './InventoryStockIndicator';
 import { cn } from '@/lib/utils';
 
@@ -42,23 +41,7 @@ import { cn } from '@/lib/utils';
 // TYPES
 // ============================================================================
 
-export interface PhysicalProduct {
-  id: string;
-  name: string;
-  sku?: string;
-  barcode?: string;
-  image_url?: string;
-  price: number;
-  currency: string;
-  has_variants: boolean;
-  track_inventory: boolean;
-  total_quantity?: number;
-  low_stock_threshold?: number;
-  total_quantity_sold?: number;
-  total_revenue?: number;
-  is_active: boolean;
-  created_at: string;
-}
+export type { PhysicalProduct };
 
 export interface PhysicalProductsListProps {
   storeId: string;
@@ -93,13 +76,13 @@ function PhysicalProductsListComponent({
   const filteredProducts = React.useMemo(() => {
     if (!products) return [];
 
-    let  filtered= [...products];
+    let filtered = [...products];
 
     // Search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
-        (p) =>
+        p =>
           p.name.toLowerCase().includes(query) ||
           p.sku?.toLowerCase().includes(query) ||
           p.barcode?.toLowerCase().includes(query)
@@ -108,7 +91,7 @@ function PhysicalProductsListComponent({
 
     // Status filter
     if (filterStatus !== 'all') {
-      filtered = filtered.filter((p) => {
+      filtered = filtered.filter(p => {
         switch (filterStatus) {
           case 'active':
             return p.is_active;
@@ -156,16 +139,18 @@ function PhysicalProductsListComponent({
 
     return {
       total: products.length,
-      active: products.filter((p) => p.is_active).length,
+      active: products.filter(p => p.is_active).length,
       lowStock: products.filter(
-        (p) =>
+        p =>
           p.track_inventory &&
           p.total_quantity !== undefined &&
           p.low_stock_threshold !== undefined &&
           p.total_quantity > 0 &&
           p.total_quantity <= p.low_stock_threshold
       ).length,
-      outOfStock: products.filter((p) => p.track_inventory && (p.total_quantity === 0 || p.total_quantity === undefined)).length,
+      outOfStock: products.filter(
+        p => p.track_inventory && (p.total_quantity === 0 || p.total_quantity === undefined)
+      ).length,
       totalRevenue: products.reduce((sum, p) => sum + (p.total_revenue || 0), 0),
     };
   }, [products]);
@@ -239,9 +224,7 @@ function PhysicalProductsListComponent({
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle>Produits Physiques</CardTitle>
-            <p className="text-sm text-muted-foreground mt-1">
-              Gérez tous vos produits physiques
-            </p>
+            <p className="text-sm text-muted-foreground mt-1">Gérez tous vos produits physiques</p>
           </div>
           {onCreateProduct && (
             <Button onClick={onCreateProduct} className="gap-2">
@@ -259,13 +242,16 @@ function PhysicalProductsListComponent({
               <Input
                 placeholder="Rechercher par nom, SKU, code-barres..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={e => setSearchQuery(e.target.value)}
                 className="pl-10"
               />
             </div>
 
             {/* Status Filter */}
-            <Select value={filterStatus} onValueChange={(value: FilterStatus) => setFilterStatus(value)}>
+            <Select
+              value={filterStatus}
+              onValueChange={(value: FilterStatus) => setFilterStatus(value)}
+            >
               <SelectTrigger className="w-full md:w-[200px]">
                 <Filter className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Filtrer par statut" />
@@ -320,7 +306,7 @@ function PhysicalProductsListComponent({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredProducts.map((product) => (
+                  {filteredProducts.map(product => (
                     <TableRow key={product.id}>
                       {/* Product */}
                       <TableCell>
@@ -350,9 +336,7 @@ function PhysicalProductsListComponent({
                       {/* SKU / Barcode */}
                       <TableCell>
                         <div className="space-y-1">
-                          {product.sku && (
-                            <p className="text-sm font-mono">{product.sku}</p>
-                          )}
+                          {product.sku && <p className="text-sm font-mono">{product.sku}</p>}
                           {product.barcode && (
                             <p className="text-xs text-muted-foreground font-mono">
                               {product.barcode}
@@ -392,9 +376,7 @@ function PhysicalProductsListComponent({
                       {/* Sales */}
                       <TableCell>
                         <div className="text-sm">
-                          <p className="font-medium">
-                            {product.total_quantity_sold || 0} vendus
-                          </p>
+                          <p className="font-medium">{product.total_quantity_sold || 0} vendus</p>
                           {product.total_revenue && (
                             <p className="text-xs text-muted-foreground">
                               {product.total_revenue.toLocaleString()} XOF
@@ -407,18 +389,14 @@ function PhysicalProductsListComponent({
                       <TableCell className="text-right">
                         <Select>
                           <SelectTrigger>
-
-                              <MoreVertical className="h-4 w-4" />
-                            
-</SelectTrigger>
+                            <MoreVertical className="h-4 w-4" />
+                          </SelectTrigger>
                           <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                            <SelectItem value="edit" onSelect={() => onViewProduct?.(product.id)}
-                            >
+                            <SelectItem value="edit" onSelect={() => onViewProduct?.(product.id)}>
                               <Eye className="h-4 w-4 mr-2" />
                               Voir
                             </SelectItem>
-                            <SelectItem value="delete" onSelect={() => onEditProduct?.(product.id)}
-                            >
+                            <SelectItem value="delete" onSelect={() => onEditProduct?.(product.id)}>
                               <Edit className="h-4 w-4 mr-2" />
                               Modifier
                             </SelectItem>
@@ -457,14 +435,17 @@ function PhysicalProductsListComponent({
 }
 
 // Optimisation avec React.memo pour éviter les re-renders inutiles
-export const PhysicalProductsList = React.memo(PhysicalProductsListComponent, (prevProps, nextProps) => {
-  return (
-    prevProps.storeId === nextProps.storeId &&
-    prevProps.onCreateProduct === nextProps.onCreateProduct &&
-    prevProps.onEditProduct === nextProps.onEditProduct &&
-    prevProps.onViewProduct === nextProps.onViewProduct &&
-    prevProps.className === nextProps.className
-  );
-});
+export const PhysicalProductsList = React.memo(
+  PhysicalProductsListComponent,
+  (prevProps, nextProps) => {
+    return (
+      prevProps.storeId === nextProps.storeId &&
+      prevProps.onCreateProduct === nextProps.onCreateProduct &&
+      prevProps.onEditProduct === nextProps.onEditProduct &&
+      prevProps.onViewProduct === nextProps.onViewProduct &&
+      prevProps.className === nextProps.className
+    );
+  }
+);
 
 PhysicalProductsList.displayName = 'PhysicalProductsList';

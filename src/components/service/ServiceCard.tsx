@@ -10,7 +10,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import {
   Calendar,
   Clock,
@@ -73,7 +73,7 @@ const ServiceCardComponent = ({
   };
 
   const getServiceTypeLabel = (type: string) => {
-    const  labels: Record<string, string> = {
+    const labels: Record<string, string> = {
       appointment: 'Rendez-vous',
       class: 'Cours',
       event: 'Événement',
@@ -119,17 +119,21 @@ const ServiceCardComponent = ({
             <StableDropdownMenu
               triggerContent={<MoreVertical className="h-4 w-4" />}
               triggerProps={{
-                variant: "secondary" as const,
-                size: "icon" as const,
-                className: "h-11 w-11 sm:h-8 sm:w-8",
-                "aria-label": `Actions pour ${service.name || service.id}`
+                variant: 'secondary' as const,
+                size: 'icon' as const,
+                className: 'h-11 w-11 sm:h-8 sm:w-8',
+                'aria-label': `Actions pour ${service.name || service.id}`,
               }}
             >
-              <SelectItem value="edit" onSelect={() => onEdit?.(service.id)}>
+              <SelectItem
+                value="edit"
+                onSelect={() => onEdit?.(service.product_id || service.product?.id || service.id)}
+              >
                 <Edit className="h-4 w-4 mr-2" />
                 Modifier
               </SelectItem>
-              <SelectItem value="delete"
+              <SelectItem
+                value="delete"
                 onSelect={() => onDelete?.(service.id)}
                 className="text-destructive"
               >
@@ -336,9 +340,3 @@ const ServicesGrid = ({
 };
 
 export { ServicesGrid };
-
-
-
-
-
-
