@@ -5,7 +5,13 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: './tests/e2e',
-  testMatch: ['**/basic-navigation.spec.ts', '**/routing.spec.ts', '**/error-handling.spec.ts'],
+  testMatch: [
+    '**/basic-navigation.spec.ts',
+    '**/routing.spec.ts',
+    '**/error-handling.spec.ts',
+    '**/partial-refund.spec.ts',
+    '**/checkout-multi-psp.spec.ts',
+  ],
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,

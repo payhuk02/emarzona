@@ -47,6 +47,7 @@
     "test:e2e:checkout": "playwright test --config=playwright.checkout.config.ts tests/e2e/cart-checkout-workflow.spec.ts tests/e2e/checkout-multi-psp.spec.ts tests/e2e/paypal-commerce-flow.spec.ts",
     "test:e2e:c1-commission": "playwright test tests/e2e/physical-zero-commission-c1.spec.ts --project=chromium",
     "test:e2e:c5-subscription": "playwright test tests/e2e/physical-subscription-activation-c5.spec.ts --project=chromium",
+    "test:e2e:financial": "playwright test tests/e2e/partial-refund.spec.ts tests/e2e/physical-zero-commission-c1.spec.ts --project=chromium",
     "test:e2e:email": "playwright test email-unsubscribe email-campaign-test-send --project=chromium",
     "verify:supabase-keys": "node scripts/verify-supabase-publishable-key.mjs",
     "test:visual": "playwright test visual-regression",

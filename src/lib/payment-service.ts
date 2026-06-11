@@ -8,7 +8,8 @@ import {
 } from './moneroo-payment';
 import { logger } from './logger';
 import { isSupportedCurrency, type Currency } from './currency-converter';
-import { isPaymentOrchestrationV2Enabled, createOrchestratedPayment } from './payments';
+import { isPaymentOrchestrationV2EnabledForStore, createOrchestratedPayment } from './payments';
+import { buildPspFallbackUserMessage } from './payments/psp-fallback-messages';
 import type { PaymentProviderCode } from '@/types/store-payment-connection';
 import { toast } from '@/hooks/use-toast';
 import { checkRateLimit } from './rate-limiter';
@@ -98,7 +99,7 @@ export const initiatePayment = async (options: PaymentOptions): Promise<PaymentR
 
   const resolvedOptions = await resolvePaymentContext(options);
 
-  if (isPaymentOrchestrationV2Enabled()) {
+  if (isPaymentOrchestrationV2EnabledForStore(resolvedOptions.storeId)) {
     try {
       const orchestrated = await createOrchestratedPayment({
         storeId: resolvedOptions.storeId,
@@ -114,6 +115,18 @@ export const initiatePayment = async (options: PaymentOptions): Promise<PaymentR
         metadata: resolvedOptions.metadata,
         preferredProvider: toOrchestratorPreferred(resolvedOptions.provider),
       });
+
+      if (orchestrated.psp_fallback) {
+        const msg = buildPspFallbackUserMessage(
+          orchestrated.psp_fallback.from_provider,
+          orchestrated.psp_fallback.reason
+        );
+        toast({
+          title: msg.title,
+          description: msg.description,
+          duration: 12_000,
+        });
+      }
 
       return {
         success: orchestrated.success,

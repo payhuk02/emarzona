@@ -103,7 +103,7 @@ export function PaymentProviderSelector({
       ];
     }
 
-    const source = rpcOptions ?? [];
+    const source = (rpcOptions ?? []).filter(opt => opt.provider !== 'flutterwave_connect');
     return source.map(opt => {
       const checkoutValue = rpcProviderToCheckout(opt.provider);
       const meta = PROVIDER_META[checkoutValue] ?? PROVIDER_META.moneroo;

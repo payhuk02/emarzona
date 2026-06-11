@@ -1,14 +1,14 @@
 /**
  * Edge Function: Auto Payout Vendors
  * Date: 30 Janvier 2025
- * 
+ *
  * Description: Reversement automatique des fonds vendeurs qui dépassent le seuil minimum après un délai configuré
- * 
+ *
  * Cron: Tous les jours à 3h du matin (configuré dans Supabase Dashboard)
  */
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.58.0";
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
 
 const defaultAllowedOrigin = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
 const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || defaultAllowedOrigin)
@@ -24,7 +24,7 @@ function resolveCorsOrigin(originHeader: string | null): string {
 function buildCorsHeaders(originHeader: string | null) {
   return {
     'Access-Control-Allow-Origin': resolveCorsOrigin(originHeader),
-    'Vary': 'Origin',
+    Vary: 'Origin',
     'Access-Control-Allow-Headers':
       'authorization, x-client-info, apikey, content-type, x-cron-secret',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
@@ -72,10 +72,7 @@ async function getAutoPayoutConfig(supabase: any): Promise<AutoPayoutConfig> {
 /**
  * Récupère les stores éligibles pour reversement automatique
  */
-async function getEligibleStores(
-  supabase: any,
-  config: AutoPayoutConfig
-): Promise<any[]> {
+async function getEligibleStores(supabase: any, config: AutoPayoutConfig): Promise<any[]> {
   try {
     // Date limite : maintenant - delayDays
     const cutoffDate = new Date();
@@ -86,7 +83,8 @@ async function getEligibleStores(
     // et dont le dernier calcul est antérieur à delayDays
     const { data: stores, error } = await supabase
       .from('store_earnings')
-      .select(`
+      .select(
+        `
         store_id,
         available_balance,
         last_calculated_at,
@@ -101,8 +99,10 @@ async function getEligibleStores(
             is_default
           )
         )
-      `)
+      `
+      )
       .gte('available_balance', config.minAmount)
+      .eq('withdrawals_blocked', false)
       .or(`last_calculated_at.is.null,last_calculated_at.lt.${cutoffDateISO}`)
       .eq('stores.store_payment_methods.is_default', true)
       .limit(50); // Limiter à 50 stores par exécution pour éviter la surcharge
@@ -164,7 +164,9 @@ async function createAutomaticWithdrawal(
       return null;
     }
 
-    console.log(`Created automatic withdrawal ${withdrawal.id} for store ${storeId} (amount: ${amount} XOF)`);
+    console.log(
+      `Created automatic withdrawal ${withdrawal.id} for store ${storeId} (amount: ${amount} XOF)`
+    );
     return withdrawal.id;
   } catch (error) {
     console.error('Error in createAutomaticWithdrawal:', error);
@@ -172,7 +174,7 @@ async function createAutomaticWithdrawal(
   }
 }
 
-serve(async (req) => {
+serve(async req => {
   const corsHeaders = buildCorsHeaders(req.headers.get('origin'));
 
   // Gérer CORS
@@ -186,17 +188,17 @@ serve(async (req) => {
     const expectedCronSecret = Deno.env.get('CRON_SECRET');
 
     if (!expectedCronSecret) {
-      return new Response(
-        JSON.stringify({ error: 'CRON_SECRET is not configured' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: 'CRON_SECRET is not configured' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     if (!cronSecret || cronSecret.trim() !== expectedCronSecret.trim()) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     // Créer le client Supabase
@@ -204,10 +206,10 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
 
     if (!supabaseUrl || !supabaseServiceKey) {
-      return new Response(
-        JSON.stringify({ error: 'Supabase configuration missing' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: 'Supabase configuration missing' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -282,7 +284,7 @@ serve(async (req) => {
         });
 
         // Petite pause entre les créations
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 500));
       } else {
         results.push({
           store_id: store.id,
@@ -294,8 +296,8 @@ serve(async (req) => {
       }
     }
 
-    const successCount = results.filter((r) => r.success).length;
-    const errorCount = results.filter((r) => !r.success).length;
+    const successCount = results.filter(r => r.success).length;
+    const errorCount = results.filter(r => !r.success).length;
 
     return new Response(
       JSON.stringify({
@@ -319,5 +321,3 @@ serve(async (req) => {
     );
   }
 });
-
-

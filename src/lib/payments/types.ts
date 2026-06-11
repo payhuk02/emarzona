@@ -42,6 +42,12 @@ export interface OrchestratedPaymentRequest {
   forcePlatformPayments?: boolean;
 }
 
+export interface PspFallbackInfo {
+  from_provider: PaymentProviderCode;
+  to_provider: 'moneroo_platform';
+  reason: string;
+}
+
 export interface OrchestratedPaymentResult {
   success: boolean;
   transaction_id: string;
@@ -50,6 +56,8 @@ export interface OrchestratedPaymentResult {
   provider_transaction_id?: string;
   connection_id?: string | null;
   error?: string;
+  /** Présent si le PSP initial a été remplacé par Moneroo (Epic 2.2.7) */
+  psp_fallback?: PspFallbackInfo;
 }
 
 export class PaymentProviderNotReadyError extends Error {

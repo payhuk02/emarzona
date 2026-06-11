@@ -1,5 +1,5 @@
 /**
- * Mise à jour DB après remboursement (tous PSP)
+ * Mise à jour DB après remboursement (tous PSP) — délègue à apply_transaction_refund (SQL)
  */
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
 
@@ -15,10 +15,10 @@ export async function applyPaymentRefund(
   supabase: SupabaseClient,
   transactionId: string,
   refund: ApplyRefundInput
-): Promise<{ orderId: string | null }> {
+): Promise<{ orderId: string | null; status: string; refundedAmount: number }> {
   const { data: transaction, error: fetchError } = await supabase
     .from('transactions')
-    .select('id, order_id, store_id, status, amount, metadata, customer_id')
+    .select('id, order_id, store_id, status, amount, refunded_amount, metadata')
     .eq('id', transactionId)
     .single();
 
@@ -27,64 +27,43 @@ export async function applyPaymentRefund(
   }
 
   if (transaction.status === 'refunded') {
-    return { orderId: transaction.order_id };
+    return {
+      orderId: transaction.order_id,
+      status: 'refunded',
+      refundedAmount: Number(transaction.refunded_amount ?? transaction.amount ?? 0),
+    };
   }
 
-  if (transaction.status !== 'completed') {
+  if (!['completed', 'partially_refunded'].includes(transaction.status ?? '')) {
     throw new Error(`Cannot refund transaction with status: ${transaction.status}`);
   }
 
   const txAmount = Number(transaction.amount ?? 0);
-  if (refund.amount > txAmount) {
-    throw new Error('Refund amount exceeds transaction amount');
+  const alreadyRefunded = Number(transaction.refunded_amount ?? 0);
+  if (alreadyRefunded + refund.amount > txAmount + 0.01) {
+    throw new Error('Refund amount exceeds remaining transaction amount');
   }
 
-  const existingMeta =
-    transaction.metadata && typeof transaction.metadata === 'object'
-      ? (transaction.metadata as Record<string, unknown>)
-      : {};
-  const now = new Date().toISOString();
-
-  await supabase
-    .from('transactions')
-    .update({
-      status: 'refunded',
-      refunded_at: now,
-      updated_at: now,
-      metadata: {
-        ...existingMeta,
-        refund: {
-          refund_id: refund.refundId,
-          amount: refund.amount,
-          currency: refund.currency,
-          provider: refund.provider,
-          reason: refund.reason ?? 'Customer request',
-          created_at: now,
-        },
-      },
-    })
-    .eq('id', transactionId);
-
-  if (transaction.order_id) {
-    await supabase
-      .from('orders')
-      .update({ payment_status: 'refunded', updated_at: now })
-      .eq('id', transaction.order_id);
-
-    const { error: revokeError } = await supabase.rpc('revoke_digital_access_for_order', {
-      p_order_id: transaction.order_id,
-    });
-    if (revokeError) {
-      console.error('revoke_digital_access_for_order failed:', revokeError);
-    }
-  }
-
-  await supabase.from('transaction_logs').insert({
-    transaction_id: transactionId,
-    event_type: 'refund_completed',
-    status: 'completed',
-    response_data: refund,
+  const { data: result, error: rpcError } = await supabase.rpc('apply_transaction_refund', {
+    p_transaction_id: transactionId,
+    p_refund_amount: refund.amount,
+    p_refund_id: refund.refundId,
+    p_provider: refund.provider,
+    p_reason: refund.reason ?? 'Customer request',
+    p_metadata: {
+      refund_currency: refund.currency,
+    },
   });
+
+  if (rpcError) {
+    throw new Error(rpcError.message);
+  }
+
+  const payload = result as {
+    order_id?: string | null;
+    status?: string;
+    refunded_amount?: number;
+  } | null;
 
   if (transaction.store_id) {
     await supabase
@@ -93,15 +72,21 @@ export async function applyPaymentRefund(
         p_event_type: 'payment.refunded',
         p_payload: {
           transaction_id: transactionId,
-          order_id: transaction.order_id,
+          order_id: payload?.order_id ?? transaction.order_id,
           refund_id: refund.refundId,
           amount: refund.amount,
+          cumulative_refunded: payload?.refunded_amount,
           currency: refund.currency,
           provider: refund.provider,
+          status: payload?.status,
         },
       })
       .then(null, (err: unknown) => console.error('payment.refunded webhook:', err));
   }
 
-  return { orderId: transaction.order_id };
+  return {
+    orderId: payload?.order_id ?? transaction.order_id,
+    status: payload?.status ?? 'refunded',
+    refundedAmount: Number(payload?.refunded_amount ?? refund.amount),
+  };
 }

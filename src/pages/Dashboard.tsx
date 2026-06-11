@@ -51,6 +51,7 @@ import { DashboardFooterMetrics } from '@/components/dashboard/DashboardFooterMe
 import { DashboardSalesEvolution } from '@/components/dashboard/DashboardSalesEvolution';
 import { DashboardRecentActivity } from '@/components/dashboard/DashboardRecentActivity';
 import { DashboardActionCenter } from '@/components/dashboard/DashboardActionCenter';
+import { PhysicalSubscriptionAlert } from '@/components/billing/PhysicalSubscriptionAlert';
 import { DashboardNotificationsStrip } from '@/components/dashboard/DashboardNotificationsStrip';
 import '@/styles/dashboard-premium.css';
 
@@ -392,6 +393,8 @@ const DashboardWithStore = ({ storeHydrating }: { storeHydrating: boolean }) => 
           onRetry={handleRefresh}
           isRetrying={isRefreshing}
         />
+
+        {store?.id && <PhysicalSubscriptionAlert storeId={store.id} />}
 
         {showStatsSkeleton ? (
           <DashboardFullSkeleton />

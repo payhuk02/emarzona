@@ -9,6 +9,7 @@ import { PhysicalSubscriptionRequired } from '@/components/billing/PhysicalSubsc
 import { Button } from '@/components/ui/button';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useStorePhysicalAccess } from '@/hooks/billing/useStorePhysicalAccess';
@@ -18,20 +19,30 @@ import { initiateSubscriptionRenewalCheckout } from '@/lib/billing/subscription-
 import { PhysicalPlanChangeSection } from '@/components/billing/PhysicalPlanChangeSection';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { formatCurrency } from '@/lib/utils';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
+import { setSubscriptionAutoRenew } from '@/lib/billing/subscription-auto-renew';
+import { useSubscriptionPaymentAttempts } from '@/hooks/billing/useSubscriptionPaymentAttempts';
+import { physicalPlanLabel } from '@/lib/billing/physical-plan-display';
 
 export default function StorePhysicalBilling() {
   const { store, loading } = useStore();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const access = useStorePhysicalAccess(store?.id);
   const { data: invoices = [], isLoading: invoicesLoading } = useSubscriptionInvoices(store?.id);
   const { data: billingMandate } = useSubscriptionBillingMandate(store?.id);
+  const { data: paymentAttempts = [], isLoading: attemptsLoading } = useSubscriptionPaymentAttempts(
+    store?.id
+  );
   const [renewing, setRenewing] = useState(false);
+  const [autoRenewUpdating, setAutoRenewUpdating] = useState(false);
 
   const autoRenewEnabled = billingMandate?.mandate?.auto_renew_enabled ?? false;
   const pendingCheckoutUrl = billingMandate?.pendingCheckout?.checkout_url ?? null;
@@ -108,6 +119,30 @@ export default function StorePhysicalBilling() {
       <PhysicalSubscriptionRequired storeId={store.id} />
 
       <div className="container mx-auto max-w-4xl px-4 pb-6 space-y-4">
+        {access.currentPeriodEnd && access.status !== 'none' && (
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Prochaine échéance</CardTitle>
+              <CardDescription>
+                {access.status === 'trialing' ? 'Fin de l&apos;essai' : 'Fin de période en cours'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-wrap items-center gap-3">
+              <p className="text-lg font-semibold">
+                {format(new Date(access.currentPeriodEnd), 'dd MMMM yyyy', { locale: fr })}
+              </p>
+              {access.planSlug && (
+                <Badge variant="outline">{physicalPlanLabel(access.planSlug)}</Badge>
+              )}
+              {access.pendingPlanSlug && (
+                <Badge variant="secondary">
+                  Downgrade prévu → {physicalPlanLabel(access.pendingPlanSlug)} à l&apos;échéance
+                </Badge>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
         {access.planSlug && (
           <PhysicalPlanChangeSection
             storeId={store.id}
@@ -117,22 +152,59 @@ export default function StorePhysicalBilling() {
           />
         )}
 
-        {autoRenewEnabled && (
+        {billingMandate?.mandate && (
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-base">Renouvellement automatique</CardTitle>
               <CardDescription>
-                Votre profil de paiement Moneroo est enregistré. Un checkout pré-rempli sera généré
-                automatiquement avant chaque échéance — confirmez sur mobile money.
+                Profil Moneroo enregistré — un checkout pré-rempli sera généré avant chaque échéance
+                (confirmation mobile money requise).
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex flex-wrap items-center gap-2">
-              <Badge variant="secondary">Auto-renouvellement actif</Badge>
-              {billingMandate?.mandate?.customer_email && (
-                <span className="text-xs text-muted-foreground">
-                  {billingMandate.mandate.customer_email}
-                </span>
-              )}
+            <CardContent className="space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="auto-renew"
+                    checked={autoRenewEnabled}
+                    disabled={autoRenewUpdating}
+                    onCheckedChange={async checked => {
+                      setAutoRenewUpdating(true);
+                      try {
+                        await setSubscriptionAutoRenew(store.id, checked);
+                        toast({
+                          title: checked
+                            ? 'Auto-renouvellement activé'
+                            : 'Auto-renouvellement désactivé',
+                          description: checked
+                            ? 'Un checkout sera préparé automatiquement avant chaque échéance.'
+                            : 'Vous devrez renouveler manuellement à chaque échéance.',
+                        });
+                        access.refresh();
+                        await queryClient.invalidateQueries({
+                          queryKey: ['subscription-billing-mandate', store.id],
+                        });
+                      } catch (e: unknown) {
+                        toast({
+                          title: 'Erreur',
+                          description: e instanceof Error ? e.message : 'Modification impossible',
+                          variant: 'destructive',
+                        });
+                      } finally {
+                        setAutoRenewUpdating(false);
+                      }
+                    }}
+                  />
+                  <Label htmlFor="auto-renew" className="text-sm font-medium">
+                    {autoRenewEnabled ? 'Activé' : 'Désactivé'}
+                  </Label>
+                </div>
+                {billingMandate.mandate.customer_email && (
+                  <span className="text-xs text-muted-foreground">
+                    Moyen de paiement : {billingMandate.mandate.customer_email}
+                  </span>
+                )}
+              </div>
             </CardContent>
           </Card>
         )}
@@ -226,6 +298,50 @@ export default function StorePhysicalBilling() {
             )}
           </CardContent>
         </Card>
+
+        {paymentAttempts.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Tentatives de paiement</CardTitle>
+              <CardDescription>Historique des prélèvements Moneroo</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {attemptsLoading ? (
+                <p className="text-sm text-muted-foreground">Chargement…</p>
+              ) : (
+                <ul className="space-y-2">
+                  {paymentAttempts.map(attempt => (
+                    <li
+                      key={attempt.id}
+                      className="flex flex-wrap items-center justify-between gap-2 rounded-md border p-3 text-sm"
+                    >
+                      <div>
+                        <p className="font-medium capitalize">{attempt.status}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {format(new Date(attempt.attempted_at), 'dd MMM yyyy HH:mm', {
+                            locale: fr,
+                          })}
+                          {attempt.failure_reason ? ` — ${attempt.failure_reason}` : ''}
+                        </p>
+                      </div>
+                      <Badge
+                        variant={
+                          attempt.status === 'succeeded'
+                            ? 'secondary'
+                            : attempt.status === 'failed'
+                              ? 'destructive'
+                              : 'outline'
+                        }
+                      >
+                        {attempt.provider}
+                      </Badge>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       <div className="container mx-auto max-w-4xl px-4 pb-8">

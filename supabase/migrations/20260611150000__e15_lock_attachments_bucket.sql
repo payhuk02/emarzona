@@ -15,6 +15,7 @@ SET public = false,
 DROP POLICY IF EXISTS "Anyone can view attachments" ON storage.objects;
 DROP POLICY IF EXISTS "Authenticated users can read attachments" ON storage.objects;
 
+DROP POLICY IF EXISTS "Users read own return attachments" ON storage.objects;
 CREATE POLICY "Users read own return attachments"
   ON storage.objects
   FOR SELECT
@@ -24,6 +25,7 @@ CREATE POLICY "Users read own return attachments"
     AND name LIKE 'returns/' || auth.uid()::text || '/%'
   );
 
+DROP POLICY IF EXISTS "Store owners read return attachments" ON storage.objects;
 CREATE POLICY "Store owners read return attachments"
   ON storage.objects
   FOR SELECT
@@ -66,6 +68,7 @@ BEGIN
   END IF;
 END $$;
 
+DROP POLICY IF EXISTS "Platform admins read attachments" ON storage.objects;
 CREATE POLICY "Platform admins read attachments"
   ON storage.objects
   FOR SELECT

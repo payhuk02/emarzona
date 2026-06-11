@@ -1,4 +1,8 @@
-export { isPaymentOrchestrationV2Enabled } from './feature-flags';
+export {
+  isPaymentOrchestrationV2Enabled,
+  isPaymentOrchestrationV2EnabledForStore,
+  getPaymentOrchestrationV2RolloutPercent,
+} from './feature-flags';
 export { createOrchestratedPayment, resolvePaymentProvider } from './orchestrator';
 export { startStripeConnectOnboarding, createStripeConnectCheckout } from './stripe-connect-client';
 export {

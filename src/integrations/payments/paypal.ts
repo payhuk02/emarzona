@@ -28,9 +28,7 @@ export class PayPalProvider extends BasePaymentProvider {
     [key: string]: unknown;
   }) {
     super(config);
-    this.paypalApiUrl = this.testMode
-      ? 'https://api.sandbox.paypal.com'
-      : 'https://api.paypal.com';
+    this.paypalApiUrl = this.testMode ? 'https://api.sandbox.paypal.com' : 'https://api.paypal.com';
   }
 
   getProviderInfo(): PaymentProvider {
@@ -38,20 +36,132 @@ export class PayPalProvider extends BasePaymentProvider {
       name: 'PayPal',
       code: 'paypal',
       supportedCurrencies: [
-        'USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'CHF', 'SEK', 'NOK', 'DKK',
-        'PLN', 'CZK', 'HUF', 'RON', 'BGN', 'HRK', 'BRL', 'MXN', 'ARS', 'CLP',
-        'COP', 'PEN', 'UYU', 'VES', 'ZAR', 'NGN', 'KES', 'EGP', 'XOF', 'XAF',
-        'MAD', 'TND', 'DZD', 'SGD', 'HKD', 'TWD', 'KRW', 'CNY', 'INR', 'IDR',
-        'THB', 'MYR', 'PHP', 'VND', 'PKR', 'BDT', 'LKR', 'NZD', 'AED', 'SAR',
-        'ILS', 'JOD', 'KWD', 'BHD', 'OMR', 'QAR', 'LBP',
+        'USD',
+        'EUR',
+        'GBP',
+        'CAD',
+        'AUD',
+        'JPY',
+        'CHF',
+        'SEK',
+        'NOK',
+        'DKK',
+        'PLN',
+        'CZK',
+        'HUF',
+        'RON',
+        'BGN',
+        'HRK',
+        'BRL',
+        'MXN',
+        'ARS',
+        'CLP',
+        'COP',
+        'PEN',
+        'UYU',
+        'VES',
+        'ZAR',
+        'NGN',
+        'KES',
+        'EGP',
+        'XOF',
+        'XAF',
+        'MAD',
+        'TND',
+        'DZD',
+        'SGD',
+        'HKD',
+        'TWD',
+        'KRW',
+        'CNY',
+        'INR',
+        'IDR',
+        'THB',
+        'MYR',
+        'PHP',
+        'VND',
+        'PKR',
+        'BDT',
+        'LKR',
+        'NZD',
+        'AED',
+        'SAR',
+        'ILS',
+        'JOD',
+        'KWD',
+        'BHD',
+        'OMR',
+        'QAR',
+        'LBP',
       ],
       supportedCountries: [
-        'US', 'CA', 'GB', 'IE', 'FR', 'DE', 'ES', 'IT', 'NL', 'BE', 'AT', 'CH',
-        'SE', 'NO', 'DK', 'FI', 'PL', 'CZ', 'HU', 'RO', 'BG', 'HR', 'GR', 'PT',
-        'AU', 'NZ', 'JP', 'SG', 'HK', 'TW', 'KR', 'CN', 'IN', 'ID', 'TH', 'MY',
-        'PH', 'VN', 'PK', 'BD', 'LK', 'BR', 'MX', 'AR', 'CL', 'CO', 'PE', 'UY',
-        'ZA', 'NG', 'KE', 'EG', 'SN', 'CI', 'CM', 'MA', 'TN', 'DZ', 'AE', 'SA',
-        'IL', 'JO', 'KW', 'BH', 'OM', 'QA', 'LB',
+        'US',
+        'CA',
+        'GB',
+        'IE',
+        'FR',
+        'DE',
+        'ES',
+        'IT',
+        'NL',
+        'BE',
+        'AT',
+        'CH',
+        'SE',
+        'NO',
+        'DK',
+        'FI',
+        'PL',
+        'CZ',
+        'HU',
+        'RO',
+        'BG',
+        'HR',
+        'GR',
+        'PT',
+        'AU',
+        'NZ',
+        'JP',
+        'SG',
+        'HK',
+        'TW',
+        'KR',
+        'CN',
+        'IN',
+        'ID',
+        'TH',
+        'MY',
+        'PH',
+        'VN',
+        'PK',
+        'BD',
+        'LK',
+        'BR',
+        'MX',
+        'AR',
+        'CL',
+        'CO',
+        'PE',
+        'UY',
+        'ZA',
+        'NG',
+        'KE',
+        'EG',
+        'SN',
+        'CI',
+        'CM',
+        'MA',
+        'TN',
+        'DZ',
+        'AE',
+        'SA',
+        'IL',
+        'JO',
+        'KW',
+        'BH',
+        'OM',
+        'QA',
+        'LB',
       ],
       features: [
         PaymentFeature.ONE_TIME,
@@ -70,9 +180,9 @@ export class PayPalProvider extends BasePaymentProvider {
     const response = await fetch(`${this.paypalApiUrl}/v1/oauth2/token`, {
       method: 'POST',
       headers: {
-        'Accept': 'application/json',
+        Accept: 'application/json',
         'Accept-Language': 'en_US',
-        'Authorization': `Basic ${btoa(`${this.apiKey}:${this.apiSecret}`)}`,
+        Authorization: `Basic ${btoa(`${this.apiKey}:${this.apiSecret}`)}`,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: 'grant_type=client_credentials',
@@ -106,7 +216,7 @@ export class PayPalProvider extends BasePaymentProvider {
       const response = await fetch(`${this.paypalApiUrl}/v2/checkout/orders`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
           'PayPal-Request-Id': `order_${Date.now()}`,
         },
@@ -179,7 +289,7 @@ export class PayPalProvider extends BasePaymentProvider {
 
       const response = await fetch(`${this.paypalApiUrl}/v2/checkout/orders/${paymentId}`, {
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       });
 
@@ -189,7 +299,7 @@ export class PayPalProvider extends BasePaymentProvider {
 
       const order = await response.json();
 
-      let  status: PaymentStatus = PaymentStatus.PENDING;
+      let status: PaymentStatus = PaymentStatus.PENDING;
       if (order.status === 'COMPLETED') {
         status = PaymentStatus.COMPLETED;
       } else if (order.status === 'APPROVED') {
@@ -233,28 +343,55 @@ export class PayPalProvider extends BasePaymentProvider {
 
       const accessToken = await this.getAccessToken();
 
-      // Récupérer d'abord les détails de la commande pour obtenir le capture_id
-      const order = await this.verifyPayment(request.paymentId);
-      
-      // Pour PayPal, on doit capturer d'abord puis rembourser
-      // TODO: Implémenter la logique complète de capture puis refund
+      const orderResponse = await fetch(
+        `${this.paypalApiUrl}/v2/checkout/orders/${request.paymentId}`,
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }
+      );
 
-      const response = await fetch(`${this.paypalApiUrl}/v2/payments/captures/${request.paymentId}/refund`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          amount: request.amount
-            ? {
-                value: request.amount.toFixed(2),
-                currency_code: order.currency,
-              }
-            : undefined,
-          note_to_payer: request.reason || 'Refund requested',
-        }),
-      });
+      if (!orderResponse.ok) {
+        throw new Error(`PayPal order lookup failed: ${orderResponse.statusText}`);
+      }
+
+      const order = await orderResponse.json();
+      const captureId =
+        order.purchase_units?.[0]?.payments?.captures?.[0]?.id ??
+        order.purchase_units?.[0]?.payments?.authorizations?.[0]?.id ??
+        (request.paymentId.startsWith('CAPTURE-') || request.paymentId.length > 20
+          ? request.paymentId
+          : null);
+
+      if (!captureId) {
+        throw new Error(
+          'PayPal capture ID introuvable — la commande doit être capturée avant remboursement'
+        );
+      }
+
+      const currency =
+        order.purchase_units?.[0]?.amount?.currency_code ||
+        order.purchase_units?.[0]?.payments?.captures?.[0]?.amount?.currency_code ||
+        'USD';
+
+      const response = await fetch(
+        `${this.paypalApiUrl}/v2/payments/captures/${captureId}/refund`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            amount: request.amount
+              ? {
+                  value: request.amount.toFixed(2),
+                  currency_code: currency,
+                }
+              : undefined,
+            note_to_payer: request.reason || 'Refund requested',
+          }),
+        }
+      );
 
       if (!response.ok) {
         const error = await response.json();
@@ -299,11 +436,3 @@ export class PayPalProvider extends BasePaymentProvider {
     };
   }
 }
-
-
-
-
-
-
-
-

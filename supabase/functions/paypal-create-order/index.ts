@@ -7,6 +7,7 @@ import { createSupabaseAdmin } from '../_shared/supabase-admin.ts';
 import { computePayPalPlatformFee, createPayPalCheckoutOrder } from '../_shared/paypal-api.ts';
 import { resolveOrderPlatformFee } from '../_shared/order-platform-fee.ts';
 import { authorizeCheckoutOrder } from '../_shared/order-checkout-auth.ts';
+import { enforceRateLimit, getClientIp, RATE_LIMIT_PRESETS } from '../_shared/rate-limit.ts';
 
 interface CreateOrderBody {
   storeId: string;
@@ -50,6 +51,23 @@ serve(async req => {
     }
 
     const supabase = createSupabaseAdmin();
+
+    const rateLimit = await enforceRateLimit(
+      supabase,
+      getClientIp(req),
+      'checkout',
+      RATE_LIMIT_PRESETS.checkout
+    );
+    if (!rateLimit.allowed) {
+      return jsonResponse(
+        {
+          error: 'Trop de tentatives de paiement',
+          message: 'Veuillez patienter avant de réessayer.',
+        },
+        rateLimit.degraded ? 503 : 429,
+        origin
+      );
+    }
 
     const checkoutToken =
       body.checkoutToken ||

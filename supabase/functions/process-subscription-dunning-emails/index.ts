@@ -1,6 +1,6 @@
 /**
  * Cron : emails dunning abonnement produits physiques
- * (J-7, J-1, past_due, checkout auto-renouvellement)
+ * (J-7, J-1, past_due, J+3, J+7, expired, checkout auto-renouvellement)
  */
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
@@ -57,6 +57,9 @@ function buildEmailPayload(target: DunningEmailTarget, billingUrl: string) {
     'j-7': 'Renouvellement dans 7 jours',
     'j-1': 'Votre abonnement expire demain',
     past_due: 'Paiement en retard',
+    'j+3': '3 jours sans paiement',
+    'j+7': 'Dernier jour de grâce',
+    expired: 'Abonnement expiré — produits suspendus',
     auto_renew: 'Confirmez votre renouvellement Moneroo',
   };
 
@@ -65,6 +68,12 @@ function buildEmailPayload(target: DunningEmailTarget, billingUrl: string) {
       'Le renouvellement automatique sera initié si votre profil Moneroo est enregistré. Sinon, régularisez depuis votre espace facturation.',
     'j-1': 'Dernière chance avant suspension de vos produits physiques.',
     past_due: 'Vos produits physiques seront suspendus si le paiement n’est pas reçu sous 7 jours.',
+    'j+3':
+      'Votre abonnement est en retard depuis 3 jours. Régularisez avant la fin de la période de grâce.',
+    'j+7':
+      'C’est le dernier jour de grâce. Sans paiement aujourd’hui, vos produits seront suspendus demain.',
+    expired:
+      'Vos produits physiques sont suspendus. Réactivez votre abonnement pour reprendre les ventes.',
     auto_renew:
       'Un checkout Moneroo a été préparé avec votre profil enregistré. Une confirmation mobile money suffit.',
   };
@@ -73,6 +82,9 @@ function buildEmailPayload(target: DunningEmailTarget, billingUrl: string) {
     'j-7': 'Gérer la facturation',
     'j-1': 'Renouveler maintenant',
     past_due: 'Régulariser le paiement',
+    'j+3': 'Régulariser le paiement',
+    'j+7': 'Payer maintenant',
+    expired: 'Réactiver mon abonnement',
     auto_renew: 'Confirmer sur Moneroo',
   };
 

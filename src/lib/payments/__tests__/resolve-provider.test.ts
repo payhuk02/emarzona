@@ -79,6 +79,27 @@ describe('resolvePaymentProvider', () => {
     expect(result.provider).toBe('moneroo_platform');
   });
 
+  it('route XOF vers moneroo même si Stripe connecté (pas de carte XOF)', () => {
+    const connections = [
+      baseConnection({ id: 'c-m', provider: 'moneroo_platform' }),
+      baseConnection({
+        id: 'c-s',
+        provider: 'stripe_connect',
+        external_account_id: 'acct_123',
+        capabilities: { card_payments: true },
+      }),
+    ];
+
+    const result = resolvePaymentProvider({
+      storeId: 'store-1',
+      amount: 15_000,
+      currency: 'XOF',
+      connections,
+    });
+
+    expect(result.provider).toBe('moneroo_platform');
+  });
+
   it('respecte la préférence acheteur si compatible', () => {
     const connections = [
       baseConnection({ id: 'c-m', provider: 'moneroo_platform' }),

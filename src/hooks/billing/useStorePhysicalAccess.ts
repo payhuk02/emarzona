@@ -11,12 +11,16 @@ export type StorePhysicalAccessState = {
   monthlyPrice: number | null;
   trialEndsAt: string | null;
   trialDaysRemaining: number | null;
+  currentPeriodEnd: string | null;
+  pendingPlanSlug: string | null;
   refresh: () => Promise<void>;
 };
 
 type StorePlatformSubRow = {
   status: string | null;
   trial_ends_at: string | null;
+  current_period_end: string | null;
+  metadata: Record<string, unknown> | null;
   platform_vendor_plans: {
     name: string;
     slug: string;
@@ -34,6 +38,8 @@ const defaultState: Omit<StorePhysicalAccessState, 'refresh'> = {
   monthlyPrice: null,
   trialEndsAt: null,
   trialDaysRemaining: null,
+  currentPeriodEnd: null,
+  pendingPlanSlug: null,
 };
 
 function daysUntil(iso: string | null): number | null {
@@ -60,6 +66,8 @@ export function useStorePhysicalAccess(storeId?: string | null): StorePhysicalAc
           `
           status,
           trial_ends_at,
+          current_period_end,
+          metadata,
           platform_vendor_plans ( name, slug, monthly_price, trial_days )
         `
         )
@@ -93,6 +101,11 @@ export function useStorePhysicalAccess(storeId?: string | null): StorePhysicalAc
         monthlyPrice: plan?.monthly_price != null ? Number(plan.monthly_price) : null,
         trialEndsAt,
         trialDaysRemaining: allowed && status === 'trialing' ? daysUntil(trialEndsAt) : null,
+        currentPeriodEnd: row.current_period_end,
+        pendingPlanSlug:
+          typeof row.metadata?.pending_plan_slug === 'string'
+            ? row.metadata.pending_plan_slug
+            : null,
       });
     } catch {
       setState({ ...defaultState, loading: false });

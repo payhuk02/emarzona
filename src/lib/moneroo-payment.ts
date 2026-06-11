@@ -679,8 +679,8 @@ export const refundMonerooPayment = async (options: RefundOptions): Promise<Refu
       throw new MonerooValidationError('Transaction not found');
     }
 
-    // Vérifier que la transaction est complétée
-    if (transaction.status !== 'completed') {
+    // Vérifier que la transaction est remboursable
+    if (!['completed', 'partially_refunded'].includes(transaction.status ?? '')) {
       throw new MonerooValidationError(
         `Cannot refund transaction with status: ${transaction.status}`
       );
@@ -693,11 +693,15 @@ export const refundMonerooPayment = async (options: RefundOptions): Promise<Refu
       throw new MonerooValidationError('Transaction is not a Moneroo payment');
     }
 
-    // Vérifier le montant
+    // Vérifier le montant (cumul partiel)
     const txAmount = transaction.amount ?? 0;
-    const refundAmount = amount ?? txAmount;
-    if (refundAmount > txAmount) {
-      throw new MonerooValidationError('Refund amount cannot exceed transaction amount');
+    const alreadyRefunded = Number(
+      (transaction as { refunded_amount?: number }).refunded_amount ?? 0
+    );
+    const remaining = txAmount - alreadyRefunded;
+    const refundAmount = amount ?? remaining;
+    if (refundAmount > remaining + 0.01) {
+      throw new MonerooValidationError('Refund amount cannot exceed remaining transaction amount');
     }
 
     // Log de début de remboursement
@@ -717,17 +721,16 @@ export const refundMonerooPayment = async (options: RefundOptions): Promise<Refu
       reason: reason || 'Customer request',
     });
 
-    // Mettre à jour la transaction avec les infos de remboursement
-    const { error: updateError } = await supabase
-      .from('transactions')
-      .update({
-        status: 'refunded',
-        moneroo_refund_id: refundResponse.refund_id,
-        moneroo_refund_amount: refundResponse.amount,
-        moneroo_refund_reason: reason || 'Customer request',
-        refunded_at: new Date().toISOString(),
-        metadata: {
-          ...((transaction.metadata as Record<string, unknown>) || {}),
+    // Source of truth SQL (partiel ou total)
+    const { data: applyResult, error: applyError } = await supabase.rpc(
+      'apply_transaction_refund' as never,
+      {
+        p_transaction_id: transactionId,
+        p_refund_amount: refundResponse.amount,
+        p_refund_id: refundResponse.refund_id,
+        p_provider: 'moneroo',
+        p_reason: reason || 'Customer request',
+        p_metadata: {
           refund: {
             refund_id: refundResponse.refund_id,
             amount: refundResponse.amount,
@@ -737,48 +740,22 @@ export const refundMonerooPayment = async (options: RefundOptions): Promise<Refu
             reason,
           },
         },
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', transactionId);
-
-    if (updateError) {
-      logger.error('Error updating transaction with refund:', updateError);
-    }
-
-    // 🔧 CORRECTION : Mettre à jour l'order associée pour déclencher la mise à jour de store_earnings
-    if (transaction.order_id) {
-      const { error: orderUpdateError } = await supabase
-        .from('orders')
-        .update({
-          payment_status: 'refunded',
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', transaction.order_id);
-
-      if (orderUpdateError) {
-        logger.error('Error updating order with refund:', orderUpdateError);
-      } else {
-        logger.log('Order updated with refund status:', {
-          orderId: transaction.order_id,
-          transactionId,
-        });
       }
+    );
+
+    if (applyError) {
+      logger.error('apply_transaction_refund failed:', applyError);
+      throw new MonerooValidationError(applyError.message);
     }
 
-    // Log de remboursement complété
-    await supabase.from('transaction_logs').insert([
-      {
-        transaction_id: transactionId,
-        event_type: 'refund_completed',
-        status: 'completed',
-        response_data: refundResponse as unknown as Json,
-      },
-    ]);
+    const refundPayload = applyResult as { status?: string; refunded_amount?: number } | null;
+    const finalStatus = refundPayload?.status ?? 'refunded';
 
     logger.log('Refund completed:', {
       transactionId,
       refundId: refundResponse.refund_id,
       amount: refundResponse.amount,
+      status: finalStatus,
     });
 
     // Envoyer une notification de remboursement
@@ -791,7 +768,7 @@ export const refundMonerooPayment = async (options: RefundOptions): Promise<Refu
       customerName: transaction.customer_name || undefined,
       amount: refundResponse.amount,
       currency: refundResponse.currency,
-      status: 'refunded',
+      status: finalStatus,
       reason: reason || 'Customer request',
       orderId: transaction.order_id || undefined,
     }).catch(err => logger.warn('Error sending refund notification:', err));
@@ -801,7 +778,7 @@ export const refundMonerooPayment = async (options: RefundOptions): Promise<Refu
       refund_id: refundResponse.refund_id,
       amount: refundResponse.amount,
       currency: refundResponse.currency,
-      status: refundResponse.status,
+      status: finalStatus,
     };
   } catch (_error: unknown) {
     const monerooError = parseMonerooError(_error);

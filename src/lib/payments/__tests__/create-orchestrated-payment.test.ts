@@ -158,4 +158,38 @@ describe('createOrchestratedPayment', () => {
     expect(createStripeConnectPayment).not.toHaveBeenCalled();
     expect(result.provider).toBe('paypal_commerce');
   });
+
+  it('fallback Moneroo explicite si provider non prêt (Flutterwave)', async () => {
+    const connections = [
+      baseConnection({
+        id: 'c-f',
+        provider: 'flutterwave_connect',
+        external_account_id: 'flw_1',
+      }),
+      baseConnection({ id: 'c-m', provider: 'moneroo_platform' }),
+    ];
+    vi.mocked(loadStorePaymentConnections).mockResolvedValue(connections);
+    vi.mocked(createMonerooPlatformPayment).mockResolvedValue({
+      success: true,
+      transaction_id: 'tx-fallback',
+      checkout_url: 'https://pay.moneroo.io/fallback',
+      provider: 'moneroo_platform',
+    });
+
+    const result = await createOrchestratedPayment({
+      storeId: 'store-1',
+      orderId: 'order-fb',
+      amount: 5000,
+      currency: 'NGN',
+      description: 'Fallback test',
+      customerEmail: 'buyer@example.com',
+      preferredProvider: 'flutterwave_connect',
+      connections,
+    });
+
+    expect(createMonerooPlatformPayment).toHaveBeenCalled();
+    expect(result.provider).toBe('moneroo_platform');
+    expect(result.psp_fallback?.from_provider).toBe('flutterwave_connect');
+    expect(result.psp_fallback?.reason).toBe('provider_not_ready');
+  });
 });
