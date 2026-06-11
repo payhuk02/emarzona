@@ -1,0 +1,90 @@
+# Déploie les variables Payment V2 canary sur Vercel production + redéploiement.
+# Secrets requis : VERCEL_TOKEN, VERCEL_PROJECT_ID (optionnel : VERCEL_ORG_ID)
+name: Payment V2 Vercel rollout
+
+on:
+  workflow_dispatch:
+    inputs:
+      rollout_percent:
+        description: 'Pourcentage canary (10, 50, 100)'
+        required: true
+        default: '10'
+        type: choice
+        options:
+          - '10'
+          - '50'
+          - '100'
+      redeploy:
+        description: 'Redéployer production après mise à jour des variables'
+        required: true
+        default: true
+        type: boolean
+
+jobs:
+  rollout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Validate secrets
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          if [ -z "$VERCEL_TOKEN" ] || [ -z "$VERCEL_PROJECT_ID" ]; then
+            echo "Configure VERCEL_TOKEN and VERCEL_PROJECT_ID in repository secrets."
+            exit 1
+          fi
+
+      - name: Set Vercel production env vars
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          ROLLOUT: ${{ inputs.rollout_percent }}
+        run: |
+          set -euo pipefail
+          TEAM_QS=""
+          if [ -n "${VERCEL_ORG_ID:-}" ]; then
+            TEAM_QS="?teamId=${VERCEL_ORG_ID}"
+          fi
+          PROJECT_URL="https://api.vercel.com/v10/projects/${VERCEL_PROJECT_ID}/env${TEAM_QS}"
+
+          upsert_env() {
+            local key="$1"
+            local value="$2"
+            local existing
+            existing=$(curl -sfS -H "Authorization: Bearer ${VERCEL_TOKEN}" \
+              "${PROJECT_URL}" | jq -r --arg k "$key" '.envs[] | select(.key==$k and (.target|index("production"))) | .id' | head -1)
+            if [ -n "$existing" ] && [ "$existing" != "null" ]; then
+              curl -sfS -X PATCH -H "Authorization: Bearer ${VERCEL_TOKEN}" \
+                -H "Content-Type: application/json" \
+                "https://api.vercel.com/v9/projects/${VERCEL_PROJECT_ID}/env/${existing}${TEAM_QS}" \
+                -d "$(jq -n --arg v "$value" '{value: $v, target: ["production"], type: "plain"}')"
+            else
+              curl -sfS -X POST -H "Authorization: Bearer ${VERCEL_TOKEN}" \
+                -H "Content-Type: application/json" \
+                "${PROJECT_URL}" \
+                -d "$(jq -n --arg k "$key" --arg v "$value" '{key: $k, value: $v, target: ["production"], type: "plain"}')"
+            fi
+          }
+
+          upsert_env "VITE_PAYMENT_ORCHESTRATION_V2" "true"
+          upsert_env "VITE_PAYMENT_ORCHESTRATION_V2_ROLLOUT" "${ROLLOUT}"
+          echo "Production env: VITE_PAYMENT_ORCHESTRATION_V2=true, ROLLOUT=${ROLLOUT}"
+
+      - name: Redeploy production
+        if: inputs.redeploy
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+        run: |
+          set -euo pipefail
+          TEAM_QS=""
+          if [ -n "${VERCEL_ORG_ID:-}" ]; then
+            TEAM_QS="?teamId=${VERCEL_ORG_ID}"
+          fi
+          curl -sfS -X POST -H "Authorization: Bearer ${VERCEL_TOKEN}" \
+            "https://api.vercel.com/v13/deployments${TEAM_QS}" \
+            -H "Content-Type: application/json" \
+            -d "$(jq -n --arg pid "$VERCEL_PROJECT_ID" '{name: "emarzona", project: $pid, target: "production"}')"
