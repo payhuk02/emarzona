@@ -1,6 +1,8 @@
 export type PhysicalPlanSlug = 'physical_basic' | 'physical_standard' | 'physical_premium' | null;
 
 export type PhysicalFeatureKey =
+  | 'whatsapp.product_button'
+  | 'emails.manage'
   | 'shipping.tracking'
   | 'shipping.fedex_live'
   | 'suppliers.manage'
@@ -23,6 +25,8 @@ const PLAN_RANK: Record<Exclude<PhysicalPlanSlug, null>, number> = {
 };
 
 const MIN_PLAN_BY_FEATURE: Record<PhysicalFeatureKey, Exclude<PhysicalPlanSlug, null>> = {
+  'whatsapp.product_button': 'physical_basic',
+  'emails.manage': 'physical_standard',
   'shipping.tracking': 'physical_standard',
   'shipping.fedex_live': 'physical_standard',
   'suppliers.manage': 'physical_standard',

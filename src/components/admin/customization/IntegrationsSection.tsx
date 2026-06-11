@@ -99,6 +99,10 @@ export const IntegrationsSection = ({ onChange }: IntegrationsSectionProps) => {
       enabled: false,
       websiteId: '',
     },
+    whatsapp: {
+      enabled: true,
+      clickUrlBase: 'https://wa.me',
+    },
     sentry: {
       enabled: false,
       dsn: '',
@@ -684,6 +688,46 @@ export const IntegrationsSection = ({ onChange }: IntegrationsSectionProps) => {
                       value={integrations.sendgrid.apiKey}
                       onChange={e => handleIntegrationChange('sendgrid', 'apiKey', e.target.value)}
                       placeholder="re_xxx..."
+                      className="text-xs"
+                    />
+                  </div>
+                </CardContent>
+              )}
+            </Card>
+
+            {/* WhatsApp (boutons produit physique) */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-sm flex items-center gap-2">
+                      <MessageSquare className="h-4 w-4" />
+                      WhatsApp (produits physiques)
+                    </CardTitle>
+                    <CardDescription className="text-xs mt-1">
+                      URL de base pour les boutons vendeur sur les fiches produit (
+                      <code className="text-[10px]">wa.me</code>). Les vendeurs saisissent
+                      uniquement leur numéro dans le wizard.
+                    </CardDescription>
+                  </div>
+                  <Switch
+                    checked={integrations.whatsapp?.enabled ?? true}
+                    onCheckedChange={checked =>
+                      handleIntegrationChange('whatsapp', 'enabled', checked)
+                    }
+                  />
+                </div>
+              </CardHeader>
+              {(integrations.whatsapp?.enabled ?? true) && (
+                <CardContent>
+                  <div className="space-y-2">
+                    <Label className="text-xs">URL de clic (sans numéro)</Label>
+                    <Input
+                      value={integrations.whatsapp?.clickUrlBase ?? 'https://wa.me'}
+                      onChange={e =>
+                        handleIntegrationChange('whatsapp', 'clickUrlBase', e.target.value)
+                      }
+                      placeholder="https://wa.me"
                       className="text-xs"
                     />
                   </div>

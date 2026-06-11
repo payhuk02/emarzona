@@ -18,6 +18,16 @@ describe('physical-plan-capabilities (Epic 3.2.7)', () => {
     expect(hasPhysicalFeatureAccess('physical_standard', 'shipping.fedex_live')).toBe(true);
   });
 
+  it('WhatsApp product button available from Starter', () => {
+    expect(hasPhysicalFeatureAccess('physical_basic', 'whatsapp.product_button')).toBe(true);
+    expect(hasPhysicalFeatureAccess(null, 'whatsapp.product_button')).toBe(false);
+  });
+
+  it('email system requires Professional', () => {
+    expect(hasPhysicalFeatureAccess('physical_basic', 'emails.manage')).toBe(false);
+    expect(hasPhysicalFeatureAccess('physical_standard', 'emails.manage')).toBe(true);
+  });
+
   it('premium-only features stay on Enterprise', () => {
     expect(hasPhysicalFeatureAccess('physical_standard', 'forecasting.demand')).toBe(false);
     expect(hasPhysicalFeatureAccess('physical_premium', 'forecasting.demand')).toBe(true);

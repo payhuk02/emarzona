@@ -261,10 +261,6 @@ serve(async req => {
     const trackingNumber = body.tracking_number.trim();
     const result = await fetchFedExTracking(trackingNumber);
 
-    if (!hasFedexTrackCredentials() && result.source !== 'mock') {
-      result.source = 'mock';
-    }
-
     return new Response(JSON.stringify(result), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

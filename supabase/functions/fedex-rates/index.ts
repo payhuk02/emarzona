@@ -4,11 +4,7 @@
  */
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import {
-  allowFedexMockResponses,
-  fedexMockDisabledError,
-  hasFedexApiCredentials,
-} from '../_shared/fedex-policy.ts';
+import { allowFedexMockResponses, fedexMockDisabledError } from '../_shared/fedex-policy.ts';
 import { requireAuthenticatedUser } from '../_shared/edge-auth-utils.ts';
 
 const defaultAllowedOrigin = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
@@ -101,7 +97,9 @@ function mockRates(weightKg: number, toCountry: string): RateQuote[] {
   ];
 }
 
-async function fetchFedExRates(body: RateRequestBody): Promise<RateQuote[]> {
+type FedexRatesResult = { rates: RateQuote[]; source: 'fedex_api' | 'mock' };
+
+async function fetchFedExRates(body: RateRequestBody): Promise<FedexRatesResult> {
   const apiKey = Deno.env.get('FEDEX_API_KEY') || '';
   const apiSecret = Deno.env.get('FEDEX_API_SECRET') || '';
   const accountNumber = Deno.env.get('FEDEX_ACCOUNT_NUMBER') || '';
@@ -111,7 +109,7 @@ async function fetchFedExRates(body: RateRequestBody): Promise<RateQuote[]> {
     if (!allowFedexMockResponses()) {
       throw fedexMockDisabledError();
     }
-    return mockRates(body.weight_kg, body.ship_to.country);
+    return { rates: mockRates(body.weight_kg, body.ship_to.country), source: 'mock' };
   }
 
   const accessToken = await getFedExAccessToken(apiKey, apiSecret, testMode);
@@ -168,7 +166,7 @@ async function fetchFedExRates(body: RateRequestBody): Promise<RateQuote[]> {
     if (!allowFedexMockResponses()) {
       throw new Error('FEDEX_API_FAILED');
     }
-    return mockRates(body.weight_kg, body.ship_to.country);
+    return { rates: mockRates(body.weight_kg, body.ship_to.country), source: 'mock' };
   }
 
   const data = await response.json();
@@ -178,10 +176,10 @@ async function fetchFedExRates(body: RateRequestBody): Promise<RateQuote[]> {
     if (!allowFedexMockResponses()) {
       throw new Error('FEDEX_API_EMPTY');
     }
-    return mockRates(body.weight_kg, body.ship_to.country);
+    return { rates: mockRates(body.weight_kg, body.ship_to.country), source: 'mock' };
   }
 
-  return rateReplyDetails.map((rate: Record<string, unknown>) => {
+  const rates = rateReplyDetails.map((rate: Record<string, unknown>) => {
     const totalNetCharge = rate.totalNetCharge as
       | { amount?: string; currency?: string }
       | undefined;
@@ -195,6 +193,8 @@ async function fetchFedExRates(body: RateRequestBody): Promise<RateQuote[]> {
       estimated_days: commit?.daysInTransit || 5,
     };
   });
+
+  return { rates, source: 'fedex_api' };
 }
 
 serve(async req => {
@@ -228,9 +228,7 @@ serve(async req => {
     const weightKg =
       typeof body.weight_kg === 'number' && body.weight_kg > 0 ? body.weight_kg : 0.5;
 
-    const hasCredentials = hasFedexApiCredentials();
-    const rates = await fetchFedExRates({ ...body, weight_kg: weightKg });
-    const source = hasCredentials ? 'fedex_api' : 'mock';
+    const { rates, source } = await fetchFedExRates({ ...body, weight_kg: weightKg });
 
     return new Response(
       JSON.stringify({

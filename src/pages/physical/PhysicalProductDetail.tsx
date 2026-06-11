@@ -59,6 +59,7 @@ import {
   PhysicalProductRecommendations,
   BoughtTogetherPhysicalRecommendations,
 } from '@/components/physical/PhysicalProductRecommendations';
+import { PhysicalProductWhatsAppButton } from '@/components/physical/PhysicalProductWhatsAppButton';
 import type { PhysicalProductVariant } from '@/types/physical-product';
 import type { InventoryItem } from '@/hooks/physical/useInventory';
 
@@ -66,7 +67,7 @@ const STORE_PUBLIC_FIELDS = 'id, name, slug, logo_url';
 const PRODUCT_PHYSICAL_FIELDS =
   'id, store_id, slug, name, description, short_description, category, tags, product_type, is_active, price, promotional_price, currency, image_url, images, created_at, updated_at, payment_options, pricing_model, licensing_type, license_terms';
 const PHYSICAL_PRODUCT_FIELDS =
-  'id, product_id, store_id, sku, manufacturer, country_of_origin, weight_kg, length_cm, width_cm, height_cm, dimensions, total_stock, created_at, updated_at';
+  'id, product_id, store_id, sku, manufacturer, country_of_origin, weight_kg, length_cm, width_cm, height_cm, dimensions, total_stock, whatsapp_number, whatsapp_enabled, created_at, updated_at';
 const PHYSICAL_VARIANT_FIELDS =
   'id, physical_product_id, store_id, name, sku, price, compare_at_price, is_active, attributes, created_at, updated_at';
 const PHYSICAL_INVENTORY_FIELDS =
@@ -521,6 +522,13 @@ export default function PhysicalProductDetail() {
 
           {/* Actions */}
           <div className="space-y-3">
+            <PhysicalProductWhatsAppButton
+              productName={product?.name || 'Produit'}
+              whatsappNumber={product?.physical?.whatsapp_number}
+              whatsappEnabled={product?.physical?.whatsapp_enabled}
+              className="w-full"
+            />
+
             <Button
               onClick={handleAddToCart}
               className="w-full"

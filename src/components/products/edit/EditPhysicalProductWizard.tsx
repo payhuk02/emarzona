@@ -45,6 +45,9 @@ import { PhysicalSEOAndFAQs } from '../create/physical/PhysicalSEOAndFAQs';
 import { PhysicalPreview } from '../create/physical/PhysicalPreview';
 import { PaymentOptionsForm } from '../create/shared/PaymentOptionsForm';
 import { ProductStatisticsDisplaySettings } from '../create/shared/ProductStatisticsDisplaySettings';
+import { PhysicalWhatsAppContactConfig } from '@/components/physical/PhysicalWhatsAppContactConfig';
+import { useStorePhysicalPlanLimits } from '@/hooks/billing/useStorePhysicalPlanLimits';
+import { hasPhysicalFeatureAccess } from '@/lib/billing/physical-plan-capabilities';
 import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/hooks/useStore';
 import { useAuth } from '@/contexts/AuthContext';
@@ -64,9 +67,12 @@ import {
 } from '@/lib/wizard-validation';
 import { useQuery } from '@tanstack/react-query';
 
-const PRODUCT_FIELDS = 'id, store_id, name, slug, description, short_description, price, compare_at_price, cost_per_item, images, image_url, category_id, tags, meta_title, meta_description, og_image, faqs, payment_options, hide_purchase_count, hide_likes_count, hide_recommendations_count, hide_downloads_count, hide_reviews_count, hide_rating, is_active';
-const PHYSICAL_PRODUCT_FIELDS = 'id, product_id, track_inventory, continue_selling_when_out_of_stock, inventory_policy, quantity, sku, barcode, requires_shipping, weight, weight_unit, dimensions, shipping_class, free_shipping, affiliate_settings';
-const PRODUCT_VARIANT_FIELDS = 'id, physical_product_id, option1_value, option2_value, option3_value, price, compare_at_price, cost_per_item, sku, barcode, quantity, weight, image_url';
+const PRODUCT_FIELDS =
+  'id, store_id, name, slug, description, short_description, price, compare_at_price, cost_per_item, images, image_url, category_id, tags, meta_title, meta_description, og_image, faqs, payment_options, hide_purchase_count, hide_likes_count, hide_recommendations_count, hide_downloads_count, hide_reviews_count, hide_rating, is_active';
+const PHYSICAL_PRODUCT_FIELDS =
+  'id, product_id, track_inventory, continue_selling_when_out_of_stock, inventory_policy, quantity, sku, barcode, requires_shipping, weight, weight_unit, dimensions, shipping_class, free_shipping, affiliate_settings, whatsapp_number, whatsapp_enabled';
+const PRODUCT_VARIANT_FIELDS =
+  'id, physical_product_id, option1_value, option2_value, option3_value, price, compare_at_price, cost_per_item, sku, barcode, quantity, weight, image_url';
 const PHYSICAL_PRODUCT_INVENTORY_FIELDS = 'id, product_id, quantity_available';
 
 const STEPS = [
@@ -147,15 +153,20 @@ interface EditPhysicalProductWizardProps {
  * Convert physical product from DB to form data
  * ✅ SÉCURITÉ: Inclut validation de propriété
  */
-const convertToFormData = async (productId: string, userId?: string): Promise<Partial<PhysicalProductFormData>> => {
+const convertToFormData = async (
+  productId: string,
+  userId?: string
+): Promise<Partial<PhysicalProductFormData>> => {
   // ✅ SÉCURITÉ: Vérifier propriété du produit avant chargement
   if (userId) {
     const { data: ownershipCheck, error: ownershipError } = await supabase
       .from('products')
-      .select(`
+      .select(
+        `
         id,
         stores!inner(user_id)
-      `)
+      `
+      )
       .eq('id', productId)
       .eq('stores.user_id', userId)
       .single();
@@ -312,6 +323,10 @@ const convertToFormData = async (productId: string, userId?: string): Promise<Pa
     // Size Chart
     size_chart_id: sizeChart?.size_chart_id || null,
 
+    // WhatsApp
+    whatsapp_number: physicalProduct?.whatsapp_number || '',
+    whatsapp_enabled: physicalProduct?.whatsapp_enabled ?? false,
+
     // Statistics Display Settings
     hide_purchase_count: product.hide_purchase_count || false,
     hide_likes_count: product.hide_likes_count || false,
@@ -339,6 +354,7 @@ export const EditPhysicalProductWizard = ({
   const { store: hookStore, loading: storeLoading } = useStore();
   const store = hookStore || (propsStoreId ? { id: propsStoreId } : null);
   const storeId = propsStoreId || store?.id;
+  const { data: planLimits } = useStorePhysicalPlanLimits(storeId);
 
   // Load existing product with security validation and cache optimisé
   const {
@@ -561,16 +577,18 @@ export const EditPhysicalProductWizard = ({
       if (user) {
         const { data: ownershipCheck, error: ownershipError } = await supabase
           .from('products')
-          .select(`
+          .select(
+            `
             id,
             stores!inner(user_id)
-          `)
+          `
+          )
           .eq('id', productId)
           .eq('stores.user_id', user.id)
           .single();
 
         if (ownershipError || !ownershipCheck) {
-          throw new Error('Vous n\'avez pas les permissions pour modifier ce produit');
+          throw new Error("Vous n'avez pas les permissions pour modifier ce produit");
         }
       }
       // Generate slug if not provided
@@ -667,6 +685,8 @@ export const EditPhysicalProductWizard = ({
         shipping_class: formData.shipping_class,
         free_shipping: formData.free_shipping || false,
         affiliate_settings: formData.affiliate,
+        whatsapp_number: formData.whatsapp_number?.trim() || null,
+        whatsapp_enabled: Boolean(formData.whatsapp_enabled && formData.whatsapp_number?.trim()),
       };
 
       if (existingPhysical) {
@@ -993,6 +1013,20 @@ export const EditPhysicalProductWizard = ({
             ) : currentStep === 7 ? (
               <div className="space-y-6">
                 {CurrentStepComponent && <CurrentStepComponent {...getStepProps()} />}
+                {hasPhysicalFeatureAccess(
+                  (planLimits?.plan_slug as
+                    | 'physical_basic'
+                    | 'physical_standard'
+                    | 'physical_premium') ?? null,
+                  'whatsapp.product_button'
+                ) && (
+                  <PhysicalWhatsAppContactConfig
+                    whatsappNumber={formData.whatsapp_number || ''}
+                    whatsappEnabled={Boolean(formData.whatsapp_enabled)}
+                    onChange={patch => handleUpdateFormData(patch)}
+                    disabled={isSaving}
+                  />
+                )}
                 <ProductStatisticsDisplaySettings
                   formData={{
                     hide_purchase_count: formData.hide_purchase_count,

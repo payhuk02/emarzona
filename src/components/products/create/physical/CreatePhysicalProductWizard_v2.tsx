@@ -48,6 +48,8 @@ import { PhysicalSEOAndFAQs } from './PhysicalSEOAndFAQs';
 import { PhysicalPreview } from './PhysicalPreview';
 import { PaymentOptionsForm } from '../shared/PaymentOptionsForm';
 import { ProductStatisticsDisplaySettings } from '../shared/ProductStatisticsDisplaySettings';
+import { PhysicalWhatsAppContactConfig } from '@/components/physical/PhysicalWhatsAppContactConfig';
+import { hasPhysicalFeatureAccess } from '@/lib/billing/physical-plan-capabilities';
 import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/hooks/useStore';
 import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
@@ -262,6 +264,10 @@ export const CreatePhysicalProductWizard = ({
 
     // Size Chart (Step 5)
     size_chart_id: null as string | null,
+
+    // WhatsApp (Starter)
+    whatsapp_number: '',
+    whatsapp_enabled: false,
 
     // Statistics Display Settings
     hide_purchase_count: false,
@@ -760,6 +766,8 @@ export const CreatePhysicalProductWizard = ({
           is_perishable: formData.is_perishable || false,
           customs_value: formData.customs_value,
           country_of_origin: formData.country_of_origin || 'CI',
+          whatsapp_number: formData.whatsapp_number?.trim() || null,
+          whatsapp_enabled: Boolean(formData.whatsapp_enabled && formData.whatsapp_number?.trim()),
         })
         .select('id')
         .single();
@@ -1263,6 +1271,20 @@ export const CreatePhysicalProductWizard = ({
             ) : currentStep === 7 ? (
               <div className="space-y-6">
                 <CurrentStepComponent {...getStepProps()} />
+                {hasPhysicalFeatureAccess(
+                  (planLimits?.plan_slug as
+                    | 'physical_basic'
+                    | 'physical_standard'
+                    | 'physical_premium') ?? null,
+                  'whatsapp.product_button'
+                ) && (
+                  <PhysicalWhatsAppContactConfig
+                    whatsappNumber={formData.whatsapp_number || ''}
+                    whatsappEnabled={Boolean(formData.whatsapp_enabled)}
+                    onChange={patch => handleUpdateFormData(patch)}
+                    disabled={isSaving}
+                  />
+                )}
                 <ProductStatisticsDisplaySettings
                   formData={{
                     hide_purchase_count: formData.hide_purchase_count,

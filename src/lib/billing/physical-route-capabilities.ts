@@ -6,6 +6,13 @@ import {
 } from '@/lib/billing/physical-plan-capabilities';
 
 const PHYSICAL_ROUTE_FEATURES: Record<string, PhysicalFeatureKey> = {
+  '/dashboard/emails/campaigns': 'emails.manage',
+  '/dashboard/emails/sequences': 'emails.manage',
+  '/dashboard/emails/segments': 'emails.manage',
+  '/dashboard/emails/analytics': 'emails.manage',
+  '/dashboard/emails/workflows': 'emails.manage',
+  '/dashboard/emails/tags': 'emails.manage',
+  '/dashboard/emails/templates/editor': 'emails.manage',
   '/dashboard/shipping-services': 'shipping.tracking',
   '/dashboard/physical-analytics': 'analytics.physical',
   '/dashboard/suppliers': 'suppliers.manage',

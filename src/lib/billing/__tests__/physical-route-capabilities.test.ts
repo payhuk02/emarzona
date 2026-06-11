@@ -38,4 +38,10 @@ describe('physical-route-capabilities', () => {
   it('returns required plan label for blocked route', () => {
     expect(requiredPlanLabelForPath('/dashboard/batch-shipping')).toBe('PREMIUM');
   });
+
+  it('gates email routes to Professional plan', () => {
+    expect(requiredPhysicalFeatureForPath('/dashboard/emails/campaigns')).toBe('emails.manage');
+    expect(canAccessSellerPath('/dashboard/emails/sequences', 'physical_basic')).toBe(false);
+    expect(canAccessSellerPath('/dashboard/emails/campaigns', 'physical_standard')).toBe(true);
+  });
 });

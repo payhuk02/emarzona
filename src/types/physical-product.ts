@@ -60,12 +60,12 @@ export interface PhysicalProductFormData {
   images: string[];
   category_id: string | null;
   tags: string[];
-  
+
   // Variants
   has_variants: boolean;
   variants: PhysicalProductVariant[];
   options: PhysicalProductOption[];
-  
+
   // Inventory
   track_inventory: boolean;
   continue_selling_when_out_of_stock: boolean;
@@ -73,7 +73,7 @@ export interface PhysicalProductFormData {
   quantity: number;
   sku: string;
   barcode: string;
-  
+
   // Shipping
   requires_shipping: boolean;
   weight: number | null;
@@ -81,13 +81,13 @@ export interface PhysicalProductFormData {
   dimensions: PhysicalProductDimensions;
   shipping_class: string | null;
   free_shipping: boolean;
-  
+
   // Affiliate (optional)
   affiliate?: PhysicalProductAffiliateSettings;
-  
+
   // Payment Options (optional)
   payment?: PhysicalProductPaymentOptions;
-  
+
   // SEO & FAQs (optional)
   seo?: {
     meta_title?: string;
@@ -103,12 +103,12 @@ export interface PhysicalProductFormData {
     answer: string;
     order?: number;
   }>;
-  
+
   // Additional fields
   customs_value?: number | null;
   country_of_origin?: string;
   size_chart_id?: string | null;
-  
+
   // Statistics Display Settings
   hide_purchase_count?: boolean;
   hide_likes_count?: boolean;
@@ -116,7 +116,11 @@ export interface PhysicalProductFormData {
   hide_downloads_count?: boolean;
   hide_reviews_count?: boolean;
   hide_rating?: boolean;
-  
+
+  // WhatsApp (Starter — URL base configurée admin)
+  whatsapp_number?: string;
+  whatsapp_enabled?: boolean;
+
   // Meta
   is_active: boolean;
   store_id?: string;
@@ -130,10 +134,3 @@ export type PhysicalProductFormDataUpdate = Partial<PhysicalProductFormData> & {
   payment?: Partial<PhysicalProductPaymentOptions>;
   variants?: PhysicalProductVariant[];
 };
-
-
-
-
-
-
-

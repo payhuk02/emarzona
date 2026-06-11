@@ -1,7 +1,7 @@
 /**
  * Physical Product Analytics Dashboard
  * Date: 28 octobre 2025
- * 
+ *
  * Dashboard analytics professionnel pour produits physiques
  */
 
@@ -27,9 +27,7 @@ interface PhysicalAnalyticsDashboardProps {
   productId: string;
 }
 
-export const PhysicalAnalyticsDashboard = ({
-  productId,
-}: PhysicalAnalyticsDashboardProps) => {
+export const PhysicalAnalyticsDashboard = ({ productId }: PhysicalAnalyticsDashboardProps) => {
   // Get product data
   const { data: product, isLoading: isLoadingProduct } = usePhysicalProduct(productId);
 
@@ -38,12 +36,28 @@ export const PhysicalAnalyticsDashboard = ({
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
   const startDate = thirtyDaysAgo.toISOString().split('T')[0];
 
+  const { data: productViews, isLoading: isLoadingViews } = useQuery({
+    queryKey: ['product-views', productId, startDate],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from('product_views')
+        .select('id', { count: 'exact', head: true })
+        .eq('product_id', productId)
+        .gte('created_at', `${startDate}T00:00:00`);
+
+      if (error) throw error;
+      return count ?? 0;
+    },
+    enabled: !!productId,
+  });
+
   const { data: orders, isLoading: isLoadingOrders } = useQuery({
     queryKey: ['product-orders', productId, startDate],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('order_items')
-        .select(`
+        .select(
+          `
           *,
           order:orders(
             id,
@@ -53,7 +67,8 @@ export const PhysicalAnalyticsDashboard = ({
             created_at,
             shipping_status
           )
-        `)
+        `
+        )
         .eq('product_id', productId)
         .gte('order.created_at', startDate);
 
@@ -66,7 +81,7 @@ export const PhysicalAnalyticsDashboard = ({
   // Calculate stats
   const stats = useMemo(() => {
     const orderItems = orders || [];
-    
+
     // Get unique orders
     const uniqueOrders = new Map();
     orderItems.forEach(item => {
@@ -74,28 +89,26 @@ export const PhysicalAnalyticsDashboard = ({
         uniqueOrders.set(item.order.id, item.order);
       }
     });
-    
+
     const ordersList = Array.from(uniqueOrders.values());
-    
+
     // Calculate metrics
     const totalSales = orderItems.reduce((sum, item) => sum + (item.quantity || 0), 0);
     const revenue = ordersList
       .filter(o => o.status === 'completed' || o.status === 'shipped')
       .reduce((sum, o) => sum + (o.total_amount || 0), 0);
-    
-    const completedOrders = ordersList.filter(o => 
-      o.status === 'completed' || o.status === 'shipped'
-    );
-    const averageOrderValue = completedOrders.length > 0
-      ? revenue / completedOrders.length
-      : 0;
 
-    const shippedOrders = ordersList.filter(o => 
-      o.shipping_status === 'shipped' || o.shipping_status === 'delivered'
+    const completedOrders = ordersList.filter(
+      o => o.status === 'completed' || o.status === 'shipped'
+    );
+    const averageOrderValue = completedOrders.length > 0 ? revenue / completedOrders.length : 0;
+
+    const shippedOrders = ordersList.filter(
+      o => o.shipping_status === 'shipped' || o.shipping_status === 'delivered'
     ).length;
-    
-    const pendingOrders = ordersList.filter(o => 
-      o.status === 'pending' || o.status === 'processing'
+
+    const pendingOrders = ordersList.filter(
+      o => o.status === 'pending' || o.status === 'processing'
     ).length;
 
     // Stock level
@@ -103,8 +116,9 @@ export const PhysicalAnalyticsDashboard = ({
     const lowStockThreshold = product?.low_stock_threshold || 10;
     const lowStockItems = stockLevel <= lowStockThreshold ? 1 : 0;
 
-    // Conversion rate (simplified - would need view data)
-    const conversionRate = 0; // TODO: Calculate from product views
+    const viewsCount = productViews ?? 0;
+    const conversionRate =
+      viewsCount > 0 ? Number(((completedOrders.length / viewsCount) * 100).toFixed(2)) : 0;
 
     return {
       totalSales,
@@ -116,15 +130,15 @@ export const PhysicalAnalyticsDashboard = ({
       pendingOrders,
       conversionRate,
     };
-  }, [orders, product]);
+  }, [orders, product, productViews]);
 
-  const isLoading = isLoadingProduct || isLoadingOrders;
+  const isLoading = isLoadingProduct || isLoadingOrders || isLoadingViews;
 
   if (isLoading) {
     return (
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map((i) => (
+          {[1, 2, 3, 4].map(i => (
             <Card key={i}>
               <CardHeader className="space-y-0 pb-2">
                 <Skeleton className="h-4 w-24 mb-2" />
@@ -151,9 +165,7 @@ export const PhysicalAnalyticsDashboard = ({
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalSales}</div>
-            <p className="text-xs text-muted-foreground">
-              Unités vendues (30 derniers jours)
-            </p>
+            <p className="text-xs text-muted-foreground">Unités vendues (30 derniers jours)</p>
           </CardContent>
         </Card>
 
@@ -163,7 +175,9 @@ export const PhysicalAnalyticsDashboard = ({
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{Math.round(stats.revenue).toLocaleString()} XOF</div>
+            <div className="text-2xl font-bold">
+              {Math.round(stats.revenue).toLocaleString()} XOF
+            </div>
             <p className="text-xs text-muted-foreground">
               Panier moyen: {Math.round(stats.averageOrderValue).toLocaleString()} XOF
             </p>
@@ -222,7 +236,7 @@ export const PhysicalAnalyticsDashboard = ({
                 <Badge variant="outline">Objectif: 3%</Badge>
               </div>
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Users className="h-4 w-4 text-blue-600" />
@@ -246,14 +260,17 @@ export const PhysicalAnalyticsDashboard = ({
       <Card>
         <CardHeader>
           <CardTitle>Analytics Avancés</CardTitle>
-          <CardDescription>Graphiques et statistiques détaillées (en développement)</CardDescription>
+          <CardDescription>
+            Graphiques et statistiques détaillées (en développement)
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <BarChart3 className="h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">Fonctionnalité en cours de développement</h3>
             <p className="text-sm text-muted-foreground max-w-md">
-              Les graphiques de ventes, tendances d'inventaire et analytics détaillés seront bientôt disponibles.
+              Les graphiques de ventes, tendances d'inventaire et analytics détaillés seront bientôt
+              disponibles.
             </p>
           </div>
         </CardContent>
@@ -261,10 +278,3 @@ export const PhysicalAnalyticsDashboard = ({
     </div>
   );
 };
-
-
-
-
-
-
-

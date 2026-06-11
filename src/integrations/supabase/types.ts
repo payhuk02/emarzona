@@ -22497,6 +22497,8 @@ export type Database = {
           updated_at: string | null;
           weight: number | null;
           weight_unit: string | null;
+          whatsapp_enabled: boolean;
+          whatsapp_number: string | null;
           width: number | null;
         };
         Insert: {
@@ -22531,6 +22533,8 @@ export type Database = {
           updated_at?: string | null;
           weight?: number | null;
           weight_unit?: string | null;
+          whatsapp_enabled?: boolean;
+          whatsapp_number?: string | null;
           width?: number | null;
         };
         Update: {
@@ -22565,6 +22569,8 @@ export type Database = {
           updated_at?: string | null;
           weight?: number | null;
           weight_unit?: string | null;
+          whatsapp_enabled?: boolean;
+          whatsapp_number?: string | null;
           width?: number | null;
         };
         Relationships: [
@@ -45513,6 +45519,7 @@ export type Database = {
         Args: { setting_key?: string };
         Returns: Json;
       };
+      get_public_whatsapp_config: { Args: never; Returns: Json };
       get_push_subscriptions_for_user: {
         Args: { p_user_id: string };
         Returns: {

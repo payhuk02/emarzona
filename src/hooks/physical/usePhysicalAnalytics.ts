@@ -6,11 +6,16 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-const PHYSICAL_PRODUCT_ANALYTICS_FIELDS = 'id, physical_product_id, variant_id, warehouse_id, period_start, period_end, period_type, units_sold, revenue, average_order_value, conversion_rate, average_stock_level, stock_turnover_rate, days_of_inventory, cost_of_goods_sold, gross_profit, gross_profit_margin, shipping_costs, total_costs, net_profit, net_profit_margin, return_rate, refund_rate, average_rating, review_count, calculated_at';
-const SALES_FORECAST_FIELDS = 'id, physical_product_id, variant_id, warehouse_id, forecast_date, forecast_type, forecast_method, predicted_units, confidence_level, lower_bound, upper_bound, actual_units, accuracy_percentage, notes, created_by';
-const WAREHOUSE_PERFORMANCE_FIELDS = 'id, warehouse_id, period_start, period_end, period_type, total_orders_fulfilled, total_units_shipped, average_fulfillment_time_hours, on_time_delivery_rate, total_inventory_value, average_stock_level, stock_accuracy_rate, shrinkage_rate, operational_costs, shipping_costs, storage_costs, labor_costs, total_costs, total_revenue, net_profit, profit_margin, orders_per_hour, units_per_hour, cost_per_order, cost_per_unit';
-const GEOGRAPHIC_SALES_FIELDS = 'id, store_id, country, region, city, postal_code, period_start, period_end, period_type, total_orders, total_units_sold, total_revenue, average_order_value, unique_customers, repeat_customer_rate, customer_acquisition_cost, customer_lifetime_value, top_selling_product_id, top_selling_variant_id';
-const STOCK_ROTATION_REPORT_FIELDS = 'id, physical_product_id, variant_id, warehouse_id, period_start, period_end, beginning_inventory, ending_inventory, average_inventory, units_sold, cost_of_goods_sold, inventory_turnover_ratio, days_sales_of_inventory, stock_velocity, previous_period_turnover, turnover_change_percentage';
+const PHYSICAL_PRODUCT_ANALYTICS_FIELDS =
+  'id, physical_product_id, variant_id, warehouse_id, period_start, period_end, period_type, units_sold, revenue, average_order_value, conversion_rate, average_stock_level, stock_turnover_rate, days_of_inventory, cost_of_goods_sold, gross_profit, gross_profit_margin, shipping_costs, total_costs, net_profit, net_profit_margin, return_rate, refund_rate, average_rating, review_count, calculated_at';
+const SALES_FORECAST_FIELDS =
+  'id, physical_product_id, variant_id, warehouse_id, forecast_date, forecast_type, forecast_method, predicted_units, confidence_level, lower_bound, upper_bound, actual_units, accuracy_percentage, notes, created_by';
+const WAREHOUSE_PERFORMANCE_FIELDS =
+  'id, warehouse_id, period_start, period_end, period_type, total_orders_fulfilled, total_units_shipped, average_fulfillment_time_hours, on_time_delivery_rate, total_inventory_value, average_stock_level, stock_accuracy_rate, shrinkage_rate, operational_costs, shipping_costs, storage_costs, labor_costs, total_costs, total_revenue, net_profit, profit_margin, orders_per_hour, units_per_hour, cost_per_order, cost_per_unit';
+const GEOGRAPHIC_SALES_FIELDS =
+  'id, store_id, country, region, city, postal_code, period_start, period_end, period_type, total_orders, total_units_sold, total_revenue, average_order_value, unique_customers, repeat_customer_rate, customer_acquisition_cost, customer_lifetime_value, top_selling_product_id, top_selling_variant_id';
+const STOCK_ROTATION_REPORT_FIELDS =
+  'id, physical_product_id, variant_id, warehouse_id, period_start, period_end, beginning_inventory, ending_inventory, average_inventory, units_sold, cost_of_goods_sold, inventory_turnover_ratio, days_sales_of_inventory, stock_velocity, previous_period_turnover, turnover_change_percentage';
 
 // =====================================================
 // TYPES
@@ -52,7 +57,12 @@ export interface SalesForecast {
   warehouse_id?: string;
   forecast_date: string;
   forecast_type: 'short_term' | 'medium_term' | 'long_term';
-  forecast_method: 'moving_average' | 'exponential_smoothing' | 'linear_regression' | 'seasonal' | 'manual';
+  forecast_method:
+    | 'moving_average'
+    | 'exponential_smoothing'
+    | 'linear_regression'
+    | 'seasonal'
+    | 'manual';
   predicted_units: number;
   confidence_level: number;
   lower_bound?: number;
@@ -152,7 +162,7 @@ export const useProductAnalytics = (
   return useQuery({
     queryKey: ['physical-product-analytics', physicalProductId, options],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('physical_product_analytics')
         .select(PHYSICAL_PRODUCT_ANALYTICS_FIELDS)
         .eq('physical_product_id', physicalProductId)
@@ -205,7 +215,7 @@ export const useStorePhysicalAnalytics = (
 
       if (productsError) throw productsError;
 
-      const productIds = products?.map((p) => p.id) || [];
+      const productIds = products?.map(p => p.id) || [];
 
       if (productIds.length === 0) {
         return {
@@ -220,7 +230,7 @@ export const useStorePhysicalAnalytics = (
         };
       }
 
-      let  query= supabase
+      let query = supabase
         .from('physical_product_analytics')
         .select(PHYSICAL_PRODUCT_ANALYTICS_FIELDS)
         .in('physical_product_id', productIds)
@@ -247,12 +257,19 @@ export const useStorePhysicalAnalytics = (
       const totalGrossProfit = analytics.reduce((sum, a) => sum + (a.gross_profit || 0), 0);
       const totalNetProfit = analytics.reduce((sum, a) => sum + (a.net_profit || 0), 0);
       const totalOrders = analytics.reduce((sum, a) => sum + (a.units_sold || 0), 0);
+      const conversionSamples = analytics.filter(a => (a.conversion_rate ?? 0) > 0);
+      const averageConversionRate =
+        conversionSamples.length > 0
+          ? conversionSamples.reduce((sum, a) => sum + (a.conversion_rate || 0), 0) /
+            conversionSamples.length
+          : 0;
 
       return {
         total_revenue: totalRevenue,
         total_units_sold: totalUnitsSold,
-        total_products: new Set(analytics.map((a) => a.physical_product_id)).size,
+        total_products: new Set(analytics.map(a => a.physical_product_id)).size,
         average_order_value: totalOrders > 0 ? totalRevenue / totalOrders : 0,
+        average_conversion_rate: Number(averageConversionRate.toFixed(2)),
         total_gross_profit: totalGrossProfit,
         total_net_profit: totalNetProfit,
         average_gross_margin: totalRevenue > 0 ? (totalGrossProfit / totalRevenue) * 100 : 0,
@@ -284,7 +301,7 @@ export const useSalesForecasts = (
   return useQuery({
     queryKey: ['sales-forecasts', physicalProductId, options],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('sales_forecasts')
         .select(SALES_FORECAST_FIELDS)
         .eq('physical_product_id', physicalProductId)
@@ -334,7 +351,7 @@ export const useCreateSalesForecast = () => {
       if (error) throw error;
       return data as SalesForecast;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({
         queryKey: ['sales-forecasts', data.physical_product_id],
       });
@@ -360,7 +377,7 @@ export const useWarehousePerformance = (
   return useQuery({
     queryKey: ['warehouse-performance', warehouseId, options],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('warehouse_performance')
         .select(WAREHOUSE_PERFORMANCE_FIELDS)
         .eq('warehouse_id', warehouseId)
@@ -408,13 +425,13 @@ export const useStoreWarehousePerformance = (
 
       if (warehousesError) throw warehousesError;
 
-      const warehouseIds = warehouses?.map((w) => w.id) || [];
+      const warehouseIds = warehouses?.map(w => w.id) || [];
 
       if (warehouseIds.length === 0) {
         return [];
       }
 
-      let  query= supabase
+      let query = supabase
         .from('warehouse_performance')
         .select(WAREHOUSE_PERFORMANCE_FIELDS)
         .in('warehouse_id', warehouseIds)
@@ -459,7 +476,7 @@ export const useGeographicSalesPerformance = (
   return useQuery({
     queryKey: ['geographic-sales', storeId, options],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('geographic_sales_performance')
         .select(GEOGRAPHIC_SALES_FIELDS)
         .eq('store_id', storeId)
@@ -509,7 +526,7 @@ export const useStockRotationReports = (
   return useQuery({
     queryKey: ['stock-rotation-reports', physicalProductId, options],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('stock_rotation_reports')
         .select(STOCK_ROTATION_REPORT_FIELDS)
         .order('period_start', { ascending: false });
@@ -622,9 +639,3 @@ export const useCalculateStockRotation = () => {
     },
   });
 };
-
-
-
-
-
-
