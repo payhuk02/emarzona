@@ -4,12 +4,9 @@
 
 export type StorePaymentMethod = 'mobile_money' | 'bank_card' | 'bank_transfer';
 
-export type StoreWithdrawalStatus = 
-  | 'pending' 
-  | 'processing' 
-  | 'completed' 
-  | 'failed' 
-  | 'cancelled';
+export type StoreWithdrawalStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled';
+
+export type StoreWithdrawalSource = 'manual' | 'auto_payout_suggested';
 
 export interface StoreEarnings {
   id: string;
@@ -32,6 +29,7 @@ export interface StoreWithdrawal {
   payment_method: StorePaymentMethod;
   payment_details: Record<string, unknown>;
   status: StoreWithdrawalStatus;
+  withdrawal_source?: StoreWithdrawalSource;
   approved_at: string | null;
   approved_by: string | null;
   rejected_at: string | null;
@@ -61,11 +59,11 @@ export interface StoreWithdrawalRequestForm {
   notes?: string;
 }
 
-export type MobileMoneyOperator = 
-  | 'orange_money' 
-  | 'mtn_mobile_money' 
-  | 'moov_money' 
-  | 'wave' 
+export type MobileMoneyOperator =
+  | 'orange_money'
+  | 'mtn_mobile_money'
+  | 'moov_money'
+  | 'wave'
   | 'free_money'
   | 'm_pesa'
   | 'airtel_money'
@@ -184,10 +182,3 @@ export interface WithdrawalAdvancedStats {
     bank_transfer: { count: number; amount: number; success_rate: number };
   };
 }
-
-
-
-
-
-
-

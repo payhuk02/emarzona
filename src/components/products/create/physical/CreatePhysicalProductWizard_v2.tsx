@@ -52,6 +52,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/hooks/useStore';
 import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
 import { useStorePhysicalAccess } from '@/hooks/billing/useStorePhysicalAccess';
+import { useStorePhysicalPlanLimits } from '@/hooks/billing/useStorePhysicalPlanLimits';
+import { isWithinProductLimit, productLimitMessage } from '@/lib/billing/physical-plan-limits';
 import { PhysicalSubscriptionRequired } from '@/components/billing/PhysicalSubscriptionRequired';
 import {
   formatPhysicalSubscriptionError,
@@ -174,6 +176,7 @@ export const CreatePhysicalProductWizard = ({
   // Use props or fallback to hook store
   const storeId = propsStoreId || store?.id;
   const physicalAccess = useStorePhysicalAccess(storeId);
+  const { data: planLimits } = useStorePhysicalPlanLimits(storeId);
 
   // Server validation hook
   const {
@@ -640,6 +643,10 @@ export const CreatePhysicalProductWizard = ({
         throw new Error(t('products.errors.noStore', 'Aucune boutique trouvée'));
       }
 
+      if (!isDraft && planLimits && !isWithinProductLimit(planLimits)) {
+        throw new Error(productLimitMessage(planLimits));
+      }
+
       // 1. Generate slug from name and ensure uniqueness
       // Utiliser le slug du formulaire s'il est fourni, sinon générer depuis le nom
       let slug =
@@ -852,7 +859,7 @@ export const CreatePhysicalProductWizard = ({
 
       return product;
     },
-    [formData, store, t]
+    [formData, store, t, planLimits]
   );
 
   /**

@@ -152,9 +152,11 @@ async function createAutomaticWithdrawal(
         currency: 'XOF',
         payment_method: paymentMethod,
         payment_details: paymentDetails || {},
-        status: 'pending', // Admin devra approuver
-        notes: `Reversement automatique - seuil minimum atteint après ${new Date().toISOString().split('T')[0]}`,
-        admin_notes: 'Créé automatiquement par le système de reversement automatique',
+        status: 'pending',
+        withdrawal_source: 'auto_payout_suggested',
+        notes: `Demande suggérée par le système — solde éligible au seuil (${new Date().toISOString().split('T')[0]})`,
+        admin_notes:
+          "Créée par le cron auto-payout-vendors. Validation et virement manuels par l'équipe (pas de transfert Moneroo automatique).",
       })
       .select('id')
       .single();

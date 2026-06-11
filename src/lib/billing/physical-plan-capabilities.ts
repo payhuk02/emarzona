@@ -2,6 +2,7 @@ export type PhysicalPlanSlug = 'physical_basic' | 'physical_standard' | 'physica
 
 export type PhysicalFeatureKey =
   | 'shipping.tracking'
+  | 'shipping.fedex_live'
   | 'suppliers.manage'
   | 'analytics.physical'
   | 'batch_shipping.manage'
@@ -23,12 +24,13 @@ const PLAN_RANK: Record<Exclude<PhysicalPlanSlug, null>, number> = {
 
 const MIN_PLAN_BY_FEATURE: Record<PhysicalFeatureKey, Exclude<PhysicalPlanSlug, null>> = {
   'shipping.tracking': 'physical_standard',
+  'shipping.fedex_live': 'physical_standard',
   'suppliers.manage': 'physical_standard',
   'analytics.physical': 'physical_standard',
+  'serial_tracking.manage': 'physical_standard',
+  'warehouses.manage': 'physical_standard',
   'batch_shipping.manage': 'physical_premium',
-  'warehouses.manage': 'physical_premium',
   'lots_expiration.manage': 'physical_premium',
-  'serial_tracking.manage': 'physical_premium',
   'barcode_scanner.use': 'physical_premium',
   'preorders.manage': 'physical_premium',
   'backorders.manage': 'physical_premium',

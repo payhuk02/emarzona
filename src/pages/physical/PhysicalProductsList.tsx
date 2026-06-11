@@ -39,6 +39,7 @@ import { Plus, Search, Package, TrendingUp, AlertTriangle, Filter } from 'lucide
 import { PhysicalProductsGrid, InventoryStats, LowStockAlert } from '@/components/physical';
 import { PhysicalProductsListVirtualized } from '@/components/physical/PhysicalProductsListVirtualized';
 import { useToast } from '@/hooks/use-toast';
+import { PhysicalPlanLimitsBanner } from '@/components/billing/PhysicalPlanLimitsBanner';
 
 export const PhysicalProductsList = () => {
   const navigate = useNavigate();
@@ -111,6 +112,8 @@ export const PhysicalProductsList = () => {
             Nouveau produit
           </Button>
         </div>
+
+        {store?.id && <PhysicalPlanLimitsBanner storeId={store.id} />}
 
         {/* Stats Cards */}
         <InventoryStats

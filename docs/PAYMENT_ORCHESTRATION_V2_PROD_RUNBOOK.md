@@ -153,6 +153,9 @@ FROM payment_webhook_events
 WHERE processing_error IS NOT NULL
 ORDER BY created_at DESC
 LIMIT 20;
+
+-- Gate P1 rollout V2 (p95 latence + backlog)
+SELECT public.get_payment_webhook_health(24);
 ```
 
 ---

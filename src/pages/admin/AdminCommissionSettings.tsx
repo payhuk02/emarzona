@@ -1,7 +1,7 @@
 /**
  * Page Admin - Configuration des Taux de Commission
  * Date: 31 Janvier 2025
- * 
+ *
  * Interface pour configurer les taux de commission de parrainage et de plateforme
  */
 
@@ -32,11 +32,30 @@ import {
 import { usePlatformSettingsDirect } from '@/hooks/usePlatformSettingsDirect';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentAdminPermissions } from '@/hooks/useCurrentAdminPermissions';
+import { useAutoPayoutAdminConfig } from '@/hooks/useAutoPayoutAdminConfig';
 
 export default function AdminCommissionSettings() {
   const { settings, isLoading, error, updateSettings, isUpdating } = usePlatformSettingsDirect();
+  const {
+    data: autoPayoutConfig,
+    isLoading: autoPayoutLoading,
+    save: saveAutoPayout,
+    isSaving: autoPayoutSaving,
+  } = useAutoPayoutAdminConfig();
   const { can } = useCurrentAdminPermissions();
   const { toast } = useToast();
+
+  const [autoPayoutLocal, setAutoPayoutLocal] = useState({
+    enabled: false,
+    delay_days: 7,
+    min_amount: 50_000,
+  });
+
+  useEffect(() => {
+    if (autoPayoutConfig) {
+      setAutoPayoutLocal(autoPayoutConfig);
+    }
+  }, [autoPayoutConfig]);
 
   // États locaux pour le formulaire
   const [localSettings, setLocalSettings] = useState({
@@ -150,7 +169,8 @@ export default function AdminCommissionSettings() {
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              <strong>Erreur de chargement :</strong> {error instanceof Error ? error.message : 'Erreur inconnue'}
+              <strong>Erreur de chargement :</strong>{' '}
+              {error instanceof Error ? error.message : 'Erreur inconnue'}
             </AlertDescription>
           </Alert>
         </div>
@@ -173,7 +193,9 @@ export default function AdminCommissionSettings() {
             </p>
           </div>
           <Badge variant="outline" className="text-sm">
-            {settings?.updated_at ? `Dernière mise à jour: ${new Date(settings.updated_at).toLocaleDateString('fr-FR')}` : 'Non configuré'}
+            {settings?.updated_at
+              ? `Dernière mise à jour: ${new Date(settings.updated_at).toLocaleDateString('fr-FR')}`
+              : 'Non configuré'}
           </Badge>
         </div>
 
@@ -181,8 +203,8 @@ export default function AdminCommissionSettings() {
         <Alert>
           <Info className="h-4 w-4" />
           <AlertDescription>
-            <strong>Note importante :</strong> Les modifications des taux s'appliquent uniquement aux nouvelles transactions. 
-            Les transactions existantes conservent leurs taux d'origine.
+            <strong>Note importante :</strong> Les modifications des taux s'appliquent uniquement
+            aux nouvelles transactions. Les transactions existantes conservent leurs taux d'origine.
           </AlertDescription>
         </Alert>
 
@@ -226,15 +248,13 @@ export default function AdminCommissionSettings() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="platformCommission">
-                    Taux de commission plateforme (%)
-                  </Label>
+                  <Label htmlFor="platformCommission">Taux de commission plateforme (%)</Label>
                   <div className="flex items-center gap-4">
                     <Input
                       id="platformCommission"
                       type="number"
                       value={localSettings.platformCommissionRate}
-                      onChange={(e) =>
+                      onChange={e =>
                         setLocalSettings({
                           ...localSettings,
                           platformCommissionRate: parseFloat(e.target.value) || 0,
@@ -336,15 +356,13 @@ export default function AdminCommissionSettings() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="referralCommission">
-                    Taux de commission parrainage (%)
-                  </Label>
+                  <Label htmlFor="referralCommission">Taux de commission parrainage (%)</Label>
                   <div className="flex items-center gap-4">
                     <Input
                       id="referralCommission"
                       type="number"
                       value={localSettings.referralCommissionRate}
-                      onChange={(e) =>
+                      onChange={e =>
                         setLocalSettings({
                           ...localSettings,
                           referralCommissionRate: parseFloat(e.target.value) || 0,
@@ -395,7 +413,8 @@ export default function AdminCommissionSettings() {
                     </div>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    Recommandé : Entre 1% et 5% pour motiver le parrainage sans impacter la rentabilité
+                    Recommandé : Entre 1% et 5% pour motiver le parrainage sans impacter la
+                    rentabilité
                   </p>
                 </div>
 
@@ -419,8 +438,8 @@ export default function AdminCommissionSettings() {
                 <Alert>
                   <Shield className="h-4 w-4" />
                   <AlertDescription>
-                    La commission de parrainage est calculée sur le montant total de la vente, 
-                    après déduction de la commission plateforme.
+                    La commission de parrainage est calculée sur le montant total de la vente, après
+                    déduction de la commission plateforme.
                   </AlertDescription>
                 </Alert>
               </CardContent>
@@ -438,14 +457,12 @@ export default function AdminCommissionSettings() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="minWithdrawal">
-                    Montant minimum de retrait (XOF)
-                  </Label>
+                  <Label htmlFor="minWithdrawal">Montant minimum de retrait (XOF)</Label>
                   <Input
                     id="minWithdrawal"
                     type="number"
                     value={localSettings.minWithdrawalAmount}
-                    onChange={(e) =>
+                    onChange={e =>
                       setLocalSettings({
                         ...localSettings,
                         minWithdrawalAmount: parseInt(e.target.value) || 0,
@@ -456,20 +473,101 @@ export default function AdminCommissionSettings() {
                     className="max-w-xs"
                   />
                   <p className="text-sm text-muted-foreground">
-                    Montant minimum requis pour qu'un utilisateur puisse demander un retrait de ses commissions
+                    Montant minimum requis pour qu'un utilisateur puisse demander un retrait de ses
+                    commissions
                   </p>
                 </div>
 
+                <Card className="border-dashed">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg">Suggestions de retrait vendeur (cron)</CardTitle>
+                    <CardDescription>
+                      Crée des demandes <strong>en attente</strong> lorsque le solde dépasse le
+                      seuil — <strong>pas de virement Moneroo automatique</strong>. Validation
+                      manuelle sur la page Retraits vendeurs.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="space-y-0.5">
+                        <Label>Activer les suggestions automatiques</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Job quotidien <code className="text-xs">auto-payout-vendors-daily</code>
+                        </p>
+                      </div>
+                      <Switch
+                        checked={autoPayoutLocal.enabled}
+                        disabled={autoPayoutLoading || autoPayoutSaving}
+                        onCheckedChange={checked =>
+                          setAutoPayoutLocal(prev => ({ ...prev, enabled: checked }))
+                        }
+                      />
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="autoPayoutDelay">Délai minimum (jours)</Label>
+                        <Input
+                          id="autoPayoutDelay"
+                          type="number"
+                          min={1}
+                          max={90}
+                          value={autoPayoutLocal.delay_days}
+                          disabled={autoPayoutLoading || autoPayoutSaving}
+                          onChange={e =>
+                            setAutoPayoutLocal(prev => ({
+                              ...prev,
+                              delay_days: parseInt(e.target.value, 10) || 7,
+                            }))
+                          }
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="autoPayoutMin">Seuil solde (XOF)</Label>
+                        <Input
+                          id="autoPayoutMin"
+                          type="number"
+                          min={10000}
+                          step={1000}
+                          value={autoPayoutLocal.min_amount}
+                          disabled={autoPayoutLoading || autoPayoutSaving}
+                          onChange={e =>
+                            setAutoPayoutLocal(prev => ({
+                              ...prev,
+                              min_amount: parseInt(e.target.value, 10) || 50_000,
+                            }))
+                          }
+                        />
+                      </div>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      disabled={autoPayoutLoading || autoPayoutSaving}
+                      onClick={() => saveAutoPayout(autoPayoutLocal)}
+                    >
+                      {autoPayoutSaving ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                          Enregistrement…
+                        </>
+                      ) : (
+                        'Enregistrer le programme de suggestion'
+                      )}
+                    </Button>
+                  </CardContent>
+                </Card>
+
                 <div className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="space-y-0.5">
-                    <Label>Approbation automatique des retraits</Label>
+                    <Label>Approbation automatique des retraits (statut)</Label>
                     <p className="text-sm text-muted-foreground">
-                      Si activé, les demandes de retrait seront approuvées automatiquement
+                      Passe les demandes au statut approuvé sans intervention — le virement reste
+                      manuel côté finance
                     </p>
                   </div>
                   <Switch
                     checked={localSettings.autoApproveWithdrawals}
-                    onCheckedChange={(checked) =>
+                    onCheckedChange={checked =>
                       setLocalSettings({
                         ...localSettings,
                         autoApproveWithdrawals: checked,
@@ -481,8 +579,8 @@ export default function AdminCommissionSettings() {
                 <Alert>
                   <Info className="h-4 w-4" />
                   <AlertDescription>
-                    L'approbation automatique est recommandée pour les petits montants. 
-                    Pour les montants importants, il est préférable de vérifier manuellement.
+                    L'approbation automatique est recommandée pour les petits montants. Pour les
+                    montants importants, il est préférable de vérifier manuellement.
                   </AlertDescription>
                 </Alert>
               </CardContent>
@@ -517,12 +615,7 @@ export default function AdminCommissionSettings() {
                   Les modifications seront appliquées immédiatement aux nouvelles transactions
                 </p>
               </div>
-              <Button
-                onClick={handleSave}
-                size="lg"
-                className="gap-2"
-                disabled={isUpdating}
-              >
+              <Button onClick={handleSave} size="lg" className="gap-2" disabled={isUpdating}>
                 {isUpdating ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -568,7 +661,7 @@ function CommissionSimulator({
           id="simulatorAmount"
           type="number"
           value={orderAmount}
-          onChange={(e) => setOrderAmount(parseInt(e.target.value) || 0)}
+          onChange={e => setOrderAmount(parseInt(e.target.value) || 0)}
           min="0"
           step="1000"
           className="max-w-xs"
@@ -582,13 +675,17 @@ function CommissionSimulator({
             <p className="text-2xl font-bold">{orderAmount.toLocaleString('fr-FR')} XOF</p>
           </div>
           <div className="space-y-2">
-            <p className="text-sm font-medium text-muted-foreground">Commission plateforme ({platformRate}%)</p>
+            <p className="text-sm font-medium text-muted-foreground">
+              Commission plateforme ({platformRate}%)
+            </p>
             <p className="text-2xl font-bold text-blue-600">
               -{platformCommission.toLocaleString('fr-FR')} XOF
             </p>
           </div>
           <div className="space-y-2">
-            <p className="text-sm font-medium text-muted-foreground">Commission parrain ({referralRate}%)</p>
+            <p className="text-sm font-medium text-muted-foreground">
+              Commission parrain ({referralRate}%)
+            </p>
             <p className="text-2xl font-bold text-green-600">
               -{referralCommission.toLocaleString('fr-FR')} XOF
             </p>
@@ -611,7 +708,7 @@ function CommissionSimulator({
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Pourcentage total :</span>
             <span className="font-bold">
-              {((platformCommission + referralCommission) / orderAmount * 100).toFixed(2)}%
+              {(((platformCommission + referralCommission) / orderAmount) * 100).toFixed(2)}%
             </span>
           </div>
         </div>
@@ -619,16 +716,3 @@ function CommissionSimulator({
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

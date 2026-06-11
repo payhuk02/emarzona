@@ -43,6 +43,10 @@ import {
   Download,
 } from 'lucide-react';
 import { StoreWithdrawal, StoreWithdrawalStatus } from '@/types/store-withdrawals';
+import {
+  AUTO_PAYOUT_SUGGESTED_BADGE,
+  isAutoPayoutSuggestedWithdrawal,
+} from '@/lib/store-withdrawals';
 import { formatCurrency } from '@/lib/utils';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -315,7 +319,16 @@ export const WithdrawalsList = ({
                     <TableCell className="text-[10px] sm:text-xs md:text-sm hidden sm:table-cell">
                       {getPaymentMethodLabel(withdrawal.payment_method)}
                     </TableCell>
-                    <TableCell>{getStatusBadge(withdrawal.status)}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-col gap-1">
+                        {getStatusBadge(withdrawal.status)}
+                        {isAutoPayoutSuggestedWithdrawal(withdrawal) && (
+                          <Badge variant="outline" className="text-[10px] font-normal">
+                            {AUTO_PAYOUT_SUGGESTED_BADGE}
+                          </Badge>
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell className="text-[10px] sm:text-xs text-muted-foreground hidden md:table-cell">
                       {withdrawal.transaction_reference || '-'}
                     </TableCell>

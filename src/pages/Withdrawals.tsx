@@ -25,6 +25,7 @@ import { WithdrawalsFilters } from '@/components/store/WithdrawalsFilters';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
+import { AutoPayoutTransparencyBanner } from '@/components/store/AutoPayoutTransparencyBanner';
 
 const Withdrawals = () => {
   const { t } = useTranslation();
@@ -200,6 +201,8 @@ const Withdrawals = () => {
           </AlertDescription>
         </Alert>
       )}
+
+      <AutoPayoutTransparencyBanner />
 
       {/* Solde et statistiques */}
       <EarningsBalance
