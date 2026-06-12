@@ -723,7 +723,7 @@ export const refundMonerooPayment = async (options: RefundOptions): Promise<Refu
 
     // Source of truth SQL (partiel ou total)
     const { data: applyResult, error: applyError } = await supabase.rpc(
-      'apply_transaction_refund' as never,
+      'apply_transaction_refund',
       {
         p_transaction_id: transactionId,
         p_refund_amount: refundResponse.amount,
@@ -739,7 +739,7 @@ export const refundMonerooPayment = async (options: RefundOptions): Promise<Refu
             created_at: refundResponse.created_at,
             reason,
           },
-        },
+        } satisfies Json,
       }
     );
 
@@ -749,7 +749,23 @@ export const refundMonerooPayment = async (options: RefundOptions): Promise<Refu
     }
 
     const refundPayload = applyResult as { status?: string; refunded_amount?: number } | null;
-    const finalStatus = refundPayload?.status ?? 'refunded';
+    const rawStatus = refundPayload?.status ?? 'refunded';
+    const finalStatus = rawStatus === 'partially_refunded' ? 'refunded' : rawStatus;
+    const notifyStatus:
+      | 'pending'
+      | 'processing'
+      | 'completed'
+      | 'failed'
+      | 'cancelled'
+      | 'refunded' =
+      finalStatus === 'pending' ||
+      finalStatus === 'processing' ||
+      finalStatus === 'completed' ||
+      finalStatus === 'failed' ||
+      finalStatus === 'cancelled' ||
+      finalStatus === 'refunded'
+        ? finalStatus
+        : 'refunded';
 
     logger.log('Refund completed:', {
       transactionId,
@@ -768,7 +784,7 @@ export const refundMonerooPayment = async (options: RefundOptions): Promise<Refu
       customerName: transaction.customer_name || undefined,
       amount: refundResponse.amount,
       currency: refundResponse.currency,
-      status: finalStatus,
+      status: notifyStatus,
       reason: reason || 'Customer request',
       orderId: transaction.order_id || undefined,
     }).catch(err => logger.warn('Error sending refund notification:', err));
@@ -778,7 +794,7 @@ export const refundMonerooPayment = async (options: RefundOptions): Promise<Refu
       refund_id: refundResponse.refund_id,
       amount: refundResponse.amount,
       currency: refundResponse.currency,
-      status: finalStatus,
+      status: rawStatus,
     };
   } catch (_error: unknown) {
     const monerooError = parseMonerooError(_error);

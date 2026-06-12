@@ -19,9 +19,11 @@ import {
   BarChart3,
 } from 'lucide-react';
 import { useBookingStats, useServiceBookings } from '@/hooks/service/useBookings';
+import { useServiceAnalyticsSummary } from '@/hooks/service/useServiceAnalyticsSummary';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useMemo } from 'react';
+import { LazyRechartsWrapper } from '@/components/charts/LazyRechartsWrapper';
 
 const UPCOMING_BOOKING_FIELDS =
   'id, product_id, status, scheduled_date, scheduled_start_time, amount_paid, participants_count, product:products(price)';
@@ -38,6 +40,12 @@ const ServiceAnalyticsDashboard = ({ serviceId }: ServiceAnalyticsDashboardProps
   const startDate = thirtyDaysAgo.toISOString().split('T')[0];
 
   const { data: bookingStats, isLoading: isLoadingStats } = useBookingStats(
+    serviceId,
+    startDate,
+    today
+  );
+
+  const { data: analyticsSummary, isLoading: isLoadingSummary } = useServiceAnalyticsSummary(
     serviceId,
     startDate,
     today
@@ -130,7 +138,24 @@ const ServiceAnalyticsDashboard = ({ serviceId }: ServiceAnalyticsDashboardProps
     };
   }, [bookingStats, allBookings, upcomingBookings, averageRating]);
 
-  const isLoading = isLoadingStats || isLoadingBookings;
+  const isLoading = isLoadingStats || isLoadingBookings || isLoadingSummary;
+
+  const chartData = useMemo(() => {
+    const daily = analyticsSummary?.daily_bookings ?? [];
+    return daily.map(point => ({
+      date: point.date,
+      total: point.total ?? 0,
+      completed: point.completed ?? 0,
+    }));
+  }, [analyticsSummary]);
+
+  const revenueChartData = useMemo(() => {
+    const daily = analyticsSummary?.daily_revenue ?? [];
+    return daily.map(point => ({
+      date: point.date,
+      revenue: Number(point.revenue ?? 0),
+    }));
+  }, [analyticsSummary]);
 
   if (isLoading) {
     return (
@@ -256,23 +281,109 @@ const ServiceAnalyticsDashboard = ({ serviceId }: ServiceAnalyticsDashboardProps
         </CardContent>
       </Card>
 
-      {/* Analytics Coming Soon */}
+      {/* Analytics avancés — RPC get_service_analytics_summary */}
       <Card>
         <CardHeader>
           <CardTitle>Analytics Avancés</CardTitle>
           <CardDescription>
-            Graphiques et statistiques détaillées (en développement)
+            Tendances des 30 derniers jours (réservations et revenus payés)
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <BarChart3 className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Fonctionnalité en cours de développement</h3>
-            <p className="text-sm text-muted-foreground max-w-md">
-              Les graphiques de réservations, tendances de disponibilité et analytics détaillés
-              seront bientôt disponibles.
-            </p>
-          </div>
+        <CardContent className="space-y-8">
+          {chartData.length === 0 && revenueChartData.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground">
+              <BarChart3 className="h-10 w-10 mb-3 opacity-50" />
+              <p className="text-sm">Pas encore assez de données pour afficher les graphiques.</p>
+            </div>
+          ) : (
+            <>
+              <div>
+                <h4 className="text-sm font-medium mb-3">Réservations par jour</h4>
+                <LazyRechartsWrapper>
+                  {recharts => (
+                    <recharts.ResponsiveContainer width="100%" height={260}>
+                      <recharts.BarChart data={chartData}>
+                        <recharts.CartesianGrid strokeDasharray="3 3" />
+                        <recharts.XAxis
+                          dataKey="date"
+                          tickFormatter={v =>
+                            new Date(v).toLocaleDateString('fr-FR', {
+                              day: '2-digit',
+                              month: '2-digit',
+                            })
+                          }
+                        />
+                        <recharts.YAxis allowDecimals={false} />
+                        <recharts.Tooltip />
+                        <recharts.Legend />
+                        <recharts.Bar dataKey="total" name="Total" fill="#6366f1" />
+                        <recharts.Bar dataKey="completed" name="Complétées" fill="#22c55e" />
+                      </recharts.BarChart>
+                    </recharts.ResponsiveContainer>
+                  )}
+                </LazyRechartsWrapper>
+              </div>
+
+              {revenueChartData.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-medium mb-3">Revenus par jour (XOF)</h4>
+                  <LazyRechartsWrapper>
+                    {recharts => (
+                      <recharts.ResponsiveContainer width="100%" height={260}>
+                        <recharts.LineChart data={revenueChartData}>
+                          <recharts.CartesianGrid strokeDasharray="3 3" />
+                          <recharts.XAxis
+                            dataKey="date"
+                            tickFormatter={v =>
+                              new Date(v).toLocaleDateString('fr-FR', {
+                                day: '2-digit',
+                                month: '2-digit',
+                              })
+                            }
+                          />
+                          <recharts.YAxis />
+                          <recharts.Tooltip
+                            formatter={(value: number) =>
+                              `${Math.round(value).toLocaleString('fr-FR')} XOF`
+                            }
+                          />
+                          <recharts.Line
+                            type="monotone"
+                            dataKey="revenue"
+                            name="Revenus"
+                            stroke="#0ea5e9"
+                            strokeWidth={2}
+                            dot={false}
+                          />
+                        </recharts.LineChart>
+                      </recharts.ResponsiveContainer>
+                    )}
+                  </LazyRechartsWrapper>
+                </div>
+              )}
+
+              {analyticsSummary && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-2">
+                  <div className="rounded-lg border p-3">
+                    <p className="text-xs text-muted-foreground">Taux d&apos;annulation</p>
+                    <p className="text-lg font-semibold">{analyticsSummary.cancellation_rate}%</p>
+                  </div>
+                  <div className="rounded-lg border p-3">
+                    <p className="text-xs text-muted-foreground">Taux complétion</p>
+                    <p className="text-lg font-semibold">{analyticsSummary.occupancy_rate}%</p>
+                  </div>
+                  <div className="rounded-lg border p-3">
+                    <p className="text-xs text-muted-foreground">En attente</p>
+                    <p className="text-lg font-semibold">{analyticsSummary.pending}</p>
+                  </div>
+                  <div className="rounded-lg border p-3">
+                    <p className="text-xs text-muted-foreground">No-show</p>
+                    <p className="text-lg font-semibold">{analyticsSummary.no_show}</p>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         </CardContent>
       </Card>
     </div>

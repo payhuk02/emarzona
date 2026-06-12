@@ -4,15 +4,7 @@
  */
 
 export { default as ZoomService } from './zoom';
-export type {
-  ZoomMeetingConfig,
-  ZoomMeeting,
-  ZoomError,
-} from './zoom';
+export type { ZoomMeetingConfig, ZoomMeeting, ZoomError } from './zoom';
 
-
-
-
-
-
-
+export { default as GoogleMeetService } from './google-meet';
+export type { GoogleMeetConfig, GoogleMeetEvent } from './google-meet';

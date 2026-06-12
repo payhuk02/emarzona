@@ -5,6 +5,7 @@ export type PhysicalFeatureKey =
   | 'emails.manage'
   | 'shipping.tracking'
   | 'shipping.fedex_live'
+  | 'shipping.local_africa'
   | 'suppliers.manage'
   | 'analytics.physical'
   | 'batch_shipping.manage'
@@ -29,6 +30,7 @@ const MIN_PLAN_BY_FEATURE: Record<PhysicalFeatureKey, Exclude<PhysicalPlanSlug, 
   'emails.manage': 'physical_standard',
   'shipping.tracking': 'physical_standard',
   'shipping.fedex_live': 'physical_standard',
+  'shipping.local_africa': 'physical_standard',
   'suppliers.manage': 'physical_standard',
   'analytics.physical': 'physical_standard',
   'serial_tracking.manage': 'physical_standard',

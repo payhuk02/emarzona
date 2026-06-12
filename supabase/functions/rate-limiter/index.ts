@@ -44,13 +44,17 @@ serve(async req => {
     });
   }
 
+  let endpoint = 'default';
+
   try {
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const { endpoint = 'default', userId } = await req.json();
+    const body = await req.json();
+    endpoint = body.endpoint ?? 'default';
+    const userId = body.userId as string | undefined;
     const ip = getClientIp(req);
     const config = RATE_LIMIT_PRESETS[endpoint] || RATE_LIMIT_PRESETS.default;
 
@@ -91,9 +95,17 @@ serve(async req => {
     );
   } catch (error) {
     console.error('Rate limiter error:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    const failClosed = isFailClosedEndpoint(endpoint);
+    const status = failClosed ? 503 : 500;
+    return new Response(
+      JSON.stringify({
+        error: failClosed ? 'Rate limit service unavailable' : 'Internal server error',
+        message: failClosed
+          ? 'Payment protection is temporarily unavailable. Please try again shortly.'
+          : undefined,
+        degraded: failClosed,
+      }),
+      { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
   }
 });

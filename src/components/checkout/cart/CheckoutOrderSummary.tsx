@@ -33,7 +33,7 @@ export interface CheckoutOrderSummaryProps {
   customerId: string | null;
   isFirstOrder: boolean;
   isProcessing: boolean;
-  hasServiceInCart: boolean;
+  checkoutBlocked: boolean;
   handleCheckout: () => void;
   onCouponApply: (promotionId: string, discountAmount: number, code: string) => void;
   onCouponRemove: () => void;
@@ -59,7 +59,7 @@ export default function CheckoutOrderSummary({
   customerId,
   isFirstOrder,
   isProcessing,
-  hasServiceInCart,
+  checkoutBlocked,
   handleCheckout,
   onCouponApply,
   onCouponRemove,
@@ -196,7 +196,7 @@ export default function CheckoutOrderSummary({
             {/* Bouton checkout pour multi-stores */}
             <Button
               onClick={handleCheckout}
-              disabled={isProcessing || items.length === 0 || isCheckingStores || hasServiceInCart}
+              disabled={isProcessing || items.length === 0 || isCheckingStores || checkoutBlocked}
               className="w-full mt-4"
               size="lg"
               aria-label={
@@ -371,7 +371,7 @@ export default function CheckoutOrderSummary({
             {/* Bouton checkout */}
             <Button
               onClick={handleCheckout}
-              disabled={isProcessing || items.length === 0 || isCheckingStores || hasServiceInCart}
+              disabled={isProcessing || items.length === 0 || isCheckingStores || checkoutBlocked}
               className="w-full"
               size="lg"
               aria-label={

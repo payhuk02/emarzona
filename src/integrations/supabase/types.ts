@@ -29787,6 +29787,92 @@ export type Database = {
           },
         ];
       };
+      service_oauth_states: {
+        Row: {
+          consumed_at: string | null;
+          created_at: string;
+          expires_at: string;
+          metadata: Json;
+          provider: string;
+          redirect_url: string | null;
+          state_token: string;
+          store_id: string;
+          user_id: string;
+        };
+        Insert: {
+          consumed_at?: string | null;
+          created_at?: string;
+          expires_at?: string;
+          metadata?: Json;
+          provider?: string;
+          redirect_url?: string | null;
+          state_token: string;
+          store_id: string;
+          user_id: string;
+        };
+        Update: {
+          consumed_at?: string | null;
+          created_at?: string;
+          expires_at?: string;
+          metadata?: Json;
+          provider?: string;
+          redirect_url?: string | null;
+          state_token?: string;
+          store_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'service_oauth_states_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'dashboard_stats_optimized';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'service_oauth_states_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'marketplace_products_optimized';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'service_oauth_states_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'store_affiliates_summary';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'service_oauth_states_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'store_stats_last_30_days';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'service_oauth_states_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'store_stats_last_7_days';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'service_oauth_states_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'stores';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'service_oauth_states_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'stores_public';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       service_package_credits_usage: {
         Row: {
           booking_id: string | null;
@@ -30123,6 +30209,7 @@ export type Database = {
           max_bookings_per_day: number | null;
           max_participants: number | null;
           meeting_url: string | null;
+          preferred_meeting_platform: string | null;
           pricing_type: string;
           product_id: string;
           require_approval: boolean | null;
@@ -30153,6 +30240,7 @@ export type Database = {
           max_bookings_per_day?: number | null;
           max_participants?: number | null;
           meeting_url?: string | null;
+          preferred_meeting_platform?: string | null;
           pricing_type?: string;
           product_id: string;
           require_approval?: boolean | null;
@@ -30183,6 +30271,7 @@ export type Database = {
           max_bookings_per_day?: number | null;
           max_participants?: number | null;
           meeting_url?: string | null;
+          preferred_meeting_platform?: string | null;
           pricing_type?: string;
           product_id?: string;
           require_approval?: boolean | null;
@@ -31652,6 +31741,7 @@ export type Database = {
       shipping_rates: {
         Row: {
           base_price: number | null;
+          carrier_label: string | null;
           created_at: string | null;
           description: string | null;
           estimated_days_max: number | null;
@@ -31671,6 +31761,7 @@ export type Database = {
         };
         Insert: {
           base_price?: number | null;
+          carrier_label?: string | null;
           created_at?: string | null;
           description?: string | null;
           estimated_days_max?: number | null;
@@ -31690,6 +31781,7 @@ export type Database = {
         };
         Update: {
           base_price?: number | null;
+          carrier_label?: string | null;
           created_at?: string | null;
           description?: string | null;
           estimated_days_max?: number | null;
@@ -31976,6 +32068,7 @@ export type Database = {
           store_id: string;
           updated_at: string | null;
           zip_codes: string[] | null;
+          zone_type: string;
         };
         Insert: {
           countries?: string[] | null;
@@ -31988,6 +32081,7 @@ export type Database = {
           store_id: string;
           updated_at?: string | null;
           zip_codes?: string[] | null;
+          zone_type?: string;
         };
         Update: {
           countries?: string[] | null;
@@ -32000,6 +32094,7 @@ export type Database = {
           store_id?: string;
           updated_at?: string | null;
           zip_codes?: string[] | null;
+          zone_type?: string;
         };
         Relationships: [
           {
@@ -44787,6 +44882,10 @@ export type Database = {
           isSetofReturn: true;
         };
       };
+      get_active_product_pre_order: {
+        Args: { p_product_id: string; p_variant_id?: string };
+        Returns: Json;
+      };
       get_active_products_with_images: {
         Args: { store_uuid: string };
         Returns: {
@@ -45434,6 +45533,10 @@ export type Database = {
         Args: { portfolio_id_param: string };
         Returns: number;
       };
+      get_product_delivery_estimate: {
+        Args: { p_product_id: string };
+        Returns: Json;
+      };
       get_product_price_in_currency: {
         Args: {
           p_country_code?: string;
@@ -45577,6 +45680,14 @@ export type Database = {
           suggestion: string;
           suggestion_type: string;
         }[];
+      };
+      get_service_analytics_summary: {
+        Args: {
+          p_end_date?: string;
+          p_product_id: string;
+          p_start_date?: string;
+        };
+        Returns: Json;
       };
       get_service_booking_stats: {
         Args: { p_product_id: string };
@@ -46738,6 +46849,10 @@ export type Database = {
         };
         Returns: string;
       };
+      register_product_pre_order: {
+        Args: { p_pre_order_id: string; p_quantity?: number };
+        Returns: Json;
+      };
       release_drip_content: { Args: { p_release_id: string }; Returns: Json };
       release_physical_inventory_for_order: {
         Args: { p_order_id: string };
@@ -46869,6 +46984,10 @@ export type Database = {
           store_name: string;
           store_slug: string;
         }[];
+      };
+      seed_africa_local_shipping_zones: {
+        Args: { p_store_id: string };
+        Returns: Json;
       };
       set_subscription_auto_renew: {
         Args: { p_enabled: boolean; p_store_id: string };
@@ -47003,6 +47122,10 @@ export type Database = {
         Returns: string;
       };
       sync_email_tags_cron_jobs: { Args: never; Returns: number };
+      sync_store_sales_history: {
+        Args: { p_store_id: string };
+        Returns: number;
+      };
       test_artist_products_referential_integrity: {
         Args: never;
         Returns: {
@@ -47148,6 +47271,10 @@ export type Database = {
       update_webhook_stats: {
         Args: { p_success: boolean; p_webhook_id: string };
         Returns: undefined;
+      };
+      upsert_google_calendar_busy_events: {
+        Args: { p_busy_blocks: Json; p_integration_id: string };
+        Returns: number;
       };
       urlencode:
         | { Args: { data: Json }; Returns: string }

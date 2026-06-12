@@ -39,6 +39,7 @@ import { ShippingCarriersManager } from '@/components/shipping/ShippingCarriersM
 import { ShippingZonesManager } from '@/components/shipping/ShippingZonesManager';
 import { ShippingRatesManager } from '@/components/shipping/ShippingRatesManager';
 import { ShippingSettings } from '@/components/shipping/ShippingSettings';
+import { AfricaLocalShippingPanel } from '@/components/shipping/AfricaLocalShippingPanel';
 
 export default function ShippingServices() {
   const { store, loading: storeLoading } = useStore();
@@ -257,6 +258,7 @@ export default function ShippingServices() {
           </TabsContent>
 
           <TabsContent value="settings" className="space-y-4">
+            <AfricaLocalShippingPanel storeId={store.id} />
             <ShippingSettings storeId={store.id} />
           </TabsContent>
         </Tabs>

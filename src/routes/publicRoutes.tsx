@@ -35,6 +35,16 @@ const CommunityPage = lazyPage(() => import('@/pages/community/CommunityPage'));
 const Cart = lazyPage(() => import('@/pages/Cart'));
 const CartEnhanced = lazyPage(() => import('@/pages/CartEnhanced'));
 const Checkout = lazyPage(() => import('@/pages/checkout/CheckoutPage'));
+const CheckoutLegacyRedirect = lazyPage(() =>
+  import('@/pages/checkout/CheckoutLegacyRedirect').then(m => ({
+    default: () => <m.CheckoutLegacyRedirect legacyPath="/checkout/cart" />,
+  }))
+);
+const CartCheckoutLegacyRedirect = lazyPage(() =>
+  import('@/pages/checkout/CheckoutLegacyRedirect').then(m => ({
+    default: () => <m.CheckoutLegacyRedirect legacyPath="/cart/checkout" />,
+  }))
+);
 const NotFound = lazyPage(() => import('@/pages/NotFound'));
 const CourseDetail = lazyPage(() => import('@/pages/courses/CourseDetail'));
 const DigitalProductDetail = lazyPage(() => import('@/pages/digital/DigitalProductDetail'));
@@ -197,6 +207,8 @@ export const publicRoutes = (
     <Route path="/cart" element={<CartEnhanced />} />
     <Route path="/cart-old" element={<Cart />} />
     <Route path="/checkout" element={<Checkout />} />
+    <Route path="/checkout/cart" element={<CheckoutLegacyRedirect />} />
+    <Route path="/cart/checkout" element={<CartCheckoutLegacyRedirect />} />
 
     {/* Storefront — Redirection vers sous-domaine myemarzona.shop */}
     <Route path="/store/:slug/product/:productSlug" element={<OldProductRouteRedirect />} />

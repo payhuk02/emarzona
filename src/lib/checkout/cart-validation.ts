@@ -12,12 +12,39 @@ export interface CheckoutCartValidation {
   message?: string;
 }
 
+function cartMetadata(item: CartItem): Record<string, unknown> {
+  if (item.metadata && typeof item.metadata === 'object' && !Array.isArray(item.metadata)) {
+    return item.metadata as Record<string, unknown>;
+  }
+  return {};
+}
+
+/** store_id porté par metadata panier (PhysicalProductDetail, ServiceDetail, etc.). */
+export function getCartItemStoreId(item: CartItem): string | null {
+  const meta = cartMetadata(item);
+  const storeId = meta.store_id ?? meta.storeId;
+  return typeof storeId === 'string' && storeId.length > 0 ? storeId : null;
+}
+
 function hasServiceBookingMeta(item: CartItem): boolean {
-  const meta = item.metadata;
-  if (!meta || typeof meta !== 'object') return false;
+  const meta = cartMetadata(item);
   return Boolean(
     meta.booking_id || meta.scheduled_at || meta.service_booking_id || meta.booking_date
   );
+}
+
+function validateSameStore(items: CartItem[]): { ok: boolean; message?: string } {
+  const storeIds = items.map(getCartItemStoreId).filter((id): id is string => Boolean(id));
+  if (storeIds.length <= 1) return { ok: true };
+
+  const unique = new Set(storeIds);
+  if (unique.size === 1) return { ok: true };
+
+  return {
+    ok: false,
+    message:
+      'Les services ne peuvent être payés qu’avec d’autres produits de la même boutique. Retirez les articles des autres vendeurs.',
+  };
 }
 
 export function validateCheckoutCart(items: CartItem[]): CheckoutCartValidation {
@@ -46,6 +73,17 @@ export function validateCheckoutCart(items: CartItem[]): CheckoutCartValidation 
 
   const bookedServices = serviceItems.filter(hasServiceBookingMeta);
   if (bookedServices.length === serviceItems.length) {
+    const sameStore = validateSameStore(items);
+    if (!sameStore.ok) {
+      return {
+        canCheckout: false,
+        checkoutItems: nonServiceItems,
+        serviceOnly: false,
+        hasMixedWithService: true,
+        message: sameStore.message,
+      };
+    }
+
     return {
       canCheckout: true,
       checkoutItems: items,

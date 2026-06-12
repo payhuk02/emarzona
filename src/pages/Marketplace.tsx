@@ -21,6 +21,7 @@ import ProductComparison from '@/components/marketplace/ProductComparison';
 import FavoritesManager from '@/components/marketplace/FavoritesManager';
 import { ContextualFilters } from '@/components/marketplace/ContextualFilters';
 import { logger } from '@/lib/logger';
+import { buildCheckoutUrl } from '@/lib/checkout/checkout-route';
 import { usePageCustomization } from '@/hooks/usePageCustomization';
 import { Product } from '@/types/marketplace';
 import { useMarketplaceFavorites } from '@/hooks/useMarketplaceFavorites';
@@ -448,13 +449,12 @@ const Marketplace = () => {
         return;
       }
 
-      // Rediriger vers la page de checkout
-      const checkoutParams = new URLSearchParams({
-        productId: product.id,
-        storeId: product.store_id,
-      });
-
-      navigate(`/checkout?${checkoutParams.toString()}`);
+      navigate(
+        buildCheckoutUrl({
+          productId: product.id,
+          storeId: product.store_id,
+        })
+      );
     },
     [toast, navigate, user, finalUserId, authLoading]
   );

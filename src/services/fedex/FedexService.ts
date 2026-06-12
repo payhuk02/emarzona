@@ -1,7 +1,7 @@
-import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { createFedexShipmentViaEdge } from '@/lib/shipping/fedex-ship-client';
 import { cancelFedexShipmentViaEdge } from '@/lib/shipping/fedex-cancel-client';
+import { fetchFedexRatesViaEdge } from '@/lib/shipping/fedex-rates-client';
 import { fetchFedexTrackingViaEdge } from '@/lib/shipping/fedex-track-client';
 import { isFedexMockAllowed, FedexUnavailableError } from '@/lib/shipping/fedex-policy';
 import {
@@ -25,40 +25,28 @@ export class FedexService {
   async getRates(request: FedexRateRequest): Promise<FedexRate[]> {
     if (this.useEdgeFedex && request.ship_from?.zip && request.ship_to?.zip) {
       try {
-        const { data, error } = await supabase.functions.invoke<{
-          rates: Array<{
-            service_type: string;
-            service_name: string;
-            total_cost: number;
-            currency: string;
-            estimated_days: number;
-          }>;
-        }>('fedex-rates', {
-          body: {
-            ship_from: {
-              country: request.ship_from.country,
-              postal_code: request.ship_from.zip,
-              city: request.ship_from.city,
-            },
-            ship_to: {
-              country: request.ship_to.country,
-              postal_code: request.ship_to.zip,
-              city: request.ship_to.city,
-            },
-            weight_kg: request.package.weight,
+        const { rates } = await fetchFedexRatesViaEdge({
+          ship_from: {
+            country: request.ship_from.country,
+            postal_code: request.ship_from.zip,
+            city: request.ship_from.city,
           },
+          ship_to: {
+            country: request.ship_to.country,
+            postal_code: request.ship_to.zip,
+            city: request.ship_to.city,
+          },
+          weight_kg: request.package.weight,
         });
 
-        if (!error && data?.rates?.length) {
-          return data.rates.map(r => ({
-            service_type: r.service_type,
-            service_name: r.service_name,
-            total_cost: r.total_cost,
-            currency: r.currency,
-            estimated_days: r.estimated_days,
-            delivery_date: '',
-          }));
-        }
+        return rates.map(r => ({
+          service_type: r.service_type,
+          service_name: r.service_name,
+          total_cost: r.total_cost,
+          currency: r.currency,
+          estimated_days: r.estimated_days,
+          delivery_date: '',
+        }));
       } catch (edgeError) {
         logger.warn('FedEx edge rates failed', { edgeError });
       }

@@ -5,6 +5,11 @@
 const TRUE_VALUES = new Set(['true', '1', 'yes']);
 const FALSE_VALUES = new Set(['false', '0', 'no']);
 
+function viteEnv(name: string): string | undefined {
+  const env = import.meta.env as Record<string, string | undefined> | undefined;
+  return env?.[name];
+}
+
 function fnv1aHash(input: string): number {
   let hash = 0x811c9dc5;
   for (let i = 0; i < input.length; i++) {
@@ -19,7 +24,7 @@ function fnv1aHash(input: string): number {
  * `VITE_PAYMENT_ORCHESTRATION_V2_ROLLOUT=10` → 10 % des boutiques (déterministe par storeId).
  */
 export function getPaymentOrchestrationV2RolloutPercent(): number {
-  const raw = import.meta.env.VITE_PAYMENT_ORCHESTRATION_V2_ROLLOUT;
+  const raw = viteEnv('VITE_PAYMENT_ORCHESTRATION_V2_ROLLOUT');
   if (raw === undefined || raw === '') {
     return isPaymentOrchestrationV2Enabled() ? 100 : 0;
   }
@@ -35,14 +40,14 @@ export function getPaymentOrchestrationV2RolloutPercent(): number {
  * - Non défini + preview Vercel : activé pour QA staging
  */
 export function isPaymentOrchestrationV2Enabled(): boolean {
-  const env = import.meta.env.VITE_PAYMENT_ORCHESTRATION_V2;
+  const env = viteEnv('VITE_PAYMENT_ORCHESTRATION_V2');
   if (env !== undefined) {
     const normalized = String(env).toLowerCase();
     if (FALSE_VALUES.has(normalized)) return false;
     return TRUE_VALUES.has(normalized);
   }
 
-  const vercelEnv = import.meta.env.VITE_VERCEL_ENV;
+  const vercelEnv = viteEnv('VITE_VERCEL_ENV');
   if (vercelEnv === 'preview') return true;
 
   return false;

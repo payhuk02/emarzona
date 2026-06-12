@@ -46,6 +46,22 @@ describe('orderItemInsertExtras', () => {
     );
     expect(extras.physical_product_id).toBe('phys-1');
   });
+
+  it('mappe booking_id et service_product_id pour les services', () => {
+    const extras = orderItemInsertExtras(
+      baseItem({
+        product_type: 'service',
+        metadata: {
+          booking_id: 'bk-99',
+          service_product_id: 'svc-99',
+          scheduled_at: '2026-06-10T10:00:00Z',
+        },
+      })
+    );
+    expect(extras.booking_id).toBe('bk-99');
+    expect(extras.service_product_id).toBe('svc-99');
+    expect(extras.item_metadata?.booking_id).toBe('bk-99');
+  });
 });
 
 describe('buildOrderItemRows', () => {
@@ -53,7 +69,7 @@ describe('buildOrderItemRows', () => {
     vi.clearAllMocks();
   });
 
-  it('rejette les services dans le panier', async () => {
+  it('rejette les services sans réservation', async () => {
     const items = [baseItem({ product_type: 'service' })];
     const validation = validateCheckoutCart(items);
     expect(validation.canCheckout).toBe(false);
@@ -72,5 +88,28 @@ describe('buildOrderItemRows', () => {
     ]);
     expect(rows[0].physical_product_id).toBe('phys-99');
     expect(rows[0].order_id).toBe('order-1');
+  });
+
+  it('construit une ligne service mixte avec booking_id', async () => {
+    const rows = await buildOrderItemRows('order-1', [
+      baseItem({
+        product_type: 'physical',
+        metadata: { store_id: 'store-1', physical_product_id: 'phys-1' },
+      }),
+      baseItem({
+        product_id: 'prod-svc',
+        product_type: 'service',
+        metadata: {
+          store_id: 'store-1',
+          booking_id: 'bk-1',
+          service_product_id: 'svc-1',
+          scheduled_at: '2026-06-10T10:00:00Z',
+        },
+      }),
+    ]);
+    expect(rows).toHaveLength(2);
+    const serviceRow = rows.find(r => r.product_type === 'service');
+    expect(serviceRow?.booking_id).toBe('bk-1');
+    expect(serviceRow?.service_product_id).toBe('svc-1');
   });
 });

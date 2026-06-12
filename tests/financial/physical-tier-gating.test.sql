@@ -49,3 +49,21 @@ BEGIN
   ASSERT v_limits ? 'active_physical_products';
   RAISE NOTICE '✓ Test 5: get_store_physical_plan_limits for store %', v_store_id;
 END $$;
+
+DO $$
+DECLARE
+  v_limits jsonb;
+  v_store_id UUID;
+BEGIN
+  SELECT s.id INTO v_store_id FROM public.stores s LIMIT 1;
+  IF v_store_id IS NULL THEN
+    RAISE NOTICE '⊘ Test 6 skipped: no store';
+    RETURN;
+  END IF;
+
+  v_limits := public.get_store_physical_plan_limits(v_store_id);
+  ASSERT v_limits -> 'features' ? 'whatsapp.product_button';
+  ASSERT v_limits -> 'features' ? 'emails.manage';
+  ASSERT v_limits -> 'features' ? 'shipping.fedex_live';
+  RAISE NOTICE '✓ Test 6: plan limits features JSON includes E32 keys';
+END $$;

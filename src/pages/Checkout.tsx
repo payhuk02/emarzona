@@ -43,6 +43,7 @@ import { buildOrderItemRows } from '@/lib/checkout-order-items';
 import { resolveCheckoutShippingAmount } from '@/lib/checkout-shipping';
 import { calculateCheckoutTaxes } from '@/lib/checkout/taxes';
 import { validateCheckoutCart } from '@/lib/checkout/cart-validation';
+import { showCheckoutBlockedToast, showPaymentErrorToast } from '@/lib/checkout/payment-toast';
 import { isPaymentOrchestrationV2Enabled } from '@/lib/payments/feature-flags';
 import { validateMultiStorePaymentProvider } from '@/lib/payments/multi-store-checkout';
 import { reserveArtistLimitedEditionsForCart } from '@/lib/artist-edition-reservation';
@@ -79,15 +80,15 @@ export default function Checkout() {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const checkoutCartValidation = useMemo(() => validateCheckoutCart(items), [items]);
-  const hasServiceInCart = !checkoutCartValidation.canCheckout;
+  const checkoutBlocked = !checkoutCartValidation.canCheckout;
 
   useEffect(() => {
-    if (!checkoutCartValidation.canCheckout && checkoutCartValidation.message) {
-      toast({
-        title: 'Panier à ajuster',
-        description: checkoutCartValidation.message,
-        variant: 'destructive',
-      });
+    if (
+      !checkoutCartValidation.canCheckout &&
+      checkoutCartValidation.message &&
+      (checkoutCartValidation.serviceOnly || checkoutCartValidation.hasMixedWithService)
+    ) {
+      showCheckoutBlockedToast(toast, checkoutCartValidation.message);
     }
   }, [checkoutCartValidation.canCheckout, checkoutCartValidation.message, toast]);
 
@@ -822,11 +823,11 @@ export default function Checkout() {
 
     // Résumé des résultats
     if (createdOrders.length === 0) {
-      toast({
-        title: 'Erreur',
-        description: "Aucune commande n'a pu être créée. Veuillez réessayer.",
-        variant: 'destructive',
-      });
+      showPaymentErrorToast(
+        toast,
+        "Aucune commande n'a pu être créée. Veuillez réessayer.",
+        'Erreur'
+      );
       setIsProcessing(false);
       return;
     }
@@ -942,13 +943,11 @@ export default function Checkout() {
     }
 
     if (!checkoutCartValidation.canCheckout) {
-      toast({
-        title: 'Panier à ajuster',
-        description:
-          checkoutCartValidation.message ??
-          'Certains articles ne peuvent pas être payés via ce checkout.',
-        variant: 'destructive',
-      });
+      showCheckoutBlockedToast(
+        toast,
+        checkoutCartValidation.message ??
+          'Certains articles ne peuvent pas être payés via ce checkout.'
+      );
       return;
     }
 
@@ -1320,21 +1319,13 @@ export default function Checkout() {
 
       // Rediriger vers le provider de paiement
       safeRedirect(paymentResult.checkout_url, () => {
-        toast({
-          title: 'Erreur de paiement',
-          description: 'URL de paiement invalide',
-          variant: 'destructive',
-        });
+        showPaymentErrorToast(toast, 'URL de paiement invalide');
       });
     } catch (_error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : 'Impossible de finaliser la commande';
       logger.error('Erreur lors du checkout:', { error: errorMessage });
-      toast({
-        title: 'Erreur',
-        description: errorMessage,
-        variant: 'destructive',
-      });
+      showPaymentErrorToast(toast, errorMessage, 'Erreur');
     } finally {
       setIsProcessing(false);
     }
@@ -1447,7 +1438,7 @@ export default function Checkout() {
                 customerId={customerId}
                 isFirstOrder={isFirstOrder}
                 isProcessing={isProcessing}
-                hasServiceInCart={hasServiceInCart}
+                checkoutBlocked={checkoutBlocked}
                 handleCheckout={handleCheckout}
                 onCouponApply={handleCouponApply}
                 onCouponRemove={handleCouponRemove}

@@ -13,6 +13,7 @@ import {
   getUserBookingNotificationPreferences,
 } from '@/lib/notifications/service-booking-notifications';
 import { createServiceRefund } from '@/lib/services/cancellation-policy';
+import { createBookingMeeting } from '@/lib/service/create-booking-meeting';
 import { logger } from '@/lib/logger';
 
 const SERVICE_BOOKING_FIELDS =
@@ -392,6 +393,29 @@ export const useConfirmBooking = () => {
         .single();
 
       if (error) throw error;
+
+      // Epic 3.3.5 — créer Zoom/Meet pour services en ligne
+      if (result) {
+        try {
+          const { data: serviceRow } = await supabase
+            .from('service_products')
+            .select('location_type, preferred_meeting_platform')
+            .eq('product_id', result.product_id)
+            .maybeSingle();
+
+          if (serviceRow?.location_type === 'online' && !result.meeting_url) {
+            await createBookingMeeting(
+              result.id,
+              (serviceRow.preferred_meeting_platform as 'zoom' | 'google_meet' | null) ?? undefined
+            );
+          }
+        } catch (meetingError) {
+          logger.warn('Auto meeting creation on confirm failed', {
+            bookingId: id,
+            error: meetingError,
+          });
+        }
+      }
 
       // 🆕 Envoyer la notification de confirmation
       if (result) {

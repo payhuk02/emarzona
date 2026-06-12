@@ -1,7 +1,7 @@
 /**
  * Demand Forecasting Dashboard Component
  * Date: 27 Janvier 2025
- * 
+ *
  * Dashboard analytics pour les prévisions de demande
  */
 
@@ -12,7 +12,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   Select,
   SelectContent,
@@ -28,35 +35,40 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { useDemandForecasts, useCalculateForecast, useReorderRecommendations, useGenerateReorderRecommendations, useUpdateRecommendationStatus, type DemandForecast, type ReorderRecommendation } from '@/hooks/physical/useDemandForecasting';
+import {
+  useDemandForecasts,
+  useCalculateForecast,
+  useReorderRecommendations,
+  useGenerateReorderRecommendations,
+  useUpdateRecommendationStatus,
+  type DbDemandForecast,
+  type DbReorderRecommendation,
+} from '@/hooks/physical/useDemandForecasting';
 import { useStore } from '@/hooks/useStore';
-import { TrendingUp, TrendingDown, AlertTriangle, Package, Calculator, RefreshCw, CheckCircle2, Clock } from 'lucide-react';
+import {
+  TrendingUp,
+  TrendingDown,
+  AlertTriangle,
+  Package,
+  Calculator,
+  RefreshCw,
+  CheckCircle2,
+  Clock,
+} from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
-// Types étendus avec relation product
-interface DemandForecastWithProduct extends DemandForecast {
-  product?: {
-    id: string;
-    name: string;
-    image_url?: string | null;
-  } | null;
-}
-
-interface ReorderRecommendationWithProduct extends ReorderRecommendation {
-  product?: {
-    id: string;
-    name: string;
-    image_url?: string | null;
-  } | null;
-}
+type DemandForecastWithProduct = DbDemandForecast;
+type ReorderRecommendationWithProduct = DbReorderRecommendation;
 
 export default function DemandForecastingDashboard() {
   const { store } = useStore();
   const { data: forecasts, isLoading: forecastsLoading } = useDemandForecasts(store?.id);
-  const { data: recommendations, isLoading: recommendationsLoading } = useReorderRecommendations(store?.id);
+  const { data: recommendations, isLoading: recommendationsLoading } = useReorderRecommendations(
+    store?.id
+  );
   const calculateForecast = useCalculateForecast();
   const generateRecommendations = useGenerateReorderRecommendations();
   const updateStatus = useUpdateRecommendationStatus();
@@ -65,7 +77,9 @@ export default function DemandForecastingDashboard() {
   const [isForecastDialogOpen, setIsForecastDialogOpen] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState('');
   const [forecastType, setForecastType] = useState<'daily' | 'weekly' | 'monthly'>('weekly');
-  const [forecastMethod, setForecastMethod] = useState<'moving_average' | 'exponential_smoothing'>('moving_average');
+  const [forecastMethod, setForecastMethod] = useState<'moving_average' | 'exponential_smoothing'>(
+    'moving_average'
+  );
 
   const handleCalculateForecast = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,7 +97,7 @@ export default function DemandForecastingDashboard() {
       });
       setIsForecastDialogOpen(false);
       setSelectedProductId('');
-    } catch ( _error: unknown) {
+    } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
@@ -98,7 +112,7 @@ export default function DemandForecastingDashboard() {
 
     try {
       await generateRecommendations.mutateAsync(store.id);
-    } catch ( _error: unknown) {
+    } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
@@ -108,10 +122,13 @@ export default function DemandForecastingDashboard() {
     }
   };
 
-  const handleUpdateRecommendationStatus = async (recommendationId: string, status: string) => {
+  const handleUpdateRecommendationStatus = async (
+    recommendationId: string,
+    status: DbReorderRecommendation['status']
+  ) => {
     await updateStatus.mutateAsync({
       recommendationId,
-      status: status as any,
+      status,
     });
   };
 
@@ -128,7 +145,7 @@ export default function DemandForecastingDashboard() {
           <Skeleton className="h-10 w-full sm:w-auto" />
         </div>
         <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4">
-          {[1, 2, 3, 4].map((i) => (
+          {[1, 2, 3, 4].map(i => (
             <Skeleton key={i} className="h-24" />
           ))}
         </div>
@@ -137,12 +154,20 @@ export default function DemandForecastingDashboard() {
     );
   }
 
-  const urgentRecommendations = (recommendations?.filter(r => r.priority === 'urgent' && r.status === 'pending') || []) as ReorderRecommendationWithProduct[];
-  const pendingRecommendations = (recommendations?.filter(r => r.status === 'pending') || []) as ReorderRecommendationWithProduct[];
+  const urgentRecommendations = (recommendations?.filter(
+    r => r.priority === 'urgent' && r.status === 'pending'
+  ) || []) as ReorderRecommendationWithProduct[];
+  const pendingRecommendations = (recommendations?.filter(r => r.status === 'pending') ||
+    []) as ReorderRecommendationWithProduct[];
   const forecastsWithProducts = (forecasts || []) as DemandForecastWithProduct[];
-  const avgConfidence = forecastsWithProducts.length > 0
-    ? (forecastsWithProducts.reduce((sum, f) => sum + f.confidence_level, 0) / forecastsWithProducts.length * 100).toFixed(0)
-    : 0;
+  const avgConfidence =
+    forecastsWithProducts.length > 0
+      ? (
+          (forecastsWithProducts.reduce((sum, f) => sum + (f.confidence_level ?? 0), 0) /
+            forecastsWithProducts.length) *
+          100
+        ).toFixed(0)
+      : '0';
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -151,8 +176,8 @@ export default function DemandForecastingDashboard() {
         ref={actionsRef}
         className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center animate-in fade-in slide-in-from-bottom-4 duration-700"
       >
-        <Button 
-          onClick={() => setIsForecastDialogOpen(true)} 
+        <Button
+          onClick={() => setIsForecastDialogOpen(true)}
           variant="outline"
           className="h-10 sm:h-11 flex-1 sm:flex-none"
         >
@@ -160,12 +185,14 @@ export default function DemandForecastingDashboard() {
           <span className="hidden sm:inline">Calculer prévision</span>
           <span className="sm:hidden">Calculer</span>
         </Button>
-        <Button 
-          onClick={handleGenerateRecommendations} 
+        <Button
+          onClick={handleGenerateRecommendations}
           disabled={generateRecommendations.isPending}
           className="h-10 sm:h-11 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white flex-1 sm:flex-none"
         >
-          <RefreshCw className={`mr-2 h-4 w-4 ${generateRecommendations.isPending ? 'animate-spin' : ''}`} />
+          <RefreshCw
+            className={`mr-2 h-4 w-4 ${generateRecommendations.isPending ? 'animate-spin' : ''}`}
+          />
           <span className="hidden sm:inline">Générer recommandations</span>
           <span className="sm:hidden">Recommandations</span>
         </Button>
@@ -216,7 +243,9 @@ export default function DemandForecastingDashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-3 sm:p-4 pt-0">
-                <div className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                <div
+                  className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}
+                >
                   {stat.value}
                 </div>
               </CardContent>
@@ -236,7 +265,8 @@ export default function DemandForecastingDashboard() {
               Recommandations Urgentes
             </CardTitle>
             <CardDescription className="text-xs sm:text-sm">
-              {urgentRecommendations.length} recommandation{urgentRecommendations.length > 1 ? 's' : ''} nécessitant une attention immédiate
+              {urgentRecommendations.length} recommandation
+              {urgentRecommendations.length > 1 ? 's' : ''} nécessitant une attention immédiate
             </CardDescription>
           </CardHeader>
           <CardContent className="p-4 sm:p-6 pt-0">
@@ -253,19 +283,23 @@ export default function DemandForecastingDashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {urgentRecommendations.map((rec) => (
+                  {urgentRecommendations.map(rec => (
                     <TableRow key={rec.id}>
                       <TableCell className="text-xs sm:text-sm">
                         {rec.product?.name || 'N/A'}
                       </TableCell>
                       <TableCell className="text-xs sm:text-sm">
-                        <Badge variant={rec.current_stock <= 5 ? 'destructive' : 'secondary'} className="text-xs">
+                        <Badge
+                          variant={rec.current_stock <= 5 ? 'destructive' : 'secondary'}
+                          className="text-xs"
+                        >
                           {rec.current_stock}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-xs sm:text-sm">{rec.forecasted_demand}</TableCell>
                       <TableCell className="text-xs sm:text-sm">
-                        {rec.days_until_stockout !== null && rec.days_until_stockout !== undefined ? (
+                        {rec.days_until_stockout !== null &&
+                        rec.days_until_stockout !== undefined ? (
                           <div className="flex items-center gap-1 text-destructive">
                             <AlertTriangle className="h-3 w-3" />
                             {rec.days_until_stockout} jour{rec.days_until_stockout > 1 ? 's' : ''}
@@ -275,12 +309,14 @@ export default function DemandForecastingDashboard() {
                         )}
                       </TableCell>
                       <TableCell className="text-xs sm:text-sm">
-                        <Badge variant="outline" className="text-xs">{rec.recommended_quantity}</Badge>
+                        <Badge variant="outline" className="text-xs">
+                          {rec.recommended_quantity}
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-right">
                         <Select
                           value={rec.status}
-                          onValueChange={(value) => handleUpdateRecommendationStatus(rec.id, value)}
+                          onValueChange={value => handleUpdateRecommendationStatus(rec.id, value)}
                         >
                           <SelectTrigger className="w-28 sm:w-32 h-8 sm:h-10 text-xs sm:text-sm">
                             <SelectValue />
@@ -303,7 +339,7 @@ export default function DemandForecastingDashboard() {
       )}
 
       {/* Prévisions */}
-      <Card 
+      <Card
         ref={forecastsRef}
         className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 animate-in fade-in slide-in-from-bottom-4 duration-700"
       >
@@ -315,7 +351,8 @@ export default function DemandForecastingDashboard() {
             Prévisions de Demande
           </CardTitle>
           <CardDescription className="text-xs sm:text-sm">
-            {forecastsWithProducts.length} prévision{forecastsWithProducts.length > 1 ? 's' : ''} active{forecastsWithProducts.length > 1 ? 's' : ''}
+            {forecastsWithProducts.length} prévision{forecastsWithProducts.length > 1 ? 's' : ''}{' '}
+            active{forecastsWithProducts.length > 1 ? 's' : ''}
           </CardDescription>
         </CardHeader>
         <CardContent className="p-4 sm:p-6 pt-0">
@@ -344,17 +381,22 @@ export default function DemandForecastingDashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {forecastsWithProducts.map((forecast) => (
+                  {forecastsWithProducts.map(forecast => (
                     <TableRow key={forecast.id}>
                       <TableCell className="text-xs sm:text-sm">
                         {forecast.product?.name || 'N/A'}
                       </TableCell>
                       <TableCell className="text-xs sm:text-sm">
-                        <Badge variant="secondary" className="text-xs">{forecast.forecast_type}</Badge>
+                        <Badge variant="secondary" className="text-xs">
+                          {forecast.forecast_type}
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-xs sm:text-sm">
-                        {format(new Date(forecast.forecast_period_start), 'dd MMM', { locale: fr })} - {' '}
-                        {format(new Date(forecast.forecast_period_end), 'dd MMM yyyy', { locale: fr })}
+                        {format(new Date(forecast.forecast_period_start), 'dd MMM', { locale: fr })}{' '}
+                        -{' '}
+                        {format(new Date(forecast.forecast_period_end), 'dd MMM yyyy', {
+                          locale: fr,
+                        })}
                       </TableCell>
                       <TableCell className="text-xs sm:text-sm">
                         <div className="flex items-center gap-1">
@@ -376,7 +418,10 @@ export default function DemandForecastingDashboard() {
                             <TrendingDown className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-yellow-500" />
                           )}
                           <span className="text-xs sm:text-sm">
-                            {(forecast.confidence_level * 100).toFixed(0)}%
+                            {forecast.confidence_level != null && forecast.confidence_level <= 1
+                              ? (forecast.confidence_level * 100).toFixed(0)
+                              : Number(forecast.confidence_level ?? 0).toFixed(0)}
+                            %
                           </span>
                         </div>
                       </TableCell>
@@ -406,11 +451,13 @@ export default function DemandForecastingDashboard() {
           <form onSubmit={handleCalculateForecast}>
             <div className="grid gap-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="product_id" className="text-xs sm:text-sm">ID Produit *</Label>
+                <Label htmlFor="product_id" className="text-xs sm:text-sm">
+                  ID Produit *
+                </Label>
                 <Input
                   id="product_id"
                   value={selectedProductId}
-                  onChange={(e) => setSelectedProductId(e.target.value)}
+                  onChange={e => setSelectedProductId(e.target.value)}
                   placeholder="UUID du produit"
                   required
                   className="h-9 sm:h-10 text-xs sm:text-sm"
@@ -418,7 +465,9 @@ export default function DemandForecastingDashboard() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="forecast_type" className="text-xs sm:text-sm">Type de prévision *</Label>
+                  <Label htmlFor="forecast_type" className="text-xs sm:text-sm">
+                    Type de prévision *
+                  </Label>
                   <Select
                     value={forecastType}
                     onValueChange={(value: string) => setForecastType(value)}
@@ -435,7 +484,9 @@ export default function DemandForecastingDashboard() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="forecast_method" className="text-xs sm:text-sm">Méthode *</Label>
+                  <Label htmlFor="forecast_method" className="text-xs sm:text-sm">
+                    Méthode *
+                  </Label>
                   <Select
                     value={forecastMethod}
                     onValueChange={(value: string) => setForecastMethod(value)}
@@ -453,16 +504,16 @@ export default function DemandForecastingDashboard() {
               </div>
             </div>
             <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 onClick={() => setIsForecastDialogOpen(false)}
                 className="w-full sm:w-auto h-9 sm:h-10 text-xs sm:text-sm"
               >
                 Annuler
               </Button>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={calculateForecast.isPending}
                 className="w-full sm:w-auto h-9 sm:h-10 text-xs sm:text-sm bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
               >
@@ -475,10 +526,3 @@ export default function DemandForecastingDashboard() {
     </div>
   );
 }
-
-
-
-
-
-
-

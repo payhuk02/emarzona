@@ -47,6 +47,8 @@ import {
 } from 'lucide-react';
 import { generateInvoicePDF } from '@/lib/invoice-generator';
 import { useToast } from '@/hooks/use-toast';
+import { buildOrderTimeline } from '@/lib/customer/order-timeline';
+import { OrderTimeline } from '@/components/customer/OrderTimeline';
 import { useEffect } from 'react';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
@@ -702,6 +704,20 @@ export default function MyOrders() {
 
                 <Separator />
 
+                <div className="space-y-2">
+                  <h3 className="font-semibold text-sm">Suivi de commande</h3>
+                  <OrderTimeline
+                    steps={buildOrderTimeline({
+                      orderStatus: selectedOrder.status,
+                      paymentStatus: selectedOrder.payment_status,
+                      productTypes: selectedOrder.items.map(item => item.product_type),
+                      createdAt: selectedOrder.created_at,
+                    })}
+                  />
+                </div>
+
+                <Separator />
+
                 {/* Articles */}
                 <div className="space-y-3">
                   <h3 className="font-semibold flex items-center gap-2">
@@ -748,7 +764,8 @@ export default function MyOrders() {
 
                 {/* Actions */}
                 <div className="flex gap-2 pt-4">
-                  {selectedOrder.payment_status === 'completed' && (
+                  {(selectedOrder.payment_status === 'completed' ||
+                    selectedOrder.payment_status === 'paid') && (
                     <Button
                       variant="outline"
                       onClick={() => {

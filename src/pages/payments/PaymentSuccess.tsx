@@ -7,6 +7,7 @@ import { OneClickUpsell } from '@/components/upsell/OneClickUpsell';
 import { supabase } from '@/integrations/supabase/client';
 import { verifyTransactionStatus } from '@/lib/payment-service';
 import { logger } from '@/lib/logger';
+import { resolveCourseLearnUrl } from '@/lib/courses/course-learn-redirect';
 
 type ConfirmationState = 'loading' | 'confirmed' | 'pending' | 'failed';
 
@@ -26,6 +27,7 @@ const PaymentSuccess = () => {
   const [showUpsell, setShowUpsell] = useState(false);
   const [purchasedProductId, setPurchasedProductId] = useState<string | null>(null);
   const [purchasedProductType, setPurchasedProductType] = useState<string>('digital');
+  const [purchasedProductSlug, setPurchasedProductSlug] = useState<string | null>(null);
   const [confirmationState, setConfirmationState] = useState<ConfirmationState>('loading');
 
   const orderId = searchParams.get('order_id');
@@ -37,7 +39,7 @@ const PaymentSuccess = () => {
     try {
       const { data: orderItems } = await supabase
         .from('order_items')
-        .select('product_id, product_type')
+        .select('product_id, product_type, products(slug)')
         .eq('order_id', id)
         .limit(1)
         .single();
@@ -45,6 +47,17 @@ const PaymentSuccess = () => {
       if (orderItems) {
         setPurchasedProductId(orderItems.product_id);
         setPurchasedProductType(orderItems.product_type || 'digital');
+        const productRow = orderItems.products as { slug?: string } | null;
+        if (productRow?.slug) {
+          setPurchasedProductSlug(productRow.slug);
+        } else if (orderItems.product_type === 'course') {
+          const { data: product } = await supabase
+            .from('products')
+            .select('slug')
+            .eq('id', orderItems.product_id)
+            .maybeSingle();
+          setPurchasedProductSlug(product?.slug ?? null);
+        }
       }
     } catch (error) {
       logger.error('Error loading order info', { error });
@@ -168,7 +181,23 @@ const PaymentSuccess = () => {
             <p className="text-lg text-muted-foreground">{description}</p>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center flex-wrap">
+            {confirmationState === 'confirmed' && purchasedProductType === 'course' && (
+              <Button
+                onClick={() =>
+                  navigate(
+                    resolveCourseLearnUrl({
+                      slug: purchasedProductSlug,
+                      productId: purchasedProductId,
+                    })
+                  )
+                }
+                className="flex items-center gap-2"
+              >
+                Accéder au cours
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            )}
             <Button
               onClick={() => navigate('/account/downloads')}
               className="flex items-center gap-2"

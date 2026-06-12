@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Product360Viewer } from './Product360Viewer';
 import { InteractiveZoom } from './InteractiveZoom';
 import { ProductVideoGallery } from './ProductVideoGallery';
-import { ProductImages } from '@/components/shared';
+import { PhysicalProductGalleryV2 } from '@/components/physical/PhysicalProductGalleryV2';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Image, Video, RotateCw, ZoomIn, GitCompare } from 'lucide-react';
 import {
@@ -101,7 +101,7 @@ export const AdvancedProductImages = ({
             </Button>
           </div>
         )}
-        <ProductImages
+        <PhysicalProductGalleryV2
           images={displayImages}
           productName={productName}
           enableLightbox={true}
@@ -151,7 +151,7 @@ export const AdvancedProductImages = ({
 
         {/* Images Standard/Variant */}
         <TabsContent value="standard" className="mt-4">
-          <ProductImages
+          <PhysicalProductGalleryV2
             images={displayImages}
             productName={productName}
             enableLightbox={true}
@@ -246,9 +246,3 @@ export const AdvancedProductImages = ({
     </div>
   );
 };
-
-
-
-
-
-

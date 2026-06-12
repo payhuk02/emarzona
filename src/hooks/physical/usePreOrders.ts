@@ -6,8 +6,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
 
-const PRE_ORDER_FIELDS = 'id, store_id, product_id, variant_id, status, is_enabled, expected_availability_date, pre_order_limit, current_pre_orders, reserved_quantity, deposit_required, deposit_amount, deposit_percentage, auto_charge_on_arrival, notification_sent, notes, created_at, updated_at';
+const PRE_ORDER_FIELDS =
+  'id, store_id, product_id, variant_id, status, is_enabled, expected_availability_date, pre_order_limit, current_pre_orders, reserved_quantity, deposit_required, deposit_amount, deposit_percentage, auto_charge_on_arrival, notification_sent, notes, created_at, updated_at';
 
 export interface PreOrder {
   id: string;
@@ -66,7 +68,8 @@ export function usePreOrders(storeId: string | null) {
 
       const { data, error } = await supabase
         .from('pre_orders')
-        .select(`
+        .select(
+          `
           *,
           product:products!inner(
             id,
@@ -76,7 +79,8 @@ export function usePreOrders(storeId: string | null) {
             id,
             name
           )
-        `)
+        `
+        )
         .eq('store_id', storeId)
         .order('created_at', { ascending: false });
 
@@ -98,7 +102,8 @@ export function usePreOrder(preOrderId: string | null) {
 
       const { data, error } = await supabase
         .from('pre_orders')
-        .select(`
+        .select(
+          `
           *,
           product:products!inner(
             id,
@@ -108,7 +113,8 @@ export function usePreOrder(preOrderId: string | null) {
             id,
             name
           )
-        `)
+        `
+        )
         .eq('id', preOrderId)
         .single();
 
@@ -130,14 +136,16 @@ export function usePreOrderCustomers(preOrderId: string | null) {
 
       const { data, error } = await supabase
         .from('pre_order_customers')
-        .select(`
+        .select(
+          `
           *,
           customer:customers!inner(
             id,
             email,
             full_name
           )
-        `)
+        `
+        )
         .eq('pre_order_id', preOrderId)
         .order('created_at', { ascending: false });
 
@@ -181,7 +189,7 @@ export function useCreatePreOrder() {
       if (error) throw error;
       return preOrder;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['pre-orders'] });
       toast({
         title: 'Précommande créée',
@@ -269,7 +277,9 @@ export function useConvertPreOrderToOrders() {
 
       const { data: customers, error: customersError } = await supabase
         .from('pre_order_customers')
-        .select('id, pre_order_id, customer_id, order_id, quantity, deposit_paid, deposit_amount, notified, created_at')
+        .select(
+          'id, pre_order_id, customer_id, order_id, quantity, deposit_paid, deposit_amount, notified, created_at'
+        )
         .eq('pre_order_id', preOrderId)
         .eq('notified', false);
 
@@ -303,7 +313,7 @@ export function useConvertPreOrderToOrders() {
 
       return { success: true, ordersCreated: orders.length };
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['pre-orders'] });
       queryClient.invalidateQueries({ queryKey: ['pre-order'] });
       queryClient.invalidateQueries({ queryKey: ['pre-order-customers'] });
@@ -341,10 +351,7 @@ export function useNotifyPreOrderCustomers() {
       if (error) throw error;
 
       // Mettre à jour la précommande
-      await supabase
-        .from('pre_orders')
-        .update({ notification_sent: true })
-        .eq('id', preOrderId);
+      await supabase.from('pre_orders').update({ notification_sent: true }).eq('id', preOrderId);
 
       return { success: true };
     },
@@ -365,9 +372,3 @@ export function useNotifyPreOrderCustomers() {
     },
   });
 }
-
-
-
-
-
-

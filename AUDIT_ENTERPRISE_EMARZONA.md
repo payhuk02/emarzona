@@ -15,11 +15,11 @@ Cependant, pour supporter une croissance mondiale à l'échelle de Shopify ou St
 
 _Évaluation selon les standards de l'industrie (SaaS Enterprise)_
 
-### 2. Score global plateforme : 81/100
+### 2. Score global plateforme : 82/100
 
 Une excellente base de travail avec un fort potentiel de scalabilité, mais ralentie par quelques dettes techniques et failles de sécurité isolées.
 
-### 3. Score sécurité : 78/100
+### 3. Score sécurité : 80/100
 
 - **Points forts** : Validation Zod, RLS Supabase bien configurées, Middleware de protection.
 - **Faiblesses** : Utilisation de `dangerouslySetInnerHTML` sans sanitisation dans certains composants (`PlatformPopupMessage.tsx`, `LegalDocumentContent.tsx`).
@@ -27,7 +27,7 @@ Une excellente base de travail avec un fort potentiel de scalabilité, mais rale
 ### 4. Score performance : 82/100
 
 - **Points forts** : Vercel Edge caching, Vite optimisé.
-- **Faiblesses** : L'analyse de bundle échoue (`analyze-bundle-size.js` manquant), risque de bundles trop lourds (Three.js, Framer Motion présents).
+- **Faiblesses** : risque de bundles trop lourds (Three.js, Framer Motion présents) — budget CI via `npm run analyze:bundle:quick`.
 
 ### 5. Score UX/UI : 88/100
 
@@ -80,13 +80,12 @@ Une excellente base de travail avec un fort potentiel de scalabilité, mais rale
 
 ### 14. Liste complète des bugs
 
-- L'exécution de `npm run analyze:bundle:quick` échoue (fichier `scripts/analyze-bundle-size.js` introuvable).
+- ~~`analyze:bundle:quick`~~ corrigé : alias vers `scripts/check-bundle-budget.mjs`.
 - La configuration CI de certains scripts fait référence à des chemins obsolètes.
 
 ### 15. Liste complète des erreurs frontend
 
-- **Injection XSS critique** : `dangerouslySetInnerHTML` appelé directement sur la prop `document.content` dans `LegalDocumentContent.tsx:17`.
-- **Injection XSS critique** : `dangerouslySetInnerHTML` appelé sur `currentPopup.message` dans `PlatformPopupMessage.tsx:112` sans appel à `sanitizeProductDescription()`.
+- ~~XSS LegalDocumentContent / PlatformPopupMessage~~ : corrigé via composant `SafeHTML` + sanitisation DOMPurify.
 - Rendu potentiellement lourd de `Three.js` (présent dans le package.json) si non lazy-loadé correctement.
 
 ### 16. Liste complète des erreurs backend
@@ -100,8 +99,8 @@ Une excellente base de travail avec un fort potentiel de scalabilité, mais rale
 
 ### 18. Liste complète des vulnérabilités (SÉCURITÉ)
 
-1. **XSS Stored** via `LegalDocumentContent.tsx`.
-2. **XSS Reflected** via `PlatformPopupMessage.tsx`.
+1. ~~**XSS Stored** via `LegalDocumentContent.tsx`~~ (SafeHTML).
+2. ~~**XSS Reflected** via `PlatformPopupMessage.tsx`~~ (SafeHTML).
 3. Le middleware SEO s'appuie sur une expression régulière `BOT_REGEX` basique qui peut être spammée pour déclencher des requêtes Supabase inutiles (DDoS via User-Agent spoofing).
 
 ### 19. Liste complète des problèmes UX
@@ -152,8 +151,8 @@ Une excellente base de travail avec un fort potentiel de scalabilité, mais rale
 
 ### 29. Recommandations critiques (À faire sous 24h)
 
-- **[SÉCURITÉ]** Patcher `LegalDocumentContent.tsx` et `PlatformPopupMessage.tsx` pour utiliser `DOMPurify` (via la fonction existante `sanitizeProductDescription()`).
-- **[DEVOPS]** Corriger ou supprimer les scripts CI cassés dans `package.json` (`analyze-bundle-size.js`).
+- ~~**[SÉCURITÉ]** XSS LegalDocumentContent / PlatformPopupMessage~~ : `SafeHTML` en place.
+- ~~**[DEVOPS]** Scripts CI bundle~~ : `analyze:bundle:quick` → `check-bundle-budget.mjs`.
 
 ### 30. Recommandations haute priorité (Sous 1 semaine)
 

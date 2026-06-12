@@ -56,10 +56,9 @@ export async function resolveStoreZoneShippingAmount(
 
   const { data: rates } = await supabase
     .from('shipping_rates')
-    .select('price, min_order_amount, max_order_amount, is_active')
-    .eq('store_id', storeId)
+    .select('base_price, min_order_amount, max_order_amount, is_active')
     .eq('is_active', true)
-    .in('zone_id', matchingZoneIds);
+    .in('shipping_zone_id', matchingZoneIds);
 
   if (!rates?.length) return null;
 
@@ -73,7 +72,7 @@ export async function resolveStoreZoneShippingAmount(
 
   if (!eligible.length) return null;
 
-  const cheapest = Math.min(...eligible.map(r => Number(r.price ?? 0)));
+  const cheapest = Math.min(...eligible.map(r => Number(r.base_price ?? 0)));
   logger.debug('Store zone shipping applied', { storeId, country, amount: cheapest });
   return Math.max(0, Math.round(cheapest));
 }

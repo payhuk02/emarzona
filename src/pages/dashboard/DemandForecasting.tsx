@@ -386,7 +386,7 @@ export default function DemandForecasting() {
                     title: '✅ Export réussi',
                     description: `${suggestions.length} suggestion(s) exportée(s) en CSV`,
                   });
-                } catch (_error: unknown) {
+                } catch (error: unknown) {
                   const errorMessage = error instanceof Error ? error.message : String(error);
                   toast({
                     title: '❌ Erreur',

@@ -9,7 +9,7 @@
  * - Détection de conflits
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -65,19 +65,40 @@ import {
   useSyncLogs,
   type CalendarIntegration,
 } from '@/hooks/service/useCalendarIntegrations';
+import {
+  useConnectGoogleCalendar,
+  useSyncGoogleCalendarBusy,
+} from '@/hooks/service/useGoogleCalendarOAuth';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
 export default function CalendarIntegrationsPage() {
   const { store } = useStore();
+  const { toast } = useToast();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [selectedIntegration, setSelectedIntegration] = useState<CalendarIntegration | null>(null);
 
-  const { data: integrations, isLoading } = useCalendarIntegrations(store?.id || '');
+  const { data: integrations, isLoading, refetch } = useCalendarIntegrations(store?.id || '');
   const createIntegration = useCreateCalendarIntegration();
   const updateIntegration = useUpdateCalendarIntegration();
   const deleteIntegration = useDeleteCalendarIntegration();
   const syncCalendar = useSyncCalendar();
+  const connectGoogle = useConnectGoogleCalendar();
+  const syncGoogleBusy = useSyncGoogleCalendarBusy();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('google_calendar') === 'connected') {
+      toast({
+        title: 'Google Calendar connecté',
+        description: 'Synchronisez vos créneaux occupés pour bloquer les réservations.',
+      });
+      refetch();
+      params.delete('google_calendar');
+      const next = `${window.location.pathname}${params.toString() ? `?${params}` : ''}`;
+      window.history.replaceState({}, '', next);
+    }
+  }, [toast, refetch]);
 
   const { data: events } = useCalendarEvents(selectedIntegration?.id || '');
   const { data: syncLogs } = useSyncLogs(selectedIntegration?.id || '');
@@ -97,15 +118,23 @@ export default function CalendarIntegrationsPage() {
   };
 
   const handleSync = async (
-    integrationId: string,
+    integration: CalendarIntegration,
     syncType: 'full' | 'incremental' | 'manual' = 'manual'
   ) => {
     try {
-      await syncCalendar.mutateAsync({ integrationId, syncType });
-      setIsSyncDialogOpen(false);
-    } catch (error) {
+      if (integration.calendar_type === 'google_calendar') {
+        await syncGoogleBusy.mutateAsync({ integrationId: integration.id });
+      } else {
+        await syncCalendar.mutateAsync({ integrationId: integration.id, syncType });
+      }
+    } catch {
       // Error handled by mutation
     }
+  };
+
+  const handleConnectGoogle = () => {
+    if (!store?.id) return;
+    connectGoogle.mutate({ storeId: store.id });
   };
 
   const getCalendarIcon = (type: string) => {
@@ -164,26 +193,36 @@ export default function CalendarIntegrationsPage() {
               Connectez vos calendriers Google, Outlook ou iCal pour synchroniser vos réservations
             </p>
           </div>
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Nouvelle Intégration
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Nouvelle Intégration Calendrier</DialogTitle>
-                <DialogDescription>
-                  Configurez une nouvelle intégration avec un calendrier externe
-                </DialogDescription>
-              </DialogHeader>
-              <CreateIntegrationForm
-                onSubmit={handleCreateIntegration}
-                onCancel={() => setIsCreateDialogOpen(false)}
-              />
-            </DialogContent>
-          </Dialog>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={handleConnectGoogle}
+              disabled={connectGoogle.isPending || !store?.id}
+            >
+              <Globe className="h-4 w-4 mr-2" />
+              Connecter Google Calendar
+            </Button>
+            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nouvelle Intégration
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Nouvelle Intégration Calendrier</DialogTitle>
+                  <DialogDescription>
+                    Configurez une nouvelle intégration avec un calendrier externe
+                  </DialogDescription>
+                </DialogHeader>
+                <CreateIntegrationForm
+                  onSubmit={handleCreateIntegration}
+                  onCancel={() => setIsCreateDialogOpen(false)}
+                />
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
         {/* Integrations List */}
@@ -217,8 +256,8 @@ export default function CalendarIntegrationsPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleSync(integration.id)}
-                        disabled={syncCalendar.isPending}
+                        onClick={() => handleSync(integration)}
+                        disabled={syncCalendar.isPending || syncGoogleBusy.isPending}
                       >
                         <RefreshCw
                           className={`h-4 w-4 mr-2 ${syncCalendar.isPending ? 'animate-spin' : ''}`}
@@ -427,7 +466,7 @@ function IntegrationDetailsDialog({
   onUpdate: (data: Partial<CalendarIntegration> & { id: string }) => Promise<CalendarIntegration>;
   events: Array<{ id: string; title: string; start: string; end: string; [key: string]: unknown }>;
   syncLogs: Array<{ id: string; status: string; created_at: string; [key: string]: unknown }>;
-  onSync: (id: string, type?: 'full' | 'incremental' | 'manual') => void;
+  onSync: (integration: CalendarIntegration, type?: 'full' | 'incremental' | 'manual') => void;
 }) {
   const [activeTab, setActiveTab] = useState('settings');
 

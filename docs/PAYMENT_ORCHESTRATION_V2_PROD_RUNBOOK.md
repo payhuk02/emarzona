@@ -97,6 +97,38 @@ VITE_SUPABASE_ANON_KEY=sb_publishable_...
 3. Redéployer production.
 4. **Staging / Preview** : laisser non défini pour auto-V2, ou `true` explicitement.
 
+### Rollout canary (50 % → 100 %)
+
+Phase recommandée après smoke QA §7 :
+
+| Phase | `VITE_PAYMENT_ORCHESTRATION_V2` | `VITE_PAYMENT_ORCHESTRATION_V2_ROLLOUT` | Critère go/no-go                                            |
+| ----- | ------------------------------- | --------------------------------------- | ----------------------------------------------------------- |
+| 1     | `true`                          | `10`                                    | 48 h sans incident webhook / double fulfillment             |
+| 2     | `true`                          | `50`                                    | `get_payment_webhook_health(24)` OK, E2E financial CI verte |
+| 3     | `true`                          | `100`                                   | Stripe + PayPal + Moneroo smoke prod                        |
+
+**Statut 2026-06-12** : phase **2 active** — `VITE_PAYMENT_ORCHESTRATION_V2=true`, `VITE_PAYMENT_ORCHESTRATION_V2_ROLLOUT=50` en production Vercel (variables confirmées via `vercel env ls production`).
+
+> **Redeploy requis** : les `VITE_*` ne sont lues qu’au build. Si le CLI local échoue (`api-upload-free`), redéployer depuis **Vercel Dashboard → Deployments → Redeploy** (branche `main`, environnement Production). Surveiller 48 h avant passage à 100 %.
+
+Script Vercel (production) :
+
+```powershell
+$env:VERCEL_TOKEN = "<token>"   # optionnel si vercel login
+.\scripts\enable-payment-v2-rollout-vercel.ps1 -RolloutPercent 50
+.\scripts\enable-payment-v2-rollout-100.ps1   # checklist go/no-go intégrée
+# Voir docs/runbooks/payment-v2-rollout-100.md
+```
+
+Tests contrat rollout :
+
+```bash
+npx vitest run src/lib/payments/__tests__/feature-flags.test.ts
+npx playwright test tests/e2e/payment-v2-rollout.spec.ts --project=chromium
+```
+
+Le bucket canary est **déterministe par `storeId`** (`fnv1aHash` dans `feature-flags.ts`) : une boutique reste dans le même groupe entre les déploiements.
+
 ---
 
 ## 6. Checklist vendeur (onboarding)

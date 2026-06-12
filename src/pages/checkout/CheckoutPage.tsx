@@ -1,9 +1,10 @@
 /**
- * Routeur checkout : panier unifié ou achat direct (?productId=).
+ * Epic 3.6 — Checkout canonique : `/checkout` (panier, buy-now, enchère via query).
  */
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
+import { resolveCheckoutMode } from '@/lib/checkout/checkout-route';
 
 const CartCheckout = lazy(() => import('@/pages/Checkout'));
 const BuyNowCheckout = lazy(() => import('@/pages/checkout/Checkout'));
@@ -20,11 +21,12 @@ function CheckoutLoading() {
 
 export default function CheckoutPage() {
   const [searchParams] = useSearchParams();
-  const productId = searchParams.get('productId');
+  const mode = useMemo(() => resolveCheckoutMode(searchParams), [searchParams]);
+  const useBuyNow = mode === 'buy_now' || mode === 'auction';
 
   return (
     <Suspense fallback={<CheckoutLoading />}>
-      {productId ? <BuyNowCheckout /> : <CartCheckout />}
+      {useBuyNow ? <BuyNowCheckout /> : <CartCheckout />}
     </Suspense>
   );
 }

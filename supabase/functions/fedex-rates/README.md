@@ -11,7 +11,12 @@ Calcule les tarifs d'expédition FedEx côté serveur (clés API jamais exposée
 | `FEDEX_ACCOUNT_NUMBER` | Numéro de compte                   |
 | `FEDEX_TEST_MODE`      | `true` (sandbox) ou `false` (prod) |
 
-Sans secrets → réponse **mock** (estimation XOF).
+Sans secrets :
+
+- **Dev/staging** : réponse **mock** (estimation XOF)
+- **Production** : **503** `FEDEX_NOT_CONFIGURED` (pas de mock transparent)
+
+Voir [`docs/runbooks/fedex-prod-credentials.md`](../../../docs/runbooks/fedex-prod-credentials.md).
 
 ## Requête
 

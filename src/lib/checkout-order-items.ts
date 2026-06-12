@@ -14,11 +14,13 @@ function cartMetadata(item: CartItem): Record<string, unknown> {
   return {};
 }
 
-/** Métadonnées JSONB + champs spécialisés pour triggers (cours, artiste, digital). */
+/** Métadonnées JSONB + champs spécialisés pour triggers (cours, artiste, digital, service). */
 export function orderItemInsertExtras(item: CartItem): {
   item_metadata?: Record<string, unknown>;
   digital_product_id?: string;
   physical_product_id?: string;
+  service_product_id?: string;
+  booking_id?: string;
 } {
   const meta = cartMetadata(item);
 
@@ -60,6 +62,22 @@ export function orderItemInsertExtras(item: CartItem): {
     return typeof physicalProductId === 'string' ? { physical_product_id: physicalProductId } : {};
   }
 
+  if (item.product_type === 'service') {
+    const bookingId = meta.booking_id ?? meta.service_booking_id;
+    const serviceProductId = meta.service_product_id ?? meta.serviceProductId;
+    const scheduledAt = meta.scheduled_at ?? meta.booking_date;
+    return {
+      ...(typeof bookingId === 'string' ? { booking_id: bookingId } : {}),
+      ...(typeof serviceProductId === 'string' ? { service_product_id: serviceProductId } : {}),
+      item_metadata: {
+        ...meta,
+        ...(typeof bookingId === 'string' ? { booking_id: bookingId } : {}),
+        ...(typeof serviceProductId === 'string' ? { service_product_id: serviceProductId } : {}),
+        ...(scheduledAt != null ? { scheduled_at: scheduledAt } : {}),
+      },
+    };
+  }
+
   return {};
 }
 
@@ -75,6 +93,8 @@ export type OrderItemInsertRow = {
   item_metadata?: Record<string, unknown>;
   digital_product_id?: string;
   physical_product_id?: string;
+  service_product_id?: string;
+  booking_id?: string;
 };
 
 function buildOrderItemRowsSync(orderId: string, items: CartItem[]): OrderItemInsertRow[] {
@@ -132,6 +152,29 @@ export async function buildOrderItemRows(
           };
         }
       }
+      if (item.product_type === 'service') {
+        const meta = cartMetadata(item);
+        const bookingId = meta.booking_id ?? meta.service_booking_id;
+        if (typeof bookingId === 'string' && !row.booking_id) {
+          row.booking_id = bookingId;
+        }
+        if (!row.service_product_id) {
+          const fromMeta = meta.service_product_id ?? meta.serviceProductId;
+          if (typeof fromMeta === 'string') {
+            row.service_product_id = fromMeta;
+          } else {
+            const { data } = await supabase
+              .from('service_products')
+              .select('id')
+              .eq('product_id', item.product_id)
+              .maybeSingle();
+            if (data?.id) row.service_product_id = data.id;
+          }
+        }
+        if (row.item_metadata && typeof bookingId === 'string' && !row.item_metadata.booking_id) {
+          row.item_metadata = { ...row.item_metadata, booking_id: bookingId };
+        }
+      }
       if (item.product_type === 'artist' && row.item_metadata) {
         const meta = cartMetadata(item);
         const artistProductId = meta.artist_product_id ?? meta.artistProductId;
@@ -156,7 +199,10 @@ export async function buildOrderItemRows(
 
   const missingPhysical = rows.some(r => r.product_type === 'physical' && !r.physical_product_id);
   const missingDigital = rows.some(r => r.product_type === 'digital' && !r.digital_product_id);
-  if (missingPhysical || missingDigital) {
+  const missingService = rows.some(
+    r => r.product_type === 'service' && (!r.service_product_id || !r.booking_id)
+  );
+  if (missingPhysical || missingDigital || missingService) {
     throw new Error(
       'Certains articles du panier sont incomplets. Retirez-les et ajoutez-les à nouveau depuis la fiche produit.'
     );

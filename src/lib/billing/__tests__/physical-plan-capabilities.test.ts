@@ -8,6 +8,12 @@ describe('physical-plan-capabilities (Epic 3.2.7)', () => {
     expect(hasPhysicalFeatureAccess('physical_premium', 'serial_tracking.manage')).toBe(true);
   });
 
+  it('local africa shipping available from Professional', () => {
+    expect(hasPhysicalFeatureAccess('physical_basic', 'shipping.local_africa')).toBe(false);
+    expect(hasPhysicalFeatureAccess('physical_standard', 'shipping.local_africa')).toBe(true);
+    expect(requiredPlanForFeature('shipping.local_africa')).toBe('physical_standard');
+  });
+
   it('warehouses available from Professional (quota enforced in DB)', () => {
     expect(hasPhysicalFeatureAccess('physical_basic', 'warehouses.manage')).toBe(false);
     expect(hasPhysicalFeatureAccess('physical_standard', 'warehouses.manage')).toBe(true);

@@ -36,12 +36,13 @@ import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { VariantSelector } from '@/components/physical/VariantSelector';
 import { InventoryStockIndicator } from '@/components/physical/InventoryStockIndicator';
-import { ShippingInfoDisplay } from '@/components/physical/ShippingInfoDisplay';
+import { PhysicalProductDeliveryEstimate } from '@/components/physical/PhysicalProductDeliveryEstimate';
+import { ProductReviewsHeroSummary } from '@/components/physical/ProductReviewsHeroSummary';
+import { PhysicalProductPreOrderCard } from '@/components/physical/PhysicalProductPreOrderCard';
 import { SizeChartDisplay } from '@/components/physical/SizeChartDisplay';
 import { ProductReviewsSummary } from '@/components/reviews/ProductReviewsSummary';
 import { ReviewsList } from '@/components/reviews/ReviewsList';
 import { ReviewForm } from '@/components/reviews/ReviewForm';
-import { ProductImages } from '@/components/shared';
 import { AdvancedProductImages } from '@/components/physical/AdvancedProductImages';
 import { useCart } from '@/hooks/cart/useCart';
 import { useAuth } from '@/contexts/AuthContext';
@@ -97,6 +98,7 @@ export default function PhysicalProductDetail() {
   const [selectedVariant, setSelectedVariant] = useState<PhysicalProductVariant | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [activeTab, setActiveTab] = useState('description');
 
   // Utiliser le hook unifié pour la wishlist
   const {
@@ -338,7 +340,7 @@ export default function PhysicalProductDetail() {
 
       // Optionnel : Rediriger vers le panier ou réinitialiser la quantité
       setQuantity(1);
-    } catch (_error: unknown) {
+    } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("Erreur lors de l'ajout au panier", error);
       toast({
@@ -461,6 +463,11 @@ export default function PhysicalProductDetail() {
                 {product.short_description}
               </p>
             )}
+            <ProductReviewsHeroSummary
+              productId={productId!}
+              onViewReviews={() => setActiveTab('reviews')}
+              className="mt-3"
+            />
           </div>
 
           {/* Price */}
@@ -520,6 +527,12 @@ export default function PhysicalProductDetail() {
             </div>
           </div>
 
+          <PhysicalProductPreOrderCard
+            productId={productId!}
+            variantId={selectedVariant?.id}
+            currency={product?.currency}
+          />
+
           {/* Actions */}
           <div className="space-y-3">
             <PhysicalProductWhatsAppButton
@@ -571,8 +584,7 @@ export default function PhysicalProductDetail() {
             </div>
           </div>
 
-          {/* Shipping Info */}
-          {product?.physical && <ShippingInfoDisplay productId={productId!} />}
+          {productId && <PhysicalProductDeliveryEstimate productId={productId} />}
 
           {/* Features */}
           {product?.physical && (
@@ -609,7 +621,7 @@ export default function PhysicalProductDetail() {
       </div>
 
       {/* Content Tabs */}
-      <Tabs defaultValue="description" className="mt-12 space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-12 space-y-6">
         <TabsList className="w-full overflow-x-auto flex-nowrap justify-start">
           <TabsTrigger value="description" className="min-h-[44px] shrink-0">
             Description
@@ -747,9 +759,6 @@ export default function PhysicalProductDetail() {
           limit={4}
         />
       )}
-
-      {/* Reviews Summary (outside tabs for visibility) */}
-      <ProductReviewsSummary productId={productId!} productType="physical" />
     </AppPageShell>
   );
 }
