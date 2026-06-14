@@ -17,7 +17,8 @@ export type PhysicalFeatureKey =
   | 'backorders.manage'
   | 'bundles.manage'
   | 'forecasting.demand'
-  | 'cost_optimization.manage';
+  | 'cost_optimization.manage'
+  | 'team.sso';
 
 const PLAN_RANK: Record<Exclude<PhysicalPlanSlug, null>, number> = {
   physical_basic: 1,
@@ -43,6 +44,7 @@ const MIN_PLAN_BY_FEATURE: Record<PhysicalFeatureKey, Exclude<PhysicalPlanSlug, 
   'bundles.manage': 'physical_premium',
   'forecasting.demand': 'physical_premium',
   'cost_optimization.manage': 'physical_premium',
+  'team.sso': 'physical_premium',
 };
 
 export function hasPhysicalFeatureAccess(

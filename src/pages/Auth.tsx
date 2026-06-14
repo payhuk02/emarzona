@@ -13,7 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { AlertCircle, Eye, EyeOff, Mail, CheckCircle2 } from 'lucide-react';
+import { AlertCircle, Eye, EyeOff, Mail, CheckCircle2, Shield } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   AUTH_LOGIN_PATH,
@@ -43,6 +43,11 @@ import {
   getCaughtErrorMessage,
 } from '@/lib/auth-error-messages';
 import { isSupabaseBackendConfigured } from '@/lib/supabase-config';
+import {
+  checkEmailSsoEnforcement,
+  getSsoLoginHref,
+  resolveSsoErrorMessage,
+} from '@/lib/sso/enforce-sso-login';
 
 const Auth = () => {
   const { t } = useTranslation();
@@ -64,9 +69,17 @@ const Auth = () => {
   const [signupName, setSignupName] = useState('');
   const [signupEmail, setSignupEmail] = useState('');
   const [signupPassword, setSignupPassword] = useState('');
+  const [ssoEnforcement, setSsoEnforcement] = useState<{
+    store_slug: string;
+    store_name?: string;
+    idp_display_name?: string;
+  } | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const authTab: AuthTab = getAuthTabFromPathname(location.pathname);
+  const searchParams = new URLSearchParams(location.search);
+  const ssoErrorCode = searchParams.get('sso_error');
+  const ssoSuccess = searchParams.get('sso') === 'success';
   const { toast } = useToast();
   const { user } = useAuth();
   const loginFormRef = useRef<HTMLFormElement>(null);
@@ -85,6 +98,42 @@ const Auth = () => {
       void redirectAfterAuth();
     }
   }, [user, redirectAfterAuth]);
+
+  useEffect(() => {
+    if (ssoErrorCode) {
+      setError(resolveSsoErrorMessage(ssoErrorCode) ?? 'Erreur SSO');
+    }
+    if (ssoSuccess) {
+      toast({
+        title: 'Connexion SSO',
+        description: 'Vérifiez votre email pour finaliser la connexion.',
+      });
+    }
+  }, [ssoErrorCode, ssoSuccess, toast]);
+
+  useEffect(() => {
+    const email = loginEmail.trim().toLowerCase();
+    if (!email.includes('@') || authTab !== 'login') {
+      setSsoEnforcement(null);
+      return;
+    }
+    const timer = setTimeout(() => {
+      checkEmailSsoEnforcement(email)
+        .then(result => {
+          if (result.enforced && result.store_slug) {
+            setSsoEnforcement({
+              store_slug: result.store_slug,
+              store_name: result.store_name,
+              idp_display_name: result.idp_display_name,
+            });
+          } else {
+            setSsoEnforcement(null);
+          }
+        })
+        .catch(() => setSsoEnforcement(null));
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [loginEmail, authTab]);
 
   // Check for password reset token in URL
   useEffect(() => {
@@ -416,6 +465,18 @@ const Auth = () => {
     }
 
     try {
+      const enforcement = await checkEmailSsoEnforcement(email);
+      if (enforcement.enforced && enforcement.store_slug) {
+        const msg = `Connexion SSO obligatoire pour ${enforcement.store_name ?? 'votre organisation'}. Utilisez ${enforcement.idp_display_name ?? 'votre IdP'}.`;
+        setError(msg);
+        setIsLoading(false);
+        return;
+      }
+    } catch {
+      // fail open si RPC indisponible
+    }
+
+    try {
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -538,6 +599,27 @@ const Auth = () => {
               </TabsList>
 
               <TabsContent value="login">
+                {ssoEnforcement && (
+                  <Alert className="mb-4 border-primary/40 bg-primary/5">
+                    <Shield className="h-4 w-4 text-primary" />
+                    <AlertDescription className="space-y-2">
+                      <p>
+                        {ssoEnforcement.store_name
+                          ? `${ssoEnforcement.store_name} exige la connexion SSO`
+                          : 'Connexion SSO obligatoire'}
+                        {ssoEnforcement.idp_display_name
+                          ? ` via ${ssoEnforcement.idp_display_name}`
+                          : ''}
+                        .
+                      </p>
+                      <Button variant="outline" size="sm" className="w-full" asChild>
+                        <Link to={getSsoLoginHref(ssoEnforcement.store_slug)}>
+                          Se connecter avec SSO Enterprise
+                        </Link>
+                      </Button>
+                    </AlertDescription>
+                  </Alert>
+                )}
                 <form
                   ref={loginFormRef}
                   onSubmit={handleSignIn}

@@ -10,7 +10,7 @@ import { AppPageShell } from '@/components/layout/AppPageShell';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StoreMembersList } from '@/components/team/StoreMembersList';
-import { Users, CheckSquare, BarChart3 } from 'lucide-react';
+import { Users, CheckSquare, BarChart3, Shield } from 'lucide-react';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useStore } from '@/hooks/useStore';
 import { Card, CardContent } from '@/components/ui/card';
@@ -18,6 +18,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { StoreTasksList } from '@/components/team/StoreTasksList';
 import { StoreTeamStats } from '@/components/team/StoreTeamStats';
 import { StoreTeamAnalytics } from '@/components/team/StoreTeamAnalytics';
+import { StoreSsoSettingsPanel } from '@/components/team/StoreSsoSettingsPanel';
 
 const StoreTeamManagement = () => {
   const { t } = useTranslation();
@@ -84,7 +85,7 @@ const StoreTeamManagement = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="members" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 gap-1.5 sm:gap-2 mb-4 sm:mb-6 h-auto p-1 bg-muted/50 backdrop-blur-sm">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2 mb-4 sm:mb-6 h-auto p-1 bg-muted/50 backdrop-blur-sm">
             <TabsTrigger
               value="members"
               className="flex items-center gap-1 sm:gap-1.5 lg:gap-2 px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 text-[10px] xs:text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300 touch-manipulation whitespace-nowrap overflow-hidden text-ellipsis"
@@ -107,6 +108,14 @@ const StoreTeamManagement = () => {
               <span className="hidden sm:inline">{t('team.tabs.stats', 'Statistiques')}</span>
               <span className="sm:hidden">{t('team.tabs.statsShort', 'Stats')}</span>
             </TabsTrigger>
+            <TabsTrigger
+              value="sso"
+              className="flex items-center gap-1 sm:gap-1.5 lg:gap-2 px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 text-[10px] xs:text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300 touch-manipulation whitespace-nowrap overflow-hidden text-ellipsis"
+            >
+              <Shield className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">{t('team.tabs.sso', 'SSO Enterprise')}</span>
+              <span className="sm:hidden">SSO</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="members" className="space-y-4 sm:space-y-6">
@@ -119,6 +128,10 @@ const StoreTeamManagement = () => {
 
           <TabsContent value="stats" className="space-y-4 sm:space-y-6">
             <StoreTeamAnalytics storeId={store.id} />
+          </TabsContent>
+
+          <TabsContent value="sso" className="space-y-4 sm:space-y-6">
+            <StoreSsoSettingsPanel storeId={store.id} storeSlug={store.slug} />
           </TabsContent>
         </Tabs>
       </div>

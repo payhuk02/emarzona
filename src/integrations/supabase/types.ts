@@ -34686,6 +34686,317 @@ export type Database = {
           },
         ];
       };
+      store_sso_login_events: {
+        Row: {
+          assigned_role: string | null;
+          created_at: string;
+          email: string | null;
+          error_message: string | null;
+          id: string;
+          idp_groups: Json;
+          ip_address: string | null;
+          provider_id: string | null;
+          status: string;
+          store_id: string;
+          user_agent: string | null;
+          user_id: string | null;
+        };
+        Insert: {
+          assigned_role?: string | null;
+          created_at?: string;
+          email?: string | null;
+          error_message?: string | null;
+          id?: string;
+          idp_groups?: Json;
+          ip_address?: string | null;
+          provider_id?: string | null;
+          status: string;
+          store_id: string;
+          user_agent?: string | null;
+          user_id?: string | null;
+        };
+        Update: {
+          assigned_role?: string | null;
+          created_at?: string;
+          email?: string | null;
+          error_message?: string | null;
+          id?: string;
+          idp_groups?: Json;
+          ip_address?: string | null;
+          provider_id?: string | null;
+          status?: string;
+          store_id?: string;
+          user_agent?: string | null;
+          user_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'store_sso_login_events_provider_id_fkey';
+            columns: ['provider_id'];
+            isOneToOne: false;
+            referencedRelation: 'store_sso_providers';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'store_sso_login_events_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'dashboard_stats_optimized';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'store_sso_login_events_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'marketplace_products_optimized';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'store_sso_login_events_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'store_affiliates_summary';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'store_sso_login_events_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'store_stats_last_30_days';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'store_sso_login_events_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'store_stats_last_7_days';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'store_sso_login_events_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'stores';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'store_sso_login_events_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'stores_public';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      store_sso_providers: {
+        Row: {
+          allowed_email_domains: string[];
+          created_at: string;
+          default_role: string;
+          enabled: boolean;
+          enforce_sso: boolean;
+          id: string;
+          idp_display_name: string;
+          jit_provisioning: boolean;
+          metadata: Json;
+          oidc_client_id: string | null;
+          oidc_client_secret: string | null;
+          oidc_issuer_url: string | null;
+          oidc_scopes: string;
+          provider_type: string;
+          role_mappings: Json;
+          saml_certificate: string | null;
+          saml_idp_entity_id: string | null;
+          saml_sso_url: string | null;
+          store_id: string;
+          updated_at: string;
+        };
+        Insert: {
+          allowed_email_domains?: string[];
+          created_at?: string;
+          default_role?: string;
+          enabled?: boolean;
+          enforce_sso?: boolean;
+          id?: string;
+          idp_display_name?: string;
+          jit_provisioning?: boolean;
+          metadata?: Json;
+          oidc_client_id?: string | null;
+          oidc_client_secret?: string | null;
+          oidc_issuer_url?: string | null;
+          oidc_scopes?: string;
+          provider_type: string;
+          role_mappings?: Json;
+          saml_certificate?: string | null;
+          saml_idp_entity_id?: string | null;
+          saml_sso_url?: string | null;
+          store_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          allowed_email_domains?: string[];
+          created_at?: string;
+          default_role?: string;
+          enabled?: boolean;
+          enforce_sso?: boolean;
+          id?: string;
+          idp_display_name?: string;
+          jit_provisioning?: boolean;
+          metadata?: Json;
+          oidc_client_id?: string | null;
+          oidc_client_secret?: string | null;
+          oidc_issuer_url?: string | null;
+          oidc_scopes?: string;
+          provider_type?: string;
+          role_mappings?: Json;
+          saml_certificate?: string | null;
+          saml_idp_entity_id?: string | null;
+          saml_sso_url?: string | null;
+          store_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'store_sso_providers_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: true;
+            referencedRelation: 'dashboard_stats_optimized';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'store_sso_providers_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: true;
+            referencedRelation: 'marketplace_products_optimized';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'store_sso_providers_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: true;
+            referencedRelation: 'store_affiliates_summary';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'store_sso_providers_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: true;
+            referencedRelation: 'store_stats_last_30_days';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'store_sso_providers_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: true;
+            referencedRelation: 'store_stats_last_7_days';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'store_sso_providers_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: true;
+            referencedRelation: 'stores';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'store_sso_providers_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: true;
+            referencedRelation: 'stores_public';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      store_sso_states: {
+        Row: {
+          consumed_at: string | null;
+          created_at: string;
+          expires_at: string;
+          nonce: string | null;
+          provider_id: string;
+          redirect_url: string | null;
+          state_token: string;
+          store_id: string;
+        };
+        Insert: {
+          consumed_at?: string | null;
+          created_at?: string;
+          expires_at?: string;
+          nonce?: string | null;
+          provider_id: string;
+          redirect_url?: string | null;
+          state_token: string;
+          store_id: string;
+        };
+        Update: {
+          consumed_at?: string | null;
+          created_at?: string;
+          expires_at?: string;
+          nonce?: string | null;
+          provider_id?: string;
+          redirect_url?: string | null;
+          state_token?: string;
+          store_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'store_sso_states_provider_id_fkey';
+            columns: ['provider_id'];
+            isOneToOne: false;
+            referencedRelation: 'store_sso_providers';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'store_sso_states_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'dashboard_stats_optimized';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'store_sso_states_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'marketplace_products_optimized';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'store_sso_states_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'store_affiliates_summary';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'store_sso_states_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'store_stats_last_30_days';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'store_sso_states_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'store_stats_last_7_days';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'store_sso_states_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'stores';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'store_sso_states_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'stores_public';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       store_task_comments: {
         Row: {
           attachments: Json | null;
@@ -44023,6 +44334,7 @@ export type Database = {
         };
         Returns: boolean;
       };
+      check_email_sso_enforcement: { Args: { p_email: string }; Returns: Json };
       check_expired_packages: { Args: never; Returns: undefined };
       check_expiring_licenses_job: { Args: never; Returns: undefined };
       check_max_bookings_per_day: {
@@ -45997,6 +46309,10 @@ export type Database = {
         Args: { p_store_id: string };
         Returns: string;
       };
+      get_store_sso_public_config: {
+        Args: { p_store_slug: string };
+        Returns: Json;
+      };
       get_store_status: { Args: { store_id: string }; Returns: boolean };
       get_store_tags_by_category: {
         Args: { p_category?: string; p_store_id: string };
@@ -46747,6 +47063,17 @@ export type Database = {
         Returns: Json;
       };
       process_subscription_dunning_notifications: { Args: never; Returns: Json };
+      provision_store_sso_member: {
+        Args: {
+          p_default_role?: string;
+          p_email: string;
+          p_idp_groups?: Json;
+          p_role_mappings?: Json;
+          p_store_id: string;
+          p_user_id: string;
+        };
+        Returns: Json;
+      };
       record_coupon_usage:
         | {
             Args: {
@@ -47069,6 +47396,10 @@ export type Database = {
           jobname: string;
           schedule: string;
         }[];
+      };
+      setup_verify_domains_cron_job: {
+        Args: { p_cron_secret: string; p_project_ref: string };
+        Returns: Json;
       };
       setup_welcome_email_hook: {
         Args: {

@@ -924,20 +924,12 @@ export default function Checkout() {
   // Traitement de la commande
   const handleCheckout = async () => {
     if (!validateForm()) {
-      toast({
-        title: 'Formulaire incomplet',
-        description: 'Veuillez corriger les erreurs dans le formulaire',
-        variant: 'destructive',
-      });
+      showCheckoutBlockedToast(toast, 'Veuillez corriger les erreurs dans le formulaire');
       return;
     }
 
     if (items.length === 0) {
-      toast({
-        title: 'Panier vide',
-        description: 'Votre panier est vide',
-        variant: 'destructive',
-      });
+      showCheckoutBlockedToast(toast, 'Votre panier est vide');
       navigate('/cart');
       return;
     }
@@ -960,11 +952,7 @@ export default function Checkout() {
       } = await supabase.auth.getUser();
 
       if (!user?.email) {
-        toast({
-          title: 'Authentification requise',
-          description: 'Veuillez vous connecter pour continuer',
-          variant: 'destructive',
-        });
+        showCheckoutBlockedToast(toast, 'Veuillez vous connecter pour continuer');
         redirectToPlatformLogin(navigate);
         return;
       }

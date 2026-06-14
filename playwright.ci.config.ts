@@ -21,6 +21,7 @@ export default defineConfig({
     '**/artist-sale-certificate.spec.ts',
     '**/course-payment-learn.spec.ts',
     '**/checkout-unified.spec.ts',
+    '**/enterprise-sso-login.spec.ts',
   ],
   fullyParallel: true,
   forbidOnly: !!process.env.CI,

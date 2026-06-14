@@ -7,6 +7,7 @@ import { generateStoreUrl, generateProductUrl } from '@/lib/store-utils';
 // Pages publiques
 const Landing = lazyPage(() => import('@/pages/Landing'));
 const Auth = lazyPage(() => import('@/pages/Auth'));
+const StoreSsoLoginPage = lazyPage(() => import('@/pages/auth/StoreSsoLoginPage'));
 const Marketplace = lazyPage(() =>
   import('@/pages/Marketplace')
     .then(m => ({ default: m.default }))
@@ -196,6 +197,7 @@ export const publicRoutes = (
     <Route path="/auth" element={<Navigate to="/login" replace />} />
     <Route path="/auth/login" element={<Navigate to="/login" replace />} />
     <Route path="/auth/signup" element={<Navigate to="/register" replace />} />
+    <Route path="/auth/sso/:storeSlug" element={<StoreSsoLoginPage />} />
     <Route path="/marketplace" element={<Marketplace />} />
     <Route path="/recommendations" element={<Recommendations />} />
     <Route path="/recommendations/history-based" element={<HistoryBasedRecommendations />} />

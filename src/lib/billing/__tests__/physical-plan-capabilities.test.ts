@@ -2,6 +2,11 @@ import { describe, it, expect } from 'vitest';
 import { hasPhysicalFeatureAccess, requiredPlanForFeature } from '../physical-plan-capabilities';
 
 describe('physical-plan-capabilities (Epic 3.2.7)', () => {
+  it('team.sso requires physical_premium', () => {
+    expect(hasPhysicalFeatureAccess('physical_premium', 'team.sso')).toBe(true);
+    expect(hasPhysicalFeatureAccess('physical_standard', 'team.sso')).toBe(false);
+  });
+
   it('serial tracking available from Professional', () => {
     expect(hasPhysicalFeatureAccess('physical_basic', 'serial_tracking.manage')).toBe(false);
     expect(hasPhysicalFeatureAccess('physical_standard', 'serial_tracking.manage')).toBe(true);

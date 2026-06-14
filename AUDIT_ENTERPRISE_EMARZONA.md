@@ -69,10 +69,10 @@ Une excellente base de travail avec un fort potentiel de scalabilité, mais rale
 - **Points forts** : Middleware Edge performant pour générer les balises OpenGraph pour les bots.
 - **Faiblesses** : Rendu statique (SSG) non natif, dépendance au middleware pour le prerendering.
 
-### 13. Score enterprise readiness : 75/100
+### 13. Score enterprise readiness : 78/100
 
-- **Points forts** : Multi-tenant, RLS, Audit Logs prévus.
-- **Faiblesses** : Pas de conformité SOC2 mentionnée, pas de SSO (SAML) pour les grands comptes vendeurs, SLA manquants sur l'infrastructure.
+- **Points forts** : Multi-tenant, RLS, Audit Logs prévus, SSO Enterprise OIDC (Epic 4.3).
+- **Faiblesses** : Pas de conformité SOC2 mentionnée, SAML phase 2, SLA manquants sur l'infrastructure.
 
 ---
 
@@ -176,7 +176,7 @@ Une excellente base de travail avec un fort potentiel de scalabilité, mais rale
 
 ### 34. Suggestions enterprise (B2B & Croissance)
 
-- Implémenter le SSO (Single Sign-On, SAML) via Supabase pour permettre aux grandes entreprises de gérer leurs équipes sur la plateforme.
+- Implémenter le SSO (Single Sign-On, SAML/OIDC) via Supabase pour permettre aux grandes entreprises de gérer leurs équipes sur la plateforme. **OIDC livré Epic 4.3** (`/auth/sso/:slug`, plan `physical_premium`).
 - Créer des logs d'audit exportables (Compliance SOC2) pour toutes les actions d'administration.
 
 ### 35. Suggestions IA
