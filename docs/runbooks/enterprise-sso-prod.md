@@ -61,9 +61,25 @@ Employé → /auth/sso/acme → edge authorize → IdP
 | `support`     | Commandes, clients                     |
 | `viewer`      | Lecture seule                          |
 
-## SAML
+## SAML 2.0 (Epic 4.5 — phase 2)
 
-Configuration UI disponible ; validation assertion SAML = **phase 2**. Utiliser OIDC en production.
+1. Type **SAML 2.0** dans Équipe → SSO Enterprise
+2. Renseigner Entity ID IdP, SSO URL, certificat X.509 PEM
+3. ACS URL chez l'IdP :
+
+```
+https://hbdnzajbyjakdhuavrvb.supabase.co/functions/v1/store-sso-auth
+```
+
+4. SP Entity ID Emarzona :
+
+```
+https://www.emarzona.com/auth/sso/saml
+```
+
+5. Binding : HTTP-POST (ACS), HTTP-Redirect (login).
+
+Validation : signature RSA-SHA256, expiration assertion, email + groupes IdP.
 
 ## Sécurité
 

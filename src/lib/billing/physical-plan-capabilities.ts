@@ -18,7 +18,9 @@ export type PhysicalFeatureKey =
   | 'bundles.manage'
   | 'forecasting.demand'
   | 'cost_optimization.manage'
-  | 'team.sso';
+  | 'team.sso'
+  | 'audit.export'
+  | 'api.public';
 
 const PLAN_RANK: Record<Exclude<PhysicalPlanSlug, null>, number> = {
   physical_basic: 1,
@@ -45,6 +47,8 @@ const MIN_PLAN_BY_FEATURE: Record<PhysicalFeatureKey, Exclude<PhysicalPlanSlug, 
   'forecasting.demand': 'physical_premium',
   'cost_optimization.manage': 'physical_premium',
   'team.sso': 'physical_premium',
+  'audit.export': 'physical_premium',
+  'api.public': 'physical_standard',
 };
 
 export function hasPhysicalFeatureAccess(

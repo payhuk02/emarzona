@@ -1,8 +1,6 @@
 /**
- * API Publique Emarzona - Edge Function
- * Date: 28 Janvier 2025
- * 
- * Point d'entrée principal de l'API publique
+ * API Publique Emarzona v1 — Epic 4.6
+ * REST vendeurs : produits, commandes, clients, analytics, export
  */
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
@@ -23,11 +21,25 @@ function resolveCorsOrigin(originHeader: string | null): string {
 function buildCorsHeaders(originHeader: string | null) {
   return {
     'Access-Control-Allow-Origin': resolveCorsOrigin(originHeader),
-    'Vary': 'Origin',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    Vary: 'Origin',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
     'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
   };
 }
+
+function json(body: unknown, status: number, corsHeaders: Record<string, string>): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
+}
+
+type ApiKeyInfo = {
+  key_id: string;
+  user_id: string;
+  store_id: string;
+  permissions: unknown;
+};
 
 const genericBodySchema = z.record(z.any());
 const productBodySchema = z
@@ -63,6 +75,7 @@ const customerBodySchema = z
     phone: z.string().max(50).optional(),
   })
   .catchall(z.any());
+
 const forbiddenFields = new Set([
   'id',
   'store_id',
@@ -74,8 +87,7 @@ const forbiddenFields = new Set([
 
 const PRODUCT_PUBLIC_FIELDS =
   'id,store_id,name,description,sku,status,price,compare_price,quantity,currency,created_at,updated_at';
-const CUSTOMER_PUBLIC_FIELDS =
-  'id,store_id,email,name,full_name,phone,created_at,updated_at';
+const CUSTOMER_PUBLIC_FIELDS = 'id,store_id,email,name,full_name,phone,created_at,updated_at';
 
 function sanitizeWritePayload(payload: Record<string, unknown>): Record<string, unknown> {
   const sanitized: Record<string, unknown> = {};
@@ -90,8 +102,8 @@ async function parseAndSanitizeBody(
   req: Request,
   schema: z.ZodSchema<Record<string, unknown>> = genericBodySchema
 ): Promise<Record<string, unknown>> {
-  const json = await req.json();
-  const parsed = schema.parse(json);
+  const jsonBody = await req.json();
+  const parsed = schema.parse(jsonBody);
   const sanitized = sanitizeWritePayload(parsed);
   if (Object.keys(sanitized).length === 0) {
     throw new Error('Empty or invalid payload');
@@ -105,198 +117,229 @@ function parsePaginationParam(value: string | null, fallback: number, max: numbe
   return Math.min(parsed, max);
 }
 
-function hasPermission(apiKeyInfo: { permissions: any }, permission: string): boolean {
+function hasPermission(apiKeyInfo: ApiKeyInfo, permission: string): boolean {
   const rawPermissions = apiKeyInfo?.permissions;
   if (!rawPermissions) return false;
   if (rawPermissions === '*') return true;
   if (Array.isArray(rawPermissions)) {
     return rawPermissions.includes('*') || rawPermissions.includes(permission);
   }
-  if (typeof rawPermissions === 'object') {
-    if (rawPermissions['*'] === true) return true;
-    return rawPermissions[permission] === true;
+  if (typeof rawPermissions === 'object' && rawPermissions !== null) {
+    const perms = rawPermissions as Record<string, boolean>;
+    if (perms['*'] === true) return true;
+    return perms[permission] === true;
   }
   return false;
 }
 
 function ensurePermission(
-  apiKeyInfo: { permissions: any },
+  apiKeyInfo: ApiKeyInfo,
   permission: string,
   corsHeaders: Record<string, string>
 ): Response | null {
   if (!hasPermission(apiKeyInfo, permission)) {
-    return new Response(
-      JSON.stringify({ error: 'Forbidden', message: `Missing permission: ${permission}` }),
-      { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    return json(
+      { error: 'Forbidden', message: `Missing permission: ${permission}` },
+      403,
+      corsHeaders
     );
   }
   return null;
 }
 
-serve(async (req) => {
-  const corsHeaders = buildCorsHeaders(req.headers.get('origin'));
+async function logRequest(
+  supabase: ReturnType<typeof createClient>,
+  info: ApiKeyInfo,
+  method: string,
+  path: string,
+  status: number,
+  started: number,
+  req: Request
+): Promise<void> {
+  try {
+    await supabase.rpc('log_api_request', {
+      p_store_id: info.store_id,
+      p_api_key_id: info.key_id,
+      p_method: method,
+      p_path: path,
+      p_status_code: status,
+      p_duration_ms: Date.now() - started,
+      p_ip_address: req.headers.get('x-forwarded-for') || req.headers.get('cf-connecting-ip'),
+      p_user_agent: req.headers.get('user-agent'),
+    });
+  } catch {
+    // best-effort
+  }
+}
 
-  // Handle CORS preflight
+serve(async req => {
+  const corsHeaders = buildCorsHeaders(req.headers.get('origin'));
+  const started = Date.now();
+
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
 
+  const url = new URL(req.url);
+  const path = url.pathname.replace('/api/v1', '') || '/';
+  const method = req.method;
+
   try {
-    // Récupérer la clé API depuis les headers
     const authHeader = req.headers.get('Authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized', message: 'Missing or invalid API key' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      return json(
+        { error: 'Unauthorized', message: 'Missing or invalid API key' },
+        401,
+        corsHeaders
       );
     }
 
     const apiKey = authHeader.replace('Bearer ', '');
-    
-    // Vérifier la clé API via la fonction SQL
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const { data: apiKeyData, error: apiKeyError } = await supabaseAdmin
-      .rpc('verify_api_key', { p_key: apiKey });
+    const { data: apiKeyData, error: apiKeyError } = await supabaseAdmin.rpc('verify_api_key', {
+      p_key: apiKey,
+    });
 
     if (apiKeyError || !apiKeyData || apiKeyData.length === 0) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized', message: 'Invalid API key' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      return json(
+        { error: 'Unauthorized', message: 'Invalid or inactive API key' },
+        401,
+        corsHeaders
       );
     }
 
-    const apiKeyInfo = apiKeyData[0];
+    const row = apiKeyData[0];
+    const apiKeyInfo: ApiKeyInfo = {
+      key_id: row.key_id ?? row.id,
+      user_id: row.user_id,
+      store_id: row.store_id,
+      permissions: row.permissions,
+    };
 
-    // Parser l'URL pour déterminer l'endpoint
-    const url = new URL(req.url);
-    const path = url.pathname.replace('/api/v1', '');
-    const method = req.method;
+    let response: Response;
 
-    // Router vers les différents endpoints
-    if (path.startsWith('/products')) {
-      return handleProducts(req, method, apiKeyInfo, supabaseAdmin);
+    if (path === '/me' || path === '/') {
+      response = await handleMe(apiKeyInfo, supabaseAdmin, corsHeaders);
+    } else if (path.startsWith('/products')) {
+      response = await handleProducts(req, method, apiKeyInfo, supabaseAdmin, corsHeaders);
     } else if (path.startsWith('/orders')) {
-      return handleOrders(req, method, apiKeyInfo, supabaseAdmin);
+      response = await handleOrders(req, method, apiKeyInfo, supabaseAdmin, corsHeaders);
     } else if (path.startsWith('/customers')) {
-      return handleCustomers(req, method, apiKeyInfo, supabaseAdmin);
+      response = await handleCustomers(req, method, apiKeyInfo, supabaseAdmin, corsHeaders);
     } else if (path.startsWith('/analytics')) {
-      return handleAnalytics(req, method, apiKeyInfo, supabaseAdmin);
-    } else if (path.startsWith('/webhooks')) {
-      return handleWebhooks(req, method, apiKeyInfo, supabaseAdmin);
+      response = await handleAnalytics(req, method, apiKeyInfo, supabaseAdmin, corsHeaders);
     } else if (path.startsWith('/export')) {
-      return handleExport(req, method, apiKeyInfo, supabaseAdmin);
-    } else if (path.startsWith('/import')) {
-      return handleImport(req, method, apiKeyInfo, supabaseAdmin);
+      response = await handleExport(req, method, apiKeyInfo, supabaseAdmin, corsHeaders);
+    } else {
+      response = json({ error: 'Not Found', message: 'Endpoint not found' }, 404, corsHeaders);
     }
 
-    return new Response(
-      JSON.stringify({ error: 'Not Found', message: 'Endpoint not found' }),
-      { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
-  } catch (error: any) {
-    return new Response(
-      JSON.stringify({ error: 'Internal Server Error', message: error.message }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    await logRequest(supabaseAdmin, apiKeyInfo, method, path, response.status, started, req);
+    return response;
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Internal Server Error';
+    const response = json({ error: 'Internal Server Error', message }, 500, corsHeaders);
+    return response;
   }
 });
 
-// Handler pour les produits
+async function handleMe(
+  apiKeyInfo: ApiKeyInfo,
+  supabase: ReturnType<typeof createClient>,
+  corsHeaders: Record<string, string>
+): Promise<Response> {
+  const { data: store } = await supabase
+    .from('stores')
+    .select('id,name,slug,currency')
+    .eq('id', apiKeyInfo.store_id)
+    .single();
+
+  return json(
+    {
+      api_version: 'v1',
+      store,
+      permissions: apiKeyInfo.permissions,
+      endpoints: ['/products', '/orders', '/customers', '/analytics', '/export'],
+    },
+    200,
+    corsHeaders
+  );
+}
+
 async function handleProducts(
   req: Request,
   method: string,
-  apiKeyInfo: { user_id: string; store_id: string; permissions: any },
-  supabase: any
+  apiKeyInfo: ApiKeyInfo,
+  supabase: ReturnType<typeof createClient>,
+  corsHeaders: Record<string, string>
 ): Promise<Response> {
   const url = new URL(req.url);
   const path = url.pathname.replace('/api/v1/products', '');
   const productId = path.replace('/', '');
 
   if (method === 'GET') {
+    if (!hasPermission(apiKeyInfo, 'products:read')) {
+      return json(
+        { error: 'Forbidden', message: 'Missing permission: products:read' },
+        403,
+        corsHeaders
+      );
+    }
     if (productId) {
-      // GET /products/:id
       const { data, error } = await supabase
         .from('products')
         .select(PRODUCT_PUBLIC_FIELDS)
         .eq('id', productId)
         .eq('store_id', apiKeyInfo.store_id)
         .single();
-
-      if (error) {
-        return new Response(
-          JSON.stringify({ error: error.message }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-
-      return new Response(
-        JSON.stringify(data),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    } else {
-      // GET /products
-      const page = parsePaginationParam(url.searchParams.get('page'), 1, 1000);
-      const limit = parsePaginationParam(url.searchParams.get('limit'), 20, 100);
-      const offset = (page - 1) * limit;
-
-      const { data, error, count } = await supabase
-        .from('products')
-        .select(PRODUCT_PUBLIC_FIELDS, { count: 'exact' })
-        .eq('store_id', apiKeyInfo.store_id)
-        .range(offset, offset + limit - 1);
-
-      if (error) {
-        return new Response(
-          JSON.stringify({ error: error.message }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-
-      return new Response(
-        JSON.stringify({
-          data,
-          pagination: {
-            page,
-            limit,
-            total: count || 0,
-            total_pages: Math.ceil((count || 0) / limit),
-          },
-        }),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      if (error) return json({ error: error.message }, 400, corsHeaders);
+      return json(data, 200, corsHeaders);
     }
-  } else if (method === 'POST') {
-    const permissionError = ensurePermission(apiKeyInfo, 'products:write', corsHeaders);
-    if (permissionError) return permissionError;
 
-    // POST /products
+    const page = parsePaginationParam(url.searchParams.get('page'), 1, 1000);
+    const limit = parsePaginationParam(url.searchParams.get('limit'), 20, 100);
+    const offset = (page - 1) * limit;
+    const { data, error, count } = await supabase
+      .from('products')
+      .select(PRODUCT_PUBLIC_FIELDS, { count: 'exact' })
+      .eq('store_id', apiKeyInfo.store_id)
+      .range(offset, offset + limit - 1);
+    if (error) return json({ error: error.message }, 400, corsHeaders);
+    return json(
+      {
+        data,
+        pagination: {
+          page,
+          limit,
+          total: count || 0,
+          total_pages: Math.ceil((count || 0) / limit),
+        },
+      },
+      200,
+      corsHeaders
+    );
+  }
+
+  if (method === 'POST') {
+    const denied = ensurePermission(apiKeyInfo, 'products:write', corsHeaders);
+    if (denied) return denied;
     const body = await parseAndSanitizeBody(req, productBodySchema);
     const { data, error } = await supabase
       .from('products')
       .insert({ ...body, store_id: apiKeyInfo.store_id })
       .select()
       .single();
+    if (error) return json({ error: error.message }, 400, corsHeaders);
+    return json(data, 201, corsHeaders);
+  }
 
-    if (error) {
-      return new Response(
-        JSON.stringify({ error: error.message }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    return new Response(
-      JSON.stringify(data),
-      { status: 201, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
-  } else if (method === 'PUT' && productId) {
-    const permissionError = ensurePermission(apiKeyInfo, 'products:write', corsHeaders);
-    if (permissionError) return permissionError;
-
-    // PUT /products/:id
+  if (method === 'PUT' && productId) {
+    const denied = ensurePermission(apiKeyInfo, 'products:write', corsHeaders);
+    if (denied) return denied;
     const body = await parseAndSanitizeBody(req, productBodySchema);
     const { data, error } = await supabase
       .from('products')
@@ -305,330 +348,261 @@ async function handleProducts(
       .eq('store_id', apiKeyInfo.store_id)
       .select()
       .single();
+    if (error) return json({ error: error.message }, 400, corsHeaders);
+    return json(data, 200, corsHeaders);
+  }
 
-    if (error) {
-      return new Response(
-        JSON.stringify({ error: error.message }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    return new Response(
-      JSON.stringify(data),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
-  } else if (method === 'DELETE' && productId) {
-    const permissionError = ensurePermission(apiKeyInfo, 'products:delete', corsHeaders);
-    if (permissionError) return permissionError;
-
-    // DELETE /products/:id
+  if (method === 'DELETE' && productId) {
+    const denied = ensurePermission(apiKeyInfo, 'products:delete', corsHeaders);
+    if (denied) return denied;
     const { error } = await supabase
       .from('products')
       .delete()
       .eq('id', productId)
       .eq('store_id', apiKeyInfo.store_id);
-
-    if (error) {
-      return new Response(
-        JSON.stringify({ error: error.message }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    return new Response(
-      JSON.stringify({ success: true }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    if (error) return json({ error: error.message }, 400, corsHeaders);
+    return json({ success: true }, 200, corsHeaders);
   }
 
-  return new Response(
-    JSON.stringify({ error: 'Method not allowed' }),
-    { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-  );
+  return json({ error: 'Method not allowed' }, 405, corsHeaders);
 }
 
-// Handler pour les commandes
 async function handleOrders(
   req: Request,
   method: string,
-  apiKeyInfo: { user_id: string; store_id: string; permissions: any },
-  supabase: any
+  apiKeyInfo: ApiKeyInfo,
+  supabase: ReturnType<typeof createClient>,
+  corsHeaders: Record<string, string>
 ): Promise<Response> {
   const url = new URL(req.url);
   const path = url.pathname.replace('/api/v1/orders', '');
   const orderId = path.replace('/', '');
 
   if (method === 'GET') {
+    if (!hasPermission(apiKeyInfo, 'orders:read')) {
+      return json(
+        { error: 'Forbidden', message: 'Missing permission: orders:read' },
+        403,
+        corsHeaders
+      );
+    }
     if (orderId) {
-      // GET /orders/:id
       const { data, error } = await supabase
         .from('orders')
         .select('*, order_items(*), customers(*)')
         .eq('id', orderId)
         .eq('store_id', apiKeyInfo.store_id)
         .single();
-
-      if (error) {
-        return new Response(
-          JSON.stringify({ error: error.message }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-
-      return new Response(
-        JSON.stringify(data),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    } else {
-      // GET /orders
-      const page = parsePaginationParam(url.searchParams.get('page'), 1, 1000);
-      const limit = parsePaginationParam(url.searchParams.get('limit'), 20, 100);
-      const offset = (page - 1) * limit;
-      const status = url.searchParams.get('status');
-
-      let query = supabase
-        .from('orders')
-        .select('id,order_number,status,payment_status,total_amount,currency,created_at', { count: 'exact' })
-        .eq('store_id', apiKeyInfo.store_id)
-        .range(offset, offset + limit - 1);
-
-      if (status) {
-        query = query.eq('status', status);
-      }
-
-      const { data, error, count } = await query;
-
-      if (error) {
-        return new Response(
-          JSON.stringify({ error: error.message }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-
-      return new Response(
-        JSON.stringify({
-          data,
-          pagination: {
-            page,
-            limit,
-            total: count || 0,
-            total_pages: Math.ceil((count || 0) / limit),
-          },
-        }),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      if (error) return json({ error: error.message }, 400, corsHeaders);
+      return json(data, 200, corsHeaders);
     }
-  } else if (method === 'POST') {
-    const permissionError = ensurePermission(apiKeyInfo, 'orders:write', corsHeaders);
-    if (permissionError) return permissionError;
 
-    // POST /orders
+    const page = parsePaginationParam(url.searchParams.get('page'), 1, 1000);
+    const limit = parsePaginationParam(url.searchParams.get('limit'), 20, 100);
+    const offset = (page - 1) * limit;
+    const status = url.searchParams.get('status');
+    let query = supabase
+      .from('orders')
+      .select('id,order_number,status,payment_status,total_amount,currency,created_at', {
+        count: 'exact',
+      })
+      .eq('store_id', apiKeyInfo.store_id)
+      .range(offset, offset + limit - 1);
+    if (status) query = query.eq('status', status);
+    const { data, error, count } = await query;
+    if (error) return json({ error: error.message }, 400, corsHeaders);
+    return json(
+      {
+        data,
+        pagination: {
+          page,
+          limit,
+          total: count || 0,
+          total_pages: Math.ceil((count || 0) / limit),
+        },
+      },
+      200,
+      corsHeaders
+    );
+  }
+
+  if (method === 'POST') {
+    const denied = ensurePermission(apiKeyInfo, 'orders:write', corsHeaders);
+    if (denied) return denied;
     const body = await parseAndSanitizeBody(req, orderBodySchema);
     const { data, error } = await supabase
       .from('orders')
       .insert({ ...body, store_id: apiKeyInfo.store_id })
       .select()
       .single();
-
-    if (error) {
-      return new Response(
-        JSON.stringify({ error: error.message }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    return new Response(
-      JSON.stringify(data),
-      { status: 201, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    if (error) return json({ error: error.message }, 400, corsHeaders);
+    return json(data, 201, corsHeaders);
   }
 
-  return new Response(
-    JSON.stringify({ error: 'Method not allowed' }),
-    { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-  );
+  return json({ error: 'Method not allowed' }, 405, corsHeaders);
 }
 
-// Handler pour les clients
 async function handleCustomers(
   req: Request,
   method: string,
-  apiKeyInfo: { user_id: string; store_id: string; permissions: any },
-  supabase: any
+  apiKeyInfo: ApiKeyInfo,
+  supabase: ReturnType<typeof createClient>,
+  corsHeaders: Record<string, string>
 ): Promise<Response> {
   const url = new URL(req.url);
   const path = url.pathname.replace('/api/v1/customers', '');
   const customerId = path.replace('/', '');
 
   if (method === 'GET') {
+    if (!hasPermission(apiKeyInfo, 'customers:read')) {
+      return json(
+        { error: 'Forbidden', message: 'Missing permission: customers:read' },
+        403,
+        corsHeaders
+      );
+    }
     if (customerId) {
-      // GET /customers/:id
       const { data, error } = await supabase
         .from('customers')
         .select(CUSTOMER_PUBLIC_FIELDS)
         .eq('id', customerId)
         .eq('store_id', apiKeyInfo.store_id)
         .single();
-
-      if (error) {
-        return new Response(
-          JSON.stringify({ error: error.message }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-
-      return new Response(
-        JSON.stringify(data),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    } else {
-      // GET /customers
-      const page = parsePaginationParam(url.searchParams.get('page'), 1, 1000);
-      const limit = parsePaginationParam(url.searchParams.get('limit'), 20, 100);
-      const offset = (page - 1) * limit;
-
-      const { data, error, count } = await supabase
-        .from('customers')
-        .select(CUSTOMER_PUBLIC_FIELDS, { count: 'exact' })
-        .eq('store_id', apiKeyInfo.store_id)
-        .range(offset, offset + limit - 1);
-
-      if (error) {
-        return new Response(
-          JSON.stringify({ error: error.message }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-
-      return new Response(
-        JSON.stringify({
-          data,
-          pagination: {
-            page,
-            limit,
-            total: count || 0,
-            total_pages: Math.ceil((count || 0) / limit),
-          },
-        }),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      if (error) return json({ error: error.message }, 400, corsHeaders);
+      return json(data, 200, corsHeaders);
     }
-  } else if (method === 'POST') {
-    const permissionError = ensurePermission(apiKeyInfo, 'customers:write', corsHeaders);
-    if (permissionError) return permissionError;
 
-    // POST /customers
+    const page = parsePaginationParam(url.searchParams.get('page'), 1, 1000);
+    const limit = parsePaginationParam(url.searchParams.get('limit'), 20, 100);
+    const offset = (page - 1) * limit;
+    const { data, error, count } = await supabase
+      .from('customers')
+      .select(CUSTOMER_PUBLIC_FIELDS, { count: 'exact' })
+      .eq('store_id', apiKeyInfo.store_id)
+      .range(offset, offset + limit - 1);
+    if (error) return json({ error: error.message }, 400, corsHeaders);
+    return json(
+      {
+        data,
+        pagination: {
+          page,
+          limit,
+          total: count || 0,
+          total_pages: Math.ceil((count || 0) / limit),
+        },
+      },
+      200,
+      corsHeaders
+    );
+  }
+
+  if (method === 'POST') {
+    const denied = ensurePermission(apiKeyInfo, 'customers:write', corsHeaders);
+    if (denied) return denied;
     const body = await parseAndSanitizeBody(req, customerBodySchema);
     const { data, error } = await supabase
       .from('customers')
       .insert({ ...body, store_id: apiKeyInfo.store_id })
       .select()
       .single();
-
-    if (error) {
-      return new Response(
-        JSON.stringify({ error: error.message }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    return new Response(
-      JSON.stringify(data),
-      { status: 201, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    if (error) return json({ error: error.message }, 400, corsHeaders);
+    return json(data, 201, corsHeaders);
   }
 
-  return new Response(
-    JSON.stringify({ error: 'Method not allowed' }),
-    { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-  );
+  return json({ error: 'Method not allowed' }, 405, corsHeaders);
 }
 
-// Handler pour analytics
 async function handleAnalytics(
   req: Request,
   method: string,
-  apiKeyInfo: { user_id: string; store_id: string; permissions: any },
-  supabase: any
+  apiKeyInfo: ApiKeyInfo,
+  supabase: ReturnType<typeof createClient>,
+  corsHeaders: Record<string, string>
 ): Promise<Response> {
   if (method !== 'GET') {
-    return new Response(
-      JSON.stringify({ error: 'Method not allowed' }),
-      { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    return json({ error: 'Method not allowed' }, 405, corsHeaders);
+  }
+  if (!hasPermission(apiKeyInfo, 'analytics:read')) {
+    return json(
+      { error: 'Forbidden', message: 'Missing permission: analytics:read' },
+      403,
+      corsHeaders
     );
   }
 
   const url = new URL(req.url);
-  const timeRange = url.searchParams.get('time_range') || '30d';
+  const days = parsePaginationParam(url.searchParams.get('days'), 30, 365);
+  const since = new Date(Date.now() - days * 86400000).toISOString();
 
-  // Implémenter la logique analytics (simplifiée)
-  // Utiliser le hook useUnifiedAnalytics côté client ou réimplémenter ici
+  const [ordersRes, productsRes] = await Promise.all([
+    supabase
+      .from('orders')
+      .select('total_amount, status, payment_status, created_at')
+      .eq('store_id', apiKeyInfo.store_id)
+      .gte('created_at', since),
+    supabase
+      .from('products')
+      .select('id', { count: 'exact', head: true })
+      .eq('store_id', apiKeyInfo.store_id),
+  ]);
 
-  return new Response(
-    JSON.stringify({ message: 'Analytics endpoint - to be implemented' }),
-    { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+  const orders = ordersRes.data || [];
+  const revenue = orders
+    .filter(o => o.payment_status === 'paid' || o.status === 'completed')
+    .reduce((sum, o) => sum + Number(o.total_amount || 0), 0);
+
+  return json(
+    {
+      period_days: days,
+      orders_count: orders.length,
+      revenue,
+      products_count: productsRes.count || 0,
+      generated_at: new Date().toISOString(),
+    },
+    200,
+    corsHeaders
   );
 }
 
-// Handler pour webhooks
-async function handleWebhooks(
-  req: Request,
-  method: string,
-  apiKeyInfo: { user_id: string; store_id: string; permissions: any },
-  supabase: any
-): Promise<Response> {
-  // Implémenter la gestion des webhooks via API
-  return new Response(
-    JSON.stringify({ message: 'Webhooks endpoint - to be implemented' }),
-    { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-  );
-}
-
-// Handler pour export
 async function handleExport(
   req: Request,
   method: string,
-  apiKeyInfo: { user_id: string; store_id: string; permissions: any },
-  supabase: any
+  apiKeyInfo: ApiKeyInfo,
+  supabase: ReturnType<typeof createClient>,
+  corsHeaders: Record<string, string>
 ): Promise<Response> {
   if (method !== 'GET') {
-    return new Response(
-      JSON.stringify({ error: 'Method not allowed' }),
-      { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    return json({ error: 'Method not allowed' }, 405, corsHeaders);
+  }
+  if (!hasPermission(apiKeyInfo, 'export:read')) {
+    return json(
+      { error: 'Forbidden', message: 'Missing permission: export:read' },
+      403,
+      corsHeaders
     );
   }
 
   const url = new URL(req.url);
   const type = url.searchParams.get('type') || 'products';
-  const format = url.searchParams.get('format') || 'csv';
+  const limit = parsePaginationParam(url.searchParams.get('limit'), 500, 2000);
 
-  // Implémenter l'export (utiliser les fonctions de import-export.ts)
-
-  return new Response(
-    JSON.stringify({ message: 'Export endpoint - to be implemented' }),
-    { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-  );
-}
-
-// Handler pour import
-async function handleImport(
-  req: Request,
-  method: string,
-  apiKeyInfo: { user_id: string; store_id: string; permissions: any },
-  supabase: any
-): Promise<Response> {
-  if (method !== 'POST') {
-    return new Response(
-      JSON.stringify({ error: 'Method not allowed' }),
-      { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+  if (type === 'orders') {
+    const { data, error } = await supabase
+      .from('orders')
+      .select('id,order_number,status,payment_status,total_amount,currency,created_at')
+      .eq('store_id', apiKeyInfo.store_id)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+    if (error) return json({ error: error.message }, 400, corsHeaders);
+    return json({ type, count: data?.length || 0, data }, 200, corsHeaders);
   }
 
-  // Implémenter l'import (utiliser les fonctions de import-export.ts)
-
-  return new Response(
-    JSON.stringify({ message: 'Import endpoint - to be implemented' }),
-    { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-  );
+  const { data, error } = await supabase
+    .from('products')
+    .select(PRODUCT_PUBLIC_FIELDS)
+    .eq('store_id', apiKeyInfo.store_id)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+  if (error) return json({ error: error.message }, 400, corsHeaders);
+  return json({ type: 'products', count: data?.length || 0, data }, 200, corsHeaders);
 }
-

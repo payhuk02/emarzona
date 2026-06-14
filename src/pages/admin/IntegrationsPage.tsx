@@ -36,11 +36,13 @@ import {
   Plus,
   Edit,
   Trash2,
+  KeyRound,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/hooks/useStore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { StoreApiKeysPanel } from '@/components/store/StoreApiKeysPanel';
 
 interface StoreIntegration {
   id: string;
@@ -274,7 +276,7 @@ export default function IntegrationsPage() {
 
         <Tabs defaultValue="zoom" className="w-full">
           <div ref={tabsRef} className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <TabsList className="grid w-full grid-cols-3 gap-2 overflow-x-auto">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-2 overflow-x-auto">
               <TabsTrigger value="zoom" className="text-xs sm:text-sm min-h-[44px]">
                 <Video className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
                 <span className="hidden sm:inline">Video Conferencing</span>
@@ -289,6 +291,11 @@ export default function IntegrationsPage() {
                 <Truck className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
                 <span className="hidden sm:inline">Shipping APIs</span>
                 <span className="sm:hidden">Shipping</span>
+              </TabsTrigger>
+              <TabsTrigger value="api" className="text-xs sm:text-sm min-h-[44px]">
+                <KeyRound className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                <span className="hidden sm:inline">API REST</span>
+                <span className="sm:hidden">API</span>
               </TabsTrigger>
             </TabsList>
           </div>
@@ -557,6 +564,21 @@ export default function IntegrationsPage() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent
+            value="api"
+            className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
+          >
+            {store?.id ? (
+              <StoreApiKeysPanel storeId={store.id} />
+            ) : (
+              <Card>
+                <CardContent className="py-8 text-center text-muted-foreground">
+                  Sélectionnez une boutique pour gérer les clés API.
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
         </Tabs>
 

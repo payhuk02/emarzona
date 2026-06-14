@@ -1,5 +1,5 @@
 /**
- * Epic 4.3 — Store SSO Enterprise (OIDC authorize + callback + JIT session)
+ * Epic 4.3/4.5 — Store SSO Enterprise (OIDC + SAML assertion validation)
  */
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { buildCorsHeaders, jsonResponse } from '../_shared/cors.ts';
@@ -8,6 +8,7 @@ import {
   createSupabaseUserClient,
   assertStoreOwner,
 } from '../_shared/supabase-admin.ts';
+import { buildSamlAuthnRedirectUrl, getSpEntityId, validateSamlResponse } from './saml.ts';
 
 interface AuthorizeBody {
   action: 'authorize';
@@ -20,6 +21,8 @@ interface UpsertBody {
   storeId: string;
   config: Record<string, unknown>;
 }
+
+type SsoProvider = Record<string, unknown>;
 
 function getSiteUrl(): string {
   return (Deno.env.get('SITE_URL') || 'https://www.emarzona.com').replace(/\/$/, '');
@@ -131,8 +134,206 @@ function emailDomainAllowed(email: string, domains: string[]): boolean {
   return domains.some(d => d.toLowerCase() === domain);
 }
 
+async function completeSsoLogin(
+  supabaseAdmin: ReturnType<typeof createSupabaseAdmin>,
+  ssoState: Record<string, unknown>,
+  provider: SsoProvider,
+  email: string,
+  groups: string[],
+  idpSub?: string
+): Promise<Response> {
+  const allowedDomains = (provider.allowed_email_domains as string[]) || [];
+  if (!emailDomainAllowed(email, allowedDomains)) {
+    await supabaseAdmin.from('store_sso_login_events').insert({
+      store_id: ssoState.store_id,
+      provider_id: ssoState.provider_id,
+      email,
+      status: 'denied',
+      error_message: 'Email domain not allowed',
+    });
+    return Response.redirect(`${getSiteUrl()}/login?sso_error=domain_not_allowed`, 302);
+  }
+
+  const { data: profile } = await supabaseAdmin
+    .from('profiles')
+    .select('id')
+    .ilike('email', email)
+    .maybeSingle();
+
+  let userId = profile?.id as string | undefined;
+
+  if (!userId) {
+    const { data: created, error: createError } = await supabaseAdmin.auth.admin.createUser({
+      email,
+      email_confirm: true,
+      user_metadata: { sso_provisioned: true, idp_sub: idpSub },
+    });
+    if (createError || !created.user) {
+      throw new Error(createError?.message || 'User creation failed');
+    }
+    userId = created.user.id;
+  }
+
+  await supabaseAdmin.rpc('provision_store_sso_member', {
+    p_store_id: ssoState.store_id,
+    p_user_id: userId,
+    p_email: email,
+    p_idp_groups: groups,
+    p_default_role: provider.default_role,
+    p_role_mappings: provider.role_mappings ?? {},
+  });
+
+  await supabaseAdmin.from('store_sso_login_events').insert({
+    store_id: ssoState.store_id,
+    provider_id: ssoState.provider_id,
+    user_id: userId,
+    email,
+    idp_groups: groups,
+    assigned_role: provider.default_role,
+    status: 'success',
+  });
+
+  await supabaseAdmin
+    .from('store_sso_states')
+    .update({ consumed_at: new Date().toISOString() })
+    .eq('state_token', ssoState.state_token);
+
+  const redirectTo = (ssoState.redirect_url as string) || `${getSiteUrl()}/dashboard`;
+  const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+    type: 'magiclink',
+    email,
+    options: { redirectTo },
+  });
+
+  if (linkError || !linkData?.properties?.action_link) {
+    return Response.redirect(
+      `${getSiteUrl()}/login?sso=success&email=${encodeURIComponent(email)}`,
+      302
+    );
+  }
+
+  return Response.redirect(linkData.properties.action_link, 302);
+}
+
+async function handleOidcCallback(
+  req: Request,
+  supabaseAdmin: ReturnType<typeof createSupabaseAdmin>
+): Promise<Response> {
+  const url = new URL(req.url);
+  const code = url.searchParams.get('code');
+  const state = url.searchParams.get('state');
+  const oauthError = url.searchParams.get('error');
+
+  if (oauthError) {
+    return Response.redirect(`${getSiteUrl()}/login?sso_error=${oauthError}`, 302);
+  }
+  if (!code || !state) {
+    return new Response('Missing code or state', { status: 400 });
+  }
+
+  const { data: ssoState, error: stateError } = await supabaseAdmin
+    .from('store_sso_states')
+    .select('*, store_sso_providers(*)')
+    .eq('state_token', state)
+    .is('consumed_at', null)
+    .gt('expires_at', new Date().toISOString())
+    .maybeSingle();
+
+  if (stateError || !ssoState) {
+    return Response.redirect(`${getSiteUrl()}/login?sso_error=invalid_state`, 302);
+  }
+
+  const provider = ssoState.store_sso_providers as SsoProvider;
+  if (!provider || provider.provider_type !== 'oidc') {
+    return Response.redirect(`${getSiteUrl()}/login?sso_error=invalid_provider`, 302);
+  }
+
+  const tokens = await exchangeOidcCode(
+    String(provider.oidc_issuer_url),
+    String(provider.oidc_client_id),
+    String(provider.oidc_client_secret),
+    code,
+    getCallbackUrl()
+  );
+
+  const userinfo = await fetchOidcUserInfo(String(provider.oidc_issuer_url), tokens.access_token);
+  const email = userinfo.email?.toLowerCase().trim();
+  if (!email) {
+    throw new Error('Email not returned by IdP');
+  }
+
+  return completeSsoLogin(
+    supabaseAdmin,
+    { ...ssoState, state_token: state },
+    provider,
+    email,
+    userinfo.groups ?? [],
+    userinfo.sub
+  );
+}
+
+async function handleSamlAcs(
+  req: Request,
+  supabaseAdmin: ReturnType<typeof createSupabaseAdmin>
+): Promise<Response> {
+  const form = await req.formData();
+  const samlResponse = form.get('SAMLResponse')?.toString();
+  const relayState = form.get('RelayState')?.toString();
+
+  if (!samlResponse || !relayState) {
+    return Response.redirect(`${getSiteUrl()}/login?sso_error=missing_saml_response`, 302);
+  }
+
+  const { data: ssoState, error: stateError } = await supabaseAdmin
+    .from('store_sso_states')
+    .select('*, store_sso_providers(*)')
+    .eq('state_token', relayState)
+    .is('consumed_at', null)
+    .gt('expires_at', new Date().toISOString())
+    .maybeSingle();
+
+  if (stateError || !ssoState) {
+    return Response.redirect(`${getSiteUrl()}/login?sso_error=invalid_state`, 302);
+  }
+
+  const provider = ssoState.store_sso_providers as SsoProvider;
+  if (!provider || provider.provider_type !== 'saml') {
+    return Response.redirect(`${getSiteUrl()}/login?sso_error=invalid_provider`, 302);
+  }
+
+  const cert = String(provider.saml_certificate || '');
+  if (!cert.includes('BEGIN CERTIFICATE')) {
+    throw new Error('IdP certificate not configured');
+  }
+
+  try {
+    const assertion = await validateSamlResponse(samlResponse, cert, getSpEntityId());
+    return completeSsoLogin(
+      supabaseAdmin,
+      { ...ssoState, state_token: relayState },
+      provider,
+      assertion.email,
+      assertion.groups,
+      assertion.nameId
+    );
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'SAML validation failed';
+    await supabaseAdmin.from('store_sso_login_events').insert({
+      store_id: ssoState.store_id,
+      provider_id: ssoState.provider_id,
+      status: 'error',
+      error_message: message,
+    });
+    return Response.redirect(
+      `${getSiteUrl()}/login?sso_error=${encodeURIComponent('saml_validation_failed')}`,
+      302
+    );
+  }
+}
+
 serve(async req => {
   const origin = req.headers.get('Origin');
+  const contentType = req.headers.get('Content-Type') || '';
 
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: buildCorsHeaders(origin) });
@@ -141,126 +342,12 @@ serve(async req => {
   const supabaseAdmin = createSupabaseAdmin();
 
   try {
-    // OIDC callback (GET)
     if (req.method === 'GET') {
-      const url = new URL(req.url);
-      const code = url.searchParams.get('code');
-      const state = url.searchParams.get('state');
-      const oauthError = url.searchParams.get('error');
+      return handleOidcCallback(req, supabaseAdmin);
+    }
 
-      if (oauthError) {
-        return Response.redirect(`${getSiteUrl()}/login?sso_error=${oauthError}`, 302);
-      }
-      if (!code || !state) {
-        return new Response('Missing code or state', { status: 400 });
-      }
-
-      const { data: ssoState, error: stateError } = await supabaseAdmin
-        .from('store_sso_states')
-        .select('*, store_sso_providers(*)')
-        .eq('state_token', state)
-        .is('consumed_at', null)
-        .gt('expires_at', new Date().toISOString())
-        .maybeSingle();
-
-      if (stateError || !ssoState) {
-        return Response.redirect(`${getSiteUrl()}/login?sso_error=invalid_state`, 302);
-      }
-
-      const provider = ssoState.store_sso_providers as Record<string, unknown>;
-      if (!provider || provider.provider_type !== 'oidc') {
-        return Response.redirect(`${getSiteUrl()}/login?sso_error=invalid_provider`, 302);
-      }
-
-      const tokens = await exchangeOidcCode(
-        String(provider.oidc_issuer_url),
-        String(provider.oidc_client_id),
-        String(provider.oidc_client_secret),
-        code,
-        getCallbackUrl()
-      );
-
-      const userinfo = await fetchOidcUserInfo(
-        String(provider.oidc_issuer_url),
-        tokens.access_token
-      );
-      const email = userinfo.email?.toLowerCase().trim();
-      if (!email) {
-        throw new Error('Email not returned by IdP');
-      }
-
-      const allowedDomains = (provider.allowed_email_domains as string[]) || [];
-      if (!emailDomainAllowed(email, allowedDomains)) {
-        await supabaseAdmin.from('store_sso_login_events').insert({
-          store_id: ssoState.store_id,
-          provider_id: ssoState.provider_id,
-          email,
-          status: 'denied',
-          error_message: 'Email domain not allowed',
-        });
-        return Response.redirect(`${getSiteUrl()}/login?sso_error=domain_not_allowed`, 302);
-      }
-
-      // Find or create user (via profiles.email)
-      const { data: profile } = await supabaseAdmin
-        .from('profiles')
-        .select('id')
-        .ilike('email', email)
-        .maybeSingle();
-
-      let userId = profile?.id as string | undefined;
-
-      if (!userId) {
-        const { data: created, error: createError } = await supabaseAdmin.auth.admin.createUser({
-          email,
-          email_confirm: true,
-          user_metadata: { sso_provisioned: true, idp_sub: userinfo.sub },
-        });
-        if (createError || !created.user) {
-          throw new Error(createError?.message || 'User creation failed');
-        }
-        userId = created.user.id;
-      }
-
-      await supabaseAdmin.rpc('provision_store_sso_member', {
-        p_store_id: ssoState.store_id,
-        p_user_id: userId,
-        p_email: email,
-        p_idp_groups: userinfo.groups ?? [],
-        p_default_role: provider.default_role,
-        p_role_mappings: provider.role_mappings ?? {},
-      });
-
-      await supabaseAdmin.from('store_sso_login_events').insert({
-        store_id: ssoState.store_id,
-        provider_id: ssoState.provider_id,
-        user_id: userId,
-        email,
-        idp_groups: userinfo.groups ?? [],
-        assigned_role: provider.default_role,
-        status: 'success',
-      });
-
-      await supabaseAdmin
-        .from('store_sso_states')
-        .update({ consumed_at: new Date().toISOString() })
-        .eq('state_token', state);
-
-      const redirectTo = ssoState.redirect_url || `${getSiteUrl()}/dashboard`;
-      const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
-        type: 'magiclink',
-        email,
-        options: { redirectTo },
-      });
-
-      if (linkError || !linkData?.properties?.action_link) {
-        return Response.redirect(
-          `${getSiteUrl()}/login?sso=success&email=${encodeURIComponent(email)}`,
-          302
-        );
-      }
-
-      return Response.redirect(linkData.properties.action_link, 302);
+    if (req.method === 'POST' && contentType.includes('application/x-www-form-urlencoded')) {
+      return handleSamlAcs(req, supabaseAdmin);
     }
 
     if (req.method !== 'POST') {
@@ -295,18 +382,6 @@ serve(async req => {
         return jsonResponse({ error: 'SSO provider not configured' }, 404, origin);
       }
 
-      if (provider.provider_type === 'saml') {
-        return jsonResponse(
-          {
-            error:
-              'SAML callback en cours de déploiement — utilisez OIDC (Azure AD / Okta) pour l’instant.',
-            code: 'SAML_PHASE2',
-          },
-          501,
-          origin
-        );
-      }
-
       const stateToken = crypto.randomUUID();
       const nonce = crypto.randomUUID();
 
@@ -318,6 +393,19 @@ serve(async req => {
         nonce,
       });
 
+      if (provider.provider_type === 'saml') {
+        if (!provider.saml_sso_url || !provider.saml_certificate) {
+          return jsonResponse({ error: 'SAML SSO URL and IdP certificate required' }, 400, origin);
+        }
+        const authUrl = buildSamlAuthnRedirectUrl(
+          provider.saml_sso_url,
+          getSpEntityId(),
+          getCallbackUrl(),
+          stateToken
+        );
+        return jsonResponse({ authUrl, state: stateToken, provider_type: 'saml' }, 200, origin);
+      }
+
       const authUrl = buildOidcAuthorizeUrl(
         provider.oidc_issuer_url!,
         provider.oidc_client_id!,
@@ -327,7 +415,7 @@ serve(async req => {
         provider.oidc_scopes || 'openid email profile'
       );
 
-      return jsonResponse({ authUrl, state: stateToken }, 200, origin);
+      return jsonResponse({ authUrl, state: stateToken, provider_type: 'oidc' }, 200, origin);
     }
 
     if (body.action === 'upsert') {

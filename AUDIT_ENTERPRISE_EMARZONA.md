@@ -72,7 +72,7 @@ Une excellente base de travail avec un fort potentiel de scalabilité, mais rale
 ### 13. Score enterprise readiness : 78/100
 
 - **Points forts** : Multi-tenant, RLS, Audit Logs prévus, SSO Enterprise OIDC (Epic 4.3).
-- **Faiblesses** : Pas de conformité SOC2 mentionnée, SAML phase 2, SLA manquants sur l'infrastructure.
+- **Faiblesses** : Conformité SOC2 en cours (audit export E41), SLA manquants sur l'infrastructure.
 
 ---
 
@@ -176,8 +176,8 @@ Une excellente base de travail avec un fort potentiel de scalabilité, mais rale
 
 ### 34. Suggestions enterprise (B2B & Croissance)
 
-- Implémenter le SSO (Single Sign-On, SAML/OIDC) via Supabase pour permettre aux grandes entreprises de gérer leurs équipes sur la plateforme. **OIDC livré Epic 4.3** (`/auth/sso/:slug`, plan `physical_premium`).
-- Créer des logs d'audit exportables (Compliance SOC2) pour toutes les actions d'administration.
+- Implémenter le SSO (Single Sign-On, SAML/OIDC) via Supabase pour permettre aux grandes entreprises de gérer leurs équipes sur la plateforme. **OIDC + SAML phase 2 livrés Epic 4.3/4.5** (`/auth/sso/:slug`, plan `physical_premium`).
+- Créer des logs d'audit exportables (Compliance SOC2) pour toutes les actions d'administration. **Livré Epic 4.4** (`query_unified_audit_logs`, export CSV/JSON).
 
 ### 35. Suggestions IA
 
@@ -189,7 +189,7 @@ Une excellente base de travail avec un fort potentiel de scalabilité, mais rale
 
 ### 37. Suggestions SaaS
 
-- Offrir une API publique (Graphql ou REST) avec des clés d'API (Bearer tokens) pour que les vendeurs puissent connecter leurs ERP/CRM.
+- Offrir une API publique (Graphql ou REST) avec des clés d'API (Bearer tokens) pour que les vendeurs puissent connecter leurs ERP/CRM. **REST v1 livré Epic 4.6** (`/api/v1`, plan `physical_standard+`).
 
 ### 38. Suggestions DevOps
 

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -14,120 +14,92 @@ import {
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Download, Search, Shield } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { Download, Search, Shield, Loader2 } from 'lucide-react';
 import { ProtectedAction } from '@/components/admin/ProtectedAction';
 import { Admin2FABanner } from '@/components/admin/Admin2FABanner';
 import { RequireAAL2 } from '@/components/admin/RequireAAL2';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
-import { logger } from '@/lib/logger';
-
-type AdminActionRow = {
-  id: string;
-  actor_id: string;
-  action: string;
-  target_type: string | null;
-  target_id: string | null;
-  metadata: unknown;
-  created_at: string;
-  actor?: { full_name?: string | null; email?: string | null } | null;
-};
-
-const ADMIN_AUDIT_ACTION_FIELDS =
-  'id, actor_id, action, target_type, target_id, metadata, created_at';
+import {
+  useUnifiedAuditLogs,
+  useExportAuditLogs,
+  downloadAuditExport,
+  type UnifiedAuditLog,
+} from '@/hooks/audit/useAuditLogs';
+import { useToast } from '@/hooks/use-toast';
 
 export default function AdminAudit() {
   const isMobile = useIsMobile();
-  const [rows, setRows] = useState<AdminActionRow[]>([]);
+  const { toast } = useToast();
   const [search, setSearch] = useState('');
-  const [loading, setLoading] = useState(true);
   const [fromDate, setFromDate] = useState<string>('');
   const [toDate, setToDate] = useState<string>('');
   const [actionFilter, setActionFilter] = useState('');
-  const [actorFilter, setActorFilter] = useState('');
+  const [logSource, setLogSource] = useState('');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
 
-  // Animations au scroll
   const headerRef = useScrollAnimation<HTMLDivElement>();
   const tableRef = useScrollAnimation<HTMLDivElement>();
 
-  useEffect(() => {
-    logger.info("Chargement des logs d'audit admin");
-    const load = async () => {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('admin_actions')
-        .select(ADMIN_AUDIT_ACTION_FIELDS)
-        .order('created_at', { ascending: false })
-        .limit(200);
-      if (!error) {
-        setRows((data ?? []) as AdminActionRow[]);
-        logger.info(`${data?.length || 0} actions d'audit chargées`);
-      } else {
-        logger.error("Erreur lors du chargement des logs d'audit:", error);
-      }
-      setLoading(false);
-    };
-    load();
-  }, []);
+  const queryFilters = useMemo(
+    () => ({
+      storeId: null as string | null,
+      from: fromDate ? new Date(fromDate).toISOString() : null,
+      to: toDate ? new Date(`${toDate}T23:59:59`).toISOString() : null,
+      actionPrefix: actionFilter || null,
+      logSource: logSource || null,
+      limit: 500,
+      offset: 0,
+    }),
+    [fromDate, toDate, actionFilter, logSource]
+  );
+
+  const { data: rows = [], isLoading } = useUnifiedAuditLogs(queryFilters);
+  const exportMutation = useExportAuditLogs();
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
-    const passText = (r: AdminActionRow) =>
-      r.action.toLowerCase().includes(q) ||
-      (r.target_type ?? '').toLowerCase().includes(q) ||
-      (r.target_id ?? '').toLowerCase().includes(q);
-    const passAction = !actionFilter || r.action.toLowerCase().includes(actionFilter.toLowerCase());
-    const passActor = !actorFilter || r.actor_id.toLowerCase().includes(actorFilter.toLowerCase());
-    const passFrom = !fromDate || new Date(r.created_at) >= new Date(fromDate);
-    const passTo = !toDate || new Date(r.created_at) <= new Date(toDate);
-    return rows.filter(r => passText(r) && passAction && passActor && passFrom && passTo);
-  }, [rows, search, actionFilter, actorFilter, fromDate, toDate]);
+    return rows.filter(
+      r =>
+        r.action.toLowerCase().includes(q) ||
+        (r.target_type ?? '').toLowerCase().includes(q) ||
+        (r.target_id ?? '').toLowerCase().includes(q) ||
+        (r.actor_email ?? '').toLowerCase().includes(q)
+    );
+  }, [rows, search]);
 
   const paged = useMemo(() => {
     const start = (page - 1) * pageSize;
     return filtered.slice(start, start + pageSize);
   }, [filtered, page, pageSize]);
 
-  const exportCSV = useCallback(() => {
-    logger.info(`Export CSV de ${filtered.length} actions d'audit`);
-    const header = ['date', 'action', 'target_type', 'target_id', 'actor_id', 'metadata'];
-    const lines = [header.join(',')].concat(
-      filtered.map(r =>
-        [
-          new Date(r.created_at).toISOString(),
-          r.action,
-          r.target_type ?? '',
-          r.target_id ?? '',
-          r.actor_id,
-          JSON.stringify(r.metadata ?? {}),
-        ]
-          .map(v => `"${String(v).replace(/"/g, '""')}"`)
-          .join(',')
-      )
-    );
-    const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `admin_audit_${Date.now()}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-    logger.info('Export CSV réussi');
-  }, [filtered]);
+  const runExport = useCallback(
+    async (format: 'csv' | 'json') => {
+      try {
+        const result = await exportMutation.mutateAsync({
+          ...queryFilters,
+          format,
+          maxRows: 10000,
+        });
+        const exportRows = (result.rows as UnifiedAuditLog[]) ?? filtered;
+        downloadAuditExport(exportRows, format, 'platform_audit');
+        toast({
+          title: 'Export SOC2',
+          description: `${result.row_count} événements (${format.toUpperCase()})`,
+        });
+      } catch (e) {
+        toast({
+          title: 'Erreur export',
+          description: e instanceof Error ? e.message : 'Échec',
+          variant: 'destructive',
+        });
+      }
+    },
+    [exportMutation, queryFilters, filtered, toast]
+  );
 
-  const exportJSON = useCallback(() => {
-    logger.info(`Export JSON de ${filtered.length} actions d'audit`);
-    const blob = new Blob([JSON.stringify(filtered, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `admin_audit_${Date.now()}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    logger.info('Export JSON réussi');
-  }, [filtered]);
+  const exportCSV = useCallback(() => runExport('csv'), [runExport]);
+  const exportJSON = useCallback(() => runExport('json'), [runExport]);
 
   return (
     <AdminLayout>
@@ -184,7 +156,7 @@ export default function AdminAudit() {
               <CardHeader>
                 <CardTitle className="text-lg sm:text-xl">Logs</CardTitle>
                 <CardDescription className="text-sm sm:text-base">
-                  Dernières 200 actions
+                  Journal unifié plateforme (admin, SSO, boutique) — export SOC2
                 </CardDescription>
                 <div className="flex flex-col gap-3 mt-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
@@ -209,15 +181,19 @@ export default function AdminAudit() {
                       }}
                       className="min-h-[44px] h-11 sm:h-12 text-xs sm:text-sm"
                     />
-                    <Input
-                      placeholder="Filtrer acteur (UUID)"
-                      value={actorFilter}
+                    <select
+                      className="border rounded px-2 min-h-[44px] h-11 sm:h-12 text-xs sm:text-sm"
+                      value={logSource}
                       onChange={e => {
-                        setActorFilter(e.target.value);
+                        setLogSource(e.target.value);
                         setPage(1);
                       }}
-                      className="min-h-[44px] h-11 sm:h-12 text-xs sm:text-sm"
-                    />
+                    >
+                      <option value="">Toutes sources</option>
+                      <option value="platform_admin">Admin plateforme</option>
+                      <option value="store_event">Boutique</option>
+                      <option value="sso_login">SSO</option>
+                    </select>
                     <div className="flex items-center gap-2">
                       <Input
                         type="date"
@@ -246,9 +222,14 @@ export default function AdminAudit() {
                           variant="outline"
                           onClick={exportCSV}
                           size="sm"
+                          disabled={exportMutation.isPending}
                           className="min-h-[44px] h-11 sm:h-12 text-xs sm:text-sm"
                         >
-                          <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                          {exportMutation.isPending ? (
+                            <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 animate-spin" />
+                          ) : (
+                            <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                          )}
                           <span className="hidden sm:inline">Exporter CSV</span>
                           <span className="sm:hidden">CSV</span>
                         </Button>
@@ -293,7 +274,7 @@ export default function AdminAudit() {
                 </div>
               </CardHeader>
               <CardContent>
-                {loading ? (
+                {isLoading ? (
                   <div className="py-10 text-center text-muted-foreground">Chargement…</div>
                 ) : filtered.length === 0 ? (
                   <div className="py-10 text-center text-muted-foreground">
@@ -307,7 +288,7 @@ export default function AdminAudit() {
                         key: 'date',
                         label: 'Date',
                         priority: 'high',
-                        render: (row: AdminActionRow) => (
+                        render: (row: UnifiedAuditLog) => (
                           <span className="text-xs text-muted-foreground">
                             {new Date(row.created_at).toLocaleString()}
                           </span>
@@ -317,17 +298,25 @@ export default function AdminAudit() {
                         key: 'action',
                         label: 'Action',
                         priority: 'high',
-                        render: (row: AdminActionRow) => (
+                        render: (row: UnifiedAuditLog) => (
                           <Badge variant="secondary" className="text-xs">
                             {row.action}
                           </Badge>
                         ),
                       },
                       {
+                        key: 'log_source',
+                        label: 'Source',
+                        priority: 'medium',
+                        render: (row: UnifiedAuditLog) => (
+                          <span className="text-xs">{row.log_source}</span>
+                        ),
+                      },
+                      {
                         key: 'target_type',
                         label: 'Cible',
                         priority: 'medium',
-                        render: (row: AdminActionRow) => (
+                        render: (row: UnifiedAuditLog) => (
                           <span className="text-xs">{row.target_type || '-'}</span>
                         ),
                       },
@@ -335,25 +324,27 @@ export default function AdminAudit() {
                         key: 'target_id',
                         label: 'Id cible',
                         priority: 'low',
-                        render: (row: AdminActionRow) => (
+                        render: (row: UnifiedAuditLog) => (
                           <span className="font-mono text-[10px] break-all">
                             {row.target_id || '-'}
                           </span>
                         ),
                       },
                       {
-                        key: 'actor_id',
-                        label: 'Admin',
+                        key: 'actor_email',
+                        label: 'Acteur',
                         priority: 'medium',
-                        render: (row: AdminActionRow) => (
-                          <span className="font-mono text-[10px] break-all">{row.actor_id}</span>
+                        render: (row: UnifiedAuditLog) => (
+                          <span className="text-[10px] break-all">
+                            {row.actor_email || row.actor_id || '-'}
+                          </span>
                         ),
                       },
                       {
                         key: 'metadata',
                         label: 'Détails',
                         priority: 'low',
-                        render: (row: AdminActionRow) => (
+                        render: (row: UnifiedAuditLog) => (
                           <pre className="text-[10px] whitespace-pre-wrap break-all max-h-32 overflow-auto">
                             {JSON.stringify(row.metadata ?? {}, null, 2)}
                           </pre>
@@ -373,13 +364,16 @@ export default function AdminAudit() {
                             Action
                           </TableHead>
                           <TableHead className="whitespace-nowrap text-xs sm:text-sm">
+                            Source
+                          </TableHead>
+                          <TableHead className="whitespace-nowrap text-xs sm:text-sm">
                             Cible
                           </TableHead>
                           <TableHead className="whitespace-nowrap text-xs sm:text-sm">
                             Id cible
                           </TableHead>
                           <TableHead className="whitespace-nowrap text-xs sm:text-sm">
-                            Admin
+                            Acteur
                           </TableHead>
                           <TableHead className="whitespace-nowrap text-xs sm:text-sm">
                             Détails
@@ -398,13 +392,16 @@ export default function AdminAudit() {
                               </Badge>
                             </TableCell>
                             <TableCell className="text-xs sm:text-sm whitespace-nowrap">
+                              {r.log_source}
+                            </TableCell>
+                            <TableCell className="text-xs sm:text-sm whitespace-nowrap">
                               {r.target_type || '-'}
                             </TableCell>
                             <TableCell className="font-mono text-[10px] sm:text-xs whitespace-nowrap">
                               {r.target_id || '-'}
                             </TableCell>
-                            <TableCell className="font-mono text-[10px] sm:text-xs whitespace-nowrap">
-                              {r.actor_id}
+                            <TableCell className="text-[10px] sm:text-xs whitespace-nowrap">
+                              {r.actor_email || r.actor_id || '-'}
                             </TableCell>
                             <TableCell>
                               <pre className="text-[10px] sm:text-xs whitespace-pre-wrap max-w-[200px] sm:max-w-[520px] overflow-auto">
@@ -425,9 +422,3 @@ export default function AdminAudit() {
     </AdminLayout>
   );
 }
-
-
-
-
-
-

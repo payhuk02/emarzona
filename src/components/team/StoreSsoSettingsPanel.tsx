@@ -197,7 +197,7 @@ export function StoreSsoSettingsPanel({ storeId, storeSlug }: Props) {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="oidc">OIDC (Azure AD, Okta, Google)</SelectItem>
-                  <SelectItem value="saml">SAML 2.0 (config — phase 2)</SelectItem>
+                  <SelectItem value="saml">SAML 2.0 (Azure AD / Okta)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

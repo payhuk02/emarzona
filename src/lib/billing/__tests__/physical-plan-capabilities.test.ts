@@ -44,4 +44,14 @@ describe('physical-plan-capabilities (Epic 3.2.7)', () => {
     expect(hasPhysicalFeatureAccess('physical_premium', 'forecasting.demand')).toBe(true);
     expect(requiredPlanForFeature('forecasting.demand')).toBe('physical_premium');
   });
+
+  it('audit.export requires physical_premium (Epic 4.4)', () => {
+    expect(hasPhysicalFeatureAccess('physical_premium', 'audit.export')).toBe(true);
+    expect(hasPhysicalFeatureAccess('physical_standard', 'audit.export')).toBe(false);
+  });
+
+  it('api.public available from physical_standard (Epic 4.6)', () => {
+    expect(hasPhysicalFeatureAccess('physical_standard', 'api.public')).toBe(true);
+    expect(hasPhysicalFeatureAccess('physical_basic', 'api.public')).toBe(false);
+  });
 });
