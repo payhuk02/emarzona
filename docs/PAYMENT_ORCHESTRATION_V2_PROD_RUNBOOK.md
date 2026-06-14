@@ -66,17 +66,18 @@ npx supabase functions deploy moneroo
 
 ## 4. Secrets Supabase (prod)
 
-| Secret                                      | PSP        | Obligatoire                         |
-| ------------------------------------------- | ---------- | ----------------------------------- |
-| `STRIPE_SECRET_KEY`                         | Stripe     | Oui si Connect                      |
-| `STRIPE_WEBHOOK_SECRET`                     | Stripe     | Oui                                 |
-| `PAYPAL_CLIENT_ID` / `PAYPAL_CLIENT_SECRET` | PayPal     | Oui si Commerce                     |
-| `PAYPAL_WEBHOOK_ID`                         | PayPal     | Oui                                 |
-| `MONEROO_*`                                 | Moneroo    | Oui (rail principal)                |
-| `SITE_URL`                                  | CORS       | `https://www.emarzona.com`          |
-| `ALLOWED_ORIGINS`                           | CORS       | Domaine prod + admin                |
-| `FEDEX_*`                                   | Shipping   | Prod sans mock (voir runbook FedEx) |
-| `ENVIRONMENT=production`                    | FedEx Edge | Désactive mock shipping             |
+| Secret                                      | PSP        | Obligatoire                            |
+| ------------------------------------------- | ---------- | -------------------------------------- |
+| `STRIPE_SECRET_KEY`                         | Stripe     | Oui si Connect                         |
+| `STRIPE_WEBHOOK_SECRET`                     | Stripe     | Oui                                    |
+| `PAYPAL_CLIENT_ID` / `PAYPAL_CLIENT_SECRET` | PayPal     | Oui si Commerce                        |
+| `PAYPAL_WEBHOOK_ID`                         | PayPal     | Oui                                    |
+| `MONEROO_*`                                 | Moneroo    | Oui (rail principal)                   |
+| `SITE_URL`                                  | CORS       | `https://www.emarzona.com`             |
+| `ALLOWED_ORIGINS`                           | CORS       | Domaine prod + admin                   |
+| `FEDEX_*`                                   | Shipping   | Prod sans mock (voir runbook FedEx)    |
+| `GOOGLE_CALENDAR_*`                         | Services   | OAuth calendrier (voir runbook Google) |
+| `ENVIRONMENT=production`                    | FedEx Edge | Désactive mock shipping                |
 
 **Stripe webhook events** : `checkout.session.completed`, `charge.refunded`, `account.updated`  
 **PayPal webhook events** : capture completed, `PAYMENT.CAPTURE.REFUNDED`, onboarding
@@ -107,9 +108,9 @@ Phase recommandée après smoke QA §7 :
 | 2     | `true`                          | `50`                                    | `get_payment_webhook_health(24)` OK, E2E financial CI verte |
 | 3     | `true`                          | `100`                                   | Stripe + PayPal + Moneroo smoke prod                        |
 
-**Statut 2026-06-12** : phase **2 active** — `VITE_PAYMENT_ORCHESTRATION_V2=true`, `VITE_PAYMENT_ORCHESTRATION_V2_ROLLOUT=50` en production Vercel (variables confirmées via `vercel env ls production`).
+**Statut 2026-06-14** : phase **3 active** — `VITE_PAYMENT_ORCHESTRATION_V2=true`, `VITE_PAYMENT_ORCHESTRATION_V2_ROLLOUT=100` en production Vercel (via `enable-payment-v2-rollout-100.ps1 -Force -SkipRedeploy`).
 
-> **Redeploy requis** : les `VITE_*` ne sont lues qu’au build. Si le CLI local échoue (`api-upload-free`), redéployer depuis **Vercel Dashboard → Deployments → Redeploy** (branche `main`, environnement Production). Surveiller 48 h avant passage à 100 %.
+> **Redeploy requis** : les `VITE_*` ne sont lues qu’au build. Redéployer depuis **Vercel Dashboard → Deployments → Redeploy** (branche `main`, environnement Production) pour activer le 100 % côté build. Rollback : `enable-payment-v2-rollout-vercel.ps1 -RolloutPercent 50 -SkipRedeploy`.
 
 Script Vercel (production) :
 

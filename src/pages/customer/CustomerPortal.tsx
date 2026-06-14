@@ -41,6 +41,7 @@ import { DownloadsTab } from '@/components/customer/DownloadsTab';
 import { LicensesTab } from '@/components/customer/LicensesTab';
 import { UpdatesTab } from '@/components/customer/UpdatesTab';
 import { FavoritesTab } from '@/components/customer/FavoritesTab';
+import { RecentOrdersTimeline } from '@/components/customer/RecentOrdersTimeline';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 interface CustomerStats {
@@ -532,6 +533,8 @@ export default function CustomerPortal() {
               value="overview"
               className="space-y-2.5 sm:space-y-3 md:space-y-4 mt-3 sm:mt-4 md:mt-6"
             >
+              {user?.id && <RecentOrdersTimeline userId={user.id} onViewAll={navigateToOrders} />}
+
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3 md:gap-4">
                 {/* Mes Commandes */}
                 <Card

@@ -1,12 +1,23 @@
 /**
  * Vercel Edge Middleware - Prerendering pour bots
  *
- * Détecte les crawlers (Google, Bing, Facebook, Twitter, LinkedIn, WhatsApp, IA, etc.)
- * et injecte les méta-données dynamiques (title, description, og:*, canonical)
- * dans le HTML statique avant la réponse.
- *
- * Les utilisateurs réels passent inchangés (React Helmet prend le relais).
+ * Epic 4.1 : cache distribue Upstash Redis + rate-limit bots
+ * Epic 4.2 : SEO meta pour domaines personnalises vendeurs
  */
+
+import {
+  BOT_RATE_LIMIT_PER_MINUTE,
+  BOT_RATE_WINDOW_SECONDS,
+  META_CACHE_TTL_SECONDS,
+  buildBotRateLimitKey,
+  buildMetaCacheKey,
+  isLikelyCustomStoreHost,
+  isStoreWildcardHost,
+  parseCachedMeta,
+  serializeCachedMeta,
+  type CachedMetaPayload,
+} from './src/lib/middleware/meta-cache';
+import { upstashGet, upstashIncrWithTtl, upstashSetEx } from './src/lib/middleware/upstash-redis';
 
 export const config = {
   matcher: '/((?!_next|api|assets|.*\\..*).*)',
@@ -51,6 +62,24 @@ function getAuthHeaders() {
     apikey: anonKey || '',
     Authorization: `Bearer ${anonKey || ''}`,
   };
+}
+
+async function fetchStoreRowByCustomDomain(host: string): Promise<Record<string, unknown> | null> {
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_store_by_custom_domain`, {
+      method: 'POST',
+      headers: {
+        ...getAuthHeaders(),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ p_domain: host }),
+    });
+    const data = await r.json();
+    const s = Array.isArray(data) ? data[0] : data;
+    return s ?? null;
+  } catch {
+    return null;
+  }
 }
 
 async function fetchProductMeta(slug: string, storeId?: string): Promise<Meta | null> {
@@ -234,8 +263,32 @@ async function resolveMeta(req: Request): Promise<Meta> {
     return buildMarketplaceBotMeta(url.searchParams, SITE);
   }
 
+  // Domaine personnalise vendeur (hors emarzona.com / *.myemarzona.shop)
+  if (isLikelyCustomStoreHost(host, STORE_DOMAIN)) {
+    const storeRow = await fetchStoreRowByCustomDomain(host);
+    const productMatchCustom = path.match(/^\/products\/([^/]+)/);
+    if (productMatchCustom && storeRow?.id) {
+      const m = await fetchProductMeta(productMatchCustom[1], String(storeRow.id));
+      if (m) {
+        m.url = `https://${host}${path}`;
+        return m;
+      }
+    }
+    if (storeRow) {
+      return {
+        title: (storeRow.meta_title as string) || `${storeRow.name as string} | Emarzona`,
+        description: String(
+          storeRow.meta_description || storeRow.description || storeRow.about || ''
+        ).slice(0, 160),
+        image: (storeRow.logo_url as string) || DEFAULT_META.image,
+        url: `https://${host}${path}`,
+        type: 'profile',
+      };
+    }
+  }
+
   // Sous-domaine boutique : *.myemarzona.shop
-  if (host.endsWith(`.${STORE_DOMAIN}`)) {
+  if (isStoreWildcardHost(host, STORE_DOMAIN) && host !== STORE_DOMAIN) {
     const sub = host.replace(`.${STORE_DOMAIN}`, '');
     const productMatch = path.match(/^\/products\/([^/]+)/);
     if (productMatch) {
@@ -297,33 +350,93 @@ async function resolveMeta(req: Request): Promise<Meta> {
   return { ...DEFAULT_META, url: `https://${host || 'emarzona.com'}${path}` };
 }
 
-// -- Cache System In-Memory --
+// -- Cache : Upstash Redis (prod) + fallback in-memory (dev/preview) --
 interface CacheEntry {
   meta: Meta;
   timestamp: number;
 }
-const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
-const MAX_CACHE_SIZE = 1000;
-const metaCache = new Map<string, CacheEntry>();
+const MEMORY_CACHE_TTL_MS = META_CACHE_TTL_SECONDS * 1000;
+const MAX_MEMORY_CACHE_SIZE = 500;
+const memoryCache = new Map<string, CacheEntry>();
 
-async function resolveMetaCached(req: Request): Promise<Meta> {
-  const cacheKey = req.url;
-  const cached = metaCache.get(cacheKey);
+function getUpstashConfig(): { url: string; token: string } | null {
+  const url =
+    globalThis.process?.env?.UPSTASH_REDIS_REST_URL ||
+    globalThis.process?.env?.KV_REST_API_URL ||
+    '';
+  const token =
+    globalThis.process?.env?.UPSTASH_REDIS_REST_TOKEN ||
+    globalThis.process?.env?.KV_REST_API_TOKEN ||
+    '';
+  if (!url || !token) return null;
+  return { url, token };
+}
 
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
-    return cached.meta;
+function getClientIp(req: Request): string {
+  return (
+    req.headers.get('x-real-ip') ||
+    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    'unknown'
+  );
+}
+
+async function checkBotRateLimit(req: Request): Promise<boolean> {
+  const redis = getUpstashConfig();
+  if (!redis) return true;
+
+  const key = buildBotRateLimitKey(getClientIp(req));
+  const count = await upstashIncrWithTtl(redis.url, redis.token, key, BOT_RATE_WINDOW_SECONDS);
+  return count <= BOT_RATE_LIMIT_PER_MINUTE;
+}
+
+async function readMetaFromCache(
+  cacheKey: string
+): Promise<{ meta: Meta; source: 'redis' | 'memory' } | null> {
+  const redis = getUpstashConfig();
+  if (redis) {
+    const raw = await upstashGet(redis.url, redis.token, cacheKey);
+    const parsed = parseCachedMeta(raw);
+    if (parsed) return { meta: parsed.meta as Meta, source: 'redis' };
+  }
+
+  const mem = memoryCache.get(cacheKey);
+  if (mem && Date.now() - mem.timestamp < MEMORY_CACHE_TTL_MS) {
+    return { meta: mem.meta, source: 'memory' };
+  }
+  return null;
+}
+
+async function writeMetaToCache(cacheKey: string, meta: Meta): Promise<void> {
+  const payload: CachedMetaPayload = { meta, cachedAt: Date.now() };
+  const serialized = serializeCachedMeta(payload);
+
+  const redis = getUpstashConfig();
+  if (redis) {
+    await upstashSetEx(redis.url, redis.token, cacheKey, serialized, META_CACHE_TTL_SECONDS);
+  }
+
+  if (memoryCache.size >= MAX_MEMORY_CACHE_SIZE) {
+    const firstKey = memoryCache.keys().next().value;
+    if (firstKey) memoryCache.delete(firstKey);
+  }
+  memoryCache.set(cacheKey, { meta, timestamp: Date.now() });
+}
+
+async function resolveMetaCached(
+  req: Request
+): Promise<{ meta: Meta; cache: 'hit-redis' | 'hit-memory' | 'miss' }> {
+  const cacheKey = buildMetaCacheKey(req.url);
+  const cached = await readMetaFromCache(cacheKey);
+  if (cached) {
+    return {
+      meta: cached.meta,
+      cache: cached.source === 'redis' ? 'hit-redis' : 'hit-memory',
+    };
   }
 
   const meta = await resolveMeta(req);
-
-  // LRU simple : si on dépasse la taille max, on supprime le plus ancien
-  if (metaCache.size >= MAX_CACHE_SIZE) {
-    const firstKey = metaCache.keys().next().value;
-    if (firstKey) metaCache.delete(firstKey);
-  }
-
-  metaCache.set(cacheKey, { meta, timestamp: Date.now() });
-  return meta;
+  await writeMetaToCache(cacheKey, meta);
+  return { meta, cache: 'miss' };
 }
 
 function escapeHtml(s: string): string {
@@ -387,6 +500,14 @@ export default async function middleware(req: Request): Promise<Response | undef
     return;
   }
 
+  const allowed = await checkBotRateLimit(req);
+  if (!allowed) {
+    return new Response('Too Many Requests', {
+      status: 429,
+      headers: { 'content-type': 'text/plain', 'retry-after': '60' },
+    });
+  }
+
   const bypassHeaders = new Headers(req.headers);
   bypassHeaders.set(PRERENDER_BYPASS_HEADER, '1');
 
@@ -401,9 +522,11 @@ export default async function middleware(req: Request): Promise<Response | undef
   if (!ct.includes('text/html')) return res;
 
   try {
-    const meta = await Promise.race<Meta>([
+    const { meta, cache } = await Promise.race([
       resolveMetaCached(req),
-      new Promise<Meta>(resolve => setTimeout(() => resolve(DEFAULT_META), 1500)),
+      new Promise<{ meta: Meta; cache: 'miss' }>(resolve =>
+        setTimeout(() => resolve({ meta: DEFAULT_META, cache: 'miss' }), 1500)
+      ),
     ]);
     const html = await res.text();
     const rewritten = injectMeta(html, meta);
@@ -413,6 +536,7 @@ export default async function middleware(req: Request): Promise<Response | undef
         'content-type': 'text/html; charset=utf-8',
         'cache-control': 'public, max-age=300, s-maxage=600',
         'x-prerendered': 'bot',
+        'x-seo-cache': cache,
       },
     });
   } catch {

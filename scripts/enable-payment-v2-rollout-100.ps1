@@ -7,8 +7,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$scriptDir = Split-Path $PSScriptRoot -Parent
-$mainScript = Join-Path $scriptDir 'enable-payment-v2-rollout-vercel.ps1'
+$mainScript = Join-Path $PSScriptRoot 'enable-payment-v2-rollout-vercel.ps1'
 
 if (-not (Test-Path $mainScript)) {
   Write-Error "Script introuvable: $mainScript"
@@ -28,11 +27,8 @@ if (-not $Force) {
   }
 }
 
-$invokeArgs = @('-RolloutPercent', '100')
 if ($SkipRedeploy) {
-  $invokeArgs += '-SkipRedeploy'
+  & $mainScript -RolloutPercent 100 -SkipRedeploy
 } else {
-  $invokeArgs += '-Redeploy'
+  & $mainScript -RolloutPercent 100 -Redeploy
 }
-
-& $mainScript @invokeArgs

@@ -20,6 +20,8 @@
 
 ## Activation 100 %
 
+**Statut 2026-06-14** : variables Vercel production mises à jour (`VITE_PAYMENT_ORCHESTRATION_V2=true`, `VITE_PAYMENT_ORCHESTRATION_V2_ROLLOUT=100`). **Redeploy build requis** (Dashboard).
+
 ### Option A — Script (recommandé)
 
 ```powershell

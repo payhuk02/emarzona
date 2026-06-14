@@ -43,8 +43,11 @@ Set these secrets in Supabase Edge Functions:
 - `CRON_SECRET=<strong-secret>`
 - `EDGE_INTERNAL_SECRET=<strong-secret>`
 - `SITE_URL=https://emarzona.com`
+- `VERCEL_API_TOKEN` + `VERCEL_PROJECT_ID` (auto-enregistrement domaines custom)
 - `CUSTOM_DOMAIN_A_TARGETS=<comma-separated expected A targets>` (optional, recommended)
 - `CUSTOM_DOMAIN_CNAME_TARGETS=<comma-separated expected CNAME targets>` (optional, recommended)
+
+Cron automatisé (Epic 4.2) : après migration E39, exécuter `setup_verify_domains_cron_job(project_ref, CRON_SECRET)`. Voir `docs/runbooks/custom-domains-cron-automation.md`.
 
 Email functions:
 

@@ -122,7 +122,7 @@ Une excellente base de travail avec un fort potentiel de scalabilité, mais rale
 
 ### 23. Liste complète des fonctionnalités incomplètes
 
-- Le processus de Custom Domain est présent en base (`get_store_by_custom_domain`) mais nécessite souvent une intervention manuelle via l'API Vercel pour configurer le DNS.
+- Le processus de Custom Domain est présent en base (`get_store_by_custom_domain`) ; cron automatisé E39 + Vercel API (Epic 4.2).
 
 ### 24. Liste complète des APIs problématiques
 
@@ -153,6 +153,7 @@ Une excellente base de travail avec un fort potentiel de scalabilité, mais rale
 
 - ~~**[SÉCURITÉ]** XSS LegalDocumentContent / PlatformPopupMessage~~ : `SafeHTML` en place.
 - ~~**[DEVOPS]** Scripts CI bundle~~ : `analyze:bundle:quick` → `check-bundle-budget.mjs`.
+- ~~**[SCALABILITÉ]** Cache middleware SEO~~ : Upstash Redis Epic 4.1 (`middleware.ts` + runbook `upstash-middleware-cache.md`).
 
 ### 30. Recommandations haute priorité (Sous 1 semaine)
 
