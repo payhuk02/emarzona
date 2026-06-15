@@ -147,9 +147,17 @@ export default function VerifyCertificatePage() {
         )}
 
         {!isLoading && !isError && !data && normalizedCode.length >= 8 && (
-          <Alert>
-            <AlertDescription>Aucun résultat pour ce code.</AlertDescription>
-          </Alert>
+          <Card className="border-destructive/30">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <ShieldX className="h-6 w-6 text-destructive" />
+                <CardTitle>Certificat non valide</CardTitle>
+              </div>
+              <CardDescription>
+                Aucun certificat ne correspond à ce code de vérification.
+              </CardDescription>
+            </CardHeader>
+          </Card>
         )}
       </div>
     </div>

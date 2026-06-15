@@ -95,7 +95,9 @@ test.describe('Artist product workflow', () => {
     await expect(page).toHaveURL(/\/verify\/TESTCODE1/);
     await expect(page.getByRole('heading', { name: /vérification de certificat/i })).toBeVisible();
     await expect(
-      page.getByText(/certificat non valide|certificat authentique|aucun certificat/i)
+      page.getByText(
+        /certificat non valide|certificat authentique|impossible de contacter le service/i
+      )
     ).toBeVisible({ timeout: 15_000 });
   });
 

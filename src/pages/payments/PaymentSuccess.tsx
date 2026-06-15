@@ -95,13 +95,18 @@ const PaymentSuccess = () => {
               .eq('id', orderId)
               .maybeSingle();
 
-            if (order?.payment_status === 'paid') {
+            if (!order) {
+              setConfirmationState('pending');
+              return;
+            }
+
+            if (order.payment_status === 'paid') {
               setConfirmationState('confirmed');
               await loadOrderInfo(orderId);
               return;
             }
 
-            if (order?.payment_status === 'failed') {
+            if (order.payment_status === 'failed') {
               setConfirmationState('failed');
               return;
             }

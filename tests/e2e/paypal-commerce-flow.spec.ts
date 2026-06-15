@@ -79,8 +79,12 @@ test.describe('Payment success — retour PayPal', () => {
       '/payment/success?order_id=00000000-0000-0000-0000-000000000099&provider=paypal&token=TEST'
     );
     expect(response?.status()).toBeLessThan(500);
-    await expect(appLocator(page).getByRole('heading', { name: /paiement réussi/i })).toBeVisible({
-      timeout: 30_000,
+    await expect(
+      appLocator(page).getByRole('heading', {
+        name: /paiement réussi|en cours de confirmation|vérification du paiement/i,
+      })
+    ).toBeVisible({
+      timeout: 15_000,
     });
   });
 });

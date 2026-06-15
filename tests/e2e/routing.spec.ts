@@ -11,14 +11,9 @@ test.describe('Routing', () => {
     // Note: Ce test nécessite un store et un produit existants
     // Pour l'instant, on teste juste que la page ne plante pas
 
-    await page.goto('/store/test-store/product/test-product');
-
-    // Attendre que la page se charge (peut rediriger, afficher 404, ou rester sur la route)
-    await page.waitForLoadState('domcontentloaded');
-
-    // Vérifier que la page ne plante pas (a un titre)
-    const title = await page.title();
-    expect(title).toBeTruthy();
+    await page.goto('/store/test-store/product/test-product', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('body')).toBeVisible();
+    await expect(page).toHaveTitle(/.+/, { timeout: 15_000 });
 
     // Vérifier qu'il n'y a pas d'erreur critique visible
     const criticalError = await page.locator('text=Erreur critique').count();

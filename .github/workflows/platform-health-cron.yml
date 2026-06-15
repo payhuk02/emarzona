@@ -15,20 +15,13 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
-          SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
         run: |
           if [ -z "$SUPABASE_URL" ] || [ -z "$CRON_SECRET" ]; then
             echo "SUPABASE_URL and CRON_SECRET secrets are required."
             exit 0
           fi
-          if [ -z "$SUPABASE_ANON_KEY" ]; then
-            echo "VITE_SUPABASE_PUBLISHABLE_KEY secret is required for Edge gateway auth."
-            exit 1
-          fi
           curl -sfS -X POST "${SUPABASE_URL%/}/functions/v1/platform-health" \
             -H "Content-Type: application/json" \
-            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
-            -H "apikey: ${SUPABASE_ANON_KEY}" \
             -H "x-cron-secret: ${CRON_SECRET}" \
             -d '{}' \
             --max-time 120

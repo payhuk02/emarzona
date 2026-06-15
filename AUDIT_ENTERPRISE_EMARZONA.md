@@ -233,7 +233,7 @@ Une excellente base de travail avec un fort potentiel de scalabilité, mais rale
 | Epic | Livrable                               | Statut                                        |
 | ---- | -------------------------------------- | --------------------------------------------- |
 | 5.1  | CSP nonces middleware                  | Code + runbook                                |
-| 5.2  | Google Indexing queue + edge           | Migration E47 + runbook                       |
+| 5.2  | Google Indexing queue + edge           | Migration E47 + secret GCP prod + smoke OK    |
 | 5.3  | Page `/status` + SLA widget Enterprise | Migration E48 + `platform-health`             |
 | 5.4  | Command-K actions vendeur              | Palette + UtilityBar ⌘K                       |
 | 5.5  | E2E CI API + audit + status            | `vendor-api-smoke`, `enterprise-audit-export` |
@@ -250,7 +250,7 @@ Une excellente base de travail avec un fort potentiel de scalabilité, mais rale
 | 6.4  | Fraud scoring checkout        | `assess_checkout_fraud_risk` + Checkout   |
 | 6.5  | Organisations multi-boutiques | `store_organizations` + UI Enterprise     |
 
-**Enterprise readiness : 92/100** (+3 vs Moon 5)
+**Enterprise readiness : 93/100** (+1 vs Moon 6 — Google Indexing prod + crons alignés)
 
 ### Ops crons (E49)
 

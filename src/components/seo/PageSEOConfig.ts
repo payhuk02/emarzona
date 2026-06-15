@@ -88,11 +88,11 @@ export const PAGE_SEO_CONFIG: Record<string, PageSEOEntry> = {
   '/about': {
     title: 'À propos | Emarzona',
     description:
-      "Découvrez l'histoire d'Emarzona, plateforme e-commerce pensée pour l'Afrique de l'Ouest.",
+      "Découvrez Emarzona, plateforme e-commerce tout-en-un pensée pour l'Afrique de l'Ouest.",
   },
   '/contact': {
     title: 'Contact | Emarzona',
-    description: "Contactez l'équipe Emarzona pour toute question ou suggestion.",
+    description: "Contactez l'équipe Emarzona : support, partenariats et presse.",
   },
   '/pricing': {
     title: 'Tarifs | Emarzona',
@@ -111,15 +111,6 @@ export const PAGE_SEO_CONFIG: Record<string, PageSEOEntry> = {
       'Des produits sélectionnés pour vous en fonction de vos préférences et de votre historique.',
   },
 
-  '/about': {
-    title: 'À propos | Emarzona',
-    description:
-      'Découvrez Emarzona, la plateforme e-commerce tout-en-un pour vendre et développer votre activité.',
-  },
-  '/contact': {
-    title: 'Contact | Emarzona',
-    description: 'Contactez l’équipe Emarzona : support, partenariats et presse.',
-  },
   '/careers': {
     title: 'Carrières | Emarzona',
     description: 'Rejoignez Emarzona et participez à la construction du commerce en ligne.',
