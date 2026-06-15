@@ -136,7 +136,7 @@ export default function AdminApiKeys() {
           {import.meta.env.VITE_SUPABASE_URL && (
             <Button variant="outline" asChild>
               <a
-                href={`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api/v1`}
+                href={`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-v1`}
                 target="_blank"
                 rel="noopener noreferrer"
               >

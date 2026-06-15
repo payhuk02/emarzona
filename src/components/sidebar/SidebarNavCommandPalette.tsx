@@ -11,15 +11,18 @@ import {
 } from '@/components/ui/command';
 import type { SidebarNavEntry } from './sidebar-nav-shared';
 import { recordNavClick } from '@/hooks/useNavigationAnalytics';
+import { OPEN_COMMAND_PALETTE_EVENT } from '@/lib/vendor-command-palette';
 
 interface SidebarNavCommandPaletteProps {
   entries: SidebarNavEntry[];
+  quickActions?: SidebarNavEntry[];
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }
 
 export function SidebarNavCommandPalette({
   entries,
+  quickActions = [],
   open: openProp,
   onOpenChange,
 }: SidebarNavCommandPaletteProps) {
@@ -44,11 +47,17 @@ export function SidebarNavCommandPalette({
         setOpen(true);
       }
     };
+    const onOpenEvent = () => setOpen(true);
     window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
+    window.addEventListener(OPEN_COMMAND_PALETTE_EVENT, onOpenEvent);
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener(OPEN_COMMAND_PALETTE_EVENT, onOpenEvent);
+    };
   }, [setOpen]);
 
-  const grouped = entries.reduce<Record<string, SidebarNavEntry[]>>((acc, entry) => {
+  const allEntries = [...quickActions, ...entries];
+  const grouped = allEntries.reduce<Record<string, SidebarNavEntry[]>>((acc, entry) => {
     if (!acc[entry.sectionLabel]) acc[entry.sectionLabel] = [];
     acc[entry.sectionLabel].push(entry);
     return acc;
@@ -56,7 +65,7 @@ export function SidebarNavCommandPalette({
 
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
-      <CommandInput placeholder="Rechercher une page, une section…" />
+      <CommandInput placeholder="Rechercher une page, une action rapide…" />
       <CommandList className="max-h-[min(60vh,420px)]">
         <CommandEmpty>Aucune page trouvée.</CommandEmpty>
         {Object.entries(grouped).map(([sectionLabel, items], index) => (

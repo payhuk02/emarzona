@@ -18,6 +18,11 @@ import {
   type CachedMetaPayload,
 } from './src/lib/middleware/meta-cache';
 import { upstashGet, upstashIncrWithTtl, upstashSetEx } from './src/lib/middleware/upstash-redis';
+import {
+  applyCspResponseHeaders,
+  generateCspNonce,
+  injectScriptNonces,
+} from './src/lib/middleware/csp-policy';
 
 export const config = {
   matcher: '/((?!_next|api|assets|.*\\..*).*)',
@@ -486,18 +491,49 @@ ${meta.type === 'product' && meta.price != null ? `    <meta property="product:p
 /** En-tête interne pour éviter que fetch() ne relance le middleware (boucle 508). */
 const PRERENDER_BYPASS_HEADER = 'x-emarzona-prerender-bypass';
 
-export default async function middleware(req: Request): Promise<Response | undefined> {
-  const ua = req.headers.get('user-agent') || '';
-  const isBot = BOT_REGEX.test(ua);
+async function fetchHtmlBypass(req: Request): Promise<Response> {
+  const bypassHeaders = new Headers(req.headers);
+  bypassHeaders.set(PRERENDER_BYPASS_HEADER, '1');
+  return fetch(
+    new Request(req.url, {
+      method: req.method,
+      headers: bypassHeaders,
+    })
+  );
+}
 
-  // Utilisateurs réels : ne pas re-fetcher la même URL (sinon INFINITE_LOOP_DETECTED sur Vercel)
-  if (!isBot) {
-    return;
+function buildCspHtmlResponse(
+  html: string,
+  res: Response,
+  extraHeaders: Record<string, string> = {}
+): Response {
+  const nonce = generateCspNonce();
+  const body = injectScriptNonces(html, nonce);
+  const headers = new Headers(res.headers);
+  headers.set('content-type', 'text/html; charset=utf-8');
+  applyCspResponseHeaders(headers, nonce);
+  for (const [key, value] of Object.entries(extraHeaders)) {
+    headers.set(key, value);
   }
+  return new Response(body, { status: res.status, headers });
+}
 
+export default async function middleware(req: Request): Promise<Response | undefined> {
   // Requête issue du fetch interne ci-dessous → laisser atteindre index.html
   if (req.headers.get(PRERENDER_BYPASS_HEADER) === '1') {
     return;
+  }
+
+  const ua = req.headers.get('user-agent') || '';
+  const isBot = BOT_REGEX.test(ua);
+
+  // Epic 5.1 — CSP nonce pour utilisateurs réels (HTML uniquement)
+  if (!isBot) {
+    const res = await fetchHtmlBypass(req);
+    const ct = res.headers.get('content-type') || '';
+    if (!ct.includes('text/html')) return res;
+    const html = await res.text();
+    return buildCspHtmlResponse(html, res);
   }
 
   const allowed = await checkBotRateLimit(req);
@@ -508,15 +544,7 @@ export default async function middleware(req: Request): Promise<Response | undef
     });
   }
 
-  const bypassHeaders = new Headers(req.headers);
-  bypassHeaders.set(PRERENDER_BYPASS_HEADER, '1');
-
-  const res = await fetch(
-    new Request(req.url, {
-      method: req.method,
-      headers: bypassHeaders,
-    })
-  );
+  const res = await fetchHtmlBypass(req);
 
   const ct = res.headers.get('content-type') || '';
   if (!ct.includes('text/html')) return res;
@@ -530,14 +558,10 @@ export default async function middleware(req: Request): Promise<Response | undef
     ]);
     const html = await res.text();
     const rewritten = injectMeta(html, meta);
-    return new Response(rewritten, {
-      status: res.status,
-      headers: {
-        'content-type': 'text/html; charset=utf-8',
-        'cache-control': 'public, max-age=300, s-maxage=600',
-        'x-prerendered': 'bot',
-        'x-seo-cache': cache,
-      },
+    return buildCspHtmlResponse(rewritten, res, {
+      'cache-control': 'public, max-age=300, s-maxage=600',
+      'x-prerendered': 'bot',
+      'x-seo-cache': cache,
     });
   } catch {
     return res;

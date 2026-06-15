@@ -1,21 +1,21 @@
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Progress } from "@/components/ui/progress";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
-import { TwoFactorAuth } from "@/components/auth/TwoFactorAuth";
-import { 
-  Loader2, 
-  Shield, 
-  Key, 
-  CheckCircle2, 
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Progress } from '@/components/ui/progress';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { TwoFactorAuth } from '@/components/auth/TwoFactorAuth';
+import {
+  Loader2,
+  Shield,
+  Key,
+  CheckCircle2,
   AlertCircle,
   Save,
   Eye,
@@ -23,9 +23,10 @@ import {
   Clock,
   Trash2,
   Settings,
-  Activity
-} from "lucide-react";
-import { logger } from "@/lib/logger";
+  Activity,
+} from 'lucide-react';
+import { logger } from '@/lib/logger';
+import { AccountDeletionPanel } from '@/components/account/AccountDeletionPanel';
 
 const USER_SESSION_FIELDS = 'id, user_id, device, location, last_active, current';
 const USER_LOGIN_HISTORY_FIELDS = 'id, user_id, timestamp, device, location, success';
@@ -36,7 +37,7 @@ interface SecuritySettings {
   currentPassword: string;
   newPassword: string;
   confirmPassword: string;
-  
+
   // Session management
   activeSessions: Array<{
     id: string;
@@ -45,7 +46,7 @@ interface SecuritySettings {
     lastActive: string;
     current: boolean;
   }>;
-  
+
   // Security events
   recentLogins: Array<{
     id: string;
@@ -54,7 +55,7 @@ interface SecuritySettings {
     location: string;
     success: boolean;
   }>;
-  
+
   // Privacy settings
   showOnlineStatus: boolean;
   allowDataCollection: boolean;
@@ -70,9 +71,9 @@ export const SecuritySettings = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [settings, setSettings] = useState<SecuritySettings>({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
     activeSessions: [],
     recentLogins: [],
     showOnlineStatus: true,
@@ -86,7 +87,7 @@ export const SecuritySettings = () => {
 
   const loadSecuritySettings = async () => {
     if (!user) return;
-    
+
     setLoading(true);
     try {
       // Load active sessions (if table exists)
@@ -119,8 +120,8 @@ export const SecuritySettings = () => {
         allowDataCollection: privacyData?.allow_data_collection ?? false,
         marketingEmails: privacyData?.marketing_emails ?? false,
       }));
-    } catch ( _error: any) {
-      logger.error('Error loading security settings', { error });
+    } catch (err: unknown) {
+      logger.error('Error loading security settings', { error: err });
       // Don't show error toast if tables don't exist yet (graceful degradation)
     } finally {
       setLoading(false);
@@ -132,18 +133,18 @@ export const SecuritySettings = () => {
 
     if (settings.newPassword !== settings.confirmPassword) {
       toast({
-        title: "Erreur",
-        description: "Les mots de passe ne correspondent pas",
-        variant: "destructive",
+        title: 'Erreur',
+        description: 'Les mots de passe ne correspondent pas',
+        variant: 'destructive',
       });
       return;
     }
 
     if (settings.newPassword.length < 8) {
       toast({
-        title: "Erreur",
-        description: "Le mot de passe doit contenir au moins 8 caractères",
-        variant: "destructive",
+        title: 'Erreur',
+        description: 'Le mot de passe doit contenir au moins 8 caractères',
+        variant: 'destructive',
       });
       return;
     }
@@ -158,34 +159,31 @@ export const SecuritySettings = () => {
       if (error) throw error;
 
       toast({
-        title: "Succès",
-        description: "Mot de passe modifié avec succès",
+        title: 'Succès',
+        description: 'Mot de passe modifié avec succès',
       });
 
       setSettings(prev => ({
         ...prev,
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
       }));
-    } catch ( _error: any) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Erreur inconnue';
       toast({
-        title: "Erreur",
-        description: error.message,
-        variant: "destructive",
+        title: 'Erreur',
+        description: message,
+        variant: 'destructive',
       });
     } finally {
       setSaving(false);
     }
   };
 
-
   const terminateSession = async (sessionId: string) => {
     try {
-      const { error } = await supabase
-        .from('user_sessions')
-        .delete()
-        .eq('id', sessionId);
+      const { error } = await supabase.from('user_sessions').delete().eq('id', sessionId);
 
       if (error) throw error;
 
@@ -195,20 +193,20 @@ export const SecuritySettings = () => {
       }));
 
       toast({
-        title: "Succès",
-        description: "Session terminée",
+        title: 'Succès',
+        description: 'Session terminée',
       });
-    } catch ( _error: any) {
+    } catch {
       toast({
-        title: "Erreur",
-        description: "Impossible de terminer la session",
-        variant: "destructive",
+        title: 'Erreur',
+        description: 'Impossible de terminer la session',
+        variant: 'destructive',
       });
     }
   };
 
   const getPasswordStrength = (password: string) => {
-    let  strength= 0;
+    let strength = 0;
     if (password.length >= 8) strength += 20;
     if (password.match(/[a-z]/)) strength += 20;
     if (password.match(/[A-Z]/)) strength += 20;
@@ -218,17 +216,17 @@ export const SecuritySettings = () => {
   };
 
   const getPasswordStrengthColor = (strength: number) => {
-    if (strength < 40) return "bg-red-500";
-    if (strength < 60) return "bg-orange-500";
-    if (strength < 80) return "bg-yellow-500";
-    return "bg-green-500";
+    if (strength < 40) return 'bg-red-500';
+    if (strength < 60) return 'bg-orange-500';
+    if (strength < 80) return 'bg-yellow-500';
+    return 'bg-green-500';
   };
 
   const getPasswordStrengthText = (strength: number) => {
-    if (strength < 40) return "Faible";
-    if (strength < 60) return "Moyen";
-    if (strength < 80) return "Bon";
-    return "Très fort";
+    if (strength < 40) return 'Faible';
+    if (strength < 60) return 'Moyen';
+    if (strength < 80) return 'Bon';
+    return 'Très fort';
   };
 
   if (loading) {
@@ -249,9 +247,7 @@ export const SecuritySettings = () => {
             <Shield className="h-5 w-5" />
             Vue d'ensemble de la sécurité
           </CardTitle>
-          <CardDescription>
-            État actuel de la sécurité de votre compte
-          </CardDescription>
+          <CardDescription>État actuel de la sécurité de votre compte</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -278,9 +274,7 @@ export const SecuritySettings = () => {
             <Key className="h-5 w-5" />
             Mot de passe
           </CardTitle>
-          <CardDescription>
-            Changez votre mot de passe pour sécuriser votre compte
-          </CardDescription>
+          <CardDescription>Changez votre mot de passe pour sécuriser votre compte</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handlePasswordChange} className="space-y-4">
@@ -289,9 +283,11 @@ export const SecuritySettings = () => {
               <div className="relative">
                 <Input
                   id="currentPassword"
-                  type={showCurrentPassword ? "text" : "password"}
+                  type={showCurrentPassword ? 'text' : 'password'}
                   value={settings.currentPassword}
-                  onChange={(e) => setSettings(prev => ({ ...prev, currentPassword: e.target.value }))}
+                  onChange={e =>
+                    setSettings(prev => ({ ...prev, currentPassword: e.target.value }))
+                  }
                   placeholder="Votre mot de passe actuel"
                 />
                 <Button
@@ -301,7 +297,11 @@ export const SecuritySettings = () => {
                   className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                   onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                 >
-                  {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showCurrentPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
             </div>
@@ -311,9 +311,9 @@ export const SecuritySettings = () => {
               <div className="relative">
                 <Input
                   id="newPassword"
-                  type={showNewPassword ? "text" : "password"}
+                  type={showNewPassword ? 'text' : 'password'}
                   value={settings.newPassword}
-                  onChange={(e) => setSettings(prev => ({ ...prev, newPassword: e.target.value }))}
+                  onChange={e => setSettings(prev => ({ ...prev, newPassword: e.target.value }))}
                   placeholder="Votre nouveau mot de passe"
                   minLength={8}
                 />
@@ -331,12 +331,11 @@ export const SecuritySettings = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Force du mot de passe</span>
-                    <span>{getPasswordStrengthText(getPasswordStrength(settings.newPassword))}</span>
+                    <span>
+                      {getPasswordStrengthText(getPasswordStrength(settings.newPassword))}
+                    </span>
                   </div>
-                  <Progress 
-                    value={getPasswordStrength(settings.newPassword)} 
-                    className="h-2"
-                  />
+                  <Progress value={getPasswordStrength(settings.newPassword)} className="h-2" />
                 </div>
               )}
             </div>
@@ -346,9 +345,11 @@ export const SecuritySettings = () => {
               <div className="relative">
                 <Input
                   id="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
+                  type={showConfirmPassword ? 'text' : 'password'}
                   value={settings.confirmPassword}
-                  onChange={(e) => setSettings(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                  onChange={e =>
+                    setSettings(prev => ({ ...prev, confirmPassword: e.target.value }))
+                  }
                   placeholder="Confirmez votre nouveau mot de passe"
                   minLength={8}
                 />
@@ -359,7 +360,11 @@ export const SecuritySettings = () => {
                   className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
-                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
             </div>
@@ -383,40 +388,34 @@ export const SecuritySettings = () => {
             <Activity className="h-5 w-5" />
             Sessions actives
           </CardTitle>
-          <CardDescription>
-            Gérez les appareils connectés à votre compte
-          </CardDescription>
+          <CardDescription>Gérez les appareils connectés à votre compte</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {settings.activeSessions.map((session) => (
-              <div key={session.id} className="flex items-center justify-between p-4 rounded-lg border">
+            {settings.activeSessions.map(session => (
+              <div
+                key={session.id}
+                className="flex items-center justify-between p-4 rounded-lg border"
+              >
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <span className="font-medium">{session.device}</span>
-                    {session.current && (
-                      <Badge variant="secondary">Actuel</Badge>
-                    )}
+                    {session.current && <Badge variant="secondary">Actuel</Badge>}
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    {session.location} • Dernière activité: {new Date(session.lastActive).toLocaleString()}
+                    {session.location} • Dernière activité:{' '}
+                    {new Date(session.lastActive).toLocaleString()}
                   </div>
                 </div>
                 {!session.current && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => terminateSession(session.id)}
-                  >
+                  <Button variant="outline" size="sm" onClick={() => terminateSession(session.id)}>
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 )}
               </div>
             ))}
             {settings.activeSessions.length === 0 && (
-              <div className="text-center py-8 text-muted-foreground">
-                Aucune session active
-              </div>
+              <div className="text-center py-8 text-muted-foreground">Aucune session active</div>
             )}
           </div>
         </CardContent>
@@ -429,14 +428,15 @@ export const SecuritySettings = () => {
             <Clock className="h-5 w-5" />
             Connexions récentes
           </CardTitle>
-          <CardDescription>
-            Historique des connexions à votre compte
-          </CardDescription>
+          <CardDescription>Historique des connexions à votre compte</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {settings.recentLogins.map((login) => (
-              <div key={login.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+            {settings.recentLogins.map(login => (
+              <div
+                key={login.id}
+                className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+              >
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <span className="font-medium">{login.device}</span>
@@ -450,15 +450,13 @@ export const SecuritySettings = () => {
                     {login.location} • {new Date(login.timestamp).toLocaleString()}
                   </div>
                 </div>
-                <Badge variant={login.success ? "default" : "destructive"}>
-                  {login.success ? "Réussi" : "Échec"}
+                <Badge variant={login.success ? 'default' : 'destructive'}>
+                  {login.success ? 'Réussi' : 'Échec'}
                 </Badge>
               </div>
             ))}
             {settings.recentLogins.length === 0 && (
-              <div className="text-center py-8 text-muted-foreground">
-                Aucune connexion récente
-              </div>
+              <div className="text-center py-8 text-muted-foreground">Aucune connexion récente</div>
             )}
           </div>
         </CardContent>
@@ -484,10 +482,12 @@ export const SecuritySettings = () => {
               </p>
             </div>
             <Button
-              variant={settings.showOnlineStatus ? "default" : "outline"}
-              onClick={() => setSettings(prev => ({ ...prev, showOnlineStatus: !prev.showOnlineStatus }))}
+              variant={settings.showOnlineStatus ? 'default' : 'outline'}
+              onClick={() =>
+                setSettings(prev => ({ ...prev, showOnlineStatus: !prev.showOnlineStatus }))
+              }
             >
-              {settings.showOnlineStatus ? "Activé" : "Désactivé"}
+              {settings.showOnlineStatus ? 'Activé' : 'Désactivé'}
             </Button>
           </div>
 
@@ -499,10 +499,12 @@ export const SecuritySettings = () => {
               </p>
             </div>
             <Button
-              variant={settings.allowDataCollection ? "default" : "outline"}
-              onClick={() => setSettings(prev => ({ ...prev, allowDataCollection: !prev.allowDataCollection }))}
+              variant={settings.allowDataCollection ? 'default' : 'outline'}
+              onClick={() =>
+                setSettings(prev => ({ ...prev, allowDataCollection: !prev.allowDataCollection }))
+              }
             >
-              {settings.allowDataCollection ? "Activé" : "Désactivé"}
+              {settings.allowDataCollection ? 'Activé' : 'Désactivé'}
             </Button>
           </div>
 
@@ -514,20 +516,18 @@ export const SecuritySettings = () => {
               </p>
             </div>
             <Button
-              variant={settings.marketingEmails ? "default" : "outline"}
-              onClick={() => setSettings(prev => ({ ...prev, marketingEmails: !prev.marketingEmails }))}
+              variant={settings.marketingEmails ? 'default' : 'outline'}
+              onClick={() =>
+                setSettings(prev => ({ ...prev, marketingEmails: !prev.marketingEmails }))
+              }
             >
-              {settings.marketingEmails ? "Activé" : "Désactivé"}
+              {settings.marketingEmails ? 'Activé' : 'Désactivé'}
             </Button>
           </div>
         </CardContent>
       </Card>
+
+      <AccountDeletionPanel />
     </div>
   );
 };
-
-
-
-
-
-

@@ -164,36 +164,75 @@ export type Database = {
         };
         Relationships: [];
       };
+      account_deletion_requests: {
+        Row: {
+          id: string;
+          metadata: Json;
+          processed_at: string | null;
+          reason: string | null;
+          requested_at: string;
+          status: string;
+          user_id: string;
+        };
+        Insert: {
+          id?: string;
+          metadata?: Json;
+          processed_at?: string | null;
+          reason?: string | null;
+          requested_at?: string;
+          status?: string;
+          user_id: string;
+        };
+        Update: {
+          id?: string;
+          metadata?: Json;
+          processed_at?: string | null;
+          reason?: string | null;
+          requested_at?: string;
+          status?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       admin_actions: {
         Row: {
           action: string;
+          actor_email: string | null;
           actor_id: string;
           created_at: string;
           id: string;
+          ip_address: string | null;
           metadata: Json | null;
           target_id: string | null;
           target_type: string;
           updated_at: string | null;
+          user_agent: string | null;
         };
         Insert: {
           action: string;
+          actor_email?: string | null;
           actor_id: string;
           created_at?: string;
           id?: string;
+          ip_address?: string | null;
           metadata?: Json | null;
           target_id?: string | null;
           target_type: string;
           updated_at?: string | null;
+          user_agent?: string | null;
         };
         Update: {
           action?: string;
+          actor_email?: string | null;
           actor_id?: string;
           created_at?: string;
           id?: string;
+          ip_address?: string | null;
           metadata?: Json | null;
           target_id?: string | null;
           target_type?: string;
           updated_at?: string | null;
+          user_agent?: string | null;
         };
         Relationships: [];
       };
@@ -1981,6 +2020,102 @@ export type Database = {
           },
           {
             foreignKeyName: 'api_keys_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'stores_public';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      api_request_logs: {
+        Row: {
+          api_key_id: string | null;
+          created_at: string;
+          duration_ms: number | null;
+          id: string;
+          ip_address: string | null;
+          method: string;
+          path: string;
+          status_code: number | null;
+          store_id: string;
+          user_agent: string | null;
+        };
+        Insert: {
+          api_key_id?: string | null;
+          created_at?: string;
+          duration_ms?: number | null;
+          id?: string;
+          ip_address?: string | null;
+          method: string;
+          path: string;
+          status_code?: number | null;
+          store_id: string;
+          user_agent?: string | null;
+        };
+        Update: {
+          api_key_id?: string | null;
+          created_at?: string;
+          duration_ms?: number | null;
+          id?: string;
+          ip_address?: string | null;
+          method?: string;
+          path?: string;
+          status_code?: number | null;
+          store_id?: string;
+          user_agent?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'api_request_logs_api_key_id_fkey';
+            columns: ['api_key_id'];
+            isOneToOne: false;
+            referencedRelation: 'api_keys';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'api_request_logs_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'dashboard_stats_optimized';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'api_request_logs_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'marketplace_products_optimized';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'api_request_logs_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'store_affiliates_summary';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'api_request_logs_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'store_stats_last_30_days';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'api_request_logs_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'store_stats_last_7_days';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'api_request_logs_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'stores';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'api_request_logs_store_id_fkey';
             columns: ['store_id'];
             isOneToOne: false;
             referencedRelation: 'stores_public';
@@ -3901,6 +4036,92 @@ export type Database = {
           },
         ];
       };
+      audit_export_logs: {
+        Row: {
+          created_at: string;
+          export_scope: string;
+          exported_by: string;
+          filters: Json;
+          format: string;
+          id: string;
+          ip_address: string | null;
+          row_count: number;
+          store_id: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          export_scope: string;
+          exported_by: string;
+          filters?: Json;
+          format: string;
+          id?: string;
+          ip_address?: string | null;
+          row_count?: number;
+          store_id?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          export_scope?: string;
+          exported_by?: string;
+          filters?: Json;
+          format?: string;
+          id?: string;
+          ip_address?: string | null;
+          row_count?: number;
+          store_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'audit_export_logs_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'dashboard_stats_optimized';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'audit_export_logs_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'marketplace_products_optimized';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'audit_export_logs_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'store_affiliates_summary';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'audit_export_logs_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'store_stats_last_30_days';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'audit_export_logs_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'store_stats_last_7_days';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'audit_export_logs_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'stores';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'audit_export_logs_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'stores_public';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       auth_identity: {
         Row: {
           createdAt: string;
@@ -5433,6 +5654,42 @@ export type Database = {
             referencedColumns: ['id'];
           },
         ];
+      };
+      checkout_fraud_assessments: {
+        Row: {
+          amount: number | null;
+          created_at: string;
+          currency: string | null;
+          email: string | null;
+          flags: string[];
+          id: string;
+          risk_level: string;
+          risk_score: number;
+          user_id: string | null;
+        };
+        Insert: {
+          amount?: number | null;
+          created_at?: string;
+          currency?: string | null;
+          email?: string | null;
+          flags?: string[];
+          id?: string;
+          risk_level: string;
+          risk_score: number;
+          user_id?: string | null;
+        };
+        Update: {
+          amount?: number | null;
+          created_at?: string;
+          currency?: string | null;
+          email?: string | null;
+          flags?: string[];
+          id?: string;
+          risk_level?: string;
+          risk_score?: number;
+          user_id?: string | null;
+        };
+        Relationships: [];
       };
       cohort_analytics: {
         Row: {
@@ -16021,6 +16278,98 @@ export type Database = {
         };
         Relationships: [];
       };
+      google_indexing_queue: {
+        Row: {
+          attempts: number;
+          created_at: string;
+          google_response: Json | null;
+          id: string;
+          last_error: string | null;
+          status: string;
+          store_id: string | null;
+          submitted_at: string | null;
+          updated_at: string;
+          url: string;
+          url_type: string;
+        };
+        Insert: {
+          attempts?: number;
+          created_at?: string;
+          google_response?: Json | null;
+          id?: string;
+          last_error?: string | null;
+          status?: string;
+          store_id?: string | null;
+          submitted_at?: string | null;
+          updated_at?: string;
+          url: string;
+          url_type?: string;
+        };
+        Update: {
+          attempts?: number;
+          created_at?: string;
+          google_response?: Json | null;
+          id?: string;
+          last_error?: string | null;
+          status?: string;
+          store_id?: string | null;
+          submitted_at?: string | null;
+          updated_at?: string;
+          url?: string;
+          url_type?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'google_indexing_queue_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'dashboard_stats_optimized';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'google_indexing_queue_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'marketplace_products_optimized';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'google_indexing_queue_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'store_affiliates_summary';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'google_indexing_queue_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'store_stats_last_30_days';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'google_indexing_queue_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'store_stats_last_7_days';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'google_indexing_queue_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'stores';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'google_indexing_queue_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'stores_public';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       idempotency_keys: {
         Row: {
           action_type: string;
@@ -20536,6 +20885,87 @@ export type Database = {
           },
         ];
       };
+      organization_store_links: {
+        Row: {
+          created_at: string;
+          id: string;
+          organization_id: string;
+          role: string;
+          store_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          organization_id: string;
+          role?: string;
+          store_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          organization_id?: string;
+          role?: string;
+          store_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'organization_store_links_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'store_organizations';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'organization_store_links_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'dashboard_stats_optimized';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'organization_store_links_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'marketplace_products_optimized';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'organization_store_links_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'store_affiliates_summary';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'organization_store_links_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'store_stats_last_30_days';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'organization_store_links_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'store_stats_last_7_days';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'organization_store_links_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'stores';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'organization_store_links_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'stores_public';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       payment_webhook_events: {
         Row: {
           created_at: string;
@@ -23028,6 +23458,72 @@ export type Database = {
           sms_notifications?: boolean;
           updated_at?: string;
           updated_by?: string | null;
+        };
+        Relationships: [];
+      };
+      platform_sla_checks: {
+        Row: {
+          checked_at: string;
+          id: string;
+          latency_ms: number | null;
+          message: string | null;
+          service_key: string;
+          service_label: string;
+          status: string;
+        };
+        Insert: {
+          checked_at?: string;
+          id?: string;
+          latency_ms?: number | null;
+          message?: string | null;
+          service_key: string;
+          service_label: string;
+          status: string;
+        };
+        Update: {
+          checked_at?: string;
+          id?: string;
+          latency_ms?: number | null;
+          message?: string | null;
+          service_key?: string;
+          service_label?: string;
+          status?: string;
+        };
+        Relationships: [];
+      };
+      platform_status_incidents: {
+        Row: {
+          created_at: string;
+          id: string;
+          resolved_at: string | null;
+          services: string[];
+          severity: string;
+          started_at: string;
+          status: string;
+          title: string;
+          updates: Json;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          resolved_at?: string | null;
+          services?: string[];
+          severity?: string;
+          started_at?: string;
+          status?: string;
+          title: string;
+          updates?: Json;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          resolved_at?: string | null;
+          services?: string[];
+          severity?: string;
+          started_at?: string;
+          status?: string;
+          title?: string;
+          updates?: Json;
         };
         Relationships: [];
       };
@@ -33238,6 +33734,101 @@ export type Database = {
           },
         ];
       };
+      store_audit_events: {
+        Row: {
+          action: string;
+          actor_email: string | null;
+          actor_id: string | null;
+          created_at: string;
+          id: string;
+          ip_address: string | null;
+          metadata: Json;
+          source: string;
+          store_id: string;
+          target_id: string | null;
+          target_type: string | null;
+          user_agent: string | null;
+        };
+        Insert: {
+          action: string;
+          actor_email?: string | null;
+          actor_id?: string | null;
+          created_at?: string;
+          id?: string;
+          ip_address?: string | null;
+          metadata?: Json;
+          source?: string;
+          store_id: string;
+          target_id?: string | null;
+          target_type?: string | null;
+          user_agent?: string | null;
+        };
+        Update: {
+          action?: string;
+          actor_email?: string | null;
+          actor_id?: string | null;
+          created_at?: string;
+          id?: string;
+          ip_address?: string | null;
+          metadata?: Json;
+          source?: string;
+          store_id?: string;
+          target_id?: string | null;
+          target_type?: string | null;
+          user_agent?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'store_audit_events_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'dashboard_stats_optimized';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'store_audit_events_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'marketplace_products_optimized';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'store_audit_events_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'store_affiliates_summary';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'store_audit_events_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'store_stats_last_30_days';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'store_audit_events_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'store_stats_last_7_days';
+            referencedColumns: ['store_id'];
+          },
+          {
+            foreignKeyName: 'store_audit_events_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'stores';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'store_audit_events_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'stores_public';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       store_contact_settings: {
         Row: {
           address: string | null;
@@ -34063,6 +34654,33 @@ export type Database = {
             referencedColumns: ['id'];
           },
         ];
+      };
+      store_organizations: {
+        Row: {
+          created_at: string;
+          id: string;
+          name: string;
+          owner_user_id: string;
+          slug: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          name: string;
+          owner_user_id: string;
+          slug?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          name?: string;
+          owner_user_id?: string;
+          slug?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
       };
       store_payment_connections: {
         Row: {
@@ -43757,6 +44375,23 @@ export type Database = {
         };
         Relationships: [];
       };
+      unified_audit_logs: {
+        Row: {
+          action: string | null;
+          actor_email: string | null;
+          actor_id: string | null;
+          created_at: string | null;
+          id: string | null;
+          ip_address: string | null;
+          log_source: string | null;
+          metadata: Json | null;
+          store_id: string | null;
+          target_id: string | null;
+          target_type: string | null;
+          user_agent: string | null;
+        };
+        Relationships: [];
+      };
       user_activity_monitor: {
         Row: {
           active_users: number | null;
@@ -43891,6 +44526,15 @@ export type Database = {
       archive_notification: {
         Args: { notification_id: string };
         Returns: undefined;
+      };
+      assess_checkout_fraud_risk: {
+        Args: {
+          p_amount: number;
+          p_currency?: string;
+          p_email: string;
+          p_ip_hint?: string;
+        };
+        Returns: Json;
       };
       assign_dispute_to_admin: {
         Args: { p_admin_id: string; p_dispute_id: string };
@@ -44279,6 +44923,10 @@ export type Database = {
         Args: { p_version_id: string };
         Returns: Json;
       };
+      check_api_rate_limit: {
+        Args: { p_api_key_id?: string; p_store_id: string };
+        Returns: boolean;
+      };
       check_artist_products_data_consistency: {
         Args: never;
         Returns: {
@@ -44436,6 +45084,28 @@ export type Database = {
       };
       check_weekly_commission_reports_job: { Args: never; Returns: undefined };
       check_weekly_digests_job: { Args: never; Returns: undefined };
+      claim_google_indexing_batch: {
+        Args: { p_limit?: number };
+        Returns: {
+          attempts: number;
+          created_at: string;
+          google_response: Json | null;
+          id: string;
+          last_error: string | null;
+          status: string;
+          store_id: string | null;
+          submitted_at: string | null;
+          updated_at: string;
+          url: string;
+          url_type: string;
+        }[];
+        SetofOptions: {
+          from: '*';
+          to: 'google_indexing_queue';
+          isOneToOne: false;
+          isSetofReturn: true;
+        };
+      };
       cleanup_expired_idempotency_keys: { Args: never; Returns: number };
       cleanup_expired_sessions: { Args: never; Returns: number };
       cleanup_expired_tags: {
@@ -44486,6 +45156,15 @@ export type Database = {
         }[];
       };
       close_dispute: { Args: { p_dispute_id: string }; Returns: boolean };
+      complete_google_indexing: {
+        Args: {
+          p_error?: string;
+          p_id: string;
+          p_response?: Json;
+          p_success: boolean;
+        };
+        Returns: undefined;
+      };
       complete_missing_rls_policies: {
         Args: { table_name_param: string };
         Returns: undefined;
@@ -44714,6 +45393,26 @@ export type Database = {
         Args: { p_product_id: string; p_user_id: string };
         Returns: string;
       };
+      create_store_api_key: {
+        Args: {
+          p_description?: string;
+          p_expires_at?: string;
+          p_name: string;
+          p_permissions?: Json;
+          p_store_id: string;
+        };
+        Returns: {
+          created_at: string;
+          id: string;
+          key: string;
+          key_prefix: string;
+          name: string;
+        }[];
+      };
+      create_store_organization: {
+        Args: { p_name: string; p_store_id?: string };
+        Returns: string;
+      };
       create_wishlist_share: {
         Args: { p_expires_in_days?: number };
         Returns: string;
@@ -44771,6 +45470,14 @@ export type Database = {
         Returns: boolean;
       };
       end_auction: { Args: { p_auction_id: string }; Returns: string };
+      enqueue_active_store_sitemaps: {
+        Args: { p_limit?: number };
+        Returns: number;
+      };
+      enqueue_google_indexing: {
+        Args: { p_store_id?: string; p_url: string; p_url_type?: string };
+        Returns: string;
+      };
       enroll_user_in_course: {
         Args: { p_course_id: string; p_order_id?: string; p_user_id?: string };
         Returns: string;
@@ -44784,6 +45491,18 @@ export type Database = {
         Returns: boolean;
       };
       expire_digital_licenses: { Args: never; Returns: number };
+      export_unified_audit_logs: {
+        Args: {
+          p_action_prefix?: string;
+          p_format?: string;
+          p_from?: string;
+          p_log_source?: string;
+          p_max_rows?: number;
+          p_store_id?: string;
+          p_to?: string;
+        };
+        Returns: Json;
+      };
       filter_artist_products: {
         Args: {
           p_artist_type?: string;
@@ -45258,6 +45977,10 @@ export type Database = {
         Returns: Json;
       };
       get_ai_recommendation_settings: { Args: never; Returns: Json };
+      get_api_rate_limit_for_store: {
+        Args: { p_store_id: string };
+        Returns: number;
+      };
       get_artist_audit_health: { Args: { p_days?: number }; Returns: Json };
       get_artist_products_monitoring: {
         Args: never;
@@ -45812,6 +46535,7 @@ export type Database = {
         }[];
       };
       get_platform_customization: { Args: never; Returns: Json };
+      get_platform_status_summary: { Args: never; Returns: Json };
       get_popular_products_by_users:
         | {
             Args: { p_action?: string; p_limit?: number; p_user_ids: string[] };
@@ -46849,12 +47573,26 @@ export type Database = {
       };
       list_subscription_dunning_email_targets: { Args: never; Returns: Json };
       list_subscriptions_for_auto_renewal: { Args: never; Returns: Json };
+      list_user_store_organizations: { Args: never; Returns: Json };
       log_admin_action: {
         Args: {
           p_action_type: string;
           p_details?: Json;
           p_target_id?: string;
           p_target_type: string;
+        };
+        Returns: string;
+      };
+      log_api_request: {
+        Args: {
+          p_api_key_id: string;
+          p_duration_ms?: number;
+          p_ip_address?: string;
+          p_method: string;
+          p_path: string;
+          p_status_code?: number;
+          p_store_id: string;
+          p_user_agent?: string;
         };
         Returns: string;
       };
@@ -46893,6 +47631,19 @@ export type Database = {
           p_user_agent?: string;
         };
         Returns: Json;
+      };
+      log_store_audit_event: {
+        Args: {
+          p_action: string;
+          p_ip_address?: string;
+          p_metadata?: Json;
+          p_source?: string;
+          p_store_id: string;
+          p_target_id?: string;
+          p_target_type?: string;
+          p_user_agent?: string;
+        };
+        Returns: string;
       };
       manual_rollback_version: {
         Args: {
@@ -47074,6 +47825,31 @@ export type Database = {
         };
         Returns: Json;
       };
+      query_unified_audit_logs: {
+        Args: {
+          p_action_prefix?: string;
+          p_from?: string;
+          p_limit?: number;
+          p_log_source?: string;
+          p_offset?: number;
+          p_store_id?: string;
+          p_to?: string;
+        };
+        Returns: {
+          action: string;
+          actor_email: string;
+          actor_id: string;
+          created_at: string;
+          id: string;
+          ip_address: string;
+          log_source: string;
+          metadata: Json;
+          store_id: string;
+          target_id: string;
+          target_type: string;
+          user_agent: string;
+        }[];
+      };
       record_coupon_usage:
         | {
             Args: {
@@ -47117,6 +47893,16 @@ export type Database = {
           p_transaction_id: string;
         };
         Returns: undefined;
+      };
+      record_platform_sla_check: {
+        Args: {
+          p_latency_ms?: number;
+          p_message?: string;
+          p_service_key: string;
+          p_service_label: string;
+          p_status: string;
+        };
+        Returns: string;
       };
       record_recommendation_click: {
         Args: {
@@ -47193,6 +47979,7 @@ export type Database = {
         Args: { p_subscription_id: string };
         Returns: Json;
       };
+      request_account_deletion: { Args: { p_reason?: string }; Returns: string };
       reschedule_recurring_bookings: {
         Args: {
           p_new_start_date: string;
@@ -47363,6 +48150,10 @@ export type Database = {
             };
             Returns: Json;
           };
+      setup_google_indexing_cron_jobs: {
+        Args: { p_cron_secret: string; p_project_ref: string };
+        Returns: Json;
+      };
       setup_moneroo_reconciliation_cron_job: {
         Args: {
           p_anon_key?: string;
@@ -47377,6 +48168,10 @@ export type Database = {
           p_cron_secret: string;
           p_project_ref: string;
         };
+        Returns: Json;
+      };
+      setup_platform_health_cron_job: {
+        Args: { p_cron_secret: string; p_project_ref: string };
         Returns: Json;
       };
       setup_scheduled_admin_broadcasts_cron_job: {
@@ -47800,6 +48595,7 @@ export type Database = {
       verify_api_key: {
         Args: { p_key: string };
         Returns: {
+          key_id: string;
           permissions: Json;
           store_id: string;
           user_id: string;

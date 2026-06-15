@@ -1,0 +1,56 @@
+# Secours si pg_cron indisponible — Google Indexing API queue
+name: Google indexing cron
+
+on:
+  schedule:
+    - cron: '15 * * * *'
+    - cron: '0 3 * * 0'
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'process | enqueue-sitemaps'
+        required: false
+        default: 'process'
+
+jobs:
+  indexing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Determine action
+        id: pick
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "action=${{ inputs.action }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event.schedule }}" = "0 3 * * 0" ]; then
+            echo "action=enqueue-sitemaps" >> "$GITHUB_OUTPUT"
+          else
+            echo "action=process" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run google-indexing-submit
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          ACTION: ${{ steps.pick.outputs.action }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$CRON_SECRET" ]; then
+            echo "SUPABASE_URL and CRON_SECRET secrets are required."
+            exit 0
+          fi
+          if [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "VITE_SUPABASE_PUBLISHABLE_KEY secret is required."
+            exit 1
+          fi
+          URL="${SUPABASE_URL%/}/functions/v1/google-indexing-submit?limit=25"
+          if [ "$ACTION" = "enqueue-sitemaps" ]; then
+            URL="${SUPABASE_URL%/}/functions/v1/google-indexing-submit?action=enqueue-sitemaps&limit=200"
+          fi
+          curl -sfS -X POST "$URL" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "x-cron-secret: ${CRON_SECRET}" \
+            -d '{}' \
+            --max-time 180

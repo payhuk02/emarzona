@@ -47,6 +47,7 @@ const CartCheckoutLegacyRedirect = lazyPage(() =>
   }))
 );
 const NotFound = lazyPage(() => import('@/pages/NotFound'));
+const StatusPage = lazyPage(() => import('@/pages/StatusPage'));
 const CourseDetail = lazyPage(() => import('@/pages/courses/CourseDetail'));
 const DigitalProductDetail = lazyPage(() => import('@/pages/digital/DigitalProductDetail'));
 const DigitalProductsSearch = lazyPage(() =>
@@ -97,6 +98,7 @@ const TermsOfService = lazyPage(() => import('@/pages/legal/TermsOfService'));
 const PrivacyPolicy = lazyPage(() => import('@/pages/legal/PrivacyPolicy'));
 const CookiePolicy = lazyPage(() => import('@/pages/legal/CookiePolicy'));
 const RefundPolicy = lazyPage(() => import('@/pages/legal/RefundPolicy'));
+const DataProcessingAgreement = lazyPage(() => import('@/pages/legal/DataProcessingAgreement'));
 
 // Pages Moneroo
 const PaymentSuccess = lazyPage(() => import('@/pages/payments/PaymentSuccess'));
@@ -236,6 +238,7 @@ export const publicRoutes = (
     <Route path="/legal/privacy" element={<PrivacyPolicy />} />
     <Route path="/legal/cookies" element={<CookiePolicy />} />
     <Route path="/legal/refund" element={<RefundPolicy />} />
+    <Route path="/legal/dpa" element={<DataProcessingAgreement />} />
 
     {/* Email */}
     <Route path="/unsubscribe" element={<UnsubscribePage />} />
@@ -270,6 +273,9 @@ export const publicRoutes = (
 
     {/* Affiliation */}
     <Route path="/aff/:code" element={<ShortLinkRedirect />} />
+
+    {/* Epic 5.3 — Status plateforme */}
+    <Route path="/status" element={<StatusPage />} />
 
     {/* Test i18n (dev only) */}
     {import.meta.env.DEV && <Route path="/i18n-test" element={<I18nTest />} />}

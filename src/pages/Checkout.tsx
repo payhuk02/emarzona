@@ -44,6 +44,7 @@ import { resolveCheckoutShippingAmount } from '@/lib/checkout-shipping';
 import { calculateCheckoutTaxes } from '@/lib/checkout/taxes';
 import { validateCheckoutCart } from '@/lib/checkout/cart-validation';
 import { showCheckoutBlockedToast, showPaymentErrorToast } from '@/lib/checkout/payment-toast';
+import { assessCheckoutFraudRisk } from '@/lib/checkout/fraud-assessment';
 import { isPaymentOrchestrationV2Enabled } from '@/lib/payments/feature-flags';
 import { validateMultiStorePaymentProvider } from '@/lib/payments/multi-store-checkout';
 import { reserveArtistLimitedEditionsForCart } from '@/lib/artist-edition-reservation';
@@ -954,6 +955,20 @@ export default function Checkout() {
       if (!user?.email) {
         showCheckoutBlockedToast(toast, 'Veuillez vous connecter pour continuer');
         redirectToPlatformLogin(navigate);
+        return;
+      }
+
+      const fraud = await assessCheckoutFraudRisk({
+        email: formData.email || user.email,
+        amount: finalTotal,
+        currency: items[0]?.currency ?? 'XOF',
+      });
+      if (fraud.block) {
+        showPaymentErrorToast(
+          toast,
+          'Cette transaction a été bloquée pour des raisons de sécurité. Contactez le support si besoin.',
+          'Paiement refusé'
+        );
         return;
       }
 

@@ -105,5 +105,5 @@ export function useRevokeStoreApiKey() {
 
 export function getApiBaseUrl(): string {
   const base = import.meta.env.VITE_SUPABASE_URL;
-  return base ? `${base}/functions/v1/api/v1` : '';
+  return base ? `${base}/functions/v1/api-v1` : '';
 }

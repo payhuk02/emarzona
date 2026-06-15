@@ -33,7 +33,11 @@ else {
   if (-not (Test-Path $SecretFile)) {
     Write-Error "Fichier manquant: $SecretFile`nCréez-le avec une seule ligne contenant le CRON_SECRET, ou utilisez -GenerateNew."
   }
-  $CronSecret = (Get-Content $SecretFile -Raw).Trim()
+  $raw = Get-Content $SecretFile -Raw
+  if (-not $raw -or $raw.Trim().Length -eq 0) {
+    Write-Error "Fichier vide: $SecretFile`nAjoutez une ligne avec le CRON_SECRET (Dashboard Supabase → Edge Functions → Secrets), ou exécutez -GenerateNew."
+  }
+  $CronSecret = $raw.Trim()
 }
 
 if ($CronSecret.Length -lt 16) {
@@ -109,6 +113,18 @@ SELECT public.setup_auction_statuses_cron_job(
   '$ProjectRef',
   '$EscSecret'
 );
+SELECT public.setup_verify_domains_cron_job(
+  '$ProjectRef',
+  '$EscSecret'
+);
+SELECT public.setup_platform_health_cron_job(
+  '$ProjectRef',
+  '$EscSecret'
+);
+SELECT public.setup_google_indexing_cron_jobs(
+  '$ProjectRef',
+  '$EscSecret'
+);
 COMMIT;
 "@
 
@@ -145,11 +161,17 @@ COMMIT;
 
   Write-Host ''
   Write-Host 'OK — CRON_SECRET mis à jour.'
+  if ($GenerateNew) {
+    $SecretFile = Join-Path $PSScriptRoot '.cron-secret.local'
+    $Utf8NoBom = New-Object System.Text.UTF8Encoding $false
+    [System.IO.File]::WriteAllText($SecretFile, $CronSecret, $Utf8NoBom)
+    Write-Host "Copie locale enregistrée dans scripts/.cron-secret.local (gitignored)."
+  }
   if (-not $SyncGitHub) {
     Write-Host 'Pensez aussi à GitHub Actions : .\scripts\rotate-cron-secret.ps1 -SyncGitHub'
   }
   if (-not $GenerateNew) {
-    Write-Host 'Vous pouvez supprimer scripts/.cron-secret.local après exécution.'
+    Write-Host 'Vous pouvez supprimer scripts/.cron-secret.local après exécution si vous préférez.'
   }
 }
 finally {

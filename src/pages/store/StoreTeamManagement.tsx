@@ -20,6 +20,8 @@ import { StoreTeamStats } from '@/components/team/StoreTeamStats';
 import { StoreTeamAnalytics } from '@/components/team/StoreTeamAnalytics';
 import { StoreSsoSettingsPanel } from '@/components/team/StoreSsoSettingsPanel';
 import { StoreAuditExportPanel } from '@/components/audit/StoreAuditExportPanel';
+import { EnterpriseStatusPanel } from '@/components/enterprise/EnterpriseStatusPanel';
+import { OrganizationPanel } from '@/components/enterprise/OrganizationPanel';
 
 const StoreTeamManagement = () => {
   const { t } = useTranslation();
@@ -140,6 +142,8 @@ const StoreTeamManagement = () => {
           </TabsContent>
 
           <TabsContent value="sso" className="space-y-4 sm:space-y-6">
+            <EnterpriseStatusPanel />
+            <OrganizationPanel storeId={store.id} />
             <StoreSsoSettingsPanel storeId={store.id} storeSlug={store.slug} />
           </TabsContent>
 

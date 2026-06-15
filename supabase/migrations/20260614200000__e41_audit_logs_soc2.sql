@@ -110,7 +110,7 @@ DECLARE
   v_id UUID;
   v_email TEXT;
 BEGIN
-  SELECT email INTO v_email FROM public.profiles WHERE user_id = auth.uid() LIMIT 1;
+  SELECT u.email INTO v_email FROM auth.users u WHERE u.id = auth.uid() LIMIT 1;
 
   INSERT INTO public.store_audit_events (
     store_id, actor_id, actor_email, action, target_type, target_id,
@@ -137,16 +137,16 @@ SELECT
   'platform_admin'::text AS log_source,
   NULL::uuid AS store_id,
   a.actor_id,
-  COALESCE(a.actor_email, p.email) AS actor_email,
+  COALESCE(a.actor_email, u.email) AS actor_email,
   a.action,
   a.target_type,
-  a.target_id,
+  a.target_id::text,
   a.metadata,
   a.ip_address,
   NULL::text AS user_agent,
   a.created_at
 FROM public.admin_actions a
-LEFT JOIN public.profiles p ON p.user_id = a.actor_id
+LEFT JOIN auth.users u ON u.id = a.actor_id
 
 UNION ALL
 
@@ -158,7 +158,7 @@ SELECT
   e.actor_email,
   e.action,
   e.target_type,
-  e.target_id,
+  e.target_id::text,
   e.metadata,
   e.ip_address,
   e.user_agent,

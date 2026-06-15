@@ -2,7 +2,7 @@
 
 ## Objectif
 
-API REST Bearer (`/functions/v1/api/v1`) pour intégrer ERP/CRM : produits, commandes, clients, analytics, export.
+API REST Bearer (`/functions/v1/api-v1`) pour intégrer ERP/CRM : produits, commandes, clients, analytics, export.
 
 ## Prérequis
 
@@ -17,7 +17,7 @@ API REST Bearer (`/functions/v1/api/v1`) pour intégrer ERP/CRM : produits, comm
 ```bash
 npx supabase db query --linked -f supabase/migrations/20260614300000__e43_vendor_public_api.sql
 npx supabase migration repair --status applied 20260614300000
-npx supabase functions deploy api/v1 --project-ref hbdnzajbyjakdhuavrvb
+npx supabase functions deploy api-v1 --project-ref hbdnzajbyjakdhuavrvb
 ```
 
 ## Création clé API (vendeur)
@@ -29,7 +29,7 @@ npx supabase functions deploy api/v1 --project-ref hbdnzajbyjakdhuavrvb
 ## Authentification
 
 ```http
-GET https://hbdnzajbyjakdhuavrvb.supabase.co/functions/v1/api/v1/me
+GET https://hbdnzajbyjakdhuavrvb.supabase.co/functions/v1/api-v1/me
 Authorization: Bearer pk_live_xxxxxxxx
 ```
 
@@ -43,15 +43,18 @@ Authorization: Bearer pk_live_xxxxxxxx
 | GET/POST            | `/customers`            | `customers:read/write`       |
 | GET                 | `/analytics?days=30`    | `analytics:read`             |
 | GET                 | `/export?type=products` | `export:read`                |
+| GET/POST/DELETE     | `/webhooks`             | `webhooks:read/write`        |
 
-Permissions JSON par défaut à la création :
+Permissions JSON exemple :
 
 ```json
 {
   "products:read": true,
   "orders:read": true,
   "customers:read": true,
-  "analytics:read": true
+  "analytics:read": true,
+  "webhooks:read": true,
+  "webhooks:write": true
 }
 ```
 

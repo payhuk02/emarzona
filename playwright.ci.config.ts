@@ -22,6 +22,9 @@ export default defineConfig({
     '**/course-payment-learn.spec.ts',
     '**/checkout-unified.spec.ts',
     '**/enterprise-sso-login.spec.ts',
+    '**/vendor-api-smoke.spec.ts',
+    '**/enterprise-audit-export.spec.ts',
+    '**/enterprise-compliance-moon6.spec.ts',
   ],
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
@@ -29,6 +32,7 @@ export default defineConfig({
   workers: process.env.CI ? 2 : undefined,
   maxFailures: process.env.CI ? 10 : undefined,
   reporter: process.env.CI ? [['html'], ['github']] : 'html',
+  timeout: 120_000,
   use: {
     baseURL: 'http://localhost:8080',
     trace: 'on-first-retry',

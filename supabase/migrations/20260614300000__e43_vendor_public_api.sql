@@ -37,6 +37,8 @@ CREATE POLICY "Store owners view api logs"
 -- ---------------------------------------------------------------------------
 -- Vérification clé API enrichie (feature gate + id clé)
 -- ---------------------------------------------------------------------------
+DROP FUNCTION IF EXISTS public.verify_api_key(TEXT);
+
 CREATE OR REPLACE FUNCTION public.verify_api_key(p_key TEXT)
 RETURNS TABLE (
   key_id UUID,

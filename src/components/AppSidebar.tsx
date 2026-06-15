@@ -1,5 +1,15 @@
 import { LayoutDashboard, Search, Check, Plus } from '@/components/icons';
-import { Circle, Clock3, ChevronDown, ChevronRight, Lock } from 'lucide-react';
+import {
+  Circle,
+  Clock3,
+  ChevronDown,
+  ChevronRight,
+  Lock,
+  ShoppingBag,
+  Key,
+  Activity,
+  Package,
+} from 'lucide-react';
 import { usePlatformLogo } from '@/hooks/usePlatformLogo';
 import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { SidebarCollapsibleSection } from '@/components/sidebar/SidebarCollapsibleSection';
@@ -189,6 +199,42 @@ export function AppSidebar() {
     [commandPaletteSections]
   );
 
+  const vendorQuickActions = useMemo(
+    () => [
+      {
+        title: t('command.newPhysicalProduct', 'Nouveau produit physique'),
+        url: '/dashboard/physical/products/new',
+        icon: Plus,
+        sectionLabel: t('command.quickActions', 'Actions rapides'),
+      },
+      {
+        title: t('command.orders', 'Commandes'),
+        url: '/dashboard/orders',
+        icon: ShoppingBag,
+        sectionLabel: t('command.quickActions', 'Actions rapides'),
+      },
+      {
+        title: t('command.integrations', 'Clés API & intégrations'),
+        url: '/dashboard/integrations',
+        icon: Key,
+        sectionLabel: t('command.quickActions', 'Actions rapides'),
+      },
+      {
+        title: t('command.inventory', 'Inventaire'),
+        url: '/dashboard/physical/inventory',
+        icon: Package,
+        sectionLabel: t('command.quickActions', 'Actions rapides'),
+      },
+      {
+        title: t('command.platformStatus', 'Statut plateforme'),
+        url: '/status',
+        icon: Activity,
+        sectionLabel: t('command.quickActions', 'Actions rapides'),
+      },
+    ],
+    [t]
+  );
+
   const handlePersonaChange = (next: SidebarPersona) => {
     setPersona(next);
     if (next === 'admin' && isAdmin) navigate('/admin');
@@ -335,6 +381,7 @@ export function AppSidebar() {
     >
       <SidebarNavCommandPalette
         entries={navCommandEntries}
+        quickActions={vendorQuickActions}
         open={commandOpen}
         onOpenChange={setCommandOpen}
       />

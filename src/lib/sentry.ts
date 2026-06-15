@@ -1,5 +1,6 @@
 import * as Sentry from '@sentry/react';
 import { logger } from './logger';
+import { sanitizeSentryEvent } from './sentry-pii';
 
 // Variable pour suivre si Sentry a déjà été initialisé
 let isSentryInitialized = false;
@@ -101,32 +102,34 @@ export const initSentry = () => {
 
       // Options avancées
       beforeSend(event, _hint) {
+        const sanitized = sanitizeSentryEvent(event as Record<string, unknown>) as typeof event;
+
         // Filtrer certains types d'erreurs en production
         if (ENV === 'production') {
           // Ignorer les erreurs réseau mineures
           if (
-            event.exception?.values?.[0]?.type === 'NetworkError' &&
-            event.exception?.values?.[0]?.value?.includes('Failed to fetch')
+            sanitized.exception?.values?.[0]?.type === 'NetworkError' &&
+            sanitized.exception?.values?.[0]?.value?.includes('Failed to fetch')
           ) {
             return null;
           }
 
           // Ignorer les erreurs de script cross-origin
-          if (event.exception?.values?.[0]?.value?.includes('Script error')) {
+          if (sanitized.exception?.values?.[0]?.value?.includes('Script error')) {
             return null;
           }
 
           // Ignorer les erreurs Sentry rate limiting (429)
           if (
-            event.exception?.values?.[0]?.value?.includes('429') ||
-            event.exception?.values?.[0]?.value?.includes('Too Many Requests')
+            sanitized.exception?.values?.[0]?.value?.includes('429') ||
+            sanitized.exception?.values?.[0]?.value?.includes('Too Many Requests')
           ) {
             return null;
           }
 
           // Ignorer les erreurs HTTP 429 dans les breadcrumbs
-          if (event.breadcrumbs) {
-            event.breadcrumbs = event.breadcrumbs.filter(breadcrumb => {
+          if (sanitized.breadcrumbs) {
+            sanitized.breadcrumbs = sanitized.breadcrumbs.filter(breadcrumb => {
               if (breadcrumb.category === 'fetch' && breadcrumb.data) {
                 const fetchData = breadcrumb.data as { status_code?: number };
                 if (fetchData.status_code === 429) {
@@ -139,17 +142,17 @@ export const initSentry = () => {
         }
 
         // Ajouter des tags automatiques
-        if (event.tags) {
-          event.tags.environment = ENV;
-          event.tags.platform = 'web';
+        if (sanitized.tags) {
+          sanitized.tags.environment = ENV;
+          sanitized.tags.platform = 'web';
         } else {
-          event.tags = {
+          sanitized.tags = {
             environment: ENV,
             platform: 'web',
           };
         }
 
-        return event;
+        return sanitized;
       },
 
       // Rate limiting pour éviter les erreurs 429
@@ -225,7 +228,12 @@ export const captureError = (error: Error, context?: Record<string, unknown>) =>
  * Définir l'utilisateur courant pour Sentry
  */
 export const setSentryUser = (user: { id: string; email?: string; username?: string }) => {
-  Sentry.setUser(user);
+  Sentry.setUser({
+    id: user.id,
+    username: user.username,
+    // Email hashé côté client — pas de PII en clair (Epic 4.8)
+    email: user.email ? `[uid:${user.id}]` : undefined,
+  });
 };
 
 /**

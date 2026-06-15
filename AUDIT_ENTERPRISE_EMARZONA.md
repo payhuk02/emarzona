@@ -69,10 +69,10 @@ Une excellente base de travail avec un fort potentiel de scalabilité, mais rale
 - **Points forts** : Middleware Edge performant pour générer les balises OpenGraph pour les bots.
 - **Faiblesses** : Rendu statique (SSG) non natif, dépendance au middleware pour le prerendering.
 
-### 13. Score enterprise readiness : 78/100
+### 13. Score enterprise readiness : 86/100
 
-- **Points forts** : Multi-tenant, RLS, Audit Logs prévus, SSO Enterprise OIDC (Epic 4.3).
-- **Faiblesses** : Conformité SOC2 en cours (audit export E41), SLA manquants sur l'infrastructure.
+- **Points forts** : Multi-tenant, RLS, Audit logs SOC2 exportables (E41), SSO OIDC+SAML (E40/E45), API REST vendeurs (E43).
+- **Faiblesses** : SLA documentés manquants, certification SOC2 formelle externe.
 
 ---
 
@@ -134,7 +134,7 @@ Une excellente base de travail avec un fort potentiel de scalabilité, mais rale
 
 ### 26. Liste complète des problèmes sécurité (Infrastructure)
 
-- Les logs Sentry capturent potentiellement des PII (Personal Identifiable Information) s'ils ne sont pas anonymisés (emails, IPs).
+- Les logs Sentry capturent potentiellement des PII (Personal Identifiable Information) s'ils ne sont pas anonymisés (emails, IPs). **Mitigé Epic 4.8** (`sentry-pii.ts`, redaction beforeSend).
 
 ### 27. Liste complète des problèmes DevOps
 
@@ -172,7 +172,7 @@ Une excellente base de travail avec un fort potentiel de scalabilité, mais rale
 ### 33. Suggestions d'améliorations premium (Esthétique & UX)
 
 - Ajouter des micro-interactions sur les boutons de paiement (Framer Motion) inspirées de Stripe.
-- Implémenter un mode "Command-K" (Palette de commandes) global pour les vendeurs pour accélérer leur flux de travail (inspiré de Linear/Vercel).
+- Implémenter un mode "Command-K" (Palette de commandes) global pour les vendeurs pour accélérer leur flux de travail (inspiré de Linear/Vercel). **Livré Epic 5.4** — actions rapides (produits, commandes, API, status) + bouton ⌘K barre utilitaire.
 
 ### 34. Suggestions enterprise (B2B & Croissance)
 
@@ -189,7 +189,7 @@ Une excellente base de travail avec un fort potentiel de scalabilité, mais rale
 
 ### 37. Suggestions SaaS
 
-- Offrir une API publique (Graphql ou REST) avec des clés d'API (Bearer tokens) pour que les vendeurs puissent connecter leurs ERP/CRM. **REST v1 livré Epic 4.6** (`/api/v1`, plan `physical_standard+`).
+- Offrir une API publique (Graphql ou REST) avec des clés d'API (Bearer tokens) pour que les vendeurs puissent connecter leurs ERP/CRM. **REST v1 livré Epic 4.6** (`/functions/v1/api-v1`, plan `physical_standard+`). **Webhooks Epic 4.7**.
 
 ### 38. Suggestions DevOps
 
@@ -197,7 +197,7 @@ Une excellente base de travail avec un fort potentiel de scalabilité, mais rale
 
 ### 39. Suggestions sécurité
 
-- Implémenter une CSP (Content Security Policy) stricte avec des Nonces cryptographiques générés par le serveur pour empêcher toute exécution de script non autorisée.
+- Implémenter une CSP (Content Security Policy) stricte avec des Nonces cryptographiques générés par le serveur pour empêcher toute exécution de script non autorisée. **Livré Epic 5.1** — nonce dynamique middleware Edge (`csp-policy.ts`, runbook `csp-nonces-prod.md`).
 
 ### 40. Suggestions infrastructure
 
@@ -218,7 +218,7 @@ Une excellente base de travail avec un fort potentiel de scalabilité, mais rale
 
 ### 44. Suggestions SEO
 
-- Génération automatique de sitemaps XML distribués (un par domaine/vendeur) et soumission automatique via Indexing API de Google.
+- Génération automatique de sitemaps XML distribués (un par domaine/vendeur) et soumission automatique via Indexing API de Google. **Epic 4.9** sitemaps + **Epic 5.2** file `google_indexing_queue` + edge `google-indexing-submit`.
 
 ### 45. Suggestions future-proof
 
@@ -227,4 +227,37 @@ Une excellente base de travail avec un fort potentiel de scalabilité, mais rale
 ---
 
 **Fin du Rapport d'Audit.**
+
+### Moon 5 — Livraisons (5.1–5.5)
+
+| Epic | Livrable                               | Statut                                        |
+| ---- | -------------------------------------- | --------------------------------------------- |
+| 5.1  | CSP nonces middleware                  | Code + runbook                                |
+| 5.2  | Google Indexing queue + edge           | Migration E47 + runbook                       |
+| 5.3  | Page `/status` + SLA widget Enterprise | Migration E48 + `platform-health`             |
+| 5.4  | Command-K actions vendeur              | Palette + UtilityBar ⌘K                       |
+| 5.5  | E2E CI API + audit + status            | `vendor-api-smoke`, `enterprise-audit-export` |
+
+**Enterprise readiness : 89/100** (+3 vs Moon 4)
+
+### Moon 6 — Livraisons (6.1–6.5)
+
+| Epic | Livrable                      | Statut                                    |
+| ---- | ----------------------------- | ----------------------------------------- |
+| 6.1  | Rate limits API par plan      | `check_api_rate_limit` + api-v1 429       |
+| 6.2  | RGPD DPA + suppression compte | `/legal/dpa`, `request_account_deletion`  |
+| 6.3  | Bundle budget CI              | `build:check` dans tests.yml (gate actif) |
+| 6.4  | Fraud scoring checkout        | `assess_checkout_fraud_risk` + Checkout   |
+| 6.5  | Organisations multi-boutiques | `store_organizations` + UI Enterprise     |
+
+**Enterprise readiness : 92/100** (+3 vs Moon 5)
+
+### Ops crons (E49)
+
+| Cron                    | Schedule      | Script                           |
+| ----------------------- | ------------- | -------------------------------- |
+| platform-health         | \*/5 min      | `setup-platform-health-cron.ps1` |
+| google-indexing enqueue | Dim 03:00 UTC | `setup-google-indexing-cron.ps1` |
+| google-indexing process | :15 hourly    | idem                             |
+
 _Emarzona dispose d'une base technique exceptionnelle. En appliquant les correctifs de sécurité critiques (XSS) et en optimisant l'architecture de données, la plateforme est prête pour une hyper-croissance mondiale._

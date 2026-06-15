@@ -39,6 +39,16 @@ verify_jwt = false
 [functions.paypal-webhook]
 verify_jwt = false
 
+# Crons pg_cron : auth via x-cron-secret (pas de JWT Supabase)
+[functions.platform-health]
+verify_jwt = false
+
+[functions.google-indexing-submit]
+verify_jwt = false
+
+[functions.verify-domains]
+verify_jwt = false
+
 # ---------------------------------------------------------------------------
 # Auth — confirmation email + SMTP Resend (mail.emarzona.com)
 # Production : configurer aussi le Dashboard Supabase (voir docs/CONFIGURATION_AUTH_EMAIL_RESEND.md)
