@@ -233,7 +233,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
         {/* Main Content */}
         <main
           className={cn(
-            'transition-all pb-16 md:pb-0',
+            'transition-all',
             // Sur mobile: pas de marge gauche; sur desktop: marge selon l'état.
             sidebarOpen ? 'md:ml-64' : 'md:ml-20'
           )}

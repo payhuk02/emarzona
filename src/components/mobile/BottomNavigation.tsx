@@ -11,6 +11,9 @@ import { cn } from '@/lib/utils';
 import { useResolvedNavItems } from '@/hooks/useResolvedNavItems';
 import { usePlanLockNavAction } from '@/hooks/usePlanLockNavAction';
 import { isNavItemActive } from '@/config/navigation.helpers';
+import { resolveHorizontalNavPersona } from '@/config/navigation.horizontal';
+import { useSidebarPersona } from '@/hooks/useSidebarPersona';
+import { useAdmin } from '@/hooks/useAdmin';
 
 interface BottomNavigationProps {
   position?: 'top' | 'bottom';
@@ -19,7 +22,10 @@ interface BottomNavigationProps {
 export const BottomNavigation = React.memo<BottomNavigationProps>(({ position = 'bottom' }) => {
   const location = useLocation();
   const { t } = useTranslation();
-  const navItems = useResolvedNavItems({ surface: 'bottomnav' });
+  const { isAdmin } = useAdmin();
+  const { persona: sidebarPersona } = useSidebarPersona(isAdmin);
+  const navPersona = resolveHorizontalNavPersona(location.pathname, sidebarPersona);
+  const navItems = useResolvedNavItems({ surface: 'bottomnav', persona: navPersona });
   const handlePlanLockedNav = usePlanLockNavAction();
   const isTop = position === 'top';
 

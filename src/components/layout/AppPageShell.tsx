@@ -21,7 +21,7 @@ const HorizontalContextNav = lazy(() =>
 
 export type AppPageShellProps = {
   children: ReactNode;
-  /** Override auto-detected layout type from pathname */
+  /** @deprecated Détection automatique via pathname — ignoré par AppPageShell. */
   layoutType?: LayoutType;
   /** Classes on outer flex row (sidebar + content) */
   shellClassName?: string;

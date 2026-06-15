@@ -362,7 +362,6 @@ export const PHASE6_CONTEXT_CONFIGS = {
   account: {
     id: 'account',
     sectionKey: 'mon_compte',
-    additionalSectionKeys: ['marketing_croissance'],
     rootPath: '/account',
     breadcrumbSectionKey: 'mon_compte',
     ariaLabel: 'Navigation compte',
@@ -386,7 +385,6 @@ export const PHASE6_CONTEXT_CONFIGS = {
       '/account/artist',
       '/account/loyalty',
       '/checkout/multi-store-tracking',
-      '/dashboard/gamification',
     ],
     groups: [
       {
@@ -418,7 +416,6 @@ export const PHASE6_CONTEXT_CONFIGS = {
           '/account/artist',
           '/account/loyalty',
           '/checkout/multi-store-tracking',
-          '/dashboard/gamification',
         ],
       },
     ],

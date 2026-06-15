@@ -98,7 +98,7 @@ describe('resolveHorizontalNavDomains', () => {
     expect(paths).toContain('/account/returns');
   });
 
-  it('inclut la gamification dans Services acheteur', () => {
+  it('exclut la gamification vendeur des Services acheteur', () => {
     const domains = resolveHorizontalNavDomains({
       persona: 'buyer',
       isPlatformAdmin: false,
@@ -107,7 +107,9 @@ describe('resolveHorizontalNavDomains', () => {
       t: mockT as never,
     });
     const services = domains.find(d => d.domainKey === 'services_fidelite');
-    expect(services?.items.map(i => i.path)).toContain('/dashboard/gamification');
+    const paths = services?.items.map(i => i.path) ?? [];
+    expect(paths).not.toContain('/dashboard/gamification');
+    expect(paths).toContain('/account/loyalty');
   });
 });
 

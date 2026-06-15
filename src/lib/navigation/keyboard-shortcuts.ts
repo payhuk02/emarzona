@@ -12,5 +12,16 @@ export function formatSidebarToggleShortcutKey(): string {
 }
 
 export function isSafeInternalNavUrl(url: string): boolean {
-  return url.startsWith('/') && !url.startsWith('//');
+  const trimmed = url.trim();
+  if (!trimmed.startsWith('/') || trimmed.startsWith('//')) return false;
+
+  const lower = trimmed.toLowerCase();
+  if (lower.startsWith('/javascript:') || lower.includes('://')) return false;
+
+  try {
+    const parsed = new URL(trimmed, 'https://navigation.invalid');
+    return parsed.origin === 'https://navigation.invalid' && parsed.pathname.startsWith('/');
+  } catch {
+    return false;
+  }
 }

@@ -3,6 +3,7 @@
  */
 
 import { UserUtilityActions } from '@/components/layout/UserUtilityActions';
+import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Search } from 'lucide-react';
@@ -33,7 +34,7 @@ export function UtilityBarHeader({ className }: UtilityBarHeaderProps) {
       role="toolbar"
       aria-label={t('sidebar.chrome.utilityBarAriaLabel')}
     >
-      <div className="hidden sm:flex items-center gap-2">
+      <div className="hidden sm:flex items-center gap-2 min-w-0">
         <Button
           type="button"
           variant="outline"
@@ -58,7 +59,10 @@ export function UtilityBarHeader({ className }: UtilityBarHeaderProps) {
           <span>{t('sidebar.chrome.shortcutToggleSidebar')}</span>
         </span>
       </div>
-      <UserUtilityActions variant="shell" />
+      <div className="flex items-center gap-1 sm:gap-2 ml-auto shrink-0">
+        <NotificationBell />
+        <UserUtilityActions variant="shell" />
+      </div>
     </header>
   );
 }

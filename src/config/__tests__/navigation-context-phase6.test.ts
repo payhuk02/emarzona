@@ -39,13 +39,13 @@ describe('context sidebar Phase 6', () => {
     expect(paths).toContain('/dashboard/services/reminders');
   });
 
-  it('resolves account portal with gamification from marketing', () => {
+  it('resolves account portal without seller gamification leak', () => {
     const nav = resolveContextSidebarNav(sections, PHASE6_CONTEXT_CONFIGS.account, mockT as never);
     const paths = nav.items.map(i => i.url.split('?')[0]);
     expect(paths).toContain('/account/profile');
     expect(paths).toContain('/account/warranties');
     expect(paths).toContain('/account/bookings');
-    expect(paths).toContain('/dashboard/gamification');
+    expect(paths).not.toContain('/dashboard/gamification');
     expect(nav.groups!.find(g => g.groupKey === 'other')).toBeUndefined();
   });
 

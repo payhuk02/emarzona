@@ -2,9 +2,11 @@
  * Layout Components - Exports centralisés
  */
 
+/** @deprecated Non monté en production — réservé aux mockups landing. */
 export { TopNavigationBar } from './TopNavigationBar';
 export { Breadcrumb } from './Breadcrumb';
 export type { BreadcrumbItem } from './Breadcrumb';
+/** @deprecated Remplacé par HorizontalContextNav — aucun import runtime. */
 export { ContextualNavBar } from './ContextualNavBar';
 export type { ContextualNavItem } from './ContextualNavBar';
 export { AppPageShell } from './AppPageShell';

@@ -47,7 +47,7 @@ describe('NAV audit verification (NAV-001 → NAV-010)', () => {
   describe('NAV-001 bottom nav mobile', () => {
     it('shows bottom nav on mobile without context-sidebar guard', () => {
       const app = readSrc('App.tsx');
-      expect(app).toContain('isBottomNavVisible = isMobile');
+      expect(app).toContain('shouldShowBottomNavigation');
       expect(app).not.toContain('hasContextSidebarForPath');
       expect(app).toContain('<BottomNavigation position="bottom" />');
     });
@@ -209,6 +209,7 @@ describe('NAV audit verification (NAV-001 → NAV-010)', () => {
       expect(isSafeInternalNavUrl('/dashboard/orders')).toBe(true);
       expect(isSafeInternalNavUrl('//evil.com')).toBe(false);
       expect(isSafeInternalNavUrl('https://evil.com')).toBe(false);
+      expect(isSafeInternalNavUrl('/javascript:alert(1)')).toBe(false);
     });
   });
 

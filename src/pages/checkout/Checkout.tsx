@@ -601,7 +601,7 @@ const Checkout = () => {
   if (loading) {
     return (
       <div
-        className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-8 px-4 sm:px-6 lg:px-8 pb-16 md:pb-0"
+        className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-8 px-4 sm:px-6 lg:px-8"
         role="main"
         aria-label="Page de paiement"
         aria-busy="true"

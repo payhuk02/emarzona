@@ -173,7 +173,7 @@ function WebhookPageShell({ adminMode, children }: { adminMode: boolean; childre
   }
 
   return (
-    <AppPageShell mainClassName="pb-16 md:pb-0">
+    <AppPageShell>
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">{children}</div>
     </AppPageShell>
   );

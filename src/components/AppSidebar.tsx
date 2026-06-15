@@ -373,6 +373,15 @@ export function AppSidebar() {
     handlePlanLockedNav(itemTitle, itemUrl);
   };
 
+  const navigateToNavItem = (item: { title: string; url: string }) => {
+    recordNavClick(item.url);
+    if (showUserMenu && isNavItemPlanLocked(item.url, planSlug)) {
+      handleLockedNavClick(item.title, item.url);
+      return;
+    }
+    navigate(item.url);
+  };
+
   return (
     <Sidebar
       collapsible="icon"
@@ -497,7 +506,7 @@ export function AppSidebar() {
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8 text-muted-foreground hover:bg-accent hover:text-foreground"
-                onClick={() => navigate(item.url)}
+                onClick={() => navigateToNavItem(item)}
                 title={item.title}
                 aria-label={item.title}
               >
@@ -523,7 +532,7 @@ export function AppSidebar() {
                       key={`pin-${item.url}`}
                       variant="ghost"
                       size="sm"
-                      onClick={() => navigate(item.url)}
+                      onClick={() => navigateToNavItem(item)}
                       className="w-full justify-start h-7 px-2 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
                     >
                       <PinIcon className="h-3.5 w-3.5 mr-2 shrink-0 stroke-[2]" />
@@ -548,7 +557,7 @@ export function AppSidebar() {
                       key={`recent-${item.url}`}
                       variant="ghost"
                       size="sm"
-                      onClick={() => navigate(item.url)}
+                      onClick={() => navigateToNavItem(item)}
                       className="w-full justify-start h-7 px-2 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
                     >
                       <RecentIcon className="h-3.5 w-3.5 mr-2 shrink-0 stroke-[2]" />
@@ -758,14 +767,16 @@ export function AppSidebar() {
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild tooltip="Retour Dashboard">
+                  <SidebarMenuButton asChild tooltip={t('sidebar.chrome.adminBackToDashboard')}>
                     <NavLink
                       to="/dashboard"
                       className={`${NAV_LINK_INACTIVE} transition-all duration-200`}
                     >
                       <LayoutDashboard className="h-4 w-4" aria-hidden="true" />
-                      {!isCollapsed && <span>← Retour Dashboard</span>}
-                      {isCollapsed && <span className="sr-only">Retour au tableau de bord</span>}
+                      {!isCollapsed && <span>{t('sidebar.chrome.adminBackToDashboard')}</span>}
+                      {isCollapsed && (
+                        <span className="sr-only">{t('sidebar.chrome.adminBackToDashboard')}</span>
+                      )}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

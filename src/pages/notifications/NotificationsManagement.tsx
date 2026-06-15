@@ -84,6 +84,7 @@ import {
   useUpdateNotificationPreferences,
 } from '@/hooks/useNotifications';
 import { useNavigate } from 'react-router-dom';
+import { isSafeInternalNavUrl } from '@/lib/navigation/keyboard-shortcuts';
 import { cn } from '@/lib/utils';
 
 export default function NotificationsManagement() {
@@ -383,8 +384,10 @@ export default function NotificationsManagement() {
       handleMarkAsRead(notification.id);
     }
 
-    if (notification.action_url) {
-      navigate(notification.action_url);
+    const actionUrl =
+      typeof notification.action_url === 'string' ? notification.action_url.trim() : '';
+    if (actionUrl && isSafeInternalNavUrl(actionUrl)) {
+      navigate(actionUrl);
     }
   };
 

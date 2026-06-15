@@ -8,6 +8,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useEffect, useState } from 'react';
 import { logger } from '@/lib/logger';
+import { isSafeInternalNavUrl } from '@/lib/navigation/keyboard-shortcuts';
 import type { Json } from '@/integrations/supabase/types';
 import type {
   Notification,
@@ -374,9 +375,10 @@ export const useRealtimeNotifications = (options?: { enabled?: boolean }) => {
               // Ouvrir l'application quand on clique sur la notification
               notification.onclick = event => {
                 event.preventDefault();
-                const url = notif.action_url || '/';
+                const rawUrl = notif.action_url?.trim();
+                const target = rawUrl && isSafeInternalNavUrl(rawUrl) ? rawUrl : '/';
                 window.focus();
-                window.location.href = url;
+                window.location.href = target;
                 notification.close();
               };
             }

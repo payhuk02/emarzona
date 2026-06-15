@@ -40,48 +40,56 @@ export const SELLER_HORIZONTAL_NAV_SECTIONS: HorizontalNavSectionSpec[] = [
   {
     domainKey: 'produits_cours',
     sectionKey: 'produits_cours',
+    shortLabelKey: 'sidebar.chrome.sellerNavProduits',
     shortLabel: 'Produits',
     rootPath: '/dashboard/products',
   },
   {
     domainKey: 'ventes_logistique',
     sectionKey: 'ventes_logistique',
+    shortLabelKey: 'sidebar.chrome.sellerNavVentes',
     shortLabel: 'Ventes',
     rootPath: '/dashboard/orders',
   },
   {
     domainKey: 'finance_paiements',
     sectionKey: 'finance_paiements',
+    shortLabelKey: 'sidebar.chrome.sellerNavFinance',
     shortLabel: 'Finance',
     rootPath: '/dashboard/payments',
   },
   {
     domainKey: 'marketing_croissance',
     sectionKey: 'marketing_croissance',
+    shortLabelKey: 'sidebar.chrome.sellerNavMarketing',
     shortLabel: 'Marketing',
     rootPath: '/dashboard/marketing',
   },
   {
     domainKey: 'analytics_seo',
     sectionKey: 'analytics_seo',
+    shortLabelKey: 'sidebar.chrome.sellerNavAnalytics',
     shortLabel: 'Analytics',
     rootPath: '/dashboard/analytics',
   },
   {
     domainKey: 'recommandations_ia',
     sectionKey: 'recommandations_ia',
+    shortLabelKey: 'sidebar.chrome.sellerNavIA',
     shortLabel: 'IA',
     rootPath: '/dashboard/ai-chatbot',
   },
   {
     domainKey: 'systemes_integrations',
     sectionKey: 'systemes_integrations',
+    shortLabelKey: 'sidebar.chrome.sellerNavSystemes',
     shortLabel: 'Systèmes',
     rootPath: '/dashboard/integrations',
   },
   {
     domainKey: 'configuration',
     sectionKey: 'configuration',
+    shortLabelKey: 'sidebar.chrome.sellerNavParametres',
     shortLabel: 'Paramètres',
     rootPath: '/dashboard/settings',
   },
@@ -289,6 +297,15 @@ export const BUYER_HORIZONTAL_MEGA_SUBGROUPS: Partial<
 
 const SELLER_HORIZONTAL_PREFIXES = ['/dashboard', '/vendor', '/affiliate', '/notifications'];
 
+function matchesNavPath(pathname: string, base: string): boolean {
+  return pathname === base || pathname.startsWith(`${base}/`);
+}
+
+/** Routes publiques « Découvrir » (marketplace, enchères, recommandations IA). */
+export function isBuyerDiscoveryPath(pathname: string): boolean {
+  return BUYER_DISCOVERY_PATHS.some(path => matchesNavPath(pathname, path));
+}
+
 export function shouldShowSellerHorizontalNav(pathname: string): boolean {
   return SELLER_HORIZONTAL_PREFIXES.some(
     prefix => pathname === prefix || pathname.startsWith(`${prefix}/`)
@@ -296,8 +313,23 @@ export function shouldShowSellerHorizontalNav(pathname: string): boolean {
 }
 
 export function shouldShowBuyerHorizontalNav(pathname: string): boolean {
-  if (pathname === '/account' || pathname.startsWith('/account/')) return true;
-  return pathname.startsWith('/checkout/multi-store');
+  if (matchesNavPath(pathname, '/account')) return true;
+  if (matchesNavPath(pathname, '/cart')) return true;
+  if (pathname.startsWith('/checkout/multi-store')) return true;
+  if (isBuyerDiscoveryPath(pathname)) return true;
+  return false;
+}
+
+const BOTTOM_NAV_AUTH_PATHS = new Set(['/login', '/register', '/auth']);
+
+/** Affiche la bottom-nav mobile globale (exclut checkout, admin, landing, auth). */
+export function shouldShowBottomNavigation(pathname: string): boolean {
+  if (pathname === '/') return false;
+  if (BOTTOM_NAV_AUTH_PATHS.has(pathname)) return false;
+  if (matchesNavPath(pathname, '/checkout/multi-store-tracking')) return true;
+  if (matchesNavPath(pathname, '/checkout')) return false;
+  if (matchesNavPath(pathname, '/admin')) return false;
+  return true;
 }
 
 export function shouldShowHorizontalNav(pathname: string): boolean {

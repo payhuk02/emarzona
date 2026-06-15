@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   CONTEXT_SIDEBAR_CONFIGS,
+  getBuyerNavSections,
   getSellerNavSections,
   resolveContextSidebarNav,
 } from '@/config/navigation.context';
@@ -65,7 +66,8 @@ describe('context sidebar navigation', () => {
 
   it('maps every context config to a non-empty nav', () => {
     for (const config of Object.values(CONTEXT_SIDEBAR_CONFIGS)) {
-      const nav = resolveContextSidebarNav(sellerSections, config, mockT as never);
+      const sections = config.persona === 'buyer' ? getBuyerNavSections() : sellerSections;
+      const nav = resolveContextSidebarNav(sections, config, mockT as never);
       expect(nav.items.length, config.id).toBeGreaterThan(0);
     }
   });

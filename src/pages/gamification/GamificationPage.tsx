@@ -19,7 +19,7 @@ export default function GamificationPage() {
   const headerRef = useScrollAnimation<HTMLDivElement>();
 
   return (
-    <AppPageShell mainClassName="pb-16 md:pb-0">
+    <AppPageShell>
       <div className="container mx-auto p-6 space-y-6">
         {/* Header */}
         <div

@@ -72,7 +72,7 @@ import { initSentry } from '@/lib/sentry';
 import { initWebVitals } from '@/lib/web-vitals';
 import { ErrorBoundary as SentryErrorBoundary } from '@sentry/react';
 import { shouldUseAppPremiumTheme } from '@/lib/premium-theme';
-import { cn } from '@/lib/utils';
+import { shouldShowBottomNavigation } from '@/config/navigation.horizontal';
 import { AppPremiumShell } from '@/components/layout/AppPremiumShell';
 import { ErrorBoundary } from '@/components/errors/ErrorBoundary';
 import { startAlertMonitoring } from '@/lib/sentry-alerts';
@@ -216,11 +216,7 @@ const AppContent = () => {
   const routePrefetch = getRoutePrefetchConfig(authLoading, storeLoading, user?.id, stores.length);
   const isMobile = useIsMobile();
   const location = useLocation();
-  const isAuthPage =
-    location.pathname === '/login' ||
-    location.pathname === '/register' ||
-    location.pathname === '/auth';
-  const isBottomNavVisible = isMobile && location.pathname !== '/' && !isAuthPage;
+  const isBottomNavVisible = isMobile && shouldShowBottomNavigation(location.pathname);
   const usePremiumTheme = shouldUseAppPremiumTheme(location.pathname);
 
   useBehavioralAnalytics(undefined, {

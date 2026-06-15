@@ -59,6 +59,27 @@ export const BOTTOM_NAV_SPECS: BottomNavSpec[] = [
   },
 ];
 
+/** Mobile bottom nav — persona acheteur */
+export const BUYER_BOTTOM_NAV_SPECS: BottomNavSpec[] = [
+  {
+    path: '/account',
+    fromMenu: false,
+    titleKey: 'sidebar.chrome.bottomNavAccount',
+    defaultTitle: 'Compte',
+    icon: User,
+  },
+  { path: '/marketplace', fromMenu: true },
+  {
+    path: '/cart',
+    fromMenu: false,
+    titleKey: 'sidebar.chrome.bottomNavCart',
+    defaultTitle: 'Panier',
+    icon: ShoppingCart,
+  },
+  { path: '/account/orders', fromMenu: true },
+  { path: '/notifications', fromMenu: true },
+];
+
 export type NavSurface = 'sidebar' | 'command' | 'topnav' | 'bottomnav';
 
 export type ResolvedNavItem = {
@@ -142,21 +163,37 @@ export function resolveNavItems(input: ResolveNavItemsInput): ResolvedNavItem[] 
   }
 
   if (input.surface === 'bottomnav') {
+    const commandSections = resolveNavSections({
+      scope: 'command',
+      persona: input.persona,
+      isPlatformAdmin: input.isPlatformAdmin,
+      can: input.can,
+      isSuperAdmin: input.isSuperAdmin,
+      t: input.t,
+    });
+    const flat = flattenNavSections(commandSections);
+    const byPath = new Map(flat.map(entry => [getNavItemPath(entry.url), entry]));
+    const specs = input.persona === 'buyer' ? BUYER_BOTTOM_NAV_SPECS : BOTTOM_NAV_SPECS;
     const { t } = input;
-    return BOTTOM_NAV_SPECS.map(spec => {
-      if (spec.fromMenu === true) {
-        const entry = byPath.get(spec.path);
-        if (!entry) return null;
-        return toResolvedNavItem(entry, planSlug);
-      }
-      return {
-        path: spec.path,
-        url: spec.path,
-        title: String(t?.(spec.titleKey, { defaultValue: spec.defaultTitle }) ?? spec.defaultTitle),
-        icon: spec.icon,
-        locked: false,
-      };
-    }).filter((item): item is ResolvedNavItem => item !== null);
+
+    return specs
+      .map(spec => {
+        if (spec.fromMenu === true) {
+          const entry = byPath.get(spec.path);
+          if (!entry) return null;
+          return toResolvedNavItem(entry, planSlug);
+        }
+        return {
+          path: spec.path,
+          url: spec.path,
+          title: String(
+            t?.(spec.titleKey, { defaultValue: spec.defaultTitle }) ?? spec.defaultTitle
+          ),
+          icon: spec.icon,
+          locked: false,
+        };
+      })
+      .filter((item): item is ResolvedNavItem => item !== null);
   }
 
   return flat.map(entry => toResolvedNavItem(entry, planSlug));

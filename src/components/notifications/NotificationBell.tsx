@@ -3,6 +3,7 @@
  */
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Bell } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -19,6 +20,7 @@ interface NotificationBellProps {
 }
 
 export const NotificationBell = ({ className }: NotificationBellProps) => {
+  const { t } = useTranslation();
   const { data: unreadCount = 0 } = useUnreadCount();
   const [open, setOpen] = useState(false);
 
@@ -29,8 +31,12 @@ export const NotificationBell = ({ className }: NotificationBellProps) => {
           type="button"
           variant="ghost"
           size="icon"
-          className={cn(topNavIconBtnClass, className)}
-          aria-label="Notifications"
+          className={cn(
+            'relative h-9 w-9 min-h-9 min-w-9 shrink-0 touch-manipulation',
+            topNavIconBtnClass,
+            className
+          )}
+          aria-label={t('sidebar.chrome.notificationsAriaLabel')}
         >
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (

@@ -73,6 +73,24 @@ describe('resolveNavItems', () => {
     expect(cart?.locked).toBe(false);
   });
 
+  it('resolves buyer bottom nav with account hub', () => {
+    const items = resolveNavItems({
+      surface: 'bottomnav',
+      persona: 'buyer',
+      isPlatformAdmin: false,
+      t: mockT,
+    });
+
+    expect(items.map(i => i.path)).toEqual([
+      '/account',
+      '/marketplace',
+      '/cart',
+      '/account/orders',
+      '/notifications',
+    ]);
+    expect(items.find(i => i.path === '/account')?.title).toBe('Compte');
+  });
+
   it('keeps plan-locked top nav items visible with locked flag', () => {
     const items = resolveNavItems({
       surface: 'topnav',

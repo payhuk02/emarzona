@@ -1336,7 +1336,7 @@ export default function Checkout() {
 
   if (cartLoading) {
     return (
-      <AppPageShell mainClassName="p-6 pb-16 md:pb-0">
+      <AppPageShell mainClassName="p-6">
         <div className="max-w-6xl mx-auto space-y-6">
           <Skeleton className="h-10 w-64" />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -1352,7 +1352,7 @@ export default function Checkout() {
 
   if (items.length === 0) {
     return (
-      <AppPageShell mainClassName="p-6 pb-16 md:pb-0">
+      <AppPageShell mainClassName="p-6">
         <div className="max-w-4xl mx-auto">
           <Alert>
             <AlertCircle className="h-4 w-4" />
@@ -1369,10 +1369,7 @@ export default function Checkout() {
   }
 
   return (
-    <AppPageShell
-      shellClassName="bg-gray-50 dark:bg-gray-900"
-      mainClassName="p-4 md:p-6 lg:p-8 pb-16 md:pb-0"
-    >
+    <AppPageShell shellClassName="bg-gray-50 dark:bg-gray-900" mainClassName="p-4 md:p-6 lg:p-8">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <header>

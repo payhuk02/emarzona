@@ -47,7 +47,7 @@ describe('buyer navigation gap audit', () => {
     expect(allPaths.has('/account/orders')).toBe(true);
     expect(allPaths.has('/account/digital')).toBe(true);
     expect(allPaths.has('/cart')).toBe(true);
-    expect(allPaths.has('/dashboard/gamification')).toBe(true);
+    expect(allPaths.has('/dashboard/gamification')).toBe(false);
     expect(allPaths.has('/notifications')).toBe(true);
     expect(allPaths.has('/settings/notifications')).toBe(true);
   });

@@ -108,7 +108,7 @@ export default function CartEnhanced() {
 
   if (isLoading) {
     return (
-      <AppPageShell mainClassName="p-6 pb-16 md:pb-0">
+      <AppPageShell mainClassName="p-6">
         <div className="max-w-7xl mx-auto space-y-6">
           <Skeleton className="h-8 w-64" />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -126,7 +126,7 @@ export default function CartEnhanced() {
 
   if (isEmpty) {
     return (
-      <AppPageShell mainClassName="p-6 pb-16 md:pb-0">
+      <AppPageShell mainClassName="p-6">
         <div className="max-w-4xl mx-auto">
           <CartEmpty />
         </div>
@@ -135,7 +135,7 @@ export default function CartEnhanced() {
   }
 
   return (
-    <AppPageShell mainClassName="p-3 sm:p-4 md:p-6 lg:p-8 pb-16 md:pb-0">
+    <AppPageShell mainClassName="p-3 sm:p-4 md:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-5 md:space-y-6">
         {/* Header avec animations */}
         <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
