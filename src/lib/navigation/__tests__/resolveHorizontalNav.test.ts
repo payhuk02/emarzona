@@ -43,6 +43,17 @@ describe('resolveHorizontalNavDomains', () => {
     ]);
   });
 
+  it('structure Finance en sous-groupes mega-menu', () => {
+    const domains = resolveHorizontalNavDomains({
+      isPlatformAdmin: false,
+      pathname: '/dashboard/payments',
+      search: '',
+      t: mockT as never,
+    });
+    const finance = domains.find(d => d.sectionKey === 'finance_paiements');
+    expect(finance?.subgroups?.map(g => g.groupKey)).toEqual(['encaissements', 'fiscalite']);
+  });
+
   it('marque Finance actif sur /dashboard/payments-customers', () => {
     const domains = resolveHorizontalNavDomains({
       isPlatformAdmin: false,

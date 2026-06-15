@@ -3,6 +3,7 @@
  * Remplace la sidebar contextuelle verticale sur desktop ; scroll + sheets sur mobile.
  */
 
+import { useCallback, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ChevronDown, Lock } from 'lucide-react';
@@ -22,21 +23,30 @@ import { useHorizontalContextNav } from '@/hooks/useHorizontalContextNav';
 import type { HorizontalNavDomain, HorizontalNavLink } from '@/lib/navigation/resolveHorizontalNav';
 import { useToast } from '@/hooks/use-toast';
 import { requiredPlanLabelForPath } from '@/lib/billing/physical-route-capabilities';
+import { isNavItemActive } from '@/config/navigation.helpers';
+import { useLocation } from 'react-router-dom';
 
 function MegaMenuLink({
   item,
   onNavigate,
+  onAfterNavigate,
 }: {
   item: HorizontalNavLink;
   onNavigate: (item: HorizontalNavLink) => void;
+  onAfterNavigate?: () => void;
 }) {
+  const location = useLocation();
   const Icon = item.icon;
+  const active = isNavItemActive(item.url, location.pathname, location.search);
 
   if (item.locked) {
     return (
       <button
         type="button"
-        onClick={() => onNavigate(item)}
+        onClick={() => {
+          onNavigate(item);
+          onAfterNavigate?.();
+        }}
         className="flex w-full items-start gap-2.5 rounded-md px-2 py-2 text-left text-sm text-muted-foreground hover:bg-accent/60 transition-colors"
       >
         <Icon className="mt-0.5 h-4 w-4 shrink-0 opacity-60" aria-hidden />
@@ -52,7 +62,11 @@ function MegaMenuLink({
     <NavigationMenuLink asChild>
       <NavLink
         to={item.url}
-        className="flex items-start gap-2.5 rounded-md px-2 py-2 text-sm hover:bg-accent/60 transition-colors focus:bg-accent/60"
+        onClick={() => onAfterNavigate?.()}
+        className={cn(
+          'flex items-start gap-2.5 rounded-md px-2 py-2 text-sm transition-colors hover:bg-accent/60 focus:bg-accent/60',
+          active && 'bg-primary/10 text-primary font-medium'
+        )}
       >
         <Icon className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
         <span className="leading-snug">{item.title}</span>
@@ -64,13 +78,15 @@ function MegaMenuLink({
 function MegaMenuPanel({
   domain,
   onNavigate,
+  onAfterNavigate,
 }: {
   domain: HorizontalNavDomain;
   onNavigate: (item: HorizontalNavLink) => void;
+  onAfterNavigate?: () => void;
 }) {
   if (domain.subgroups) {
     return (
-      <div className="grid gap-4 p-4 md:grid-cols-2 lg:grid-cols-3 md:w-[720px] lg:w-[880px]">
+      <div className="grid gap-4 p-4 md:grid-cols-2 lg:grid-cols-3 md:w-[720px] lg:w-[880px] max-h-[min(70vh,520px)] overflow-y-auto">
         {domain.subgroups.map(group => (
           <div key={group.groupKey} className="min-w-0 space-y-1">
             <p className="px-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -78,7 +94,12 @@ function MegaMenuPanel({
             </p>
             <div className="space-y-0.5">
               {group.items.map(item => (
-                <MegaMenuLink key={item.url} item={item} onNavigate={onNavigate} />
+                <MegaMenuLink
+                  key={item.url}
+                  item={item}
+                  onNavigate={onNavigate}
+                  onAfterNavigate={onAfterNavigate}
+                />
               ))}
             </div>
           </div>
@@ -88,9 +109,14 @@ function MegaMenuPanel({
   }
 
   return (
-    <div className="grid gap-1 p-4 sm:grid-cols-2 md:w-[520px] lg:w-[640px]">
+    <div className="grid gap-1 p-4 sm:grid-cols-2 md:w-[520px] lg:w-[640px] max-h-[min(70vh,480px)] overflow-y-auto">
       {domain.items.map(item => (
-        <MegaMenuLink key={item.url} item={item} onNavigate={onNavigate} />
+        <MegaMenuLink
+          key={item.url}
+          item={item}
+          onNavigate={onNavigate}
+          onAfterNavigate={onAfterNavigate}
+        />
       ))}
     </div>
   );
@@ -103,8 +129,10 @@ function MobileDomainSheet({
   domain: HorizontalNavDomain;
   onNavigate: (item: HorizontalNavLink) => void;
 }) {
+  const [open, setOpen] = useState(false);
+
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button
           type="button"
@@ -124,7 +152,11 @@ function MobileDomainSheet({
           <SheetTitle>{domain.label}</SheetTitle>
         </SheetHeader>
         <div className="mt-4 pb-6">
-          <MegaMenuPanel domain={domain} onNavigate={onNavigate} />
+          <MegaMenuPanel
+            domain={domain}
+            onNavigate={onNavigate}
+            onAfterNavigate={() => setOpen(false)}
+          />
         </div>
       </SheetContent>
     </Sheet>
@@ -137,39 +169,46 @@ export function HorizontalContextNav() {
   const { toast } = useToast();
   const domains = useHorizontalContextNav();
 
-  const handleNavigate = (item: HorizontalNavLink) => {
-    if (item.locked) {
-      const planLabel = requiredPlanLabelForPath(item.path);
-      toast({
-        title: t('sidebar.context.planLockTitle', { defaultValue: 'Fonctionnalité verrouillée' }),
-        description: planLabel
-          ? t('sidebar.context.planLockRequiresPlan', {
-              defaultValue: '{{item}} requiert le plan {{plan}}.',
-              item: item.title,
-              plan: planLabel,
-            })
-          : t('sidebar.context.planLockRequiresUpgrade', {
-              defaultValue: '{{item}} nécessite un plan supérieur.',
-              item: item.title,
-            }),
-      });
-      navigate('/dashboard/billing/physical');
-      return;
-    }
-    navigate(item.url);
-  };
+  const handleNavigate = useCallback(
+    (item: HorizontalNavLink) => {
+      if (item.locked) {
+        const planLabel = requiredPlanLabelForPath(item.path);
+        toast({
+          title: t('sidebar.context.planLockTitle', { defaultValue: 'Fonctionnalité verrouillée' }),
+          description: planLabel
+            ? t('sidebar.context.planLockRequiresPlan', {
+                defaultValue: '{{item}} requiert le plan {{plan}}.',
+                item: item.title,
+                plan: planLabel,
+              })
+            : t('sidebar.context.planLockRequiresUpgrade', {
+                defaultValue: '{{item}} nécessite un plan supérieur.',
+                item: item.title,
+              }),
+        });
+        navigate('/dashboard/billing/physical');
+        return;
+      }
+      navigate(item.url);
+    },
+    [navigate, t, toast]
+  );
 
   if (domains.length === 0) return null;
 
   return (
     <div
-      className="sticky top-11 sm:top-12 z-20 shrink-0 border-b border-border/50 bg-background/95 backdrop-blur-md"
+      className="sticky top-11 sm:top-12 z-20 shrink-0 border-b border-border/50 bg-background/95 backdrop-blur-md shadow-[0_1px_0_0_hsl(var(--border)/0.4)]"
       data-testid="horizontal-context-nav"
     >
-      {/* Desktop — mega-menu Radix */}
       <div className="hidden md:block px-3 lg:px-6">
-        <NavigationMenu className="max-w-none w-full justify-start">
-          <NavigationMenuList className="flex flex-wrap justify-start gap-0.5 py-1">
+        <NavigationMenu
+          className="horizontal-context-nav-menu max-w-none w-full justify-start [&>div.absolute]:left-0 [&>div.absolute]:justify-start"
+          aria-label={t('sidebar.chrome.horizontalContextNav', {
+            defaultValue: 'Navigation par domaine',
+          })}
+        >
+          <NavigationMenuList className="flex flex-wrap justify-start gap-0.5 py-1.5">
             {domains.map(domain => (
               <NavigationMenuItem key={domain.sectionKey}>
                 {domain.items.length <= 1 && domain.rootPath ? (
@@ -179,7 +218,7 @@ export function HorizontalContextNav() {
                       className={cn(
                         navigationMenuTriggerStyle(),
                         'h-9 px-3 text-sm font-medium',
-                        domain.isActive && 'bg-primary/10 text-primary'
+                        domain.isActive && 'bg-primary/10 text-primary shadow-none'
                       )}
                     >
                       {domain.shortLabel}
@@ -206,9 +245,9 @@ export function HorizontalContextNav() {
         </NavigationMenu>
       </div>
 
-      {/* Mobile — scroll horizontal + bottom sheets */}
       <div
         className="md:hidden flex items-center gap-1 overflow-x-auto px-3 py-2 scrollbar-hide"
+        role="navigation"
         aria-label={t('sidebar.chrome.horizontalContextNav', {
           defaultValue: 'Navigation contextuelle',
         })}

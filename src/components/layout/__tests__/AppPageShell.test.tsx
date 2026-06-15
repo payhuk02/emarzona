@@ -25,12 +25,12 @@ function renderShell(ui: ReactNode, { path = '/dashboard' }: { path?: string } =
 }
 
 describe('AppPageShell', () => {
-  it('renders AppSidebar, utility bar, and main content for default layout', () => {
+  it('renders AppSidebar, utility bar, and main content for default layout', async () => {
     renderShell(<p>Page body</p>, { path: '/dashboard' });
 
     expect(screen.getByTestId('app-sidebar')).toBeInTheDocument();
     expect(screen.getByTestId('utility-bar')).toBeInTheDocument();
-    expect(screen.getByTestId('horizontal-context-nav')).toBeInTheDocument();
+    expect(await screen.findByTestId('horizontal-context-nav')).toBeInTheDocument();
     expect(screen.queryByTestId('context-sidebar')).not.toBeInTheDocument();
 
     const main = screen.getByRole('main', { name: /contenu principal/i });
@@ -38,9 +38,9 @@ describe('AppPageShell', () => {
     expect(main).toHaveTextContent('Page body');
   });
 
-  it('renders horizontal nav on finance routes (replaces vertical context sidebar)', () => {
+  it('renders horizontal nav on finance routes (replaces vertical context sidebar)', async () => {
     renderShell(<p>Payments</p>, { path: '/dashboard/payments-customers' });
-    expect(screen.getByTestId('horizontal-context-nav')).toBeInTheDocument();
+    expect(await screen.findByTestId('horizontal-context-nav')).toBeInTheDocument();
     expect(screen.queryByTestId('context-sidebar')).not.toBeInTheDocument();
   });
 

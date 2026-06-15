@@ -39,6 +39,24 @@ export const HORIZONTAL_MEGA_SUBGROUPS: Partial<
   Record<string, Pick<ContextSidebarGroupConfig, 'groupKey' | 'defaultLabel' | 'paths'>[]>
 > = {
   ventes_logistique: PHASE6_CONTEXT_CONFIGS.sales.groups,
+  finance_paiements: [
+    {
+      groupKey: 'encaissements',
+      defaultLabel: 'Encaissements',
+      paths: [
+        '/dashboard/payments',
+        '/dashboard/payments-customers',
+        '/dashboard/payment-management',
+        '/dashboard/pay-balance',
+        '/dashboard/withdrawals',
+      ],
+    },
+    {
+      groupKey: 'fiscalite',
+      defaultLabel: 'Fiscalité & moyens',
+      paths: ['/dashboard/taxes', '/dashboard/payment-methods', '/dashboard/payment-connections'],
+    },
+  ],
   produits_cours: [
     {
       groupKey: 'catalogue',

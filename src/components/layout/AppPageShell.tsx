@@ -3,16 +3,21 @@
  * AppSidebar compact + barre horizontale contextuelle (mega-menu) + UtilityBar + main
  */
 
-import { ReactNode } from 'react';
+import { lazy, ReactNode, Suspense } from 'react';
 import { useLocation } from 'react-router-dom';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { UtilityBarHeader } from '@/components/layout/UtilityBarHeader';
-import { HorizontalContextNav } from '@/components/layout/HorizontalContextNav';
 import { shouldShowSellerHorizontalNav } from '@/config/navigation.horizontal';
 import { detectLayoutType } from '@/config/layoutTypeDetection';
 import type { LayoutType } from '@/components/layout/layout.types';
 import { cn } from '@/lib/utils';
+
+const HorizontalContextNav = lazy(() =>
+  import('@/components/layout/HorizontalContextNav').then(m => ({
+    default: m.HorizontalContextNav,
+  }))
+);
 
 export type AppPageShellProps = {
   children: ReactNode;
@@ -47,7 +52,11 @@ export function AppPageShell({
         <AppSidebar />
         <div className={cn('flex flex-1 flex-col min-w-0 min-h-screen', className)}>
           {showUtilityBar && <UtilityBarHeader />}
-          {showHorizontalNav && <HorizontalContextNav />}
+          {showHorizontalNav && (
+            <Suspense fallback={null}>
+              <HorizontalContextNav />
+            </Suspense>
+          )}
           <main
             id="main-content"
             role="main"
