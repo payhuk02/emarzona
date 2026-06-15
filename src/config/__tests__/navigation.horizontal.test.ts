@@ -30,4 +30,10 @@ describe('navigation.horizontal visibility', () => {
     expect(resolveHorizontalNavPersona('/account/digital')).toBe('buyer');
     expect(resolveHorizontalNavPersona('/dashboard/orders')).toBe('seller');
   });
+
+  it('uses preferred persona on shared notification routes', () => {
+    expect(resolveHorizontalNavPersona('/notifications', 'buyer')).toBe('buyer');
+    expect(resolveHorizontalNavPersona('/notifications', 'seller')).toBe('seller');
+    expect(resolveHorizontalNavPersona('/settings/notifications', 'buyer')).toBe('buyer');
+  });
 });

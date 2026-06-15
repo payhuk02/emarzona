@@ -38,6 +38,7 @@ describe('buyer navigation gap audit', () => {
       'achats',
       'portails',
       'services_fidelite',
+      'notifications',
     ]);
 
     expect(allPaths.has('/marketplace')).toBe(true);
@@ -47,6 +48,8 @@ describe('buyer navigation gap audit', () => {
     expect(allPaths.has('/account/digital')).toBe(true);
     expect(allPaths.has('/cart')).toBe(true);
     expect(allPaths.has('/dashboard/gamification')).toBe(true);
+    expect(allPaths.has('/notifications')).toBe(true);
+    expect(allPaths.has('/settings/notifications')).toBe(true);
   });
 
   it('structures Portails and Découvrir en sous-groupes mega-menu', () => {

@@ -6,14 +6,16 @@ import { resolveHorizontalNavPersona } from '@/config/navigation.horizontal';
 import { useAdmin } from '@/hooks/useAdmin';
 import { useStoreContext } from '@/contexts/StoreContext';
 import { useStorePhysicalAccess } from '@/hooks/billing/useStorePhysicalAccess';
+import { useSidebarPersona } from '@/hooks/useSidebarPersona';
 
 export function useHorizontalContextNav() {
   const { t } = useTranslation();
   const location = useLocation();
   const { isAdmin } = useAdmin();
+  const { persona: sidebarPersona } = useSidebarPersona(isAdmin);
   const { selectedStoreId } = useStoreContext();
   const { planSlug } = useStorePhysicalAccess(selectedStoreId);
-  const persona = resolveHorizontalNavPersona(location.pathname);
+  const persona = resolveHorizontalNavPersona(location.pathname, sidebarPersona);
 
   return useMemo(
     () =>

@@ -5,6 +5,7 @@
 
 import { PHASE6_CONTEXT_CONFIGS } from '@/config/navigation.context.phase6';
 import type { ContextSidebarGroupConfig } from '@/config/navigation.context.types';
+import type { SidebarPersona } from '@/config/navigation.types';
 
 export type HorizontalNavSectionSpec = {
   /** Identifiant stable pour clés React (peut différer de sectionKey côté acheteur) */
@@ -124,6 +125,15 @@ export const BUYER_HORIZONTAL_NAV_SECTIONS: HorizontalNavSectionSpec[] = [
     shortLabelKey: 'sidebar.chrome.buyerNavServices',
     shortLabel: 'Services',
     rootPath: '/account/bookings',
+  },
+  {
+    domainKey: 'notifications',
+    sectionKey: 'systemes_integrations',
+    shortLabelKey: 'sidebar.chrome.buyerNavNotifications',
+    shortLabel: 'Notifications',
+    rootPath: '/notifications',
+    includePaths: ['/notifications', '/settings/notifications'],
+    sourceSectionKeys: ['systemes_integrations', 'configuration'],
   },
 ];
 
@@ -294,7 +304,20 @@ export function shouldShowHorizontalNav(pathname: string): boolean {
   return shouldShowSellerHorizontalNav(pathname) || shouldShowBuyerHorizontalNav(pathname);
 }
 
-export function resolveHorizontalNavPersona(pathname: string): 'seller' | 'buyer' {
+export function resolveHorizontalNavPersona(
+  pathname: string,
+  preferredPersona: SidebarPersona = 'seller'
+): 'seller' | 'buyer' {
+  const isNotificationPath =
+    pathname === '/notifications' ||
+    pathname.startsWith('/notifications/') ||
+    pathname === '/settings/notifications' ||
+    pathname.startsWith('/settings/notifications/');
+
+  if (isNotificationPath) {
+    return preferredPersona === 'buyer' ? 'buyer' : 'seller';
+  }
+
   if (shouldShowBuyerHorizontalNav(pathname)) return 'buyer';
   return 'seller';
 }

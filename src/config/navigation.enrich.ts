@@ -118,6 +118,10 @@ function resolvePersonas(url: string, sectionLabel: string): SidebarPersona[] {
 
   if (BUYER_PUBLIC_PATHS.has(path)) return ['seller', 'buyer'];
 
+  if (path === '/notifications' || path === '/settings/notifications') {
+    return ['seller', 'buyer'];
+  }
+
   if (sectionLabel === 'Recommandations IA') {
     return path.startsWith('/dashboard') ? ['seller'] : ['buyer'];
   }
@@ -125,8 +129,7 @@ function resolvePersonas(url: string, sectionLabel: string): SidebarPersona[] {
   if (
     path.startsWith('/dashboard') ||
     path.startsWith('/vendor') ||
-    path.startsWith('/affiliate') ||
-    path === '/notifications'
+    path.startsWith('/affiliate')
   ) {
     return ['seller'];
   }

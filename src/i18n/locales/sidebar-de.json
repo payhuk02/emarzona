@@ -83,7 +83,8 @@
       "buyerNavAchats": "Käufe",
       "buyerNavPortails": "Portale",
       "buyerNavServices": "Services",
-      "buyerNavDecouvrir": "Entdecken"
+      "buyerNavDecouvrir": "Entdecken",
+      "buyerNavNotifications": "Benachrichtigungen"
     },
     "notifications": {
       "title": "Benachrichtigungen",

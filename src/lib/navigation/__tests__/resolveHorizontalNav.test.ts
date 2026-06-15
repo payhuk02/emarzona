@@ -79,6 +79,7 @@ describe('resolveHorizontalNavDomains', () => {
       'achats',
       'portails',
       'services_fidelite',
+      'notifications',
     ]);
     expect(domains.map(d => d.shortLabel)).toEqual([
       'Découvrir',
@@ -86,6 +87,7 @@ describe('resolveHorizontalNavDomains', () => {
       'Achats',
       'Portails',
       'Services',
+      'Notifications',
     ]);
 
     const achats = domains.find(d => d.domainKey === 'achats');
