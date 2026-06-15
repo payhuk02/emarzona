@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { isNavItemActive } from '@/config/navigation.helpers';
+import {
+  isNavItemActive,
+  resolveSidebarLogoAriaKey,
+  resolveSidebarLogoHome,
+} from '@/config/navigation.helpers';
 
 describe('isNavItemActive', () => {
   describe('exact mode', () => {
@@ -46,5 +50,19 @@ describe('isNavItemActive', () => {
       expect(isNavItemActive('/', '/marketplace', '', 'prefix')).toBe(false);
       expect(isNavItemActive('/', '/', '', 'prefix')).toBe(true);
     });
+  });
+});
+
+describe('resolveSidebarLogoHome', () => {
+  it('routes logo to persona home', () => {
+    expect(resolveSidebarLogoHome('seller')).toBe('/dashboard');
+    expect(resolveSidebarLogoHome('buyer')).toBe('/account');
+    expect(resolveSidebarLogoHome('admin')).toBe('/admin');
+  });
+
+  it('maps persona to aria i18n keys', () => {
+    expect(resolveSidebarLogoAriaKey('seller')).toBe('sidebar.chrome.backToDashboard');
+    expect(resolveSidebarLogoAriaKey('buyer')).toBe('sidebar.chrome.backToAccount');
+    expect(resolveSidebarLogoAriaKey('admin')).toBe('sidebar.chrome.backToAdmin');
   });
 });

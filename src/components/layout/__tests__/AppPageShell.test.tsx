@@ -44,8 +44,13 @@ describe('AppPageShell', () => {
     expect(screen.queryByTestId('context-sidebar')).not.toBeInTheDocument();
   });
 
-  it('hides horizontal nav on non-seller routes', () => {
+  it('shows horizontal nav on buyer discovery routes', async () => {
     renderShell(<p>Marketplace</p>, { path: '/marketplace' });
+    expect(await screen.findByTestId('horizontal-context-nav')).toBeInTheDocument();
+  });
+
+  it('hides horizontal nav on public routes outside nav shell', () => {
+    renderShell(<p>Landing</p>, { path: '/pricing' });
     expect(screen.queryByTestId('horizontal-context-nav')).not.toBeInTheDocument();
   });
 

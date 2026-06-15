@@ -54,6 +54,7 @@ import { useLCPPreload } from '@/hooks/useLCPPreload';
 import { generateProductUrl } from '@/lib/store-utils';
 import { useMarketplaceFacets } from '@/hooks/useMarketplaceFacets';
 import { buildMarketplaceBreadcrumbs, buildMarketplaceSEO } from '@/lib/marketplace-seo';
+import { BuyerDiscoveryPageLayout } from '@/components/layout/BuyerDiscoveryPageLayout';
 
 const Marketplace = () => {
   const { t } = useTranslation();
@@ -543,6 +544,9 @@ const Marketplace = () => {
 
   // Animations au scroll (déjà déclarées plus haut)
 
+  const useAuthenticatedShell = Boolean(user) && !authLoading;
+  const mainAriaLabel = t('marketplace.mainContent', 'Contenu principal de la marketplace');
+
   return (
     <>
       {/* SEO Meta Tags */}
@@ -577,22 +581,24 @@ const Marketplace = () => {
         />
       )}
 
-      <div
-        className="landing-premium marketplace-premium min-h-screen overflow-x-hidden"
-        role="main"
-        id="main-content"
-        aria-label={t('marketplace.mainContent', 'Contenu principal de la marketplace')}
+      <BuyerDiscoveryPageLayout
+        authenticated={useAuthenticatedShell}
+        mainAriaLabel={mainAriaLabel}
+        guestClassName="landing-premium marketplace-premium min-h-screen overflow-x-hidden"
+        shellMainClassName="landing-premium marketplace-premium overflow-x-hidden"
       >
-        {/* Skip to main content link for keyboard navigation */}
-        <a
-          href="#main-content"
-          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded-md focus:shadow-lg"
-          aria-label={t('marketplace.hero.skipToMain', 'Aller au contenu principal')}
-        >
-          {t('marketplace.hero.skipToMain', 'Aller au contenu principal')}
-        </a>
+        {/* Skip to main content link for keyboard navigation (invités) */}
+        {!useAuthenticatedShell && (
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded-md focus:shadow-lg"
+            aria-label={t('marketplace.hero.skipToMain', 'Aller au contenu principal')}
+          >
+            {t('marketplace.hero.skipToMain', 'Aller au contenu principal')}
+          </a>
+        )}
 
-        <PremiumNav />
+        {!useAuthenticatedShell && <PremiumNav />}
 
         {/* Breadcrumb Navigation */}
         <div className="mp-breadcrumb container mx-auto max-w-7xl px-3 sm:px-4 lg:px-8 pb-2">
@@ -993,7 +999,7 @@ const Marketplace = () => {
           </div>
         </section>
 
-        <PremiumFooter />
+        {!useAuthenticatedShell && <PremiumFooter />}
 
         {/* Modales */}
         <AdvancedFilters
@@ -1021,7 +1027,7 @@ const Marketplace = () => {
           onClearAll={clearAllFavorites}
           onClose={() => {}}
         />
-      </div>
+      </BuyerDiscoveryPageLayout>
     </>
   );
 };

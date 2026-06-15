@@ -4,6 +4,7 @@
  */
 
 import { lazy, ReactNode, Suspense } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
@@ -40,6 +41,7 @@ export function AppPageShell({
   mainClassName,
   showUtilityBar = true,
 }: AppPageShellProps) {
+  const { t } = useTranslation();
   const location = useLocation();
   void (layoutType ?? detectLayoutType(location.pathname));
   const showHorizontalNav = shouldShowHorizontalNav(location.pathname);
@@ -61,7 +63,9 @@ export function AppPageShell({
             id="main-content"
             role="main"
             tabIndex={-1}
-            aria-label="Contenu principal"
+            aria-label={t('sidebar.chrome.mainContentAriaLabel', {
+              defaultValue: 'Contenu principal',
+            })}
             className={cn('flex-1 overflow-auto', mainClassName)}
           >
             {children}

@@ -21,7 +21,13 @@ import {
   flattenNavSections,
   sectionContainsPath,
 } from '@/config/navigation.enrich';
-import { getNavItemPath, isNavItemActive, parseNavTo } from '@/config/navigation.helpers';
+import {
+  getNavItemPath,
+  isNavItemActive,
+  parseNavTo,
+  resolveSidebarLogoAriaKey,
+  resolveSidebarLogoHome,
+} from '@/config/navigation.helpers';
 import { resolveNavItemIcon } from '@/config/navigation.icons';
 import type { NavSection, SidebarPersona } from '@/config/navigation.types';
 import { useSidebarPersona } from '@/hooks/useSidebarPersona';
@@ -179,6 +185,8 @@ export function AppSidebar() {
 
   const showAdminMenu = isAdmin && persona === 'admin';
   const showUserMenu = !showAdminMenu;
+  const logoHome = resolveSidebarLogoHome(persona);
+  const logoAriaKey = resolveSidebarLogoAriaKey(persona);
 
   const { activeSections, commandPaletteSections } = useSidebarNavigation({
     persona,
@@ -398,9 +406,9 @@ export function AppSidebar() {
       <div className={cn('shrink-0 border-b border-border', isCollapsed ? 'p-2' : 'px-3 py-2.5')}>
         <div className="flex items-center gap-2 min-h-[2.75rem]">
           <Link
-            to="/dashboard"
+            to={logoHome}
             className="flex items-center gap-1.5 group transition-opacity duration-200 hover:opacity-90 shrink-0"
-            aria-label={t('sidebar.chrome.backToDashboard')}
+            aria-label={t(logoAriaKey)}
           >
             {platformLogo ? (
               <LogoImageWithFallback

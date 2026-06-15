@@ -67,6 +67,7 @@ export function SidebarPersonaSwitch({
             aria-selected={isActive}
             title={label}
             onClick={() => onPersonaChange(option.id)}
+            data-testid={`persona-tab-${option.id}`}
             className={cn(
               'flex items-center justify-center gap-1.5 rounded-md text-xs font-medium transition-all duration-200',
               isCollapsed ? 'h-8 w-full' : 'flex-1 h-8 px-2',

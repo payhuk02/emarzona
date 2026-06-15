@@ -20,6 +20,7 @@ import { SidebarProvider } from '@/components/ui/sidebar';
 import * as StoreContext from '@/contexts/StoreContext';
 import * as AuthContext from '@/contexts/AuthContext';
 import * as AdminHook from '@/hooks/useAdmin';
+import * as SidebarPersonaHook from '@/hooks/useSidebarPersona';
 
 vi.mock('@/contexts/StoreContext', () => ({
   useStoreContext: vi.fn(),
@@ -62,6 +63,14 @@ vi.mock('@/integrations/supabase/client', () => ({
 
 vi.mock('@/components/sidebar/SidebarNavCommandPalette', () => ({
   SidebarNavCommandPalette: () => null,
+}));
+
+vi.mock('@/hooks/useSidebarPersona', () => ({
+  useSidebarPersona: vi.fn(() => ({
+    persona: 'seller',
+    setPersona: vi.fn(),
+    resetPersona: vi.fn(),
+  })),
 }));
 
 const mockLocation = { pathname: '/dashboard' };
@@ -109,6 +118,13 @@ describe('AppSidebar', () => {
     localStorage.clear();
     mockLocation.pathname = '/dashboard';
 
+    vi.mocked(SidebarPersonaHook.useSidebarPersona).mockReturnValue({
+      persona: 'seller',
+      setPersona: vi.fn(),
+      resetPersona: vi.fn(),
+      isManualPersona: false,
+    });
+
     vi.mocked(StoreContext.useStoreContext).mockReturnValue({
       ...defaultStoreContext,
       switchStore: vi.fn(),
@@ -152,6 +168,25 @@ describe('AppSidebar', () => {
       },
       { timeout: 15_000 }
     );
+  });
+
+  it('should point logo to account hub in buyer persona', async () => {
+    vi.mocked(SidebarPersonaHook.useSidebarPersona).mockReturnValue({
+      persona: 'buyer',
+      setPersona: vi.fn(),
+      resetPersona: vi.fn(),
+      isManualPersona: true,
+    });
+    mockLocation.pathname = '/account';
+
+    renderAppSidebar();
+
+    await waitFor(() => {
+      const logoLinks = screen
+        .getAllByRole('link')
+        .filter(link => link.getAttribute('href') === '/account');
+      expect(logoLinks.length).toBeGreaterThan(0);
+    });
   });
 
   it('should display products link', async () => {
@@ -212,6 +247,12 @@ describe('AppSidebar', () => {
       isAdmin: true,
       loading: false,
     } as ReturnType<typeof AdminHook.useAdmin>);
+    vi.mocked(SidebarPersonaHook.useSidebarPersona).mockReturnValue({
+      persona: 'admin',
+      setPersona: vi.fn(),
+      resetPersona: vi.fn(),
+      isManualPersona: true,
+    });
 
     renderAppSidebar();
 

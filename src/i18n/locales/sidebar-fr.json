@@ -48,6 +48,8 @@
     "chrome": {
       "logoAriaLabel": "Logo Emarzona",
       "backToDashboard": "Retour au tableau de bord Emarzona",
+      "backToAccount": "Retour au portail client",
+      "backToAdmin": "Retour à l'administration",
       "adminBackToDashboard": "← Retour Dashboard",
       "searchAriaLabelCollapsed": "Rechercher (Ctrl+K)",
       "searchAriaLabel": "Ouvrir la palette de navigation (Ctrl+K)",
@@ -95,7 +97,8 @@
       "buyerNavPortails": "Portails",
       "buyerNavServices": "Services",
       "buyerNavDecouvrir": "Découvrir",
-      "buyerNavNotifications": "Notifications"
+      "buyerNavNotifications": "Notifications",
+      "mainContentAriaLabel": "Contenu principal"
     },
     "notifications": {
       "title": "Notifications",

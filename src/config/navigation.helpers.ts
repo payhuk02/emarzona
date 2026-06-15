@@ -1,3 +1,5 @@
+import type { SidebarPersona } from '@/config/navigation.types';
+
 export type NavActiveMatchMode = 'exact' | 'prefix';
 
 /** Hub routes: prefix mode matches only the exact path, not child segments. */
@@ -52,3 +54,17 @@ export const parseNavTo = (url: string): string | { pathname: string; search: st
 };
 
 export const getNavItemPath = (url: string) => url.split('?')[0];
+
+/** Cible du clic logo sidebar selon la persona active. */
+export function resolveSidebarLogoHome(persona: SidebarPersona): string {
+  if (persona === 'buyer') return '/account';
+  if (persona === 'admin') return '/admin';
+  return '/dashboard';
+}
+
+/** Clé i18n pour l'aria-label du logo sidebar. */
+export function resolveSidebarLogoAriaKey(persona: SidebarPersona): string {
+  if (persona === 'buyer') return 'sidebar.chrome.backToAccount';
+  if (persona === 'admin') return 'sidebar.chrome.backToAdmin';
+  return 'sidebar.chrome.backToDashboard';
+}

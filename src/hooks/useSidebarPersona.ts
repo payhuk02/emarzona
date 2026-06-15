@@ -1,12 +1,18 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { isBuyerDiscoveryPath } from '@/config/navigation.horizontal';
 import type { SidebarPersona } from '@/config/navigation.types';
 
 const SIDEBAR_PERSONA_KEY = 'sidebarPersona';
 
 export function detectPersonaFromPath(pathname: string, isAdmin: boolean): SidebarPersona {
   if (pathname.startsWith('/admin') && isAdmin) return 'admin';
-  if (pathname.startsWith('/account') || pathname.startsWith('/checkout/multi-store')) {
+  if (
+    pathname.startsWith('/account') ||
+    pathname.startsWith('/checkout/multi-store') ||
+    pathname.startsWith('/cart') ||
+    isBuyerDiscoveryPath(pathname)
+  ) {
     return 'buyer';
   }
   return 'seller';
