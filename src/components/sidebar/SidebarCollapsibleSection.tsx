@@ -4,6 +4,8 @@ import { SidebarGroup, SidebarGroupLabel } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
 
 interface SidebarCollapsibleSectionProps {
+  /** Stable id base for aria-controls / panel id (avoid label-based ids). */
+  sectionId: string;
   label: string;
   isOpen: boolean;
   onToggle: () => void;
@@ -14,6 +16,7 @@ interface SidebarCollapsibleSectionProps {
 }
 
 export function SidebarCollapsibleSection({
+  sectionId,
   label,
   isOpen,
   onToggle,
@@ -21,6 +24,7 @@ export function SidebarCollapsibleSection({
   children,
   className,
 }: SidebarCollapsibleSectionProps) {
+  const panelId = `sidebar-section-${sectionId}`;
   return (
     <SidebarGroup className={cn('app-sidebar-section py-0', className)}>
       {!hideHeader && (
@@ -30,7 +34,7 @@ export function SidebarCollapsibleSection({
             onClick={onToggle}
             className="app-sidebar-section-header w-full flex items-center justify-between gap-2 rounded-md px-2 py-2 text-left transition-colors duration-200"
             aria-expanded={isOpen}
-            aria-controls={`sidebar-section-${label.replace(/\s+/g, '-')}`}
+            aria-controls={panelId}
           >
             <span className="text-[10px] uppercase tracking-[0.14em] font-bold text-muted-foreground">
               {label}
@@ -46,7 +50,7 @@ export function SidebarCollapsibleSection({
         </SidebarGroupLabel>
       )}
       <div
-        id={`sidebar-section-${label.replace(/\s+/g, '-')}`}
+        id={panelId}
         className={cn(
           'app-sidebar-accordion grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]',
           isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'

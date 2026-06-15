@@ -575,6 +575,7 @@ export function AppSidebar() {
                 />
               )}
               <SidebarCollapsibleSection
+                sectionId={section.sectionKey}
                 label={section.label}
                 isOpen={isCollapsed || !collapsedSections.includes(section.sectionKey)}
                 onToggle={() => toggleSectionCollapse(section.sectionKey)}
@@ -785,6 +786,7 @@ export function AppSidebar() {
                 />
               )}
               <SidebarCollapsibleSection
+                sectionId={section.sectionKey}
                 label={section.label}
                 isOpen={isCollapsed || !collapsedSections.includes(section.sectionKey)}
                 onToggle={() => toggleSectionCollapse(section.sectionKey)}
