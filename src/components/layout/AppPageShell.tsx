@@ -8,7 +8,7 @@ import { useLocation } from 'react-router-dom';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { UtilityBarHeader } from '@/components/layout/UtilityBarHeader';
-import { shouldShowSellerHorizontalNav } from '@/config/navigation.horizontal';
+import { shouldShowHorizontalNav } from '@/config/navigation.horizontal';
 import { detectLayoutType } from '@/config/layoutTypeDetection';
 import type { LayoutType } from '@/components/layout/layout.types';
 import { cn } from '@/lib/utils';
@@ -42,7 +42,7 @@ export function AppPageShell({
 }: AppPageShellProps) {
   const location = useLocation();
   void (layoutType ?? detectLayoutType(location.pathname));
-  const showHorizontalNav = shouldShowSellerHorizontalNav(location.pathname);
+  const showHorizontalNav = shouldShowHorizontalNav(location.pathname);
 
   return (
     <SidebarProvider>

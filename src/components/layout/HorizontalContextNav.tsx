@@ -23,6 +23,7 @@ import { useHorizontalContextNav } from '@/hooks/useHorizontalContextNav';
 import type { HorizontalNavDomain, HorizontalNavLink } from '@/lib/navigation/resolveHorizontalNav';
 import { usePlanLockNavAction } from '@/hooks/usePlanLockNavAction';
 import { isNavItemActive } from '@/config/navigation.helpers';
+import { resolveHorizontalNavPersona } from '@/config/navigation.horizontal';
 import { useLocation } from 'react-router-dom';
 
 function MegaMenuLink({
@@ -164,9 +165,14 @@ function MobileDomainSheet({
 
 export function HorizontalContextNav() {
   const { t } = useTranslation();
+  const location = useLocation();
   const navigate = useNavigate();
   const handlePlanLockedNav = usePlanLockNavAction();
   const domains = useHorizontalContextNav();
+  const isBuyerNav = resolveHorizontalNavPersona(location.pathname) === 'buyer';
+  const navAriaLabel = isBuyerNav
+    ? t('sidebar.chrome.horizontalContextNavBuyer', { defaultValue: 'Navigation acheteur' })
+    : t('sidebar.chrome.horizontalContextNav', { defaultValue: 'Navigation par domaine' });
 
   const handleNavigate = useCallback(
     (item: HorizontalNavLink) => {
@@ -189,13 +195,11 @@ export function HorizontalContextNav() {
       <div className="hidden md:block px-3 lg:px-6">
         <NavigationMenu
           className="horizontal-context-nav-menu max-w-none w-full justify-start [&>div.absolute]:left-0 [&>div.absolute]:justify-start"
-          aria-label={t('sidebar.chrome.horizontalContextNav', {
-            defaultValue: 'Navigation par domaine',
-          })}
+          aria-label={navAriaLabel}
         >
           <NavigationMenuList className="flex flex-wrap justify-start gap-0.5 py-1.5">
             {domains.map(domain => (
-              <NavigationMenuItem key={domain.sectionKey}>
+              <NavigationMenuItem key={domain.domainKey}>
                 {domain.items.length <= 1 && domain.rootPath ? (
                   <NavigationMenuLink asChild>
                     <NavLink
@@ -233,12 +237,10 @@ export function HorizontalContextNav() {
       <div
         className="md:hidden flex items-center gap-1 overflow-x-auto px-3 py-2 scrollbar-hide"
         role="navigation"
-        aria-label={t('sidebar.chrome.horizontalContextNav', {
-          defaultValue: 'Navigation contextuelle',
-        })}
+        aria-label={navAriaLabel}
       >
         {domains.map(domain => (
-          <MobileDomainSheet key={domain.sectionKey} domain={domain} onNavigate={handleNavigate} />
+          <MobileDomainSheet key={domain.domainKey} domain={domain} onNavigate={handleNavigate} />
         ))}
       </div>
     </div>

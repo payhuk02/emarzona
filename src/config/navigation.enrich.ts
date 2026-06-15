@@ -81,6 +81,16 @@ export const SELLER_PRIMARY_PATHS = new Set([
 
 const BUYER_PUBLIC_PATHS = new Set(['/marketplace', '/auctions']);
 
+/** Curated buyer sidebar — essentials; extended links in horizontal mega-menu */
+export const BUYER_PRIMARY_PATHS = new Set([
+  '/account',
+  '/marketplace',
+  '/auctions',
+  '/account/orders',
+  '/account/digital',
+  '/account/profile',
+]);
+
 /** Public/discovery URLs excluded from seller navigation (Phase 4 cleanup). */
 export const SELLER_EXCLUDED_PATHS = new Set([
   '/digital/search',
@@ -142,7 +152,9 @@ function resolvePersonas(url: string, sectionLabel: string): SidebarPersona[] {
 function resolveTier(url: string, sectionLabel: string): NavTier {
   const path = url.split('?')[0];
   if (CREATE_PATHS.has(path)) return 'primary';
-  if (sectionLabel === 'Mon Compte') return 'primary';
+  if (sectionLabel === 'Mon Compte') {
+    return BUYER_PRIMARY_PATHS.has(path) ? 'primary' : 'extended';
+  }
   if (sectionLabel === 'Principal') return SELLER_PRIMARY_PATHS.has(path) ? 'primary' : 'extended';
   return SELLER_PRIMARY_PATHS.has(path) ? 'primary' : 'extended';
 }

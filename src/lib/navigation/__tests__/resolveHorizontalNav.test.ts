@@ -63,6 +63,43 @@ describe('resolveHorizontalNavDomains', () => {
     });
     expect(domains.find(d => d.sectionKey === 'finance_paiements')?.isActive).toBe(true);
   });
+
+  it('expose les 4 domaines acheteur avec mega-menus', () => {
+    const domains = resolveHorizontalNavDomains({
+      persona: 'buyer',
+      isPlatformAdmin: false,
+      pathname: '/account/orders',
+      search: '',
+      t: mockT as never,
+    });
+
+    expect(domains.map(d => d.domainKey)).toEqual([
+      'profil_compte',
+      'achats',
+      'portails',
+      'services_fidelite',
+    ]);
+    expect(domains.map(d => d.shortLabel)).toEqual(['Compte', 'Achats', 'Portails', 'Services']);
+
+    const achats = domains.find(d => d.domainKey === 'achats');
+    expect(achats?.isActive).toBe(true);
+    const paths = achats!.items.map(i => i.path);
+    expect(paths).toContain('/account/orders');
+    expect(paths).toContain('/account/invoices');
+    expect(paths).toContain('/account/returns');
+  });
+
+  it('inclut la gamification dans Services acheteur', () => {
+    const domains = resolveHorizontalNavDomains({
+      persona: 'buyer',
+      isPlatformAdmin: false,
+      pathname: '/account/loyalty',
+      search: '',
+      t: mockT as never,
+    });
+    const services = domains.find(d => d.domainKey === 'services_fidelite');
+    expect(services?.items.map(i => i.path)).toContain('/dashboard/gamification');
+  });
 });
 
 describe('sidebar i18n keys for horizontal nav', () => {

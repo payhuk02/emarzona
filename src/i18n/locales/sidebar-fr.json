@@ -77,7 +77,12 @@
       "commandPaletteEmpty": "Aucune page trouvée.",
       "utilityBarAriaLabel": "Actions utilisateur",
       "shortcutToggleSidebar": "Basculer la barre latérale",
-      "shortcutCommandPalette": "Ouvrir la palette de commandes"
+      "shortcutCommandPalette": "Ouvrir la palette de commandes",
+      "horizontalContextNavBuyer": "Navigation acheteur",
+      "buyerNavCompte": "Compte",
+      "buyerNavAchats": "Achats",
+      "buyerNavPortails": "Portails",
+      "buyerNavServices": "Services"
     },
     "notifications": {
       "title": "Notifications",

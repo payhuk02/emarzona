@@ -77,7 +77,12 @@
       "commandPaletteEmpty": "No pages found.",
       "utilityBarAriaLabel": "User actions",
       "shortcutToggleSidebar": "Toggle sidebar",
-      "shortcutCommandPalette": "Open command palette"
+      "shortcutCommandPalette": "Open command palette",
+      "horizontalContextNavBuyer": "Buyer navigation",
+      "buyerNavCompte": "Account",
+      "buyerNavAchats": "Purchases",
+      "buyerNavPortails": "Portals",
+      "buyerNavServices": "Services"
     },
     "notifications": {
       "title": "Notifications",

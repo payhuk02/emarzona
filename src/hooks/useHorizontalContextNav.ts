@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { resolveHorizontalNavDomains } from '@/lib/navigation/resolveHorizontalNav';
+import { resolveHorizontalNavPersona } from '@/config/navigation.horizontal';
 import { useAdmin } from '@/hooks/useAdmin';
 import { useStoreContext } from '@/contexts/StoreContext';
 import { useStorePhysicalAccess } from '@/hooks/billing/useStorePhysicalAccess';
@@ -12,16 +13,18 @@ export function useHorizontalContextNav() {
   const { isAdmin } = useAdmin();
   const { selectedStoreId } = useStoreContext();
   const { planSlug } = useStorePhysicalAccess(selectedStoreId);
+  const persona = resolveHorizontalNavPersona(location.pathname);
 
   return useMemo(
     () =>
       resolveHorizontalNavDomains({
+        persona,
         isPlatformAdmin: isAdmin,
         physicalPlanSlug: planSlug,
         pathname: location.pathname,
         search: location.search,
         t,
       }),
-    [isAdmin, planSlug, location.pathname, location.search, t]
+    [persona, isAdmin, planSlug, location.pathname, location.search, t]
   );
 }

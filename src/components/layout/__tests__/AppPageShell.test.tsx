@@ -49,6 +49,11 @@ describe('AppPageShell', () => {
     expect(screen.queryByTestId('horizontal-context-nav')).not.toBeInTheDocument();
   });
 
+  it('renders horizontal nav on buyer account routes', async () => {
+    renderShell(<p>Account</p>, { path: '/account/orders' });
+    expect(await screen.findByTestId('horizontal-context-nav')).toBeInTheDocument();
+  });
+
   it('hides utility bar when showUtilityBar is false', () => {
     render(
       <MemoryRouter initialEntries={['/dashboard']}>

@@ -77,7 +77,12 @@
       "commandPaletteEmpty": "Keine Seiten gefunden.",
       "utilityBarAriaLabel": "Benutzeraktionen",
       "shortcutToggleSidebar": "Seitenleiste ein-/ausblenden",
-      "shortcutCommandPalette": "Befehlspalette öffnen"
+      "shortcutCommandPalette": "Befehlspalette öffnen",
+      "horizontalContextNavBuyer": "Käufernavigation",
+      "buyerNavCompte": "Konto",
+      "buyerNavAchats": "Käufe",
+      "buyerNavPortails": "Portale",
+      "buyerNavServices": "Services"
     },
     "notifications": {
       "title": "Benachrichtigungen",
