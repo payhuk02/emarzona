@@ -26,14 +26,15 @@ export async function getGoogleIndexingAccessToken(
 ): Promise<string> {
   const privateKey = await importPKCS8(serviceAccount.private_key.replace(/\\n/g, '\n'), 'RS256');
 
-  const jwt = await new SignJWT({})
+  const jwt = await new SignJWT({
+    scope: 'https://www.googleapis.com/auth/indexing',
+  })
     .setProtectedHeader({ alg: 'RS256', typ: 'JWT' })
     .setIssuer(serviceAccount.client_email)
     .setSubject(serviceAccount.client_email)
     .setAudience('https://oauth2.googleapis.com/token')
     .setIssuedAt()
     .setExpirationTime('1h')
-    .setClaim('scope', 'https://www.googleapis.com/auth/indexing')
     .sign(privateKey);
 
   const tokenRes = await fetch('https://oauth2.googleapis.com/token', {

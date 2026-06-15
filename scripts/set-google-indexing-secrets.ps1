@@ -50,9 +50,17 @@ $compact = ($raw -replace "`r`n", '' -replace '\s+', ' ').Trim()
 Write-Host "Configuration GOOGLE_INDEXING_SERVICE_ACCOUNT_JSON ($ProjectRef)..." -ForegroundColor Cyan
 Write-Host "Service account: $($parsed.client_email)" -ForegroundColor DarkGray
 
-& npx supabase secrets set "GOOGLE_INDEXING_SERVICE_ACCOUNT_JSON=$compact" --project-ref $ProjectRef
-if ($LASTEXITCODE -ne 0) {
-  throw "supabase secrets set failed (exit $LASTEXITCODE)"
+# JSON contient des '=' — passer via fichier temporaire (pas en argument CLI)
+$Utf8NoBom = New-Object System.Text.UTF8Encoding $false
+$TempEnv = [System.IO.Path]::GetTempFileName()
+try {
+  $escaped = $compact.Replace('\', '\\').Replace('"', '\"')
+  [System.IO.File]::WriteAllText($TempEnv, "GOOGLE_INDEXING_SERVICE_ACCOUNT_JSON=`"$escaped`"`n", $Utf8NoBom)
+  & npx supabase secrets set --env-file $TempEnv --project-ref $ProjectRef
+  if ($LASTEXITCODE -ne 0) { throw "supabase secrets set failed (exit $LASTEXITCODE)" }
+}
+finally {
+  if (Test-Path $TempEnv) { Remove-Item $TempEnv -Force }
 }
 
 Write-Host ''
