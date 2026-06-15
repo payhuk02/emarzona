@@ -64,7 +64,7 @@ describe('resolveHorizontalNavDomains', () => {
     expect(domains.find(d => d.sectionKey === 'finance_paiements')?.isActive).toBe(true);
   });
 
-  it('expose les 4 domaines acheteur avec mega-menus', () => {
+  it('expose les 5 domaines acheteur avec mega-menus', () => {
     const domains = resolveHorizontalNavDomains({
       persona: 'buyer',
       isPlatformAdmin: false,
@@ -74,12 +74,19 @@ describe('resolveHorizontalNavDomains', () => {
     });
 
     expect(domains.map(d => d.domainKey)).toEqual([
+      'decouvrir',
       'profil_compte',
       'achats',
       'portails',
       'services_fidelite',
     ]);
-    expect(domains.map(d => d.shortLabel)).toEqual(['Compte', 'Achats', 'Portails', 'Services']);
+    expect(domains.map(d => d.shortLabel)).toEqual([
+      'Découvrir',
+      'Compte',
+      'Achats',
+      'Portails',
+      'Services',
+    ]);
 
     const achats = domains.find(d => d.domainKey === 'achats');
     expect(achats?.isActive).toBe(true);

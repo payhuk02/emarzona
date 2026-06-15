@@ -1,6 +1,7 @@
 import type { TFunction } from 'i18next';
 import {
   BUYER_HORIZONTAL_NAV_SECTIONS,
+  BUYER_HORIZONTAL_MEGA_SUBGROUPS,
   HORIZONTAL_MEGA_SUBGROUPS,
   SELLER_HORIZONTAL_NAV_SECTIONS,
   type HorizontalNavSectionSpec,
@@ -14,6 +15,8 @@ import { userMenuSections } from '@/config/navigation.menus';
 import { filterSellerNavSectionsByAccess } from '@/config/navigation.rbac';
 import type { NavItem, NavSection, SidebarPersona } from '@/config/navigation.types';
 import { isNavPathPlanLocked } from '@/lib/navigation/plan-lock-nav';
+import { ShoppingCart } from 'lucide-react';
+import type { ContextSidebarGroupConfig } from '@/config/navigation.context.types';
 
 export type HorizontalNavLink = {
   title: string;
@@ -54,11 +57,14 @@ function toLink(item: NavItem, planSlug: string | null | undefined): HorizontalN
 }
 
 function buildSubgroups(
-  sectionKey: string,
+  subgroupKey: string,
   items: HorizontalNavLink[],
-  t: TFunction
+  t: TFunction,
+  subgroupMap: Partial<
+    Record<string, Pick<ContextSidebarGroupConfig, 'groupKey' | 'defaultLabel' | 'paths'>[]>
+  >
 ): HorizontalNavSubgroup[] | null {
-  const defs = HORIZONTAL_MEGA_SUBGROUPS[sectionKey];
+  const defs = subgroupMap[subgroupKey];
   if (!defs?.length) return null;
 
   const assigned = new Set<string>();
@@ -109,6 +115,44 @@ function collectBuyerAccountItems(sections: NavSection[]): NavItem[] {
   return items.filter(item => config.includePaths!.some(p => pathMatches(item.url, p)));
 }
 
+function collectBuyerItemsByPaths(
+  sections: NavSection[],
+  includePaths: string[],
+  sourceSectionKeys?: string[]
+): NavItem[] {
+  const keys = sourceSectionKeys?.length
+    ? new Set(sourceSectionKeys)
+    : new Set(sections.map(s => s.sectionKey));
+  const seen = new Set<string>();
+  const items: NavItem[] = [];
+
+  for (const section of sections) {
+    if (!keys.has(section.sectionKey)) continue;
+    for (const item of section.items) {
+      if (seen.has(item.url)) continue;
+      if (!includePaths.some(p => pathMatches(item.url, p))) continue;
+      seen.add(item.url);
+      items.push(item);
+    }
+  }
+
+  return items;
+}
+
+function appendBuyerCartLink(items: HorizontalNavLink[], t: TFunction): HorizontalNavLink[] {
+  if (items.some(i => i.path === '/cart')) return items;
+  return [
+    ...items,
+    {
+      title: t('sidebar.chrome.bottomNavCart', { defaultValue: 'Panier' }),
+      url: '/cart',
+      path: '/cart',
+      icon: ShoppingCart,
+      locked: false,
+    },
+  ];
+}
+
 function resolveSellerHorizontalNavDomains(
   input: {
     isPlatformAdmin: boolean;
@@ -139,7 +183,7 @@ function resolveSellerHorizontalNavDomains(
       shortLabel,
       label: section.label,
       items,
-      subgroups: buildSubgroups(spec.sectionKey, items, input.t),
+      subgroups: buildSubgroups(spec.sectionKey, items, input.t, HORIZONTAL_MEGA_SUBGROUPS),
       isActive,
     });
   }
@@ -158,30 +202,45 @@ function resolveBuyerHorizontalNavDomains(input: {
   const domains: HorizontalNavDomain[] = [];
 
   for (const spec of BUYER_HORIZONTAL_NAV_SECTIONS) {
-    const group = accountConfig.groups.find(g => g.groupKey === spec.domainKey);
-    const groupPaths = group?.paths ?? [];
-    const items = accountItems
-      .filter(item => groupPaths.some(p => pathMatches(item.url, p)))
-      .map(item => toLink(item, null));
+    let items: HorizontalNavLink[];
+
+    if (spec.includePaths?.length) {
+      const raw = collectBuyerItemsByPaths(sections, spec.includePaths, spec.sourceSectionKeys);
+      items = raw.map(item => toLink(item, null));
+    } else {
+      const group = accountConfig.groups.find(g => g.groupKey === spec.domainKey);
+      const groupPaths = group?.paths ?? [];
+      items = accountItems
+        .filter(item => groupPaths.some(p => pathMatches(item.url, p)))
+        .map(item => toLink(item, null));
+    }
+
+    if (spec.domainKey === 'achats') {
+      items = appendBuyerCartLink(items, input.t);
+    }
 
     if (items.length === 0) continue;
 
-    const isActive = items.some(item =>
-      isNavItemActive(item.url, input.pathname, input.search, 'prefix')
-    );
+    const isActive =
+      items.some(item => isNavItemActive(item.url, input.pathname, input.search, 'prefix')) ||
+      (spec.domainKey === 'achats' && input.pathname === '/cart');
+
     const shortLabel = spec.shortLabelKey
       ? input.t(spec.shortLabelKey, { defaultValue: spec.shortLabel })
       : spec.shortLabel;
+    const group = accountConfig.groups.find(g => g.groupKey === spec.domainKey);
     const label = group
       ? input.t(`sidebar.contextGroups.${group.groupKey}`, { defaultValue: group.defaultLabel })
-      : shortLabel;
+      : spec.domainKey === 'decouvrir'
+        ? input.t('sidebar.chrome.buyerNavDecouvrir', { defaultValue: 'Découvrir' })
+        : shortLabel;
 
     domains.push({
       ...spec,
       shortLabel,
       label,
       items,
-      subgroups: null,
+      subgroups: buildSubgroups(spec.domainKey, items, input.t, BUYER_HORIZONTAL_MEGA_SUBGROUPS),
       isActive,
     });
   }

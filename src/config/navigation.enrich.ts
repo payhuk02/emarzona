@@ -81,15 +81,8 @@ export const SELLER_PRIMARY_PATHS = new Set([
 
 const BUYER_PUBLIC_PATHS = new Set(['/marketplace', '/auctions']);
 
-/** Curated buyer sidebar — essentials; extended links in horizontal mega-menu */
-export const BUYER_PRIMARY_PATHS = new Set([
-  '/account',
-  '/marketplace',
-  '/auctions',
-  '/account/orders',
-  '/account/digital',
-  '/account/profile',
-]);
+/** Curated buyer sidebar — hub uniquement ; liens détaillés dans la barre horizontale */
+export const BUYER_PRIMARY_PATHS = new Set(['/account']);
 
 /** Public/discovery URLs excluded from seller navigation (Phase 4 cleanup). */
 export const SELLER_EXCLUDED_PATHS = new Set([
@@ -237,6 +230,7 @@ export function filterNavSections(
       items: section.items.filter(item => {
         if (!item.personas.includes(persona)) return false;
         if (persona === 'buyer' && section.label === 'Principal') {
+          if (sidebarOnly) return false;
           return BUYER_PUBLIC_PATHS.has(item.url.split('?')[0]);
         }
         if (!sidebarOnly) return true;

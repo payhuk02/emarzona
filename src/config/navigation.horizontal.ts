@@ -16,7 +16,23 @@ export type HorizontalNavSectionSpec = {
   shortLabelKey?: string;
   /** Chemin racine pour lien direct si un seul item ou highlight */
   rootPath?: string;
+  /** Filtre explicite de paths (domaines hors account.groups) */
+  includePaths?: string[];
+  /** Sections menu à parcourir avec includePaths */
+  sourceSectionKeys?: string[];
 };
+
+/** Découverte & shopping public — barre horizontale acheteur */
+export const BUYER_DISCOVERY_PATHS = [
+  '/marketplace',
+  '/auctions',
+  '/recommendations',
+  '/discover',
+  '/trending',
+  '/recommendations/history-based',
+  '/personalization/quiz',
+  '/personalization/recommendations',
+] as const;
 
 /** Ordre des domaines dans la barre horizontale vendeur */
 export const SELLER_HORIZONTAL_NAV_SECTIONS: HorizontalNavSectionSpec[] = [
@@ -70,8 +86,17 @@ export const SELLER_HORIZONTAL_NAV_SECTIONS: HorizontalNavSectionSpec[] = [
   },
 ];
 
-/** Domaines acheteur — alignés sur PHASE6_CONTEXT_CONFIGS.account.groups */
+/** Domaines acheteur — alignés sur PHASE6_CONTEXT_CONFIGS.account.groups + découverte */
 export const BUYER_HORIZONTAL_NAV_SECTIONS: HorizontalNavSectionSpec[] = [
+  {
+    domainKey: 'decouvrir',
+    sectionKey: 'principal',
+    shortLabelKey: 'sidebar.chrome.buyerNavDecouvrir',
+    shortLabel: 'Découvrir',
+    rootPath: '/marketplace',
+    includePaths: [...BUYER_DISCOVERY_PATHS],
+    sourceSectionKeys: ['principal', 'recommandations_ia'],
+  },
   {
     domainKey: 'profil_compte',
     sectionKey: 'mon_compte',
@@ -194,6 +219,60 @@ export const HORIZONTAL_MEGA_SUBGROUPS: Partial<
         '/dashboard/gamification',
         '/dashboard/promotions/stats',
       ],
+    },
+  ],
+};
+
+/** Sous-groupes mega-menu acheteur */
+export const BUYER_HORIZONTAL_MEGA_SUBGROUPS: Partial<
+  Record<string, Pick<ContextSidebarGroupConfig, 'groupKey' | 'defaultLabel' | 'paths'>[]>
+> = {
+  decouvrir: [
+    {
+      groupKey: 'boutique',
+      defaultLabel: 'Boutique',
+      paths: ['/marketplace', '/auctions'],
+    },
+    {
+      groupKey: 'recommandations_ia',
+      defaultLabel: 'Pour vous',
+      paths: [
+        '/recommendations',
+        '/discover',
+        '/trending',
+        '/recommendations/history-based',
+        '/personalization/quiz',
+        '/personalization/recommendations',
+      ],
+    },
+  ],
+  achats: [
+    {
+      groupKey: 'commandes',
+      defaultLabel: 'Commandes',
+      paths: ['/account/orders', '/account/returns', '/cart'],
+    },
+    {
+      groupKey: 'facturation',
+      defaultLabel: 'Facturation',
+      paths: ['/account/invoices', '/account/gift-cards', '/account/warranties'],
+    },
+  ],
+  portails: [
+    {
+      groupKey: 'mon_portail_digital',
+      defaultLabel: 'Digital',
+      paths: ['/account/downloads', '/account/digital'],
+    },
+    {
+      groupKey: 'produits_physiques',
+      defaultLabel: 'Physique',
+      paths: ['/account/physical'],
+    },
+    {
+      groupKey: 'mes_cours',
+      defaultLabel: 'Cours',
+      paths: ['/account/courses'],
     },
   ],
 };

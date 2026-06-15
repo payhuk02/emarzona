@@ -82,7 +82,8 @@
       "buyerNavCompte": "Konto",
       "buyerNavAchats": "Käufe",
       "buyerNavPortails": "Portale",
-      "buyerNavServices": "Services"
+      "buyerNavServices": "Services",
+      "buyerNavDecouvrir": "Entdecken"
     },
     "notifications": {
       "title": "Benachrichtigungen",

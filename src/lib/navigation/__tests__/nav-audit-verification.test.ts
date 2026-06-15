@@ -211,4 +211,19 @@ describe('NAV audit verification (NAV-001 → NAV-010)', () => {
       expect(isSafeInternalNavUrl('https://evil.com')).toBe(false);
     });
   });
+
+  describe('buyer horizontal nav', () => {
+    it('exposes buyer horizontal nav on account routes', () => {
+      const horizontal = readSrc('config/navigation.horizontal.ts');
+      expect(horizontal).toContain('BUYER_HORIZONTAL_NAV_SECTIONS');
+      expect(horizontal).toContain('shouldShowBuyerHorizontalNav');
+      expect(readSrc('components/layout/AppPageShell.tsx')).toContain('shouldShowHorizontalNav');
+    });
+
+    it('includes discovery domain and mega subgroups for buyer', () => {
+      const horizontal = readSrc('config/navigation.horizontal.ts');
+      expect(horizontal).toContain("domainKey: 'decouvrir'");
+      expect(horizontal).toContain('BUYER_HORIZONTAL_MEGA_SUBGROUPS');
+    });
+  });
 });
