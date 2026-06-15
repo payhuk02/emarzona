@@ -48,6 +48,7 @@ describe('NAV audit verification (NAV-001 → NAV-010)', () => {
     it('shows bottom nav on mobile without context-sidebar guard', () => {
       const app = readSrc('App.tsx');
       expect(app).toContain('shouldShowBottomNavigation');
+      expect(app).toContain("import { cn } from '@/lib/utils'");
       expect(app).not.toContain('hasContextSidebarForPath');
       expect(app).toContain('<BottomNavigation position="bottom" />');
     });
