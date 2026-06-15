@@ -29,7 +29,7 @@
     "test:unit:payments": "vitest run src/lib/payments",
     "test:unit:stable": "vitest run --maxWorkers=2",
     "test:guards": "vitest run src/components/billing/__tests__/SellerRoutePermissionGuard.test.tsx src/lib/billing/__tests__/physical-route-capabilities.test.ts src/lib/admin/__tests__/admin-route-permissions.test.ts",
-    "test:navigation": "vitest run src/config/__tests__/sidebar-routes.test.ts src/config/__tests__/navigation-phase4.test.ts src/config/__tests__/navigation-context.test.ts src/config/__tests__/navigation-context-phase6.test.ts src/config/__tests__/layoutTypeDetection.test.ts src/hooks/__tests__/useNavigationAnalytics.test.ts src/lib/navigation/__tests__/feature-flags.test.ts src/lib/navigation/__tests__/resolveNavItems.test.ts",
+    "test:navigation": "vitest run src/config/__tests__/sidebar-routes.test.ts src/config/__tests__/navigation-phase4.test.ts src/config/__tests__/navigation-context.test.ts src/config/__tests__/navigation-context-phase6.test.ts src/config/__tests__/layoutTypeDetection.test.ts src/hooks/__tests__/useNavigationAnalytics.test.ts src/lib/navigation/__tests__/feature-flags.test.ts src/lib/navigation/__tests__/resolveNavItems.test.ts src/lib/navigation/__tests__/resolveHorizontalNav.test.ts src/config/__tests__/sidebar-gap-audit.test.ts",
     "test:components": "vitest run src/components --maxWorkers=2",
     "test:security": "npm run test:guards && npm run test:unit:payments",
     "audit:rls": "node scripts/audit-rls-check.mjs",

@@ -8,12 +8,8 @@ vi.mock('@/components/AppSidebar', () => ({
   AppSidebar: () => <aside data-testid="app-sidebar">AppSidebar</aside>,
 }));
 
-vi.mock('@/components/layout/SectionContextSidebar', () => ({
-  ConfigContextSidebar: ({ configId }: { configId: string }) => (
-    <nav data-testid="context-sidebar" data-config-id={configId}>
-      ContextSidebar
-    </nav>
-  ),
+vi.mock('@/components/layout/HorizontalContextNav', () => ({
+  HorizontalContextNav: () => <nav data-testid="horizontal-context-nav">HorizontalContextNav</nav>,
 }));
 
 vi.mock('@/components/layout/UtilityBarHeader', () => ({
@@ -34,6 +30,7 @@ describe('AppPageShell', () => {
 
     expect(screen.getByTestId('app-sidebar')).toBeInTheDocument();
     expect(screen.getByTestId('utility-bar')).toBeInTheDocument();
+    expect(screen.getByTestId('horizontal-context-nav')).toBeInTheDocument();
     expect(screen.queryByTestId('context-sidebar')).not.toBeInTheDocument();
 
     const main = screen.getByRole('main', { name: /contenu principal/i });
@@ -41,24 +38,15 @@ describe('AppPageShell', () => {
     expect(main).toHaveTextContent('Page body');
   });
 
-  it('renders context sidebar when layoutType maps to a config', () => {
-    render(
-      <MemoryRouter initialEntries={['/dashboard/settings']}>
-        <AppPageShell layoutType="settings">
-          <p>Settings</p>
-        </AppPageShell>
-      </MemoryRouter>
-    );
-
-    const contextSidebar = screen.getByTestId('context-sidebar');
-    expect(contextSidebar).toBeInTheDocument();
-    expect(contextSidebar).toHaveAttribute('data-config-id', 'settings');
+  it('renders horizontal nav on finance routes (replaces vertical context sidebar)', () => {
+    renderShell(<p>Payments</p>, { path: '/dashboard/payments-customers' });
+    expect(screen.getByTestId('horizontal-context-nav')).toBeInTheDocument();
+    expect(screen.queryByTestId('context-sidebar')).not.toBeInTheDocument();
   });
 
-  it('auto-detects context sidebar from pathname when layoutType is omitted', () => {
-    renderShell(<p>Orders</p>, { path: '/dashboard/orders' });
-
-    expect(screen.getByTestId('context-sidebar')).toHaveAttribute('data-config-id', 'orders');
+  it('hides horizontal nav on non-seller routes', () => {
+    renderShell(<p>Marketplace</p>, { path: '/marketplace' });
+    expect(screen.queryByTestId('horizontal-context-nav')).not.toBeInTheDocument();
   });
 
   it('hides utility bar when showUtilityBar is false', () => {

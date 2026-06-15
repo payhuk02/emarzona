@@ -13,6 +13,7 @@ export { ContextSidebarNavItem } from './ContextSidebarNavItem';
 export { ConfigContextSidebar, SectionContextSidebar } from './SectionContextSidebar';
 export { AppPageShell } from './AppPageShell';
 export type { AppPageShellProps } from './AppPageShell';
+export { HorizontalContextNav } from './HorizontalContextNav';
 export { UtilityBarHeader } from './UtilityBarHeader';
 export { UserUtilityActions } from './UserUtilityActions';
 export type { LayoutType } from './layout.types';

@@ -1,6 +1,6 @@
 /**
- * AppPageShell — shell dashboard unifié (Sprint 3)
- * AppSidebar + sidebar contextuelle optionnelle + UtilityBar + #main-content
+ * AppPageShell — shell dashboard unifié
+ * AppSidebar compact + barre horizontale contextuelle (mega-menu) + UtilityBar + main
  */
 
 import { ReactNode } from 'react';
@@ -8,8 +8,8 @@ import { useLocation } from 'react-router-dom';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { UtilityBarHeader } from '@/components/layout/UtilityBarHeader';
-import { ConfigContextSidebar } from '@/components/layout/SectionContextSidebar';
-import { getContextSidebarConfigId } from '@/config/contextSidebar.registry';
+import { HorizontalContextNav } from '@/components/layout/HorizontalContextNav';
+import { shouldShowSellerHorizontalNav } from '@/config/navigation.horizontal';
 import { detectLayoutType } from '@/config/layoutTypeDetection';
 import type { LayoutType } from '@/components/layout/layout.types';
 import { cn } from '@/lib/utils';
@@ -36,9 +36,8 @@ export function AppPageShell({
   showUtilityBar = true,
 }: AppPageShellProps) {
   const location = useLocation();
-  const detectedType = layoutType ?? detectLayoutType(location.pathname);
-  const contextConfigId = getContextSidebarConfigId(detectedType);
-  const hasContextSidebar = Boolean(contextConfigId);
+  void (layoutType ?? detectLayoutType(location.pathname));
+  const showHorizontalNav = shouldShowSellerHorizontalNav(location.pathname);
 
   return (
     <SidebarProvider>
@@ -46,15 +45,9 @@ export function AppPageShell({
         className={cn('flex min-h-screen w-full bg-background overflow-x-hidden', shellClassName)}
       >
         <AppSidebar />
-        {contextConfigId && <ConfigContextSidebar configId={contextConfigId} />}
-        <div
-          className={cn(
-            'flex flex-1 flex-col min-w-0 min-h-screen',
-            hasContextSidebar && 'pb-16 md:pb-0',
-            className
-          )}
-        >
+        <div className={cn('flex flex-1 flex-col min-w-0 min-h-screen', className)}>
           {showUtilityBar && <UtilityBarHeader />}
+          {showHorizontalNav && <HorizontalContextNav />}
           <main
             id="main-content"
             role="main"

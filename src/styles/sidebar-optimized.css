@@ -64,6 +64,20 @@
   flex-shrink: 0;
 }
 
+/* Horizontal context mega-nav (Systeme.io style) */
+[data-testid='horizontal-context-nav'] [data-radix-collection-item] {
+  scroll-margin-top: 3rem;
+}
+
+[data-testid='horizontal-context-nav'] .scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+[data-testid='horizontal-context-nav'] .scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 .app-context-sidebar svg {
   color: hsl(var(--foreground));
   stroke: currentColor;

@@ -39,5 +39,6 @@ describe('sidebar gap audit', () => {
     expect(notInPrimary.length).toBe(missing.length);
     expect(visible.size).toBeGreaterThanOrEqual(25);
     expect(visible.size).toBeLessThanOrEqual(50);
+    // Les liens extended sont dans HorizontalContextNav (resolveHorizontalNavDomains)
   });
 });
