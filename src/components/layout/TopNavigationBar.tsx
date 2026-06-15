@@ -16,8 +16,64 @@ import { User, Menu, Settings } from '@/components/icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
 import { LoyaltyBadge } from '@/components/loyalty/LoyaltyBadge';
+import { Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useResolvedNavItems } from '@/hooks/useResolvedNavItems';
+import { isNavItemActive } from '@/config/navigation.helpers';
+import { usePlanLockNavAction } from '@/hooks/usePlanLockNavAction';
+import type { ResolvedNavItem } from '@/lib/navigation/resolveNavItems';
+
+function TopNavMainLink({
+  item,
+  active,
+  onLockedClick,
+  className,
+  showLabel = true,
+  onNavigate,
+}: {
+  item: ResolvedNavItem;
+  active: boolean;
+  onLockedClick: (title: string, url: string) => void;
+  className: string;
+  showLabel?: boolean;
+  onNavigate?: () => void;
+}) {
+  const Icon = item.icon;
+  const content = (
+    <>
+      <Icon className="h-4 w-4 shrink-0" />
+      <span className={showLabel ? undefined : 'hidden xl:inline'}>{item.title}</span>
+      {item.locked && <Lock className="h-3 w-3 shrink-0 opacity-70" aria-hidden />}
+    </>
+  );
+
+  if (item.locked) {
+    return (
+      <button
+        type="button"
+        onClick={() => onLockedClick(item.title, item.url)}
+        className={className}
+        title={item.title}
+        aria-label={item.title}
+      >
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <NavLink
+      to={item.url}
+      onClick={onNavigate}
+      title={item.title}
+      aria-label={item.title}
+      className={className}
+      aria-current={active ? 'page' : undefined}
+    >
+      {content}
+    </NavLink>
+  );
+}
 
 export const TopNavigationBar = () => {
   const { t } = useTranslation();
@@ -26,13 +82,10 @@ export const TopNavigationBar = () => {
   const { user } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const mainNavItems = useResolvedNavItems({ surface: 'topnav' });
+  const handlePlanLockedNav = usePlanLockNavAction();
 
-  const isActive = (path: string) => {
-    if (path === '/dashboard') {
-      return location.pathname === '/dashboard';
-    }
-    return location.pathname.startsWith(path);
-  };
+  const isActive = (url: string) =>
+    isNavItemActive(url, location.pathname, location.search, 'prefix');
 
   return (
     <header className="app-premium-topnav fixed top-0 left-0 right-0 z-50 border-b shadow-sm overflow-visible">
@@ -95,21 +148,20 @@ export const TopNavigationBar = () => {
                     aria-label={t('sidebar.chrome.topNavMain')}
                   >
                     {mainNavItems.map(item => {
-                      const Icon = item.icon;
-                      const active = isActive(item.path);
+                      const active = isActive(item.url);
                       return (
-                        <NavLink
+                        <TopNavMainLink
                           key={item.path}
-                          to={item.url}
-                          onClick={() => setMobileMenuOpen(false)}
+                          item={item}
+                          active={active}
+                          onLockedClick={handlePlanLockedNav}
+                          onNavigate={() => setMobileMenuOpen(false)}
                           className={cn(
-                            'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors',
-                            active ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+                            'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors w-full',
+                            active ? 'bg-primary text-primary-foreground' : 'hover:bg-muted',
+                            item.locked && 'opacity-75'
                           )}
-                        >
-                          <Icon className="h-5 w-5" />
-                          <span>{item.title}</span>
-                        </NavLink>
+                        />
                       );
                     })}
                   </nav>
@@ -132,24 +184,22 @@ export const TopNavigationBar = () => {
             aria-label={t('sidebar.chrome.topNavMain')}
           >
             {mainNavItems.map(item => {
-              const Icon = item.icon;
-              const active = isActive(item.path);
+              const active = isActive(item.url);
               return (
-                <NavLink
+                <TopNavMainLink
                   key={item.path}
-                  to={item.url}
-                  title={item.title}
-                  aria-label={item.title}
+                  item={item}
+                  active={active}
+                  onLockedClick={handlePlanLockedNav}
+                  showLabel={false}
                   className={cn(
                     'topnav-main-link inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md px-2.5 xl:px-3 text-xs xl:text-sm font-medium transition-colors whitespace-nowrap',
                     active
                       ? 'bg-primary text-primary-foreground shadow-sm'
-                      : 'text-muted-foreground hover:bg-white/10 hover:text-white'
+                      : 'text-muted-foreground hover:bg-white/10 hover:text-white',
+                    item.locked && 'opacity-75'
                   )}
-                >
-                  <Icon className="h-4 w-4 shrink-0" />
-                  <span className="hidden xl:inline">{item.title}</span>
-                </NavLink>
+                />
               );
             })}
           </nav>

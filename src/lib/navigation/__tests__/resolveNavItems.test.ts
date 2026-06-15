@@ -70,5 +70,20 @@ describe('resolveNavItems', () => {
 
     const cart = items.find(i => i.path === '/cart');
     expect(cart?.title).toBe('Panier');
+    expect(cart?.locked).toBe(false);
+  });
+
+  it('keeps plan-locked top nav items visible with locked flag', () => {
+    const items = resolveNavItems({
+      surface: 'topnav',
+      persona: 'seller',
+      isPlatformAdmin: false,
+      physicalPlanSlug: null,
+      t: mockT,
+    });
+
+    const emails = items.find(i => i.path === '/dashboard/emails/campaigns');
+    expect(emails).toBeDefined();
+    expect(emails?.locked).toBe(true);
   });
 });

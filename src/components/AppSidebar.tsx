@@ -46,12 +46,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useAdmin } from '@/hooks/useAdmin';
 import { useStoreContext } from '@/contexts/StoreContext';
 import { useStorePhysicalAccess } from '@/hooks/billing/useStorePhysicalAccess';
-import {
-  hasPhysicalFeatureAccess,
-  requiredPlanForFeature,
-  type PhysicalPlanSlug,
-} from '@/lib/billing/physical-plan-capabilities';
-import { requiredPhysicalFeatureForPath } from '@/lib/billing/physical-route-capabilities';
+import { isNavPathPlanLocked } from '@/lib/navigation/plan-lock-nav';
+import { usePlanLockNavAction } from '@/hooks/usePlanLockNavAction';
 import { logger } from '@/lib/logger';
 
 const PINNED_NAV_KEY = 'sidebarPinnedUrls';
@@ -60,11 +56,8 @@ const COLLAPSED_SECTIONS_KEY = 'sidebarCollapsedSections';
 const STORES_EXPANDED_KEY = 'sidebarStoresExpanded';
 const MAX_RECENT_ITEMS = 2;
 
-const isNavItemPlanLocked = (url: string, planSlug: string | null) => {
-  const feature = requiredPhysicalFeatureForPath(getNavItemPath(url));
-  if (!feature) return false;
-  return !hasPhysicalFeatureAccess(planSlug as PhysicalPlanSlug, feature);
-};
+const isNavItemPlanLocked = (url: string, planSlug: string | null) =>
+  isNavPathPlanLocked(url, planSlug);
 
 const buildDefaultCollapsedSections = (
   sections: NavSection[],
@@ -167,6 +160,7 @@ export function AppSidebar() {
   } = useStoreContext();
   const { planSlug } = useStorePhysicalAccess(selectedStoreId);
   const platformLogo = usePlatformLogo();
+  const handlePlanLockedNav = usePlanLockNavAction();
   /** Desktop rail only — mobile drawer always shows labels + icons */
   const isCollapsed = state === 'collapsed' && !isMobile;
   const { persona, setPersona } = useSidebarPersona(isAdmin);
@@ -358,20 +352,7 @@ export function AppSidebar() {
   };
 
   const handleLockedNavClick = (itemTitle: string, itemUrl: string) => {
-    const feature = requiredPhysicalFeatureForPath(getNavItemPath(itemUrl));
-    const requiredPlan = feature
-      ? requiredPlanForFeature(feature).replace('physical_', '').toUpperCase()
-      : t('sidebar.chrome.planLockFallbackPlan');
-    toast({
-      title: t('sidebar.context.planLockTitle'),
-      description: t('sidebar.context.planLockRequiresPlan', {
-        item: itemTitle,
-        plan: requiredPlan,
-      }),
-    });
-    navigate('/dashboard/billing/physical', {
-      state: { blockedPath: getNavItemPath(itemUrl), requiredFeature: feature, requiredPlan },
-    });
+    handlePlanLockedNav(itemTitle, itemUrl);
   };
 
   return (

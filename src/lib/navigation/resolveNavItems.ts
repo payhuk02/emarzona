@@ -14,11 +14,7 @@ import {
   filterSellerNavSectionsByAccess,
 } from '@/config/navigation.rbac';
 import type { FlatNavEntry, NavItem, NavSection, SidebarPersona } from '@/config/navigation.types';
-import {
-  hasPhysicalFeatureAccess,
-  type PhysicalPlanSlug,
-} from '@/lib/billing/physical-plan-capabilities';
-import { requiredPhysicalFeatureForPath } from '@/lib/billing/physical-route-capabilities';
+import { isNavPathPlanLocked } from '@/lib/navigation/plan-lock-nav';
 
 /** Ordered links for horizontal top nav (MainLayout seller chrome). */
 export const TOP_NAV_PRIMARY_PATHS = [
@@ -70,6 +66,7 @@ export type ResolvedNavItem = {
   url: string;
   path: string;
   icon: NavItem['icon'];
+  locked: boolean;
 };
 
 export type ResolveNavSectionsInput = {
@@ -89,20 +86,14 @@ export type ResolveNavItemsInput = Omit<ResolveNavSectionsInput, 'scope'> & {
 const enrichedUserSections = enrichNavSections(userMenuSections);
 const enrichedAdminSections = enrichNavSections(adminMenuSections);
 
-function isNavItemPlanLocked(path: string, planSlug: string | null | undefined): boolean {
-  const feature = requiredPhysicalFeatureForPath(path);
-  if (!feature) return false;
-  if (!planSlug) return true;
-  return !hasPhysicalFeatureAccess(planSlug as PhysicalPlanSlug, feature);
-}
-
-function toResolvedNavItem(entry: FlatNavEntry): ResolvedNavItem {
+function toResolvedNavItem(entry: FlatNavEntry, planSlug?: string | null): ResolvedNavItem {
   const path = getNavItemPath(entry.url);
   return {
     title: entry.title,
     url: entry.url,
     path,
     icon: resolveNavItemIcon(entry.url, entry.icon),
+    locked: isNavPathPlanLocked(path, planSlug),
   };
 }
 
@@ -142,14 +133,12 @@ export function resolveNavItems(input: ResolveNavItemsInput): ResolvedNavItem[] 
 
   const flat = flattenNavSections(sections);
   const byPath = new Map(flat.map(entry => [getNavItemPath(entry.url), entry]));
-
-  const includePath = (path: string) => !isNavItemPlanLocked(path, input.physicalPlanSlug);
+  const planSlug = input.physicalPlanSlug;
 
   if (input.surface === 'topnav') {
     return TOP_NAV_PRIMARY_PATHS.map(path => byPath.get(path))
       .filter((entry): entry is FlatNavEntry => Boolean(entry))
-      .filter(entry => includePath(getNavItemPath(entry.url)))
-      .map(toResolvedNavItem);
+      .map(entry => toResolvedNavItem(entry, planSlug));
   }
 
   if (input.surface === 'bottomnav') {
@@ -157,17 +146,18 @@ export function resolveNavItems(input: ResolveNavItemsInput): ResolvedNavItem[] 
     return BOTTOM_NAV_SPECS.map(spec => {
       if (spec.fromMenu === true) {
         const entry = byPath.get(spec.path);
-        if (!entry || !includePath(spec.path)) return null;
-        return toResolvedNavItem(entry);
+        if (!entry) return null;
+        return toResolvedNavItem(entry, planSlug);
       }
       return {
         path: spec.path,
         url: spec.path,
         title: String(t?.(spec.titleKey, { defaultValue: spec.defaultTitle }) ?? spec.defaultTitle),
         icon: spec.icon,
+        locked: false,
       };
     }).filter((item): item is ResolvedNavItem => item !== null);
   }
 
-  return flat.filter(entry => includePath(getNavItemPath(entry.url))).map(toResolvedNavItem);
+  return flat.map(entry => toResolvedNavItem(entry, planSlug));
 }

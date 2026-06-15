@@ -2,7 +2,10 @@ import type { LayoutType } from '@/components/layout/layout.types';
 import type { ContextSidebarConfigId } from '@/config/navigation.context';
 import { detectLayoutType } from '@/config/layoutTypeDetection';
 
-/** Maps layout types to context sidebar configs */
+/**
+ * Maps dashboard layout types to navigation context config ids.
+ * Used by mega-menu grouping (`navigation.horizontal`) and layout detection — not a mounted sidebar UI.
+ */
 export const LAYOUT_CONTEXT_SIDEBAR_MAP: Partial<Record<LayoutType, ContextSidebarConfigId>> = {
   settings: 'settings',
   emails: 'emails',
@@ -32,7 +35,10 @@ export function getContextSidebarConfigId(layoutType: LayoutType): ContextSideba
   return LAYOUT_CONTEXT_SIDEBAR_MAP[layoutType] ?? null;
 }
 
-/** True when the route uses a context sidebar (mobile bottom nav). */
+/**
+ * True when the route belongs to a seller domain with dedicated horizontal context nav config.
+ * @deprecated Prefer `shouldShowSellerHorizontalNav` from `@/config/navigation.horizontal` for shell chrome.
+ */
 export function hasContextSidebarForPath(pathname: string): boolean {
   return getContextSidebarConfigId(detectLayoutType(pathname)) !== null;
 }

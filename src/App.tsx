@@ -71,7 +71,6 @@ const AutoSEO = lazy(() => import('@/components/seo/AutoSEO').then(m => ({ defau
 import { initSentry } from '@/lib/sentry';
 import { initWebVitals } from '@/lib/web-vitals';
 import { ErrorBoundary as SentryErrorBoundary } from '@sentry/react';
-import { hasContextSidebarForPath } from '@/config/contextSidebar.registry';
 import { shouldUseAppPremiumTheme } from '@/lib/premium-theme';
 import { cn } from '@/lib/utils';
 import { AppPremiumShell } from '@/components/layout/AppPremiumShell';
@@ -221,9 +220,7 @@ const AppContent = () => {
     location.pathname === '/login' ||
     location.pathname === '/register' ||
     location.pathname === '/auth';
-  const hasContextSidebar = hasContextSidebarForPath(location.pathname);
-  const isBottomNavVisible =
-    isMobile && location.pathname !== '/' && !isAuthPage && !hasContextSidebar;
+  const isBottomNavVisible = isMobile && location.pathname !== '/' && !isAuthPage;
   const usePremiumTheme = shouldUseAppPremiumTheme(location.pathname);
 
   useBehavioralAnalytics(undefined, {

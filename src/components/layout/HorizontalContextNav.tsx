@@ -21,8 +21,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useHorizontalContextNav } from '@/hooks/useHorizontalContextNav';
 import type { HorizontalNavDomain, HorizontalNavLink } from '@/lib/navigation/resolveHorizontalNav';
-import { useToast } from '@/hooks/use-toast';
-import { requiredPlanLabelForPath } from '@/lib/billing/physical-route-capabilities';
+import { usePlanLockNavAction } from '@/hooks/usePlanLockNavAction';
 import { isNavItemActive } from '@/config/navigation.helpers';
 import { useLocation } from 'react-router-dom';
 
@@ -37,7 +36,7 @@ function MegaMenuLink({
 }) {
   const location = useLocation();
   const Icon = item.icon;
-  const active = isNavItemActive(item.url, location.pathname, location.search);
+  const active = isNavItemActive(item.url, location.pathname, location.search, 'prefix');
 
   if (item.locked) {
     return (
@@ -166,32 +165,18 @@ function MobileDomainSheet({
 export function HorizontalContextNav() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const handlePlanLockedNav = usePlanLockNavAction();
   const domains = useHorizontalContextNav();
 
   const handleNavigate = useCallback(
     (item: HorizontalNavLink) => {
       if (item.locked) {
-        const planLabel = requiredPlanLabelForPath(item.path);
-        toast({
-          title: t('sidebar.context.planLockTitle', { defaultValue: 'Fonctionnalité verrouillée' }),
-          description: planLabel
-            ? t('sidebar.context.planLockRequiresPlan', {
-                defaultValue: '{{item}} requiert le plan {{plan}}.',
-                item: item.title,
-                plan: planLabel,
-              })
-            : t('sidebar.context.planLockRequiresUpgrade', {
-                defaultValue: '{{item}} nécessite un plan supérieur.',
-                item: item.title,
-              }),
-        });
-        navigate('/dashboard/billing/physical');
+        handlePlanLockedNav(item.title, item.url);
         return;
       }
       navigate(item.url);
     },
-    [navigate, t, toast]
+    [navigate, handlePlanLockedNav]
   );
 
   if (domains.length === 0) return null;

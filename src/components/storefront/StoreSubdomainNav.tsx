@@ -9,6 +9,7 @@ import { Store, Palette, FolderOpen, Gavel, ShoppingCart, Menu, X } from 'lucide
 import { useState, useMemo, CSSProperties } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { isNavItemActive } from '@/config/navigation.helpers';
 
 interface StoreThemeColors {
   primaryColor?: string;
@@ -56,10 +57,8 @@ export function StoreSubdomainNav({ storeName, logoUrl, themeColors }: StoreSubd
     };
   }, [themeColors, hasTheme]);
 
-  const isActive = (path: string) => {
-    if (path === '/') return location.pathname === '/';
-    return location.pathname.startsWith(path);
-  };
+  const isActive = (path: string) =>
+    isNavItemActive(path, location.pathname, location.search, 'prefix');
 
   const getItemStyle = (active: boolean): CSSProperties => {
     if (!hasTheme) return {};
@@ -107,7 +106,7 @@ export function StoreSubdomainNav({ storeName, logoUrl, themeColors }: StoreSubd
 
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-1">
-            {navItems.map((item) => {
+            {navItems.map(item => {
               const active = isActive(item.path);
               return (
                 <Link
@@ -115,9 +114,10 @@ export function StoreSubdomainNav({ storeName, logoUrl, themeColors }: StoreSubd
                   to={item.path}
                   className={cn(
                     'flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors',
-                    !hasTheme && (active
-                      ? 'bg-primary/10 text-primary'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/50')
+                    !hasTheme &&
+                      (active
+                        ? 'bg-primary/10 text-primary'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-muted/50')
                   )}
                   style={getItemStyle(active)}
                 >
@@ -131,7 +131,12 @@ export function StoreSubdomainNav({ storeName, logoUrl, themeColors }: StoreSubd
           {/* Cart + mobile toggle */}
           <div className="flex items-center gap-2">
             <Link to="/cart">
-              <Button variant="ghost" size="icon" className="relative" style={{ color: themeColors?.textColor || undefined }}>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative"
+                style={{ color: themeColors?.textColor || undefined }}
+              >
                 <ShoppingCart className="h-5 w-5" />
               </Button>
             </Link>
@@ -156,7 +161,7 @@ export function StoreSubdomainNav({ storeName, logoUrl, themeColors }: StoreSubd
           style={{ backgroundColor: themeColors?.backgroundColor || undefined }}
         >
           <div className="px-4 py-2 space-y-1">
-            {navItems.map((item) => {
+            {navItems.map(item => {
               const active = isActive(item.path);
               return (
                 <Link
@@ -165,9 +170,10 @@ export function StoreSubdomainNav({ storeName, logoUrl, themeColors }: StoreSubd
                   onClick={() => setMobileOpen(false)}
                   className={cn(
                     'flex items-center gap-2 px-3 py-2.5 rounded-md text-sm font-medium transition-colors',
-                    !hasTheme && (active
-                      ? 'bg-primary/10 text-primary'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/50')
+                    !hasTheme &&
+                      (active
+                        ? 'bg-primary/10 text-primary'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-muted/50')
                   )}
                   style={getItemStyle(active)}
                 >

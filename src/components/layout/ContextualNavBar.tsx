@@ -7,6 +7,7 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { LucideIcon } from 'lucide-react';
+import { isNavItemActive } from '@/config/navigation.helpers';
 
 export interface ContextualNavItem {
   label: string;
@@ -22,20 +23,11 @@ interface ContextualNavBarProps {
   className?: string;
 }
 
-export const ContextualNavBar = ({
-  title,
-  items,
-  basePath,
-  className,
-}: ContextualNavBarProps) => {
+export const ContextualNavBar = ({ title, items, basePath, className }: ContextualNavBarProps) => {
   const location = useLocation();
 
-  const isActive = (path: string) => {
-    if (path === basePath) {
-      return location.pathname === basePath;
-    }
-    return location.pathname.startsWith(path);
-  };
+  const isActive = (path: string) =>
+    isNavItemActive(path, location.pathname, location.search, 'prefix');
 
   return (
     <div
@@ -53,7 +45,7 @@ export const ContextualNavBar = ({
 
           {/* Navigation Items */}
           <nav className="flex items-center gap-1 flex-1 overflow-x-auto scrollbar-hide">
-            {items.map((item) => {
+            {items.map(item => {
               const Icon = item.icon;
               const active = isActive(item.path);
 
@@ -92,10 +84,3 @@ export const ContextualNavBar = ({
     </div>
   );
 };
-
-
-
-
-
-
-

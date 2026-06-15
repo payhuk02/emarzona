@@ -3,15 +3,10 @@
  * Navigation en bas d'écran optimisée pour mobile
  */
 
-import { Link, useLocation } from "react-router-dom";
-import { cn } from "@/lib/utils";
-import {
-  Home,
-  ShoppingBag,
-  User,
-  Menu,
-  Search,
-} from "lucide-react";
+import { Link, useLocation } from 'react-router-dom';
+import { cn } from '@/lib/utils';
+import { isNavItemActive } from '@/config/navigation.helpers';
+import { Home, ShoppingBag, User, Menu, Search } from 'lucide-react';
 
 interface NavItem {
   label: string;
@@ -20,36 +15,36 @@ interface NavItem {
   ariaLabel: string;
 }
 
-const  navItems: NavItem[] = [
+const navItems: NavItem[] = [
   {
-    label: "Accueil",
+    label: 'Accueil',
     icon: Home,
-    path: "/",
+    path: '/',
     ariaLabel: "Aller à l'accueil",
   },
   {
-    label: "Marketplace",
+    label: 'Marketplace',
     icon: ShoppingBag,
-    path: "/marketplace",
-    ariaLabel: "Aller à la marketplace",
+    path: '/marketplace',
+    ariaLabel: 'Aller à la marketplace',
   },
   {
-    label: "Recherche",
+    label: 'Recherche',
     icon: Search,
-    path: "/marketplace?search=true",
-    ariaLabel: "Rechercher des produits",
+    path: '/marketplace?search=true',
+    ariaLabel: 'Rechercher des produits',
   },
   {
-    label: "Menu",
+    label: 'Menu',
     icon: Menu,
-    path: "/dashboard",
-    ariaLabel: "Ouvrir le menu",
+    path: '/dashboard',
+    ariaLabel: 'Ouvrir le menu',
   },
   {
-    label: "Compte",
+    label: 'Compte',
     icon: User,
-    path: "/account",
-    ariaLabel: "Aller à mon compte",
+    path: '/account',
+    ariaLabel: 'Aller à mon compte',
   },
 ];
 
@@ -66,24 +61,21 @@ export function MobileBottomNav() {
       aria-label="Navigation principale"
     >
       <div className="flex items-center justify-around h-16">
-        {navItems.map((item) => {
+        {navItems.map(item => {
           const Icon = item.icon;
-          const isActive = location.pathname === item.path || 
-            (item.path !== "/" && location.pathname.startsWith(item.path));
+          const isActive = isNavItemActive(item.path, location.pathname, location.search, 'prefix');
 
           return (
             <Link
               key={item.path}
               to={item.path}
               className={cn(
-                "flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-colors",
-                "min-w-[44px] min-h-[44px]", // Touch target optimal
-                isActive
-                  ? "text-primary"
-                  : "text-muted-foreground hover:text-foreground"
+                'flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-colors',
+                'min-w-[44px] min-h-[44px]', // Touch target optimal
+                isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
               )}
               aria-label={item.ariaLabel}
-              aria-current={isActive ? "page" : undefined}
+              aria-current={isActive ? 'page' : undefined}
             >
               <Icon className="w-5 h-5" aria-hidden="true" />
               <span className="text-xs font-medium">{item.label}</span>
@@ -94,12 +86,3 @@ export function MobileBottomNav() {
     </nav>
   );
 }
-
-
-
-
-
-
-
-
-

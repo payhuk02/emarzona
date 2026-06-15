@@ -11,11 +11,7 @@ import { translateNavSections } from '@/config/navigation.i18n';
 import { userMenuSections } from '@/config/navigation.menus';
 import { filterSellerNavSectionsByAccess } from '@/config/navigation.rbac';
 import type { NavItem, SidebarPersona } from '@/config/navigation.types';
-import {
-  hasPhysicalFeatureAccess,
-  type PhysicalPlanSlug,
-} from '@/lib/billing/physical-plan-capabilities';
-import { requiredPhysicalFeatureForPath } from '@/lib/billing/physical-route-capabilities';
+import { isNavPathPlanLocked } from '@/lib/navigation/plan-lock-nav';
 
 export type HorizontalNavLink = {
   title: string;
@@ -40,17 +36,12 @@ export type HorizontalNavDomain = HorizontalNavSectionSpec & {
 
 function toLink(item: NavItem, planSlug: string | null | undefined): HorizontalNavLink {
   const path = getNavItemPath(item.url);
-  const feature = requiredPhysicalFeatureForPath(path);
-  const locked =
-    Boolean(feature) &&
-    (!planSlug || !hasPhysicalFeatureAccess(planSlug as PhysicalPlanSlug, feature));
-
   return {
     title: item.title,
     url: item.url,
     path,
     icon: resolveNavItemIcon(item.url, item.icon),
-    locked,
+    locked: isNavPathPlanLocked(path, planSlug),
   };
 }
 
@@ -116,7 +107,9 @@ export function resolveHorizontalNavDomains(input: {
     if (!section || section.items.length === 0) continue;
 
     const items = section.items.map(item => toLink(item, input.physicalPlanSlug));
-    const isActive = items.some(item => isNavItemActive(item.url, input.pathname, input.search));
+    const isActive = items.some(item =>
+      isNavItemActive(item.url, input.pathname, input.search, 'prefix')
+    );
 
     domains.push({
       ...spec,
