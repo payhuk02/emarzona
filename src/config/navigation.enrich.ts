@@ -66,6 +66,8 @@ export const SELLER_PRIMARY_PATHS = new Set([
   '/dashboard/emails/campaigns',
   '/dashboard/coupons',
   '/dashboard/payments',
+  '/dashboard/payments-customers',
+  '/dashboard/payment-management',
   '/dashboard/taxes',
   '/dashboard/payment-methods',
   '/dashboard/payment-connections',

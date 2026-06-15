@@ -29,6 +29,7 @@ describe('context sidebar Phase 6', () => {
     expect(paths).toContain('/dashboard/taxes');
     expect(paths).toContain('/dashboard/payment-methods');
     expect(paths).toContain('/dashboard/payments-customers');
+    expect(paths).toContain('/dashboard/payment-management');
   });
 
   it('resolves bookings from ventes section including new service routes', () => {

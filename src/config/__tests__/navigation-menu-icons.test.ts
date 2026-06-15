@@ -41,6 +41,16 @@ describe('navigation menu icons', () => {
     expect(payments?.icon).toBe(CreditCard);
   });
 
+  it('Paiements & Clients et Gestion Paiements sont dans le sidebar vendeur compact', () => {
+    const compact = filterNavSections(enrichNavSections(userMenuSections), 'seller', {
+      sidebarOnly: true,
+    });
+    const finance = compact.find(s => s.sectionKey === 'finance_paiements');
+    const paths = finance?.items.map(i => i.url) ?? [];
+    expect(paths).toContain('/dashboard/payments-customers');
+    expect(paths).toContain('/dashboard/payment-management');
+  });
+
   it('resolveNavItemIcon falls back to CreditCard for payments', () => {
     expect(resolveNavItemIcon('/dashboard/payments', undefined)).toBe(CreditCard);
   });
