@@ -72,7 +72,19 @@
       "topNavUserMenu": "User menu",
       "bottomNavMain": "Main navigation",
       "bottomNavCart": "Cart",
-      "bottomNavAccount": "Account"
+      "bottomNavAccount": "Account",
+      "commandPaletteSearchPlaceholder": "Search for a page or quick action…",
+      "commandPaletteEmpty": "No pages found.",
+      "utilityBarAriaLabel": "User actions",
+      "shortcutToggleSidebar": "Toggle sidebar",
+      "shortcutCommandPalette": "Open command palette"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "markAllRead": "Mark all as read",
+      "settingsAriaLabel": "Notification settings",
+      "empty": "No notifications",
+      "viewAll": "View all notifications"
     },
     "contextGroups": {
       "integrations": "Integrations",

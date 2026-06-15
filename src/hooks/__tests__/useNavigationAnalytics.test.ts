@@ -4,9 +4,11 @@ import {
   recordNavClick,
   sortEntriesByNavFrequency,
 } from '@/hooks/useNavigationAnalytics';
+import { setSidebarPrefsUserId } from '@/lib/navigation/sidebar-prefs-storage';
 
 describe('useNavigationAnalytics', () => {
   beforeEach(() => {
+    setSidebarPrefsUserId('test-user');
     vi.stubGlobal('localStorage', {
       store: {} as Record<string, string>,
       getItem(key: string) {

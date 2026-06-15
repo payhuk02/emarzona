@@ -1,28 +1,22 @@
-const NAV_CLICK_COUNTS_KEY = 'navClickCounts';
+import {
+  readSidebarJsonPref,
+  SIDEBAR_PREF_KEYS,
+  writeSidebarJsonPref,
+} from '@/lib/navigation/sidebar-prefs-storage';
+
 const MAX_TRACKED_URLS = 200;
 
 type ClickCounts = Record<string, number>;
 
 function readCounts(): ClickCounts {
-  try {
-    const raw = localStorage.getItem(NAV_CLICK_COUNTS_KEY);
-    if (!raw) return {};
-    const parsed = JSON.parse(raw) as ClickCounts;
-    return parsed && typeof parsed === 'object' ? parsed : {};
-  } catch {
-    return {};
-  }
+  return readSidebarJsonPref<ClickCounts>(SIDEBAR_PREF_KEYS.navClickCounts) ?? {};
 }
 
 function writeCounts(counts: ClickCounts) {
-  try {
-    const entries = Object.entries(counts)
-      .sort(([, a], [, b]) => b - a)
-      .slice(0, MAX_TRACKED_URLS);
-    localStorage.setItem(NAV_CLICK_COUNTS_KEY, JSON.stringify(Object.fromEntries(entries)));
-  } catch {
-    /* ignore quota errors */
-  }
+  const entries = Object.entries(counts)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, MAX_TRACKED_URLS);
+  writeSidebarJsonPref(SIDEBAR_PREF_KEYS.navClickCounts, Object.fromEntries(entries));
 }
 
 /** Record a sidebar / command palette navigation click. */
@@ -44,3 +38,5 @@ export function sortEntriesByNavFrequency<T extends { url: string }>(entries: T[
     return a.url.localeCompare(b.url);
   });
 }
+
+export const NAV_CLICK_COUNTS_KEY = SIDEBAR_PREF_KEYS.navClickCounts;

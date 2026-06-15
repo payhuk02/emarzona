@@ -72,7 +72,19 @@
       "topNavUserMenu": "Menu do utilizador",
       "bottomNavMain": "Navegação principal",
       "bottomNavCart": "Carrinho",
-      "bottomNavAccount": "Conta"
+      "bottomNavAccount": "Conta",
+      "commandPaletteSearchPlaceholder": "Pesquisar uma página ou ação rápida…",
+      "commandPaletteEmpty": "Nenhuma página encontrada.",
+      "utilityBarAriaLabel": "Ações do utilizador",
+      "shortcutToggleSidebar": "Mostrar/ocultar barra lateral",
+      "shortcutCommandPalette": "Abrir paleta de comandos"
+    },
+    "notifications": {
+      "title": "Notificações",
+      "markAllRead": "Marcar tudo como lido",
+      "settingsAriaLabel": "Definições de notificações",
+      "empty": "Sem notificações",
+      "viewAll": "Ver todas as notificações"
     },
     "contextGroups": {
       "integrations": "Integrações",

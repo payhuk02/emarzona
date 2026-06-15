@@ -45,15 +45,19 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useAdmin } from '@/hooks/useAdmin';
 import { useStoreContext } from '@/contexts/StoreContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useStorePhysicalAccess } from '@/hooks/billing/useStorePhysicalAccess';
 import { isNavPathPlanLocked } from '@/lib/navigation/plan-lock-nav';
 import { usePlanLockNavAction } from '@/hooks/usePlanLockNavAction';
+import {
+  hasSidebarJsonPref,
+  readSidebarJsonPref,
+  setSidebarPrefsUserId,
+  SIDEBAR_PREF_KEYS,
+  writeSidebarJsonPref,
+} from '@/lib/navigation/sidebar-prefs-storage';
 import { logger } from '@/lib/logger';
 
-const PINNED_NAV_KEY = 'sidebarPinnedUrls';
-const RECENT_NAV_KEY = 'sidebarRecentUrls';
-const COLLAPSED_SECTIONS_KEY = 'sidebarCollapsedSections';
-const STORES_EXPANDED_KEY = 'sidebarStoresExpanded';
 const MAX_RECENT_ITEMS = 2;
 
 const isNavItemPlanLocked = (url: string, planSlug: string | null) =>
@@ -146,6 +150,8 @@ const LogoImageWithFallback = ({ src, className }: { src: string; className?: st
 
 export function AppSidebar() {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const userId = user?.id ?? null;
   const { state, isMobile } = useSidebar();
   const navigate = useNavigate();
   const location = useLocation();
@@ -243,39 +249,48 @@ export function AppSidebar() {
   }, [allCurrentEntries, location.pathname, location.search]);
 
   useEffect(() => {
-    try {
-      const storedPinned = localStorage.getItem(PINNED_NAV_KEY);
-      const storedRecent = localStorage.getItem(RECENT_NAV_KEY);
-      const storedCollapsed = localStorage.getItem(COLLAPSED_SECTIONS_KEY);
-      const storedStores = localStorage.getItem(STORES_EXPANDED_KEY);
+    setSidebarPrefsUserId(userId);
+  }, [userId]);
 
-      if (storedPinned) setPinnedUrls(JSON.parse(storedPinned));
+  useEffect(() => {
+    setPrefsHydrated(false);
+    try {
+      const storedPinned = readSidebarJsonPref<string[]>(SIDEBAR_PREF_KEYS.pinnedUrls, userId);
+      const storedRecent = readSidebarJsonPref<string[]>(SIDEBAR_PREF_KEYS.recentUrls, userId);
+      const storedCollapsed = readSidebarJsonPref<string[]>(
+        SIDEBAR_PREF_KEYS.collapsedSections,
+        userId
+      );
+      const storedStores = readSidebarJsonPref<boolean>(SIDEBAR_PREF_KEYS.storesExpanded, userId);
+
+      setPinnedUrls(storedPinned ?? []);
       if (storedRecent) {
-        const parsed = JSON.parse(storedRecent) as string[];
-        setRecentUrls(Array.isArray(parsed) ? parsed.slice(0, MAX_RECENT_ITEMS) : []);
+        setRecentUrls(Array.isArray(storedRecent) ? storedRecent.slice(0, MAX_RECENT_ITEMS) : []);
+      } else {
+        setRecentUrls([]);
       }
-      if (storedCollapsed) setCollapsedSections(JSON.parse(storedCollapsed));
-      if (storedStores !== null) setStoresMenuOpen(JSON.parse(storedStores));
+      if (storedCollapsed) setCollapsedSections(storedCollapsed);
+      if (storedStores !== null) setStoresMenuOpen(storedStores);
       setPrefsHydrated(true);
     } catch (error) {
       logger.warn('Failed to restore sidebar preferences', error);
       setPrefsHydrated(true);
     }
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
     if (!prefsHydrated) return;
-    if (localStorage.getItem(COLLAPSED_SECTIONS_KEY) !== null) return;
+    if (hasSidebarJsonPref(SIDEBAR_PREF_KEYS.collapsedSections, userId)) return;
     setCollapsedSections(
       buildDefaultCollapsedSections(activeSections, location.pathname, location.search)
     );
-  }, [prefsHydrated, activeSections, location.pathname, location.search]);
+  }, [prefsHydrated, activeSections, location.pathname, location.search, userId]);
 
   useEffect(() => {
     if (!prefsHydrated) return;
-    if (localStorage.getItem(STORES_EXPANDED_KEY) !== null) return;
+    if (hasSidebarJsonPref(SIDEBAR_PREF_KEYS.storesExpanded, userId)) return;
     setStoresMenuOpen(stores.length <= 1);
-  }, [prefsHydrated, stores.length]);
+  }, [prefsHydrated, stores.length, userId]);
 
   useEffect(() => {
     const activeKey = activeSections.find(s =>
@@ -289,20 +304,23 @@ export function AppSidebar() {
 
   useEffect(() => {
     if (!prefsHydrated) return;
-    localStorage.setItem(STORES_EXPANDED_KEY, JSON.stringify(storesMenuOpen));
-  }, [storesMenuOpen, prefsHydrated]);
+    writeSidebarJsonPref(SIDEBAR_PREF_KEYS.storesExpanded, storesMenuOpen, userId);
+  }, [storesMenuOpen, prefsHydrated, userId]);
 
   useEffect(() => {
-    localStorage.setItem(PINNED_NAV_KEY, JSON.stringify(pinnedUrls));
-  }, [pinnedUrls]);
+    if (!prefsHydrated) return;
+    writeSidebarJsonPref(SIDEBAR_PREF_KEYS.pinnedUrls, pinnedUrls, userId);
+  }, [pinnedUrls, prefsHydrated, userId]);
 
   useEffect(() => {
-    localStorage.setItem(RECENT_NAV_KEY, JSON.stringify(recentUrls));
-  }, [recentUrls]);
+    if (!prefsHydrated) return;
+    writeSidebarJsonPref(SIDEBAR_PREF_KEYS.recentUrls, recentUrls, userId);
+  }, [recentUrls, prefsHydrated, userId]);
 
   useEffect(() => {
-    localStorage.setItem(COLLAPSED_SECTIONS_KEY, JSON.stringify(collapsedSections));
-  }, [collapsedSections]);
+    if (!prefsHydrated) return;
+    writeSidebarJsonPref(SIDEBAR_PREF_KEYS.collapsedSections, collapsedSections, userId);
+  }, [collapsedSections, prefsHydrated, userId]);
 
   useEffect(() => {
     if (!currentNavItem?.url) return;

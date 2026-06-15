@@ -5,6 +5,7 @@
  */
 
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -16,13 +17,14 @@ import {
   useUnreadCount,
 } from '@/hooks/useNotifications';
 import { NotificationItem } from './NotificationItem';
-import { Separator } from '@/components/ui/separator';
+import { isSafeInternalNavUrl } from '@/lib/navigation/keyboard-shortcuts';
 
 interface NotificationDropdownProps {
   onClose: () => void;
 }
 
 export const NotificationDropdown = ({ onClose }: NotificationDropdownProps) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: notificationsResult, isLoading } = useNotifications({ page: 1, pageSize: 10 });
   const notifications = notificationsResult?.data || [];
@@ -30,15 +32,18 @@ export const NotificationDropdown = ({ onClose }: NotificationDropdownProps) => 
   const markAsRead = useMarkAsRead();
   const markAllAsRead = useMarkAllAsRead();
 
-  const handleNotificationClick = async (notification: any) => {
-    // Marquer comme lu
+  const handleNotificationClick = async (notification: {
+    id: string;
+    is_read: boolean;
+    action_url?: string | null;
+  }) => {
     if (!notification.is_read) {
       await markAsRead.mutateAsync(notification.id);
     }
 
-    // Naviguer vers l'URL d'action si présente
-    if (notification.action_url) {
-      navigate(notification.action_url);
+    const actionUrl = notification.action_url?.trim();
+    if (actionUrl && isSafeInternalNavUrl(actionUrl)) {
+      navigate(actionUrl);
       onClose();
     }
   };
@@ -69,40 +74,38 @@ export const NotificationDropdown = ({ onClose }: NotificationDropdownProps) => 
 
   return (
     <div className="w-96">
-      {/* Header */}
       <div className="p-4 border-b">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-base">Notifications</h3>
+          <h3 className="font-semibold text-base">{t('sidebar.notifications.title')}</h3>
           <div className="flex items-center gap-2">
             {unreadCount > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleMarkAllRead}
-                className="text-xs"
-              >
+              <Button variant="ghost" size="sm" onClick={handleMarkAllRead} className="text-xs">
                 <Check className="w-3 h-3 mr-1" />
-                Tout marquer lu
+                {t('sidebar.notifications.markAllRead')}
               </Button>
             )}
-            <Button variant="ghost" size="icon" onClick={handleSettings} aria-label="Paramètres de notification">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleSettings}
+              aria-label={t('sidebar.notifications.settingsAriaLabel')}
+            >
               <Settings className="w-4 h-4" />
             </Button>
           </div>
         </div>
       </div>
 
-      {/* Liste notifications */}
       {notifications.length === 0 ? (
         <div className="p-12 text-center">
           <Bell className="w-12 h-12 mx-auto mb-3 text-muted-foreground opacity-50" />
-          <p className="text-sm text-muted-foreground">Aucune notification</p>
+          <p className="text-sm text-muted-foreground">{t('sidebar.notifications.empty')}</p>
         </div>
       ) : (
         <>
           <ScrollArea className="h-[400px]">
             <div className="divide-y">
-              {notifications.map((notification) => (
+              {notifications.map(notification => (
                 <NotificationItem
                   key={notification.id}
                   notification={notification}
@@ -112,7 +115,6 @@ export const NotificationDropdown = ({ onClose }: NotificationDropdownProps) => 
             </div>
           </ScrollArea>
 
-          {/* Footer */}
           <div className="p-3 border-t">
             <Button
               variant="ghost"
@@ -120,7 +122,7 @@ export const NotificationDropdown = ({ onClose }: NotificationDropdownProps) => 
               onClick={handleViewAll}
             >
               <Eye className="w-4 h-4 mr-2" />
-              Voir toutes les notifications
+              {t('sidebar.notifications.viewAll')}
             </Button>
           </div>
         </>
@@ -128,10 +130,3 @@ export const NotificationDropdown = ({ onClose }: NotificationDropdownProps) => 
     </div>
   );
 };
-
-
-
-
-
-
-

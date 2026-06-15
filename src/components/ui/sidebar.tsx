@@ -5,6 +5,7 @@ import { PanelLeft } from 'lucide-react';
 
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
@@ -256,8 +257,8 @@ const Sidebar = React.forwardRef<
         >
           <div
             data-sidebar="sidebar"
-            data-sidebar-theme="dark"
-            className="flex h-full min-h-0 w-full flex-col text-white group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-white/10 group-data-[variant=floating]:shadow"
+            data-sidebar-theme="light"
+            className="flex h-full min-h-0 w-full flex-col text-sidebar-foreground group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow"
           >
             {children}
           </div>
@@ -273,6 +274,8 @@ const SidebarTrigger = React.forwardRef<
   React.ComponentProps<typeof Button>
 >(({ className, onClick, ...props }, ref) => {
   const { toggleSidebar } = useSidebar();
+  const { t } = useTranslation();
+  const toggleLabel = t('sidebar.chrome.shortcutToggleSidebar');
 
   return (
     <Button
@@ -285,11 +288,11 @@ const SidebarTrigger = React.forwardRef<
         onClick?.(event);
         toggleSidebar();
       }}
-      aria-label="Basculer la barre latérale"
+      aria-label={toggleLabel}
       {...props}
     >
       <PanelLeft />
-      <span className="sr-only">Basculer la barre latérale</span>
+      <span className="sr-only">{toggleLabel}</span>
     </Button>
   );
 });
@@ -298,15 +301,17 @@ SidebarTrigger.displayName = 'SidebarTrigger';
 const SidebarRail = React.forwardRef<HTMLButtonElement, React.ComponentProps<'button'>>(
   ({ className, ...props }, ref) => {
     const { toggleSidebar } = useSidebar();
+    const { t } = useTranslation();
+    const toggleLabel = t('sidebar.chrome.shortcutToggleSidebar');
 
     return (
       <button
         ref={ref}
         data-sidebar="rail"
-        aria-label="Basculer la barre latérale"
+        aria-label={toggleLabel}
         tabIndex={-1}
         onClick={toggleSidebar}
-        title="Basculer la barre latérale"
+        title={toggleLabel}
         className={cn(
           'absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] group-data-[side=left]:-right-4 group-data-[side=right]:left-0 hover:after:bg-sidebar-border sm:flex',
           '[[data-side=left]_&]:cursor-w-resize [[data-side=right]_&]:cursor-e-resize',

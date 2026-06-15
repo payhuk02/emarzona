@@ -7,12 +7,21 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Search } from 'lucide-react';
 import { dispatchOpenCommandPalette } from '@/lib/vendor-command-palette';
+import { useTranslation } from 'react-i18next';
+import {
+  formatSearchShortcutKey,
+  formatSidebarToggleShortcutKey,
+} from '@/lib/navigation/keyboard-shortcuts';
 
 type UtilityBarHeaderProps = {
   className?: string;
 };
 
 export function UtilityBarHeader({ className }: UtilityBarHeaderProps) {
+  const { t } = useTranslation();
+  const searchShortcut = formatSearchShortcutKey();
+  const sidebarShortcut = formatSidebarToggleShortcutKey();
+
   return (
     <header
       className={cn(
@@ -22,22 +31,33 @@ export function UtilityBarHeader({ className }: UtilityBarHeaderProps) {
         className
       )}
       role="toolbar"
-      aria-label="Actions utilisateur"
+      aria-label={t('sidebar.chrome.utilityBarAriaLabel')}
     >
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        className="hidden sm:inline-flex h-8 gap-2 text-muted-foreground"
-        onClick={dispatchOpenCommandPalette}
-        aria-label="Ouvrir la palette de commandes"
-      >
-        <Search className="h-3.5 w-3.5" aria-hidden />
-        <span className="text-xs">Rechercher…</span>
-        <kbd className="pointer-events-none hidden md:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
-          <span className="text-xs">⌘</span>K
-        </kbd>
-      </Button>
+      <div className="hidden sm:flex items-center gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="h-8 gap-2 text-muted-foreground"
+          onClick={dispatchOpenCommandPalette}
+          aria-label={t('sidebar.chrome.shortcutCommandPalette')}
+        >
+          <Search className="h-3.5 w-3.5" aria-hidden />
+          <span className="text-xs">{t('sidebar.chrome.searchPlaceholder')}</span>
+          <kbd className="pointer-events-none hidden md:inline-flex h-5 select-none items-center rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
+            {searchShortcut}
+          </kbd>
+        </Button>
+        <span
+          className="hidden lg:inline-flex items-center gap-1.5 text-[10px] text-muted-foreground"
+          aria-hidden
+        >
+          <kbd className="pointer-events-none inline-flex h-5 select-none items-center rounded border bg-muted px-1.5 font-mono font-medium">
+            {sidebarShortcut}
+          </kbd>
+          <span>{t('sidebar.chrome.shortcutToggleSidebar')}</span>
+        </span>
+      </div>
       <UserUtilityActions variant="shell" />
     </header>
   );

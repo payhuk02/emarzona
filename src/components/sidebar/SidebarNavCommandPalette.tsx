@@ -12,6 +12,7 @@ import {
 import type { SidebarNavEntry } from './sidebar-nav-shared';
 import { recordNavClick } from '@/hooks/useNavigationAnalytics';
 import { OPEN_COMMAND_PALETTE_EVENT } from '@/lib/vendor-command-palette';
+import { useTranslation } from 'react-i18next';
 
 interface SidebarNavCommandPaletteProps {
   entries: SidebarNavEntry[];
@@ -26,6 +27,7 @@ export function SidebarNavCommandPalette({
   open: openProp,
   onOpenChange,
 }: SidebarNavCommandPaletteProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [openInternal, setOpenInternal] = useState(false);
   const open = openProp ?? openInternal;
@@ -65,9 +67,9 @@ export function SidebarNavCommandPalette({
 
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
-      <CommandInput placeholder="Rechercher une page, une action rapide…" />
+      <CommandInput placeholder={t('sidebar.chrome.commandPaletteSearchPlaceholder')} />
       <CommandList className="max-h-[min(60vh,420px)]">
-        <CommandEmpty>Aucune page trouvée.</CommandEmpty>
+        <CommandEmpty>{t('sidebar.chrome.commandPaletteEmpty')}</CommandEmpty>
         {Object.entries(grouped).map(([sectionLabel, items], index) => (
           <div key={sectionLabel}>
             {index > 0 && <CommandSeparator />}
