@@ -243,6 +243,91 @@ describe('useRequire2FA', () => {
     expect(onRequire2FA).toHaveBeenCalledTimes(1);
     expect(mockNavigate).not.toHaveBeenCalled();
   });
+
+  it('should redirect to security settings when 2FA is required', async () => {
+    const { supabase } = await import('@/integrations/supabase/client');
+    vi.mocked(supabase.rpc).mockResolvedValue({ data: true, error: null });
+    vi.mocked(supabase.auth.mfa.listFactors).mockResolvedValue({
+      data: { factors: [], totp: [], phone: [], all: [] },
+      error: null,
+    });
+
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <BrowserRouter>{children}</BrowserRouter>
+    );
+
+    const { result } = renderHook(() => useRequire2FA({ gracePeriodDays: 0 }), { wrapper });
+
+    await waitFor(() => {
+      expect(result.current.requires2FA).toBe(true);
+    });
+
+    expect(mockToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: '🔒 2FA Obligatoire',
+        duration: 0,
+      })
+    );
+
+    await waitFor(
+      () => {
+        expect(mockNavigate).toHaveBeenCalledWith(
+          '/dashboard/settings?tab=security&action=enable2fa'
+        );
+      },
+      { timeout: 2500 }
+    );
+  });
+
+  it('should not redirect on whitelisted settings route', async () => {
+    mockPathname = '/dashboard/settings/security';
+    const { supabase } = await import('@/integrations/supabase/client');
+    vi.mocked(supabase.rpc).mockResolvedValue({ data: true, error: null });
+    vi.mocked(supabase.auth.mfa.listFactors).mockResolvedValue({
+      data: { factors: [], totp: [], phone: [], all: [] },
+      error: null,
+    });
+
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <BrowserRouter>{children}</BrowserRouter>
+    );
+
+    const { result } = renderHook(() => useRequire2FA({ gracePeriodDays: 0 }), { wrapper });
+
+    await waitFor(() => {
+      expect(result.current.requires2FA).toBe(true);
+    });
+
+    await new Promise(resolve => setTimeout(resolve, 1200));
+
+    expect(mockToast).not.toHaveBeenCalledWith(
+      expect.objectContaining({ title: '🔒 2FA Obligatoire' })
+    );
+    expect(mockNavigate).not.toHaveBeenCalled();
+  });
+
+  it('uses singular day label in warning toast when one day remains', async () => {
+    const { supabase } = await import('@/integrations/supabase/client');
+    vi.mocked(supabase.rpc).mockResolvedValue({ data: true, error: null });
+    vi.mocked(supabase.auth.mfa.listFactors).mockResolvedValue({
+      data: { factors: [], totp: [], phone: [], all: [] },
+      error: null,
+    });
+
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <BrowserRouter>{children}</BrowserRouter>
+    );
+
+    renderHook(() => useRequire2FA({ gracePeriodDays: 1 }), { wrapper });
+
+    await waitFor(() => {
+      expect(mockToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          description: expect.stringContaining('1 jour.'),
+        })
+      );
+    });
+  });
 });
 
 describe('useIs2FAEnabled', () => {

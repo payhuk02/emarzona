@@ -46,4 +46,66 @@ describe('isPaymentOrchestrationV2Enabled', () => {
     const b = isPaymentOrchestrationV2EnabledForStore('store-canary-a');
     expect(a).toBe(b);
   });
+
+  it('returns 0 rollout when V2 disabled and rollout unset', () => {
+    vi.stubEnv('VITE_PAYMENT_ORCHESTRATION_V2', 'false');
+    expect(getPaymentOrchestrationV2RolloutPercent()).toBe(0);
+  });
+
+  it('returns 100 rollout when V2 enabled and rollout unset', () => {
+    vi.stubEnv('VITE_PAYMENT_ORCHESTRATION_V2', 'true');
+    expect(getPaymentOrchestrationV2RolloutPercent()).toBe(100);
+  });
+
+  it('clamps invalid or out-of-range rollout values', () => {
+    vi.stubEnv('VITE_PAYMENT_ORCHESTRATION_V2', 'true');
+    vi.stubEnv('VITE_PAYMENT_ORCHESTRATION_V2_ROLLOUT', 'not-a-number');
+    expect(getPaymentOrchestrationV2RolloutPercent()).toBe(100);
+
+    vi.stubEnv('VITE_PAYMENT_ORCHESTRATION_V2_ROLLOUT', '150');
+    expect(getPaymentOrchestrationV2RolloutPercent()).toBe(100);
+
+    vi.stubEnv('VITE_PAYMENT_ORCHESTRATION_V2_ROLLOUT', '-5');
+    expect(getPaymentOrchestrationV2RolloutPercent()).toBe(0);
+  });
+
+  it('accepts alternate true/false env values', () => {
+    vi.stubEnv('VITE_PAYMENT_ORCHESTRATION_V2', '1');
+    expect(isPaymentOrchestrationV2Enabled()).toBe(true);
+
+    vi.stubEnv('VITE_PAYMENT_ORCHESTRATION_V2', 'yes');
+    expect(isPaymentOrchestrationV2Enabled()).toBe(true);
+
+    vi.stubEnv('VITE_PAYMENT_ORCHESTRATION_V2', '0');
+    expect(isPaymentOrchestrationV2Enabled()).toBe(false);
+
+    vi.stubEnv('VITE_PAYMENT_ORCHESTRATION_V2', 'no');
+    expect(isPaymentOrchestrationV2Enabled()).toBe(false);
+  });
+
+  it('returns false for unknown explicit env values', () => {
+    vi.stubEnv('VITE_PAYMENT_ORCHESTRATION_V2', 'maybe');
+    vi.stubEnv('VITE_VERCEL_ENV', 'preview');
+    expect(isPaymentOrchestrationV2Enabled()).toBe(false);
+  });
+
+  it('returns false when Vercel env is not preview and flag unset', () => {
+    vi.unstubAllEnvs();
+    vi.stubEnv('VITE_PAYMENT_ORCHESTRATION_V2', '');
+    vi.stubEnv('VITE_VERCEL_ENV', 'production');
+    expect(isPaymentOrchestrationV2Enabled()).toBe(false);
+  });
+
+  it('returns false for store rollout when storeId is missing', () => {
+    vi.stubEnv('VITE_PAYMENT_ORCHESTRATION_V2', 'true');
+    vi.stubEnv('VITE_PAYMENT_ORCHESTRATION_V2_ROLLOUT', '50');
+    expect(isPaymentOrchestrationV2EnabledForStore(null)).toBe(false);
+    expect(isPaymentOrchestrationV2EnabledForStore(undefined)).toBe(false);
+  });
+
+  it('returns false for store rollout when V2 is disabled', () => {
+    vi.stubEnv('VITE_PAYMENT_ORCHESTRATION_V2', 'false');
+    vi.stubEnv('VITE_PAYMENT_ORCHESTRATION_V2_ROLLOUT', '100');
+    expect(isPaymentOrchestrationV2EnabledForStore('store-abc')).toBe(false);
+  });
 });
