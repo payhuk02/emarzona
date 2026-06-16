@@ -47,7 +47,7 @@ function MegaMenuLink({
     'flex w-full items-center gap-3 rounded-md text-sm transition-colors',
     variant === 'sidebar'
       ? 'min-h-[44px] touch-manipulation px-3 py-2.5'
-      : 'items-start gap-2.5 px-2 py-2',
+      : 'items-start gap-2.5 px-2.5 py-2.5 min-h-[52px]',
     'hover:bg-accent/60 focus:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
     active && 'bg-primary/10 text-primary font-medium'
   );
@@ -63,7 +63,7 @@ function MegaMenuLink({
         className={cn(linkClassName, 'text-left text-muted-foreground')}
       >
         <Icon className="h-4 w-4 shrink-0 opacity-60" aria-hidden />
-        <span className="flex-1 leading-snug">
+        <span className="flex-1 leading-snug break-words line-clamp-2">
           {item.title}
           <Lock className="inline-block ml-1 h-3 w-3 opacity-70" aria-hidden />
         </span>
@@ -75,7 +75,7 @@ function MegaMenuLink({
     return (
       <NavLink to={item.url} onClick={() => onAfterNavigate?.()} className={linkClassName}>
         <Icon className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-        <span className="leading-snug">{item.title}</span>
+        <span className="leading-snug break-words line-clamp-2">{item.title}</span>
       </NavLink>
     );
   }
@@ -84,7 +84,7 @@ function MegaMenuLink({
     <NavigationMenuLink asChild>
       <NavLink to={item.url} onClick={() => onAfterNavigate?.()} className={linkClassName}>
         <Icon className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-        <span className="leading-snug">{item.title}</span>
+        <span className="leading-snug break-words line-clamp-2">{item.title}</span>
       </NavLink>
     </NavigationMenuLink>
   );
@@ -109,11 +109,11 @@ function MegaMenuPanel({
         className={cn(
           isSidebar
             ? 'flex flex-col gap-5 px-1 py-1'
-            : 'grid gap-4 p-4 md:grid-cols-2 lg:grid-cols-3 md:w-[720px] lg:w-[880px] max-h-[min(70vh,520px)] overflow-y-auto'
+            : 'grid gap-4 p-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:w-[760px] lg:w-[940px] xl:w-[1080px] max-h-[min(74vh,560px)] overflow-y-auto'
         )}
       >
         {domain.subgroups.map(group => (
-          <div key={group.groupKey} className="min-w-0 space-y-1">
+          <div key={group.groupKey} className="min-w-0 space-y-1.5">
             <p
               className={cn(
                 'font-semibold uppercase tracking-wider text-muted-foreground',
@@ -144,7 +144,7 @@ function MegaMenuPanel({
       className={cn(
         isSidebar
           ? 'flex flex-col gap-0.5 px-1 py-1'
-          : 'grid gap-1 p-4 sm:grid-cols-2 md:w-[520px] lg:w-[640px] max-h-[min(70vh,480px)] overflow-y-auto'
+          : 'grid gap-1.5 p-4 sm:grid-cols-2 md:w-[580px] lg:w-[720px] max-h-[min(74vh,520px)] overflow-y-auto'
       )}
     >
       {domain.items.map(item => (
