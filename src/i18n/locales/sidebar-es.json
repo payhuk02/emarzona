@@ -129,7 +129,7 @@
       "portails": "Mis portales",
       "services_fidelite": "Servicios y fidelización",
       "mon_portail_digital": "Mi portal digital",
-      "gestion_digitale": "Gestión (vendedor)",
+      "gestion_digitale": "Ops vendedor",
       "mon_portail_physique": "Mi portal físico",
       "stocks_suivi": "Stock y seguimiento",
       "operations_physiques": "Operaciones",
@@ -137,7 +137,7 @@
       "suivi_qualite": "Seguimiento y trazabilidad",
       "optimisation_stock": "Optimización",
       "mes_cours": "Mis cursos",
-      "gestion_cours": "Gestión (vendedor)",
+      "gestion_cours": "Ops vendedor",
       "commandes": "Pedidos",
       "communication": "Comunicación",
       "paiements_logistique": "Pagos y logística",
@@ -159,7 +159,7 @@
       "campagnes": "Campañas",
       "email_automation": "Email y automatización",
       "boutique": "Marketplace",
-      "recommandations_ia": "Recomendaciones IA",
+      "recommandations_ia": "Para ti",
       "facturation": "Facturación"
     },
     "items": {

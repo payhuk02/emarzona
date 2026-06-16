@@ -129,7 +129,7 @@
       "portails": "My Portals",
       "services_fidelite": "Services & Loyalty",
       "mon_portail_digital": "My Digital Portal",
-      "gestion_digitale": "Management (seller)",
+      "gestion_digitale": "Seller Ops",
       "mon_portail_physique": "My Physical Portal",
       "stocks_suivi": "Stock & tracking",
       "operations_physiques": "Operations",
@@ -137,7 +137,7 @@
       "suivi_qualite": "Tracking & traceability",
       "optimisation_stock": "Optimization",
       "mes_cours": "My courses",
-      "gestion_cours": "Management (seller)",
+      "gestion_cours": "Seller Ops",
       "commandes": "Orders",
       "communication": "Communication",
       "paiements_logistique": "Payments & logistics",
@@ -159,7 +159,7 @@
       "campagnes": "Campaigns",
       "email_automation": "Email & Automation",
       "boutique": "Marketplace",
-      "recommandations_ia": "AI Recommendations",
+      "recommandations_ia": "For You",
       "facturation": "Billing"
     },
     "items": {
