@@ -80,5 +80,15 @@
         { "key": "Cache-Control", "value": "public, max-age=3600" }
       ]
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/cache/warm",
+      "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/cache/health",
+      "schedule": "*/15 * * * *"
+    }
   ]
 }

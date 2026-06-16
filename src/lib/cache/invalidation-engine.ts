@@ -125,18 +125,23 @@ export function invalidateByEvent(
   return invalidateTags(queryClient, tags, context);
 }
 
-/** Purge Redis edge via API (fire-and-forget côté client) */
+/** Purge Redis edge — serveur uniquement (API Vercel / scripts). Le client utilise les triggers DB. */
 export async function purgeRedisTags(tags: CacheTagValue[], secret?: string): Promise<boolean> {
-  if (typeof window === 'undefined') return false;
+  if (typeof window !== 'undefined') {
+    logger.debug('Redis purge skipped on client — handled by DB webhook → cache-invalidate');
+    return false;
+  }
 
-  const apiSecret = secret ?? import.meta.env.VITE_CACHE_INVALIDATION_SECRET;
+  const apiSecret = secret ?? process.env.CACHE_INVALIDATION_SECRET;
   if (!apiSecret) {
-    logger.debug('Redis purge skipped: no VITE_CACHE_INVALIDATION_SECRET');
+    logger.debug('Redis purge skipped: CACHE_INVALIDATION_SECRET not set');
     return false;
   }
 
   try {
-    const res = await fetch('/api/cache/invalidate', {
+    const site = process.env.SITE_URL || process.env.VERCEL_URL || 'https://www.emarzona.com';
+    const base = site.startsWith('http') ? site : `https://${site}`;
+    const res = await fetch(`${base}/api/cache/invalidate`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

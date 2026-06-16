@@ -122,7 +122,7 @@ export function buildMarketplaceProductsQueryKey(
 /**
  * Fonction optimisée pour charger les produits avec sélection de colonnes spécifiques
  */
-async function fetchMarketplaceProducts({
+export async function fetchMarketplaceProducts({
   filters,
   pagination,
   hasSearchQuery,

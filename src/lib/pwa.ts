@@ -3,6 +3,11 @@
  * Gestion du Service Worker, notifications push, mode offline
  */
 
+import {
+  urlBase64ToUint8Array,
+  getVapidPublicKey,
+  isVapidConfigured,
+} from '@/lib/notifications/vapid';
 import { logger } from './logger';
 
 /**
@@ -120,11 +125,16 @@ export async function requestNotificationPermission(): Promise<NotificationPermi
  */
 export async function subscribeToPushNotifications(): Promise<PushSubscription | null> {
   try {
+    if (!isVapidConfigured()) {
+      logger.warn('PWA push: VAPID public key not configured');
+      return null;
+    }
+
     const registration = await navigator.serviceWorker.ready;
 
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(import.meta.env.VITE_VAPID_PUBLIC_KEY || ''),
+      applicationServerKey: urlBase64ToUint8Array(getVapidPublicKey()!),
     });
 
     logger.info('PWA push subscription', { subscription });
@@ -244,23 +254,6 @@ export function sendMessageToSW(message: unknown): void {
   if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
     navigator.serviceWorker.controller.postMessage(message);
   }
-}
-
-/**
- * Convertir une clé VAPID base64 en Uint8Array
- */
-function urlBase64ToUint8Array(base64String: string): Uint8Array {
-  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-
-  const rawData = window.atob(base64);
-  const outputArray = new Uint8Array(rawData.length);
-
-  for (let i = 0; i < rawData.length; ++i) {
-    outputArray[i] = rawData.charCodeAt(i);
-  }
-
-  return outputArray;
 }
 
 /**

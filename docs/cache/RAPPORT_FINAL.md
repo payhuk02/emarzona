@@ -74,11 +74,10 @@ UPSTASH_REDIS_REST_TOKEN=xxx
 # Invalidation API (recommandé)
 CACHE_INVALIDATION_SECRET=<random-32-bytes-hex>
 
-# Optionnel client (préférer webhook serveur)
-VITE_CACHE_INVALIDATION_SECRET=<same-as-server>
-
 # Build (existant)
 VITE_BUILD_ID=<commit-sha>
+
+# Ne PAS exposer CACHE_INVALIDATION_SECRET côté client (VITE_*)
 ```
 
 ---
@@ -94,13 +93,24 @@ VITE_BUILD_ID=<commit-sha>
 
 ---
 
-## Prochaines étapes recommandées
+## Prochaines étapes — STATUT
 
-1. **Webhook Supabase** → `POST /api/cache/invalidate` sur mutation `products`/`stores`
-2. **Cron Vercel** warm cache post-deploy
-3. **Retirer** `VITE_CACHE_INVALIDATION_SECRET` du bundle client
-4. **Fusion RPC** marketplace products + facets (réduire double fetch)
-5. **Migrer** rate-limiter edge functions vers Redis
+1. ✅ **Webhook Supabase** — `cache-invalidate` edge function + triggers `products`/`stores`
+2. ✅ **Cron Vercel** — warm cache 6h + health 15min (`vercel.json` crons)
+3. ✅ **Sécurité** — secret retiré du bundle client ; purge Redis serveur-only
+4. ✅ **Cloudflare** — `docs/cache/CLOUDFLARE_SETUP.md`
+5. ✅ **Catalogue unifié** — `useMarketplaceCatalog` (1 React Query, 2 RPC parallèles)
+
+### Configuration manuelle production
+
+- Remplacer `REPLACE_WITH_CACHE_INVALIDATION_SECRET` dans la migration SQL
+- Déployer edge functions `cache-invalidate` et `cache-warm`
+- Secrets Vercel + Supabase — voir `RUNBOOK_CACHE_WEBHOOK.md`
+- Options Cloudflare dashboard
+
+### Backlog
+
+- Migrer rate-limiter edge functions vers Redis
 
 ---
 

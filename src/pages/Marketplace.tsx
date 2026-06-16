@@ -37,7 +37,7 @@ import { SEOMeta, WebsiteSchema, BreadcrumbSchema, ItemListSchema } from '@/comp
 import { useFilteredProducts } from '@/hooks/useFilteredProducts';
 import { useCurrentUserId } from '@/hooks/useCurrentUserId';
 import { useAuth } from '@/contexts/AuthContext';
-import { useMarketplaceProducts } from '@/hooks/useMarketplaceProducts';
+import { useMarketplaceCatalog } from '@/hooks/useMarketplaceCatalog';
 import { useQueryClient } from '@tanstack/react-query';
 // ✅ REFACTORING: Imports des nouveaux hooks et composants
 import {
@@ -123,18 +123,25 @@ const Marketplace = () => {
   const shouldUseUnifiedRpc = !hasSearchQuery && !useTypeSpecificRpc;
 
   const {
-    products: queryProducts,
+    products: catalogQueryProducts,
     totalCount: queryTotalCount,
-    isLoading: queryIsLoading,
-    error: queryError,
+    facets: catalogFacets,
+    isLoading: unifiedCatalogLoading,
+    error: catalogQueryError,
     prefetchNextPage,
     prefetchPreviousPage,
-  } = useMarketplaceProducts({
+  } = useMarketplaceCatalog({
     filters,
     pagination,
+    searchQuery: debouncedSearch,
     hasSearchQuery,
     shouldUseRPCFiltering: shouldUseUnifiedRpc,
+    enabled: shouldUseUnifiedRpc,
   });
+
+  const queryProducts = catalogQueryProducts;
+  const queryIsLoading = unifiedCatalogLoading;
+  const queryError = catalogQueryError;
 
   const {
     data: typeFilteredProducts = [],
@@ -335,11 +342,14 @@ const Marketplace = () => {
     return types.sort();
   }, [catalogProducts]);
 
-  const { data: marketplaceFacets, isLoading: facetsLoading } = useMarketplaceFacets({
+  const { data: typeSpecificFacets, isLoading: typeFacetsLoading } = useMarketplaceFacets({
     filters,
     searchQuery: debouncedSearch,
-    enabled: !hasSearchQuery,
+    enabled: !hasSearchQuery && useTypeSpecificRpc,
   });
+
+  const marketplaceFacets = shouldUseUnifiedRpc ? catalogFacets : typeSpecificFacets;
+  const facetsLoading = shouldUseUnifiedRpc ? unifiedCatalogLoading : typeFacetsLoading;
 
   const categoryFacetMap = useMemo(() => {
     const map: Record<string, number> = {};

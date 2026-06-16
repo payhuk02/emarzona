@@ -37,6 +37,7 @@ const NotificationSettings = () => {
   const {
     permission: pushPermission,
     isSupported: isPushSupported,
+    isVapidReady,
     isSubscribed: isPushSubscribed,
     isLoading: isPushLoading,
     subscribe: subscribePush,
@@ -135,13 +136,21 @@ const NotificationSettings = () => {
                 ) : (
                   <Button
                     onClick={subscribePush}
-                    disabled={isPushLoading || pushPermission.permission === 'denied'}
+                    disabled={
+                      isPushLoading || pushPermission.permission === 'denied' || !isVapidReady
+                    }
                     className="bg-blue-600"
                   >
                     {isPushLoading ? 'Chargement...' : 'Activer'}
                   </Button>
                 )}
               </div>
+              {!isVapidReady && (
+                <p className="text-sm text-amber-700 dark:text-amber-400">
+                  Configuration serveur en cours — les notifications push seront disponibles dès que
+                  la clé VAPID est activée en production.
+                </p>
+              )}
               {pushPermission.permission === 'denied' && (
                 <p className="text-sm text-red-600 dark:text-red-400">
                   Les notifications push ont été désactivées. Activez-les dans les paramètres de

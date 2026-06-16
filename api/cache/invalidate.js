@@ -69,10 +69,16 @@ function expandTags(tags) {
 
 function checkAuth(req) {
   const secret = process.env.CACHE_INVALIDATION_SECRET;
-  if (!secret) return { ok: false, reason: 'CACHE_INVALIDATION_SECRET not configured' };
-  const auth = req.headers.authorization || '';
-  if (auth !== `Bearer ${secret}`) return { ok: false, reason: 'Unauthorized' };
-  return { ok: true };
+  const cronSecret = process.env.CRON_SECRET;
+  const auth = req.headers.get('authorization') || '';
+
+  if (secret && auth === `Bearer ${secret}`) return { ok: true };
+  if (cronSecret && auth === `Bearer ${cronSecret}`) return { ok: true };
+
+  if (!secret && !cronSecret) {
+    return { ok: false, reason: 'CACHE_INVALIDATION_SECRET not configured' };
+  }
+  return { ok: false, reason: 'Unauthorized' };
 }
 
 export default async function handler(req, res) {

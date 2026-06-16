@@ -3,13 +3,20 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { pushNotificationService, type PushNotification, type NotificationPermission } from '@/lib/notifications/push';
+import {
+  pushNotificationService,
+  PushSubscribeError,
+  type PushNotification,
+  type NotificationPermission,
+} from '@/lib/notifications/push';
+import { isVapidConfigured } from '@/lib/notifications/vapid';
 import { logger } from '@/lib/logger';
 import { useToast } from '@/hooks/use-toast';
 
 export interface UsePushNotificationsReturn {
   permission: NotificationPermission;
   isSupported: boolean;
+  isVapidReady: boolean;
   isSubscribed: boolean;
   isLoading: boolean;
   requestPermission: () => Promise<void>;
@@ -18,9 +25,26 @@ export interface UsePushNotificationsReturn {
   showLocalNotification: (notification: PushNotification) => Promise<void>;
 }
 
-/**
- * Hook pour gérer les notifications push
- */
+function mapSubscribeError(error: unknown): string {
+  if (error instanceof PushSubscribeError) {
+    switch (error.code) {
+      case 'VAPID_NOT_CONFIGURED':
+        return error.message;
+      case 'NOT_AUTHENTICATED':
+        return error.message;
+      case 'PERMISSION_DENIED':
+        return error.message;
+      case 'SAVE_FAILED':
+        return "Impossible d'enregistrer l'abonnement. Vérifiez votre connexion et réessayez.";
+      case 'SUBSCRIBE_FAILED':
+        return "Le navigateur a refusé l'abonnement push. Réessayez ou utilisez Chrome/Firefox récent.";
+      default:
+        return error.message;
+    }
+  }
+  return "Impossible de s'abonner aux notifications push.";
+}
+
 export function usePushNotifications(): UsePushNotificationsReturn {
   const { toast } = useToast();
   const [permission, setPermission] = useState<NotificationPermission>({
@@ -30,66 +54,46 @@ export function usePushNotifications(): UsePushNotificationsReturn {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSupported, setIsSupported] = useState(false);
+  const isVapidReady = isVapidConfigured();
 
-  // Vérifier le support et l'état initial
-  useEffect(() => {
-    const checkSupport = () => {
-      const supported = 'serviceWorker' in navigator && 'PushManager' in window;
-      setIsSupported(supported);
-
-      if (supported) {
-        const currentPermission = pushNotificationService.getPermissionStatus();
-        setPermission(currentPermission);
-
-        // Vérifier si l'utilisateur est déjà abonné
-        checkSubscription();
-      }
-    };
-
-    checkSupport();
-
-    // Écouter les changements de permission
-    if ('Notification' in window) {
-      const interval = setInterval(() => {
-        const currentPermission = pushNotificationService.getPermissionStatus();
-        setPermission(currentPermission);
-      }, 1000);
-
-      return () => clearInterval(interval);
-    }
+  const refreshPermission = useCallback(() => {
+    setPermission(pushNotificationService.getPermissionStatus());
   }, []);
 
-  // Vérifier si l'utilisateur est abonné
-  const checkSubscription = async () => {
+  const checkSubscription = useCallback(async () => {
     try {
-      if ('serviceWorker' in navigator) {
-        const registration = await navigator.serviceWorker.ready;
-        const subscription = await registration.pushManager.getSubscription();
-        setIsSubscribed(!!subscription);
-      }
+      if (!pushNotificationService.isSupported()) return;
+      const subscription = await pushNotificationService.getExistingSubscription();
+      setIsSubscribed(!!subscription);
     } catch (error) {
       logger.error('Error checking subscription', { error });
     }
-  };
+  }, []);
 
-  // Demander la permission
+  useEffect(() => {
+    const supported = pushNotificationService.isSupported();
+    setIsSupported(supported);
+    if (supported) {
+      refreshPermission();
+      void checkSubscription();
+    }
+  }, [refreshPermission, checkSubscription]);
+
   const requestPermission = useCallback(async () => {
     try {
       setIsLoading(true);
       const result = await pushNotificationService.requestPermission();
-      
-      const newPermission = pushNotificationService.getPermissionStatus();
-      setPermission(newPermission);
+      refreshPermission();
 
       if (result === 'granted') {
         toast({
           title: 'Permission accordée',
-          description: 'Vous recevrez maintenant les notifications push.',
+          description: "Cliquez sur Activer pour finaliser l'abonnement push.",
         });
       } else if (result === 'denied') {
         toast({
           title: 'Permission refusée',
-          description: 'Les notifications push ont été désactivées. Vous pouvez les activer dans les paramètres de votre navigateur.',
+          description: 'Activez les notifications dans les paramètres de votre navigateur.',
           variant: 'destructive',
         });
       }
@@ -103,56 +107,61 @@ export function usePushNotifications(): UsePushNotificationsReturn {
     } finally {
       setIsLoading(false);
     }
-  }, [toast]);
+  }, [toast, refreshPermission]);
 
-  // S'abonner aux notifications push
   const subscribe = useCallback(async (): Promise<boolean> => {
     try {
       setIsLoading(true);
 
-      // Vérifier la permission d'abord
-      const currentPermission = pushNotificationService.getPermissionStatus();
-      if (currentPermission.permission !== 'granted') {
-        await requestPermission();
-      }
-
-      // Initialiser le service
-      const success = await pushNotificationService.initialize();
-      
-      if (success) {
-        setIsSubscribed(true);
+      if (!isVapidConfigured()) {
         toast({
-          title: 'Abonnement réussi',
-          description: 'Vous recevrez maintenant les notifications push.',
-        });
-      } else {
-        toast({
-          title: 'Échec de l\'abonnement',
-          description: 'Impossible de s\'abonner aux notifications push.',
+          title: 'Configuration requise',
+          description:
+            'Les notifications push ne sont pas encore activées sur la plateforme (clé VAPID).',
           variant: 'destructive',
         });
+        return false;
       }
 
-      return success;
+      let perm = pushNotificationService.getPermissionStatus().permission;
+      if (perm !== 'granted') {
+        perm = await pushNotificationService.requestPermission();
+        refreshPermission();
+      }
+
+      if (perm !== 'granted') {
+        toast({
+          title: 'Permission requise',
+          description: 'Autorisez les notifications pour continuer.',
+          variant: 'destructive',
+        });
+        return false;
+      }
+
+      await pushNotificationService.subscribe();
+      setIsSubscribed(true);
+      toast({
+        title: 'Abonnement réussi',
+        description: 'Vous recevrez maintenant les notifications push.',
+      });
+      return true;
     } catch (error) {
       logger.error('Error subscribing to push notifications', { error });
       toast({
-        title: 'Erreur',
-        description: 'Une erreur est survenue lors de l\'abonnement.',
+        title: "Échec de l'abonnement",
+        description: mapSubscribeError(error),
         variant: 'destructive',
       });
       return false;
     } finally {
       setIsLoading(false);
     }
-  }, [requestPermission, toast]);
+  }, [toast, refreshPermission]);
 
-  // Se désabonner des notifications push
   const unsubscribe = useCallback(async (): Promise<boolean> => {
     try {
       setIsLoading(true);
       const success = await pushNotificationService.unsubscribe();
-      
       if (success) {
         setIsSubscribed(false);
         toast({
@@ -160,7 +169,6 @@ export function usePushNotifications(): UsePushNotificationsReturn {
           description: 'Vous ne recevrez plus de notifications push.',
         });
       }
-
       return success;
     } catch (error) {
       logger.error('Error unsubscribing from push notifications', { error });
@@ -175,23 +183,26 @@ export function usePushNotifications(): UsePushNotificationsReturn {
     }
   }, [toast]);
 
-  // Afficher une notification locale
-  const showLocalNotification = useCallback(async (notification: PushNotification) => {
-    try {
-      await pushNotificationService.showLocalNotification(notification);
-    } catch (error) {
-      logger.error('Error showing local notification', { error });
-      toast({
-        title: 'Erreur',
-        description: 'Impossible d\'afficher la notification.',
-        variant: 'destructive',
-      });
-    }
-  }, [toast]);
+  const showLocalNotification = useCallback(
+    async (notification: PushNotification) => {
+      try {
+        await pushNotificationService.showLocalNotification(notification);
+      } catch (error) {
+        logger.error('Error showing local notification', { error });
+        toast({
+          title: 'Erreur',
+          description: "Impossible d'afficher la notification.",
+          variant: 'destructive',
+        });
+      }
+    },
+    [toast]
+  );
 
   return {
     permission,
     isSupported,
+    isVapidReady,
     isSubscribed,
     isLoading,
     requestPermission,
@@ -200,16 +211,3 @@ export function usePushNotifications(): UsePushNotificationsReturn {
     showLocalNotification,
   };
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

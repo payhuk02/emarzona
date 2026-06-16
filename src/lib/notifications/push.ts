@@ -1,10 +1,17 @@
 /**
  * Push Notifications System
- * Système de notifications push (Web Push et in-app)
+ * Web Push + notifications locales via Service Worker
  */
 
 import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
+import { registerServiceWorker } from '@/lib/pwa';
+import {
+  getVapidPublicKey,
+  isVapidConfigured,
+  urlBase64ToUint8Array,
+  getVapidConfigErrorMessage,
+} from '@/lib/notifications/vapid';
 
 export interface PushNotification {
   title: string;
@@ -25,45 +32,159 @@ export interface NotificationPermission {
   canRequest: boolean;
 }
 
-/**
- * Classe principale pour les notifications push
- */
+export type PushSubscribeErrorCode =
+  | 'NOT_SUPPORTED'
+  | 'VAPID_NOT_CONFIGURED'
+  | 'PERMISSION_DENIED'
+  | 'NOT_AUTHENTICATED'
+  | 'SW_REGISTRATION_FAILED'
+  | 'SUBSCRIBE_FAILED'
+  | 'SAVE_FAILED';
+
+export class PushSubscribeError extends Error {
+  code: PushSubscribeErrorCode;
+
+  constructor(code: PushSubscribeErrorCode, message: string, cause?: unknown) {
+    super(message);
+    this.name = 'PushSubscribeError';
+    this.code = code;
+    if (cause) this.cause = cause;
+  }
+}
+
 export class PushNotificationService {
   private registration: ServiceWorkerRegistration | null = null;
   private subscription: PushSubscription | null = null;
 
+  isSupported(): boolean {
+    return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+  }
+
+  async getRegistration(): Promise<ServiceWorkerRegistration> {
+    if (this.registration) return this.registration;
+
+    const registered = await registerServiceWorker();
+    if (registered) {
+      this.registration = registered;
+      return registered;
+    }
+
+    if ('serviceWorker' in navigator) {
+      this.registration = await navigator.serviceWorker.ready;
+      return this.registration;
+    }
+
+    throw new PushSubscribeError(
+      'SW_REGISTRATION_FAILED',
+      "Impossible d'enregistrer le Service Worker."
+    );
+  }
+
+  async requestPermission(): Promise<NotificationPermissionState> {
+    if (!('Notification' in window)) return 'denied';
+    try {
+      return await Notification.requestPermission();
+    } catch (error) {
+      logger.error('PushNotificationService.requestPermission error', { error });
+      return 'denied';
+    }
+  }
+
+  getPermissionStatus(): NotificationPermission {
+    if (!('Notification' in window)) {
+      return { permission: 'denied', canRequest: false };
+    }
+    const permission = Notification.permission;
+    return { permission, canRequest: permission === 'default' };
+  }
+
+  async getExistingSubscription(): Promise<PushSubscription | null> {
+    const registration = await this.getRegistration();
+    return registration.pushManager.getSubscription();
+  }
+
   /**
-   * Initialiser le service de notifications push
+   * S'abonne aux notifications push (permission doit être granted).
    */
+  async subscribe(): Promise<PushSubscription> {
+    if (!this.isSupported()) {
+      throw new PushSubscribeError('NOT_SUPPORTED', 'Notifications push non supportées.');
+    }
+
+    if (!isVapidConfigured()) {
+      throw new PushSubscribeError('VAPID_NOT_CONFIGURED', getVapidConfigErrorMessage());
+    }
+
+    if (Notification.permission !== 'granted') {
+      throw new PushSubscribeError(
+        'PERMISSION_DENIED',
+        'Autorisez les notifications dans votre navigateur avant de vous abonner.'
+      );
+    }
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      throw new PushSubscribeError(
+        'NOT_AUTHENTICATED',
+        'Connectez-vous pour activer les notifications push.'
+      );
+    }
+
+    const registration = await this.getRegistration();
+    const existing = await registration.pushManager.getSubscription();
+    if (existing) {
+      this.subscription = existing;
+      await this.saveSubscription(existing);
+      return existing;
+    }
+
+    const vapidKey = getVapidPublicKey()!;
+    let applicationServerKey: Uint8Array;
+    try {
+      applicationServerKey = urlBase64ToUint8Array(vapidKey);
+    } catch {
+      throw new PushSubscribeError('VAPID_NOT_CONFIGURED', getVapidConfigErrorMessage());
+    }
+
+    try {
+      this.subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey,
+      });
+    } catch (error) {
+      logger.error('pushManager.subscribe failed', { error });
+      throw new PushSubscribeError(
+        'SUBSCRIBE_FAILED',
+        "Le navigateur n'a pas pu créer l'abonnement push.",
+        error
+      );
+    }
+
+    try {
+      await this.saveSubscription(this.subscription);
+    } catch (error) {
+      await this.subscription.unsubscribe().catch(() => undefined);
+      this.subscription = null;
+      throw new PushSubscribeError(
+        'SAVE_FAILED',
+        "Abonnement créé mais impossible de l'enregistrer. Réessayez.",
+        error
+      );
+    }
+
+    return this.subscription;
+  }
+
+  /** @deprecated Utiliser subscribe() */
   async initialize(): Promise<boolean> {
     try {
-      if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-        logger.warn('Push notifications not supported in this browser');
-        return false;
+      if (Notification.permission === 'default') {
+        const perm = await this.requestPermission();
+        if (perm !== 'granted') return false;
       }
-
-      // Enregistrer le service worker
-      this.registration = await navigator.serviceWorker.register('/sw.js');
-      logger.info('Service Worker registered', { registration: this.registration });
-
-      // Demander la permission
-      const permission = await this.requestPermission();
-      if (permission !== 'granted') {
-        logger.warn('Notification permission not granted', { permission });
-        return false;
-      }
-
-      // S'abonner aux notifications push
-      this.subscription = await this.registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: this.urlBase64ToUint8Array(
-          import.meta.env.VITE_VAPID_PUBLIC_KEY || ''
-        ),
-      });
-
-      // Enregistrer l'abonnement dans la base de données
-      await this.saveSubscription(this.subscription);
-
+      await this.subscribe();
       return true;
     } catch (error) {
       logger.error('PushNotificationService.initialize error', { error });
@@ -71,188 +192,79 @@ export class PushNotificationService {
     }
   }
 
-  /**
-   * Demander la permission de notification
-   */
-  async requestPermission(): Promise<NotificationPermissionState> {
-    try {
-      if (!('Notification' in window)) {
-        return 'denied';
-      }
-
-      const permission = await Notification.requestPermission();
-      return permission;
-    } catch (error) {
-      logger.error('PushNotificationService.requestPermission error', { error });
-      return 'denied';
-    }
-  }
-
-  /**
-   * Obtenir l'état de la permission
-   */
-  getPermissionStatus(): NotificationPermission {
-    if (!('Notification' in window)) {
-      return { permission: 'denied', canRequest: false };
-    }
-
-    const permission = Notification.permission;
-    const canRequest = permission === 'default';
-
-    return { permission, canRequest };
-  }
-
-  /**
-   * Envoyer une notification locale
-   */
   async showLocalNotification(notification: PushNotification): Promise<void> {
-    try {
-      if (!this.registration) {
-        await this.initialize();
-      }
-
-      if (!this.registration) {
-        throw new Error('Service Worker not registered');
-      }
-
-      await this.registration.showNotification(notification.title, {
-        body: notification.body,
-        icon: notification.icon || '/icon-192x192.png',
-        image: notification.image,
-        badge: notification.badge || '/badge-72x72.png',
-        tag: notification.tag,
-        data: notification.data,
-        requireInteraction: notification.requireInteraction || false,
-        silent: notification.silent !== undefined ? notification.silent : false, // ✅ SON ACTIVÉ par défaut (silent: false)
-        timestamp: notification.timestamp || Date.now(),
-        actions: notification.actions,
-        vibrate: [200, 100, 200], // ✅ Vibration pour mobile
-      });
-
-      // Logger la notification
-      await this.logNotification(notification, 'local');
-    } catch (error) {
-      logger.error('PushNotificationService.showLocalNotification error', { error, notification });
-    }
+    const registration = await this.getRegistration();
+    await registration.showNotification(notification.title, {
+      body: notification.body,
+      icon: notification.icon || '/icon-192x192.png',
+      image: notification.image,
+      badge: notification.badge || '/badge-72x72.png',
+      tag: notification.tag,
+      data: notification.data,
+      requireInteraction: notification.requireInteraction || false,
+      silent: notification.silent !== undefined ? notification.silent : false,
+      timestamp: notification.timestamp || Date.now(),
+      actions: notification.actions,
+      vibrate: [200, 100, 200],
+    });
+    await this.logNotification(notification, 'local');
   }
 
-  /**
-   * Envoyer une notification in-app
-   */
   async showInAppNotification(notification: PushNotification): Promise<void> {
-    try {
-      // Créer une notification in-app dans l'interface
-      // Cette fonction sera appelée depuis les composants React
-      const event = new CustomEvent('in-app-notification', {
-        detail: notification,
-      });
-      window.dispatchEvent(event);
-
-      // Logger la notification
-      await this.logNotification(notification, 'in-app');
-    } catch (error) {
-      logger.error('PushNotificationService.showInAppNotification error', { error, notification });
-    }
+    window.dispatchEvent(new CustomEvent('in-app-notification', { detail: notification }));
+    await this.logNotification(notification, 'in-app');
   }
 
-  /**
-   * Se désabonner des notifications push
-   */
   async unsubscribe(): Promise<boolean> {
-    try {
-      if (!this.subscription) {
-        return false;
-      }
+    const subscription = this.subscription ?? (await this.getExistingSubscription());
+    if (!subscription) return false;
 
-      const unsubscribed = await this.subscription.unsubscribe();
-      if (unsubscribed) {
-        await this.removeSubscription(this.subscription);
-        this.subscription = null;
-      }
-
-      return unsubscribed;
-    } catch (error) {
-      logger.error('PushNotificationService.unsubscribe error', { error });
-      return false;
+    const unsubscribed = await subscription.unsubscribe();
+    if (unsubscribed) {
+      await this.removeSubscription(subscription);
+      this.subscription = null;
     }
+    return unsubscribed;
   }
 
-  /**
-   * Sauvegarder l'abonnement dans la base de données
-   */
   private async saveSubscription(subscription: PushSubscription): Promise<void> {
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) {
-        return;
-      }
+    const p256dh = subscription.getKey('p256dh');
+    const auth = subscription.getKey('auth');
+    if (!p256dh || !auth) {
+      throw new Error('Invalid push subscription keys');
+    }
 
-      const keys = {
-        p256dh: this.arrayBufferToBase64(subscription.getKey('p256dh')!),
-        auth: this.arrayBufferToBase64(subscription.getKey('auth')!),
-      };
+    const keys = {
+      p256dh: this.arrayBufferToBase64(p256dh),
+      auth: this.arrayBufferToBase64(auth),
+    };
 
-      // Obtenir les informations du navigateur
-      const userAgent = navigator.userAgent;
-      const deviceInfo = {
+    const { error } = await supabase.rpc('save_push_subscription', {
+      p_endpoint: subscription.endpoint,
+      p_keys: keys,
+      p_user_agent: navigator.userAgent,
+      p_device_info: {
         platform: navigator.platform,
-        userAgent: navigator.userAgent,
         language: navigator.language,
         onLine: navigator.onLine,
-      };
+      },
+    });
 
-      // Utiliser la fonction SQL pour sauvegarder
-      const { error } = await supabase.rpc('save_push_subscription', {
-        p_endpoint: subscription.endpoint,
-        p_keys: keys,
-        p_user_agent: userAgent,
-        p_device_info: deviceInfo,
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      logger.info('Push subscription saved', { endpoint: subscription.endpoint });
-    } catch (error) {
-      logger.error('PushNotificationService.saveSubscription error', { error });
+    if (error) {
+      logger.error('save_push_subscription RPC error', { error });
       throw error;
     }
+
+    logger.info('Push subscription saved', { endpoint: subscription.endpoint });
   }
 
-  /**
-   * Supprimer l'abonnement de la base de données
-   */
   private async removeSubscription(subscription: PushSubscription): Promise<void> {
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) {
-        return;
-      }
-
-      // Utiliser la fonction SQL pour supprimer
-      const { error } = await supabase.rpc('delete_push_subscription', {
-        p_endpoint: subscription.endpoint,
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      logger.info('Push subscription removed', { endpoint: subscription.endpoint });
-    } catch (error) {
-      logger.error('PushNotificationService.removeSubscription error', { error });
-      throw error;
-    }
+    const { error } = await supabase.rpc('delete_push_subscription', {
+      p_endpoint: subscription.endpoint,
+    });
+    if (error) throw error;
   }
 
-  /**
-   * Logger une notification
-   */
   private async logNotification(
     notification: PushNotification,
     type: 'local' | 'in-app' | 'push'
@@ -261,14 +273,11 @@ export class PushNotificationService {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      if (!user) {
-        return;
-      }
+      if (!user) return;
 
-      // Utiliser la fonction SQL pour logger
       await supabase.rpc('log_notification', {
         p_user_id: user.id,
-        p_type: type === 'push' ? 'push' : type === 'local' ? 'push' : 'in-app',
+        p_type: type === 'in-app' ? 'in-app' : 'push',
         p_title: notification.title,
         p_body: notification.body,
         p_data: notification.data || {},
@@ -281,40 +290,14 @@ export class PushNotificationService {
     }
   }
 
-  /**
-   * Convertir une clé VAPID en Uint8Array
-   */
-  private urlBase64ToUint8Array(base64String: string): Uint8Array {
-    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-
-    const rawData = window.atob(base64);
-    const outputArray = new Uint8Array(rawData.length);
-
-    for (let  i= 0; i < rawData.length; ++i) {
-      outputArray[i] = rawData.charCodeAt(i);
-    }
-    return outputArray;
-  }
-
-  /**
-   * Convertir un ArrayBuffer en Base64
-   */
   private arrayBufferToBase64(buffer: ArrayBuffer): string {
     const bytes = new Uint8Array(buffer);
-    let  binary= '';
-    for (let  i= 0; i < bytes.byteLength; i++) {
+    let binary = '';
+    for (let i = 0; i < bytes.byteLength; i++) {
       binary += String.fromCharCode(bytes[i]);
     }
     return window.btoa(binary);
   }
 }
 
-// Instance singleton
 export const pushNotificationService = new PushNotificationService();
-
-
-
-
-
-

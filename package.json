@@ -118,7 +118,10 @@
     "execute:rls-migrations": "node scripts/execute-rls-migrations.js",
     "verify:unsubscribe-css": "node scripts/verify-unsubscribe-css.js",
     "loyalty:integrate": "node scripts/integrate-loyalty-events.js",
-    "load:test:marketplace": "k6 run scripts/k6/marketplace-rpc.js"
+    "load:test:marketplace": "k6 run scripts/k6/marketplace-rpc.js",
+    "deploy:cache": "powershell -ExecutionPolicy Bypass -File scripts/deploy-cache-enterprise.ps1 -Interactive",
+    "deploy:cache:ci": "powershell -ExecutionPolicy Bypass -File scripts/deploy-cache-enterprise.ps1",
+    "generate:vapid-keys": "node scripts/generate-vapid-keys.mjs"
   },
   "vercel": {
     "buildCommand": "npm run build",

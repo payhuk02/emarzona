@@ -73,24 +73,7 @@ export function invalidateCatalogCaches(queryClient: QueryClient): void {
     ],
     { purgeBrowserCache: true }
   );
-  void purgeRedisCatalogAsync();
-}
-
-/** Fire-and-forget purge Redis edge après mutation catalogue */
-function purgeRedisCatalogAsync(): void {
-  if (typeof window === 'undefined') return;
-  const secret = import.meta.env.VITE_CACHE_INVALIDATION_SECRET;
-  if (!secret) return;
-  void fetch('/api/cache/invalidate', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${secret}`,
-    },
-    body: JSON.stringify({ event: 'product:mutation' }),
-  }).catch(() => {
-    /* non-blocking */
-  });
+  // Purge Redis : déclenchée côté serveur via trigger DB → cache-invalidate edge function
 }
 
 /**

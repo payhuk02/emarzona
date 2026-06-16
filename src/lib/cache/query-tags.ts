@@ -27,6 +27,7 @@ export const TAG_TO_QUERY_PREFIXES: Record<CacheTagValue, string[]> = {
   [CacheTag.RECOMMENDATIONS]: ['product-recommendations', 'ai-recommendations'],
   [CacheTag.HOMEPAGE]: ['homepage', 'featured-products', 'platform-customization'],
   [CacheTag.MARKETPLACE]: [
+    'marketplace-catalog',
     'marketplace-products',
     'marketplace-facets',
     'filtered-products',

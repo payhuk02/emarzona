@@ -38,6 +38,25 @@ function normalizeFacets(data: unknown): MarketplaceFacetsResponse {
   };
 }
 
+export async function fetchMarketplaceFacetsData(
+  filters: FilterState,
+  searchQuery: string
+): Promise<MarketplaceFacetsResponse> {
+  const { data, error } = await supabase.rpc('get_marketplace_facets', {
+    p_product_type: filters.productType !== 'all' ? filters.productType : null,
+    p_category: filters.category !== 'all' ? filters.category : null,
+    p_search_query: searchQuery.trim() || null,
+    p_featured_only: filters.featuredOnly || filters.category === 'featured',
+  });
+
+  if (error) {
+    logger.error('[fetchMarketplaceFacetsData] RPC error:', error);
+    throw error;
+  }
+
+  return normalizeFacets(data);
+}
+
 export function useMarketplaceFacets({
   filters,
   searchQuery,
@@ -67,19 +86,7 @@ export function useMarketplaceFacets({
       filters.featuredOnly,
     ],
     queryFn: async (): Promise<MarketplaceFacetsResponse> => {
-      const { data, error } = await supabase.rpc('get_marketplace_facets', {
-        p_product_type: filters.productType !== 'all' ? filters.productType : null,
-        p_category: filters.category !== 'all' ? filters.category : null,
-        p_search_query: searchQuery.trim() || null,
-        p_featured_only: filters.featuredOnly || filters.category === 'featured',
-      });
-
-      if (error) {
-        logger.error('[useMarketplaceFacets] RPC error:', error);
-        throw error;
-      }
-
-      const facets = normalizeFacets(data);
+      const facets = await fetchMarketplaceFacetsData(filters, searchQuery);
       cacheMarketplaceFacets(facetCacheParams, facets).catch(err =>
         logger.warn('[useMarketplaceFacets] cache write failed', err)
       );

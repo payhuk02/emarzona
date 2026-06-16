@@ -4,9 +4,12 @@
 
 function checkAuth(req) {
   const secret = process.env.CACHE_INVALIDATION_SECRET;
-  if (!secret) return false;
-  const auth = req.headers.authorization || '';
-  return auth === `Bearer ${secret}`;
+  const cronSecret = process.env.CRON_SECRET;
+  const auth = req.headers.get('authorization') || '';
+
+  if (secret && auth === `Bearer ${secret}`) return true;
+  if (cronSecret && auth === `Bearer ${cronSecret}`) return true;
+  return false;
 }
 
 export default async function handler(req, res) {

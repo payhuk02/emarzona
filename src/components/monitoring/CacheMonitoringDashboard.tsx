@@ -14,6 +14,7 @@ import {
   type CacheMetricsSummary,
   type CacheMetricPoint,
 } from '@/lib/redis/metrics';
+import { supabase } from '@/integrations/supabase/client';
 import { Activity, Database, Globe, HardDrive, RefreshCw, Server, Zap } from 'lucide-react';
 
 interface EdgeHealth {
@@ -55,15 +56,8 @@ export function CacheMonitoringDashboard() {
   const handleWarmCache = async () => {
     setLoading(true);
     try {
-      const secret = import.meta.env.VITE_CACHE_INVALIDATION_SECRET;
-      if (!secret) return;
-      await fetch('/api/cache/warm', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${secret}`,
-        },
-      });
+      const { error } = await supabase.functions.invoke('cache-warm', { body: {} });
+      if (error) throw error;
       await refresh();
     } finally {
       setLoading(false);
