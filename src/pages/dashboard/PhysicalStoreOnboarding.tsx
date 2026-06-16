@@ -1,13 +1,41 @@
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useRef } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AppPageShell } from '@/components/layout/AppPageShell';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Gift, Rocket, Sparkles } from 'lucide-react';
 import { PHYSICAL_TRIAL_DAYS } from '@/hooks/billing/useStorePhysicalAccess';
+import { useStore } from '@/hooks/useStore';
+import { useAnalytics } from '@/hooks/useAnalytics';
 
 const PhysicalStoreOnboarding = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { store } = useStore();
+  const seenTrackedRef = useRef(false);
+  const storeIdFromQuery = searchParams.get('storeId');
+  const analyticsStoreId = useMemo(
+    () => storeIdFromQuery ?? store?.id ?? undefined,
+    [storeIdFromQuery, store?.id]
+  );
+  const { trackEvent } = useAnalytics(analyticsStoreId);
+
+  useEffect(() => {
+    if (!analyticsStoreId || seenTrackedRef.current) {
+      return;
+    }
+
+    seenTrackedRef.current = true;
+    void trackEvent({
+      storeId: analyticsStoreId,
+      eventType: 'physical_onboarding_seen',
+      eventData: {
+        trial_days: PHYSICAL_TRIAL_DAYS,
+        source: 'physical_store_onboarding',
+      },
+    });
+  }, [analyticsStoreId, trackEvent]);
 
   return (
     <AppPageShell>
@@ -51,7 +79,19 @@ const PhysicalStoreOnboarding = () => {
 
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <Button
-                onClick={() => navigate('/dashboard')}
+                onClick={() => {
+                  if (analyticsStoreId) {
+                    void trackEvent({
+                      storeId: analyticsStoreId,
+                      eventType: 'trial_continue_clicked',
+                      eventData: {
+                        trial_days: PHYSICAL_TRIAL_DAYS,
+                        source: 'physical_store_onboarding',
+                      },
+                    });
+                  }
+                  navigate('/dashboard');
+                }}
                 className="w-full sm:w-auto min-h-[44px] gap-2"
               >
                 <Rocket className="h-4 w-4" aria-hidden />
@@ -59,7 +99,19 @@ const PhysicalStoreOnboarding = () => {
               </Button>
               <Button
                 variant="outline"
-                onClick={() => navigate('/dashboard/billing/physical')}
+                onClick={() => {
+                  if (analyticsStoreId) {
+                    void trackEvent({
+                      storeId: analyticsStoreId,
+                      eventType: 'billing_cta_clicked',
+                      eventData: {
+                        trial_days: PHYSICAL_TRIAL_DAYS,
+                        source: 'physical_store_onboarding',
+                      },
+                    });
+                  }
+                  navigate('/dashboard/billing/physical');
+                }}
                 className="w-full sm:w-auto min-h-[44px]"
               >
                 Voir les abonnements maintenant

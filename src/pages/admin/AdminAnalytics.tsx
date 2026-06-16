@@ -3,7 +3,7 @@
  * Analytics globales de la plateforme
  */
 
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
@@ -15,15 +15,34 @@ import {
   Package,
   Store,
   Activity,
+  MousePointerClick,
+  Target,
 } from 'lucide-react';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { supabase } from '@/integrations/supabase/client';
+
+type PhysicalConversionSnapshot = {
+  loading: boolean;
+  onboardingViews: number;
+  trialClicks: number;
+  billingClicks: number;
+};
+
+const INITIAL_SNAPSHOT: PhysicalConversionSnapshot = {
+  loading: true,
+  onboardingViews: 0,
+  trialClicks: 0,
+  billingClicks: 0,
+};
 
 export default function AdminAnalytics() {
   // Animations au scroll
   const headerRef = useScrollAnimation<HTMLDivElement>();
   const statsRef = useScrollAnimation<HTMLDivElement>();
   const chartsRef = useScrollAnimation<HTMLDivElement>();
+  const [physicalSnapshot, setPhysicalSnapshot] =
+    useState<PhysicalConversionSnapshot>(INITIAL_SNAPSHOT);
 
   // Mock stats - À remplacer par vraies données
   const stats = useMemo(
@@ -43,6 +62,67 @@ export default function AdminAnalytics() {
   useEffect(() => {
     logger.info('Admin Analytics page chargée');
   }, []);
+
+  useEffect(() => {
+    let active = true;
+
+    const loadPhysicalConversionSnapshot = async () => {
+      try {
+        const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+        const eventTypes = [
+          'physical_onboarding_seen',
+          'trial_continue_clicked',
+          'billing_cta_clicked',
+        ] as const;
+
+        const results = await Promise.all(
+          eventTypes.map(async eventType => {
+            const { count, error } = await supabase
+              .from('store_analytics_events')
+              .select('id', { count: 'exact', head: true })
+              .eq('event_type', eventType)
+              .gte('created_at', since);
+
+            if (error) throw error;
+            return { eventType, count: count ?? 0 };
+          })
+        );
+
+        if (!active) return;
+
+        const byType = Object.fromEntries(results.map(r => [r.eventType, r.count])) as Record<
+          (typeof eventTypes)[number],
+          number
+        >;
+
+        setPhysicalSnapshot({
+          loading: false,
+          onboardingViews: byType.physical_onboarding_seen,
+          trialClicks: byType.trial_continue_clicked,
+          billingClicks: byType.billing_cta_clicked,
+        });
+      } catch (error) {
+        if (!active) return;
+        logger.error('Erreur chargement conversion snapshot', { error });
+        setPhysicalSnapshot(prev => ({ ...prev, loading: false }));
+      }
+    };
+
+    void loadPhysicalConversionSnapshot();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const trialRate = useMemo(() => {
+    if (physicalSnapshot.onboardingViews === 0) return 0;
+    return (physicalSnapshot.trialClicks / physicalSnapshot.onboardingViews) * 100;
+  }, [physicalSnapshot.onboardingViews, physicalSnapshot.trialClicks]);
+
+  const billingRate = useMemo(() => {
+    if (physicalSnapshot.onboardingViews === 0) return 0;
+    return (physicalSnapshot.billingClicks / physicalSnapshot.onboardingViews) * 100;
+  }, [physicalSnapshot.onboardingViews, physicalSnapshot.billingClicks]);
 
   return (
     <AdminLayout>
@@ -228,6 +308,56 @@ export default function AdminAnalytics() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Physical Conversion Snapshot */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Target className="h-4 w-4" aria-hidden />
+              Conversion Snapshot - Onboarding Physique
+            </CardTitle>
+            <CardDescription>
+              Funnel 30 jours : vues onboarding → clic essai gratuit → clic abonnement.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {physicalSnapshot.loading ? (
+              <p className="text-sm text-muted-foreground">
+                Chargement des donnees de conversion...
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+                <div className="rounded-lg border p-4">
+                  <p className="text-xs text-muted-foreground mb-1">Vues onboarding</p>
+                  <p className="text-2xl font-bold">{physicalSnapshot.onboardingViews}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Event: physical_onboarding_seen
+                  </p>
+                </div>
+                <div className="rounded-lg border p-4">
+                  <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                    <Rocket className="h-3.5 w-3.5" aria-hidden />
+                    Clic essai gratuit
+                  </p>
+                  <p className="text-2xl font-bold">{physicalSnapshot.trialClicks}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {trialRate.toFixed(1)}% des vues onboarding
+                  </p>
+                </div>
+                <div className="rounded-lg border p-4">
+                  <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                    <MousePointerClick className="h-3.5 w-3.5" aria-hidden />
+                    Clic abonnement
+                  </p>
+                  <p className="text-2xl font-bold">{physicalSnapshot.billingClicks}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {billingRate.toFixed(1)}% des vues onboarding
+                  </p>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Performance by Store Type */}
         <Card>

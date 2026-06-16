@@ -38,11 +38,32 @@ export default mergeConfig(
           'src/hooks/useRequire2FA.ts',
         ],
         exclude: ['**/*.test.{ts,tsx}', '**/*.d.ts', '**/__tests__/**'],
+        // Sprint 3: +5 pts vs Sprint 2 (45/35/30/45), avec garde-fous par domaine
         thresholds: {
-          lines: 45,
-          functions: 35,
-          branches: 30,
-          statements: 45,
+          lines: 50,
+          functions: 40,
+          branches: 35,
+          statements: 50,
+          'src/lib/checkout/**': {
+            lines: 48,
+            functions: 45,
+            branches: 35,
+            statements: 48,
+          },
+          'src/lib/payments/**': {
+            // Couverture mesurée: lines 53%, funcs 56%, branches 33%, stmts 49%
+            // Sprint 3: +2 pts stmts/lines, +1 branches (Sprint 4 vise +5 chacun)
+            lines: 50,
+            functions: 54,
+            branches: 31,
+            statements: 47,
+          },
+          'src/hooks/useRequire2FA.ts': {
+            lines: 60,
+            functions: 50,
+            branches: 52,
+            statements: 60,
+          },
         },
       },
     },

@@ -23,8 +23,6 @@ import { logger } from '@/lib/logger';
 import { useSpaceInputFix } from '@/hooks/useSpaceInputFix';
 import {
   Store,
-  Settings,
-  Save,
   Loader2,
   AlertCircle,
   Plus,
@@ -46,8 +44,8 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
     stores,
     loading: storesLoading,
     createStore,
-    updateStore,
-    deleteStore,
+    updateStore: _updateStore,
+    deleteStore: _deleteStore,
     refetch,
     canCreateStore,
     getRemainingStores,
@@ -58,7 +56,7 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('list');
   const [selectedStore, setSelectedStore] = useState<string | null>(null);
-  const [isCreating, setIsCreating] = useState(false);
+  const [_isCreating, setIsCreating] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [storeToDelete, setStoreToDelete] = useState<{ id: string; name: string } | null>(null);
   const [newStoreData, setNewStoreData] = useState({
@@ -97,7 +95,7 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
       setSaving(true);
       const slug = newStoreData.slug.trim() || generateSlug(newStoreData.name);
 
-      await createStore({
+      const createdStore = await createStore({
         name: newStoreData.name.trim(),
         description: newStoreData.description.trim() || null,
         slug: slug,
@@ -111,7 +109,7 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
 
       const targetPath =
         newStoreData.commerceType === 'physical'
-          ? '/dashboard/onboarding/physical-subscription'
+          ? `/dashboard/onboarding/physical-subscription?storeId=${encodeURIComponent(createdStore.id)}`
           : '/dashboard';
 
       setNewStoreData({ name: '', description: '', slug: '', commerceType: 'physical' });

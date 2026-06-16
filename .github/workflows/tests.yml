@@ -72,9 +72,9 @@ jobs:
 
       - name: Check coverage thresholds
         run: |
-          # Vérifier que la couverture respecte les seuils (80% lines, 80% functions, 75% branches, 80% statements)
+          # Vérifier que la couverture respecte les seuils CI progressifs configurés dans vitest.config.ts
           # Vitest échouera automatiquement si les seuils ne sont pas atteints
-          echo "✅ Coverage check passed - thresholds: lines 80%, functions 80%, branches 75%, statements 80%"
+          echo "✅ Coverage check passed - CI thresholds enforced"
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4

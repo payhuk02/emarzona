@@ -926,7 +926,11 @@ const StoreForm = ({
 
           const insertData = sanitizeStorePayload(rawInsertData);
 
-          const { error } = await supabase.from('stores').insert(insertData);
+          const { data: createdStore, error } = await supabase
+            .from('stores')
+            .insert(insertData)
+            .select('id')
+            .single();
 
           if (error) {
             // Gérer l'erreur spécifique de limite de la base de données
@@ -952,7 +956,7 @@ const StoreForm = ({
           // La nouvelle boutique sera automatiquement sélectionnée par le contexte
           const redirectTarget =
             commerceType === 'physical'
-              ? '/dashboard/onboarding/physical-subscription'
+              ? `/dashboard/onboarding/physical-subscription?storeId=${encodeURIComponent(createdStore.id)}`
               : '/dashboard';
           navigate(redirectTarget, { replace: true });
         }
