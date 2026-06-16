@@ -9,6 +9,8 @@
 import { QueryClient } from '@tanstack/react-query';
 import { clearAllMarketplaceCache } from './marketplace-cache';
 import { logger } from './logger';
+import { invalidateTags } from './cache/invalidation-engine';
+import { CacheTag } from './cache/tags';
 
 /**
  * Types d'entités dans le système
@@ -45,17 +47,6 @@ export enum EntityAction {
   DEACTIVATE = 'deactivate',
 }
 
-/** Préfixes React Query du catalogue public / marketplace */
-const MARKETPLACE_QUERY_PREFIXES = [
-  'marketplace-products',
-  'marketplace-facets',
-  'search-suggestions',
-  'popular-searches',
-  'product-search',
-  'filtered-products',
-  'product-recommendations',
-] as const;
-
 const CATALOG_ENTITY_TYPES = new Set<EntityType>([
   EntityType.PRODUCT,
   EntityType.DIGITAL_PRODUCT,
@@ -70,11 +61,36 @@ const CATALOG_ENTITY_TYPES = new Set<EntityType>([
  * À appeler après toute mutation produit / boutique visible sur le marketplace.
  */
 export function invalidateCatalogCaches(queryClient: QueryClient): void {
-  MARKETPLACE_QUERY_PREFIXES.forEach(prefix => {
-    queryClient.invalidateQueries({ queryKey: [prefix] });
+  invalidateTags(
+    queryClient,
+    [
+      CacheTag.MARKETPLACE,
+      CacheTag.PRODUCTS_LIST,
+      CacheTag.FACETS,
+      CacheTag.SEARCH,
+      CacheTag.RECOMMENDATIONS,
+      CacheTag.HOMEPAGE,
+    ],
+    { purgeBrowserCache: true }
+  );
+  void purgeRedisCatalogAsync();
+}
+
+/** Fire-and-forget purge Redis edge après mutation catalogue */
+function purgeRedisCatalogAsync(): void {
+  if (typeof window === 'undefined') return;
+  const secret = import.meta.env.VITE_CACHE_INVALIDATION_SECRET;
+  if (!secret) return;
+  void fetch('/api/cache/invalidate', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${secret}`,
+    },
+    body: JSON.stringify({ event: 'product:mutation' }),
+  }).catch(() => {
+    /* non-blocking */
   });
-  queryClient.invalidateQueries({ queryKey: ['products'] });
-  void clearAllMarketplaceCache();
 }
 
 /**

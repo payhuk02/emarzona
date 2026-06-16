@@ -82,6 +82,7 @@ import {
   setupCacheCleanup,
   optimizeLocalStorageCache,
 } from '@/lib/cache-optimization';
+import { scheduleClientWarmOnDeploy } from '@/lib/cache/CACHE_WARMER';
 import { updateSEOMetadata } from '@/lib/seo-enhancements';
 
 // Route modules
@@ -197,6 +198,7 @@ const AppInitializer = ({
     const stopAlertMonitoring = startAlertMonitoring(60000);
     const stopCacheCleanup = setupCacheCleanup(queryClient, 600000);
     optimizeLocalStorageCache();
+    scheduleClientWarmOnDeploy();
     updateSEOMetadata({
       title: 'Emarzona - Plateforme de ecommerce et marketing',
       description: 'Créez et gérez votre boutique en ligne avec Emarzona',
