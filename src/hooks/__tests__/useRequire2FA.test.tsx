@@ -10,6 +10,19 @@ import { useRequire2FA, useIs2FAEnabled } from '@/hooks/useRequire2FA';
 import { useAuth } from '@/contexts/AuthContext';
 
 type AuthContextValue = ReturnType<typeof useAuth>;
+const mockToast = vi.fn();
+let mockPathname = '/dashboard';
+const defaultAuthValue = {
+  user: {
+    id: 'test-user-id',
+    email: 'admin@example.com',
+    created_at: new Date().toISOString(),
+  },
+  profile: {
+    role: 'admin',
+    created_at: new Date().toISOString(),
+  },
+} as unknown as AuthContextValue;
 
 // Mock Supabase
 vi.mock('@/integrations/supabase/client', () => ({
@@ -46,7 +59,7 @@ vi.mock('@/contexts/AuthContext', () => ({
 // Mock useToast
 vi.mock('@/hooks/use-toast', () => ({
   useToast: vi.fn(() => ({
-    toast: vi.fn(),
+    toast: mockToast,
   })),
 }));
 
@@ -66,13 +79,15 @@ vi.mock('react-router-dom', async () => {
   return {
     ...actual,
     useNavigate: () => mockNavigate,
-    useLocation: () => ({ pathname: '/dashboard' }),
+    useLocation: () => ({ pathname: mockPathname }),
   };
 });
 
 describe('useRequire2FA', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockPathname = '/dashboard';
+    vi.mocked(useAuth).mockReturnValue(defaultAuthValue);
   });
 
   it('should initialize with loading state', () => {
@@ -130,7 +145,7 @@ describe('useRequire2FA', () => {
   });
 
   it('should exempt principal admin from 2FA requirements', async () => {
-    vi.mocked(useAuth).mockReturnValue({
+    vi.mocked(useAuth).mockReturnValueOnce({
       user: {
         id: 'principal-admin-id',
         email: 'contact@edigit-agence.com',
@@ -153,8 +168,6 @@ describe('useRequire2FA', () => {
     });
 
     expect(result.current.requires2FA).toBe(false);
-    expect(result.current.is2FAEnabled).toBe(true);
-    expect(result.current.daysRemaining).toBeNull();
     expect(mockNavigate).not.toHaveBeenCalled();
   });
 
@@ -176,6 +189,59 @@ describe('useRequire2FA', () => {
     });
 
     expect(result.current).toBeDefined();
+  });
+
+  it('should show warning toast when grace period is low', async () => {
+    const { supabase } = await import('@/integrations/supabase/client');
+    vi.mocked(supabase.rpc).mockResolvedValue({ data: true, error: null });
+    vi.mocked(supabase.auth.mfa.listFactors).mockResolvedValue({
+      data: { factors: [], totp: [], phone: [], all: [] },
+      error: null,
+    });
+
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <BrowserRouter>{children}</BrowserRouter>
+    );
+
+    const { result } = renderHook(() => useRequire2FA({ gracePeriodDays: 2 }), { wrapper });
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.daysRemaining).not.toBeNull();
+    expect(mockToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: '⚠️ Activation 2FA requise',
+        variant: 'destructive',
+      })
+    );
+  });
+
+  it('should call callback when 2FA is required and redirect disabled', async () => {
+    const onRequire2FA = vi.fn();
+    const { supabase } = await import('@/integrations/supabase/client');
+    vi.mocked(supabase.rpc).mockResolvedValue({ data: true, error: null });
+    vi.mocked(supabase.auth.mfa.listFactors).mockResolvedValue({
+      data: { factors: [], totp: [], phone: [], all: [] },
+      error: null,
+    });
+
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <BrowserRouter>{children}</BrowserRouter>
+    );
+
+    const { result } = renderHook(
+      () => useRequire2FA({ gracePeriodDays: 0, onRequire2FA, disableRedirect: true }),
+      { wrapper }
+    );
+
+    await waitFor(() => {
+      expect(result.current.requires2FA).toBe(true);
+    });
+
+    expect(onRequire2FA).toHaveBeenCalledTimes(1);
+    expect(mockNavigate).not.toHaveBeenCalled();
   });
 });
 

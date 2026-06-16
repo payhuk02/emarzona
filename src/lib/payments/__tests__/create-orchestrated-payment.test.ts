@@ -159,6 +159,135 @@ describe('createOrchestratedPayment', () => {
     expect(result.provider).toBe('paypal_commerce');
   });
 
+  it('ajoute psp_fallback adapter_redirect quand un adapter retourne Moneroo', async () => {
+    const connections = [
+      baseConnection({ id: 'c-m', provider: 'moneroo_platform' }),
+      baseConnection({
+        id: 'c-s',
+        provider: 'stripe_connect',
+        external_account_id: 'acct_1',
+        capabilities: { card_payments: true },
+      }),
+    ];
+    vi.mocked(loadStorePaymentConnections).mockResolvedValue(connections);
+    vi.mocked(createStripeConnectPayment).mockResolvedValue({
+      success: true,
+      transaction_id: 'tx-redirect',
+      checkout_url: 'https://pay.moneroo.io/fallback',
+      provider: 'moneroo_platform',
+    });
+
+    const result = await createOrchestratedPayment({
+      storeId: 'store-1',
+      orderId: 'order-redirect',
+      amount: 40,
+      currency: 'EUR',
+      description: 'Adapter redirect',
+      customerEmail: 'buyer@example.com',
+    });
+
+    expect(result.provider).toBe('moneroo_platform');
+    expect(result.psp_fallback?.from_provider).toBe('stripe_connect');
+    expect(result.psp_fallback?.reason).toBe('adapter_redirect');
+  });
+
+  it('fallback Moneroo sur erreur Stripe explicite', async () => {
+    const connections = [
+      baseConnection({ id: 'c-m', provider: 'moneroo_platform' }),
+      baseConnection({
+        id: 'c-s',
+        provider: 'stripe_connect',
+        external_account_id: 'acct_1',
+        capabilities: { card_payments: true },
+      }),
+    ];
+    vi.mocked(loadStorePaymentConnections).mockResolvedValue(connections);
+    vi.mocked(createStripeConnectPayment).mockRejectedValue(new Error('Stripe API unavailable'));
+    vi.mocked(createMonerooPlatformPayment).mockResolvedValue({
+      success: true,
+      transaction_id: 'tx-fallback',
+      checkout_url: 'https://pay.moneroo.io/fallback',
+      provider: 'moneroo_platform',
+    });
+
+    const result = await createOrchestratedPayment({
+      storeId: 'store-1',
+      orderId: 'order-stripe-error',
+      amount: 60,
+      currency: 'EUR',
+      description: 'Stripe error',
+      customerEmail: 'buyer@example.com',
+    });
+
+    expect(createMonerooPlatformPayment).toHaveBeenCalled();
+    expect(result.provider).toBe('moneroo_platform');
+    expect(result.psp_fallback?.from_provider).toBe('stripe_connect');
+    expect(result.psp_fallback?.reason).toBe('provider_error');
+  });
+
+  it('fallback Moneroo sur erreur générique quand provider résolu non Moneroo', async () => {
+    const connections = [
+      baseConnection({ id: 'c-m', provider: 'moneroo_platform' }),
+      baseConnection({
+        id: 'c-p',
+        provider: 'paypal_commerce',
+        external_account_id: 'merchant_1',
+      }),
+    ];
+    vi.mocked(loadStorePaymentConnections).mockResolvedValue(connections);
+    vi.mocked(createPayPalCommercePayment).mockRejectedValue(new Error('PayPal timeout'));
+    vi.mocked(createMonerooPlatformPayment).mockResolvedValue({
+      success: true,
+      transaction_id: 'tx-generic-fallback',
+      checkout_url: 'https://pay.moneroo.io/fallback-2',
+      provider: 'moneroo_platform',
+    });
+
+    const result = await createOrchestratedPayment({
+      storeId: 'store-1',
+      orderId: 'order-generic-error',
+      amount: 70,
+      currency: 'USD',
+      description: 'Generic error',
+      customerEmail: 'buyer@example.com',
+      preferredProvider: 'paypal_commerce',
+      connections,
+    });
+
+    expect(createMonerooPlatformPayment).toHaveBeenCalled();
+    expect(result.psp_fallback?.from_provider).toBe('paypal_commerce');
+    expect(result.psp_fallback?.reason).toBe('provider_error');
+  });
+
+  it('retourne un échec standard si fallback Moneroo échoue aussi', async () => {
+    const connections = [
+      baseConnection({ id: 'c-m', provider: 'moneroo_platform' }),
+      baseConnection({
+        id: 'c-p',
+        provider: 'paypal_commerce',
+        external_account_id: 'merchant_1',
+      }),
+    ];
+    vi.mocked(loadStorePaymentConnections).mockResolvedValue(connections);
+    vi.mocked(createPayPalCommercePayment).mockRejectedValue(new Error('PayPal down'));
+    vi.mocked(createMonerooPlatformPayment).mockRejectedValue(new Error('Moneroo down'));
+
+    const result = await createOrchestratedPayment({
+      storeId: 'store-1',
+      orderId: 'order-double-fail',
+      amount: 80,
+      currency: 'USD',
+      description: 'Double fail',
+      customerEmail: 'buyer@example.com',
+      preferredProvider: 'paypal_commerce',
+      connections,
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.provider).toBe('moneroo_platform');
+    expect(result.error).toContain('PayPal down');
+  });
+
   it('fallback Moneroo explicite si provider non prêt (Flutterwave)', async () => {
     const connections = [
       baseConnection({
