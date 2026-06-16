@@ -3,6 +3,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 const fromMock = vi.fn();
 const invokeMock = vi.fn();
 const refundMonerooPayment = vi.fn();
+const loggerWarn = vi.fn();
+const loggerError = vi.fn();
 
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: {
@@ -15,11 +17,19 @@ vi.mock('@/lib/moneroo-payment', () => ({
   refundMonerooPayment: (...args: unknown[]) => refundMonerooPayment(...args),
 }));
 
+vi.mock('@/lib/logger', () => ({
+  logger: {
+    warn: (...args: unknown[]) => loggerWarn(...args),
+    error: (...args: unknown[]) => loggerError(...args),
+  },
+}));
+
 vi.mock('@/lib/moneroo-notifications', () => ({
   notifyPaymentRefunded: vi.fn().mockResolvedValue(undefined),
 }));
 
 import { refundPayment } from '../refund-payment';
+import { notifyPaymentRefunded } from '@/lib/moneroo-notifications';
 
 function queryWith(data: unknown, error: unknown = null) {
   return {
@@ -68,6 +78,14 @@ describe('refundPayment', () => {
     expect(result).toEqual({ success: false, error: 'pp down' });
   });
 
+  it('returns paypal default failure when provider error missing', async () => {
+    fromMock.mockReturnValueOnce(queryWith({ id: 'tx-1', payment_provider: 'paypal_commerce' }));
+    invokeMock.mockResolvedValue({ data: { success: false }, error: null });
+
+    const result = await refundPayment({ transactionId: 'tx-1' });
+    expect(result).toEqual({ success: false, error: 'PayPal refund failed' });
+  });
+
   it('routes stripe_connect to stripe-refund', async () => {
     fromMock
       .mockReturnValueOnce(queryWith({ id: 'tx-2', payment_provider: 'stripe_connect' }))
@@ -83,6 +101,22 @@ describe('refundPayment', () => {
     expect(invokeMock).toHaveBeenCalledWith('stripe-refund', { body: { transactionId: 'tx-2' } });
   });
 
+  it('returns stripe invoke error', async () => {
+    fromMock.mockReturnValueOnce(queryWith({ id: 'tx-2', payment_provider: 'stripe_connect' }));
+    invokeMock.mockResolvedValue({ data: null, error: { message: 'stripe down' } });
+
+    const result = await refundPayment({ transactionId: 'tx-2' });
+    expect(result).toEqual({ success: false, error: 'stripe down' });
+  });
+
+  it('returns stripe default failure when provider error missing', async () => {
+    fromMock.mockReturnValueOnce(queryWith({ id: 'tx-2', payment_provider: 'stripe_connect' }));
+    invokeMock.mockResolvedValue({ data: { success: false }, error: null });
+
+    const result = await refundPayment({ transactionId: 'tx-2' });
+    expect(result).toEqual({ success: false, error: 'Stripe refund failed' });
+  });
+
   it('routes moneroo provider to refundMonerooPayment', async () => {
     fromMock
       .mockReturnValueOnce(queryWith({ id: 'tx-3', payment_provider: 'moneroo_platform' }))
@@ -93,6 +127,93 @@ describe('refundPayment', () => {
 
     expect(result.success).toBe(true);
     expect(refundMonerooPayment).toHaveBeenCalledWith({ transactionId: 'tx-3' });
+  });
+
+  it('defaults to moneroo when payment_provider is null', async () => {
+    fromMock
+      .mockReturnValueOnce(queryWith({ id: 'tx-5', payment_provider: null }))
+      .mockReturnValueOnce(queryWith({ store_id: 's1', amount: 100, currency: 'XOF' }));
+    refundMonerooPayment.mockResolvedValue({ success: true, amount: 100, currency: 'XOF' });
+
+    const result = await refundPayment({ transactionId: 'tx-5' });
+    expect(result.success).toBe(true);
+    expect(refundMonerooPayment).toHaveBeenCalledWith({ transactionId: 'tx-5' });
+  });
+
+  it('skips notification when refund result is unsuccessful', async () => {
+    fromMock.mockReturnValueOnce(queryWith({ id: 'tx-6', payment_provider: 'moneroo_platform' }));
+    refundMonerooPayment.mockResolvedValue({ success: false, error: 'rejected' });
+
+    const result = await refundPayment({ transactionId: 'tx-6' });
+    expect(result.success).toBe(false);
+    expect(notifyPaymentRefunded).not.toHaveBeenCalled();
+  });
+
+  it('does not notify when transaction details are missing after refund success', async () => {
+    fromMock
+      .mockReturnValueOnce(queryWith({ id: 'tx-7', payment_provider: 'paypal_commerce' }))
+      .mockReturnValueOnce(queryWith(null, null));
+    invokeMock.mockResolvedValue({
+      data: { success: true, amount: 10, currency: 'EUR' },
+      error: null,
+    });
+
+    const result = await refundPayment({ transactionId: 'tx-7' });
+    expect(result.success).toBe(true);
+    expect(notifyPaymentRefunded).not.toHaveBeenCalled();
+  });
+
+  it('uses transaction fallbacks when notifying refund without amount/currency', async () => {
+    fromMock
+      .mockReturnValueOnce(queryWith({ id: 'tx-9', payment_provider: 'stripe_connect' }))
+      .mockReturnValueOnce(
+        queryWith({
+          store_id: null,
+          customer_id: null,
+          customer_email: null,
+          customer_name: null,
+          order_id: null,
+          amount: null,
+          currency: null,
+        })
+      );
+    invokeMock.mockResolvedValue({ data: { success: true }, error: null });
+
+    const result = await refundPayment({ transactionId: 'tx-9' });
+
+    expect(result.success).toBe(true);
+    expect(notifyPaymentRefunded).toHaveBeenCalledWith(
+      expect.objectContaining({
+        transactionId: 'tx-9',
+        amount: 0,
+        currency: 'XOF',
+      })
+    );
+  });
+
+  it('swallows notification errors and keeps refund successful', async () => {
+    fromMock
+      .mockReturnValueOnce(queryWith({ id: 'tx-8', payment_provider: 'paypal_commerce' }))
+      .mockReturnValueOnce(
+        queryWith({
+          store_id: 's1',
+          customer_id: 'u1',
+          customer_email: 'buyer@example.com',
+          customer_name: 'Buyer',
+          order_id: 'o1',
+          amount: 10,
+          currency: 'EUR',
+        })
+      );
+    invokeMock.mockResolvedValue({
+      data: { success: true, amount: 10, currency: 'EUR' },
+      error: null,
+    });
+    vi.mocked(notifyPaymentRefunded).mockRejectedValueOnce(new Error('notify failed'));
+
+    const result = await refundPayment({ transactionId: 'tx-8' });
+    expect(result.success).toBe(true);
+    expect(loggerWarn).toHaveBeenCalled();
   });
 
   it('returns unsupported provider error', async () => {
