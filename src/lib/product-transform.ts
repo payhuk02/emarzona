@@ -57,7 +57,7 @@ type DatabaseProduct = {
  * Transforme un produit de la base de données vers UnifiedProduct
  */
 export function transformToUnifiedProduct(product: DatabaseProduct): UnifiedProduct {
-  const  base: Partial<BaseProduct> = {
+  const base: Partial<BaseProduct> = {
     id: product.id,
     name: product.name,
     slug: product.slug,
@@ -91,6 +91,7 @@ export function transformToUnifiedProduct(product: DatabaseProduct): UnifiedProd
     affiliate_percentage: product.product_affiliate_settings?.[0]?.commission_rate,
     affiliate_enabled: product.product_affiliate_settings?.[0]?.affiliate_enabled || false,
     product_affiliate_settings: product.product_affiliate_settings || null,
+    payment_options: product.payment_options,
   };
 
   // Transformer selon le type
@@ -225,9 +226,3 @@ function extractFormatsFromFiles(files: FileItem[] | unknown[]): string[] {
 export function transformProducts(products: DatabaseProduct[]): UnifiedProduct[] {
   return products.map(transformToUnifiedProduct);
 }
-
-
-
-
-
-

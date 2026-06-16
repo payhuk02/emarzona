@@ -180,6 +180,7 @@ async function fetchMarketplaceProducts({
           const product = item as Record<string, unknown>;
           return {
             id: product.id as string,
+            store_id: product.store_id as string,
             name: product.name as string,
             slug: product.slug as string,
             description: product.description as string,
@@ -195,6 +196,7 @@ async function fetchMarketplaceProducts({
             licensing_type: product.licensing_type as string,
             license_terms: product.license_terms as string,
             is_featured: product.is_featured as boolean,
+            payment_options: (product.payment_options as Product['payment_options']) ?? null,
             created_at: product.created_at as string,
             updated_at: product.updated_at as string,
             tags: product.tags as string[],
@@ -251,6 +253,7 @@ async function fetchMarketplaceProducts({
   // Sélectionner uniquement les colonnes nécessaires pour réduire la taille des données
   const baseColumns = [
     'id',
+    'store_id',
     'name',
     'slug',
     'description',
@@ -266,6 +269,7 @@ async function fetchMarketplaceProducts({
     'licensing_type',
     'license_terms',
     'is_featured',
+    'payment_options',
     'created_at',
     'updated_at',
     'tags',

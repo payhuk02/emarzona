@@ -102,6 +102,10 @@ const Checkout = () => {
   const productId = searchParams.get('productId');
   const storeId = searchParams.get('storeId');
   const variantId = searchParams.get('variantId');
+  const guestEmail = searchParams.get('guestEmail');
+  const guestName = searchParams.get('guestName');
+  const guestPhone = searchParams.get('guestPhone');
+  const isGuestCheckout = Boolean(guestEmail?.trim());
 
   // États
   const [loading, setLoading] = useState(true);
@@ -182,7 +186,7 @@ const Checkout = () => {
         const {
           data: { user: currentUser },
         } = await supabase.auth.getUser();
-        if (!currentUser?.email) {
+        if (!currentUser?.email && !isGuestCheckout) {
           toast({
             title: 'Authentification requise',
             description: 'Veuillez vous connecter pour effectuer un achat',
@@ -191,7 +195,9 @@ const Checkout = () => {
           redirectToPlatformLogin(navigate);
           return;
         }
-        setUser(currentUser);
+        if (currentUser) {
+          setUser(currentUser);
+        }
 
         // Charger le produit
         const { data: productData, error: productError } = await supabase
@@ -280,19 +286,34 @@ const Checkout = () => {
           }
         }
 
-        // Pré-remplir le formulaire avec les données utilisateur
-        const fullName = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
-        const nameParts = fullName.split(' ');
-        setFormData({
-          firstName: nameParts[0] || '',
-          lastName: nameParts.slice(1).join(' ') || '',
-          email: currentUser.email || '',
-          phone: currentUser.user_metadata?.phone || '',
-          address: currentUser.user_metadata?.address || '',
-          city: currentUser.user_metadata?.city || 'Ouagadougou',
-          country: currentUser.user_metadata?.country || 'Burkina Faso',
-          postalCode: currentUser.user_metadata?.postal_code || '',
-        });
+        // Pré-remplir le formulaire avec les données utilisateur ou invité
+        if (currentUser?.email) {
+          const fullName = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
+          const nameParts = fullName.split(' ');
+          setFormData({
+            firstName: nameParts[0] || '',
+            lastName: nameParts.slice(1).join(' ') || '',
+            email: currentUser.email || '',
+            phone: currentUser.user_metadata?.phone || '',
+            address: currentUser.user_metadata?.address || '',
+            city: currentUser.user_metadata?.city || 'Ouagadougou',
+            country: currentUser.user_metadata?.country || 'Burkina Faso',
+            postalCode: currentUser.user_metadata?.postal_code || '',
+          });
+        } else if (guestEmail) {
+          const displayName = guestName?.trim() || guestEmail.split('@')[0];
+          const nameParts = displayName.split(' ');
+          setFormData({
+            firstName: nameParts[0] || '',
+            lastName: nameParts.slice(1).join(' ') || '',
+            email: guestEmail,
+            phone: guestPhone || '',
+            address: '',
+            city: 'Ouagadougou',
+            country: 'Burkina Faso',
+            postalCode: '',
+          });
+        }
       } catch (_err: unknown) {
         logger.error(
           'Error loading checkout data:',
@@ -305,7 +326,17 @@ const Checkout = () => {
     };
 
     loadData();
-  }, [productId, storeId, variantId, navigate, toast]);
+  }, [
+    productId,
+    storeId,
+    variantId,
+    navigate,
+    toast,
+    isGuestCheckout,
+    guestEmail,
+    guestName,
+    guestPhone,
+  ]);
 
   /**
    * Valide le formulaire de commande

@@ -103,6 +103,7 @@ const DataProcessingAgreement = lazyPage(() => import('@/pages/legal/DataProcess
 // Pages Moneroo
 const PaymentSuccess = lazyPage(() => import('@/pages/payments/PaymentSuccess'));
 const PaymentCancel = lazyPage(() => import('@/pages/payments/PaymentCancel'));
+const GuestOrderConfirmation = lazyPage(() => import('@/pages/orders/GuestOrderConfirmation'));
 
 // Pages Email publiques
 const UnsubscribePage = lazyPage(() => import('@/pages/UnsubscribePage'));
@@ -246,6 +247,7 @@ export const publicRoutes = (
     {/* Moneroo */}
     <Route path="/payment/success" element={<PaymentSuccess />} />
     <Route path="/payment/cancel" element={<PaymentCancel />} />
+    <Route path="/orders/confirmed" element={<GuestOrderConfirmation />} />
 
     {/* Produits publics */}
     <Route path="/digital/search" element={<DigitalProductsSearch />} />

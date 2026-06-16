@@ -1,8 +1,10 @@
 import { supabase } from '@/integrations/supabase/client';
 import { createNotification } from '@/lib/notifications/helpers';
-import { playNotificationSound } from '@/lib/notifications/play-notification-sound';
+import {
+  playNotificationSound,
+  type NotificationSoundType,
+} from '@/lib/notifications/play-notification-sound';
 import { logger } from '@/lib/logger';
-import type { NotificationSoundType } from '@/lib/notifications/play-notification-sound';
 
 export type PhysicalOrderNotificationInput = {
   customerEmail: string;

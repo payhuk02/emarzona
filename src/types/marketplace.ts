@@ -29,6 +29,7 @@ export interface Product {
   free_shipping?: boolean | null;
   shipping_cost?: number | null;
   stock_quantity?: number | null;
+  payment_options?: Record<string, unknown> | string | null;
   stores?: {
     id: string;
     name: string;

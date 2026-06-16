@@ -6,7 +6,7 @@
  * Améliorée avec SEO, analytics, recommandations, partage social et wishlist
  */
 
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -90,6 +90,9 @@ interface WindowWithTracking extends Window {
 
 export default function ServiceDetail() {
   const { serviceId } = useParams<{ serviceId: string }>();
+  const [searchParams] = useSearchParams();
+  const guestEmail = searchParams.get('guestEmail');
+  const guestName = searchParams.get('guestName');
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -343,7 +346,7 @@ export default function ServiceDetail() {
       return;
     }
 
-    if (!user?.email) {
+    if (!user?.email && !guestEmail) {
       toast({
         title: '❌ Authentification requise',
         description: 'Veuillez vous connecter pour réserver',
@@ -352,6 +355,9 @@ export default function ServiceDetail() {
       navigate('/login');
       return;
     }
+
+    const checkoutEmail = user?.email || guestEmail!;
+    const checkoutName = user?.user_metadata?.full_name || guestName || checkoutEmail.split('@')[0];
 
     // Validation finale avant réservation
     if (validationError) {
@@ -419,8 +425,8 @@ export default function ServiceDetail() {
         serviceProductId: service.service.id,
         productId: serviceId!,
         storeId,
-        customerEmail: user.email,
-        customerName: user.user_metadata?.full_name || user.email,
+        customerEmail: checkoutEmail,
+        customerName: checkoutName,
         bookingDateTime,
         numberOfParticipants: participants,
         durationMinutes: service.service.duration_minutes,

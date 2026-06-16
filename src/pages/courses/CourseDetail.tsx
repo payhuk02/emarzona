@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -80,6 +80,9 @@ const CourseDetail = ({ learnMode = false }: CourseDetailProps) => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const guestEmail = searchParams.get('guestEmail');
+  const guestName = searchParams.get('guestName');
   const isLearnRoute = learnMode || location.pathname.startsWith('/learn/');
   const { toast } = useToast();
   const { user } = useAuth();
@@ -198,8 +201,8 @@ const CourseDetail = ({ learnMode = false }: CourseDetailProps) => {
 
   const handleEnroll = async () => {
     if (!isEnrolled && !isEnrolling) {
-      // Vérifier que l'utilisateur est connecté
-      if (!user) {
+      const checkoutEmail = user?.email || guestEmail;
+      if (!checkoutEmail) {
         toast({
           title: 'Connexion requise',
           description: 'Veuillez vous connecter pour vous inscrire au cours.',
@@ -225,11 +228,12 @@ const CourseDetail = ({ learnMode = false }: CourseDetailProps) => {
       trackEvent.mutate({
         product_id: product.id,
         event_type: 'click',
-        user_id: user.id,
+        user_id: user?.id,
         session_id: getSessionId(),
         metadata: {
           source: 'enroll_button',
           course_id: course.id,
+          guest_checkout: !user,
         },
       });
 
@@ -239,8 +243,8 @@ const CourseDetail = ({ learnMode = false }: CourseDetailProps) => {
           courseId: course.id,
           productId: product.id,
           storeId: product.store_id,
-          customerEmail: user.email || '',
-          customerName: user.user_metadata?.name || user.email?.split('@')[0] || '',
+          customerEmail: checkoutEmail,
+          customerName: user?.user_metadata?.name || guestName || checkoutEmail.split('@')[0] || '',
         });
 
         // Rediriger vers la page de paiement Moneroo

@@ -19,6 +19,7 @@ import { notifyPhysicalOrderPlaced } from '@/lib/notifications/physical-order-no
 import { parsePhysicalCheckoutOptions } from '@/lib/physical/physical-checkout-display';
 import type { PhysicalCheckoutMethod } from '@/constants/physical-checkout-options';
 import { safeRedirect } from '@/lib/url-validator';
+import { buildGuestOrderConfirmationPath } from '@/lib/physical/guest-order-confirmation';
 
 export type PhysicalQuickOrderProduct = {
   productId: string;
@@ -112,7 +113,20 @@ export function PhysicalQuickOrderDialog({
           title: 'Commande confirmée',
           description: `Votre commande « ${product.name} » est enregistrée. Paiement à la livraison.`,
         });
-        navigate(user ? '/account/orders' : '/account/orders', { replace: true });
+        const orderNumber = result.orderNumber ?? result.orderId.slice(0, 8);
+        if (user) {
+          navigate('/account/orders', { replace: true });
+        } else {
+          navigate(
+            buildGuestOrderConfirmationPath({
+              orderId: result.orderId,
+              orderNumber,
+              productName: product.name,
+              cashOnDelivery: true,
+            }),
+            { replace: true }
+          );
+        }
         return;
       }
 

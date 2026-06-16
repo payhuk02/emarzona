@@ -41,6 +41,7 @@ const ProductRecommendationsComponent: React.FC<ProductRecommendationsProps> = (
 
     return recommendations.map((rec: ProductRecommendation) => ({
       id: rec.product_id,
+      store_id: rec.store_id,
       name: rec.product_name,
       slug: rec.product_slug,
       image_url: rec.image_url,
@@ -190,6 +191,7 @@ const PersonalizedRecommendationsComponent: React.FC<PersonalizedRecommendations
 
     return recommendations.map((rec: ProductRecommendation) => ({
       id: rec.product_id,
+      store_id: rec.store_id,
       name: rec.product_name,
       slug: rec.product_slug,
       image_url: rec.image_url,
