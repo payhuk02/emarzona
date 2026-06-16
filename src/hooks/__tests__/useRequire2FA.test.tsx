@@ -217,4 +217,15 @@ describe('useIs2FAEnabled', () => {
       expect(result.current).toBe(true);
     });
   });
+
+  it('handles unexpected errors without throwing', async () => {
+    const { supabase } = await import('@/integrations/supabase/client');
+    vi.mocked(supabase.auth.mfa.listFactors).mockRejectedValueOnce(new Error('network down'));
+
+    const { result } = renderHook(() => useIs2FAEnabled());
+
+    await waitFor(() => {
+      expect(result.current).toBe(false);
+    });
+  });
 });
