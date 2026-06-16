@@ -5,9 +5,10 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useStoreContext } from '@/contexts/StoreContext';
 import { logger } from '@/lib/logger';
 import { sanitizeStorePayload } from '@/lib/store-payload-utils';
+import type { StoreCommerceType } from '@/constants/store-commerce-types';
 
 const STORE_FIELDS =
-  'id, user_id, name, slug, subdomain, description, default_currency, custom_domain, domain_status, domain_verification_token, domain_verified_at, domain_error_message, logo_url, banner_url, info_message, info_message_color, info_message_font, created_at, updated_at';
+  'id, user_id, name, slug, subdomain, description, default_currency, custom_domain, domain_status, domain_verification_token, domain_verified_at, domain_error_message, logo_url, banner_url, info_message, info_message_color, info_message_font, metadata, created_at, updated_at';
 
 export interface Store {
   id: string;
@@ -27,6 +28,8 @@ export interface Store {
   info_message?: string | null;
   info_message_color?: string | null;
   info_message_font?: string | null;
+  metadata?: Record<string, unknown> | null;
+  commerce_type?: StoreCommerceType | null;
   created_at: string;
   updated_at: string;
 }

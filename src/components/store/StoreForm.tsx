@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -47,6 +48,10 @@ import { StoreFieldHelper } from './StoreFieldHelper';
 import { StoreSuggestions } from './StoreSuggestions';
 import type { StoreOpeningHours, StoreLegalPages } from '@/hooks/useStores';
 import { sanitizeStorePayload } from '@/lib/store-payload-utils';
+import {
+  STORE_COMMERCE_TYPE_LABELS,
+  type StoreCommerceType,
+} from '@/constants/store-commerce-types';
 
 interface StoreFormProps {
   onSuccess: () => void;
@@ -153,6 +158,7 @@ interface StoreFormProps {
     tiktok_pixel_enabled?: boolean;
     custom_tracking_scripts?: string | null;
     custom_scripts_enabled?: boolean;
+    metadata?: Record<string, unknown> | null;
   };
 }
 
@@ -239,6 +245,9 @@ const StoreForm = ({
   );
   const [customScriptsEnabled, setCustomScriptsEnabled] = useState(
     initialData?.custom_scripts_enabled || false
+  );
+  const [commerceType, setCommerceType] = useState<StoreCommerceType>(
+    (initialData?.metadata?.commerce_type as StoreCommerceType | undefined) || 'physical'
   );
 
   // Phase 1 - Thème et couleurs
@@ -339,6 +348,7 @@ const StoreForm = ({
   // mais le setter n'est pas encore utilisé.
   const [advancedMode] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
   const { refreshStores } = useStoreContext();
   const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
 
@@ -586,6 +596,7 @@ const StoreForm = ({
             tiktok_pixel_enabled?: boolean;
             custom_tracking_scripts?: string | null;
             custom_scripts_enabled?: boolean;
+            metadata?: Record<string, unknown> | null;
             [key: string]: unknown;
           }
           const rawUpdateData: StoreUpdateData = {
@@ -689,6 +700,10 @@ const StoreForm = ({
             tiktok_pixel_enabled: tiktokPixelEnabled,
             custom_tracking_scripts: customTrackingScripts.trim() || null,
             custom_scripts_enabled: customScriptsEnabled,
+            metadata: {
+              ...(initialData?.metadata ?? {}),
+              commerce_type: commerceType,
+            },
           };
 
           const updateData = sanitizeStorePayload(rawUpdateData);
@@ -904,6 +919,9 @@ const StoreForm = ({
             snapchat_url: snapchatUrl || null,
             discord_url: discordUrl || null,
             twitch_url: twitchUrl || null,
+            metadata: {
+              commerce_type: commerceType,
+            },
           };
 
           const insertData = sanitizeStorePayload(rawInsertData);
@@ -932,6 +950,11 @@ const StoreForm = ({
           // Rafraîchir la liste des boutiques et sélectionner la nouvelle
           await refreshStores();
           // La nouvelle boutique sera automatiquement sélectionnée par le contexte
+          const redirectTarget =
+            commerceType === 'physical'
+              ? '/dashboard/onboarding/physical-subscription'
+              : '/dashboard';
+          navigate(redirectTarget, { replace: true });
         }
 
         onSuccess();
@@ -1042,6 +1065,8 @@ const StoreForm = ({
       tiktokPixelEnabled,
       customTrackingScripts,
       customScriptsEnabled,
+      commerceType,
+      navigate,
       // Autres
       legalPages,
       initialData,
@@ -1128,6 +1153,28 @@ const StoreForm = ({
                 onMetaTitleSuggestion={suggestion => setMetaTitle(suggestion)}
                 onMetaDescriptionSuggestion={suggestion => setMetaDescription(suggestion)}
               />
+              <div className="space-y-2">
+                <Label htmlFor="commerce_type">Type de boutique *</Label>
+                <Select
+                  value={commerceType}
+                  onValueChange={value => setCommerceType(value as StoreCommerceType)}
+                >
+                  <SelectTrigger id="commerce_type">
+                    <SelectValue placeholder="Choisir un type de boutique" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(STORE_COMMERCE_TYPE_LABELS).map(([value, label]) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  L&apos;abonnement est requis uniquement pour le type Produits physiques.
+                </p>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="name">Nom de la boutique *</Label>
                 <Input

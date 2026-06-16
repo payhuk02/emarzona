@@ -4,6 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
 import type { Database } from '@/integrations/supabase/types';
+import type { StoreCommerceType } from '@/constants/store-commerce-types';
 
 type StoreInsert = Database['public']['Tables']['stores']['Insert'];
 type StoreUpdate = Database['public']['Tables']['stores']['Update'];
@@ -187,6 +188,8 @@ export interface Store {
   custom_tracking_scripts?: string | null;
   custom_scripts_enabled?: boolean;
   subdomain?: string | null;
+  metadata?: Record<string, unknown> | null;
+  commerce_type?: StoreCommerceType | null;
 }
 
 const MAX_STORES_PER_USER = 3;
@@ -218,7 +221,7 @@ export const useStores = () => {
       const { data, error } = await supabase
         .from('stores')
         .select(
-          'id, user_id, name, slug, subdomain, description, logo_url, banner_url, is_active, created_at, updated_at, custom_domain, domain_status'
+          'id, user_id, name, slug, subdomain, description, logo_url, banner_url, is_active, created_at, updated_at, custom_domain, domain_status, metadata'
         )
         .eq('user_id', user.id)
         .order('created_at', { ascending: true });
@@ -227,7 +230,14 @@ export const useStores = () => {
         throw error;
       }
 
-      return (data ?? []) as Store[];
+      return ((data ?? []) as Store[]).map(store => {
+        const commerceType = (
+          store.metadata && typeof store.metadata === 'object' && 'commerce_type' in store.metadata
+            ? store.metadata.commerce_type
+            : null
+        ) as StoreCommerceType | null;
+        return { ...store, commerce_type: commerceType };
+      });
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
