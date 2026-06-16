@@ -91,17 +91,33 @@ describe('resolveNavItems', () => {
     expect(items.find(i => i.path === '/account')?.title).toBe('Compte');
   });
 
-  it('keeps plan-locked top nav items visible with locked flag', () => {
+  it('keeps plan-locked top nav items visible with locked flag for physical stores', () => {
     const items = resolveNavItems({
       surface: 'topnav',
       persona: 'seller',
       isPlatformAdmin: false,
       physicalPlanSlug: null,
+      commerceType: 'physical',
       t: mockT,
     });
 
     const emails = items.find(i => i.path === '/dashboard/emails/campaigns');
     expect(emails).toBeDefined();
     expect(emails?.locked).toBe(true);
+  });
+
+  it('does not lock emailing for non-physical commerce stores', () => {
+    const items = resolveNavItems({
+      surface: 'topnav',
+      persona: 'seller',
+      isPlatformAdmin: false,
+      physicalPlanSlug: null,
+      commerceType: 'digital',
+      t: mockT,
+    });
+
+    const emails = items.find(i => i.path === '/dashboard/emails/campaigns');
+    expect(emails).toBeDefined();
+    expect(emails?.locked).toBe(false);
   });
 });

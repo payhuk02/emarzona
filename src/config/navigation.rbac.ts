@@ -1,5 +1,11 @@
 import { canAccessAdminPath } from '@/lib/admin/admin-route-permissions';
+import { getNavItemPath } from '@/config/navigation.helpers';
+import type { StoreCommerceType } from '@/constants/store-commerce-types';
 import type { NavSection } from '@/config/navigation.types';
+import {
+  isPhysicalOnlyNavUrl,
+  shouldApplyPhysicalPlanGating,
+} from '@/lib/billing/store-commerce-access';
 
 const getNavPath = (url: string) => url.split('?')[0];
 
@@ -29,13 +35,19 @@ export function filterAdminNavSectionsByRbac(
 /** Seller nav: hide items that require platform admin (future-proof). */
 export function filterSellerNavSectionsByAccess(
   sections: NavSection[],
-  options: { isPlatformAdmin: boolean }
+  options: { isPlatformAdmin: boolean; commerceType?: StoreCommerceType | null }
 ): NavSection[] {
-  if (options.isPlatformAdmin) return sections;
+  const hidePhysicalOnly =
+    options.commerceType != null && !shouldApplyPhysicalPlanGating(options.commerceType);
+
   return sections
     .map(section => ({
       ...section,
-      items: section.items.filter(item => !item.adminOnly),
+      items: section.items.filter(item => {
+        if (!options.isPlatformAdmin && item.adminOnly) return false;
+        if (hidePhysicalOnly && isPhysicalOnlyNavUrl(item.url)) return false;
+        return true;
+      }),
     }))
     .filter(section => section.items.length > 0);
 }

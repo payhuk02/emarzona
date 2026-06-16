@@ -1,4 +1,5 @@
 import type { TFunction } from 'i18next';
+import type { StoreCommerceType } from '@/constants/store-commerce-types';
 import {
   BUYER_HORIZONTAL_NAV_SECTIONS,
   BUYER_HORIZONTAL_MEGA_SUBGROUPS,
@@ -45,14 +46,18 @@ function pathMatches(itemUrl: string, pattern: string): boolean {
   return itemUrl === pattern || itemPath === patternPath || itemPath.startsWith(`${patternPath}/`);
 }
 
-function toLink(item: NavItem, planSlug: string | null | undefined): HorizontalNavLink {
+function toLink(
+  item: NavItem,
+  planSlug: string | null | undefined,
+  commerceType?: StoreCommerceType | null
+): HorizontalNavLink {
   const path = getNavItemPath(item.url);
   return {
     title: item.title,
     url: item.url,
     path,
     icon: resolveNavItemIcon(item.url, item.icon),
-    locked: isNavPathPlanLocked(path, planSlug),
+    locked: isNavPathPlanLocked(path, planSlug, commerceType),
   };
 }
 
@@ -157,6 +162,7 @@ function resolveSellerHorizontalNavDomains(
   input: {
     isPlatformAdmin: boolean;
     physicalPlanSlug?: string | null;
+    commerceType?: StoreCommerceType | null;
     pathname: string;
     search: string;
     t: TFunction;
@@ -170,7 +176,9 @@ function resolveSellerHorizontalNavDomains(
     const section = byKey.get(spec.sectionKey);
     if (!section || section.items.length === 0) continue;
 
-    const items = section.items.map(item => toLink(item, input.physicalPlanSlug));
+    const items = section.items.map(item =>
+      toLink(item, input.physicalPlanSlug, input.commerceType)
+    );
     const isActive = items.some(item =>
       isNavItemActive(item.url, input.pathname, input.search, 'prefix')
     );
@@ -252,6 +260,7 @@ export function resolveHorizontalNavDomains(input: {
   persona?: SidebarPersona;
   isPlatformAdmin: boolean;
   physicalPlanSlug?: string | null;
+  commerceType?: StoreCommerceType | null;
   pathname: string;
   search: string;
   t: TFunction;
@@ -267,6 +276,7 @@ export function resolveHorizontalNavDomains(input: {
   });
   sections = filterSellerNavSectionsByAccess(sections, {
     isPlatformAdmin: input.isPlatformAdmin,
+    commerceType: input.commerceType,
   });
   sections = translateNavSections(sections, input.t);
 

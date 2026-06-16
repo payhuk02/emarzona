@@ -21,8 +21,9 @@ export function useResolvedNavItems({
   const { t } = useTranslation();
   const { isAdmin } = useAdmin();
   const { can, isSuperAdmin } = useCurrentAdminPermissions();
-  const { selectedStoreId } = useStoreContext();
+  const { selectedStoreId, selectedStore } = useStoreContext();
   const { planSlug } = useStorePhysicalAccess(selectedStoreId);
+  const commerceType = selectedStore?.commerce_type;
 
   const persona: SidebarPersona = personaOverride ?? 'seller';
 
@@ -35,8 +36,9 @@ export function useResolvedNavItems({
         can,
         isSuperAdmin,
         physicalPlanSlug: planSlug,
+        commerceType,
         t,
       }),
-    [surface, persona, isAdmin, can, isSuperAdmin, planSlug, t]
+    [surface, persona, isAdmin, can, isSuperAdmin, planSlug, commerceType, t]
   );
 }

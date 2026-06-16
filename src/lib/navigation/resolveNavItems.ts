@@ -1,5 +1,6 @@
 import type { TFunction } from 'i18next';
 import { ShoppingCart, User } from 'lucide-react';
+import type { StoreCommerceType } from '@/constants/store-commerce-types';
 import {
   enrichNavSections,
   filterNavSections,
@@ -94,6 +95,7 @@ export type ResolveNavSectionsInput = {
   scope: 'sidebar' | 'command' | 'admin';
   persona: SidebarPersona;
   isPlatformAdmin: boolean;
+  commerceType?: StoreCommerceType | null;
   can?: (key: string) => boolean;
   isSuperAdmin?: boolean;
   t?: TFunction;
@@ -107,14 +109,18 @@ export type ResolveNavItemsInput = Omit<ResolveNavSectionsInput, 'scope'> & {
 const enrichedUserSections = enrichNavSections(userMenuSections);
 const enrichedAdminSections = enrichNavSections(adminMenuSections);
 
-function toResolvedNavItem(entry: FlatNavEntry, planSlug?: string | null): ResolvedNavItem {
+function toResolvedNavItem(
+  entry: FlatNavEntry,
+  planSlug?: string | null,
+  commerceType?: StoreCommerceType | null
+): ResolvedNavItem {
   const path = getNavItemPath(entry.url);
   return {
     title: entry.title,
     url: entry.url,
     path,
     icon: resolveNavItemIcon(entry.url, entry.icon),
-    locked: isNavPathPlanLocked(path, planSlug),
+    locked: isNavPathPlanLocked(path, planSlug, commerceType),
   };
 }
 
@@ -134,6 +140,7 @@ export function resolveNavSections(input: ResolveNavSectionsInput): NavSection[]
   let sections = filterNavSections(enrichedUserSections, navPersona, { sidebarOnly });
   sections = filterSellerNavSectionsByAccess(sections, {
     isPlatformAdmin: input.isPlatformAdmin,
+    commerceType: input.commerceType,
   });
   return t ? translateNavSections(sections, t) : sections;
 }
@@ -147,6 +154,7 @@ export function resolveNavItems(input: ResolveNavItemsInput): ResolvedNavItem[] 
     scope: sectionScope,
     persona: input.persona,
     isPlatformAdmin: input.isPlatformAdmin,
+    commerceType: input.commerceType,
     can: input.can,
     isSuperAdmin: input.isSuperAdmin,
     t: input.t,
@@ -155,11 +163,12 @@ export function resolveNavItems(input: ResolveNavItemsInput): ResolvedNavItem[] 
   const flat = flattenNavSections(sections);
   const byPath = new Map(flat.map(entry => [getNavItemPath(entry.url), entry]));
   const planSlug = input.physicalPlanSlug;
+  const commerceType = input.commerceType;
 
   if (input.surface === 'topnav') {
     return TOP_NAV_PRIMARY_PATHS.map(path => byPath.get(path))
       .filter((entry): entry is FlatNavEntry => Boolean(entry))
-      .map(entry => toResolvedNavItem(entry, planSlug));
+      .map(entry => toResolvedNavItem(entry, planSlug, commerceType));
   }
 
   if (input.surface === 'bottomnav') {
@@ -167,6 +176,7 @@ export function resolveNavItems(input: ResolveNavItemsInput): ResolvedNavItem[] 
       scope: 'command',
       persona: input.persona,
       isPlatformAdmin: input.isPlatformAdmin,
+      commerceType: input.commerceType,
       can: input.can,
       isSuperAdmin: input.isSuperAdmin,
       t: input.t,
@@ -181,7 +191,7 @@ export function resolveNavItems(input: ResolveNavItemsInput): ResolvedNavItem[] 
         if (spec.fromMenu === true) {
           const entry = byPath.get(spec.path);
           if (!entry) return null;
-          return toResolvedNavItem(entry, planSlug);
+          return toResolvedNavItem(entry, planSlug, commerceType);
         }
         return {
           path: spec.path,
@@ -196,5 +206,5 @@ export function resolveNavItems(input: ResolveNavItemsInput): ResolvedNavItem[] 
       .filter((item): item is ResolvedNavItem => item !== null);
   }
 
-  return flat.map(entry => toResolvedNavItem(entry, planSlug));
+  return flat.map(entry => toResolvedNavItem(entry, planSlug, commerceType));
 }

@@ -48,8 +48,8 @@ export function PhysicalSubscriptionRequired({
     switch (access.status) {
       case 'trialing':
         return access.trialDaysRemaining != null
-          ? `Essai gratuit — ${access.trialDaysRemaining} jour(s) restant(s)`
-          : `Essai gratuit — ${PHYSICAL_TRIAL_DAYS} jours`;
+          ? `Essai gratuit — ${access.trialDaysRemaining} jour(s) restant(s). Vous pouvez activer un abonnement payant à tout moment pour débloquer les fonctionnalités avancées.`
+          : `Essai gratuit — ${PHYSICAL_TRIAL_DAYS} jours. Vous pouvez activer un abonnement payant à tout moment.`;
       case 'expired':
         return 'Votre essai gratuit est terminé. Choisissez un plan pour continuer.';
       case 'past_due':
@@ -62,6 +62,8 @@ export function PhysicalSubscriptionRequired({
         return 'Abonnement requis pour activer l’e-commerce produits physiques.';
     }
   })();
+
+  const canSubscribeNow = !access.allowed || access.status === 'trialing';
 
   return (
     <div className={compact ? 'space-y-4' : 'container mx-auto max-w-4xl p-4 sm:p-6 space-y-6'}>
@@ -116,22 +118,30 @@ export function PhysicalSubscriptionRequired({
             </CardHeader>
             <CardContent>
               <p className="text-2xl font-bold">{formatCurrency(plan.price)}</p>
-              <p className="text-xs text-muted-foreground">/ mois après essai</p>
+              <p className="text-xs text-muted-foreground">
+                / mois
+                {access.status === 'trialing' ? ' (activation immédiate possible)' : ' après essai'}
+              </p>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {!access.allowed && (
+      {canSubscribeNow && (
         <Card className="border-amber-500/30 bg-amber-50/50 dark:bg-amber-950/20">
           <CardContent className="pt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex gap-3">
               <AlertCircle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
               <div>
-                <p className="font-medium text-sm">Activez votre abonnement physique</p>
+                <p className="font-medium text-sm">
+                  {access.status === 'trialing'
+                    ? 'Passez à un abonnement payant quand vous voulez'
+                    : 'Activez votre abonnement physique'}
+                </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Consultez votre facturation ou choisissez un plan Starter / Professional /
-                  Enterprise.
+                  {access.status === 'trialing'
+                    ? "Pas besoin d'attendre la fin de l'essai : choisissez Starter, Professional ou Enterprise pour débloquer plus de capacités."
+                    : 'Consultez votre facturation ou choisissez un plan Starter / Professional / Enterprise.'}
                 </p>
               </div>
             </div>
@@ -145,13 +155,17 @@ export function PhysicalSubscriptionRequired({
         </Card>
       )}
 
-      {!access.allowed && (
+      {canSubscribeNow && (
         <Card>
           <CardHeader>
-            <CardTitle>Activer un plan</CardTitle>
+            <CardTitle>
+              {access.status === 'trialing'
+                ? 'Activer un abonnement maintenant'
+                : 'Activer un plan'}
+            </CardTitle>
             <CardDescription>
-              Paiement sécurisé via Moneroo. À confirmation, votre accès “produits physiques” est
-              activé automatiquement.
+              Paiement sécurisé via Moneroo. À confirmation, votre accès « produits physiques » est
+              activé automatiquement — y compris pendant votre essai gratuit.
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-3">

@@ -41,6 +41,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useStorePhysicalAccess } from '@/hooks/billing/useStorePhysicalAccess';
+import { useStoreContext } from '@/contexts/StoreContext';
+import { isPhysicalCommerceStore } from '@/lib/billing/store-commerce-access';
 import { useToast } from '@/hooks/use-toast';
 import { PHYSICAL_TRIAL_DAYS } from '@/lib/billing/platform-pricing';
 
@@ -184,6 +186,8 @@ export const EnhancedProductTypeSelector = ({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { stores } = useStoreContext();
+  const commerceType = stores.find(store => store.id === storeId)?.commerce_type;
   const physicalAccess = useStorePhysicalAccess(storeId);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<ProductStats>({
@@ -249,11 +253,18 @@ export const EnhancedProductTypeSelector = ({
     }
   }, [storeId]);
 
+  const availableTypes = useMemo(() => {
+    if (isPhysicalCommerceStore(commerceType)) {
+      return PRODUCT_TYPES;
+    }
+    return PRODUCT_TYPES.filter(type => type.value !== 'physical');
+  }, [commerceType]);
+
   /**
    * Filter products based on search and filter
    */
   const filteredTypes = useMemo(() => {
-    let filtered = PRODUCT_TYPES;
+    let filtered = availableTypes;
 
     // Apply search filter
     if (searchQuery.trim()) {
@@ -275,7 +286,7 @@ export const EnhancedProductTypeSelector = ({
     }
 
     return filtered;
-  }, [searchQuery, filter]);
+  }, [searchQuery, filter, availableTypes]);
 
   /**
    * Handle product type selection

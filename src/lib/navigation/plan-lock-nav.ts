@@ -1,5 +1,6 @@
 import type { TFunction } from 'i18next';
 import type { NavigateFunction } from 'react-router-dom';
+import type { StoreCommerceType } from '@/constants/store-commerce-types';
 import { getNavItemPath } from '@/config/navigation.helpers';
 import {
   hasPhysicalFeatureAccess,
@@ -10,13 +11,19 @@ import {
   requiredPhysicalFeatureForPath,
   requiredPlanLabelForPath,
 } from '@/lib/billing/physical-route-capabilities';
+import { shouldApplyPhysicalPlanGating } from '@/lib/billing/store-commerce-access';
 
 export const PLAN_LOCK_BILLING_PATH = '/dashboard/billing/physical';
 
 export function isNavPathPlanLocked(
   urlOrPath: string,
-  planSlug: string | null | undefined
+  planSlug: string | null | undefined,
+  commerceType?: StoreCommerceType | null
 ): boolean {
+  if (!shouldApplyPhysicalPlanGating(commerceType)) {
+    return false;
+  }
+
   const path = getNavItemPath(urlOrPath);
   const feature = requiredPhysicalFeatureForPath(path);
   if (!feature) return false;

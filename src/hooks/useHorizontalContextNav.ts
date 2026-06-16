@@ -13,8 +13,9 @@ export function useHorizontalContextNav() {
   const location = useLocation();
   const { isAdmin } = useAdmin();
   const { persona: sidebarPersona } = useSidebarPersona(isAdmin);
-  const { selectedStoreId } = useStoreContext();
+  const { selectedStoreId, selectedStore } = useStoreContext();
   const { planSlug } = useStorePhysicalAccess(selectedStoreId);
+  const commerceType = selectedStore?.commerce_type;
   const persona = resolveHorizontalNavPersona(location.pathname, sidebarPersona);
 
   return useMemo(
@@ -23,10 +24,11 @@ export function useHorizontalContextNav() {
         persona,
         isPlatformAdmin: isAdmin,
         physicalPlanSlug: planSlug,
+        commerceType,
         pathname: location.pathname,
         search: location.search,
         t,
       }),
-    [persona, isAdmin, planSlug, location.pathname, location.search, t]
+    [persona, isAdmin, planSlug, commerceType, location.pathname, location.search, t]
   );
 }

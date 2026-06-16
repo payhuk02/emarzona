@@ -39,9 +39,13 @@ describe('physical-route-capabilities', () => {
     expect(requiredPlanLabelForPath('/dashboard/batch-shipping')).toBe('PREMIUM');
   });
 
-  it('gates email routes to Professional plan', () => {
+  it('gates email routes to Professional plan for physical stores', () => {
     expect(requiredPhysicalFeatureForPath('/dashboard/emails/campaigns')).toBe('emails.manage');
-    expect(canAccessSellerPath('/dashboard/emails/sequences', 'physical_basic')).toBe(false);
-    expect(canAccessSellerPath('/dashboard/emails/campaigns', 'physical_standard')).toBe(true);
+    expect(canAccessSellerPath('/dashboard/emails/sequences', 'physical_basic', 'physical')).toBe(
+      false
+    );
+    expect(
+      canAccessSellerPath('/dashboard/emails/campaigns', 'physical_standard', 'physical')
+    ).toBe(true);
   });
 });

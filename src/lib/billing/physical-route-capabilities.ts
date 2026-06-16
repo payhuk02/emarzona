@@ -1,9 +1,14 @@
+import type { StoreCommerceType } from '@/constants/store-commerce-types';
 import {
   hasPhysicalFeatureAccess,
   requiredPlanForFeature,
   type PhysicalFeatureKey,
   type PhysicalPlanSlug,
 } from '@/lib/billing/physical-plan-capabilities';
+import {
+  isPhysicalOnlySellerPath,
+  shouldApplyPhysicalPlanGating,
+} from '@/lib/billing/store-commerce-access';
 
 const PHYSICAL_ROUTE_FEATURES: Record<string, PhysicalFeatureKey> = {
   '/dashboard/emails/campaigns': 'emails.manage',
@@ -42,7 +47,18 @@ export function requiredPhysicalFeatureForPath(pathname: string): PhysicalFeatur
   return prefix ? PHYSICAL_ROUTE_FEATURES[prefix] : null;
 }
 
-export function canAccessSellerPath(pathname: string, planSlug: PhysicalPlanSlug): boolean {
+export function canAccessSellerPath(
+  pathname: string,
+  planSlug: PhysicalPlanSlug,
+  commerceType?: StoreCommerceType | null
+): boolean {
+  if (!shouldApplyPhysicalPlanGating(commerceType)) {
+    if (isPhysicalOnlySellerPath(pathname)) {
+      return false;
+    }
+    return true;
+  }
+
   const requiredFeature = requiredPhysicalFeatureForPath(pathname);
   if (!requiredFeature) return true;
   return hasPhysicalFeatureAccess(planSlug, requiredFeature);

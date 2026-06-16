@@ -8,6 +8,7 @@ import {
   requiredPlanLabelForPath,
   requiredPhysicalFeatureForPath,
 } from '@/lib/billing/physical-route-capabilities';
+import { isPhysicalOnlySellerPath } from '@/lib/billing/store-commerce-access';
 
 type SellerRoutePermissionGuardProps = {
   children: ReactNode;
@@ -23,12 +24,29 @@ export function SellerRoutePermissionGuard({ children }: SellerRoutePermissionGu
   const { toast } = useToast();
   const { store, loading: storeLoading } = useStore();
   const { planSlug, loading: accessLoading } = useStorePhysicalAccess(store?.id ?? null);
+  const commerceType = store?.commerce_type;
 
   const requiredFeature = requiredPhysicalFeatureForPath(location.pathname);
-  const allowed = canAccessSellerPath(location.pathname, planSlug);
+  const allowed = canAccessSellerPath(location.pathname, planSlug, commerceType);
+  const physicalOnlyBlocked =
+    commerceType != null &&
+    commerceType !== 'physical' &&
+    isPhysicalOnlySellerPath(location.pathname);
 
   useEffect(() => {
     if (storeLoading || accessLoading) return;
+
+    if (physicalOnlyBlocked) {
+      toast({
+        title: 'Fonctionnalité non disponible',
+        description:
+          'Cette section concerne uniquement les boutiques produits physiques. Choisissez ce type à la création de boutique pour y accéder.',
+        variant: 'destructive',
+      });
+      navigate('/dashboard', { replace: true });
+      return;
+    }
+
     if (!requiredFeature || allowed) return;
 
     const requiredPlan = requiredPlanLabelForPath(location.pathname);
@@ -45,9 +63,19 @@ export function SellerRoutePermissionGuard({ children }: SellerRoutePermissionGu
         requiredPlan,
       },
     });
-  }, [storeLoading, accessLoading, requiredFeature, allowed, toast, navigate, location.pathname]);
+  }, [
+    storeLoading,
+    accessLoading,
+    requiredFeature,
+    allowed,
+    physicalOnlyBlocked,
+    toast,
+    navigate,
+    location.pathname,
+  ]);
 
   if (storeLoading || accessLoading) return null;
+  if (physicalOnlyBlocked) return null;
   if (requiredFeature && !allowed) return null;
 
   return <>{children}</>;

@@ -62,12 +62,17 @@ import {
   SIDEBAR_PREF_KEYS,
   writeSidebarJsonPref,
 } from '@/lib/navigation/sidebar-prefs-storage';
+import type { StoreCommerceType } from '@/constants/store-commerce-types';
+import { isPhysicalCommerceStore } from '@/lib/billing/store-commerce-access';
 import { logger } from '@/lib/logger';
 
 const MAX_RECENT_ITEMS = 2;
 
-const isNavItemPlanLocked = (url: string, planSlug: string | null) =>
-  isNavPathPlanLocked(url, planSlug);
+const isNavItemPlanLocked = (
+  url: string,
+  planSlug: string | null,
+  commerceType?: StoreCommerceType | null
+) => isNavPathPlanLocked(url, planSlug, commerceType);
 
 const buildDefaultCollapsedSections = (
   sections: NavSection[],
@@ -166,11 +171,13 @@ export function AppSidebar() {
   const {
     stores,
     selectedStoreId,
+    selectedStore,
     switchStore,
     canCreateStore,
     loading: storesLoading,
   } = useStoreContext();
   const { planSlug } = useStorePhysicalAccess(selectedStoreId);
+  const commerceType = selectedStore?.commerce_type;
   const platformLogo = usePlatformLogo();
   const handlePlanLockedNav = usePlanLockNavAction();
   /** Desktop rail only — mobile drawer always shows labels + icons */
@@ -192,6 +199,7 @@ export function AppSidebar() {
     persona,
     isPlatformAdmin: isAdmin,
     showAdminMenu,
+    commerceType,
   });
 
   const allCurrentEntries = useMemo(() => flattenNavSections(activeSections), [activeSections]);
@@ -207,13 +215,14 @@ export function AppSidebar() {
     [commandPaletteSections]
   );
 
-  const vendorQuickActions = useMemo(
-    () => [
+  const vendorQuickActions = useMemo(() => {
+    const actions = [
       {
         title: t('command.newPhysicalProduct', 'Nouveau produit physique'),
         url: '/dashboard/physical/products/new',
         icon: Plus,
         sectionLabel: t('command.quickActions', 'Actions rapides'),
+        physicalOnly: true,
       },
       {
         title: t('command.orders', 'Commandes'),
@@ -232,6 +241,7 @@ export function AppSidebar() {
         url: '/dashboard/physical/inventory',
         icon: Package,
         sectionLabel: t('command.quickActions', 'Actions rapides'),
+        physicalOnly: true,
       },
       {
         title: t('command.platformStatus', 'Statut plateforme'),
@@ -239,9 +249,14 @@ export function AppSidebar() {
         icon: Activity,
         sectionLabel: t('command.quickActions', 'Actions rapides'),
       },
-    ],
-    [t]
-  );
+    ];
+
+    if (isPhysicalCommerceStore(commerceType)) {
+      return actions;
+    }
+
+    return actions.filter(action => !('physicalOnly' in action && action.physicalOnly));
+  }, [t, commerceType]);
 
   const handlePersonaChange = (next: SidebarPersona) => {
     setPersona(next);
@@ -383,7 +398,7 @@ export function AppSidebar() {
 
   const navigateToNavItem = (item: { title: string; url: string }) => {
     recordNavClick(item.url);
-    if (showUserMenu && isNavItemPlanLocked(item.url, planSlug)) {
+    if (showUserMenu && isNavItemPlanLocked(item.url, planSlug, commerceType)) {
       handleLockedNavClick(item.title, item.url);
       return;
     }
@@ -704,7 +719,8 @@ export function AppSidebar() {
                       }
 
                       // Menu items normaux
-                      const isPlanLocked = showUserMenu && isNavItemPlanLocked(item.url, planSlug);
+                      const isPlanLocked =
+                        showUserMenu && isNavItemPlanLocked(item.url, planSlug, commerceType);
 
                       if (isPlanLocked) {
                         return (
