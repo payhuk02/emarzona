@@ -6,7 +6,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import { useRequire2FA } from '@/hooks/useRequire2FA';
+import { useRequire2FA, useIs2FAEnabled } from '@/hooks/useRequire2FA';
 import { useAuth } from '@/contexts/AuthContext';
 
 type AuthContextValue = ReturnType<typeof useAuth>;
@@ -176,5 +176,45 @@ describe('useRequire2FA', () => {
     });
 
     expect(result.current).toBeDefined();
+  });
+});
+
+describe('useIs2FAEnabled', () => {
+  beforeEach(async () => {
+    const { supabase } = await import('@/integrations/supabase/client');
+    vi.mocked(supabase.auth.mfa.listFactors).mockReset();
+  });
+
+  it('returns false when MFA factors are unavailable', async () => {
+    const { supabase } = await import('@/integrations/supabase/client');
+    vi.mocked(supabase.auth.mfa.listFactors).mockResolvedValueOnce({
+      data: { factors: [], totp: [], phone: [], all: [] },
+      error: { message: 'Test error', name: 'AuthError', status: 500 },
+    });
+
+    const { result } = renderHook(() => useIs2FAEnabled());
+
+    await waitFor(() => {
+      expect(result.current).toBe(false);
+    });
+  });
+
+  it('returns true when a verified factor exists', async () => {
+    const { supabase } = await import('@/integrations/supabase/client');
+    vi.mocked(supabase.auth.mfa.listFactors).mockResolvedValue({
+      data: {
+        factors: [{ id: 'factor-1', status: 'verified' }],
+        totp: [],
+        phone: [],
+        all: [],
+      },
+      error: null,
+    });
+
+    const { result } = renderHook(() => useIs2FAEnabled());
+
+    await waitFor(() => {
+      expect(result.current).toBe(true);
+    });
   });
 });

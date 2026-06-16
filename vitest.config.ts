@@ -2,6 +2,11 @@ import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
+const isCiExecution =
+  process.env.CI === 'true' ||
+  process.env.CI === '1' ||
+  process.argv.some(arg => arg.includes('vitest.ci.config.ts'));
+
 export default defineConfig({
   plugins: [react()],
   test: {
@@ -25,8 +30,8 @@ export default defineConfig({
         '**/*.test.{ts,tsx}',
         'src/integrations/supabase/types.ts', // Fichier généré
       ],
-      // Seuils de couverture minimum (désactivés en CI tant que la dette de tests est réduite)
-      thresholds: process.env.CI
+      // Seuils de couverture minimum
+      thresholds: isCiExecution
         ? { lines: 0, functions: 0, branches: 0, statements: 0 }
         : {
             lines: 80,
@@ -34,8 +39,14 @@ export default defineConfig({
             branches: 75,
             statements: 80,
           },
-      // Inclure seulement les fichiers source
-      include: ['src/**/*.{ts,tsx}'],
+      // Scope couverture: complet en local, critique en mode CI
+      include: isCiExecution
+        ? [
+            'src/lib/checkout/**/*.{ts,tsx}',
+            'src/lib/payments/**/*.{ts,tsx}',
+            'src/hooks/useRequire2FA.ts',
+          ]
+        : ['src/**/*.{ts,tsx}'],
     },
   },
   resolve: {

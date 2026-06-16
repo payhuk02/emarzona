@@ -816,7 +816,7 @@ export default function Checkout() {
           orderNumber,
         });
       } catch (_error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+        const errorMessage = _error instanceof Error ? _error.message : 'Erreur inconnue';
         logger.error(`Error processing checkout for store ${storeId}:`, { error: errorMessage });
         errors.push({ storeId, error: errorMessage });
       }
@@ -1198,7 +1198,7 @@ export default function Checkout() {
                 });
               }
             } catch (_err: unknown) {
-              const errorMessage = err instanceof Error ? err.message : String(err);
+              const errorMessage = _err instanceof Error ? _err.message : String(_err);
               logger.warn('Error incrementing promotion usage counter:', { error: errorMessage });
             }
 
@@ -1315,7 +1315,7 @@ export default function Checkout() {
         }
       } catch (_recoveryError: unknown) {
         const errorMessage =
-          recoveryError instanceof Error ? recoveryError.message : String(recoveryError);
+          _recoveryError instanceof Error ? _recoveryError.message : String(_recoveryError);
         logger.warn('Error marking cart as recovered', { error: errorMessage });
         // Ne pas bloquer le processus si l'erreur survient
       }
@@ -1326,7 +1326,7 @@ export default function Checkout() {
       });
     } catch (_error: unknown) {
       const errorMessage =
-        error instanceof Error ? error.message : 'Impossible de finaliser la commande';
+        _error instanceof Error ? _error.message : 'Impossible de finaliser la commande';
       logger.error('Erreur lors du checkout:', { error: errorMessage });
       showPaymentErrorToast(toast, errorMessage, 'Erreur');
     } finally {

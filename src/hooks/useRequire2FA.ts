@@ -223,7 +223,7 @@ export function useIs2FAEnabled(): boolean {
       const hasVerified = factors?.some(f => f.status === 'verified') || false;
       setIsEnabled(hasVerified);
     } catch (error) {
-      logger.error('Error in useIs2FAEnabled', { error, userId: user?.id });
+      logger.error('Error in useIs2FAEnabled', { error });
     }
   };
 
