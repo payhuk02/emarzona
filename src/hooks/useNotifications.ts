@@ -9,6 +9,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useEffect, useState } from 'react';
 import { logger } from '@/lib/logger';
 import { isSafeInternalNavUrl } from '@/lib/navigation/keyboard-shortcuts';
+import { playNotificationSound } from '@/lib/notifications/play-notification-sound';
+import type { NotificationSoundType } from '@/lib/notifications/play-notification-sound';
 import type { Json } from '@/integrations/supabase/types';
 import type {
   Notification,
@@ -17,7 +19,7 @@ import type {
 } from '@/types/notifications';
 
 const NOTIFICATION_PREFERENCES_FIELDS =
-  'id, user_id, email_notifications, push_notifications, sound_notifications, vibration_notifications, vibration_intensity, created_at, updated_at';
+  'id, user_id, email_notifications, push_notifications, sound_notifications, vibration_notifications, vibration_intensity, notification_sound_type, created_at, updated_at';
 
 /**
  * Hook pour récupérer les notifications de l'utilisateur avec pagination
@@ -339,6 +341,12 @@ export const useRealtimeNotifications = (options?: { enabled?: boolean }) => {
               // Respecter les préférences utilisateur pour les sons et vibrations
               const shouldPlaySound = preferences?.sound_notifications !== false; // true par défaut
               const shouldVibrate = preferences?.vibration_notifications !== false; // true par défaut
+
+              if (shouldPlaySound) {
+                playNotificationSound(
+                  (preferences?.notification_sound_type as NotificationSoundType) || 'default'
+                );
+              }
 
               // Déterminer l'intensité de vibration selon les préférences
               const getVibrationPattern = (): number[] => {

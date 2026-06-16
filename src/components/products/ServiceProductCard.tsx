@@ -46,6 +46,9 @@ import {
   ServiceCancellationBadge,
   ServiceMaxParticipantsBadge,
 } from '@/components/products/ServicePricingBadges';
+import { useMarketplaceGuestBuy } from '@/hooks/marketplace/useMarketplaceGuestBuy';
+import { MarketplaceGuestBuyDialogs } from '@/components/marketplace/MarketplaceGuestBuyDialogs';
+import { Loader2 } from 'lucide-react';
 
 interface ServiceProductCardProps {
   product: ServiceProduct;
@@ -64,6 +67,19 @@ export function ServiceProductCard({
   const { toast } = useToast();
   const [isFavorite, setIsFavorite] = useState(false);
   const priceInfo = useMemo(() => getDisplayPrice(product), [product]);
+  const marketplaceBuy = useMarketplaceGuestBuy({
+    product: {
+      id: product.id,
+      slug: product.slug,
+      name: product.name,
+      store_id: product.store_id,
+      product_type: 'service',
+      currency: product.currency,
+      payment_options: product.payment_options,
+    },
+    price: priceInfo.price,
+    storeSlug: product.store?.slug,
+  });
 
   // Vérifier si le produit est nouveau (< 7 jours)
   const isNew = useMemo(() => {
@@ -560,41 +576,49 @@ export function ServiceProductCard({
               </Link>
             </Button>
 
-            {/* Bouton BLEU "Réserver" ou "Acheter" */}
-            {product.calendar_available ? (
-              <Button
-                size="sm"
-                className="flex-1 h-10 sm:h-11 text-xs sm:text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium"
-                asChild
-              >
-                <Link
-                  to={productUrl}
-                  aria-label={`Réserver ${product.name}`}
-                  onClick={() => onAction?.('buy', product)}
-                >
-                  <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
-                  Réserver
-                </Link>
-              </Button>
-            ) : (
-              <Button
-                size="sm"
-                className="flex-1 h-10 sm:h-11 text-xs sm:text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium"
-                asChild
-              >
-                <Link
-                  to={productUrl}
-                  aria-label={`Acheter ${product.name}`}
-                  onClick={() => onAction?.('buy', product)}
-                >
-                  <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
-                  Acheter
-                </Link>
-              </Button>
-            )}
+            <Button
+              size="sm"
+              className="flex-1 h-10 sm:h-11 text-xs sm:text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium"
+              disabled={marketplaceBuy.loading}
+              onClick={e => {
+                e.preventDefault();
+                e.stopPropagation();
+                onAction?.('buy', product);
+                void marketplaceBuy.handleBuyClick();
+              }}
+              aria-label={`${marketplaceBuy.cta.buyAriaVerb} ${product.name}`}
+            >
+              {marketplaceBuy.loading ? (
+                <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 animate-spin" />
+              ) : product.calendar_available ? (
+                <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
+              ) : (
+                <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
+              )}
+              {marketplaceBuy.cta.buyLabel}
+            </Button>
           </div>
         </div>
       </div>
+
+      <MarketplaceGuestBuyDialogs
+        product={{
+          id: product.id,
+          slug: product.slug,
+          name: product.name,
+          store_id: product.store_id,
+          product_type: 'service',
+          currency: product.currency,
+          payment_options: product.payment_options,
+        }}
+        price={priceInfo.price}
+        guestOpen={marketplaceBuy.guestOpen}
+        setGuestOpen={marketplaceBuy.setGuestOpen}
+        physicalOpen={marketplaceBuy.physicalOpen}
+        setPhysicalOpen={marketplaceBuy.setPhysicalOpen}
+        loading={marketplaceBuy.loading}
+        onGuestConfirm={marketplaceBuy.proceedWithCustomer}
+      />
     </Card>
   );
 }

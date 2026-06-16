@@ -81,6 +81,12 @@ export interface DigitalProduct extends BaseProduct {
  */
 export interface PhysicalProduct extends BaseProduct {
   type: 'physical';
+  payment_options?: {
+    checkout_method?: 'online' | 'cash_on_delivery';
+    cta_button_label?: string;
+    payment_type?: 'full' | 'percentage' | 'delivery_secured';
+    percentage_rate?: number;
+  } | null;
   stock?: number;
   weight?: number;
   dimensions?: {
@@ -201,9 +207,3 @@ export interface ProductKeyInfo {
   icon?: React.ComponentType<{ className?: string }>;
   badge?: boolean;
 }
-
-
-
-
-
-

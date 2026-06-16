@@ -13,15 +13,13 @@ import {
   Loader2,
 } from '@/components/icons';
 import { Heart, Play, ZoomIn } from 'lucide-react';
-import { initiateMonerooPayment } from '@/lib/moneroo-payment';
-import { isSupportedCurrency, type Currency } from '@/lib/currency-converter';
+import { useMarketplaceGuestBuy } from '@/hooks/marketplace/useMarketplaceGuestBuy';
+import { MarketplaceGuestBuyDialogs } from '@/components/marketplace/MarketplaceGuestBuyDialogs';
+import { PhysicalCheckoutMethodBadge } from '@/components/products/PhysicalCheckoutMethodBadge';
+import type { PhysicalProductPaymentOptions } from '@/types/physical-product';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
 import { useMarketplaceFavorites } from '@/hooks/useMarketplaceFavorites';
-import { safeRedirect } from '@/lib/url-validator';
-// import { ProductBanner } from '@/components/ui/ResponsiveProductImage';
-import { logger } from '@/lib/logger';
 import { PriceStockAlertButton } from './PriceStockAlertButton';
 import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
 import { PaymentOptionsBadge, getPaymentOptions } from '@/components/products/PaymentOptionsBadge';
@@ -52,8 +50,9 @@ interface ProductCardProps {
     hide_reviews_count?: boolean | null;
     category?: string;
     store_id?: string;
-    product_type?: 'digital' | 'physical' | 'service' | 'course';
+    product_type?: 'digital' | 'physical' | 'service' | 'course' | 'artist';
     stock_quantity?: number | null;
+    payment_options?: PhysicalProductPaymentOptions | string | null;
     licensing_type?: 'plr' | 'copyrighted' | 'standard';
     product_affiliate_settings?: Array<{
       commission_rate: number;
@@ -70,9 +69,7 @@ interface ProductCardProps {
 }
 
 const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
-  const [loading, setLoading] = useState(false);
   const [isZoomOpen, setIsZoomOpen] = useState(false);
-  const { toast } = useToast();
   const { favorites, toggleFavorite } = useMarketplaceFavorites();
   const isFavorite = favorites.has(product.id);
   const isDigital = product.product_type === 'digital';
@@ -98,6 +95,21 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
       discountPercent: calculatedDiscountPercent,
     };
   }, [product.promo_price, product.price]);
+
+  const marketplaceBuy = useMarketplaceGuestBuy({
+    product: {
+      id: product.id,
+      slug: product.slug,
+      name: product.name,
+      store_id: product.store_id,
+      product_type: product.product_type,
+      currency: product.currency,
+      payment_options: product.payment_options,
+    },
+    price,
+    storeSlug: storeSlug || storeInfo?.slug,
+  });
+  const cta = marketplaceBuy.cta;
 
   // Gérer les favoris - Utiliser le hook centralisé pour synchronisation
   const handleFavorite = useCallback(
@@ -130,52 +142,8 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
     </div>
   );
 
-  const handleBuyNow = async () => {
-    if (!product.store_id) {
-      toast({
-        title: 'Erreur',
-        description: 'Boutique non disponible',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    try {
-      setLoading(true);
-
-      const result = await initiateMonerooPayment({
-        storeId: product.store_id,
-        productId: product.id,
-        amount: price,
-        currency: (isSupportedCurrency(product.currency ?? '')
-          ? product.currency
-          : 'XOF') as Currency,
-        description: `Achat de ${product.name}`,
-        customerEmail: 'client@example.com',
-        metadata: { productName: product.name, storeSlug },
-      });
-
-      if (result.checkout_url) {
-        safeRedirect(result.checkout_url, () => {
-          toast({
-            title: 'Erreur de paiement',
-            description: 'URL de paiement invalide. Veuillez réessayer.',
-            variant: 'destructive',
-          });
-        });
-      }
-    } catch (_error: unknown) {
-      const errorMessage =
-        _error instanceof Error ? _error.message : "Impossible d'initialiser le paiement";
-      logger.error('Erreur Moneroo', { error: _error, productId: product.id });
-      toast({
-        title: 'Erreur de paiement',
-        description: errorMessage,
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
+  const handleBuyNow = () => {
+    void marketplaceBuy.handleBuyClick();
   };
 
   return (
@@ -405,6 +373,12 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
             {product.name}
           </h3>
 
+          {cta.showPhysicalCheckoutBadge && (
+            <div className="mb-2">
+              <PhysicalCheckoutMethodBadge paymentOptions={product.payment_options} />
+            </div>
+          )}
+
           {/* Badges d'information - Placés après le titre de manière professionnelle */}
           <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3">
             {hasPromo && (
@@ -559,12 +533,12 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
 
           <Button
             onClick={handleBuyNow}
-            disabled={loading}
+            disabled={marketplaceBuy.loading}
             size="sm"
             className="product-button product-button-primary min-h-[44px] h-11 text-xs sm:text-sm px-2 sm:px-3"
-            aria-label={`Acheter le produit ${product.name} pour ${price.toLocaleString()} ${product.currency ?? 'FCFA'}`}
+            aria-label={`${cta.buyAriaVerb} ${product.name} pour ${price.toLocaleString()} ${product.currency ?? 'FCFA'}`}
           >
-            {loading ? (
+            {marketplaceBuy.loading ? (
               <>
                 <Loader2
                   className="h-3 w-3 sm:h-3.5 sm:w-3.5 animate-spin mr-1 sm:mr-1.5 flex-shrink-0"
@@ -578,12 +552,31 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
                   className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1 sm:mr-1.5 flex-shrink-0"
                   aria-hidden="true"
                 />
-                <span className="whitespace-nowrap">Acheter</span>
+                <span className="whitespace-nowrap">{cta.buyLabel}</span>
               </>
             )}
           </Button>
         </div>
       </div>
+
+      <MarketplaceGuestBuyDialogs
+        product={{
+          id: product.id,
+          slug: product.slug,
+          name: product.name,
+          store_id: product.store_id,
+          product_type: product.product_type,
+          currency: product.currency,
+          payment_options: product.payment_options,
+        }}
+        price={price}
+        guestOpen={marketplaceBuy.guestOpen}
+        setGuestOpen={marketplaceBuy.setGuestOpen}
+        physicalOpen={marketplaceBuy.physicalOpen}
+        setPhysicalOpen={marketplaceBuy.setPhysicalOpen}
+        loading={marketplaceBuy.loading}
+        onGuestConfirm={marketplaceBuy.proceedWithCustomer}
+      />
     </article>
   );
 };

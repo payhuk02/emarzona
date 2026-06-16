@@ -42,7 +42,13 @@ export interface PhysicalProductAffiliateSettings {
   terms_and_conditions: string;
 }
 
+export type PhysicalCheckoutMethod = 'online' | 'cash_on_delivery';
+
 export interface PhysicalProductPaymentOptions {
+  /** Mode de paiement affiché sur la carte produit */
+  checkout_method?: PhysicalCheckoutMethod;
+  /** Libellé du bouton d'action sur la carte produit */
+  cta_button_label?: string;
   payment_type: 'full' | 'percentage' | 'delivery_secured';
   percentage_rate: number;
   min_percentage?: number;

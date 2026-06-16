@@ -46,7 +46,7 @@ import { PhysicalSizeChartSelector } from './PhysicalSizeChartSelector';
 import { PhysicalAffiliateSettings } from './PhysicalAffiliateSettings';
 import { PhysicalSEOAndFAQs } from './PhysicalSEOAndFAQs';
 import { PhysicalPreview } from './PhysicalPreview';
-import { PaymentOptionsForm } from '../shared/PaymentOptionsForm';
+import { PhysicalCheckoutOptionsForm } from './PhysicalCheckoutOptionsForm';
 import { ProductStatisticsDisplaySettings } from '../shared/ProductStatisticsDisplaySettings';
 import { PhysicalWhatsAppContactConfig } from '@/components/physical/PhysicalWhatsAppContactConfig';
 import { hasPhysicalFeatureAccess } from '@/lib/billing/physical-plan-capabilities';
@@ -132,10 +132,10 @@ const STEPS = [
   },
   {
     id: 8,
-    title: 'Options de Paiement',
-    description: 'Complet, partiel, escrow',
+    title: 'Checkout & Bouton',
+    description: 'Paiement en ligne ou à la livraison, libellé du bouton',
     icon: CreditCard,
-    component: PaymentOptionsForm,
+    component: PhysicalCheckoutOptionsForm,
   },
   {
     id: 9,
@@ -256,10 +256,12 @@ export const CreatePhysicalProductWizard = ({
     },
     faqs: [],
 
-    // Payment Options (Step 8)
+    // Payment / Checkout Options (Step 8)
     payment: {
-      payment_type: 'full', // 'full' | 'percentage' | 'delivery_secured'
-      percentage_rate: 30, // Pour paiement partiel (10-90%)
+      checkout_method: 'online',
+      cta_button_label: 'Commander',
+      payment_type: 'full',
+      percentage_rate: 30,
     },
 
     // Size Chart (Step 5)
@@ -721,6 +723,8 @@ export const CreatePhysicalProductWizard = ({
           faqs: formData.faqs || [],
           // Payment Options
           payment_options: formData.payment || {
+            checkout_method: 'online',
+            cta_button_label: 'Commander',
             payment_type: 'full',
             percentage_rate: 30,
           },
@@ -1010,11 +1014,8 @@ export const CreatePhysicalProductWizard = ({
           onUpdate: handleUpdateFormData,
         };
 
-      case 8: // Payment Options
+      case 8: // Checkout options
         return {
-          productPrice:
-            typeof formData.price === 'number' && !isNaN(formData.price) ? formData.price : 0,
-          productType: 'physical' as const,
           data: formData.payment || {},
           onUpdate: (paymentData: PhysicalProductFormDataUpdate['payment']) =>
             handleUpdateFormData({ payment: paymentData }),

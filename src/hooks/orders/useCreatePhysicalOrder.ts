@@ -21,6 +21,8 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
 import { logger } from '@/lib/logger';
+import { parsePhysicalCheckoutOptions } from '@/lib/physical/physical-checkout-display';
+import type { PhysicalCheckoutMethod } from '@/constants/physical-checkout-options';
 
 const PRODUCT_FIELDS = 'id, name, price, promotional_price, currency, payment_options';
 const PHYSICAL_PRODUCT_FIELDS = 'id, product_id';
@@ -71,6 +73,9 @@ export interface CreatePhysicalOrderOptions {
 
   /** Montant de la carte cadeau à utiliser (optionnel) */
   giftCardAmount?: number;
+
+  /** Surcharge du mode checkout (sinon lu depuis payment_options produit) */
+  checkoutMethod?: PhysicalCheckoutMethod;
 }
 
 /**
@@ -86,11 +91,17 @@ export interface CreatePhysicalOrderResult {
   /** ID de l'inventaire réservé */
   inventoryId: string;
 
-  /** URL de checkout Moneroo */
-  checkoutUrl: string;
+  /** URL de checkout Moneroo (absent si paiement à la livraison) */
+  checkoutUrl?: string;
 
   /** ID de transaction Moneroo */
-  transactionId: string;
+  transactionId?: string;
+
+  /** True si commande en paiement à la livraison */
+  cashOnDelivery?: boolean;
+
+  /** Numéro de commande lisible */
+  orderNumber?: string;
 }
 
 /**
@@ -138,7 +149,10 @@ export const useCreatePhysicalOrder = () => {
         inventoryLocationId,
         giftCardId,
         giftCardAmount = 0,
+        checkoutMethod: checkoutMethodOverride,
       } = options;
+
+      let resolvedPhysicalProductId = physicalProductId;
 
       // 1. Récupérer les détails du produit (avec payment_options)
       const { data: product, error: productError } = await supabase
@@ -151,19 +165,38 @@ export const useCreatePhysicalOrder = () => {
         throw new Error('Produit non trouvé');
       }
 
+      const parsedCheckout = parsePhysicalCheckoutOptions(
+        product.payment_options as Parameters<typeof parsePhysicalCheckoutOptions>[0]
+      );
+      const checkoutMethod = checkoutMethodOverride ?? parsedCheckout.checkout_method;
+      const isCashOnDelivery = checkoutMethod === 'cash_on_delivery';
+
+      if (!resolvedPhysicalProductId) {
+        const { data: physicalRow } = await supabase
+          .from('physical_products')
+          .select('id')
+          .eq('product_id', productId)
+          .maybeSingle();
+        resolvedPhysicalProductId = physicalRow?.id ?? '';
+      }
+
+      if (!resolvedPhysicalProductId) {
+        throw new Error('Produit physique non trouvé');
+      }
+
       // Récupérer les options de paiement configurées
       const paymentOptions = (product.payment_options as {
         payment_type?: string;
         percentage_rate?: number;
       } | null) || { payment_type: 'full', percentage_rate: 30 };
-      const paymentType = paymentOptions.payment_type || 'full';
+      const paymentType = isCashOnDelivery ? 'full' : paymentOptions.payment_type || 'full';
       const percentageRate = paymentOptions.percentage_rate || 30;
 
       // 2. Récupérer les détails physiques
       const { data: physicalProduct, error: physicalError } = await supabase
         .from('physical_products')
         .select(PHYSICAL_PRODUCT_FIELDS)
-        .eq('id', physicalProductId)
+        .eq('id', resolvedPhysicalProductId)
         .single();
 
       if (physicalError || !physicalProduct) {
@@ -270,16 +303,21 @@ export const useCreatePhysicalOrder = () => {
         .insert({
           store_id: storeId,
           customer_id: customerId,
+          customer_email: customerEmail,
           order_number: orderNumber,
-          total_amount: totalPrice - (giftCardAmount || 0), // Montant final après gift card
+          total_amount: totalPrice - (giftCardAmount || 0),
           currency: product.currency,
-          payment_status: 'pending',
-          status: 'pending',
+          payment_status: isCashOnDelivery ? 'cod_pending' : 'pending',
+          status: isCashOnDelivery ? 'confirmed' : 'pending',
           delivery_status: 'pending',
           payment_type: paymentType,
           percentage_paid: percentagePaid,
           remaining_amount: remainingAmount,
           affiliate_tracking_cookie: affiliateTrackingCookie,
+          metadata: {
+            checkout_method: checkoutMethod,
+            guest_checkout: true,
+          },
         })
         .select(
           'id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at'
@@ -358,7 +396,7 @@ export const useCreatePhysicalOrder = () => {
           order_id: order.id,
           product_id: productId,
           product_type: 'physical',
-          physical_product_id: physicalProductId,
+          physical_product_id: resolvedPhysicalProductId,
           variant_id: variantId,
           product_name: product.name,
           quantity,
@@ -412,7 +450,17 @@ export const useCreatePhysicalOrder = () => {
         });
       }
 
-      // 11. Initier le paiement Moneroo (avec amountToPay adapté)
+      // 11. Paiement en ligne ou confirmation COD
+      if (isCashOnDelivery) {
+        return {
+          orderId: order.id,
+          orderItemId: orderItem.id,
+          inventoryId,
+          cashOnDelivery: true,
+          orderNumber: order.order_number,
+        };
+      }
+
       const paymentDescription =
         paymentType === 'percentage'
           ? `Acompte ${percentageRate}%: ${product.name} x${quantity}`
@@ -433,7 +481,7 @@ export const useCreatePhysicalOrder = () => {
         customerPhone,
         metadata: {
           product_type: 'physical',
-          physical_product_id: physicalProductId,
+          physical_product_id: resolvedPhysicalProductId,
           variant_id: variantId,
           inventory_id: inventoryId || undefined,
           inventory_location: inventoryLocation,
@@ -460,17 +508,20 @@ export const useCreatePhysicalOrder = () => {
         inventoryId,
         checkoutUrl: paymentResult.checkout_url,
         transactionId: paymentResult.transaction_id,
+        orderNumber: order.order_number,
       };
     },
 
-    onSuccess: async data => {
+    onSuccess: async (data, variables) => {
       toast({
-        title: '✅ Commande créée',
-        description: 'Stock réservé. Redirection vers le paiement...',
+        title: data.cashOnDelivery ? '✅ Commande confirmée' : '✅ Commande créée',
+        description: data.cashOnDelivery
+          ? 'Paiement à la livraison — votre commande est enregistrée.'
+          : 'Stock réservé. Redirection vers le paiement...',
       });
 
       // Déclencher webhook pour achat (en arrière-plan) - Système unifié
-      if (data.orderId && storeId) {
+      if (data.orderId && variables.storeId) {
         import('@/lib/webhooks/unified-webhook-service')
           .then(({ triggerPurchaseWebhook }) => {
             // Récupérer les détails de la commande pour le payload
@@ -481,7 +532,7 @@ export const useCreatePhysicalOrder = () => {
               .single()
               .then(({ data: orderData }) => {
                 if (orderData) {
-                  triggerPurchaseWebhook(storeId, orderData.id, {
+                  triggerPurchaseWebhook(variables.storeId, orderData.id, {
                     order_id: orderData.id,
                     order_number: orderData.order_number || data.orderId,
                     customer_id: orderData.customer_id,

@@ -20,7 +20,10 @@ import {
   ZoomIn,
   Calendar,
 } from 'lucide-react';
-import { getMarketplaceProductCTA } from '@/lib/marketplace-product-cta';
+import { useMarketplaceGuestBuy } from '@/hooks/marketplace/useMarketplaceGuestBuy';
+import { MarketplaceGuestBuyDialogs } from '@/components/marketplace/MarketplaceGuestBuyDialogs';
+import { PhysicalCheckoutMethodBadge } from '@/components/products/PhysicalCheckoutMethodBadge';
+import type { PhysicalProductPaymentOptions } from '@/types/physical-product';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
@@ -62,6 +65,7 @@ interface ProductCardModernProps {
     category?: string | null;
     product_type?: string | null;
     store_id?: string;
+    payment_options?: PhysicalProductPaymentOptions | string | null;
     stock_quantity?: number | null;
     stores?: {
       id: string;
@@ -94,14 +98,12 @@ const ProductCardModernComponent = ({
   freeShipping,
   shippingCost,
 }: ProductCardModernProps) => {
-  const [loading, setLoading] = useState(false);
   const [isZoomOpen, setIsZoomOpen] = useState(false);
   const [_userId, setUserId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { addItem } = useCart();
   const isDigital = product.product_type === 'digital';
-  const cta = getMarketplaceProductCTA(product.product_type);
 
   // Hook centralisé pour favoris synchronisés
   const { favorites, toggleFavorite } = useMarketplaceFavorites();
@@ -134,6 +136,21 @@ const ProductCardModernComponent = ({
       discountPercent: calculatedDiscountPercent,
     };
   }, [product.promotional_price, product.price]);
+
+  const marketplaceBuy = useMarketplaceGuestBuy({
+    product: {
+      id: product.id,
+      slug: product.slug,
+      name: product.name,
+      store_id: product.store_id,
+      product_type: product.product_type,
+      currency: product.currency,
+      payment_options: product.payment_options,
+    },
+    price,
+    storeSlug: storeSlug || product.stores?.slug,
+  });
+  const cta = marketplaceBuy.cta;
 
   // Vérifier si le produit est nouveau (< 7 jours) - mémorisé
   const isNew = useMemo(() => {
@@ -171,60 +188,9 @@ const ProductCardModernComponent = ({
   );
 
   // Handlers mémorisés pour éviter les re-créations
-  const handleBuyNow = useCallback(async () => {
-    if (!product.store_id) {
-      toast({
-        title: 'Erreur',
-        description: 'Boutique non disponible',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        toast({
-          title: 'Authentification requise',
-          description: 'Veuillez vous connecter pour effectuer un achat',
-          variant: 'destructive',
-        });
-        navigate('/login');
-        return;
-      }
-
-      if (cta.action === 'service') {
-        navigate(`/service/${product.id}`);
-        return;
-      }
-
-      if (cta.action === 'course') {
-        navigate(`/courses/${product.slug}`);
-        return;
-      }
-
-      const checkoutParams = new URLSearchParams({
-        productId: product.id,
-        storeId: product.store_id,
-      });
-      navigate(`/checkout?${checkoutParams.toString()}`);
-    } catch (err: unknown) {
-      logger.error("Erreur lors de l'achat", {
-        error: err instanceof Error ? err : new Error(String(err)),
-      });
-      toast({
-        title: 'Erreur',
-        description: "Impossible d'ouvrir le checkout",
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [product.store_id, product.id, product.slug, cta.action, navigate, toast]);
+  const handleBuyNow = useCallback(() => {
+    void marketplaceBuy.handleBuyClick();
+  }, [marketplaceBuy]);
 
   const handleAddToCart = useCallback(async () => {
     if (!cta.showAddToCart) return;
@@ -452,6 +418,12 @@ const ProductCardModernComponent = ({
             {product.name}
           </h3>
         </Link>
+
+        {cta.showPhysicalCheckoutBadge && (
+          <div className="mb-2">
+            <PhysicalCheckoutMethodBadge paymentOptions={product.payment_options} />
+          </div>
+        )}
 
         {/* Badges d'information - Placés après le titre de manière professionnelle */}
         <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3">
@@ -699,16 +671,16 @@ const ProductCardModernComponent = ({
 
             <Button
               onClick={handleBuyNow}
-              disabled={loading}
+              disabled={marketplaceBuy.loading}
               size="sm"
               className="flex-1 min-h-[44px] h-11 text-xs sm:text-xs bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium disabled:opacity-50 px-3 sm:px-3 touch-manipulation active:scale-95 transition-transform"
               aria-label={
-                loading
+                marketplaceBuy.loading
                   ? `Traitement en cours pour ${product.name}`
                   : `${cta.buyAriaVerb} ${product.name} pour ${formatPrice(price)} ${product.currency || 'XOF'}`
               }
             >
-              {loading ? (
+              {marketplaceBuy.loading ? (
                 <>
                   <Loader2
                     className="h-3 w-3 sm:h-3.5 sm:w-3.5 animate-spin flex-shrink-0"
@@ -736,6 +708,25 @@ const ProductCardModernComponent = ({
           </div>
         </div>
       </div>
+
+      <MarketplaceGuestBuyDialogs
+        product={{
+          id: product.id,
+          slug: product.slug,
+          name: product.name,
+          store_id: product.store_id,
+          product_type: product.product_type,
+          currency: product.currency,
+          payment_options: product.payment_options,
+        }}
+        price={price}
+        guestOpen={marketplaceBuy.guestOpen}
+        setGuestOpen={marketplaceBuy.setGuestOpen}
+        physicalOpen={marketplaceBuy.physicalOpen}
+        setPhysicalOpen={marketplaceBuy.setPhysicalOpen}
+        loading={marketplaceBuy.loading}
+        onGuestConfirm={marketplaceBuy.proceedWithCustomer}
+      />
     </article>
   );
 };

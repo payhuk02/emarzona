@@ -49,6 +49,9 @@ import {
   CourseDurationBadge,
   CourseModulesBadge,
 } from '@/components/products/CourseInfoBadges';
+import { useMarketplaceGuestBuy } from '@/hooks/marketplace/useMarketplaceGuestBuy';
+import { MarketplaceGuestBuyDialogs } from '@/components/marketplace/MarketplaceGuestBuyDialogs';
+import { Loader2 } from 'lucide-react';
 
 interface CourseProductCardProps {
   product: CourseProduct;
@@ -67,6 +70,19 @@ export function CourseProductCard({
   const { toast } = useToast();
   const [isFavorite, setIsFavorite] = useState(false);
   const priceInfo = useMemo(() => getDisplayPrice(product), [product]);
+  const marketplaceBuy = useMarketplaceGuestBuy({
+    product: {
+      id: product.id,
+      slug: product.slug,
+      name: product.name,
+      store_id: product.store_id,
+      product_type: 'course',
+      currency: product.currency,
+      payment_options: product.payment_options,
+    },
+    price: priceInfo.price,
+    storeSlug: product.store?.slug,
+  });
   const imageSizes =
     variant === 'compact'
       ? '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'
@@ -569,24 +585,47 @@ export function CourseProductCard({
               </Link>
             </Button>
 
-            {/* Bouton BLEU "S'inscrire" */}
             <Button
               size="sm"
               className="flex-1 h-10 sm:h-11 text-xs sm:text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium"
-              asChild
+              disabled={marketplaceBuy.loading}
+              onClick={e => {
+                e.preventDefault();
+                e.stopPropagation();
+                onAction?.('buy', product);
+                void marketplaceBuy.handleBuyClick();
+              }}
+              aria-label={`${marketplaceBuy.cta.buyAriaVerb} ${product.name}`}
             >
-              <Link
-                to={productUrl}
-                aria-label={`S'inscrire à ${product.name}`}
-                onClick={() => onAction?.('buy', product)}
-              >
+              {marketplaceBuy.loading ? (
+                <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 animate-spin" />
+              ) : (
                 <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
-                Acheter
-              </Link>
+              )}
+              {marketplaceBuy.cta.buyLabel}
             </Button>
           </div>
         </div>
       </div>
+
+      <MarketplaceGuestBuyDialogs
+        product={{
+          id: product.id,
+          slug: product.slug,
+          name: product.name,
+          store_id: product.store_id,
+          product_type: 'course',
+          currency: product.currency,
+          payment_options: product.payment_options,
+        }}
+        price={priceInfo.price}
+        guestOpen={marketplaceBuy.guestOpen}
+        setGuestOpen={marketplaceBuy.setGuestOpen}
+        physicalOpen={marketplaceBuy.physicalOpen}
+        setPhysicalOpen={marketplaceBuy.setPhysicalOpen}
+        loading={marketplaceBuy.loading}
+        onGuestConfirm={marketplaceBuy.proceedWithCustomer}
+      />
     </Card>
   );
 }

@@ -14,12 +14,14 @@ import {
   ShoppingBag,
   Store,
 } from 'lucide-react';
-import { initiateMonerooPayment } from '@/lib/moneroo-payment';
+import { useMarketplaceGuestBuy } from '@/hooks/marketplace/useMarketplaceGuestBuy';
+import { MarketplaceGuestBuyDialogs } from '@/components/marketplace/MarketplaceGuestBuyDialogs';
+import { PhysicalCheckoutMethodBadge } from '@/components/products/PhysicalCheckoutMethodBadge';
+import type { PhysicalProductPaymentOptions } from '@/types/physical-product';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { safeRedirect } from '@/lib/url-validator';
 import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
@@ -49,9 +51,10 @@ interface ProductCardProfessionalProps {
     hide_rating?: boolean | null;
     hide_reviews_count?: boolean | null;
     category?: string;
-    product_type?: 'digital' | 'physical' | 'service' | 'course';
+    product_type?: 'digital' | 'physical' | 'service' | 'course' | 'artist';
     stock_quantity?: number | null;
     store_id?: string;
+    payment_options?: PhysicalProductPaymentOptions | string | null;
     stores?: {
       id: string;
       name: string;
@@ -79,7 +82,6 @@ const ProductCardProfessionalComponent = ({
   onAddToComparison,
   isInComparison = false,
 }: ProductCardProfessionalProps) => {
-  const [loading, setLoading] = useState(false);
   const [_userId, setUserId] = useState<string | null>(null);
   const { toast } = useToast();
   const { addItem } = useCart();
@@ -114,6 +116,21 @@ const ProductCardProfessionalComponent = ({
     };
   }, [product.promotional_price, product.price]);
 
+  const marketplaceBuy = useMarketplaceGuestBuy({
+    product: {
+      id: product.id,
+      slug: product.slug,
+      name: product.name,
+      store_id: product.store_id,
+      product_type: product.product_type,
+      currency: product.currency,
+      payment_options: product.payment_options,
+    },
+    price,
+    storeSlug,
+  });
+  const cta = marketplaceBuy.cta;
+
   const renderStars = (rating: number) => (
     <div
       className="flex items-center gap-0.5"
@@ -132,77 +149,8 @@ const ProductCardProfessionalComponent = ({
     </div>
   );
 
-  const handleBuyNow = async () => {
-    if (!product.store_id) {
-      toast({
-        title: 'Erreur',
-        description: 'Boutique non disponible',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    try {
-      setLoading(true);
-
-      // Récupérer l'utilisateur authentifié
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user?.email) {
-        toast({
-          title: 'Authentification requise',
-          description: 'Veuillez vous connecter pour effectuer un achat',
-          variant: 'destructive',
-        });
-        setLoading(false);
-        return;
-      }
-
-      const result = await initiateMonerooPayment({
-        storeId: product.store_id,
-        productId: product.id,
-        amount: price,
-        currency: (product.currency ?? 'XOF') as
-          | 'XOF'
-          | 'EUR'
-          | 'USD'
-          | 'GBP'
-          | 'NGN'
-          | 'GHS'
-          | 'KES'
-          | 'ZAR',
-        description: `Achat de ${product.name}`,
-        customerEmail: user.email,
-        customerName: user.user_metadata?.full_name || user.email.split('@')[0],
-        metadata: {
-          productName: product.name,
-          storeSlug,
-          userId: user.id,
-        },
-      });
-
-      if (result.checkout_url) {
-        safeRedirect(result.checkout_url, () => {
-          toast({
-            title: 'Erreur de paiement',
-            description: 'URL de paiement invalide. Veuillez réessayer.',
-            variant: 'destructive',
-          });
-        });
-      }
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue';
-      logger.error("Erreur lors de l'achat:", { error: errorMessage, productId: product.id });
-      toast({
-        title: 'Erreur de paiement',
-        description: errorMessage || "Impossible d'initialiser le paiement",
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
+  const handleBuyNow = () => {
+    void marketplaceBuy.handleBuyClick();
   };
 
   const handleAddToCart = async () => {
@@ -225,7 +173,7 @@ const ProductCardProfessionalComponent = ({
           | 'course',
         quantity: 1,
       });
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue';
       logger.error("Erreur lors de l'ajout au panier:", {
         error: errorMessage,
@@ -246,7 +194,7 @@ const ProductCardProfessionalComponent = ({
   };
 
   const getCategoryColor = (category: string) => {
-    const  colors: { [key: string]: string } = {
+    const colors: { [key: string]: string } = {
       SEO: 'bg-blue-100 text-blue-800',
       Marketing: 'bg-green-100 text-green-800',
       Design: 'bg-purple-100 text-purple-800',
@@ -392,6 +340,12 @@ const ProductCardProfessionalComponent = ({
         >
           {product.name}
         </h3>
+
+        {cta.showPhysicalCheckoutBadge && (
+          <div className="mb-2">
+            <PhysicalCheckoutMethodBadge paymentOptions={product.payment_options} />
+          </div>
+        )}
 
         {/* Badges d'information - Placés après le titre de manière professionnelle */}
         {product && product.licensing_type && (
@@ -623,7 +577,6 @@ const ProductCardProfessionalComponent = ({
 
             <Button
               onClick={handleAddToCart}
-              disabled={loading}
               size="sm"
               variant="outline"
               className="product-action-button min-h-[44px] h-11 px-3 text-sm border-purple-300 dark:border-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:border-purple-400 dark:hover:border-purple-500 transition-all duration-200 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50"
@@ -635,17 +588,17 @@ const ProductCardProfessionalComponent = ({
 
           <Button
             onClick={handleBuyNow}
-            disabled={loading}
+            disabled={marketplaceBuy.loading}
             size="sm"
             className="product-action-button w-full min-h-[44px] h-11 px-3 text-sm bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 active:from-blue-800 active:to-purple-800 text-white font-medium transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
             aria-label={
-              loading
+              marketplaceBuy.loading
                 ? `Traitement de l'achat de ${product.name} en cours`
-                : `Acheter ${product.name} pour ${formatPrice(price)} ${product.currency || 'FCFA'}`
+                : `${cta.buyAriaVerb} ${product.name} pour ${formatPrice(price)} ${product.currency || 'FCFA'}`
             }
           >
             <div className="flex items-center justify-center gap-1.5 truncate w-full">
-              {loading ? (
+              {marketplaceBuy.loading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin flex-shrink-0" aria-hidden="true" />
                   <span className="truncate">Paiement...</span>
@@ -653,13 +606,32 @@ const ProductCardProfessionalComponent = ({
               ) : (
                 <>
                   <ShoppingCart className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
-                  <span className="truncate">Acheter maintenant</span>
+                  <span className="truncate">{cta.buyLabel}</span>
                 </>
               )}
             </div>
           </Button>
         </div>
       </CardContent>
+
+      <MarketplaceGuestBuyDialogs
+        product={{
+          id: product.id,
+          slug: product.slug,
+          name: product.name,
+          store_id: product.store_id,
+          product_type: product.product_type,
+          currency: product.currency,
+          payment_options: product.payment_options,
+        }}
+        price={price}
+        guestOpen={marketplaceBuy.guestOpen}
+        setGuestOpen={marketplaceBuy.setGuestOpen}
+        physicalOpen={marketplaceBuy.physicalOpen}
+        setPhysicalOpen={marketplaceBuy.setPhysicalOpen}
+        loading={marketplaceBuy.loading}
+        onGuestConfirm={marketplaceBuy.proceedWithCustomer}
+      />
     </Card>
   );
 };
@@ -686,9 +658,3 @@ const ProductCardProfessional = React.memo(
 ProductCardProfessional.displayName = 'ProductCardProfessional';
 
 export default ProductCardProfessional;
-
-
-
-
-
-

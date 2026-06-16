@@ -59,7 +59,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import '@/styles/product-grid-professional.css';
+import {
+  GuestPurchaseDialog,
+  type GuestCustomerInfo,
+} from '@/components/checkout/GuestPurchaseDialog';
 
 interface ProductCardProps {
   product: ExtendedProduct & Partial<UnifiedProduct>;
@@ -70,6 +73,7 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
   const [loading, setLoading] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isZoomOpen, setIsZoomOpen] = useState(false);
+  const [guestDialogOpen, setGuestDialogOpen] = useState(false);
   const [_userId, setUserId] = useState<string | null>(null);
   const { toast } = useToast();
   const isDigital = product.product_type === 'digital';
@@ -175,7 +179,63 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
     [product.name, toast]
   );
 
-  // Gérer l'achat - mémorisé
+  const proceedToPayment = useCallback(
+    async (customer: GuestCustomerInfo) => {
+      if (!product.store_id) {
+        toast({
+          title: 'Erreur',
+          description: 'Boutique non disponible',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      setLoading(true);
+
+      try {
+        const result = await initiateMonerooPayment({
+          storeId: product.store_id,
+          productId: product.id,
+          amount: price,
+          currency: (product.currency ?? 'XOF') as import('@/lib/currency-converter').Currency,
+          description: `Achat de ${product.name}`,
+          customerEmail: customer.email,
+          customerName: customer.fullName,
+          metadata: {
+            productName: product.name,
+            storeSlug,
+            guest_checkout: true,
+            customer_phone: customer.phone,
+          },
+        });
+
+        if (result.success && result.checkout_url) {
+          safeRedirect(result.checkout_url, () => {
+            toast({
+              title: 'Erreur',
+              description: 'URL de paiement invalide. Veuillez réessayer.',
+              variant: 'destructive',
+            });
+          });
+        } else {
+          throw new Error("Échec de l'initialisation du paiement");
+        }
+      } catch (_error: unknown) {
+        const errorMessage = _error instanceof Error ? _error.message : 'Une erreur est survenue';
+        toast({
+          title: 'Erreur',
+          description: errorMessage || "Impossible d'initier le paiement",
+          variant: 'destructive',
+        });
+      } finally {
+        setLoading(false);
+        setGuestDialogOpen(false);
+      }
+    },
+    [product.store_id, product.id, product.name, product.currency, price, storeSlug, toast]
+  );
+
+  // Gérer l'achat — invité autorisé avant création de compte
   const handleBuyNow = useCallback(async () => {
     if (!product.store_id) {
       toast({
@@ -186,59 +246,20 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
       return;
     }
 
-    try {
-      setLoading(true);
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user?.email) {
-        toast({
-          title: 'Authentification requise',
-          description: 'Veuillez vous connecter pour effectuer un achat',
-          variant: 'destructive',
-        });
-        setLoading(false);
-        return;
-      }
-
-      const result = await initiateMonerooPayment({
-        storeId: product.store_id,
-        productId: product.id,
-        amount: price,
-        currency: (product.currency ?? 'XOF') as import('@/lib/currency-converter').Currency,
-        description: `Achat de ${product.name}`,
-        customerEmail: user.email,
-        customerName: user.user_metadata?.full_name || user.email.split('@')[0],
-        metadata: {
-          productName: product.name,
-          storeSlug,
-          userId: user.id,
-        },
-      });
-
-      if (result.success && result.checkout_url) {
-        safeRedirect(result.checkout_url, () => {
-          toast({
-            title: 'Erreur',
-            description: 'URL de paiement invalide. Veuillez réessayer.',
-            variant: 'destructive',
-          });
-        });
-      } else {
-        throw new Error("Échec de l'initialisation du paiement");
-      }
-    } catch (_error: unknown) {
-      const errorMessage = _error instanceof Error ? _error.message : 'Une erreur est survenue';
-      toast({
-        title: 'Erreur',
-        description: errorMessage || "Impossible d'initier le paiement",
-        variant: 'destructive',
-      });
-      setLoading(false);
+    if (!user?.email) {
+      setGuestDialogOpen(true);
+      return;
     }
-  }, [product.store_id, product.id, product.name, product.currency, price, storeSlug, toast]);
+
+    await proceedToPayment({
+      email: user.email,
+      fullName: (user.user_metadata?.full_name as string | undefined) || user.email.split('@')[0],
+    });
+  }, [product.store_id, proceedToPayment, toast]);
 
   // Rendre les étoiles - mémorisé
   const renderStars = useCallback(
@@ -714,6 +735,14 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
           </Button>
         </div>
       </CardContent>
+
+      <GuestPurchaseDialog
+        open={guestDialogOpen}
+        onOpenChange={setGuestDialogOpen}
+        productName={product.name}
+        onConfirm={proceedToPayment}
+        loading={loading}
+      />
     </Card>
   );
 };

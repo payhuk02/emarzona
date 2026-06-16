@@ -50,6 +50,9 @@ import {
   ArtistSignatureBadge,
 } from '@/components/products/ArtistInfoBadges';
 import { generateProductUrl } from '@/lib/store-utils';
+import { useMarketplaceGuestBuy } from '@/hooks/marketplace/useMarketplaceGuestBuy';
+import { MarketplaceGuestBuyDialogs } from '@/components/marketplace/MarketplaceGuestBuyDialogs';
+import { Loader2 } from 'lucide-react';
 
 interface ArtistProductCardProps {
   product: ArtistProduct;
@@ -160,6 +163,19 @@ export function ArtistProductCard({
   };
 
   const priceInfo = useMemo(() => getDisplayPrice(product), [product]);
+  const marketplaceBuy = useMarketplaceGuestBuy({
+    product: {
+      id: product.id,
+      slug: product.slug,
+      name: product.artwork_title || product.name,
+      store_id: product.store_id,
+      product_type: 'artist',
+      currency: product.currency,
+      payment_options: product.payment_options,
+    },
+    price: priceInfo.price,
+    storeSlug: product.store?.slug,
+  });
 
   // URL du produit
   const productUrl = useMemo(
@@ -649,24 +665,47 @@ export function ArtistProductCard({
               </Link>
             </Button>
 
-            {/* Bouton BLEU "Acheter" */}
             <Button
               size="sm"
               className="flex-1 h-10 sm:h-11 text-xs sm:text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium"
-              asChild
+              disabled={marketplaceBuy.loading}
+              onClick={e => {
+                e.preventDefault();
+                e.stopPropagation();
+                onAction?.('buy', product);
+                void marketplaceBuy.handleBuyClick();
+              }}
+              aria-label={`${marketplaceBuy.cta.buyAriaVerb} ${product.artwork_title || product.name}`}
             >
-              <Link
-                to={productUrl}
-                aria-label={`Acheter ${product.artwork_title || product.name}`}
-                onClick={() => onAction?.('buy', product)}
-              >
+              {marketplaceBuy.loading ? (
+                <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 animate-spin" />
+              ) : (
                 <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
-                Acheter
-              </Link>
+              )}
+              {marketplaceBuy.cta.buyLabel}
             </Button>
           </div>
         </div>
       </div>
+
+      <MarketplaceGuestBuyDialogs
+        product={{
+          id: product.id,
+          slug: product.slug,
+          name: product.artwork_title || product.name,
+          store_id: product.store_id,
+          product_type: 'artist',
+          currency: product.currency,
+          payment_options: product.payment_options,
+        }}
+        price={priceInfo.price}
+        guestOpen={marketplaceBuy.guestOpen}
+        setGuestOpen={marketplaceBuy.setGuestOpen}
+        physicalOpen={marketplaceBuy.physicalOpen}
+        setPhysicalOpen={marketplaceBuy.setPhysicalOpen}
+        loading={marketplaceBuy.loading}
+        onGuestConfirm={marketplaceBuy.proceedWithCustomer}
+      />
     </Card>
   );
 }

@@ -42,6 +42,9 @@ import { cn } from '@/lib/utils';
 import { PriceStockAlertButton } from '@/components/marketplace/PriceStockAlertButton';
 import { useToast } from '@/hooks/use-toast';
 import { PaymentOptionsBadge, getPaymentOptions } from '@/components/products/PaymentOptionsBadge';
+import { PhysicalCheckoutMethodBadge } from '@/components/products/PhysicalCheckoutMethodBadge';
+import { PhysicalQuickOrderDialog } from '@/components/physical/PhysicalQuickOrderDialog';
+import { parsePhysicalCheckoutOptions } from '@/lib/physical/physical-checkout-display';
 import { PricingModelBadge } from '@/components/products/PricingModelBadge';
 import { PhysicalSizeChartBadge } from '@/components/products/PhysicalInfoBadges';
 
@@ -61,6 +64,11 @@ export function PhysicalProductCard({
   const isCompact = variant === 'compact';
   const { toast } = useToast();
   const [isFavorite, setIsFavorite] = useState(false);
+  const [quickOrderOpen, setQuickOrderOpen] = useState(false);
+  const checkoutDisplay = useMemo(
+    () => parsePhysicalCheckoutOptions((product as { payment_options?: unknown }).payment_options),
+    [product]
+  );
   const priceInfo = useMemo(() => getDisplayPrice(product), [product]);
   const imageSizes =
     variant === 'compact'
@@ -302,7 +310,7 @@ export function PhysicalProductCard({
           <h3
             id={`product-title-${product.id}`}
             className={cn(
-              'font-semibold leading-tight line-clamp-2 mb-3',
+              'font-semibold leading-tight line-clamp-2',
               'text-sm sm:text-base lg:text-lg',
               'text-white',
               'hover:text-primary transition-colors',
@@ -312,6 +320,11 @@ export function PhysicalProductCard({
             {product.name}
           </h3>
         </Link>
+
+        <PhysicalCheckoutMethodBadge
+          paymentOptions={(product as { payment_options?: unknown }).payment_options}
+          className="mb-2"
+        />
 
         {/* Badges d'information - Placés après le titre de manière professionnelle */}
         <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3">
@@ -578,27 +591,45 @@ export function PhysicalProductCard({
               </Link>
             </Button>
 
-            {/* Bouton BLEU "Acheter" */}
+            {/* Bouton d'action principal (libellé vendeur) */}
             <Button
               size="sm"
               className="flex-1 h-10 sm:h-11 text-xs sm:text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-              asChild
               disabled={product.stock === 0}
+              onClick={e => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (product.stock === 0) return;
+                onAction?.('buy', product);
+                setQuickOrderOpen(true);
+              }}
+              aria-label={
+                product.stock === 0
+                  ? `${product.name} est épuisé`
+                  : `${checkoutDisplay.cta_button_label} ${product.name}`
+              }
             >
-              <Link
-                to={productUrl}
-                aria-label={
-                  product.stock === 0 ? `${product.name} est épuisé` : `Acheter ${product.name}`
-                }
-                onClick={() => product.stock !== 0 && onAction?.('buy', product)}
-              >
-                <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
-                {product.stock === 0 ? 'Épuisé' : 'Acheter'}
-              </Link>
+              <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
+              {product.stock === 0 ? 'Épuisé' : checkoutDisplay.cta_button_label}
             </Button>
           </div>
         </div>
       </div>
+
+      {product.store_id && (
+        <PhysicalQuickOrderDialog
+          open={quickOrderOpen}
+          onOpenChange={setQuickOrderOpen}
+          product={{
+            productId: product.id,
+            storeId: product.store_id,
+            name: product.name,
+            price: priceInfo.price,
+            currency: product.currency || 'XOF',
+            payment_options: (product as { payment_options?: unknown }).payment_options,
+          }}
+        />
+      )}
     </Card>
   );
 }

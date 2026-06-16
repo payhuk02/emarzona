@@ -43,7 +43,7 @@ import { PhysicalSizeChartSelector } from '../create/physical/PhysicalSizeChartS
 import { PhysicalAffiliateSettings } from '../create/physical/PhysicalAffiliateSettings';
 import { PhysicalSEOAndFAQs } from '../create/physical/PhysicalSEOAndFAQs';
 import { PhysicalPreview } from '../create/physical/PhysicalPreview';
-import { PaymentOptionsForm } from '../create/shared/PaymentOptionsForm';
+import { PhysicalCheckoutOptionsForm } from '../create/physical/PhysicalCheckoutOptionsForm';
 import { ProductStatisticsDisplaySettings } from '../create/shared/ProductStatisticsDisplaySettings';
 import { PhysicalWhatsAppContactConfig } from '@/components/physical/PhysicalWhatsAppContactConfig';
 import { useStorePhysicalPlanLimits } from '@/hooks/billing/useStorePhysicalPlanLimits';
@@ -127,10 +127,10 @@ const STEPS = [
   },
   {
     id: 8,
-    title: 'Options de Paiement',
-    description: 'Complet, partiel, escrow',
+    title: 'Checkout & Bouton',
+    description: 'Paiement en ligne ou à la livraison, libellé du bouton',
     icon: CreditCard,
-    component: PaymentOptionsForm,
+    component: PhysicalCheckoutOptionsForm,
   },
   {
     id: 9,
@@ -822,9 +822,6 @@ export const EditPhysicalProductWizard = ({
 
       case 8:
         return {
-          productPrice:
-            typeof formData.price === 'number' && !isNaN(formData.price) ? formData.price : 0,
-          productType: 'physical' as const,
           data: formData.payment || {},
           onUpdate: (paymentData: PhysicalProductFormDataUpdate['payment']) =>
             handleUpdateFormData({ payment: paymentData }),

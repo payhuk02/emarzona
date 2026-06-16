@@ -26,6 +26,7 @@ import {
   Heart,
   Play,
   ZoomIn,
+  Loader2,
 } from 'lucide-react';
 import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
@@ -55,6 +56,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { useMarketplaceGuestBuy } from '@/hooks/marketplace/useMarketplaceGuestBuy';
+import { MarketplaceGuestBuyDialogs } from '@/components/marketplace/MarketplaceGuestBuyDialogs';
 
 const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
   product,
@@ -78,6 +81,19 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
     [product.rating, product.review_count]
   );
   const productImage = useMemo(() => getProductImage(product), [product]);
+  const marketplaceBuy = useMarketplaceGuestBuy({
+    product: {
+      id: product.id,
+      slug: product.slug,
+      name: product.name,
+      store_id: product.store_id,
+      product_type: product.type,
+      currency: product.currency,
+      payment_options: product.payment_options,
+    },
+    price: priceInfo.price,
+    storeSlug: product.store?.slug,
+  });
 
   // Mémoriser l'URL du produit
   const productUrl = useMemo(
@@ -583,19 +599,51 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
               <Button
                 size="sm"
                 className="flex-1 h-11 sm:h-8 md:h-9 text-xs sm:text-xs bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200 hover:scale-[1.02] px-3 sm:px-3 touch-manipulation active:scale-95"
-                onClick={e => handleAction('buy', e)}
-                aria-label={`Acheter ${product.name} pour ${formatPrice(priceInfo.price, product.currency)}`}
+                disabled={marketplaceBuy.loading}
+                onClick={e => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleAction('buy', e);
+                  void marketplaceBuy.handleBuyClick();
+                }}
+                aria-label={`${marketplaceBuy.cta.buyAriaVerb} ${product.name} pour ${formatPrice(priceInfo.price, product.currency)}`}
               >
-                <ShoppingCart
-                  className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 mr-1 sm:mr-1.5 md:mr-2 flex-shrink-0"
-                  aria-hidden="true"
-                />
-                <span className="whitespace-nowrap">Acheter</span>
+                {marketplaceBuy.loading ? (
+                  <Loader2
+                    className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 mr-1 sm:mr-1.5 md:mr-2 flex-shrink-0 animate-spin"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <ShoppingCart
+                    className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 mr-1 sm:mr-1.5 md:mr-2 flex-shrink-0"
+                    aria-hidden="true"
+                  />
+                )}
+                <span className="whitespace-nowrap">{marketplaceBuy.cta.buyLabel}</span>
               </Button>
             </div>
           )}
         </div>
       </div>
+
+      <MarketplaceGuestBuyDialogs
+        product={{
+          id: product.id,
+          slug: product.slug,
+          name: product.name,
+          store_id: product.store_id,
+          product_type: product.type,
+          currency: product.currency,
+          payment_options: product.payment_options,
+        }}
+        price={priceInfo.price}
+        guestOpen={marketplaceBuy.guestOpen}
+        setGuestOpen={marketplaceBuy.setGuestOpen}
+        physicalOpen={marketplaceBuy.physicalOpen}
+        setPhysicalOpen={marketplaceBuy.setPhysicalOpen}
+        loading={marketplaceBuy.loading}
+        onGuestConfirm={marketplaceBuy.proceedWithCustomer}
+      />
     </Card>
   );
 };
