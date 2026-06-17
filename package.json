@@ -53,6 +53,7 @@
     "test:e2e:financial": "playwright test tests/e2e/partial-refund.spec.ts tests/e2e/physical-zero-commission-c1.spec.ts tests/e2e/physical-subscription-renewal.spec.ts tests/e2e/referral-c1.spec.ts tests/e2e/mixed-cart-service-product.spec.ts tests/e2e/payment-v2-rollout.spec.ts --project=chromium",
     "test:e2e:email": "playwright test email-unsubscribe email-campaign-test-send --project=chromium",
     "verify:supabase-keys": "node scripts/verify-supabase-publishable-key.mjs",
+    "setup:commerce-e2e-secret": "node scripts/setup-commerce-e2e-github-secret.mjs",
     "test:visual": "playwright test visual-regression",
     "test:a11y": "playwright test accessibility",
     "test:a11y:check": "node scripts/check-accessibility.js",
