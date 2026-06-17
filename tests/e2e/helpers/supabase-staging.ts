@@ -5,12 +5,13 @@
  *   E2E_STAGING_SUPABASE_URL
  *   E2E_STAGING_SUPABASE_SERVICE_KEY
  */
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import { createNodeSupabaseClient } from './create-node-supabase-client';
 
 export function hasStagingSupabaseCredentials(): boolean {
   return Boolean(
     process.env.E2E_STAGING_SUPABASE_URL?.trim() &&
-      process.env.E2E_STAGING_SUPABASE_SERVICE_KEY?.trim()
+    process.env.E2E_STAGING_SUPABASE_SERVICE_KEY?.trim()
   );
 }
 
@@ -24,9 +25,7 @@ export function createStagingSupabaseClient(): SupabaseClient {
     );
   }
 
-  return createClient(url, key, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
+  return createNodeSupabaseClient(url, key);
 }
 
 export async function findPhysicalOnlyPaidOrder(

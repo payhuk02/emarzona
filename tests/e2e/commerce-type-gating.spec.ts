@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { createClient } from '@supabase/supabase-js';
+import { createNodeSupabaseClient } from './helpers/create-node-supabase-client';
 
 type StoreCommerceType = 'physical' | 'digital' | 'service' | 'course' | 'artist';
 
@@ -110,9 +110,7 @@ test.describe('Commerce type gating (E2E minimal)', () => {
 
   for (const commerceType of TYPES) {
     test(`create store (${commerceType}) -> sidebar/route gating`, async ({ page }, testInfo) => {
-      const admin = createClient(supabaseUrl!, supabaseServiceKey!, {
-        auth: { persistSession: false, autoRefreshToken: false },
-      });
+      const admin = createNodeSupabaseClient(supabaseUrl!, supabaseServiceKey!);
 
       const runId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
       const email = `e2e-commerce-${commerceType}-${runId}@example.com`;
