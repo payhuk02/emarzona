@@ -4,6 +4,7 @@ import {
   canAccessProductCreateNavPath,
   getPrimaryProductCreatePath,
   getRouteCapabilityRule,
+  isGenericProductCreateChooser,
   resolveStoreCommerceTypeFromStore,
 } from '@/lib/commerce/store-capability-map';
 
@@ -89,5 +90,28 @@ describe('store-capability-map', () => {
       false
     );
     expect(canAccessProductCreateNavPath('/dashboard/courses/new', 'course')).toBe(true);
+  });
+
+  it('blocks generic product chooser route for all commerce types', () => {
+    expect(canAccessCommercePath('/dashboard/products/new', 'physical')).toBe(false);
+    expect(canAccessCommercePath('/dashboard/products/new', 'artist')).toBe(false);
+    expect(isGenericProductCreateChooser('/dashboard/products/new')).toBe(true);
+  });
+
+  it('gates physical-products and multi-currency for physical stores only', () => {
+    expect(canAccessCommercePath('/dashboard/physical-products', 'physical')).toBe(true);
+    expect(canAccessCommercePath('/dashboard/physical-products', 'digital')).toBe(false);
+    expect(canAccessCommercePath('/dashboard/multi-currency', 'service')).toBe(false);
+  });
+
+  it('gates artist public discovery and course affiliate paths', () => {
+    expect(canAccessCommercePath('/collections', 'artist')).toBe(true);
+    expect(canAccessCommercePath('/collections', 'course')).toBe(false);
+    expect(canAccessCommercePath('/auctions', 'artist')).toBe(true);
+    expect(canAccessCommercePath('/auctions', 'physical')).toBe(false);
+    expect(canAccessCommercePath('/affiliate/courses', 'course')).toBe(true);
+    expect(canAccessCommercePath('/affiliate/courses', 'digital')).toBe(false);
+    expect(canAccessCommercePath('/digital/search', 'digital')).toBe(true);
+    expect(canAccessCommercePath('/digital/search', 'physical')).toBe(false);
   });
 });

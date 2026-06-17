@@ -33,6 +33,7 @@ import { initiatePayment } from '@/lib/payment-service';
 import { useToast } from '@/hooks/use-toast';
 import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
 import { logger } from '@/lib/logger';
+import { resolveOrderNumber } from '@/lib/orders/resolve-order-number';
 
 const PRODUCT_FIELDS = 'id, name, price, promotional_price, currency, payment_options';
 const SERVICE_PRODUCT_FIELDS =
@@ -617,8 +618,9 @@ export const useCreateServiceOrder = () => {
       const finalAmountToPay = Math.max(0, amountToPay - (giftCardAmount || 0));
 
       // 8. Générer un numéro de commande
-      const { data: orderNumberData } = await supabase.rpc('generate_order_number');
-      const orderNumber = orderNumberData || `ORD-${Date.now()}`;
+      const { data: orderNumberData, error: orderNumberError } =
+        await supabase.rpc('generate_order_number');
+      const orderNumber = resolveOrderNumber(orderNumberData, orderNumberError);
 
       // 9. Créer la commande (avec payment_type)
       // Récupérer le cookie d'affiliation s'il existe

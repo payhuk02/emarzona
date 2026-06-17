@@ -73,6 +73,8 @@ const ROUTE_CAPABILITY_RULES: readonly RouteRule[] = [
       '/dashboard/licenses/manage',
       '/dashboard/digital/',
       '/dashboard/digital',
+      '/digital/search',
+      '/digital/compare',
     ],
   },
   {
@@ -95,12 +97,13 @@ const ROUTE_CAPABILITY_RULES: readonly RouteRule[] = [
       '/dashboard/courses',
       '/dashboard/cohorts',
       '/courses/',
+      '/affiliate/courses',
     ],
   },
   {
     label: "Modules Oeuvres d'artiste",
     allowedTypes: ['artist'],
-    pathPrefixes: ['/dashboard/portfolios', '/dashboard/auctions'],
+    pathPrefixes: ['/dashboard/portfolios', '/dashboard/auctions', '/collections', '/auctions'],
   },
   {
     label: 'Fonctionnalites communes',
@@ -145,10 +148,17 @@ export function getRouteCapabilityRule(pathname: string): RouteRule | null {
   return null;
 }
 
+export function isGenericProductCreateChooser(pathname: string): boolean {
+  return normalizePath(pathname.split('?')[0]) === '/dashboard/products/new';
+}
+
 export function canAccessCommercePath(
   pathname: string,
   commerceType?: StoreCommerceType | null
 ): boolean {
+  if (isGenericProductCreateChooser(pathname)) {
+    return false;
+  }
   const rule = getRouteCapabilityRule(pathname);
   if (!rule) {
     return true;

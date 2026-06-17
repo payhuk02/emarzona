@@ -16,6 +16,7 @@ import { initiatePayment } from '@/lib/payment-service';
 import { useToast } from '@/hooks/use-toast';
 import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
 import { logger } from '@/lib/logger';
+import { resolveOrderNumber } from '@/lib/orders/resolve-order-number';
 
 const PRODUCT_FIELDS = 'id, name, price, promotional_price, currency, payment_options';
 const COURSE_FIELDS = 'id, product_id';
@@ -221,13 +222,7 @@ export const useCreateCourseOrder = () => {
       // 6. Générer un numéro de commande
       const { data: orderNumberData, error: orderNumberError } =
         await supabase.rpc('generate_order_number');
-      const orderNumberCandidate = typeof orderNumberData === 'string' ? orderNumberData : '';
-      // En E2E / certaines DB, un check constraint impose TEST-ORDER-<digits>.
-      // On garde la valeur RPC si elle existe et respecte le format, sinon on tombe en fallback compatible.
-      const orderNumber =
-        !orderNumberError && /^TEST-ORDER-\d+$/.test(orderNumberCandidate)
-          ? orderNumberCandidate
-          : `TEST-ORDER-${Date.now()}`;
+      const orderNumber = resolveOrderNumber(orderNumberData, orderNumberError);
 
       // 7. Créer la commande (avec payment_type)
       // Récupérer le cookie d'affiliation s'il existe

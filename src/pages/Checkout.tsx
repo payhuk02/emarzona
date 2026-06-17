@@ -40,6 +40,7 @@ import type {
 import { isTaxCalculationResult } from '@/pages/checkout/cart/checkout-types';
 import { validateShippingForm } from '@/pages/checkout/cart/checkout-validation';
 import { buildOrderItemRows } from '@/lib/checkout-order-items';
+import { resolveOrderNumber } from '@/lib/orders/resolve-order-number';
 import { resolveCheckoutShippingAmount } from '@/lib/checkout-shipping';
 import { calculateCheckoutTaxes } from '@/lib/checkout/taxes';
 import { validateCheckoutCart } from '@/lib/checkout/cart-validation';
@@ -633,8 +634,11 @@ export default function Checkout() {
         }
 
         // Générer numéro de commande
-        const { data: orderNumberData } = await supabase.rpc('generate_order_number');
-        const orderNumber = orderNumberData || `ORD-${Date.now()}-${storeId.slice(0, 8)}`;
+        const { data: orderNumberData, error: orderNumberError } =
+          await supabase.rpc('generate_order_number');
+        const orderNumber = resolveOrderNumber(orderNumberData, orderNumberError, {
+          suffix: storeId.slice(0, 8),
+        });
 
         // Créer la commande
         const { data: order, error: orderError } = await supabase
@@ -1098,8 +1102,9 @@ export default function Checkout() {
       await reserveArtistLimitedEditionsForCart(items);
 
       // Générer numéro de commande
-      const { data: orderNumberData } = await supabase.rpc('generate_order_number');
-      const orderNumber = orderNumberData || `ORD-${Date.now()}`;
+      const { data: orderNumberData, error: orderNumberError } =
+        await supabase.rpc('generate_order_number');
+      const orderNumber = resolveOrderNumber(orderNumberData, orderNumberError);
 
       // Créer la commande
       const { data: order, error: orderError } = await supabase

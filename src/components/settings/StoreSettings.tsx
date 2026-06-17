@@ -17,6 +17,16 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { DeleteStoreDialog } from '@/components/store/DeleteStoreDialog';
 import { deleteStoreWithDependencies, archiveStore } from '@/lib/store-delete-protection';
 import { logger } from '@/lib/logger';
@@ -44,7 +54,7 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
     stores,
     loading: storesLoading,
     createStore,
-    updateStore: _updateStore,
+    updateStore,
     deleteStore: _deleteStore,
     refetch,
     canCreateStore,
@@ -65,6 +75,13 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
     slug: '',
     commerceType: 'physical' as StoreCommerceType,
   });
+  const [commerceTypeDraft, setCommerceTypeDraft] = useState<Record<string, StoreCommerceType>>({});
+  const [pendingCommerceChange, setPendingCommerceChange] = useState<{
+    storeId: string;
+    storeName: string;
+    from: StoreCommerceType;
+    to: StoreCommerceType;
+  } | null>(null);
   const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
 
   // Sélectionner la première boutique par défaut
@@ -80,6 +97,59 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
       setActiveTab('create');
     }
   }, [action]);
+
+  const handleCommerceTypeDraftChange = (storeId: string, value: StoreCommerceType) => {
+    setCommerceTypeDraft(prev => ({ ...prev, [storeId]: value }));
+  };
+
+  const handleRequestCommerceTypeChange = (
+    storeId: string,
+    storeName: string,
+    from: StoreCommerceType,
+    to: StoreCommerceType
+  ) => {
+    if (from === to) return;
+    setPendingCommerceChange({ storeId, storeName, from, to });
+  };
+
+  const handleConfirmCommerceTypeChange = async () => {
+    if (!pendingCommerceChange) return;
+
+    const { storeId, to } = pendingCommerceChange;
+    try {
+      setSaving(true);
+      await updateStore({
+        storeId,
+        updates: {
+          commerce_type: to,
+          metadata: {
+            ...((stores.find(s => s.id === storeId)?.metadata as Record<string, unknown>) ?? {}),
+            commerce_type: to,
+          },
+        },
+      });
+      await refreshStores();
+      setCommerceTypeDraft(prev => {
+        const next = { ...prev };
+        delete next[storeId];
+        return next;
+      });
+      toast({
+        title: 'Type de boutique mis à jour',
+        description: `Votre boutique est maintenant de type « ${STORE_COMMERCE_TYPE_LABELS[to]} ». Le menu vendeur a été adapté.`,
+      });
+      if (to === 'physical') {
+        navigate(
+          `/dashboard/onboarding/physical-subscription?storeId=${encodeURIComponent(storeId)}`
+        );
+      }
+    } catch (error) {
+      logger.error('Erreur lors du changement de type de boutique', { error });
+    } finally {
+      setSaving(false);
+      setPendingCommerceChange(null);
+    }
+  };
 
   const handleCreateStore = async () => {
     if (!newStoreData.name.trim()) {
@@ -157,7 +227,7 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
         });
       }
     } catch (_error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage = _error instanceof Error ? _error.message : String(_error);
       logger.error('Erreur lors de la suppression', {
         error: errorMessage,
         storeId: storeToDelete.id,
@@ -192,8 +262,11 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
         });
       }
     } catch (_error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error("Erreur lors de l'archivage", { error: errorMessage, storeId });
+      const errorMessage = _error instanceof Error ? _error.message : String(_error);
+      logger.error("Erreur lors de l'archivage", {
+        error: errorMessage,
+        storeId: storeToDelete?.id,
+      });
       toast({
         title: 'Erreur',
         description: errorMessage || 'Une erreur est survenue',
@@ -304,9 +377,12 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
                           <CardDescription>
                             {store.description || 'Aucune description'}
                           </CardDescription>
-                          <div className="flex items-center gap-2 mt-2">
+                          <div className="flex flex-wrap items-center gap-2 mt-2">
                             <Badge variant={store.is_active ? 'default' : 'secondary'}>
                               {store.is_active ? 'Active' : 'Inactive'}
+                            </Badge>
+                            <Badge variant="outline">
+                              {STORE_COMMERCE_TYPE_LABELS[store.commerce_type ?? 'physical']}
                             </Badge>
                             <span className="text-xs text-muted-foreground">{store.slug}</span>
                           </div>
@@ -353,6 +429,56 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
                       </div>
                     </div>
                   </CardHeader>
+                  <CardContent className="pt-0 border-t">
+                    <div className="flex flex-col sm:flex-row sm:items-end gap-3 pt-4">
+                      <div className="flex-1 space-y-2">
+                        <Label htmlFor={`commerce_type_${store.id}`}>Type de boutique</Label>
+                        <Select
+                          value={commerceTypeDraft[store.id] ?? store.commerce_type ?? 'physical'}
+                          onValueChange={value =>
+                            handleCommerceTypeDraftChange(store.id, value as StoreCommerceType)
+                          }
+                        >
+                          <SelectTrigger id={`commerce_type_${store.id}`}>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Object.entries(STORE_COMMERCE_TYPE_LABELS).map(([value, label]) => (
+                              <SelectItem key={value} value={value}>
+                                {label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <p className="text-xs text-muted-foreground">
+                          Modifier le type adapte les menus vendeur (sidebar, navbar) et les modules
+                          accessibles. Les produits existants ne sont pas supprimés.
+                        </p>
+                      </div>
+                      <Button
+                        variant="secondary"
+                        disabled={
+                          saving ||
+                          (commerceTypeDraft[store.id] ?? store.commerce_type ?? 'physical') ===
+                            (store.commerce_type ?? 'physical')
+                        }
+                        onClick={() =>
+                          handleRequestCommerceTypeChange(
+                            store.id,
+                            store.name,
+                            store.commerce_type ?? 'physical',
+                            commerceTypeDraft[store.id] ?? store.commerce_type ?? 'physical'
+                          )
+                        }
+                      >
+                        {saving ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          'Appliquer le type'
+                        )}
+                      </Button>
+                    </div>
+                  </CardContent>
                 </Card>
               ))}
             </div>
@@ -483,6 +609,45 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
           )}
         </TabsContent>
       </Tabs>
+
+      <AlertDialog
+        open={pendingCommerceChange != null}
+        onOpenChange={open => {
+          if (!open) setPendingCommerceChange(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Changer le type de boutique ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {pendingCommerceChange ? (
+                <>
+                  La boutique « {pendingCommerceChange.storeName} » passera de{' '}
+                  <strong>{STORE_COMMERCE_TYPE_LABELS[pendingCommerceChange.from]}</strong> à{' '}
+                  <strong>{STORE_COMMERCE_TYPE_LABELS[pendingCommerceChange.to]}</strong>. Les menus
+                  vendeur (sidebar, navbar horizontale) et les routes dashboard seront filtrés en
+                  conséquence. Vos produits et commandes existants sont conservés.
+                  {pendingCommerceChange.to === 'physical' ? (
+                    <>
+                      {' '}
+                      Un abonnement produits physiques peut être requis pour activer la logistique.
+                    </>
+                  ) : null}
+                </>
+              ) : null}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={saving}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => void handleConfirmCommerceTypeChange()}
+              disabled={saving}
+            >
+              Confirmer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Dialog de suppression avec protection */}
       {storeToDelete && (

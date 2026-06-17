@@ -31,22 +31,15 @@ test.describe('Epic 3.5.1 — artiste vente & certificat', () => {
     await loginAs(page, E2E_TEST_CONFIG.buyerEmail, E2E_TEST_CONFIG.buyerPassword);
     await gotoApp(page, `/artist/${productId}`);
 
-    const cta = appLocator(page).getByRole('button', {
-      name: /acheter|ajouter|panier|buy|commander/i,
-    });
-    if (
-      !(await cta
-        .first()
-        .isVisible()
-        .catch(() => false))
-    ) {
-      test.skip(true, 'Pas de CTA achat');
+    const addToCart = appLocator(page).getByTestId('artist-add-to-cart');
+    if (!(await addToCart.isVisible({ timeout: 10_000 }).catch(() => false))) {
+      test.skip(true, 'Pas de CTA ajouter au panier (artist-add-to-cart)');
       return;
     }
 
-    await cta.first().click();
-    await page.waitForURL(/\/checkout/, { timeout: 15_000 });
-    expect(page.url()).toMatch(/\/checkout/);
+    await addToCart.click();
+    await gotoApp(page, '/checkout');
+    await expect(page).toHaveURL(/\/checkout/, { timeout: 15_000 });
   });
 
   test('portail artiste acheteur (auth)', async ({ page }) => {

@@ -19,6 +19,8 @@ export const PHYSICAL_ONLY_SELLER_PATHS = [
   '/dashboard/physical-backorders',
   '/dashboard/physical-bundles',
   '/dashboard/physical-promotions',
+  '/dashboard/physical-products',
+  '/dashboard/multi-currency',
   '/dashboard/demand-forecasting',
   '/dashboard/cost-optimization',
   '/dashboard/inventory',

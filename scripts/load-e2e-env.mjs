@@ -40,26 +40,44 @@ function mergeEnvLayers(...layers) {
   return merged;
 }
 
+/**
+ * Clé publishable Supabase — priorise .env.e2e.local (Vercel pull) sur .env local
+ * pour éviter qu'une VITE_SUPABASE_ANON_KEY tronquée écrase la bonne PUBLISHABLE_KEY.
+ */
+export function resolveSupabasePublishableKey(merged, e2eLayer = {}) {
+  const fromE2e =
+    e2eLayer.VITE_SUPABASE_PUBLISHABLE_KEY?.trim() ||
+    e2eLayer.VITE_SUPABASE_ANON_KEY?.trim() ||
+    e2eLayer.VITE_SUPABASE_TEST_ANON_KEY?.trim();
+  if (fromE2e) return fromE2e;
+
+  return (
+    merged.VITE_SUPABASE_PUBLISHABLE_KEY?.trim() ||
+    merged.VITE_SUPABASE_ANON_KEY?.trim() ||
+    merged.VITE_SUPABASE_TEST_ANON_KEY?.trim() ||
+    ''
+  );
+}
+
 /** Priorité : process.env < .env < .env.local < .env.e2e.local (Vercel pull) */
 export function loadE2EEnv(root = process.cwd()) {
+  const e2eLayer = loadEnvFile(resolve(root, '.env.e2e.local'));
   const merged = mergeEnvLayers(
     loadEnvFile(resolve(root, '.env')),
     loadEnvFile(resolve(root, '.env.local')),
-    loadEnvFile(resolve(root, '.env.e2e.local')),
+    e2eLayer,
     process.env
   );
 
   const url =
-    merged.VITE_SUPABASE_URL ??
-    merged.SUPABASE_URL ??
-    merged.VITE_SUPABASE_TEST_URL ??
+    e2eLayer.VITE_SUPABASE_URL?.trim() ||
+    e2eLayer.VITE_SUPABASE_TEST_URL?.trim() ||
+    merged.VITE_SUPABASE_URL ||
+    merged.SUPABASE_URL ||
+    merged.VITE_SUPABASE_TEST_URL ||
     '';
 
-  const anonKey =
-    merged.VITE_SUPABASE_ANON_KEY ??
-    merged.VITE_SUPABASE_PUBLISHABLE_KEY ??
-    merged.VITE_SUPABASE_TEST_ANON_KEY ??
-    '';
+  const anonKey = resolveSupabasePublishableKey(merged, e2eLayer);
 
   const serviceKey =
     merged.SUPABASE_SERVICE_ROLE_KEY ??

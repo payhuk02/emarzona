@@ -18,6 +18,7 @@ import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
 import { logger } from '@/lib/logger';
 import { isSupportedCurrency, type Currency } from '@/lib/currency-converter';
 import { validateCheckoutPromotion } from '@/lib/checkout/promotion';
+import { resolveOrderNumber } from '@/lib/orders/resolve-order-number';
 
 const PRODUCT_FIELDS = 'id, name, price, promotional_price, currency';
 
@@ -261,8 +262,9 @@ export const useCreateDigitalOrder = () => {
       const finalAmount = Math.max(0, baseAmount - promoDiscount - (giftCardAmount || 0));
 
       // 5. Générer un numéro de commande
-      const { data: orderNumberData } = await supabase.rpc('generate_order_number');
-      const orderNumber = orderNumberData || `ORD-${Date.now()}`;
+      const { data: orderNumberData, error: orderNumberError } =
+        await supabase.rpc('generate_order_number');
+      const orderNumber = resolveOrderNumber(orderNumberData, orderNumberError);
 
       // 6. Créer la commande
       // Récupérer le cookie d'affiliation s'il existe

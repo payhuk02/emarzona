@@ -16,6 +16,7 @@ import { useCreateArtistOrder, type CreateArtistOrderOptions } from './useCreate
 import { initiatePayment } from '@/lib/payment-service';
 import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
 import { logger } from '@/lib/logger';
+import { resolveOrderNumber } from '@/lib/orders/resolve-order-number';
 
 const GENERIC_PRODUCT_FIELDS = 'id, name, price, promotional_price, currency, product_type';
 
@@ -285,8 +286,9 @@ export const useCreateOrder = () => {
           }
 
           // Créer order générique
-          const { data: orderNumberData } = await supabase.rpc('generate_order_number');
-          const orderNumber = orderNumberData || `ORD-${Date.now()}`;
+          const { data: orderNumberData, error: orderNumberError } =
+            await supabase.rpc('generate_order_number');
+          const orderNumber = resolveOrderNumber(orderNumberData, orderNumberError);
 
           const totalPrice = (product.promotional_price || product.price) * quantity;
 

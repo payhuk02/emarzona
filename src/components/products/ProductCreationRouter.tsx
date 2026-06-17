@@ -12,11 +12,12 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, ArrowLeft } from 'lucide-react';
-import { EnhancedProductTypeSelector } from './EnhancedProductTypeSelector';
 import { logger } from '@/lib/logger';
-import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import type { ProductTemplate, ProductType } from '@/lib/products/product-templates';
 import { useNavigate } from 'react-router-dom';
+import { getPrimaryProductCreatePath } from '@/lib/commerce/store-capability-map';
+import { useStoreContext } from '@/contexts/StoreContext';
+import { parseStoreCommerceType } from '@/lib/billing/store-commerce-access';
 
 // Lazy loading des wizards pour optimiser les performances
 const CreateCourseWizard = lazy(() =>
@@ -117,31 +118,18 @@ export const ProductCreationRouter = ({
   const [selectedTemplate, setSelectedTemplate] = useState<ProductTemplate | null>(null);
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
 
-  // Refs for animations
-  const headerRef = useScrollAnimation<HTMLDivElement>();
-
-  /**
-   * Handler pour le changement de type
-   */
-  const handleTypeSelect = useCallback(
-    (type: string) => {
-      logger.info('Type de produit sélectionné dans le router', { type });
-      setSelectedType(type);
-      // Synchroniser l'URL avec le type sélectionné (URLs explicites)
-      navigate(`/dashboard/products/new/${type}`);
-    },
-    [navigate]
+  const { stores } = useStoreContext();
+  const commerceType = parseStoreCommerceType(
+    stores.find(store => store.id === storeId)?.commerce_type
   );
 
   /**
    * Handler pour retour arrière (changement de type)
    */
   const handleBack = useCallback(() => {
-    logger.info('Retour au sélecteur de type');
+    logger.info('Retour liste produits');
     setSelectedType(null);
-    // Revenir à l'URL générique sans type
-    navigate('/dashboard/products/new');
-    // Scroll to top
+    navigate('/dashboard/products');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [navigate]);
 
@@ -163,25 +151,14 @@ export const ProductCreationRouter = ({
     });
   }, [storeId, initialProductType, selectedType]);
 
-  // Si pas encore de type sélectionné, afficher le sélecteur
-  if (!selectedType) {
-    return (
-      <div className="container mx-auto px-2 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8 max-w-7xl overflow-x-hidden">
-        <div
-          ref={headerRef}
-          className="mb-6 sm:mb-8 animate-in fade-in slide-in-from-top-4 duration-700"
-        >
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 sm:mb-3 bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-            {t('products.createNew', 'Créer un nouveau produit')}
-          </h1>
-          <p className="text-sm sm:text-base text-muted-foreground">
-            {t('products.chooseType', 'Choisissez le type de produit que vous souhaitez vendre')}
-          </p>
-        </div>
+  useEffect(() => {
+    if (initialProductType) return;
+    navigate(getPrimaryProductCreatePath(commerceType), { replace: true });
+  }, [initialProductType, commerceType, navigate]);
 
-        <EnhancedProductTypeSelector onSelect={handleTypeSelect} storeId={storeId} />
-      </div>
-    );
+  // Si pas encore de type sélectionné, rediriger vers le wizard du type de boutique
+  if (!selectedType) {
+    return <LoadingFallback />;
   }
 
   // Si type sélectionné mais pas de template, afficher le sélecteur de templates

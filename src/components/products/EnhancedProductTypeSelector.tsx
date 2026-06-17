@@ -42,7 +42,7 @@ import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useStorePhysicalAccess } from '@/hooks/billing/useStorePhysicalAccess';
 import { useStoreContext } from '@/contexts/StoreContext';
-import { isPhysicalCommerceStore } from '@/lib/billing/store-commerce-access';
+import { parseStoreCommerceType } from '@/lib/billing/store-commerce-access';
 import { useToast } from '@/hooks/use-toast';
 import { PHYSICAL_TRIAL_DAYS } from '@/lib/billing/platform-pricing';
 
@@ -253,12 +253,11 @@ export const EnhancedProductTypeSelector = ({
     }
   }, [storeId]);
 
+  const effectiveCommerceType = parseStoreCommerceType(commerceType);
+
   const availableTypes = useMemo(() => {
-    if (isPhysicalCommerceStore(commerceType)) {
-      return PRODUCT_TYPES;
-    }
-    return PRODUCT_TYPES.filter(type => type.value !== 'physical');
-  }, [commerceType]);
+    return PRODUCT_TYPES.filter(type => type.value === effectiveCommerceType);
+  }, [effectiveCommerceType]);
 
   /**
    * Filter products based on search and filter

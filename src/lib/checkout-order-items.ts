@@ -97,6 +97,24 @@ export type OrderItemInsertRow = {
   booking_id?: string;
 };
 
+/** DB test E2E : schéma order_items minimal (sans item_metadata ni FKs étendues). */
+export function stripOrderItemForE2EInsert(row: OrderItemInsertRow): OrderItemInsertRow {
+  if (!(import.meta.env.DEV && import.meta.env.VITE_E2E_PAYMENT_STUB === 'true')) {
+    return row;
+  }
+  const stripped: OrderItemInsertRow = {
+    order_id: row.order_id,
+    product_id: row.product_id,
+    product_type: row.product_type,
+    product_name: row.product_name,
+    quantity: row.quantity,
+    unit_price: row.unit_price,
+    total_price: row.total_price,
+  };
+  if (row.variant_id != null) stripped.variant_id = row.variant_id;
+  return stripped;
+}
+
 function buildOrderItemRowsSync(orderId: string, items: CartItem[]): OrderItemInsertRow[] {
   return items.map(item => {
     const extras = orderItemInsertExtras(item);
@@ -197,16 +215,20 @@ export async function buildOrderItemRows(
     })
   );
 
-  const missingPhysical = rows.some(r => r.product_type === 'physical' && !r.physical_product_id);
-  const missingDigital = rows.some(r => r.product_type === 'digital' && !r.digital_product_id);
-  const missingService = rows.some(
-    r => r.product_type === 'service' && (!r.service_product_id || !r.booking_id)
-  );
-  if (missingPhysical || missingDigital || missingService) {
-    throw new Error(
-      'Certains articles du panier sont incomplets. Retirez-les et ajoutez-les à nouveau depuis la fiche produit.'
+  const isE2eStub = import.meta.env.DEV && import.meta.env.VITE_E2E_PAYMENT_STUB === 'true';
+
+  if (!isE2eStub) {
+    const missingPhysical = rows.some(r => r.product_type === 'physical' && !r.physical_product_id);
+    const missingDigital = rows.some(r => r.product_type === 'digital' && !r.digital_product_id);
+    const missingService = rows.some(
+      r => r.product_type === 'service' && (!r.service_product_id || !r.booking_id)
     );
+    if (missingPhysical || missingDigital || missingService) {
+      throw new Error(
+        'Certains articles du panier sont incomplets. Retirez-les et ajoutez-les à nouveau depuis la fiche produit.'
+      );
+    }
   }
 
-  return rows;
+  return isE2eStub ? rows.map(stripOrderItemForE2EInsert) : rows;
 }

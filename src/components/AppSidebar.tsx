@@ -63,7 +63,11 @@ import {
   writeSidebarJsonPref,
 } from '@/lib/navigation/sidebar-prefs-storage';
 import type { StoreCommerceType } from '@/constants/store-commerce-types';
-import { isPhysicalCommerceStore } from '@/lib/billing/store-commerce-access';
+import { parseStoreCommerceType } from '@/lib/billing/store-commerce-access';
+import {
+  canAccessCommercePath,
+  getPrimaryProductCreatePath,
+} from '@/lib/commerce/store-capability-map';
 import { logger } from '@/lib/logger';
 
 const MAX_RECENT_ITEMS = 2;
@@ -216,13 +220,21 @@ export function AppSidebar() {
   );
 
   const vendorQuickActions = useMemo(() => {
+    const type = parseStoreCommerceType(commerceType);
+    const createLabels: Record<StoreCommerceType, string> = {
+      physical: t('command.newPhysicalProduct', 'Nouveau produit physique'),
+      digital: t('command.newDigitalProduct', 'Nouveau produit digital'),
+      service: t('command.newService', 'Nouveau service'),
+      course: t('command.newCourse', 'Nouveau cours'),
+      artist: t('command.newArtistWork', "Nouvelle œuvre d'artiste"),
+    };
+
     const actions = [
       {
-        title: t('command.newPhysicalProduct', 'Nouveau produit physique'),
-        url: '/dashboard/physical/products/new',
+        title: createLabels[type],
+        url: getPrimaryProductCreatePath(type),
         icon: Plus,
         sectionLabel: t('command.quickActions', 'Actions rapides'),
-        physicalOnly: true,
       },
       {
         title: t('command.orders', 'Commandes'),
@@ -241,7 +253,6 @@ export function AppSidebar() {
         url: '/dashboard/physical/inventory',
         icon: Package,
         sectionLabel: t('command.quickActions', 'Actions rapides'),
-        physicalOnly: true,
       },
       {
         title: t('command.platformStatus', 'Statut plateforme'),
@@ -251,11 +262,7 @@ export function AppSidebar() {
       },
     ];
 
-    if (isPhysicalCommerceStore(commerceType)) {
-      return actions;
-    }
-
-    return actions.filter(action => !('physicalOnly' in action && action.physicalOnly));
+    return actions.filter(action => canAccessCommercePath(action.url, type));
   }, [t, commerceType]);
 
   const handlePersonaChange = (next: SidebarPersona) => {

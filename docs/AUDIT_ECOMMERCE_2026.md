@@ -10,17 +10,17 @@ Voir aussi : [`ARCHITECTURE.md`](./ARCHITECTURE.md), [`SECURE_DEPLOY_CHECKLIST.m
 
 ## Synthèse exécutive
 
-| Verticale          | Score      | Position vs leaders                              |
-| ------------------ | ---------- | ------------------------------------------------ |
-| Produits digitaux  | **8/10**   | Proche Gumroad / Shopify Digital                 |
-| Produits physiques | **7/10**   | WMS fort ; vitrine acheteur à renforcer          |
-| Services           | **7,5/10** | Calendly/Acuity sur réservation ; hors panier    |
-| Cours en ligne     | **8/10**   | Teachable/Kajabi sur LMS                         |
-| Œuvres d'artiste   | **6,5/10** | Enchères + certificats ; E2E et polish en retard |
+| Verticale          | Score      | Position vs leaders                                         |
+| ------------------ | ---------- | ----------------------------------------------------------- |
+| Produits digitaux  | **8/10**   | Proche Gumroad / Shopify Digital                            |
+| Produits physiques | **7/10**   | WMS fort ; vitrine acheteur à renforcer                     |
+| Services           | **7,5/10** | Calendly/Acuity ; panier mixte avec réservation (Vague 2.1) |
+| Cours en ligne     | **8/10**   | Teachable/Kajabi sur LMS                                    |
+| Œuvres d'artiste   | **7/10**   | Enchères + certificats ; E2E payant CI en place             |
 
 **Forces** : modèle unifié `products.product_type`, 5 hooks commande, checkout unifié, triggers SQL fulfillment, marketplace multi-facettes, ops physiques avancées, portails client segmentés.
 
-**Freins scale mondiale** : Moneroo seul en production, FedEx mock sans credentials, Stripe/PayPal non branchés au checkout, E2E artiste/cours incomplets.
+**Freins scale mondiale** : Moneroo seul en production, FedEx mock sans credentials prod, Stripe/PayPal non branchés au checkout.
 
 ---
 
@@ -32,13 +32,13 @@ Marketplace / Storefront → Fiche → Panier (sauf service) → Checkout.tsx
   → Triggers SQL + Edge Functions → /account/*
 ```
 
-| Type       | Table extension     | Checkout                                     |
-| ---------- | ------------------- | -------------------------------------------- |
-| `digital`  | `digital_products`  | Panier ou `?productId=`                      |
-| `physical` | `physical_products` | Panier                                       |
-| `service`  | `service_products`  | Fiche service uniquement                     |
-| `course`   | `courses`           | Panier ou direct ; `/learn/:slug` si inscrit |
-| `artist`   | `artist_products`   | Panier                                       |
+| Type       | Table extension     | Checkout                                               |
+| ---------- | ------------------- | ------------------------------------------------------ |
+| `digital`  | `digital_products`  | Panier ou `?productId=`                                |
+| `physical` | `physical_products` | Panier                                                 |
+| `service`  | `service_products`  | Réservation obligatoire → panier mixte (même boutique) |
+| `course`   | `courses`           | Panier ou direct ; `/learn/:slug` si inscrit           |
+| `artist`   | `artist_products`   | Panier                                                 |
 
 **Fichiers pivots**
 
@@ -127,7 +127,7 @@ Marketplace / Storefront → Fiche → Panier (sauf service) → Checkout.tsx
 | Étape        | Fichiers                                                       |
 | ------------ | -------------------------------------------------------------- |
 | Fiche + résa | `service/ServiceDetail.tsx`, `useCreateServiceOrder.ts`        |
-| Panier       | **Interdit** — `checkout-order-items.ts` L101–106              |
+| Panier       | Réservation → `service-cart-policy.ts` + `useCart` guard       |
 | Webhook      | `moneroo-webhook` → `service_bookings` confirmed               |
 | Vendeur      | `BookingsManagement.tsx`, calendrier, staff, waitlist, rappels |
 | Client       | `customer/CustomerMyBookings.tsx`                              |
@@ -135,7 +135,7 @@ Marketplace / Storefront → Fiche → Panier (sauf service) → Checkout.tsx
 ### Checklist QA
 
 - [ ] Validations : max participants, advance_booking_days, buffer, conflits staff
-- [ ] `service_availability` : requête alignée sur schéma (`is_active`, `day_of_week`)
+- [x] `service_availability_slots` utilisé partout (legacy `service_availability` non référencé côté app)
 - [ ] Intégrations calendrier OAuth en prod
 
 ### E2E
@@ -144,10 +144,10 @@ Marketplace / Storefront → Fiche → Panier (sauf service) → Checkout.tsx
 
 ### Gaps
 
-| Gap                            | Priorité |
-| ------------------------------ | -------- |
-| Panier mixte service + produit | P1       |
-| Analytics vendeur non mockées  | P1       |
+| Gap                            | Priorité                                                                     |
+| ------------------------------ | ---------------------------------------------------------------------------- |
+| Panier mixte service + produit | P1 — amorcé (`mixed-cart-service-product.spec.ts`, `ServiceDetail` → panier) |
+| Analytics vendeur non mockées  | P1                                                                           |
 
 ---
 
@@ -171,15 +171,16 @@ Marketplace / Storefront → Fiche → Panier (sauf service) → Checkout.tsx
 
 ### E2E
 
-- `tests/e2e/course-enrollment-flow.spec.ts` — **renforcé sprint 1** (navigation + garde auth)
+- `tests/e2e/course-enrollment-flow.spec.ts` — navigation + auth
+- `tests/e2e/course-paid-enrollment.spec.ts` — **payant** (seed Supabase, `/learn/:slug`, checkout CTA) — CI `test-vertical-paid`
 
 ### Gaps
 
-| Gap                                  | Priorité |
-| ------------------------------------ | -------- |
-| E2E paiement → `/learn` bout en bout | P0 QA    |
-| SCORM / offline PWA                  | P2       |
-| Landing marketplace cours dédiée     | P1       |
+| Gap                                  | Priorité                                           |
+| ------------------------------------ | -------------------------------------------------- |
+| E2E paiement → `/learn` bout en bout | ~~P0 QA~~ **couvert** par `course-paid-enrollment` |
+| SCORM / offline PWA                  | P2                                                 |
+| Landing marketplace cours dédiée     | P1                                                 |
 
 ---
 
@@ -203,46 +204,52 @@ Marketplace / Storefront → Fiche → Panier (sauf service) → Checkout.tsx
 
 ### E2E
 
-- `tests/e2e/artist-product-workflow.spec.ts` — **renforcé sprint 1**
+- `tests/e2e/artist-product-workflow.spec.ts` — navigation publique + auth
+- `tests/e2e/artist-paid-purchase.spec.ts` — **payant** (portail, certificat, panier → checkout) — CI `test-vertical-paid`
+- `tests/e2e/artist-sale-certificate.spec.ts` — verify + flux panier → checkout aligné
 
 ### Gaps
 
-| Gap                            | Priorité |
-| ------------------------------ | -------- |
-| E2E achat complet              | P0 QA    |
-| Assurance transport partenaire | P1       |
-| Expertise tierce               | P2       |
+| Gap                            | Priorité                                         |
+| ------------------------------ | ------------------------------------------------ |
+| E2E achat complet              | ~~P0 QA~~ **couvert** par `artist-paid-purchase` |
+| Assurance transport partenaire | P1                                               |
+| Expertise tierce               | P2                                               |
 
 ---
 
 ## Registre des risques transversaux
 
-| ID  | Risque                     | Priorité | Fichiers                  |
-| --- | -------------------------- | -------- | ------------------------- |
-| R1  | Moneroo seul en prod       | P0       | `payment-service.ts`      |
-| R2  | FedEx mock                 | P0       | `FedexService.ts`         |
-| R3  | Services hors panier       | P1       | `checkout-order-items.ts` |
-| R4  | Fallback TVA 18 %          | P1       | `Checkout.tsx`            |
-| R5  | E2E artiste/cours faibles  | P0 QA    | `tests/e2e/`              |
-| R6  | Stripe/PayPal non branchés | P1       | `integrations/payments/`  |
+| ID  | Risque                     | Priorité                              | Fichiers                 |
+| --- | -------------------------- | ------------------------------------- | ------------------------ |
+| R1  | Moneroo seul en prod       | P0                                    | `payment-service.ts`     |
+| R2  | FedEx mock                 | P0                                    | `FedexService.ts`        |
+| R3  | Services hors panier       | P1 — réservation → panier (Vague 2.1) | `service-cart-policy.ts` |
+| R4  | Fallback TVA 18 %          | P1                                    | `Checkout.tsx`           |
+| R5  | E2E artiste/cours faibles  | ~~P0 QA~~ **CI vertical-paid**        | `tests/e2e/*-paid-*`     |
+| R6  | Stripe/PayPal non branchés | P1                                    | `integrations/payments/` |
 
 ---
 
 ## Matrice tests E2E
 
-| Verticale   | Spec                                | Profondeur                              |
-| ----------- | ----------------------------------- | --------------------------------------- |
-| Digital     | `digital-product-workflow.spec.ts`  | Complète                                |
-| Physical    | `physical-product-workflow.spec.ts` | Complète                                |
-| Service     | `service-workflow.spec.ts`          | Complète                                |
-| Course      | `course-enrollment-flow.spec.ts`    | Navigation + auth (paiement : env test) |
-| Artist      | `artist-product-workflow.spec.ts`   | Navigation publique + auth              |
-| Transversal | `cart-checkout-workflow.spec.ts`    | Routage checkout                        |
+| Verticale   | Spec                                 | Profondeur                               |
+| ----------- | ------------------------------------ | ---------------------------------------- |
+| Digital     | `digital-product-workflow.spec.ts`   | Complète                                 |
+| Physical    | `physical-product-workflow.spec.ts`  | Complète                                 |
+| Service     | `service-workflow.spec.ts`           | Complète                                 |
+| Course      | `course-enrollment-flow.spec.ts`     | Navigation + auth                        |
+| Course      | `course-paid-enrollment.spec.ts`     | **Payant** (seed + learn + checkout)     |
+| Artist      | `artist-product-workflow.spec.ts`    | Navigation publique + auth               |
+| Artist      | `artist-paid-purchase.spec.ts`       | **Payant** (portail + certificat)        |
+| Transversal | `cart-checkout-workflow.spec.ts`     | Routage checkout                         |
+| Transversal | `mixed-cart-service-product.spec.ts` | Panier mixte service + produit (contrat) |
 
 ```bash
-npm run test:e2e:cart
-npx playwright test tests/e2e/artist-product-workflow.spec.ts
-npx playwright test tests/e2e/course-enrollment-flow.spec.ts
+npm run test:e2e:vertical-paid
+npm run test:e2e:vertical-paid:local   # .env.e2e.local (Vercel pull)
+npm run test:e2e:commerce-gating
+npm run test:production-truth
 npm run typecheck:commerce-core
 ```
 
@@ -263,13 +270,13 @@ npm run typecheck:commerce-core
 
 ### J+30 — Production truth
 
-| Livrable                               | Owner    |
-| -------------------------------------- | -------- |
-| FedEx 100 % réel staging/prod          | Infra    |
-| E2E artiste + cours renforcés          | QA       |
-| Fix `service_availability` query/types | Platform |
-| Régression panier multi-type (4 types) | QA       |
-| Monitoring fulfillment post-paid       | Platform |
+| Livrable                               | Owner    | Statut                                          |
+| -------------------------------------- | -------- | ----------------------------------------------- |
+| FedEx 100 % réel staging/prod          | Infra    | Code prêt ; secrets `FEDEX_*` à poser           |
+| E2E artiste + cours renforcés          | QA       | **Fait** — `test-vertical-paid` (5 specs)       |
+| Fix `service_availability` query/types | Platform | **Fait** — app sur `service_availability_slots` |
+| Régression panier multi-type (4 types) | QA       | Contrat Vitest + `mixed-cart-service-product`   |
+| Monitoring fulfillment post-paid       | Platform | À faire                                         |
 
 **KPIs** : fulfillment < 5 min ≥ 99 % ; 5/5 E2E verts chemin critique ; 0 % shipping mock en prod.
 
@@ -303,7 +310,7 @@ npm run typecheck:commerce-core
 
 ## Definition of Done (release majeure)
 
-- [ ] E2E chemin payant vert sur CI (ou documenté skip env)
+- [x] E2E chemin payant vert sur CI (`test-vertical-paid` dans `playwright.yml`)
 - [ ] Trigger fulfillment vérifié staging
 - [ ] Webhook idempotent (pas double fulfillment)
 - [ ] RLS portails client validé

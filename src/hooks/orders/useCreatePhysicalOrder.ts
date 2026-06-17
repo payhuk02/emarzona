@@ -21,6 +21,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
 import { logger } from '@/lib/logger';
+import { resolveOrderNumber } from '@/lib/orders/resolve-order-number';
 import { parsePhysicalCheckoutOptions } from '@/lib/physical/physical-checkout-display';
 import type { PhysicalCheckoutMethod } from '@/constants/physical-checkout-options';
 
@@ -305,8 +306,9 @@ export const useCreatePhysicalOrder = () => {
       const finalAmountToPay = Math.max(0, amountToPay - (giftCardAmount || 0));
 
       // 7. Générer un numéro de commande
-      const { data: orderNumberData } = await supabase.rpc('generate_order_number');
-      const orderNumber = orderNumberData || `ORD-${Date.now()}`;
+      const { data: orderNumberData, error: orderNumberError } =
+        await supabase.rpc('generate_order_number');
+      const orderNumber = resolveOrderNumber(orderNumberData, orderNumberError);
 
       // 8. Créer la commande (avec payment_type)
       // Récupérer le cookie d'affiliation s'il existe

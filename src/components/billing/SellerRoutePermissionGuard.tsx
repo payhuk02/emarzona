@@ -12,6 +12,8 @@ import { isPhysicalOnlySellerPath } from '@/lib/billing/store-commerce-access';
 import {
   canAccessCommercePath,
   getRouteCapabilityRule,
+  getPrimaryProductCreatePath,
+  isGenericProductCreateChooser,
   resolveStoreCommerceTypeFromStore,
 } from '@/lib/commerce/store-capability-map';
 
@@ -60,10 +62,15 @@ export function SellerRoutePermissionGuard({ children }: SellerRoutePermissionGu
         description:
           commerceRule != null
             ? `Cette section est réservée au type de boutique correspondant (${commerceRule.label}).`
-            : 'Cette section n’est pas disponible pour le type de boutique sélectionné.',
+            : isGenericProductCreateChooser(location.pathname)
+              ? 'Utilisez le wizard de création adapté à votre type de boutique.'
+              : 'Cette section n’est pas disponible pour le type de boutique sélectionné.',
         variant: 'destructive',
       });
-      navigate('/dashboard', { replace: true });
+      const redirectTo = isGenericProductCreateChooser(location.pathname)
+        ? getPrimaryProductCreatePath(commerceType)
+        : '/dashboard';
+      navigate(redirectTo, { replace: true });
       return;
     }
 

@@ -85,7 +85,11 @@ console.log('  (service role chargée — ne pas committer .env.e2e.local)');
 const result = spawnSync('npm', ['run', npmScript], {
   stdio: 'inherit',
   shell: process.platform === 'win32',
-  env: { ...process.env, ...env },
+  env: {
+    ...process.env,
+    ...env,
+    VITE_E2E_PAYMENT_STUB: env.VITE_E2E_PAYMENT_STUB ?? 'true',
+  },
 });
 
 process.exit(result.status ?? 1);

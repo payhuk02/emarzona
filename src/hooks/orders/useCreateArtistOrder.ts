@@ -18,6 +18,7 @@ import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
 import { logger } from '@/lib/logger';
 import { retryWithExponentialBackoff } from '@/lib/retry-utils';
 import { reserveArtistLimitedEdition } from '@/lib/artist-edition-reservation';
+import { resolveOrderNumber } from '@/lib/orders/resolve-order-number';
 
 const PRODUCT_FIELDS = 'id, name, price, promotional_price, currency, payment_options';
 const ARTIST_PRODUCT_FIELDS =
@@ -254,11 +255,7 @@ export const useCreateArtistOrder = () => {
       // 7. Générer un numéro de commande
       const { data: orderNumberData, error: orderNumberError } =
         await supabase.rpc('generate_order_number');
-      const orderNumberCandidate = typeof orderNumberData === 'string' ? orderNumberData : '';
-      const orderNumber =
-        !orderNumberError && /^TEST-ORDER-\d+$/.test(orderNumberCandidate)
-          ? orderNumberCandidate
-          : `TEST-ORDER-${Date.now()}`;
+      const orderNumber = resolveOrderNumber(orderNumberData, orderNumberError);
 
       // 8. Créer la commande (avec payment_type)
       // Récupérer le cookie d'affiliation s'il existe

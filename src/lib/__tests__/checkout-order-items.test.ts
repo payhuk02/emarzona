@@ -1,5 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { buildOrderItemRows, orderItemInsertExtras } from '../checkout-order-items';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import {
+  buildOrderItemRows,
+  orderItemInsertExtras,
+  stripOrderItemForE2EInsert,
+} from '../checkout-order-items';
 import { validateCheckoutCart } from '@/lib/checkout/cart-validation';
 import type { CartItem } from '@/types/cart';
 
@@ -61,6 +65,51 @@ describe('orderItemInsertExtras', () => {
     expect(extras.booking_id).toBe('bk-99');
     expect(extras.service_product_id).toBe('svc-99');
     expect(extras.item_metadata?.booking_id).toBe('bk-99');
+  });
+});
+
+describe('stripOrderItemForE2EInsert', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('conserve les colonnes étendues hors mode E2E', () => {
+    vi.stubEnv('DEV', 'true');
+    vi.stubEnv('VITE_E2E_PAYMENT_STUB', 'false');
+    const row = {
+      order_id: 'o1',
+      product_id: 'p1',
+      product_type: 'course' as const,
+      product_name: 'Cours',
+      quantity: 1,
+      unit_price: 100,
+      total_price: 100,
+      item_metadata: { course_id: 'c1', auto_enroll: true },
+    };
+    expect(stripOrderItemForE2EInsert(row).item_metadata).toEqual({
+      course_id: 'c1',
+      auto_enroll: true,
+    });
+  });
+
+  it('retire item_metadata et FKs en mode E2E stub', () => {
+    vi.stubEnv('DEV', 'true');
+    vi.stubEnv('VITE_E2E_PAYMENT_STUB', 'true');
+    const row = {
+      order_id: 'o1',
+      product_id: 'p1',
+      product_type: 'artist' as const,
+      product_name: 'Oeuvre',
+      quantity: 1,
+      unit_price: 100,
+      total_price: 100,
+      item_metadata: { artist_product_id: 'a1' },
+      booking_id: 'bk-1',
+    };
+    const stripped = stripOrderItemForE2EInsert(row);
+    expect(stripped.item_metadata).toBeUndefined();
+    expect(stripped.booking_id).toBeUndefined();
+    expect(stripped.product_id).toBe('p1');
   });
 });
 
