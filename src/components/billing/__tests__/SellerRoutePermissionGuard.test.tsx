@@ -9,10 +9,11 @@ let mockStoreLoading = false;
 let mockAccessLoading = false;
 let mockPlanSlug: 'physical_basic' | 'physical_standard' | 'physical_premium' | null =
   'physical_basic';
+let mockCommerceType: 'physical' | 'digital' | 'service' | 'course' | 'artist' = 'physical';
 
 vi.mock('@/hooks/useStore', () => ({
   useStore: () => ({
-    store: { id: 'store-1' },
+    store: { id: 'store-1', commerce_type: mockCommerceType },
     loading: mockStoreLoading,
   }),
 }));
@@ -58,6 +59,7 @@ describe('SellerRoutePermissionGuard', () => {
     mockStoreLoading = false;
     mockAccessLoading = false;
     mockPlanSlug = 'physical_basic';
+    mockCommerceType = 'physical';
     mockToast.mockReset();
   });
 
@@ -100,5 +102,54 @@ describe('SellerRoutePermissionGuard', () => {
     });
 
     expect(screen.getByText('PROTECTED_CONTENT')).toBeInTheDocument();
+  });
+
+  it('blocks digital-only route for non-digital stores', async () => {
+    mockCommerceType = 'service';
+    renderGuard('/dashboard/digital-products');
+
+    await waitFor(() => {
+      expect(screen.getByTestId('location')).toHaveTextContent('/dashboard');
+    });
+
+    expect(mockToast).toHaveBeenCalled();
+  });
+
+  it('allows digital store on digital route', async () => {
+    mockCommerceType = 'digital';
+    renderGuard('/dashboard/digital-products');
+
+    await waitFor(() => {
+      expect(screen.getByTestId('location')).toHaveTextContent('/dashboard/digital-products');
+    });
+
+    expect(screen.getByText('PROTECTED_CONTENT')).toBeInTheDocument();
+  });
+
+  it('allows service store on service route', async () => {
+    mockCommerceType = 'service';
+    renderGuard('/dashboard/services/calendar');
+
+    await waitFor(() => {
+      expect(screen.getByTestId('location')).toHaveTextContent('/dashboard/services/calendar');
+    });
+  });
+
+  it('allows course store on course route', async () => {
+    mockCommerceType = 'course';
+    renderGuard('/dashboard/my-courses');
+
+    await waitFor(() => {
+      expect(screen.getByTestId('location')).toHaveTextContent('/dashboard/my-courses');
+    });
+  });
+
+  it('allows artist store on artist route', async () => {
+    mockCommerceType = 'artist';
+    renderGuard('/dashboard/auctions');
+
+    await waitFor(() => {
+      expect(screen.getByTestId('location')).toHaveTextContent('/dashboard/auctions');
+    });
   });
 });

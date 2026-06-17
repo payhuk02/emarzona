@@ -9,6 +9,11 @@ import {
   requiredPhysicalFeatureForPath,
 } from '@/lib/billing/physical-route-capabilities';
 import { isPhysicalOnlySellerPath } from '@/lib/billing/store-commerce-access';
+import {
+  canAccessCommercePath,
+  getRouteCapabilityRule,
+  resolveStoreCommerceTypeFromStore,
+} from '@/lib/commerce/store-capability-map';
 
 type SellerRoutePermissionGuardProps = {
   children: ReactNode;
@@ -24,7 +29,7 @@ export function SellerRoutePermissionGuard({ children }: SellerRoutePermissionGu
   const { toast } = useToast();
   const { store, loading: storeLoading } = useStore();
   const { planSlug, loading: accessLoading } = useStorePhysicalAccess(store?.id ?? null);
-  const commerceType = store?.commerce_type;
+  const commerceType = store ? resolveStoreCommerceTypeFromStore(store) : 'physical';
 
   const requiredFeature = requiredPhysicalFeatureForPath(location.pathname);
   const allowed = canAccessSellerPath(location.pathname, planSlug, commerceType);
@@ -32,6 +37,8 @@ export function SellerRoutePermissionGuard({ children }: SellerRoutePermissionGu
     commerceType != null &&
     commerceType !== 'physical' &&
     isPhysicalOnlySellerPath(location.pathname);
+  const commerceRule = getRouteCapabilityRule(location.pathname);
+  const commerceTypeBlocked = !canAccessCommercePath(location.pathname, commerceType);
 
   useEffect(() => {
     if (storeLoading || accessLoading) return;
@@ -41,6 +48,19 @@ export function SellerRoutePermissionGuard({ children }: SellerRoutePermissionGu
         title: 'Fonctionnalité non disponible',
         description:
           'Cette section concerne uniquement les boutiques produits physiques. Choisissez ce type à la création de boutique pour y accéder.',
+        variant: 'destructive',
+      });
+      navigate('/dashboard', { replace: true });
+      return;
+    }
+
+    if (commerceTypeBlocked) {
+      toast({
+        title: 'Fonctionnalité non disponible',
+        description:
+          commerceRule != null
+            ? `Cette section est réservée au type de boutique correspondant (${commerceRule.label}).`
+            : 'Cette section n’est pas disponible pour le type de boutique sélectionné.',
         variant: 'destructive',
       });
       navigate('/dashboard', { replace: true });
@@ -69,6 +89,8 @@ export function SellerRoutePermissionGuard({ children }: SellerRoutePermissionGu
     requiredFeature,
     allowed,
     physicalOnlyBlocked,
+    commerceTypeBlocked,
+    commerceRule,
     toast,
     navigate,
     location.pathname,
@@ -76,6 +98,7 @@ export function SellerRoutePermissionGuard({ children }: SellerRoutePermissionGu
 
   if (storeLoading || accessLoading) return null;
   if (physicalOnlyBlocked) return null;
+  if (commerceTypeBlocked) return null;
   if (requiredFeature && !allowed) return null;
 
   return <>{children}</>;

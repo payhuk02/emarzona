@@ -120,4 +120,47 @@ describe('resolveNavItems', () => {
     expect(emails).toBeDefined();
     expect(emails?.locked).toBe(false);
   });
+
+  it('filters digital routes for service stores in command surface', () => {
+    const items = resolveNavItems({
+      surface: 'command',
+      persona: 'seller',
+      isPlatformAdmin: false,
+      commerceType: 'service',
+      t: mockT,
+    });
+
+    const paths = items.map(i => i.path);
+    expect(paths).toContain('/dashboard/services');
+    expect(paths).not.toContain('/dashboard/digital-products');
+  });
+
+  it('filters service routes for course stores in command surface', () => {
+    const items = resolveNavItems({
+      surface: 'command',
+      persona: 'seller',
+      isPlatformAdmin: false,
+      commerceType: 'course',
+      t: mockT,
+    });
+
+    const paths = items.map(i => i.path);
+    expect(paths).toContain('/dashboard/my-courses');
+    expect(paths).not.toContain('/dashboard/services');
+  });
+
+  it('filters non-artist routes in artist-specific modules', () => {
+    const items = resolveNavItems({
+      surface: 'command',
+      persona: 'seller',
+      isPlatformAdmin: false,
+      commerceType: 'artist',
+      t: mockT,
+    });
+
+    const paths = items.map(i => i.path);
+    expect(paths).toContain('/dashboard/auctions');
+    expect(paths).not.toContain('/dashboard/digital-products');
+    expect(paths).not.toContain('/dashboard/services');
+  });
 });

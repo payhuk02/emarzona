@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
 import type { Database } from '@/integrations/supabase/types';
 import type { StoreCommerceType } from '@/constants/store-commerce-types';
+import { resolveStoreCommerceTypeFromStore } from '@/lib/commerce/store-capability-map';
 
 type StoreInsert = Database['public']['Tables']['stores']['Insert'];
 type StoreUpdate = Database['public']['Tables']['stores']['Update'];
@@ -230,14 +231,10 @@ export const useStores = () => {
         throw error;
       }
 
-      return ((data ?? []) as Store[]).map(store => {
-        const commerceType = (
-          store.metadata && typeof store.metadata === 'object' && 'commerce_type' in store.metadata
-            ? store.metadata.commerce_type
-            : null
-        ) as StoreCommerceType | null;
-        return { ...store, commerce_type: commerceType };
-      });
+      return ((data ?? []) as Store[]).map(store => ({
+        ...store,
+        commerce_type: resolveStoreCommerceTypeFromStore(store),
+      }));
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes

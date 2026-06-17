@@ -40,9 +40,10 @@ export function parseStoreCommerceType(
 }
 
 export function resolveStoreCommerceType(
-  metadata?: Record<string, unknown> | null
+  metadata?: Record<string, unknown> | null,
+  explicitCommerceType?: unknown
 ): StoreCommerceType {
-  return parseStoreCommerceType(metadata?.commerce_type);
+  return parseStoreCommerceType(explicitCommerceType ?? metadata?.commerce_type);
 }
 
 /**

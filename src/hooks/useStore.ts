@@ -7,6 +7,7 @@ import { logger } from '@/lib/logger';
 import { sanitizeStorePayload } from '@/lib/store-payload-utils';
 import type { StoreCommerceType } from '@/constants/store-commerce-types';
 import type { Json } from '@/integrations/supabase/types';
+import { resolveStoreCommerceTypeFromStore } from '@/lib/commerce/store-capability-map';
 
 const STORE_FIELDS =
   'id, user_id, name, slug, subdomain, description, default_currency, custom_domain, domain_status, domain_verification_token, domain_verified_at, domain_error_message, logo_url, banner_url, info_message, info_message_color, info_message_font, metadata, created_at, updated_at';
@@ -138,7 +139,15 @@ export const useStore = () => {
           setStore(null);
         } else {
           logger.info('✅ [useStore] Boutique récupérée:', data.id);
-          setStore(data);
+          setStore({
+            ...data,
+            commerce_type: resolveStoreCommerceTypeFromStore(
+              data as {
+                commerce_type?: unknown;
+                metadata?: Record<string, unknown> | null;
+              }
+            ),
+          });
           hydratedStoreIdRef.current = data.id;
         }
       } else {
@@ -356,7 +365,15 @@ export const useStore = () => {
           setStore(null);
         } else if (data && data.length > 0) {
           logger.info('✅ [useStore] Boutique trouvée automatiquement:', data[0].id);
-          setStore(data[0]);
+          setStore({
+            ...data[0],
+            commerce_type: resolveStoreCommerceTypeFromStore(
+              data[0] as {
+                commerce_type?: unknown;
+                metadata?: Record<string, unknown> | null;
+              }
+            ),
+          });
           hydratedStoreIdRef.current = data[0].id;
           // Mettre à jour le contexte via setSelectedStoreId (évite la désynchronisation)
           try {

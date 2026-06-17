@@ -6,8 +6,10 @@ on:
     paths:
       - 'src/components/billing/**'
       - 'src/lib/billing/**'
+      - 'src/lib/commerce/**'
       - 'src/lib/admin/**'
       - 'src/config/**'
+      - 'src/lib/navigation/**'
       - 'src/hooks/useSidebarNavigation.ts'
       - 'src/components/AppSidebar.tsx'
       - 'src/components/layout/HorizontalContextNav.tsx'
@@ -43,6 +45,11 @@ jobs:
 
       - name: Run navigation tests
         run: npm run test:navigation
+        env:
+          CI: true
+
+      - name: Run commerce gating tests
+        run: npm run test:commerce-gating
         env:
           CI: true
 

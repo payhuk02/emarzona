@@ -99,6 +99,7 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
         name: newStoreData.name.trim(),
         description: newStoreData.description.trim() || null,
         slug: slug,
+        commerce_type: newStoreData.commerceType,
         metadata: {
           commerce_type: newStoreData.commerceType,
         },

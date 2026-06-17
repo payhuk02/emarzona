@@ -596,6 +596,7 @@ const StoreForm = ({
             tiktok_pixel_enabled?: boolean;
             custom_tracking_scripts?: string | null;
             custom_scripts_enabled?: boolean;
+            commerce_type?: StoreCommerceType;
             metadata?: Record<string, unknown> | null;
             [key: string]: unknown;
           }
@@ -700,6 +701,7 @@ const StoreForm = ({
             tiktok_pixel_enabled: tiktokPixelEnabled,
             custom_tracking_scripts: customTrackingScripts.trim() || null,
             custom_scripts_enabled: customScriptsEnabled,
+            commerce_type: commerceType,
             metadata: {
               ...(initialData?.metadata ?? {}),
               commerce_type: commerceType,
@@ -826,6 +828,7 @@ const StoreForm = ({
             snapchat_url?: string | null;
             discord_url?: string | null;
             twitch_url?: string | null;
+            commerce_type?: StoreCommerceType;
             [key: string]: unknown;
           }
           const rawInsertData: StoreInsertData = {
@@ -919,6 +922,7 @@ const StoreForm = ({
             snapchat_url: snapchatUrl || null,
             discord_url: discordUrl || null,
             twitch_url: twitchUrl || null,
+            commerce_type: commerceType,
             metadata: {
               commerce_type: commerceType,
             },
