@@ -129,6 +129,7 @@ export const PHASE6_CONTEXT_CONFIGS = {
         groupKey: 'produits_physiques',
         defaultLabel: 'Produits Physiques',
         paths: [
+          '/dashboard/physical-products',
           '/dashboard/physical-inventory',
           '/dashboard/physical-analytics',
           '/dashboard/physical-lots',

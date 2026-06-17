@@ -113,7 +113,38 @@ const ROUTE_CAPABILITY_RULES: readonly RouteRule[] = [
       '/dashboard/analytics',
       '/notifications',
       '/settings/notifications',
+      '/dashboard/integrations',
     ],
+  },
+  {
+    label: 'Programme affiliation promoteurs',
+    allowedTypes: ['digital', 'course', 'artist'],
+    pathPrefixes: ['/dashboard/affiliates', '/affiliate/dashboard'],
+  },
+  {
+    label: 'Gestion affiliation boutique',
+    allowedTypes: ALL_TYPES,
+    pathPrefixes: ['/dashboard/store-affiliates'],
+  },
+  {
+    label: 'Gamification',
+    allowedTypes: ['course', 'digital', 'artist'],
+    pathPrefixes: ['/dashboard/gamification'],
+  },
+  {
+    label: 'Webhooks & automatisations',
+    allowedTypes: ['physical', 'digital', 'service', 'course', 'artist'],
+    pathPrefixes: ['/dashboard/webhooks'],
+  },
+  {
+    label: 'Fidelite & cartes cadeaux',
+    allowedTypes: ['physical', 'digital', 'service', 'course'],
+    pathPrefixes: ['/dashboard/loyalty', '/dashboard/gift-cards'],
+  },
+  {
+    label: 'Comparateur produits physiques',
+    allowedTypes: ['physical'],
+    pathPrefixes: ['/products/compare'],
   },
 ];
 

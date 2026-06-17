@@ -114,4 +114,32 @@ describe('store-capability-map', () => {
     expect(canAccessCommercePath('/digital/search', 'digital')).toBe(true);
     expect(canAccessCommercePath('/digital/search', 'physical')).toBe(false);
   });
+
+  it('gates affiliation, gamification and integrations by commerce type', () => {
+    expect(canAccessCommercePath('/dashboard/affiliates', 'digital')).toBe(true);
+    expect(canAccessCommercePath('/dashboard/affiliates', 'service')).toBe(false);
+    expect(canAccessCommercePath('/dashboard/affiliates', 'course')).toBe(true);
+    expect(canAccessCommercePath('/affiliate/dashboard', 'artist')).toBe(true);
+    expect(canAccessCommercePath('/affiliate/dashboard', 'physical')).toBe(false);
+
+    expect(canAccessCommercePath('/dashboard/store-affiliates', 'physical')).toBe(true);
+    expect(canAccessCommercePath('/dashboard/store-affiliates', 'service')).toBe(true);
+
+    expect(canAccessCommercePath('/dashboard/gamification', 'course')).toBe(true);
+    expect(canAccessCommercePath('/dashboard/gamification', 'digital')).toBe(true);
+    expect(canAccessCommercePath('/dashboard/gamification', 'artist')).toBe(true);
+    expect(canAccessCommercePath('/dashboard/gamification', 'physical')).toBe(false);
+
+    expect(canAccessCommercePath('/dashboard/integrations', 'service')).toBe(true);
+    expect(canAccessCommercePath('/dashboard/integrations', 'artist')).toBe(true);
+    expect(canAccessCommercePath('/dashboard/webhooks', 'digital')).toBe(true);
+    expect(canAccessCommercePath('/dashboard/webhooks', 'service')).toBe(true);
+
+    expect(canAccessCommercePath('/dashboard/loyalty', 'physical')).toBe(true);
+    expect(canAccessCommercePath('/dashboard/loyalty', 'artist')).toBe(false);
+    expect(canAccessCommercePath('/dashboard/gift-cards', 'course')).toBe(true);
+
+    expect(canAccessCommercePath('/products/compare', 'physical')).toBe(true);
+    expect(canAccessCommercePath('/products/compare', 'digital')).toBe(false);
+  });
 });

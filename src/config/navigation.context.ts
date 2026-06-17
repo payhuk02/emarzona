@@ -133,6 +133,23 @@ export const CONTEXT_SIDEBAR_CONFIGS = {
         paths: ['/dashboard/auctions', '/dashboard/auctions/watchlist', '/dashboard/portfolios'],
       },
       {
+        groupKey: 'produits_physiques',
+        defaultLabel: 'Produits physiques',
+        paths: [
+          '/dashboard/physical-products',
+          '/dashboard/physical-inventory',
+          '/dashboard/physical-analytics',
+          '/dashboard/physical-lots',
+          '/dashboard/physical-serial-tracking',
+          '/dashboard/physical-barcode-scanner',
+          '/dashboard/physical-preorders',
+          '/dashboard/physical-backorders',
+          '/dashboard/physical-bundles',
+          '/dashboard/physical-promotions',
+          '/dashboard/multi-currency',
+        ],
+      },
+      {
         groupKey: 'analytics_digitaux',
         defaultLabel: 'Analytics',
         paths: ['/dashboard/digital-products?view=analytics'],

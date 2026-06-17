@@ -101,5 +101,16 @@ describe('commerce sidebar integration', () => {
     expect(artist).toContain('/dashboard/auctions');
     expect(artist).toContain('/dashboard/portfolios');
     expect(artist).not.toContain('/dashboard/digital-products');
+    expect(artist).not.toContain('/dashboard/affiliates');
+  });
+
+  it('excludes physical-only paths from non-physical compact sidebars', () => {
+    for (const commerceType of ['digital', 'service', 'course', 'artist'] as const) {
+      const paths = sidebarPathsForType(commerceType);
+      expect(paths).not.toContain('/dashboard/products/new/physical');
+      expect(paths).not.toContain('/dashboard/inventory');
+      expect(paths).not.toContain('/dashboard/shipping');
+      expect(paths).not.toContain('/dashboard/physical-products');
+    }
   });
 });

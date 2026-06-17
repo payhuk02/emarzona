@@ -767,24 +767,42 @@ export const EnhancedProductTypeSelector = ({
               {t('products.help.title', "Besoin d'aide pour choisir ?")}
             </h4>
             <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-              {t(
-                'products.help.description',
-                "Chaque type de produit est optimisé pour un cas d'usage spécifique."
-              )}{' '}
-              <strong>{t('products.help.courses', 'Les Cours en ligne')}</strong>{' '}
-              {t(
-                'products.help.coursesDesc',
-                'sont parfaits pour des formations structurées avec vidéos et quiz.'
-              )}{' '}
-              <strong>{t('products.help.digital', 'Les Produits digitaux')}</strong>{' '}
-              {t('products.help.digitalDesc', 'pour des fichiers téléchargeables.')}{' '}
-              <strong>{t('products.help.physical', 'Les Produits physiques')}</strong>{' '}
-              {t(
-                'products.help.physicalDesc',
-                'requièrent un abonnement mensuel (essai 30 jours). Les autres systèmes sont à commission 10%.'
-              )}{' '}
-              <strong>{t('products.help.services', 'Les Services')}</strong>{' '}
-              {t('products.help.servicesDesc', 'pour des prestations avec réservations.')}
+              {effectiveCommerceType === 'course' && (
+                <>
+                  <strong>{t('products.help.courses', 'Les Cours en ligne')}</strong>{' '}
+                  {t(
+                    'products.help.coursesDesc',
+                    'sont parfaits pour des formations structurées avec vidéos et quiz.'
+                  )}
+                </>
+              )}
+              {effectiveCommerceType === 'digital' && (
+                <>
+                  <strong>{t('products.help.digital', 'Les Produits digitaux')}</strong>{' '}
+                  {t('products.help.digitalDesc', 'pour des fichiers téléchargeables.')}
+                </>
+              )}
+              {effectiveCommerceType === 'physical' && (
+                <>
+                  <strong>{t('products.help.physical', 'Les Produits physiques')}</strong>{' '}
+                  {t(
+                    'products.help.physicalDesc',
+                    'requièrent un abonnement mensuel (essai 30 jours).'
+                  )}
+                </>
+              )}
+              {effectiveCommerceType === 'service' && (
+                <>
+                  <strong>{t('products.help.services', 'Les Services')}</strong>{' '}
+                  {t('products.help.servicesDesc', 'pour des prestations avec réservations.')}
+                </>
+              )}
+              {effectiveCommerceType === 'artist' && (
+                <>
+                  <strong>Les Œuvres d&apos;artiste</strong> pour vendre des créations avec
+                  certificats et enchères.
+                </>
+              )}
             </p>
           </div>
         </CardContent>
