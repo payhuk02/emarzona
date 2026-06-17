@@ -4,9 +4,24 @@ import type { Database } from './types';
 
 const SUPABASE_URL =
   import.meta.env.VITE_SUPABASE_URL || 'https://hbdnzajbyjakdhuavrvb.supabase.co';
-/** Préférer sb_publishable_... (JWT legacy anon désactivé sur le projet). Voir docs/DEPLOIEMENT_FRONT_SUPABASE_KEYS.md */
-const SUPABASE_PUBLISHABLE_KEY =
+
+/**
+ * Clé publique Supabase.
+ * En environnement de test (Vitest CI), on utilise une valeur factice pour éviter l'erreur
+ * \"supabaseKey is required\" tout en restant inoffensif côté données.
+ */
+const rawPublishableKey =
   import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || '';
+
+const SUPABASE_PUBLISHABLE_KEY =
+  (rawPublishableKey &&
+    typeof rawPublishableKey === 'string' &&
+    rawPublishableKey.trim().length > 0 &&
+    rawPublishableKey !== 'sb_publishable_votre_cle' &&
+    rawPublishableKey !== 'mock-key') ||
+  import.meta.env.MODE !== 'test'
+    ? rawPublishableKey
+    : 'test-supabase-key';
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";

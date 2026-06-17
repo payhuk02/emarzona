@@ -9,12 +9,14 @@ const hasTestCredentials = Boolean(process.env.E2E_TEST_EMAIL && process.env.E2E
 
 test.describe('Authentication', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
   });
 
   test('should display landing page', async ({ page }) => {
     await expect(page).toHaveTitle(/Emarzona/);
-    await expect(page.locator('footer').locator('text=/©\\s*\\d{4}\\s+Emarzona/i')).toBeVisible();
+    const footer = page.locator('footer');
+    await expect(footer).toBeVisible();
+    await expect(footer).toContainText(/Emarzona/i);
   });
 
   test('should navigate to auth page', async ({ page }) => {

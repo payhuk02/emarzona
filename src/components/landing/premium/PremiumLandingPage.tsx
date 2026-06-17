@@ -86,11 +86,9 @@ export function PremiumLandingPage() {
         </LandingDeferredSection>
       </main>
 
-      <LandingDeferredSection minHeight="12rem">
-        <Suspense fallback={null}>
-          <PremiumFooter />
-        </Suspense>
-      </LandingDeferredSection>
+      <Suspense fallback={null}>
+        <PremiumFooter />
+      </Suspense>
     </div>
   );
 }

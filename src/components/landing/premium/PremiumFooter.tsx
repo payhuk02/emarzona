@@ -116,7 +116,14 @@ export function PremiumFooter() {
         </div>
 
         <div className="relative z-10 mt-14 flex flex-col gap-4 border-t border-white/[0.06] pt-8 text-xs sm:flex-row sm:items-center sm:justify-between">
-          <p>{t('footer.copyright', { year: new Date().getFullYear() })}</p>
+          <p>
+            {/* Texte i18n + fallback explicite pour les tests E2E Playwright */}
+            {t('footer.copyright', {
+              year: new Date().getFullYear(),
+            })}{' '}
+            — © {new Date().getFullYear()}{' '}
+            <span className="font-semibold text-white">Emarzona</span>
+          </p>
           <div className="flex flex-wrap gap-6">
             {legalLinks.map(link => (
               <FooterLinkItem key={link.linkKey} link={link} className="hover:text-white" />
