@@ -29,7 +29,16 @@ type RpcFunction = (
   error: { message?: string } | null;
 }>;
 
-const rpc = supabase.rpc.bind(supabase) as unknown as RpcFunction;
+const rpc: RpcFunction = async (fn, params) => {
+  return (
+    supabase as unknown as {
+      rpc: (
+        name: string,
+        args: Record<string, unknown>
+      ) => Promise<{ data: unknown; error: { message?: string } | null }>;
+    }
+  ).rpc(fn, params);
+};
 
 /**
  * Créer une facture à partir d'une commande

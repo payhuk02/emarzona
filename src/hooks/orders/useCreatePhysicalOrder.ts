@@ -26,7 +26,7 @@ import type { PhysicalCheckoutMethod } from '@/constants/physical-checkout-optio
 
 const PRODUCT_FIELDS = 'id, name, price, promotional_price, currency, payment_options';
 const PHYSICAL_PRODUCT_FIELDS = 'id, product_id';
-const PHYSICAL_PRODUCT_VARIANT_FIELDS = 'id, is_available, price_adjustment';
+const PHYSICAL_PRODUCT_VARIANT_FIELDS = 'id';
 
 /**
  * Options pour créer une commande physical
@@ -103,6 +103,19 @@ export interface CreatePhysicalOrderResult {
   /** Numéro de commande lisible */
   orderNumber?: string;
 }
+
+type OrderRow = {
+  id: string;
+  store_id: string;
+  customer_id: string;
+  order_number: string;
+  total_amount: number;
+  currency: string;
+  status: string;
+  payment_status: string;
+  created_at: string;
+  order_items?: unknown[];
+};
 
 /**
  * Hook pour créer une commande de produit physique
@@ -216,11 +229,12 @@ export const useCreatePhysicalOrder = () => {
           throw new Error('Variante non trouvée');
         }
 
-        if (!variant.is_available) {
+        const variantRecord = variant as { is_available?: boolean; price_adjustment?: number };
+        if (variantRecord.is_available === false) {
           throw new Error("Cette variante n'est pas disponible");
         }
 
-        variantPrice = variant.price_adjustment || 0;
+        variantPrice = variantRecord.price_adjustment || 0;
       }
 
       // 4. Récupérer ou créer le customer
@@ -298,7 +312,16 @@ export const useCreatePhysicalOrder = () => {
       // Récupérer le cookie d'affiliation s'il existe
       const affiliateTrackingCookie = getAffiliateTrackingCookie();
 
-      const { data: order, error: orderError } = await supabase
+      const unsafeOrdersClient = supabase as unknown as {
+        from: (table: 'orders') => {
+          insert: (values: Record<string, unknown>) => {
+            select: (columns: string) => {
+              single: () => Promise<{ data: Record<string, unknown> | null; error: unknown }>;
+            };
+          };
+        };
+      };
+      const { data: order, error: orderError } = await unsafeOrdersClient
         .from('orders')
         .insert({
           store_id: storeId,
@@ -327,6 +350,7 @@ export const useCreatePhysicalOrder = () => {
       if (orderError || !order) {
         throw new Error('Erreur lors de la création de la commande');
       }
+      const typedOrder = order as unknown as OrderRow;
 
       // 8a. Rédimer la carte cadeau si applicable (APRÈS création commande)
       if (giftCardId && giftCardAmount && giftCardAmount > 0) {
@@ -335,7 +359,7 @@ export const useCreatePhysicalOrder = () => {
             'redeem_gift_card',
             {
               p_gift_card_id: giftCardId,
-              p_order_id: order.id,
+              p_order_id: typedOrder.id,
               p_amount: giftCardAmount,
             }
           );
@@ -358,7 +382,7 @@ export const useCreatePhysicalOrder = () => {
         const { data: invoiceId, error: invoiceError } = await supabase.rpc(
           'create_invoice_from_order',
           {
-            p_order_id: order.id,
+            p_order_id: typedOrder.id,
           }
         );
 
@@ -375,25 +399,42 @@ export const useCreatePhysicalOrder = () => {
 
       // 10. Déclencher webhook order.created (asynchrone, ne bloque pas)
       import('@/lib/webhooks').then(({ triggerOrderCreatedWebhook }) => {
-        triggerOrderCreatedWebhook(order.id, {
-          store_id: order.store_id,
-          customer_id: order.customer_id,
-          order_number: order.order_number,
-          status: order.status,
-          total_amount: order.total_amount,
-          currency: order.currency,
-          payment_status: order.payment_status,
-          created_at: order.created_at,
+        triggerOrderCreatedWebhook(typedOrder.id, {
+          store_id: typedOrder.store_id,
+          customer_id: typedOrder.customer_id,
+          order_number: typedOrder.order_number,
+          status: typedOrder.status,
+          total_amount: typedOrder.total_amount,
+          currency: typedOrder.currency,
+          payment_status: typedOrder.payment_status,
+          created_at: typedOrder.created_at,
         }).catch(err => {
-          logger.error('Error in analytics tracking', { error: err, orderId: order.id });
+          logger.error('Error in analytics tracking', { error: err, orderId: typedOrder.id });
         });
       });
 
       // 11. Créer l'order_item avec les références spécialisées
-      const { data: orderItem, error: orderItemError } = await supabase
+      const unsafeOrderItemsClient = supabase as unknown as {
+        from: (table: 'order_items') => {
+          insert: (values: Record<string, unknown>) => {
+            select: (columns: string) => {
+              single: () => Promise<{ data: { id: string } | null; error: unknown }>;
+            };
+          };
+          select: (columns: string) => {
+            eq: (
+              column: string,
+              value: string
+            ) => {
+              single: () => Promise<{ data: Record<string, unknown> | null; error: unknown }>;
+            };
+          };
+        };
+      };
+      const { data: orderItem, error: orderItemError } = await unsafeOrderItemsClient
         .from('order_items')
         .insert({
-          order_id: order.id,
+          order_id: typedOrder.id,
           product_id: productId,
           product_type: 'physical',
           physical_product_id: resolvedPhysicalProductId,
@@ -416,18 +457,19 @@ export const useCreatePhysicalOrder = () => {
       }
 
       try {
-        await reservePhysicalInventoryForOrder(order.id);
+        await reservePhysicalInventoryForOrder(typedOrder.id);
       } catch (stockErr) {
         throw stockErr instanceof Error ? stockErr : new Error('Stock insuffisant');
       }
 
-      const { data: reservedItem } = await supabase
+      const { data: reservedItem } = await unsafeOrderItemsClient
         .from('order_items')
         .select('item_metadata')
         .eq('id', orderItem.id)
         .single();
 
-      const reservedMeta = (reservedItem?.item_metadata ?? {}) as Record<string, unknown>;
+      const reservedMeta = ((reservedItem as { item_metadata?: unknown } | null)?.item_metadata ??
+        {}) as Record<string, unknown>;
       const inventoryId =
         typeof reservedMeta.inventory_id === 'string' ? reservedMeta.inventory_id : '';
       const inventoryLocation =
@@ -438,7 +480,7 @@ export const useCreatePhysicalOrder = () => {
       // 10. Créer un secured_payment si paiement escrow
       if (paymentType === 'delivery_secured') {
         await supabase.from('secured_payments').insert({
-          order_id: order.id,
+          order_id: typedOrder.id,
           total_amount: totalPrice,
           held_amount: amountToPay,
           status: 'held',
@@ -453,11 +495,11 @@ export const useCreatePhysicalOrder = () => {
       // 11. Paiement en ligne ou confirmation COD
       if (isCashOnDelivery) {
         return {
-          orderId: order.id,
+          orderId: typedOrder.id,
           orderItemId: orderItem.id,
           inventoryId,
           cashOnDelivery: true,
-          orderNumber: order.order_number,
+          orderNumber: typedOrder.order_number,
         };
       }
 
@@ -471,7 +513,7 @@ export const useCreatePhysicalOrder = () => {
       const paymentResult = await initiatePayment({
         storeId,
         productId,
-        orderId: order.id,
+        orderId: typedOrder.id,
         customerId,
         amount: finalAmountToPay,
         currency: product.currency,
@@ -497,18 +539,18 @@ export const useCreatePhysicalOrder = () => {
       });
 
       if (!paymentResult.success || !paymentResult.checkout_url) {
-        await releasePhysicalInventoryForOrder(order.id);
+        await releasePhysicalInventoryForOrder(typedOrder.id);
         throw new Error("Erreur lors de l'initialisation du paiement");
       }
 
       // 12. Retourner le résultat
       return {
-        orderId: order.id,
+        orderId: typedOrder.id,
         orderItemId: orderItem.id,
         inventoryId,
         checkoutUrl: paymentResult.checkout_url,
         transactionId: paymentResult.transaction_id,
-        orderNumber: order.order_number,
+        orderNumber: typedOrder.order_number,
       };
     },
 
@@ -525,30 +567,44 @@ export const useCreatePhysicalOrder = () => {
         import('@/lib/webhooks/unified-webhook-service')
           .then(({ triggerPurchaseWebhook }) => {
             // Récupérer les détails de la commande pour le payload
-            supabase
+            (
+              supabase as unknown as {
+                from: (table: 'orders') => {
+                  select: (columns: string) => {
+                    eq: (
+                      column: string,
+                      value: string
+                    ) => { single: () => Promise<{ data: Record<string, unknown> | null }> };
+                  };
+                };
+              }
+            )
               .from('orders')
               .select('*, order_items(*, product_id, products(*))')
               .eq('id', data.orderId)
               .single()
-              .then(({ data: orderData }) => {
-                if (orderData) {
-                  triggerPurchaseWebhook(variables.storeId, orderData.id, {
-                    order_id: orderData.id,
-                    order_number: orderData.order_number || data.orderId,
-                    customer_id: orderData.customer_id,
-                    total_amount: orderData.total_amount,
-                    currency: orderData.currency,
-                    payment_status: orderData.payment_status,
-                    status: orderData.status,
-                    items: orderData.order_items || [],
-                  }).catch(error => {
-                    logger.error('Error triggering purchase webhook', { error });
-                  });
+              .then(
+                ({ data: orderData }) => {
+                  if (orderData) {
+                    const orderRecord = orderData as OrderRow;
+                    triggerPurchaseWebhook(variables.storeId, orderRecord.id, {
+                      order_id: orderRecord.id,
+                      order_number: orderRecord.order_number || data.orderId,
+                      customer_id: orderRecord.customer_id,
+                      total_amount: orderRecord.total_amount,
+                      currency: orderRecord.currency,
+                      payment_status: orderRecord.payment_status,
+                      status: orderRecord.status,
+                      items: orderRecord.order_items || [],
+                    }).catch(error => {
+                      logger.error('Error triggering purchase webhook', { error });
+                    });
+                  }
+                },
+                error => {
+                  logger.error('Error fetching order for webhook', { error });
                 }
-              })
-              .catch(error => {
-                logger.error('Error fetching order for webhook', { error });
-              });
+              );
           })
           .catch(error => {
             logger.error('Error loading unified webhook service', { error });

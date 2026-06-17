@@ -6,6 +6,7 @@ import { useStoreContext } from '@/contexts/StoreContext';
 import { logger } from '@/lib/logger';
 import { sanitizeStorePayload } from '@/lib/store-payload-utils';
 import type { StoreCommerceType } from '@/constants/store-commerce-types';
+import type { Json } from '@/integrations/supabase/types';
 
 const STORE_FIELDS =
   'id, user_id, name, slug, subdomain, description, default_currency, custom_domain, domain_status, domain_verification_token, domain_verified_at, domain_error_message, logo_url, banner_url, info_message, info_message_color, info_message_font, metadata, created_at, updated_at';
@@ -28,7 +29,7 @@ export interface Store {
   info_message?: string | null;
   info_message_color?: string | null;
   info_message_font?: string | null;
-  metadata?: Record<string, unknown> | null;
+  metadata?: Json | null;
   commerce_type?: StoreCommerceType | null;
   created_at: string;
   updated_at: string;
@@ -251,7 +252,7 @@ export const useStore = () => {
     try {
       // Nettoyer le payload pour ne garder que les colonnes réellement supportées
       const sanitizedUpdates = sanitizeStorePayload(updates as Record<string, unknown>);
-      const updateData: Partial<Store> = { ...(sanitizedUpdates as Partial<Store>) };
+      const updateData: Record<string, unknown> = { ...sanitizedUpdates };
 
       // Si le nom change, regénérer le slug
       if (updates.name && updates.name !== store.name) {
@@ -270,7 +271,22 @@ export const useStore = () => {
         updateData.slug = newSlug;
       }
 
-      const { data, error } = await supabase
+      const { data, error } = await (
+        supabase as unknown as {
+          from: (table: 'stores') => {
+            update: (values: Record<string, unknown>) => {
+              eq: (
+                column: string,
+                value: string
+              ) => {
+                select: () => {
+                  limit: (count: number) => Promise<{ data: Store[] | null; error: unknown }>;
+                };
+              };
+            };
+          };
+        }
+      )
         .from('stores')
         .update(updateData)
         .eq('id', store.id)

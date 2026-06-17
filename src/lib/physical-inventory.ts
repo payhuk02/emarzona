@@ -12,7 +12,16 @@ type PhysicalInventoryRpc = (
   params: Record<string, unknown>
 ) => Promise<{ data: unknown; error: { message?: string; details?: string } | null }>;
 
-const rpc = supabase.rpc.bind(supabase) as unknown as PhysicalInventoryRpc;
+const rpc: PhysicalInventoryRpc = async (fn, params) => {
+  return (
+    supabase as unknown as {
+      rpc: (
+        name: string,
+        args: Record<string, unknown>
+      ) => Promise<{ data: unknown; error: { message?: string; details?: string } | null }>;
+    }
+  ).rpc(fn, params);
+};
 
 function parseRpcError(error: { message?: string; details?: string } | null): string {
   if (!error) return 'Erreur inventaire';

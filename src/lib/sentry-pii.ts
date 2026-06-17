@@ -44,9 +44,18 @@ function scrubValue(value: unknown): unknown {
   return value;
 }
 
+type SentryLikeEvent = Record<string, unknown> & {
+  user?: Record<string, unknown>;
+  request?: Record<string, unknown>;
+  breadcrumbs?: unknown[];
+  exception?: { values?: Array<{ value?: string }> };
+  extra?: unknown;
+  contexts?: unknown;
+};
+
 /** Sanitize a Sentry event payload before transmission. */
 export function sanitizeSentryEvent<T extends Record<string, unknown>>(event: T): T {
-  const copy = { ...event };
+  const copy = { ...event } as SentryLikeEvent;
 
   if (copy.user && typeof copy.user === 'object') {
     const user = { ...(copy.user as Record<string, unknown>) };
@@ -78,7 +87,7 @@ export function sanitizeSentryEvent<T extends Record<string, unknown>>(event: T)
   }
 
   if (copy.exception && typeof copy.exception === 'object') {
-    const ex = copy.exception as { values?: Array<{ value?: string }> };
+    const ex = copy.exception;
     if (Array.isArray(ex.values)) {
       ex.values = ex.values.map(v => ({
         ...v,
@@ -90,5 +99,5 @@ export function sanitizeSentryEvent<T extends Record<string, unknown>>(event: T)
   if (copy.extra) copy.extra = scrubValue(copy.extra);
   if (copy.contexts) copy.contexts = scrubValue(copy.contexts);
 
-  return copy;
+  return copy as T;
 }

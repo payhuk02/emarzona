@@ -60,11 +60,13 @@ export function useStorePaymentOptions(params: {
       if (!storeId) return [];
 
       const { data, error } = await (
-        supabase.rpc as (
-          fn: string,
-          args: { p_store_id: string; p_currency: string; p_buyer_country: string | null }
-        ) => ReturnType<typeof supabase.rpc>
-      )('get_store_payment_options', {
+        supabase as unknown as {
+          rpc: (
+            fn: string,
+            args: { p_store_id: string; p_currency: string; p_buyer_country: string | null }
+          ) => Promise<{ data: unknown; error: { message?: string } | null }>;
+        }
+      ).rpc('get_store_payment_options', {
         p_store_id: storeId,
         p_currency: currency,
         p_buyer_country: buyerCountry ?? null,

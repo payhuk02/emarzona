@@ -102,7 +102,9 @@ export const initSentry = () => {
 
       // Options avancées
       beforeSend(event, _hint) {
-        const sanitized = sanitizeSentryEvent(event as Record<string, unknown>) as typeof event;
+        const sanitized = sanitizeSentryEvent(
+          event as unknown as Record<string, unknown>
+        ) as unknown as typeof event;
 
         // Filtrer certains types d'erreurs en production
         if (ENV === 'production') {

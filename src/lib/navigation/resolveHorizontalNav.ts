@@ -102,7 +102,9 @@ function buildSubgroups(
 
 function collectBuyerAccountItems(sections: NavSection[]): NavItem[] {
   const config = PHASE6_CONTEXT_CONFIGS.account;
-  const keys = [config.sectionKey, ...(config.additionalSectionKeys ?? [])];
+  const additionalSectionKeys = (config as typeof config & { additionalSectionKeys?: string[] })
+    .additionalSectionKeys;
+  const keys = [config.sectionKey, ...(additionalSectionKeys ?? [])];
   const seen = new Set<string>();
   const items: NavItem[] = [];
 

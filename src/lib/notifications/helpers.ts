@@ -7,6 +7,22 @@
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import type { CreateNotificationData } from '@/types/notifications';
+import type { NotificationType } from '@/types/notifications';
+import type { Json } from '@/integrations/supabase/types';
+
+const COURSE_TYPE_MAP = {
+  lesson_complete: 'course_lesson_complete',
+  certificate_ready: 'course_certificate_ready',
+  quiz_passed: 'course_quiz_passed',
+  quiz_failed: 'course_quiz_failed',
+  new_course: 'course_new_content',
+  affiliate_sale: 'affiliate_commission_earned',
+  affiliate_commission: 'affiliate_commission_paid',
+} as const;
+
+function normalizeNotificationType(type: string): NotificationType {
+  return (COURSE_TYPE_MAP[type as keyof typeof COURSE_TYPE_MAP] ?? type) as NotificationType;
+}
 
 /**
  * Créer une notification
@@ -15,10 +31,10 @@ export const createNotification = async (data: CreateNotificationData) => {
   try {
     const { error } = await supabase.from('notifications').insert({
       user_id: data.user_id,
-      type: data.type,
+      type: normalizeNotificationType(data.type),
       title: data.title,
       message: data.message,
-      metadata: data.metadata || {},
+      metadata: (data.metadata || {}) as Json,
       action_url: data.action_url,
       action_label: data.action_label,
       priority: data.priority || 'normal',
@@ -29,7 +45,11 @@ export const createNotification = async (data: CreateNotificationData) => {
       return false;
     }
 
-    logger.debug('Notification created', { title: data.title, type: data.type, userId: data.user_id });
+    logger.debug('Notification created', {
+      title: data.title,
+      type: data.type,
+      userId: data.user_id,
+    });
     return true;
   } catch (error) {
     logger.error('Exception creating notification', { error, notificationData: data });
@@ -69,7 +89,7 @@ export const notifyLessonComplete = async (
 ) => {
   return createNotification({
     user_id: userId,
-    type: 'lesson_complete',
+    type: 'course_lesson_complete',
     title: `Leçon terminée !`,
     message: `Vous avez terminé "${lessonTitle}". Continuez sur votre lancée !`,
     action_url: `/courses/${courseSlug}`,
@@ -119,7 +139,7 @@ export const notifyCertificateReady = async (
 ) => {
   return createNotification({
     user_id: userId,
-    type: 'certificate_ready',
+    type: 'course_certificate_ready',
     title: `Votre certificat est prêt ! 🏆`,
     message: `Félicitations ! Vous pouvez maintenant télécharger votre certificat pour ${courseName}.`,
     action_url: `/courses/${courseSlug}`,
@@ -143,7 +163,7 @@ export const notifyQuizPassed = async (
 ) => {
   return createNotification({
     user_id: userId,
-    type: 'quiz_passed',
+    type: 'course_quiz_passed',
     title: `Quiz réussi ! ✅`,
     message: `Vous avez obtenu ${score}% au quiz "${quizTitle}". Excellent travail !`,
     action_url: `/courses/${courseSlug}`,
@@ -168,7 +188,7 @@ export const notifyQuizFailed = async (
 ) => {
   return createNotification({
     user_id: userId,
-    type: 'quiz_failed',
+    type: 'course_quiz_failed',
     title: `Quiz non réussi`,
     message: `Vous avez obtenu ${score}% au quiz "${quizTitle}". Réessayez pour améliorer votre score.`,
     action_url: `/courses/${courseSlug}`,
@@ -193,7 +213,7 @@ export const notifyNewCourse = async (
 ) => {
   return createNotification({
     user_id: userId,
-    type: 'new_course',
+    type: 'course_new_content',
     title: `Nouveau cours disponible !`,
     message: `${instructorName} a publié "${courseName}". Découvrez-le maintenant.`,
     action_url: `/courses/${courseSlug}`,
@@ -218,7 +238,7 @@ export const notifyAffiliateSale = async (
 ) => {
   return createNotification({
     user_id: userId,
-    type: 'affiliate_sale',
+    type: 'affiliate_commission_earned',
     title: `Nouvelle vente affilié ! 💰`,
     message: `Vous avez généré une vente pour "${courseName}". Commission: ${commission.toLocaleString()} ${currency}`,
     action_url: `/affiliate/courses`,
@@ -242,7 +262,7 @@ export const notifyAffiliateCommission = async (
 ) => {
   return createNotification({
     user_id: userId,
-    type: 'affiliate_commission',
+    type: 'affiliate_commission_paid',
     title: `Commission disponible !`,
     message: `Votre commission de ${amount.toLocaleString()} ${currency} est maintenant disponible.`,
     action_url: `/affiliate/dashboard`,
@@ -254,10 +274,3 @@ export const notifyAffiliateCommission = async (
     },
   });
 };
-
-
-
-
-
-
-
