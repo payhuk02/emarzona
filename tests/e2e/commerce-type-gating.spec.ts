@@ -1,9 +1,27 @@
 import { test, expect, type Page } from '@playwright/test';
 import { createNodeSupabaseClient } from './helpers/create-node-supabase-client';
+import { PRIMARY_PRODUCT_CREATE_PATH_BY_TYPE } from '../../src/lib/commerce/store-capability-map';
 
 type StoreCommerceType = 'physical' | 'digital' | 'service' | 'course' | 'artist';
 
 const TYPES: readonly StoreCommerceType[] = ['physical', 'digital', 'service', 'course', 'artist'];
+
+const ALL_CREATE_PATHS = [
+  '/dashboard/products/new',
+  '/dashboard/products/new/physical',
+  '/dashboard/products/new/digital',
+  '/dashboard/products/new/service',
+  '/dashboard/products/new/artist',
+  '/dashboard/courses/new',
+] as const;
+
+const WRONG_CREATE_PATH_BY_TYPE: Record<StoreCommerceType, string> = {
+  physical: '/dashboard/products/new/digital',
+  digital: '/dashboard/products/new/physical',
+  service: '/dashboard/products/new/artist',
+  course: '/dashboard/products/new/service',
+  artist: '/dashboard/courses/new',
+};
 
 function requiredEnv(name: string): string | null {
   const v = process.env[name];
@@ -168,8 +186,21 @@ test.describe('Commerce type gating (E2E minimal)', () => {
         await expectSidebarMissingLink(page, path);
       }
 
+      const ownCreatePath = PRIMARY_PRODUCT_CREATE_PATH_BY_TYPE[commerceType];
+      await expectSidebarHasLink(page, ownCreatePath);
+
+      for (const path of ALL_CREATE_PATHS) {
+        if (path !== ownCreatePath) {
+          await expectSidebarMissingLink(page, path);
+        }
+      }
+
       // Direct URL access should redirect to /dashboard if forbidden
       await page.goto(forbiddenDirectPath, { waitUntil: 'domcontentloaded' });
+      await expect(page).toHaveURL('/dashboard', { timeout: 20_000 });
+
+      const wrongCreatePath = WRONG_CREATE_PATH_BY_TYPE[commerceType];
+      await page.goto(wrongCreatePath, { waitUntil: 'domcontentloaded' });
       await expect(page).toHaveURL('/dashboard', { timeout: 20_000 });
 
       // Cleanup best-effort (do not fail test run on cleanup errors)

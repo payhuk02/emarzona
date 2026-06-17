@@ -6,7 +6,10 @@ import {
   isPhysicalOnlyNavUrl,
   shouldApplyPhysicalPlanGating,
 } from '@/lib/billing/store-commerce-access';
-import { canAccessCommercePath } from '@/lib/commerce/store-capability-map';
+import {
+  canAccessCommercePath,
+  canAccessProductCreateNavPath,
+} from '@/lib/commerce/store-capability-map';
 
 const getNavPath = (url: string) => url.split('?')[0];
 
@@ -47,7 +50,11 @@ export function filterSellerNavSectionsByAccess(
       items: section.items.filter(item => {
         if (!options.isPlatformAdmin && item.adminOnly) return false;
         if (hidePhysicalOnly && isPhysicalOnlyNavUrl(item.url)) return false;
-        if (!canAccessCommercePath(getNavItemPath(item.url), options.commerceType)) return false;
+        const path = getNavItemPath(item.url);
+        if (item.createGroup && !canAccessProductCreateNavPath(path, options.commerceType)) {
+          return false;
+        }
+        if (!canAccessCommercePath(path, options.commerceType)) return false;
         return true;
       }),
     }))

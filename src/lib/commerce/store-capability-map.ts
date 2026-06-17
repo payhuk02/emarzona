@@ -15,7 +15,45 @@ const ALL_TYPES: readonly StoreCommerceType[] = [
   'artist',
 ] as const;
 
+/** Primary wizard entry per store commerce type (sidebar + route guard). */
+export const PRIMARY_PRODUCT_CREATE_PATH_BY_TYPE: Record<StoreCommerceType, string> = {
+  physical: '/dashboard/products/new/physical',
+  digital: '/dashboard/products/new/digital',
+  service: '/dashboard/products/new/service',
+  course: '/dashboard/courses/new',
+  artist: '/dashboard/products/new/artist',
+};
+
+const PRODUCT_CREATE_ROUTE_RULES: readonly RouteRule[] = [
+  {
+    label: 'Creation produit physique',
+    allowedTypes: ['physical'],
+    pathPrefixes: ['/dashboard/products/new/physical'],
+  },
+  {
+    label: 'Creation produit digital',
+    allowedTypes: ['digital'],
+    pathPrefixes: ['/dashboard/products/new/digital'],
+  },
+  {
+    label: 'Creation service',
+    allowedTypes: ['service'],
+    pathPrefixes: ['/dashboard/products/new/service'],
+  },
+  {
+    label: "Creation oeuvre d'artiste",
+    allowedTypes: ['artist'],
+    pathPrefixes: ['/dashboard/products/new/artist'],
+  },
+  {
+    label: 'Creation cours',
+    allowedTypes: ['course'],
+    pathPrefixes: ['/dashboard/courses/new'],
+  },
+];
+
 const ROUTE_CAPABILITY_RULES: readonly RouteRule[] = [
+  ...PRODUCT_CREATE_ROUTE_RULES,
   {
     label: 'Modules Produits Physiques',
     allowedTypes: ['physical'],
@@ -128,4 +166,20 @@ export function canAccessCommercePath(
   }
   const effectiveType = parseStoreCommerceType(commerceType);
   return rule.allowedTypes.includes(effectiveType);
+}
+
+export function getPrimaryProductCreatePath(commerceType?: StoreCommerceType | null): string {
+  return PRIMARY_PRODUCT_CREATE_PATH_BY_TYPE[parseStoreCommerceType(commerceType)];
+}
+
+/** Sidebar create links: one typed wizard per store; hide generic type chooser. */
+export function canAccessProductCreateNavPath(
+  pathname: string,
+  commerceType?: StoreCommerceType | null
+): boolean {
+  const path = normalizePath(pathname.split('?')[0]);
+  if (path === '/dashboard/products/new') {
+    return false;
+  }
+  return canAccessCommercePath(pathname, commerceType);
 }

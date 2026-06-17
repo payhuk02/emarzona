@@ -152,4 +152,35 @@ describe('SellerRoutePermissionGuard', () => {
       expect(screen.getByTestId('location')).toHaveTextContent('/dashboard/auctions');
     });
   });
+
+  it('blocks physical product wizard for digital store', async () => {
+    mockCommerceType = 'digital';
+    renderGuard('/dashboard/products/new/physical');
+
+    await waitFor(() => {
+      expect(screen.getByTestId('location')).toHaveTextContent('/dashboard');
+    });
+
+    expect(mockToast).toHaveBeenCalled();
+  });
+
+  it('allows digital store on digital product wizard', async () => {
+    mockCommerceType = 'digital';
+    renderGuard('/dashboard/products/new/digital');
+
+    await waitFor(() => {
+      expect(screen.getByTestId('location')).toHaveTextContent('/dashboard/products/new/digital');
+    });
+
+    expect(screen.getByText('PROTECTED_CONTENT')).toBeInTheDocument();
+  });
+
+  it('allows course store on course creation route', async () => {
+    mockCommerceType = 'course';
+    renderGuard('/dashboard/courses/new');
+
+    await waitFor(() => {
+      expect(screen.getByTestId('location')).toHaveTextContent('/dashboard/courses/new');
+    });
+  });
 });

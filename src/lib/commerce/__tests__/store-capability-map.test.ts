@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   canAccessCommercePath,
+  canAccessProductCreateNavPath,
+  getPrimaryProductCreatePath,
   getRouteCapabilityRule,
   resolveStoreCommerceTypeFromStore,
 } from '@/lib/commerce/store-capability-map';
@@ -56,5 +58,30 @@ describe('store-capability-map', () => {
     // Should not match "/dashboard/digital" rule because segment is "digitalized".
     expect(canAccessCommercePath('/dashboard/digitalized', 'service')).toBe(true);
     expect(getRouteCapabilityRule('/dashboard/digitalized')).toBeNull();
+  });
+
+  it('gates product creation routes by store commerce type', () => {
+    expect(canAccessCommercePath('/dashboard/products/new/physical', 'physical')).toBe(true);
+    expect(canAccessCommercePath('/dashboard/products/new/physical', 'digital')).toBe(false);
+    expect(canAccessCommercePath('/dashboard/products/new/digital', 'digital')).toBe(true);
+    expect(canAccessCommercePath('/dashboard/products/new/service', 'course')).toBe(false);
+    expect(canAccessCommercePath('/dashboard/courses/new', 'course')).toBe(true);
+    expect(canAccessCommercePath('/dashboard/products/new/artist', 'artist')).toBe(true);
+  });
+
+  it('maps primary product create path per commerce type', () => {
+    expect(getPrimaryProductCreatePath('physical')).toBe('/dashboard/products/new/physical');
+    expect(getPrimaryProductCreatePath('course')).toBe('/dashboard/courses/new');
+    expect(getPrimaryProductCreatePath('artist')).toBe('/dashboard/products/new/artist');
+  });
+
+  it('hides generic product chooser in sidebar create links', () => {
+    expect(canAccessProductCreateNavPath('/dashboard/products/new', 'physical')).toBe(false);
+    expect(canAccessProductCreateNavPath('/dashboard/products/new', 'digital')).toBe(false);
+    expect(canAccessProductCreateNavPath('/dashboard/products/new/digital', 'digital')).toBe(true);
+    expect(canAccessProductCreateNavPath('/dashboard/products/new/digital', 'physical')).toBe(
+      false
+    );
+    expect(canAccessProductCreateNavPath('/dashboard/courses/new', 'course')).toBe(true);
   });
 });
