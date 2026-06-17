@@ -5,6 +5,7 @@
 import { Building2, Briefcase, FileText, HelpCircle, Mail, Newspaper, Plug } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { PageConfig } from '@/components/admin/customization/pages/types';
+import { MARKETING_PAGE_BODIES } from '@/lib/admin/platformFooterPageDefaults';
 
 export interface PlatformMarketingPageMeta {
   slug: string;
@@ -17,9 +18,6 @@ export interface PlatformMarketingPageMeta {
   defaultBody: string;
 }
 
-const defaultBody = (title: string) =>
-  `<p>Cette page est gérée depuis le panneau d'administration Emarzona (<strong>Personnalisation → Pages → ${title}</strong>). Adaptez le titre, le sous-titre et le contenu HTML selon vos besoins.</p>`;
-
 export const PLATFORM_MARKETING_PAGES: PlatformMarketingPageMeta[] = [
   {
     slug: 'about',
@@ -30,7 +28,7 @@ export const PLATFORM_MARKETING_PAGES: PlatformMarketingPageMeta[] = [
     defaultTitle: "À propos d'Emarzona",
     defaultSubtitle:
       'La plateforme e-commerce tout-en-un pour vendre, gérer et développer votre activité en ligne.',
-    defaultBody: defaultBody('À propos'),
+    defaultBody: MARKETING_PAGE_BODIES.about,
   },
   {
     slug: 'contact',
@@ -40,8 +38,7 @@ export const PLATFORM_MARKETING_PAGES: PlatformMarketingPageMeta[] = [
     icon: Mail,
     defaultTitle: 'Contactez-nous',
     defaultSubtitle: 'Notre équipe vous répond sous 24 à 48 h ouvrées.',
-    defaultBody:
-      '<p><strong>E-mail général :</strong> <a href="mailto:contact@emarzona.com">contact@emarzona.com</a></p><p><strong>Support :</strong> <a href="mailto:support@emarzona.com">support@emarzona.com</a></p><p><strong>Partenariats :</strong> <a href="mailto:partners@emarzona.com">partners@emarzona.com</a></p>',
+    defaultBody: MARKETING_PAGE_BODIES.contact,
   },
   {
     slug: 'careers',
@@ -52,7 +49,7 @@ export const PLATFORM_MARKETING_PAGES: PlatformMarketingPageMeta[] = [
     defaultTitle: 'Carrières',
     defaultSubtitle:
       'Rejoignez une équipe qui construit le commerce de demain en Afrique et dans le monde.',
-    defaultBody: defaultBody('Carrières'),
+    defaultBody: MARKETING_PAGE_BODIES.careers,
   },
   {
     slug: 'press',
@@ -62,8 +59,7 @@ export const PLATFORM_MARKETING_PAGES: PlatformMarketingPageMeta[] = [
     icon: Newspaper,
     defaultTitle: 'Espace presse',
     defaultSubtitle: 'Communiqués, ressources médias et contacts presse.',
-    defaultBody:
-      '<p><strong>Presse :</strong> <a href="mailto:press@emarzona.com">press@emarzona.com</a></p>',
+    defaultBody: MARKETING_PAGE_BODIES.press,
   },
   {
     slug: 'blog',
@@ -73,7 +69,7 @@ export const PLATFORM_MARKETING_PAGES: PlatformMarketingPageMeta[] = [
     icon: FileText,
     defaultTitle: 'Blog Emarzona',
     defaultSubtitle: 'Conseils e-commerce, études de cas et nouveautés produit.',
-    defaultBody: defaultBody('Blog'),
+    defaultBody: MARKETING_PAGE_BODIES.blog,
   },
   {
     slug: 'docs',
@@ -83,7 +79,7 @@ export const PLATFORM_MARKETING_PAGES: PlatformMarketingPageMeta[] = [
     icon: FileText,
     defaultTitle: 'Documentation',
     defaultSubtitle: 'Guides pour démarrer, vendre et optimiser votre boutique.',
-    defaultBody: defaultBody('Documentation'),
+    defaultBody: MARKETING_PAGE_BODIES.docs,
   },
   {
     slug: 'help',
@@ -93,7 +89,7 @@ export const PLATFORM_MARKETING_PAGES: PlatformMarketingPageMeta[] = [
     icon: HelpCircle,
     defaultTitle: "Centre d'aide",
     defaultSubtitle: 'FAQ, tutoriels et assistance pour vendeurs et acheteurs.',
-    defaultBody: defaultBody("Centre d'aide"),
+    defaultBody: MARKETING_PAGE_BODIES.help,
   },
   {
     slug: 'integrations',
@@ -103,7 +99,7 @@ export const PLATFORM_MARKETING_PAGES: PlatformMarketingPageMeta[] = [
     icon: Plug,
     defaultTitle: 'Intégrations',
     defaultSubtitle: 'Paiements, logistique, marketing et outils connectés à Emarzona.',
-    defaultBody: defaultBody('Intégrations'),
+    defaultBody: MARKETING_PAGE_BODIES.integrations,
   },
 ];
 
@@ -163,11 +159,13 @@ export function buildPlatformMarketingPageConfigs(): PageConfig[] {
           },
           {
             id: 'content.body',
-            label: 'Corps (HTML)',
+            label: 'Corps (texte)',
             type: 'textarea' as const,
             key: `${page.pageId}.content.body`,
             defaultValue: page.defaultBody,
-            description: 'HTML autorisé (p, h2, ul, a, strong…)',
+            description:
+              'Texte brut uniquement. Séparez les paragraphes par une ligne vide. Listes : commencez chaque ligne par « - ».',
+            rows: 12,
           },
         ],
       },

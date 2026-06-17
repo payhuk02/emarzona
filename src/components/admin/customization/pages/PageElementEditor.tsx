@@ -54,7 +54,7 @@ export const PageElementEditor = ({
           value={stringValue}
           onChange={e => onChange(pageId, element.key, e.target.value)}
           placeholder={element.defaultValue}
-          rows={3}
+          rows={element.rows ?? 3}
           className="text-sm"
         />
       );

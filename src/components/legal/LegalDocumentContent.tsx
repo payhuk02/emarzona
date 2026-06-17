@@ -1,21 +1,24 @@
 import type { ReactNode } from 'react';
 import type { LegalDocument } from '@/types/legal';
-import { SafeHTML } from '@/components/security/SafeHTML';
+import { PlainTextContent } from '@/components/content/PlainTextContent';
+import { normalizeContentForDisplay } from '@/lib/content/plain-text-content';
+
 interface LegalDocumentContentProps {
   document: LegalDocument | null | undefined;
   fallback: ReactNode;
 }
 
 /**
- * Affiche le contenu HTML publié en base (legal_documents) ou le template statique.
+ * Affiche le contenu publié en base (legal_documents) en texte brut, ou le template statique.
  */
 export function LegalDocumentContent({ document, fallback }: LegalDocumentContentProps) {
   if (document?.content?.trim()) {
     return (
-      <SafeHTML
-        html={document.content}
-        as="article"
-        className="prose prose-blue max-w-none legal-document-from-db"
+      <PlainTextContent
+        text={normalizeContentForDisplay(document.content)}
+        headingClassName="text-gray-900"
+        paragraphClassName="text-gray-700"
+        listClassName="text-gray-700"
       />
     );
   }

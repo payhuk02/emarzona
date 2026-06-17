@@ -25,5 +25,6 @@ export interface PageElement {
   key: string;
   defaultValue?: string;
   description?: string;
+  rows?: number;
   options?: { value: string; label: string }[];
 }
