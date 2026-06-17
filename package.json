@@ -42,6 +42,7 @@
     "test:coverage:html": "vitest run --coverage && open coverage/index.html",
     "test:e2e": "playwright test --grep-invert \"visual-regression|accessibility|responsive\"",
     "test:e2e:ci": "playwright test --config=playwright.ci.config.ts",
+    "test:e2e:commerce-gating": "playwright test --config=playwright.commerce-gating.config.ts",
     "test:e2e:auth": "playwright test --config=playwright.auth.config.ts",
     "test:e2e:marketplace": "playwright test tests/e2e/marketplace",
     "test:e2e:products": "playwright test --config=playwright.products.config.ts",

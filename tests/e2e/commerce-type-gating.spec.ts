@@ -99,10 +99,13 @@ const canRun = Boolean(supabaseUrl && supabaseServiceKey);
 
 test.describe('Commerce type gating (E2E minimal)', () => {
   test.beforeAll(() => {
-    test.skip(
-      !canRun,
-      'Requires SUPABASE_SERVICE_ROLE_KEY + VITE_SUPABASE_URL (test Supabase migrated).'
-    );
+    if (canRun) return;
+    const message =
+      'Requires SUPABASE_SERVICE_ROLE_KEY + VITE_SUPABASE_URL (test Supabase migrated).';
+    if (process.env.CI) {
+      throw new Error(message);
+    }
+    test.skip(true, message);
   });
 
   for (const commerceType of TYPES) {
