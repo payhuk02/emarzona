@@ -16,10 +16,16 @@ export default defineConfig(({ mode }) => {
     env.VERCEL_GIT_COMMIT_SHA?.slice(0, 12) ||
     env.VITE_BUILD_ID ||
     `build-${Date.now().toString(36)}`;
-  const publicBackendUrl = env.VITE_SUPABASE_URL || 'https://mock.supabase.co';
+  const publicBackendUrl =
+    env.VITE_SUPABASE_URL || process.env.VITE_SUPABASE_URL || 'https://mock.supabase.co';
   const publicBackendKey =
-    env.VITE_SUPABASE_PUBLISHABLE_KEY || env.VITE_SUPABASE_ANON_KEY || 'mock-key';
-  const publicBackendProjectId = env.VITE_SUPABASE_PROJECT_ID || 'mock-project';
+    env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+    env.VITE_SUPABASE_ANON_KEY ||
+    process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+    process.env.VITE_SUPABASE_ANON_KEY ||
+    'mock-key';
+  const publicBackendProjectId =
+    env.VITE_SUPABASE_PROJECT_ID || process.env.VITE_SUPABASE_PROJECT_ID || 'mock-project';
 
   // Garantit l'ordre de chargement : index (React) avant les autres chunks
   const ensureChunkOrderPlugin = (): Plugin => ({
@@ -110,6 +116,7 @@ export default defineConfig(({ mode }) => {
   return {
     define: {
       'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(publicBackendUrl),
+      'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(publicBackendKey),
       'import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY': JSON.stringify(publicBackendKey),
       'import.meta.env.VITE_SUPABASE_PROJECT_ID': JSON.stringify(publicBackendProjectId),
       'import.meta.env.VITE_BUILD_ID': JSON.stringify(buildId),

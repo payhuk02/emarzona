@@ -89,3 +89,20 @@ export function assertE2ESupabaseEnv(env) {
   }
   return missing;
 }
+
+export function validateServiceRoleKeyFormat(key) {
+  if (!key?.trim()) return 'Clé absente';
+  if (key.startsWith('eyJ')) {
+    return 'Clé JWT legacy (eyJ...) — désactivée. Utilisez sb_secret_... depuis Supabase Dashboard → API Keys.';
+  }
+  if (key.startsWith('sb_publishable_')) {
+    return 'Clé publishable (sb_publishable_...) — utilisez sb_secret_... (service role).';
+  }
+  if (!key.startsWith('sb_secret_')) {
+    return `Format inattendu (attendu sb_secret_..., reçu "${key.slice(0, 12)}...").`;
+  }
+  if (key.length < 40) {
+    return `Clé tronquée (longueur ${key.length}). Copiez la clé complète depuis le Dashboard.`;
+  }
+  return null;
+}

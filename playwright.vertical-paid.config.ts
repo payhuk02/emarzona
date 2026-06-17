@@ -1,11 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
 
-const supabaseUrl = process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL ?? '';
-const supabaseAnonKey =
-  process.env.VITE_SUPABASE_ANON_KEY ?? process.env.VITE_SUPABASE_PUBLISHABLE_KEY ?? '';
-
 /**
  * E2E payants cours + artiste — requires SUPABASE_SERVICE_ROLE_KEY in CI.
+ * Le dev server est lancé via scripts/start-e2e-dev.mjs (.env.e2e.local).
  */
 export default defineConfig({
   testDir: './tests/e2e',
@@ -27,14 +24,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run dev',
+    command: 'node scripts/start-e2e-dev.mjs',
     url: 'http://localhost:8080',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     timeout: 120_000,
-    env: {
-      VITE_SUPABASE_URL: supabaseUrl,
-      VITE_SUPABASE_ANON_KEY: supabaseAnonKey,
-      VITE_SUPABASE_PUBLISHABLE_KEY: supabaseAnonKey,
-    },
   },
 });

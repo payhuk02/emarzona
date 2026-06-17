@@ -1,0 +1,32 @@
+#!/usr/bin/env node
+/**
+ * Dev server Vite pour Playwright E2E — injecte .env.e2e.local dans le process enfant.
+ */
+import { spawn } from 'node:child_process';
+import { loadE2EEnv } from './load-e2e-env.mjs';
+
+const merged = { ...process.env, ...loadE2EEnv() };
+const anonKey =
+  merged.VITE_SUPABASE_ANON_KEY ??
+  merged.VITE_SUPABASE_PUBLISHABLE_KEY ??
+  '';
+
+if (!merged.VITE_SUPABASE_URL?.trim() || !anonKey.trim()) {
+  console.error('[start-e2e-dev] VITE_SUPABASE_URL et clé publishable requises (.env.e2e.local)');
+  process.exit(1);
+}
+
+merged.VITE_SUPABASE_ANON_KEY = anonKey;
+merged.VITE_SUPABASE_PUBLISHABLE_KEY = anonKey;
+
+console.log(
+  `[start-e2e-dev] ${merged.VITE_SUPABASE_URL} — publishable ${anonKey.slice(0, 20)}... (${anonKey.length} car.)`
+);
+
+const child = spawn('npm', ['run', 'dev'], {
+  stdio: 'inherit',
+  shell: process.platform === 'win32',
+  env: merged,
+});
+
+child.on('exit', code => process.exit(code ?? 1));

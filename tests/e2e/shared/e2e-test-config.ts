@@ -2,6 +2,8 @@
  * Configuration partagée des tests E2E Emarzona.
  * Surcharge via variables d'environnement en CI (secrets).
  */
+import type { SupabaseClient } from '@supabase/supabase-js';
+
 export const E2E_TEST_CONFIG = {
   vendorEmail: process.env.E2E_VENDOR_EMAIL ?? 'vendor-test@emarzona.com',
   vendorPassword: process.env.E2E_VENDOR_PASSWORD ?? 'TestPassword123!',
@@ -9,9 +11,12 @@ export const E2E_TEST_CONFIG = {
   buyerPassword: process.env.E2E_BUYER_PASSWORD ?? 'TestPassword123!',
   clientEmail: process.env.E2E_CLIENT_EMAIL ?? 'client-test@emarzona.com',
   clientPassword: process.env.E2E_CLIENT_PASSWORD ?? 'TestPassword123!',
+  /** Mot de passe fixe pour utilisateurs créés via admin API (évite caractères instables dans runId). */
+  seededUserPassword: 'E2eTestPass1!',
   paymentTimeout: 30_000,
   navigationTimeout: 90_000,
   appReadyTimeout: 90_000,
+  authTimeout: 60_000,
 } as const;
 
 type PlaywrightPage = import('@playwright/test').Page;
@@ -56,9 +61,110 @@ export async function loginAs(
   password: string
 ): Promise<void> {
   await gotoApp(page, '/login');
-  await page.fill('input[type="email"]', email);
-  await page.fill('input[type="password"]', password);
-  await page.click('button[type="submit"]');
-  await page.waitForURL(/\/(dashboard|marketplace|account)/, { timeout: 30_000 });
+  const emailInput = page.locator('input[name="email-login"], input[type="email"]').first();
+  await emailInput.fill(email);
+  await page.locator('#password-login').fill(password);
+  await page
+    .locator('form')
+    .filter({ has: page.locator('#password-login') })
+    .locator('button[type="submit"]')
+    .click();
+
+  try {
+    await page.waitForURL(/\/(dashboard|marketplace|account|admin)/, {
+      timeout: E2E_TEST_CONFIG.authTimeout,
+      waitUntil: 'domcontentloaded',
+    });
+  } catch {
+    const alertText = await page
+      .locator('[role="alert"]')
+      .first()
+      .textContent()
+      .catch(() => null);
+    throw new Error(
+      `Login failed for ${email} (url=${page.url()})${alertText ? `: ${alertText.trim()}` : ''}`
+    );
+  }
+  await waitForReactApp(page);
+}
+
+/**
+ * Connexion fiable pour utilisateurs créés via service role — évite signIn UI quand la clé publishable locale est invalide/tronquée.
+ */
+export async function loginAsSeededUser(
+  page: PlaywrightPage,
+  admin: SupabaseClient,
+  email: string,
+  redirectPath = '/dashboard'
+): Promise<void> {
+  const baseURL = process.env.PLAYWRIGHT_TEST_BASE_URL ?? 'http://localhost:8080';
+  const supabaseUrl = process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL ?? '';
+  if (!supabaseUrl) {
+    throw new Error('VITE_SUPABASE_URL missing for loginAsSeededUser');
+  }
+  const projectRef = new URL(supabaseUrl).hostname.split('.')[0];
+  const storageKey = `sb-${projectRef}-auth-token`;
+
+  const { data, error } = await admin.auth.admin.generateLink({
+    type: 'magiclink',
+    email,
+    options: { redirectTo: `${baseURL}${redirectPath}` },
+  });
+
+  if (error || !data.properties?.action_link) {
+    throw error ?? new Error(`generateLink(magiclink) failed for ${email}`);
+  }
+
+  await page.goto(data.properties.action_link, {
+    waitUntil: 'domcontentloaded',
+    timeout: E2E_TEST_CONFIG.navigationTimeout,
+  });
+
+  await page
+    .waitForFunction(() => /access_token=/.test(window.location.hash), {
+      timeout: E2E_TEST_CONFIG.authTimeout,
+    })
+    .catch(() => undefined);
+
+  const tokens = await page.evaluate(() => {
+    const params = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+    return {
+      access_token: params.get('access_token'),
+      refresh_token: params.get('refresh_token'),
+      expires_in: params.get('expires_in'),
+      token_type: params.get('token_type') ?? 'bearer',
+    };
+  });
+
+  if (!tokens.access_token || !tokens.refresh_token) {
+    throw new Error(`Magic link did not yield session tokens (url=${page.url()})`);
+  }
+
+  const expiresIn = Number(tokens.expires_in ?? 3600);
+  const session = {
+    access_token: tokens.access_token,
+    refresh_token: tokens.refresh_token,
+    expires_in: expiresIn,
+    expires_at: Math.floor(Date.now() / 1000) + expiresIn,
+    token_type: tokens.token_type,
+    user: data.user,
+  };
+
+  await page.goto(baseURL, {
+    waitUntil: 'domcontentloaded',
+    timeout: E2E_TEST_CONFIG.navigationTimeout,
+  });
+  await page.evaluate(
+    ({ key, value }) => {
+      sessionStorage.setItem(key, value);
+    },
+    { key: storageKey, value: JSON.stringify(session) }
+  );
+
+  await gotoApp(page, redirectPath);
+  await page.waitForURL(/\/(dashboard|marketplace|account|admin)/, {
+    timeout: E2E_TEST_CONFIG.authTimeout,
+    waitUntil: 'domcontentloaded',
+  });
   await waitForReactApp(page);
 }

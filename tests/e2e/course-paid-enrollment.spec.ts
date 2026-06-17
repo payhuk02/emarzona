@@ -12,7 +12,7 @@ import {
   cleanupPaidFixture,
   seedPaidCourseFixture,
 } from './helpers/paid-vertical-seed';
-import { gotoApp, loginAs } from './shared/e2e-test-config';
+import { gotoApp, loginAsSeededUser, E2E_TEST_CONFIG } from './shared/e2e-test-config';
 
 const supabaseUrl =
   process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -38,16 +38,16 @@ test.describe('Course paid enrollment (E2E)', () => {
     try {
       await assertCourseEnrollment(admin, fixture.courseId, fixture.buyer.id);
 
-      await loginAs(page, fixture.buyer.email, fixture.buyer.password);
+      await loginAsSeededUser(page, admin, fixture.buyer.email);
       await gotoApp(page, `/learn/${fixture.product.slug}`);
 
       await expect(page).not.toHaveURL(/\/login/);
       await expect(page.getByRole('button', { name: /inscrire|s'inscrire|enroll/i })).toHaveCount(
         0
       );
-      await expect(
-        page.locator('text=/progression|section|chapitre|leçon|programme/i').or(page.locator('h1'))
-      ).toBeVisible({ timeout: 20_000 });
+      await expect(page.getByRole('heading', { level: 1 })).toContainText(fixture.product.name, {
+        timeout: 20_000,
+      });
     } finally {
       try {
         await cleanupPaidFixture(admin, fixture);
@@ -65,21 +65,20 @@ test.describe('Course paid enrollment (E2E)', () => {
     try {
       const unpaidBuyer = await (async () => {
         const email = `e2e-course-cta-${runId}@example.com`;
-        const password = `E2E!${runId}cC1`;
         const { data, error } = await admin.auth.admin.createUser({
           email,
-          password,
+          password: E2E_TEST_CONFIG.seededUserPassword,
           email_confirm: true,
         });
         if (error || !data.user?.id) throw error ?? new Error('buyer create failed');
-        return { email, password, id: data.user.id };
+        return { email, id: data.user.id };
       })();
 
-      await loginAs(page, unpaidBuyer.email, unpaidBuyer.password);
+      await loginAsSeededUser(page, admin, unpaidBuyer.email);
       await gotoApp(page, `/courses/${fixture.product.slug}`);
 
       const enrollButton = page.getByRole('button', {
-        name: /inscrire|acheter|s'inscrire|enroll/i,
+        name: /s'inscrire maintenant|inscrire|acheter|enroll/i,
       });
       await expect(enrollButton.first()).toBeVisible({ timeout: 15_000 });
       await enrollButton.first().click();

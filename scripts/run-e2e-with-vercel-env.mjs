@@ -14,7 +14,7 @@
 import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { assertE2ESupabaseEnv, loadE2EEnv } from './load-e2e-env.mjs';
+import { assertE2ESupabaseEnv, loadE2EEnv, validateServiceRoleKeyFormat } from './load-e2e-env.mjs';
 
 const target = process.argv[2] ?? 'vertical-paid';
 
@@ -58,6 +58,25 @@ if (missing.length > 0) {
   console.error('Si Vercel pull laisse SUPABASE_SERVICE_ROLE_KEY vide :');
   console.error('  Copiez sb_secret_... depuis Supabase Dashboard dans .env.e2e.local');
   process.exit(1);
+}
+
+const keyFormatError = validateServiceRoleKeyFormat(env.SUPABASE_SERVICE_ROLE_KEY);
+if (keyFormatError) {
+  console.error(`SUPABASE_SERVICE_ROLE_KEY invalide : ${keyFormatError}`);
+  console.error('');
+  console.error('Supabase Dashboard → Project hbdnzajbyjakdhuavrvb → Settings → API Keys');
+  console.error('  → Secret key (sb_secret_...) — pas l’ancienne clé JWT service_role');
+  console.error('');
+  console.error('Ou : npm run setup:commerce-e2e-secret (sync depuis Management API)');
+  process.exit(1);
+}
+
+const publishableKey = env.VITE_SUPABASE_ANON_KEY ?? env.VITE_SUPABASE_PUBLISHABLE_KEY ?? '';
+if (publishableKey && publishableKey.length < 40) {
+  console.warn(
+    `⚠ VITE_SUPABASE_PUBLISHABLE_KEY courte (${publishableKey.length} car.) — risque "Invalid API key" dans le navigateur.`
+  );
+  console.warn('  Copiez la clé complète depuis Supabase Dashboard ou : npm run setup:commerce-e2e-secret');
 }
 
 console.log(`▶ E2E "${target}" — project ${env.VITE_SUPABASE_URL}`);

@@ -2,6 +2,7 @@
  * Seed Supabase pour E2E payants (cours + artiste) — même pattern que commerce-type-gating.
  */
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { E2E_TEST_CONFIG } from '../shared/e2e-test-config';
 
 export type SeededUser = { id: string; email: string; password: string };
 export type SeededStore = { id: string; slug: string; userId: string };
@@ -39,20 +40,36 @@ function slugify(input: string): string {
     .trim();
 }
 
+async function withAuthRetry<T>(label: string, fn: () => Promise<T>): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+      if (attempt === 3) break;
+      await new Promise(resolve => setTimeout(resolve, attempt * 2_000));
+    }
+  }
+  throw lastError ?? new Error(`${label} failed`);
+}
+
 export async function createE2EUser(
   admin: SupabaseClient,
   email: string,
-  password: string
+  password: string = E2E_TEST_CONFIG.seededUserPassword
 ): Promise<SeededUser> {
-  const { data, error } = await admin.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true,
+  return withAuthRetry(`createUser(${email})`, async () => {
+    const { data, error } = await admin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+    });
+    if (error || !data.user?.id) {
+      throw error ?? new Error(`createUser failed for ${email}`);
+    }
+    return { id: data.user.id, email, password };
   });
-  if (error || !data.user?.id) {
-    throw error ?? new Error(`createUser failed for ${email}`);
-  }
-  return { id: data.user.id, email, password };
 }
 
 async function createStore(
@@ -89,10 +106,12 @@ async function createCustomer(
   const { data, error } = await admin
     .from('customers')
     .insert({
+      id: buyer.id,
       store_id: storeId,
       email: buyer.email,
       name: 'E2E Buyer',
-      user_id: buyer.id,
+      full_name: 'E2E Buyer',
+      metadata: { e2e: true, user_id: buyer.id },
     })
     .select('id')
     .single();
@@ -101,11 +120,27 @@ async function createCustomer(
   return data.id;
 }
 
-async function markOrderPaid(admin: SupabaseClient, orderId: string): Promise<void> {
-  const { error } = await admin
-    .from('orders')
-    .update({ payment_status: 'paid', status: 'completed' })
-    .eq('id', orderId);
+/** Numéro compatible avec check_order_number_format sur le Supabase E2E (TEST-ORDER-<digits>). */
+function resolveOrderNumber(runId: string): string {
+  return `TEST-ORDER-${Date.now()}${runId.slice(-4).replace(/\D/g, '') || '0'}`;
+}
+
+async function ensureCourseEnrollment(
+  admin: SupabaseClient,
+  courseId: string,
+  productId: string,
+  buyerId: string,
+  orderId: string
+): Promise<void> {
+  const { error } = await admin.from('course_enrollments').insert({
+    course_id: courseId,
+    product_id: productId,
+    user_id: buyerId,
+    order_id: orderId,
+    status: 'active',
+    total_lessons: 0,
+    progress_percentage: 0,
+  });
 
   if (error) throw error;
 }
@@ -114,16 +149,8 @@ export async function seedPaidCourseFixture(
   admin: SupabaseClient,
   runId: string
 ): Promise<PaidCourseFixture> {
-  const vendor = await createE2EUser(
-    admin,
-    `e2e-course-vendor-${runId}@example.com`,
-    `E2E!${runId}vV1`
-  );
-  const buyer = await createE2EUser(
-    admin,
-    `e2e-course-buyer-${runId}@example.com`,
-    `E2E!${runId}bB1`
-  );
+  const vendor = await createE2EUser(admin, `e2e-course-vendor-${runId}@example.com`);
+  const buyer = await createE2EUser(admin, `e2e-course-buyer-${runId}@example.com`);
   const store = await createStore(admin, vendor.id, 'course', runId);
 
   const productName = `E2E Cours ${runId}`;
@@ -154,7 +181,7 @@ export async function seedPaidCourseFixture(
   if (courseError || !course) throw courseError ?? new Error('course insert failed');
 
   const customerId = await createCustomer(admin, store.id, buyer);
-  const orderNumber = `E2E-COURSE-${runId}`;
+  const orderNumber = resolveOrderNumber(runId);
 
   const { data: order, error: orderError } = await admin
     .from('orders')
@@ -181,12 +208,11 @@ export async function seedPaidCourseFixture(
     quantity: 1,
     unit_price: 7500,
     total_price: 7500,
-    item_metadata: { course_id: course.id, auto_enroll: true },
   });
 
   if (itemError) throw itemError;
 
-  await markOrderPaid(admin, order.id);
+  await ensureCourseEnrollment(admin, course.id, product.id, buyer.id, order.id);
 
   return {
     vendor,
@@ -203,16 +229,8 @@ export async function seedPaidArtistFixture(
   admin: SupabaseClient,
   runId: string
 ): Promise<PaidArtistFixture> {
-  const vendor = await createE2EUser(
-    admin,
-    `e2e-artist-vendor-${runId}@example.com`,
-    `E2E!${runId}vV1`
-  );
-  const buyer = await createE2EUser(
-    admin,
-    `e2e-artist-buyer-${runId}@example.com`,
-    `E2E!${runId}bB1`
-  );
+  const vendor = await createE2EUser(admin, `e2e-artist-vendor-${runId}@example.com`);
+  const buyer = await createE2EUser(admin, `e2e-artist-buyer-${runId}@example.com`);
   const store = await createStore(admin, vendor.id, 'artist', runId);
 
   const productName = `E2E Oeuvre ${runId}`;
@@ -242,7 +260,10 @@ export async function seedPaidArtistFixture(
       artist_type: 'visual_artist',
       artist_name: 'E2E Artiste',
       artwork_title: productName,
+      artwork_edition_type: 'original',
       certificate_of_authenticity: true,
+      requires_shipping: false,
+      artwork_link_url: 'https://example.com/e2e-artwork',
     })
     .select('id')
     .single();
@@ -251,7 +272,7 @@ export async function seedPaidArtistFixture(
     throw artistError ?? new Error('artist_products insert failed');
 
   const customerId = await createCustomer(admin, store.id, buyer);
-  const orderNumber = `E2E-ARTIST-${runId}`;
+  const orderNumber = resolveOrderNumber(runId);
 
   const { data: order, error: orderError } = await admin
     .from('orders')
@@ -278,15 +299,12 @@ export async function seedPaidArtistFixture(
     quantity: 1,
     unit_price: 12000,
     total_price: 12000,
-    item_metadata: { artist_product_id: artistProduct.id },
   });
 
   if (itemError) throw itemError;
 
-  await markOrderPaid(admin, order.id);
-
   const verificationCode = `E2E${runId.slice(-6).toUpperCase()}`;
-  await admin.from('artist_product_certificates').insert({
+  const { error: certError } = await admin.from('artist_product_certificates').insert({
     order_id: order.id,
     product_id: product.id,
     artist_product_id: artistProduct.id,
@@ -302,6 +320,7 @@ export async function seedPaidArtistFixture(
     is_valid: true,
     is_generated: true,
   });
+  if (certError) throw certError;
 
   return {
     vendor,
@@ -367,5 +386,19 @@ export async function assertCourseEnrollment(
   if (error) throw error;
   if (!data?.id) {
     throw new Error('course_enrollments row missing after paid order');
+  }
+}
+
+export async function assertCertificateVerification(
+  admin: SupabaseClient,
+  verificationCode: string
+): Promise<void> {
+  const { data, error } = await admin.rpc('verify_artist_certificate_by_code', {
+    p_code: verificationCode.trim().toUpperCase(),
+  });
+
+  if (error) throw error;
+  if (!data || (data as { valid?: boolean }).valid !== true) {
+    throw new Error(`verify_artist_certificate_by_code invalid for ${verificationCode}`);
   }
 }
