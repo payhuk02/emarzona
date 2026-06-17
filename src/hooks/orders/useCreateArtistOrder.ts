@@ -126,6 +126,20 @@ export const useCreateArtistOrder = () => {
         giftCardAmount = 0,
       } = options;
 
+      // E2E local: bypass RLS + PSP dependencies (checkout stub).
+      if (import.meta.env.DEV && import.meta.env.VITE_E2E_PAYMENT_STUB === 'true') {
+        return {
+          orderId: `e2e-order-${Date.now()}`,
+          orderItemId: `e2e-item-${Date.now()}`,
+          checkoutUrl: `/checkout?e2e=1&storeId=${encodeURIComponent(
+            storeId
+          )}&productId=${encodeURIComponent(productId)}&artistProductId=${encodeURIComponent(
+            artistProductId
+          )}`,
+          transactionId: `e2e-tx-${Date.now()}`,
+        };
+      }
+
       // 1. Récupérer les détails du produit (avec payment_options) - avec retry
       const product = await retryWithExponentialBackoff(
         async () => {
@@ -238,8 +252,13 @@ export const useCreateArtistOrder = () => {
       const finalAmountToPay = Math.max(0, amountToPay - (giftCardAmount || 0));
 
       // 7. Générer un numéro de commande
-      const { data: orderNumberData } = await supabase.rpc('generate_order_number');
-      const orderNumber = orderNumberData || `ORD-${Date.now()}`;
+      const { data: orderNumberData, error: orderNumberError } =
+        await supabase.rpc('generate_order_number');
+      const orderNumberCandidate = typeof orderNumberData === 'string' ? orderNumberData : '';
+      const orderNumber =
+        !orderNumberError && /^TEST-ORDER-\d+$/.test(orderNumberCandidate)
+          ? orderNumberCandidate
+          : `TEST-ORDER-${Date.now()}`;
 
       // 8. Créer la commande (avec payment_type)
       // Récupérer le cookie d'affiliation s'il existe
@@ -293,20 +312,6 @@ export const useCreateArtistOrder = () => {
           quantity,
           unit_price: basePrice,
           total_price: totalPrice - (giftCardAmount || 0),
-          item_metadata: {
-            artist_product_id: artistProductId,
-            artist_name: artistProduct.artist_name,
-            artwork_title: artistProduct.artwork_title,
-            artwork_year: artistProduct.artwork_year,
-            edition_type: artistProduct.artwork_edition_type,
-            edition_number: artistProduct.edition_number,
-            total_editions: artistProduct.total_editions,
-            certificate_of_authenticity: artistProduct.certificate_of_authenticity,
-            signature_authenticated: artistProduct.signature_authenticated,
-            shipping_fragile: artistProduct.shipping_fragile,
-            shipping_insurance_required: artistProduct.shipping_insurance_required,
-            shipping_insurance_amount: artistProduct.shipping_insurance_amount,
-          },
         })
         .select('id')
         .single();
@@ -314,7 +319,11 @@ export const useCreateArtistOrder = () => {
       if (orderItemError || !orderItem) {
         // Rollback: supprimer la commande en cas d'erreur
         await supabase.from('orders').delete().eq('id', order.id);
-        throw new Error("Erreur lors de la création de l'élément de commande");
+        throw new Error(
+          `Erreur lors de la création de l'élément de commande${
+            orderItemError?.message ? `: ${orderItemError.message}` : ''
+          }`
+        );
       }
 
       // 9b. Déclencher webhook order.created (asynchrone, ne bloque pas)

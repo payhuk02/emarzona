@@ -247,6 +247,7 @@ export async function seedPaidArtistFixture(
       currency: 'XOF',
       product_type: 'artist',
       is_active: true,
+      is_draft: false,
     })
     .select('id, slug, name')
     .single();
