@@ -1,0 +1,183 @@
+import { test, expect, type Page } from '@playwright/test';
+import { createClient } from '@supabase/supabase-js';
+
+type StoreCommerceType = 'physical' | 'digital' | 'service' | 'course' | 'artist';
+
+const TYPES: readonly StoreCommerceType[] = ['physical', 'digital', 'service', 'course', 'artist'];
+
+function requiredEnv(name: string): string | null {
+  const v = process.env[name];
+  return v && v.trim().length > 0 ? v : null;
+}
+
+function slugify(input: string): string {
+  return input
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .trim();
+}
+
+function expectSidebarHasLink(page: Page, path: string) {
+  return expect(page.locator(`a[href="${path}"]`)).toHaveCount(1);
+}
+
+function expectSidebarMissingLink(page: Page, path: string) {
+  return expect(page.locator(`a[href="${path}"]`)).toHaveCount(0);
+}
+
+const typeAssertions: Record<
+  StoreCommerceType,
+  {
+    mustHave: string[];
+    mustNotHave: string[];
+    forbiddenDirectPath: string;
+  }
+> = {
+  physical: {
+    mustHave: ['/dashboard/shipping'],
+    mustNotHave: [
+      '/dashboard/digital-products',
+      '/dashboard/bookings',
+      '/dashboard/my-courses',
+      '/dashboard/auctions',
+    ],
+    forbiddenDirectPath: '/dashboard/digital-products',
+  },
+  digital: {
+    mustHave: ['/dashboard/digital-products'],
+    mustNotHave: [
+      '/dashboard/shipping',
+      '/dashboard/bookings',
+      '/dashboard/my-courses',
+      '/dashboard/auctions',
+    ],
+    forbiddenDirectPath: '/dashboard/shipping',
+  },
+  service: {
+    mustHave: ['/dashboard/bookings'],
+    mustNotHave: [
+      '/dashboard/shipping',
+      '/dashboard/digital-products',
+      '/dashboard/my-courses',
+      '/dashboard/auctions',
+    ],
+    forbiddenDirectPath: '/dashboard/digital-products',
+  },
+  course: {
+    mustHave: ['/dashboard/my-courses'],
+    mustNotHave: [
+      '/dashboard/shipping',
+      '/dashboard/digital-products',
+      '/dashboard/bookings',
+      '/dashboard/auctions',
+    ],
+    forbiddenDirectPath: '/dashboard/shipping',
+  },
+  artist: {
+    mustHave: ['/dashboard/auctions', '/dashboard/portfolios'],
+    mustNotHave: [
+      '/dashboard/shipping',
+      '/dashboard/digital-products',
+      '/dashboard/bookings',
+      '/dashboard/my-courses',
+    ],
+    forbiddenDirectPath: '/dashboard/digital-products',
+  },
+};
+
+const supabaseUrl =
+  requiredEnv('VITE_SUPABASE_URL') ??
+  requiredEnv('SUPABASE_URL') ??
+  requiredEnv('NEXT_PUBLIC_SUPABASE_URL');
+const supabaseServiceKey = requiredEnv('SUPABASE_SERVICE_ROLE_KEY');
+
+const canRun = Boolean(supabaseUrl && supabaseServiceKey);
+
+test.describe('Commerce type gating (E2E minimal)', () => {
+  test.beforeAll(() => {
+    test.skip(
+      !canRun,
+      'Requires SUPABASE_SERVICE_ROLE_KEY + VITE_SUPABASE_URL (test Supabase migrated).'
+    );
+  });
+
+  for (const commerceType of TYPES) {
+    test(`create store (${commerceType}) -> sidebar/route gating`, async ({ page }, testInfo) => {
+      const admin = createClient(supabaseUrl!, supabaseServiceKey!, {
+        auth: { persistSession: false, autoRefreshToken: false },
+      });
+
+      const runId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      const email = `e2e-commerce-${commerceType}-${runId}@example.com`;
+      const password = `E2E!${runId}aA1`;
+      const storeName = `E2E ${commerceType} ${runId}`;
+      const storeSlug = slugify(storeName);
+
+      const { data: createdUser, error: userError } = await admin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+      });
+      expect(userError, 'admin.createUser should succeed').toBeNull();
+      expect(createdUser.user?.id, 'created user id').toBeTruthy();
+      const userId = createdUser.user!.id;
+
+      const { data: storeData, error: storeError } = await admin
+        .from('stores')
+        .insert({
+          user_id: userId,
+          name: storeName,
+          slug: storeSlug,
+          description: `E2E store for ${commerceType}`,
+          is_active: true,
+          commerce_type: commerceType,
+          metadata: { commerce_type: commerceType },
+        })
+        .select('id')
+        .single();
+
+      expect(storeError, 'insert store should succeed').toBeNull();
+      const storeId = (storeData as { id: string } | null)?.id;
+      expect(storeId, 'created store id').toBeTruthy();
+
+      // Login via UI
+      await page.goto('/login', { waitUntil: 'domcontentloaded' });
+      await page.fill('input[type="email"]', email);
+      await page.fill('input[type="password"]', password);
+      await page.click('button[type="submit"]');
+      await expect(page).toHaveURL('/dashboard', { timeout: 20_000 });
+
+      // Ensure sidebar loaded
+      await expect(page.locator('.app-sidebar')).toBeVisible();
+
+      const { mustHave, mustNotHave, forbiddenDirectPath } = typeAssertions[commerceType];
+
+      for (const path of mustHave) {
+        await expectSidebarHasLink(page, path);
+      }
+      for (const path of mustNotHave) {
+        await expectSidebarMissingLink(page, path);
+      }
+
+      // Direct URL access should redirect to /dashboard if forbidden
+      await page.goto(forbiddenDirectPath, { waitUntil: 'domcontentloaded' });
+      await expect(page).toHaveURL('/dashboard', { timeout: 20_000 });
+
+      // Cleanup best-effort (do not fail test run on cleanup errors)
+      try {
+        await admin.from('stores').delete().eq('id', storeId!);
+      } catch (e) {
+        testInfo.attach('cleanup-store-error', { body: String(e), contentType: 'text/plain' });
+      }
+      try {
+        await admin.auth.admin.deleteUser(userId);
+      } catch (e) {
+        testInfo.attach('cleanup-user-error', { body: String(e), contentType: 'text/plain' });
+      }
+    });
+  }
+});

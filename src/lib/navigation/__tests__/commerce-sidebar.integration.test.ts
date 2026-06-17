@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { resolveNavItems } from '@/lib/navigation/resolveNavItems';
 import type { StoreCommerceType } from '@/constants/store-commerce-types';
+import expectedPathsByType from './fixtures/commerce-sidebar.paths.json';
 
 const COMMERCE_TYPES: readonly StoreCommerceType[] = [
   'physical',
@@ -22,11 +23,45 @@ function sidebarPathsForType(commerceType: StoreCommerceType): string[] {
 }
 
 describe('commerce sidebar integration', () => {
-  it('matches complete visible sidebar paths snapshot by commerce type', () => {
-    const byType = Object.fromEntries(
+  it('matches complete visible sidebar paths by commerce type', () => {
+    const actual = Object.fromEntries(
       COMMERCE_TYPES.map(type => [type, sidebarPathsForType(type)])
-    );
-    expect(byType).toMatchSnapshot();
+    ) as Record<StoreCommerceType, string[]>;
+
+    const expected = expectedPathsByType as Record<StoreCommerceType, string[]>;
+
+    const diffLines: string[] = [];
+    for (const type of COMMERCE_TYPES) {
+      const actualSet = new Set(actual[type] ?? []);
+      const expectedSet = new Set(expected[type] ?? []);
+      const added = [...actualSet].filter(p => !expectedSet.has(p)).sort();
+      const removed = [...expectedSet].filter(p => !actualSet.has(p)).sort();
+
+      if (added.length === 0 && removed.length === 0) continue;
+
+      diffLines.push(`\n=== ${type} ===`);
+      if (added.length > 0) {
+        diffLines.push('ADDED:');
+        diffLines.push(...added.map(p => `+ ${p}`));
+      }
+      if (removed.length > 0) {
+        diffLines.push('REMOVED:');
+        diffLines.push(...removed.map(p => `- ${p}`));
+      }
+    }
+
+    if (diffLines.length > 0) {
+      throw new Error(
+        [
+          'Sidebar navigation changed per commerce_type.',
+          'Update baseline file: src/lib/navigation/__tests__/fixtures/commerce-sidebar.paths.json',
+          ...diffLines,
+          '',
+        ].join('\n')
+      );
+    }
+
+    expect(actual).toEqual(expected);
   });
 
   it('keeps shared capabilities visible for all commerce types', () => {
