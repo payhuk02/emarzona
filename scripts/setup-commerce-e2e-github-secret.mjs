@@ -1,10 +1,14 @@
 #!/usr/bin/env node
 /**
- * Sync SUPABASE_TEST_SERVICE_ROLE_KEY to GitHub using Supabase Management API (reveal=true).
+ * Sync commerce E2E GitHub secrets from Supabase Management API (reveal=true).
+ *
+ * Sets:
+ *   - SUPABASE_TEST_SERVICE_ROLE_KEY (sb_secret_...)
+ *   - VITE_SUPABASE_TEST_ANON_KEY (sb_publishable_...)
+ *   - VITE_SUPABASE_TEST_URL
  *
  * Prereqs:
- *   - SUPABASE_ACCESS_TOKEN (https://supabase.com/dashboard/account/tokens)
- *     On Windows, auto-read from Supabase CLI credential store when omitted.
+ *   - SUPABASE_ACCESS_TOKEN (or Supabase CLI login on Windows)
  *   - gh CLI authenticated
  *
  * Usage:
@@ -15,8 +19,12 @@ import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const PROJECT_REF = 'hbdnzajbyjakdhuavrvb';
-const SECRET_NAME = 'SUPABASE_TEST_SERVICE_ROLE_KEY';
-const PREFERRED_KEY_NAMES = ['app_service_role', 'supabase_service_role_key', 'default'];
+const PROJECT_URL = `https://${PROJECT_REF}.supabase.co`;
+const SERVICE_ROLE_SECRET = 'SUPABASE_TEST_SERVICE_ROLE_KEY';
+const PUBLISHABLE_SECRET = 'VITE_SUPABASE_TEST_ANON_KEY';
+const URL_SECRET = 'VITE_SUPABASE_TEST_URL';
+const PREFERRED_SERVICE_NAMES = ['app_service_role', 'supabase_service_role_key', 'default'];
+const PREFERRED_PUBLISHABLE_NAMES = ['app_anon', 'default'];
 
 function resolveAccessToken() {
   const fromEnv = process.env.SUPABASE_ACCESS_TOKEN?.trim();
@@ -36,6 +44,29 @@ function resolveAccessToken() {
   }
 
   return null;
+}
+
+function setGhSecret(name, value) {
+  execSync(`gh secret set ${name}`, {
+    input: value,
+    stdio: ['pipe', 'inherit', 'inherit'],
+  });
+}
+
+function pickKey(keys, type, preferredNames) {
+  const filtered = keys.filter(k => k.type === type);
+  for (const name of preferredNames) {
+    const match = filtered.find(k => k.name === name);
+    if (match?.api_key) return match;
+  }
+  return filtered[0] ?? null;
+}
+
+function assertAsciiKey(key, label) {
+  if (!key || key.length < 40 || /[^\x21-\x7E]/.test(key)) {
+    console.error(`${label} looks invalid/truncated. Copy full key from Supabase Dashboard.`);
+    process.exit(1);
+  }
 }
 
 const accessToken = resolveAccessToken();
@@ -63,45 +94,51 @@ if (!response.ok) {
 /** @type {Array<{ name: string; type: string; api_key: string }>} */
 const keys = await response.json();
 
-const secretKeys = keys.filter(k => k.type === 'secret' && k.api_key?.startsWith('sb_secret_'));
+const serviceKeyEntry = pickKey(keys, 'secret', PREFERRED_SERVICE_NAMES);
+const publishableKeyEntry = pickKey(keys, 'publishable', PREFERRED_PUBLISHABLE_NAMES);
 
-let chosen = null;
-for (const preferred of PREFERRED_KEY_NAMES) {
-  chosen = secretKeys.find(k => k.name === preferred);
-  if (chosen) break;
+if (!serviceKeyEntry?.api_key?.startsWith('sb_secret_')) {
+  console.error('No sb_secret_ service role key found.');
+  process.exit(1);
 }
-if (!chosen) chosen = secretKeys[0];
-
-if (!chosen?.api_key) {
-  console.error('No sb_secret_ service role key found. Create one in Supabase Dashboard → API Keys.');
+if (!publishableKeyEntry?.api_key?.startsWith('sb_publishable_')) {
+  console.error('No sb_publishable_ anon key found.');
   process.exit(1);
 }
 
-const key = chosen.api_key;
-if (key.length < 40 || /[^\x21-\x7E]/.test(key)) {
-  console.error('Revealed key looks invalid/truncated. Copy manually from Dashboard → API Keys.');
-  process.exit(1);
-}
+const serviceKey = serviceKeyEntry.api_key;
+const publishableKey = publishableKeyEntry.api_key;
+assertAsciiKey(serviceKey, 'Service role key');
+assertAsciiKey(publishableKey, 'Publishable key');
 
-// Validate against Auth admin API
 const { createClient } = await import('@supabase/supabase-js');
 const ws = (await import('ws')).default;
-const url = `https://${PROJECT_REF}.supabase.co`;
-const admin = createClient(url, key, {
+
+const admin = createClient(PROJECT_URL, serviceKey, {
   auth: { persistSession: false, autoRefreshToken: false },
   realtime: { transport: ws },
 });
-const { error } = await admin.auth.admin.listUsers({ page: 1, perPage: 1 });
-if (error) {
-  console.error(`Key "${chosen.name}" failed auth admin ping: ${error.message}`);
+const { error: adminError } = await admin.auth.admin.listUsers({ page: 1, perPage: 1 });
+if (adminError) {
+  console.error(`Service role key "${serviceKeyEntry.name}" failed: ${adminError.message}`);
   process.exit(1);
 }
 
-console.log(`Validated service role key "${chosen.name}" (${key.slice(0, 16)}...) for ${PROJECT_REF}`);
-
-execSync(`gh secret set ${SECRET_NAME}`, {
-  input: key,
-  stdio: ['pipe', 'inherit', 'inherit'],
+const client = createClient(PROJECT_URL, publishableKey, {
+  auth: { persistSession: false, autoRefreshToken: false },
+  realtime: { transport: ws },
 });
+const { error: restError } = await client.from('stores').select('id').limit(1);
+if (restError && !['PGRST116', '42501'].includes(restError.code ?? '')) {
+  console.error(`Publishable key "${publishableKeyEntry.name}" failed REST ping: ${restError.message}`);
+  process.exit(1);
+}
 
-console.log(`GitHub secret ${SECRET_NAME} updated.`);
+console.log(`Validated service role "${serviceKeyEntry.name}" (${serviceKey.slice(0, 16)}...)`);
+console.log(`Validated publishable "${publishableKeyEntry.name}" (${publishableKey.slice(0, 20)}...)`);
+
+setGhSecret(SERVICE_ROLE_SECRET, serviceKey);
+setGhSecret(PUBLISHABLE_SECRET, publishableKey);
+setGhSecret(URL_SECRET, PROJECT_URL);
+
+console.log(`GitHub secrets updated: ${SERVICE_ROLE_SECRET}, ${PUBLISHABLE_SECRET}, ${URL_SECRET}`);

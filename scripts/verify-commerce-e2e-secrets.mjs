@@ -61,8 +61,8 @@ if (missing.length > 0) {
   console.error('Missing commerce E2E secrets:');
   for (const name of missing) console.error(`  - ${name}`);
   console.error('');
-  console.error('Configure GitHub secret: SUPABASE_TEST_SERVICE_ROLE_KEY');
-  console.error('Optional dedicated test URL/key: VITE_SUPABASE_TEST_URL, VITE_SUPABASE_TEST_ANON_KEY');
+  console.error('Configure GitHub secrets: SUPABASE_TEST_SERVICE_ROLE_KEY, VITE_SUPABASE_TEST_ANON_KEY');
+  console.error('Rotate all: npm run setup:commerce-e2e-secret');
   process.exit(1);
 }
 
@@ -87,6 +87,13 @@ if (formatError) {
 
 if (anonKey.startsWith('eyJ')) {
   console.error('VITE_SUPABASE_ANON_KEY / PUBLISHABLE_KEY is a legacy JWT (eyJ...). Use sb_publishable_...');
+  console.error('Fix: npm run setup:commerce-e2e-secret (sets VITE_SUPABASE_TEST_ANON_KEY)');
+  process.exit(1);
+}
+
+if (!anonKey.startsWith('sb_publishable_')) {
+  console.error(`Unexpected publishable key format (expected sb_publishable_..., got "${anonKey.slice(0, 12)}...").`);
+  console.error('Fix: npm run setup:commerce-e2e-secret');
   process.exit(1);
 }
 
