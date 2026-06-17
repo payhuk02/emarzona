@@ -50,6 +50,7 @@ import {
 } from '@/components/courses/gamification';
 import { CohortsList } from '@/components/courses/cohorts';
 import { AssignmentsList } from '@/components/courses/assignments';
+import { PrerequisitesList } from '@/components/courses/prerequisites';
 import { LiveSessionsList } from '@/components/courses/live';
 import { CourseSchema, minutesToISO8601 } from '@/components/seo/CourseSchema';
 import {
@@ -70,6 +71,7 @@ import { ProductReviewsSummary } from '@/components/reviews';
 import { PaymentOptionsBadge, getPaymentOptions } from '@/components/products/PaymentOptionsBadge';
 import { PricingModelBadge } from '@/components/products/PricingModelBadge';
 import { useCreateCourseOrder } from '@/hooks/orders/useCreateCourseOrder';
+import { logSupabaseRuntimeProbe } from '@/lib/debug/supabase-runtime-probe';
 
 interface CourseDetailProps {
   /** Route /learn/:slug — focalise l'expérience sur le lecteur si inscrit */
@@ -92,6 +94,11 @@ const CourseDetail = ({ learnMode = false }: CourseDetailProps) => {
   const [currentLesson, setCurrentLesson] = useState<CourseLesson | null>(null);
   const [hasTrackedView, setHasTrackedView] = useState(false);
   const [isEnrolling, setIsEnrolling] = useState(false);
+
+  useEffect(() => {
+    if (!isLearnRoute || !slug || !import.meta.env.DEV) return;
+    void logSupabaseRuntimeProbe(location.pathname);
+  }, [isLearnRoute, slug, location.pathname]);
 
   // Hook pour créer commande cours
   const createCourseOrder = useCreateCourseOrder();

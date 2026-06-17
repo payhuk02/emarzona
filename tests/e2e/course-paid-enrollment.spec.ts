@@ -13,6 +13,10 @@ import {
   seedPaidCourseFixture,
 } from './helpers/paid-vertical-seed';
 import { gotoApp, loginAsSeededUser, E2E_TEST_CONFIG } from './shared/e2e-test-config';
+import {
+  attachSupabaseProbeListener,
+  formatSupabaseProbeSummary,
+} from './helpers/capture-supabase-probe';
 
 const supabaseUrl =
   process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -35,11 +39,27 @@ test.describe('Course paid enrollment (E2E)', () => {
     const runId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
     const fixture = await seedPaidCourseFixture(admin, runId);
+    const { getLatestProbe, runProbe } = attachSupabaseProbeListener(page, testInfo);
     try {
       await assertCourseEnrollment(admin, fixture.courseId, fixture.buyer.id);
 
       await loginAsSeededUser(page, admin, fixture.buyer.email);
       await gotoApp(page, `/learn/${fixture.product.slug}`);
+
+      await page.waitForFunction(() => typeof window.__e2eSupabaseProbe === 'function', {
+        timeout: 15_000,
+      });
+      const probe = (await runProbe()) ?? getLatestProbe();
+      const probeSummary = formatSupabaseProbeSummary(probe);
+      console.log('BROWSER_SUPABASE_PROBE', probeSummary, probe);
+      testInfo.annotations.push({ type: 'supabase-probe', description: probeSummary });
+
+      if (!probe) {
+        throw new Error('Supabase browser probe missing (window.__e2eSupabaseProbe)');
+      }
+      if (String(probe.productsSlugQueryError ?? '').includes('Invalid API key')) {
+        throw new Error(`Supabase browser probe: ${probeSummary}`);
+      }
 
       await expect(page).not.toHaveURL(/\/login/);
       await expect(page.getByRole('button', { name: /inscrire|s'inscrire|enroll/i })).toHaveCount(

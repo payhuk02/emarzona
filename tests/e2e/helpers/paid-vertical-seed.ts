@@ -166,6 +166,7 @@ export async function seedPaidCourseFixture(
       currency: 'XOF',
       product_type: 'course',
       is_active: true,
+      is_draft: false,
     })
     .select('id, slug, name')
     .single();

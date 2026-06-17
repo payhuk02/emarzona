@@ -6,10 +6,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-const PRODUCT_FIELDS = 'id, store_id, slug, name, description, product_type, is_active, free_product_id, paid_product_id, image_url, price, currency, created_at, updated_at';
-const COURSE_FIELDS = 'id, product_id, title, subtitle, description, instructor_id, level, language, duration_hours, total_lessons, total_sections, requirements, target_audience, learning_outcomes, created_at, updated_at';
-const COURSE_SECTION_FIELDS = 'id, course_id, title, description, order_index, created_at, updated_at';
-const COURSE_LESSON_FIELDS = 'id, course_id, section_id, title, description, content_type, content_url, duration_minutes, order_index, is_preview, is_published, created_at, updated_at';
+const PRODUCT_FIELDS =
+  'id, store_id, slug, name, description, product_type, is_active, free_product_id, paid_product_id, image_url, price, currency, created_at, updated_at';
+const COURSE_FIELDS =
+  'id, product_id, level, language, certificate_enabled, learning_objectives, prerequisites, target_audience, total_lessons, total_duration_minutes, total_enrollments, average_rating, created_at, updated_at';
+const COURSE_SECTION_FIELDS =
+  'id, course_id, title, description, order_index, created_at, updated_at';
+const COURSE_LESSON_FIELDS =
+  'id, course_id, section_id, title, description, video_type, video_url, video_duration_seconds, order_index, is_preview, created_at, updated_at';
 
 export const useCourseDetail = (slug: string) => {
   return useQuery({
@@ -25,9 +29,9 @@ export const useCourseDetail = (slug: string) => {
         .single();
 
       // Récupérer les produits preview/paid si ils existent
-      let  freeProduct= null;
-      let  paidProduct= null;
-      
+      let freeProduct = null;
+      let paidProduct = null;
+
       if (product?.free_product_id) {
         const { data: freeData } = await supabase
           .from('products')
@@ -36,7 +40,7 @@ export const useCourseDetail = (slug: string) => {
           .single();
         freeProduct = freeData;
       }
-      
+
       if (product?.paid_product_id) {
         const { data: paidData } = await supabase
           .from('products')
@@ -86,7 +90,7 @@ export const useCourseDetail = (slug: string) => {
       // 5. Organiser les leçons par section
       const sectionsWithLessons = sections.map(section => ({
         ...section,
-        lessons: lessons.filter(lesson => lesson.section_id === section.id)
+        lessons: lessons.filter(lesson => lesson.section_id === section.id),
       }));
 
       // 6. Récupérer le store (pour afficher l'instructeur)
@@ -97,11 +101,13 @@ export const useCourseDetail = (slug: string) => {
         .single();
 
       // 7. Vérifier si l'utilisateur est inscrit et récupérer la progression
-      let  isEnrolled= false;
-      let  enrollment= null;
-      let  lastViewedLesson= null;
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      let isEnrolled = false;
+      let enrollment = null;
+      let lastViewedLesson = null;
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       if (user) {
         const { data: enrollmentData } = await supabase
           .from('course_enrollments')
@@ -128,7 +134,9 @@ export const useCourseDetail = (slug: string) => {
           if (progressData) {
             // Trouver la leçon correspondante
             for (const section of sectionsWithLessons) {
-              const lesson = section.lessons.find((l: any) => l.id === progressData.lesson_id);
+              const lesson = section.lessons.find(
+                (l: { id: string }) => l.id === progressData.lesson_id
+              );
               if (lesson) {
                 lastViewedLesson = lesson;
                 break;
@@ -155,10 +163,3 @@ export const useCourseDetail = (slug: string) => {
     enabled: !!slug,
   });
 };
-
-
-
-
-
-
-

@@ -14,14 +14,31 @@ const rawPublishableKey =
   import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || '';
 
 const SUPABASE_PUBLISHABLE_KEY =
-  (rawPublishableKey &&
-    typeof rawPublishableKey === 'string' &&
-    rawPublishableKey.trim().length > 0 &&
-    rawPublishableKey !== 'sb_publishable_votre_cle' &&
-    rawPublishableKey !== 'mock-key') ||
-  import.meta.env.MODE !== 'test'
+  typeof rawPublishableKey === 'string' &&
+  rawPublishableKey.trim().length > 0 &&
+  rawPublishableKey !== 'sb_publishable_votre_cle' &&
+  rawPublishableKey !== 'mock-key'
     ? rawPublishableKey
-    : 'test-supabase-key';
+    : import.meta.env.MODE === 'test'
+      ? 'test-supabase-key'
+      : rawPublishableKey;
+
+/** Diagnostic E2E (masqué) — clé réellement passée à createClient. */
+export const supabaseClientRuntimeMeta = {
+  url: SUPABASE_URL,
+  keyLength: SUPABASE_PUBLISHABLE_KEY.length,
+  keyPrefix:
+    SUPABASE_PUBLISHABLE_KEY.length > 0 ? `${SUPABASE_PUBLISHABLE_KEY.slice(0, 16)}…` : '(empty)',
+  keyKind: SUPABASE_PUBLISHABLE_KEY.startsWith('sb_publishable_')
+    ? 'publishable'
+    : SUPABASE_PUBLISHABLE_KEY === 'mock-key' || SUPABASE_PUBLISHABLE_KEY === 'test-supabase-key'
+      ? 'mock'
+      : SUPABASE_PUBLISHABLE_KEY.startsWith('eyJ')
+        ? 'jwt'
+        : SUPABASE_PUBLISHABLE_KEY.length === 0
+          ? 'empty'
+          : 'other',
+} as const;
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";

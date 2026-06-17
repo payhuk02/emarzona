@@ -99,6 +99,18 @@ export const initiatePayment = async (options: PaymentOptions): Promise<PaymentR
 
   const resolvedOptions = await resolvePaymentContext(options);
 
+  // E2E local: ne dépend pas des secrets PSP / réseau externe.
+  if (import.meta.env.DEV && import.meta.env.VITE_E2E_PAYMENT_STUB === 'true') {
+    const orderId = typeof resolvedOptions.orderId === 'string' ? resolvedOptions.orderId : '';
+    return {
+      success: true,
+      transaction_id: `e2e-${Date.now()}`,
+      checkout_url: `/checkout?e2e=1${orderId ? `&orderId=${encodeURIComponent(orderId)}` : ''}`,
+      provider: 'moneroo',
+      provider_transaction_id: 'e2e-stub',
+    };
+  }
+
   if (isPaymentOrchestrationV2EnabledForStore(resolvedOptions.storeId)) {
     try {
       const orchestrated = await createOrchestratedPayment({
