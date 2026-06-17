@@ -10,7 +10,7 @@ import type { Json } from '@/integrations/supabase/types';
 import { resolveStoreCommerceTypeFromStore } from '@/lib/commerce/store-capability-map';
 
 const STORE_FIELDS =
-  'id, user_id, name, slug, subdomain, description, default_currency, custom_domain, domain_status, domain_verification_token, domain_verified_at, domain_error_message, logo_url, banner_url, info_message, info_message_color, info_message_font, metadata, created_at, updated_at';
+  'id, user_id, name, slug, subdomain, description, default_currency, custom_domain, domain_status, domain_verification_token, domain_verified_at, domain_error_message, logo_url, banner_url, info_message, info_message_color, info_message_font, metadata, commerce_type, created_at, updated_at';
 
 export interface Store {
   id: string;

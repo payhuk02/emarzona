@@ -222,7 +222,7 @@ export const useStores = () => {
       const { data, error } = await supabase
         .from('stores')
         .select(
-          'id, user_id, name, slug, subdomain, description, logo_url, banner_url, is_active, created_at, updated_at, custom_domain, domain_status, metadata'
+          'id, user_id, name, slug, subdomain, description, logo_url, banner_url, is_active, created_at, updated_at, custom_domain, domain_status, metadata, commerce_type'
         )
         .eq('user_id', user.id)
         .order('created_at', { ascending: true });

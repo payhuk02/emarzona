@@ -22,11 +22,15 @@ function slugify(input: string): string {
 }
 
 function expectSidebarHasLink(page: Page, path: string) {
-  return expect(page.locator(`a[href="${path}"]`)).toHaveCount(1);
+  return expect(page.locator(`.app-sidebar a[href="${path}"]`)).toHaveCount(1, {
+    timeout: 15_000,
+  });
 }
 
 function expectSidebarMissingLink(page: Page, path: string) {
-  return expect(page.locator(`a[href="${path}"]`)).toHaveCount(0);
+  return expect(page.locator(`.app-sidebar a[href="${path}"]`)).toHaveCount(0, {
+    timeout: 5_000,
+  });
 }
 
 const typeAssertions: Record<
@@ -152,7 +156,7 @@ test.describe('Commerce type gating (E2E minimal)', () => {
       await page.click('button[type="submit"]');
       await expect(page).toHaveURL('/dashboard', { timeout: 20_000 });
 
-      // Ensure sidebar loaded
+      // Ensure sidebar loaded (commerce_type from StoreContext drives nav filtering)
       await expect(page.locator('.app-sidebar')).toBeVisible();
 
       const { mustHave, mustNotHave, forbiddenDirectPath } = typeAssertions[commerceType];

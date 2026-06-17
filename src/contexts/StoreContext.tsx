@@ -10,6 +10,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './AuthContext';
 import { logger } from '@/lib/logger';
+import { resolveStoreCommerceTypeFromStore } from '@/lib/commerce/store-capability-map';
 
 // Import des types depuis useStores pour éviter la duplication
 import type { Store as StoreType } from '@/hooks/useStores';
@@ -137,7 +138,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
 
       const { data, error: fetchError } = await supabase
         .from('stores')
-        .select('id,name,slug,created_at,updated_at')
+        .select('id,name,slug,created_at,updated_at,metadata,commerce_type')
         .eq('user_id', user.id)
         .order('created_at', { ascending: true });
 
@@ -145,7 +146,12 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
         throw fetchError;
       }
 
-      const storesData = (data || []) as Store[];
+      const storesData = (data || []).map(row => ({
+        ...row,
+        commerce_type: resolveStoreCommerceTypeFromStore(
+          row as { commerce_type?: unknown; metadata?: Record<string, unknown> | null }
+        ),
+      })) as Store[];
       setStores(storesData);
 
       // Si aucune boutique n'est sélectionnée, essayer de récupérer depuis localStorage
