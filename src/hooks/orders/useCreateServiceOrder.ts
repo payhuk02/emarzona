@@ -114,6 +114,9 @@ export interface CreateServiceOrderOptions {
 
   /** Montant de la carte cadeau à utiliser (optionnel) */
   giftCardAmount?: number;
+
+  /** `cart` = réserve le créneau sans paiement immédiat (panier mixte) */
+  checkoutMode?: 'immediate' | 'cart';
 }
 
 /**
@@ -201,6 +204,7 @@ export const useCreateServiceOrder = () => {
         notes,
         giftCardId,
         giftCardAmount = 0,
+        checkoutMode = 'immediate',
       } = options;
 
       // 1. Récupérer les détails du produit (avec payment_options)
@@ -547,6 +551,16 @@ export const useCreateServiceOrder = () => {
         throw new Error('Erreur lors de la création de la réservation');
       }
 
+      if (checkoutMode === 'cart') {
+        return {
+          orderId: '',
+          orderItemId: '',
+          bookingId: booking.id,
+          checkoutUrl: '',
+          transactionId: '',
+        };
+      }
+
       // Déclencher webhook service.booking_created (asynchrone, ne bloque pas)
       import('@/lib/webhooks').then(({ triggerServiceBookingCreatedWebhook }) => {
         triggerServiceBookingCreatedWebhook(
@@ -814,6 +828,9 @@ export const useCreateServiceOrder = () => {
     },
 
     onSuccess: data => {
+      if (data.bookingId && !data.orderId) {
+        return;
+      }
       toast({
         title: '✅ Réservation créée',
         description: 'Créneau réservé. Redirection vers le paiement...',

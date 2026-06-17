@@ -16,6 +16,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
+import { assertCanAddServiceToCart } from '@/lib/cart/service-cart-policy';
 import type { User } from '@supabase/supabase-js';
 import type { CartItem, CartSummary, AddToCartOptions, UpdateCartItemOptions } from '@/types/cart';
 import type { Database, Json } from '@/integrations/supabase/types';
@@ -126,6 +127,10 @@ export function useCart() {
 
       if (productError || !product) {
         throw new Error('Produit non trouvé');
+      }
+
+      if (options.product_type === 'service') {
+        assertCanAddServiceToCart(options.metadata);
       }
 
       // Prix final (promotional ou normal)

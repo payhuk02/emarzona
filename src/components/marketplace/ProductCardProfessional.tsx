@@ -154,6 +154,8 @@ const ProductCardProfessionalComponent = ({
   };
 
   const handleAddToCart = async () => {
+    if (!cta.showAddToCart) return;
+
     if (!product.store_id) {
       toast({
         title: 'Erreur',
@@ -575,15 +577,17 @@ const ProductCardProfessionalComponent = ({
               </Link>
             </Button>
 
-            <Button
-              onClick={handleAddToCart}
-              size="sm"
-              variant="outline"
-              className="product-action-button min-h-[44px] h-11 px-3 text-sm border-purple-300 dark:border-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:border-purple-400 dark:hover:border-purple-500 transition-all duration-200 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50"
-              aria-label={`Ajouter ${product.name} au panier`}
-            >
-              <ShoppingBag className="h-4 w-4" aria-hidden="true" />
-            </Button>
+            {cta.showAddToCart ? (
+              <Button
+                onClick={handleAddToCart}
+                size="sm"
+                variant="outline"
+                className="product-action-button min-h-[44px] h-11 px-3 text-sm border-purple-300 dark:border-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:border-purple-400 dark:hover:border-purple-500 transition-all duration-200 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50"
+                aria-label={`Ajouter ${product.name} au panier`}
+              >
+                <ShoppingBag className="h-4 w-4" aria-hidden="true" />
+              </Button>
+            ) : null}
           </div>
 
           <Button

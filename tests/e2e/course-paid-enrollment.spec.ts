@@ -1,0 +1,99 @@
+/**
+ * E2E — Cours payant : commande paid → auto-enrollment → accès /learn/:slug
+ *
+ * Prérequis CI : SUPABASE_SERVICE_ROLE_KEY + VITE_SUPABASE_URL (test Supabase migré)
+ * npx playwright test tests/e2e/course-paid-enrollment.spec.ts
+ */
+
+import { test, expect } from '@playwright/test';
+import { createNodeSupabaseClient } from './helpers/create-node-supabase-client';
+import {
+  assertCourseEnrollment,
+  cleanupPaidFixture,
+  seedPaidCourseFixture,
+} from './helpers/paid-vertical-seed';
+import { gotoApp, loginAs } from './shared/e2e-test-config';
+
+const supabaseUrl =
+  process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const canRun = Boolean(supabaseUrl && supabaseServiceKey);
+
+test.describe('Course paid enrollment (E2E)', () => {
+  test.setTimeout(120_000);
+
+  test.beforeAll(() => {
+    if (canRun) return;
+    const message =
+      'Requires SUPABASE_SERVICE_ROLE_KEY + VITE_SUPABASE_URL (test Supabase migrated).';
+    if (process.env.CI) throw new Error(message);
+    test.skip(true, message);
+  });
+
+  test('paid order enrolls buyer and unlocks learn route', async ({ page }, testInfo) => {
+    const admin = createNodeSupabaseClient(supabaseUrl!, supabaseServiceKey!);
+    const runId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+    const fixture = await seedPaidCourseFixture(admin, runId);
+    try {
+      await assertCourseEnrollment(admin, fixture.courseId, fixture.buyer.id);
+
+      await loginAs(page, fixture.buyer.email, fixture.buyer.password);
+      await gotoApp(page, `/learn/${fixture.product.slug}`);
+
+      await expect(page).not.toHaveURL(/\/login/);
+      await expect(page.getByRole('button', { name: /inscrire|s'inscrire|enroll/i })).toHaveCount(
+        0
+      );
+      await expect(
+        page.locator('text=/progression|section|chapitre|leçon|programme/i').or(page.locator('h1'))
+      ).toBeVisible({ timeout: 20_000 });
+    } finally {
+      try {
+        await cleanupPaidFixture(admin, fixture);
+      } catch (e) {
+        testInfo.attach('cleanup-error', { body: String(e), contentType: 'text/plain' });
+      }
+    }
+  });
+
+  test('logged-in buyer reaches checkout from course detail', async ({ page }, testInfo) => {
+    const admin = createNodeSupabaseClient(supabaseUrl!, supabaseServiceKey!);
+    const runId = `${Date.now()}-cta-${Math.random().toString(16).slice(2)}`;
+
+    const fixture = await seedPaidCourseFixture(admin, runId);
+    try {
+      const unpaidBuyer = await (async () => {
+        const email = `e2e-course-cta-${runId}@example.com`;
+        const password = `E2E!${runId}cC1`;
+        const { data, error } = await admin.auth.admin.createUser({
+          email,
+          password,
+          email_confirm: true,
+        });
+        if (error || !data.user?.id) throw error ?? new Error('buyer create failed');
+        return { email, password, id: data.user.id };
+      })();
+
+      await loginAs(page, unpaidBuyer.email, unpaidBuyer.password);
+      await gotoApp(page, `/courses/${fixture.product.slug}`);
+
+      const enrollButton = page.getByRole('button', {
+        name: /inscrire|acheter|s'inscrire|enroll/i,
+      });
+      await expect(enrollButton.first()).toBeVisible({ timeout: 15_000 });
+      await enrollButton.first().click();
+
+      await page.waitForURL(/\/(checkout|moneroo)/, { timeout: 30_000 });
+      expect(page.url()).toMatch(/\/checkout|moneroo/);
+
+      await admin.auth.admin.deleteUser(unpaidBuyer.id);
+    } finally {
+      try {
+        await cleanupPaidFixture(admin, fixture);
+      } catch (e) {
+        testInfo.attach('cleanup-error', { body: String(e), contentType: 'text/plain' });
+      }
+    }
+  });
+});

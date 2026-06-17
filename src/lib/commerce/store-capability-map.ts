@@ -1,5 +1,8 @@
 import type { StoreCommerceType } from '@/constants/store-commerce-types';
-import { parseStoreCommerceType } from '@/lib/billing/store-commerce-access';
+import {
+  parseStoreCommerceType,
+  PHYSICAL_ONLY_SELLER_PATHS,
+} from '@/lib/billing/store-commerce-access';
 
 type RouteRule = {
   allowedTypes: readonly StoreCommerceType[];
@@ -57,21 +60,7 @@ const ROUTE_CAPABILITY_RULES: readonly RouteRule[] = [
   {
     label: 'Modules Produits Physiques',
     allowedTypes: ['physical'],
-    pathPrefixes: [
-      '/dashboard/shipping',
-      '/dashboard/shipping-services',
-      '/dashboard/contact-shipping-service',
-      '/dashboard/batch-shipping',
-      '/dashboard/suppliers',
-      '/dashboard/warehouses',
-      '/dashboard/physical',
-      '/dashboard/inventory',
-      '/dashboard/product-kits',
-      '/dashboard/demand-forecasting',
-      '/dashboard/cost-optimization',
-      '/shipping',
-      '/inventory',
-    ],
+    pathPrefixes: [...PHYSICAL_ONLY_SELLER_PATHS, '/shipping', '/inventory'],
   },
   {
     label: 'Modules Produits Digitaux',

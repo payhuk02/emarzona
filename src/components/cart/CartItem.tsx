@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { LazyImage } from '@/components/ui/lazy-image';
 import { Trash2, Plus, Minus } from '@/components/icons';
 import type { CartItem as CartItemType } from '@/types/cart';
+import { formatServiceCartSlotLabel } from '@/lib/cart/service-cart-policy';
 
 interface CartItemProps {
   item: CartItemType;
@@ -27,11 +28,19 @@ const CartItemComponent = ({ item, onUpdateQuantity, onRemove, isLoading }: Cart
     onUpdateQuantity(item.id!, newQuantity);
   };
 
-  const itemTotal = ((item.unit_price - (item.discount_amount || 0)) * item.quantity).toLocaleString('fr-FR');
+  const itemTotal = (
+    (item.unit_price - (item.discount_amount || 0)) *
+    item.quantity
+  ).toLocaleString('fr-FR');
   const hasDiscount = (item.discount_amount || 0) > 0;
+  const serviceSlotLabel =
+    item.product_type === 'service' ? formatServiceCartSlotLabel(item.metadata) : null;
 
   return (
-    <article className="flex flex-col sm:flex-row gap-3 sm:gap-4 p-3 sm:p-4 border rounded-lg hover:bg-muted/50 transition-colors" aria-labelledby={`cart-item-${item.id}-name`}>
+    <article
+      className="flex flex-col sm:flex-row gap-3 sm:gap-4 p-3 sm:p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+      aria-labelledby={`cart-item-${item.id}-name`}
+    >
       {/* Image */}
       <div className="relative w-full sm:w-24 h-48 sm:h-24 rounded-lg overflow-hidden flex-shrink-0 border">
         <LazyImage
@@ -43,17 +52,32 @@ const CartItemComponent = ({ item, onUpdateQuantity, onRemove, isLoading }: Cart
 
       {/* Infos produit */}
       <div className="flex-1 min-w-0">
-        <h3 id={`cart-item-${item.id}-name`} className="font-semibold text-base sm:text-lg mb-1 truncate">{item.product_name}</h3>
-        
+        <h3
+          id={`cart-item-${item.id}-name`}
+          className="font-semibold text-base sm:text-lg mb-1 truncate"
+        >
+          {item.product_name}
+        </h3>
+
         {item.variant_name && (
           <p className="text-xs sm:text-sm text-muted-foreground mb-2">
             Variant: {item.variant_name}
           </p>
         )}
 
+        {serviceSlotLabel && (
+          <p className="text-xs sm:text-sm text-muted-foreground mb-2">
+            Créneau réservé : {serviceSlotLabel}
+          </p>
+        )}
+
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mt-2">
           {/* Quantité */}
-          <div className="flex items-center gap-2" role="group" aria-label={`Quantité pour ${item.product_name}`}>
+          <div
+            className="flex items-center gap-2"
+            role="group"
+            aria-label={`Quantité pour ${item.product_name}`}
+          >
             <Button
               variant="outline"
               size="icon"
@@ -68,7 +92,7 @@ const CartItemComponent = ({ item, onUpdateQuantity, onRemove, isLoading }: Cart
               type="number"
               min="1"
               value={item.quantity}
-              onChange={(e) => {
+              onChange={e => {
                 const newQty = parseInt(e.target.value) || 1;
                 handleQuantityChange(newQty);
               }}
@@ -100,7 +124,8 @@ const CartItemComponent = ({ item, onUpdateQuantity, onRemove, isLoading }: Cart
             </p>
             {hasDiscount && (
               <p className="text-xs text-green-600">
-                Économie: {((item.discount_amount || 0) * item.quantity).toLocaleString('fr-FR')} {item.currency}
+                Économie: {((item.discount_amount || 0) * item.quantity).toLocaleString('fr-FR')}{' '}
+                {item.currency}
               </p>
             )}
           </div>
@@ -136,10 +161,3 @@ export const CartItem = React.memo(CartItemComponent, (prevProps, nextProps) => 
 });
 
 CartItem.displayName = 'CartItem';
-
-
-
-
-
-
-

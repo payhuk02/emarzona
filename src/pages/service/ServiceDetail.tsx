@@ -38,6 +38,7 @@ import {
   CheckCircle2,
   Shield,
   TrendingUp,
+  ShoppingBag,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
@@ -51,6 +52,8 @@ import { StaffCard } from '@/components/shared';
 import { ProductImages } from '@/components/shared';
 import type { StaffMember } from '@/hooks/service/useAvailability';
 import { useCreateServiceOrder } from '@/hooks/orders/useCreateServiceOrder';
+import { useCart } from '@/hooks/cart/useCart';
+import { buildServiceCartMetadata } from '@/lib/cart/service-cart-policy';
 import {
   useValidateServiceBooking,
   useQuickAvailabilityCheck,
@@ -97,6 +100,7 @@ export default function ServiceDetail() {
   const { toast } = useToast();
   const { user } = useAuth();
   const createServiceOrder = useCreateServiceOrder();
+  const { addItem } = useCart();
   // Type pour le créneau horaire sélectionné
   interface TimeSlot {
     time: string;
@@ -327,7 +331,7 @@ export default function ServiceDetail() {
     return () => clearTimeout(timeoutId);
   }, [selectedDate, selectedSlot, participants, service?.service, serviceId, validateBooking]);
 
-  const handleBooking = async () => {
+  const handleBooking = async (mode: 'pay' | 'cart' = 'pay') => {
     if (!selectedDate || !selectedSlot) {
       toast({
         title: '⚠️ Sélection incomplète',
@@ -431,12 +435,35 @@ export default function ServiceDetail() {
         numberOfParticipants: participants,
         durationMinutes: service.service.duration_minutes,
         notes: `Réservation via ServiceDetail - ${selectedDate.toLocaleDateString('fr-FR')}`,
+        checkoutMode: mode === 'cart' ? 'cart' : 'immediate',
       });
 
       logger.info('Réservation créée avec succès', {
         bookingId: result.bookingId,
         transactionId: result.transactionId,
+        mode,
       });
+
+      if (mode === 'cart') {
+        await addItem.mutateAsync({
+          product_id: serviceId!,
+          product_type: 'service',
+          quantity: 1,
+          metadata: buildServiceCartMetadata({
+            storeId,
+            bookingId: result.bookingId,
+            serviceProductId: service.service.id,
+            scheduledAt: bookingDateTime,
+            numberOfParticipants: participants,
+          }),
+        });
+        toast({
+          title: '✅ Service ajouté au panier',
+          description: 'Vous pouvez ajouter d’autres produits de la même boutique avant de payer.',
+        });
+        navigate('/cart');
+        return;
+      }
 
       // Rediriger vers Moneroo pour le paiement
       if (result.checkoutUrl) {
@@ -457,8 +484,8 @@ export default function ServiceDetail() {
         navigate('/account/bookings');
       }
     } catch (_error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error('Erreur lors de la réservation', error);
+      const errorMessage = _error instanceof Error ? _error.message : String(_error);
+      logger.error('Erreur lors de la réservation', _error);
       toast({
         title: '❌ Erreur de réservation',
         description: errorMessage || 'Une erreur est survenue lors de la réservation',
@@ -1036,7 +1063,7 @@ export default function ServiceDetail() {
 
               {/* Book Button */}
               <Button
-                onClick={handleBooking}
+                onClick={() => void handleBooking('pay')}
                 className="w-full"
                 size="lg"
                 disabled={
@@ -1051,8 +1078,21 @@ export default function ServiceDetail() {
                 ) : !selectedDate || !selectedSlot ? (
                   'Sélectionnez une date et un créneau'
                 ) : (
-                  'Réserver maintenant'
+                  'Payer maintenant'
                 )}
+              </Button>
+
+              <Button
+                variant="outline"
+                onClick={() => void handleBooking('cart')}
+                className="w-full"
+                size="lg"
+                disabled={
+                  !selectedDate || !selectedSlot || isBooking || isValidating || !!validationError
+                }
+              >
+                <ShoppingBag className="h-4 w-4 mr-2" />
+                Ajouter au panier
               </Button>
 
               <Separator />

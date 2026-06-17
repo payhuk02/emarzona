@@ -32,6 +32,12 @@ describe('store-capability-map', () => {
     expect(canAccessCommercePath('/settings/notifications', 'artist')).toBe(true);
   });
 
+  it('gates physical-only logistics routes', () => {
+    expect(canAccessCommercePath('/dashboard/physical-lots', 'physical')).toBe(true);
+    expect(canAccessCommercePath('/dashboard/physical-lots', 'digital')).toBe(false);
+    expect(canAccessCommercePath('/dashboard/billing/physical', 'service')).toBe(false);
+  });
+
   it('enforces strict type routing by commerce type', () => {
     expect(canAccessCommercePath('/dashboard/digital-products', 'digital')).toBe(true);
     expect(canAccessCommercePath('/dashboard/digital-products', 'service')).toBe(false);

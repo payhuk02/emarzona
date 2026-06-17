@@ -53,3 +53,8 @@ jobs:
         env:
           CI: true
 
+      - name: Run production truth tests
+        run: npm run test:production-truth
+        env:
+          CI: true
+
