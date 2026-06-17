@@ -36083,6 +36083,7 @@ export type Database = {
           cache_enabled: boolean | null;
           cdn_enabled: boolean | null;
           city: string | null;
+          commerce_type: string;
           contact_email: string | null;
           contact_phone: string | null;
           country: string | null;
@@ -36208,6 +36209,7 @@ export type Database = {
           cache_enabled?: boolean | null;
           cdn_enabled?: boolean | null;
           city?: string | null;
+          commerce_type?: string;
           contact_email?: string | null;
           contact_phone?: string | null;
           country?: string | null;
@@ -36333,6 +36335,7 @@ export type Database = {
           cache_enabled?: boolean | null;
           cdn_enabled?: boolean | null;
           city?: string | null;
+          commerce_type?: string;
           contact_email?: string | null;
           contact_phone?: string | null;
           country?: string | null;
@@ -44156,6 +44159,7 @@ export type Database = {
           button_secondary_color?: string | null;
           button_secondary_text?: string | null;
           city?: string | null;
+          commerce_type?: string;
           contact_email?: string | null;
           contact_phone?: string | null;
           country?: string | null;
@@ -44251,6 +44255,7 @@ export type Database = {
           button_secondary_color?: string | null;
           button_secondary_text?: string | null;
           city?: string | null;
+          commerce_type?: string;
           contact_email?: string | null;
           contact_phone?: string | null;
           country?: string | null;

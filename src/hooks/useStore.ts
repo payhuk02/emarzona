@@ -12,6 +12,16 @@ import { resolveStoreCommerceTypeFromStore } from '@/lib/commerce/store-capabili
 const STORE_FIELDS =
   'id, user_id, name, slug, subdomain, description, default_currency, custom_domain, domain_status, domain_verification_token, domain_verified_at, domain_error_message, logo_url, banner_url, info_message, info_message_color, info_message_font, metadata, commerce_type, created_at, updated_at';
 
+function mapStoreRow(row: Record<string, unknown> | null | undefined): Store | null {
+  if (!row) return null;
+  return {
+    ...row,
+    commerce_type: resolveStoreCommerceTypeFromStore(
+      row as { commerce_type?: unknown; metadata?: Record<string, unknown> | null }
+    ),
+  } as Store;
+}
+
 export interface Store {
   id: string;
   user_id: string;
@@ -139,15 +149,7 @@ export const useStore = () => {
           setStore(null);
         } else {
           logger.info('✅ [useStore] Boutique récupérée:', data.id);
-          setStore({
-            ...data,
-            commerce_type: resolveStoreCommerceTypeFromStore(
-              data as {
-                commerce_type?: unknown;
-                metadata?: Record<string, unknown> | null;
-              }
-            ),
-          });
+          setStore(mapStoreRow(data));
           hydratedStoreIdRef.current = data.id;
         }
       } else {
@@ -223,7 +225,7 @@ export const useStore = () => {
 
       if (error) throw error;
 
-      setStore(data && data.length > 0 ? data[0] : null);
+      setStore(mapStoreRow(data?.[0] ?? null));
       toast({
         title: 'Boutique créée !',
         description: `Votre boutique "${name}" est maintenant en ligne.`,
@@ -304,7 +306,10 @@ export const useStore = () => {
 
       if (error) throw error;
 
-      setStore(data && data.length > 0 ? data[0] : store);
+      const updated = data?.[0];
+      setStore(
+        updated ? (mapStoreRow(updated as unknown as Record<string, unknown>) ?? store) : store
+      );
       toast({
         title: 'Boutique mise à jour',
         description: 'Les modifications ont été enregistrées.',
@@ -365,15 +370,7 @@ export const useStore = () => {
           setStore(null);
         } else if (data && data.length > 0) {
           logger.info('✅ [useStore] Boutique trouvée automatiquement:', data[0].id);
-          setStore({
-            ...data[0],
-            commerce_type: resolveStoreCommerceTypeFromStore(
-              data[0] as {
-                commerce_type?: unknown;
-                metadata?: Record<string, unknown> | null;
-              }
-            ),
-          });
+          setStore(mapStoreRow(data[0]));
           hydratedStoreIdRef.current = data[0].id;
           // Mettre à jour le contexte via setSelectedStoreId (évite la désynchronisation)
           try {
