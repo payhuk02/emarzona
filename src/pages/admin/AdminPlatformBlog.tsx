@@ -33,6 +33,7 @@ import {
   Plus,
   RefreshCw,
   Save,
+  Sparkles,
   Trash2,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -52,6 +53,7 @@ import {
   slugifyBlog,
 } from '@/lib/platform/platformBlogUtils';
 import { PlatformBlogImageField } from '@/components/admin/platform/PlatformBlogImageField';
+import { BlogAIGeneratorDialog } from '@/components/admin/platform/BlogAIGeneratorDialog';
 
 const STATUS_OPTIONS: { value: BlogPostStatus; label: string }[] = [
   { value: 'draft', label: 'Brouillon' },
@@ -131,6 +133,7 @@ export default function AdminPlatformBlog() {
   const [enContent, setEnContent] = useState('');
   const [statusFilter, setStatusFilter] = useState<BlogPostStatus | 'all'>('all');
   const [search, setSearch] = useState('');
+  const [aiDialogOpen, setAiDialogOpen] = useState(false);
 
   const filteredPosts = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -172,6 +175,30 @@ export default function AdminPlatformBlog() {
   const closeEditor = () => {
     setEditingId(null);
     setDraft(emptyPost());
+  };
+
+  const handleAiGenerated = ({
+    draft: aiDraft,
+    postId,
+    en,
+    tagsText: aiTags,
+  }: {
+    draft: BlogPostInput;
+    postId: string | null;
+    en: { title: string; excerpt: string; content: string };
+    tagsText: string;
+  }) => {
+    if (postId) {
+      setEditingId(postId);
+    } else {
+      setEditingId('new');
+    }
+    setDraft(aiDraft);
+    setTagsText(aiTags);
+    setEnTitle(en.title);
+    setEnExcerpt(en.excerpt);
+    setEnContent(en.content);
+    void refetch();
   };
 
   useEffect(() => {
@@ -253,6 +280,10 @@ export default function AdminPlatformBlog() {
               Retour à la liste
             </Button>
             <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={() => setAiDialogOpen(true)}>
+                <Sparkles className="h-4 w-4 mr-1" />
+                IA
+              </Button>
               {draft.slug && draft.status === 'published' ? (
                 <Button variant="outline" size="sm" asChild>
                   <Link to={`${PLATFORM_BLOG_ROUTE}/${draft.slug}`} target="_blank">
@@ -565,6 +596,14 @@ export default function AdminPlatformBlog() {
             </TabsContent>
           </Tabs>
         </div>
+
+        <BlogAIGeneratorDialog
+          open={aiDialogOpen}
+          onOpenChange={setAiDialogOpen}
+          categories={categories}
+          onGenerated={handleAiGenerated}
+          onSaved={() => void refetch()}
+        />
       </AdminLayout>
     );
   }
@@ -590,6 +629,10 @@ export default function AdminPlatformBlog() {
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
               <RefreshCw className={isFetching ? 'h-4 w-4 animate-spin' : 'h-4 w-4'} />
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setAiDialogOpen(true)}>
+              <Sparkles className="h-4 w-4 mr-1" />
+              Générer avec IA
             </Button>
             <Button size="sm" onClick={openNew}>
               <Plus className="h-4 w-4 mr-1" />
@@ -705,6 +748,14 @@ export default function AdminPlatformBlog() {
           </div>
         )}
       </div>
+
+      <BlogAIGeneratorDialog
+        open={aiDialogOpen}
+        onOpenChange={setAiDialogOpen}
+        categories={categories}
+        onGenerated={handleAiGenerated}
+        onSaved={() => void refetch()}
+      />
     </AdminLayout>
   );
 }

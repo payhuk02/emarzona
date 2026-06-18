@@ -38,8 +38,10 @@ import {
   Activity,
   Loader2,
   Library,
+  Newspaper,
 } from 'lucide-react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
+import { PlatformAiApiKeysPanel } from '@/components/admin/PlatformAiApiKeysPanel';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
@@ -87,6 +89,26 @@ export interface AIManagementSettings {
     sourceTypes: Array<'blog' | 'faq' | 'product'>;
     locale: string;
   };
+  blogGenerator: {
+    enabled: boolean;
+    provider: 'lovable' | 'openai' | 'anthropic' | 'google' | 'custom';
+    textModel: string;
+    imageModel: string;
+    systemPrompt: string;
+    articlePromptTemplate: string;
+    imagePromptTemplate: string;
+    temperature: number;
+    maxTokens: number;
+    minWords: number;
+    defaultTone: string;
+    defaultLanguage: string;
+    generateEnTranslation: boolean;
+    generateFeaturedImage: boolean;
+    autoSaveDraft: boolean;
+    authorName: string;
+    authorBio: string;
+    allowCommentsDefault: boolean;
+  };
 }
 
 const DEFAULTS: AIManagementSettings = {
@@ -124,6 +146,29 @@ const DEFAULTS: AIManagementSettings = {
     matchThreshold: 0.55,
     sourceTypes: ['blog', 'faq', 'product'],
     locale: 'fr',
+  },
+  blogGenerator: {
+    enabled: true,
+    provider: 'lovable',
+    textModel: 'google/gemini-3.1-pro-preview',
+    imageModel: 'google/gemini-3.1-flash-image-preview',
+    systemPrompt:
+      'Tu es le rédacteur en chef du blog Emarzona, plateforme e-commerce multi-boutiques. Tu rédiges des articles premium en HTML sémantique, experts et orientés conversion.',
+    articlePromptTemplate:
+      'Rédige un article premium pour Emarzona.\nSujet : {{topic}}\nBrief : {{brief}}\nTon : {{tone}}\nLangue : {{language}}\nMots-clés : {{keywords}}\nMinimum {{minWords}} mots.',
+    imagePromptTemplate:
+      'Premium editorial blog hero image for e-commerce SaaS article: {{title}}. Modern, professional, no text overlay, 16:9.',
+    temperature: 0.75,
+    maxTokens: 8000,
+    minWords: 1200,
+    defaultTone: 'premium',
+    defaultLanguage: 'fr',
+    generateEnTranslation: true,
+    generateFeaturedImage: true,
+    autoSaveDraft: true,
+    authorName: 'Emarzona',
+    authorBio: 'Conseils e-commerce et produit pour la communauté Emarzona.',
+    allowCommentsDefault: true,
   },
 };
 
@@ -247,6 +292,10 @@ const AIManagementPage: React.FC = () => {
               sourceTypes: partial.rag?.sourceTypes?.length
                 ? partial.rag.sourceTypes
                 : DEFAULTS.rag.sourceTypes,
+            },
+            blogGenerator: {
+              ...DEFAULTS.blogGenerator,
+              ...partial.blogGenerator,
             },
           });
         }
@@ -410,6 +459,14 @@ const AIManagementPage: React.FC = () => {
         model: settings.rag.embeddingModel,
         color: 'text-amber-500',
       },
+      {
+        key: 'blogGenerator',
+        icon: Newspaper,
+        label: 'Blog IA',
+        enabled: settings.blogGenerator.enabled,
+        model: settings.blogGenerator.textModel,
+        color: 'text-violet-500',
+      },
     ],
     [settings]
   );
@@ -471,10 +528,11 @@ const AIManagementPage: React.FC = () => {
         )}
 
         <Tabs defaultValue="overview" className="space-y-4">
-          <TabsList className="grid grid-cols-3 lg:grid-cols-7 gap-1 h-auto">
+          <TabsList className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-1 h-auto">
             <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
             <TabsTrigger value="chatbot">Chatbot</TabsTrigger>
             <TabsTrigger value="content">Contenu</TabsTrigger>
+            <TabsTrigger value="blog">Blog IA</TabsTrigger>
             <TabsTrigger value="image">Image</TabsTrigger>
             <TabsTrigger value="rag">RAG</TabsTrigger>
             <TabsTrigger value="recommendations">Reco.</TabsTrigger>
@@ -814,6 +872,183 @@ const AIManagementPage: React.FC = () => {
             </Card>
           </TabsContent>
 
+          {/* Blog IA generator */}
+          <TabsContent value="blog" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Newspaper className="h-5 w-5" /> Générateur d&apos;articles blog
+                </CardTitle>
+                <CardDescription>
+                  Rédaction premium avec contexte RAG (blog, FAQ, produits), SEO optimisé, image
+                  hero et sauvegarde en brouillon. Configurable depuis Admin &gt; Blog plateforme.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-5">
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <Label className="font-medium">Générateur blog activé</Label>
+                  <Switch
+                    checked={settings.blogGenerator.enabled}
+                    onCheckedChange={v => update('blogGenerator', { enabled: v })}
+                  />
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Modèle texte</Label>
+                    <ModelSelect
+                      value={settings.blogGenerator.textModel}
+                      onChange={v => update('blogGenerator', { textModel: v })}
+                      options={TEXT_MODELS}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Modèle image</Label>
+                    <ModelSelect
+                      value={settings.blogGenerator.imageModel}
+                      onChange={v => update('blogGenerator', { imageModel: v })}
+                      options={IMAGE_MODELS}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Prompt système (rédacteur en chef)</Label>
+                  <Textarea
+                    rows={4}
+                    value={settings.blogGenerator.systemPrompt}
+                    onChange={e => update('blogGenerator', { systemPrompt: e.target.value })}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>
+                    Template prompt article ({'{{topic}}'}, {'{{brief}}'}, etc.)
+                  </Label>
+                  <Textarea
+                    rows={5}
+                    value={settings.blogGenerator.articlePromptTemplate}
+                    onChange={e =>
+                      update('blogGenerator', { articlePromptTemplate: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>
+                    Template prompt image ({'{{title}}'}, {'{{topic}}'})
+                  </Label>
+                  <Textarea
+                    rows={3}
+                    value={settings.blogGenerator.imagePromptTemplate}
+                    onChange={e => update('blogGenerator', { imagePromptTemplate: e.target.value })}
+                  />
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <NumberSlider
+                    label="Température"
+                    value={settings.blogGenerator.temperature}
+                    onChange={v => update('blogGenerator', { temperature: v })}
+                    min={0}
+                    max={1.5}
+                    step={0.05}
+                  />
+                  <NumberSlider
+                    label="Max tokens"
+                    value={settings.blogGenerator.maxTokens}
+                    onChange={v => update('blogGenerator', { maxTokens: v })}
+                    min={2000}
+                    max={16000}
+                    step={500}
+                  />
+                </div>
+
+                <NumberSlider
+                  label="Longueur minimale (mots)"
+                  value={settings.blogGenerator.minWords}
+                  onChange={v => update('blogGenerator', { minWords: v })}
+                  min={600}
+                  max={3000}
+                  step={100}
+                />
+
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Ton par défaut</Label>
+                    <Select
+                      value={settings.blogGenerator.defaultTone}
+                      onValueChange={v => update('blogGenerator', { defaultTone: v })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="premium">Premium</SelectItem>
+                        <SelectItem value="expert">Expert</SelectItem>
+                        <SelectItem value="friendly">Accessible</SelectItem>
+                        <SelectItem value="educational">Pédagogique</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Auteur par défaut</Label>
+                    <Input
+                      value={settings.blogGenerator.authorName}
+                      onChange={e => update('blogGenerator', { authorName: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Bio auteur par défaut</Label>
+                  <Textarea
+                    rows={2}
+                    value={settings.blogGenerator.authorBio}
+                    onChange={e => update('blogGenerator', { authorBio: e.target.value })}
+                  />
+                </div>
+
+                <div className="flex flex-wrap gap-6">
+                  <label className="flex items-center gap-2 text-sm">
+                    <Switch
+                      checked={settings.blogGenerator.generateEnTranslation}
+                      onCheckedChange={v => update('blogGenerator', { generateEnTranslation: v })}
+                    />
+                    Traduction EN automatique
+                  </label>
+                  <label className="flex items-center gap-2 text-sm">
+                    <Switch
+                      checked={settings.blogGenerator.generateFeaturedImage}
+                      onCheckedChange={v => update('blogGenerator', { generateFeaturedImage: v })}
+                    />
+                    Image hero premium
+                  </label>
+                  <label className="flex items-center gap-2 text-sm">
+                    <Switch
+                      checked={settings.blogGenerator.autoSaveDraft}
+                      onCheckedChange={v => update('blogGenerator', { autoSaveDraft: v })}
+                    />
+                    Sauvegarde brouillon auto
+                  </label>
+                  <label className="flex items-center gap-2 text-sm">
+                    <Switch
+                      checked={settings.blogGenerator.allowCommentsDefault}
+                      onCheckedChange={v => update('blogGenerator', { allowCommentsDefault: v })}
+                    />
+                    Commentaires activés
+                  </label>
+                </div>
+
+                <Button asChild variant="outline">
+                  <Link to="/admin/platform-blog">
+                    Ouvrir Admin Blog <ExternalLink className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           {/* RAG profond */}
           <TabsContent value="rag" className="space-y-4">
             <Card>
@@ -954,29 +1189,7 @@ const AIManagementPage: React.FC = () => {
                 <CardDescription>Gestion centralisée des accès aux services IA.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-emerald-500/10">
-                      <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-                    </div>
-                    <div>
-                      <p className="font-medium">Lovable AI Gateway</p>
-                      <p className="text-xs text-muted-foreground">
-                        LOVABLE_API_KEY (managée par Lovable Cloud)
-                      </p>
-                    </div>
-                  </div>
-                  <Badge>Configurée</Badge>
-                </div>
-
-                <Alert>
-                  <KeyRound className="h-4 w-4" />
-                  <AlertTitle>Modèles disponibles</AlertTitle>
-                  <AlertDescription>
-                    Lovable AI Gateway donne accès à Google Gemini (2.5, 3.x) et OpenAI GPT-5.x sans
-                    clé séparée. Aucune clé OpenAI ou Anthropic personnelle n'est requise.
-                  </AlertDescription>
-                </Alert>
+                <PlatformAiApiKeysPanel />
 
                 <Alert variant="destructive">
                   <AlertTriangle className="h-4 w-4" />
