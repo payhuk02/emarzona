@@ -13,7 +13,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AppPageShell } from '@/components/layout/AppPageShell';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { useMemo } from 'react';
 import { useCart } from '@/hooks/cart/useCart';
+import { validateCheckoutCart } from '@/lib/checkout/cart-validation';
+import { summarizeCartProductTypes } from '@/lib/cart/cart-product-type';
 import { CartItem } from '@/components/cart/CartItem';
 import { CartSummary } from '@/components/cart/CartSummary';
 import { CartEmpty } from '@/components/cart/CartEmpty';
@@ -24,6 +29,8 @@ import { usePageCustomization } from '@/hooks/usePageCustomization';
 export default function Cart() {
   const { getValue } = usePageCustomization('cart');
   const { items, summary, isLoading, updateItem, removeItem, clearCart, isEmpty } = useCart();
+  const checkoutValidation = useMemo(() => validateCheckoutCart(items), [items]);
+  const typeSummary = useMemo(() => summarizeCartProductTypes(items), [items]);
 
   const handleUpdateQuantity = async (itemId: string, quantity: number) => {
     try {
@@ -112,6 +119,33 @@ export default function Cart() {
             </Button>
           )}
         </header>
+
+        {typeSummary.length > 1 && (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm text-muted-foreground">Panier multi-type :</span>
+            {typeSummary.map(entry => (
+              <Badge key={entry.type} variant="outline">
+                {entry.count} {entry.label}
+                {entry.count > 1 ? 's' : ''}
+              </Badge>
+            ))}
+          </div>
+        )}
+
+        {checkoutValidation.hasMixedWithService && checkoutValidation.canCheckout && (
+          <Alert>
+            <AlertDescription>
+              Panier mixte : votre réservation de service sera payée avec les autres articles de la
+              même boutique.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {!checkoutValidation.canCheckout && checkoutValidation.message && (
+          <Alert variant="destructive">
+            <AlertDescription>{checkoutValidation.message}</AlertDescription>
+          </Alert>
+        )}
 
         {/* Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

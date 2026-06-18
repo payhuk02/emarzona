@@ -7,10 +7,12 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import { LazyImage } from '@/components/ui/lazy-image';
 import { Trash2, Plus, Minus } from '@/components/icons';
 import type { CartItem as CartItemType } from '@/types/cart';
 import { formatServiceCartSlotLabel } from '@/lib/cart/service-cart-policy';
+import { getCartProductTypeLabel } from '@/lib/cart/cart-product-type';
 
 interface CartItemProps {
   item: CartItemType;
@@ -35,6 +37,8 @@ const CartItemComponent = ({ item, onUpdateQuantity, onRemove, isLoading }: Cart
   const hasDiscount = (item.discount_amount || 0) > 0;
   const serviceSlotLabel =
     item.product_type === 'service' ? formatServiceCartSlotLabel(item.metadata) : null;
+  const isServiceItem = item.product_type === 'service';
+  const typeLabel = getCartProductTypeLabel(item.product_type);
 
   return (
     <article
@@ -52,12 +56,17 @@ const CartItemComponent = ({ item, onUpdateQuantity, onRemove, isLoading }: Cart
 
       {/* Infos produit */}
       <div className="flex-1 min-w-0">
-        <h3
-          id={`cart-item-${item.id}-name`}
-          className="font-semibold text-base sm:text-lg mb-1 truncate"
-        >
-          {item.product_name}
-        </h3>
+        <div className="flex flex-wrap items-center gap-2 mb-1">
+          <h3
+            id={`cart-item-${item.id}-name`}
+            className="font-semibold text-base sm:text-lg truncate"
+          >
+            {item.product_name}
+          </h3>
+          <Badge variant="secondary" className="text-[10px] uppercase tracking-wide">
+            {typeLabel}
+          </Badge>
+        </div>
 
         {item.variant_name && (
           <p className="text-xs sm:text-sm text-muted-foreground mb-2">
@@ -72,45 +81,49 @@ const CartItemComponent = ({ item, onUpdateQuantity, onRemove, isLoading }: Cart
         )}
 
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mt-2">
-          {/* Quantité */}
-          <div
-            className="flex items-center gap-2"
-            role="group"
-            aria-label={`Quantité pour ${item.product_name}`}
-          >
-            <Button
-              variant="outline"
-              size="icon"
-              className="min-h-[44px] min-w-[44px] h-11 w-11"
-              onClick={() => handleQuantityChange(item.quantity - 1)}
-              disabled={isLoading}
-              aria-label={`Diminuer la quantité de ${item.product_name}`}
+          {/* Quantité (fixe pour les services réservés) */}
+          {isServiceItem ? (
+            <p className="text-xs text-muted-foreground">Quantité : 1 (créneau réservé)</p>
+          ) : (
+            <div
+              className="flex items-center gap-2"
+              role="group"
+              aria-label={`Quantité pour ${item.product_name}`}
             >
-              <Minus className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
-            </Button>
-            <Input
-              type="number"
-              min="1"
-              value={item.quantity}
-              onChange={e => {
-                const newQty = parseInt(e.target.value) || 1;
-                handleQuantityChange(newQty);
-              }}
-              className="w-20 sm:w-16 text-center min-h-[44px] h-11"
-              disabled={isLoading}
-              aria-label={`Quantité de ${item.product_name}`}
-            />
-            <Button
-              variant="outline"
-              size="icon"
-              className="min-h-[44px] min-w-[44px] h-11 w-11"
-              onClick={() => handleQuantityChange(item.quantity + 1)}
-              disabled={isLoading}
-              aria-label={`Augmenter la quantité de ${item.product_name}`}
-            >
-              <Plus className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
-            </Button>
-          </div>
+              <Button
+                variant="outline"
+                size="icon"
+                className="min-h-[44px] min-w-[44px] h-11 w-11"
+                onClick={() => handleQuantityChange(item.quantity - 1)}
+                disabled={isLoading}
+                aria-label={`Diminuer la quantité de ${item.product_name}`}
+              >
+                <Minus className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
+              </Button>
+              <Input
+                type="number"
+                min="1"
+                value={item.quantity}
+                onChange={e => {
+                  const newQty = parseInt(e.target.value) || 1;
+                  handleQuantityChange(newQty);
+                }}
+                className="w-20 sm:w-16 text-center min-h-[44px] h-11"
+                disabled={isLoading}
+                aria-label={`Quantité de ${item.product_name}`}
+              />
+              <Button
+                variant="outline"
+                size="icon"
+                className="min-h-[44px] min-w-[44px] h-11 w-11"
+                onClick={() => handleQuantityChange(item.quantity + 1)}
+                disabled={isLoading}
+                aria-label={`Augmenter la quantité de ${item.product_name}`}
+              >
+                <Plus className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
+              </Button>
+            </div>
+          )}
 
           {/* Prix */}
           <div className="flex-1 text-left sm:text-right">

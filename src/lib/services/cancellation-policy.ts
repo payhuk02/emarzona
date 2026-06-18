@@ -8,79 +8,19 @@
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { refundPayment } from '@/lib/payments/refund-payment';
+import type {
+  RefundCalculation,
+  RefundRule,
+  ServiceCancellationPolicy,
+  ServiceCancellationRefund,
+} from '@/types/service-cancellation';
 
-// =====================================================
-// TYPES
-// =====================================================
-
-export interface RefundRule {
-  hours_before: number;
-  refund_percentage: number;
-  description?: string;
-}
-
-export interface ServiceCancellationPolicy {
-  id: string;
-  product_id: string;
-  store_id: string;
-  policy_name: string;
-  refund_rules: RefundRule[];
-  allow_same_day_cancellation: boolean;
-  same_day_refund_percentage: number;
-  allow_emergency_cancellation: boolean;
-  emergency_refund_percentage: number;
-  emergency_reasons: string[];
-  cancellation_fee_enabled: boolean;
-  cancellation_fee_amount: number;
-  cancellation_fee_percentage: number;
-  allow_store_credit: boolean;
-  store_credit_bonus_percentage: number;
-  refund_processing_days: number;
-  auto_refund_enabled: boolean;
-  auto_refund_minimum_hours: number;
-  is_active: boolean;
-  is_default: boolean;
-  metadata?: Record<string, unknown>;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface RefundCalculation {
-  refund_percentage: number;
-  refund_amount: number;
-  cancellation_fee: number;
-  net_refund_amount: number;
-  hours_before_service: number;
-  applicable_rule: RefundRule | null;
-}
-
-export interface ServiceCancellationRefund {
-  id: string;
-  booking_id: string;
-  policy_id?: string;
-  original_amount: number;
-  refund_percentage: number;
-  refund_amount: number;
-  cancellation_fee: number;
-  net_refund_amount: number;
-  refund_method: 'original_payment' | 'store_credit' | 'bank_transfer' | 'check';
-  hours_before_service: number;
-  cancellation_reason?: string;
-  is_emergency: boolean;
-  emergency_reason?: string;
-  original_order_id?: string;
-  original_payment_id?: string;
-  refund_transaction_id?: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled';
-  requested_at: string;
-  processed_at?: string;
-  completed_at?: string;
-  admin_notes?: string;
-  customer_notes?: string;
-  metadata?: Record<string, unknown>;
-  created_at: string;
-  updated_at: string;
-}
+export type {
+  RefundCalculation,
+  RefundRule,
+  ServiceCancellationPolicy,
+  ServiceCancellationRefund,
+} from '@/types/service-cancellation';
 
 const SERVICE_CANCELLATION_POLICY_FIELDS =
   'id,product_id,store_id,policy_name,refund_rules,allow_same_day_cancellation,same_day_refund_percentage,allow_emergency_cancellation,emergency_refund_percentage,emergency_reasons,cancellation_fee_enabled,cancellation_fee_amount,cancellation_fee_percentage,allow_store_credit,store_credit_bonus_percentage,refund_processing_days,auto_refund_enabled,auto_refund_minimum_hours,is_active,is_default,metadata,created_at,updated_at';

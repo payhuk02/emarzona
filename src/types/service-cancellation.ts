@@ -3,16 +3,27 @@
  * Utilisés par cancellation-policy et useCancellationPolicy.
  */
 
+export interface RefundRule {
+  hours_before: number;
+  refund_percentage: number;
+  description?: string;
+}
+
+export interface RefundCalculation {
+  refund_percentage: number;
+  refund_amount: number;
+  cancellation_fee: number;
+  net_refund_amount: number;
+  hours_before_service: number;
+  applicable_rule: RefundRule | null;
+}
+
 export interface ServiceCancellationPolicyRow {
   id: string;
   product_id: string;
   store_id: string;
   policy_name: string;
-  refund_rules: Array<{
-    hours_before: number;
-    refund_percentage: number;
-    description?: string;
-  }>;
+  refund_rules: RefundRule[];
   allow_same_day_cancellation: boolean;
   same_day_refund_percentage: number;
   allow_emergency_cancellation: boolean;
@@ -60,3 +71,7 @@ export interface ServiceCancellationRefundRow {
   created_at?: string;
   updated_at?: string;
 }
+
+/** Alias pour compatibilité avec cancellation-policy / hooks. */
+export type ServiceCancellationPolicy = ServiceCancellationPolicyRow;
+export type ServiceCancellationRefund = ServiceCancellationRefundRow;

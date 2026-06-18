@@ -1,14 +1,16 @@
 /**
  * useBookings Hook
- * 
- * CRUD and availability management for service bookings
+ *
+ * @deprecated Schéma obsolète (table `bookings` / `service_id`).
+ * Utiliser `src/hooks/service/useBookings.ts` et `service_bookings`.
  * Date: 29 Octobre 2025
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-const BOOKING_FIELDS = 'id, service_id, customer_id, scheduled_date, duration, status, customer_notes, internal_notes, amount_paid, payment_method, created_at, updated_at';
+const BOOKING_FIELDS =
+  'id, service_id, customer_id, scheduled_date, duration, status, customer_notes, internal_notes, amount_paid, payment_method, created_at, updated_at';
 
 /**
  * Booking interface
@@ -19,7 +21,15 @@ export interface Booking {
   customer_id: string;
   scheduled_date: Date | string;
   duration: number;
-  status: 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled' | 'no_show' | 'rescheduled' | 'refunded';
+  status:
+    | 'pending'
+    | 'confirmed'
+    | 'in_progress'
+    | 'completed'
+    | 'cancelled'
+    | 'no_show'
+    | 'rescheduled'
+    | 'refunded';
   customer_notes?: string;
   internal_notes?: string;
   amount_paid?: number;
@@ -115,7 +125,7 @@ export const useCreateBooking = () => {
         .neq('status', 'cancelled');
 
       if (conflicts && conflicts.length > 0) {
-        throw new Error('Ce créneau n\'est plus disponible');
+        throw new Error("Ce créneau n'est plus disponible");
       }
 
       const { data, error } = await supabase
@@ -127,7 +137,7 @@ export const useCreateBooking = () => {
       if (error) throw error;
       return data as Booking;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['bookings', 'service', data.service_id] });
       queryClient.invalidateQueries({ queryKey: ['bookings', 'customer', data.customer_id] });
     },
@@ -141,13 +151,7 @@ export const useUpdateBooking = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      id,
-      updates,
-    }: {
-      id: string;
-      updates: Partial<Booking>;
-    }) => {
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Booking> }) => {
       const { data, error } = await supabase
         .from('bookings')
         .update(updates)
@@ -158,7 +162,7 @@ export const useUpdateBooking = () => {
       if (error) throw error;
       return data as Booking;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['booking', data.id] });
       queryClient.invalidateQueries({ queryKey: ['bookings', 'service', data.service_id] });
       queryClient.invalidateQueries({ queryKey: ['bookings', 'customer', data.customer_id] });
@@ -173,14 +177,8 @@ export const useCancelBooking = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      id,
-      reason,
-    }: {
-      id: string;
-      reason?: string;
-    }) => {
-      const { data, error} = await supabase
+    mutationFn: async ({ id, reason }: { id: string; reason?: string }) => {
+      const { data, error } = await supabase
         .from('bookings')
         .update({
           status: 'cancelled',
@@ -194,7 +192,7 @@ export const useCancelBooking = () => {
       if (error) throw error;
       return data as Booking;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['booking', data.id] });
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
     },
@@ -228,16 +226,16 @@ export const useCheckAvailability = () => {
       if (error) throw error;
 
       // Generate all possible slots (every 30 minutes)
-      const  slots: AvailabilitySlot[] = [];
+      const slots: AvailabilitySlot[] = [];
       const start = new Date(startDate);
       const end = new Date(endDate);
 
-      for (let  time= new Date(start); time < end; time.setMinutes(time.getMinutes() + 30)) {
+      for (let time = new Date(start); time < end; time.setMinutes(time.getMinutes() + 30)) {
         const slotStart = new Date(time);
         const slotEnd = new Date(time.getTime() + duration * 60000);
 
         // Check if this slot conflicts with any booking
-        const hasConflict = bookings?.some((booking) => {
+        const hasConflict = bookings?.some(booking => {
           const bookingStart = new Date(booking.scheduled_date);
           const bookingEnd = new Date(bookingStart.getTime() + booking.duration * 60000);
 
@@ -253,7 +251,7 @@ export const useCheckAvailability = () => {
           end: slotEnd,
           isAvailable: !hasConflict,
           bookingId: hasConflict
-            ? bookings?.find((b) => {
+            ? bookings?.find(b => {
                 const bookingStart = new Date(b.scheduled_date);
                 return slotStart >= bookingStart;
               })?.id
@@ -267,10 +265,3 @@ export const useCheckAvailability = () => {
 };
 
 export default useServiceBookings;
-
-
-
-
-
-
-

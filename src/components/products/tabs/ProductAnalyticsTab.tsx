@@ -1,15 +1,15 @@
-import { useState, useCallback } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  BarChart3, 
+import { useState, useCallback } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  BarChart3,
   Settings,
   Activity,
   Target,
@@ -22,20 +22,29 @@ import {
   DollarSign,
   Users,
   TrendingUp,
-  Clock
-} from "lucide-react";
-import { cn } from "@/lib/utils";
-import { useToast } from "@/hooks/use-toast";
-import { useProductAnalytics, useAnalyticsTracking, useAnalyticsHistory } from "@/hooks/useProductAnalytics";
-import { AnalyticsChart, TrafficSourceChart, RealtimeMetrics } from "@/components/analytics/AnalyticsCharts";
-import { ReportsSection } from "@/components/analytics/ReportsSection";
+  Clock,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
+import {
+  useProductAnalytics,
+  useAnalyticsTracking,
+  useAnalyticsHistory,
+  useProductTrafficSources,
+} from '@/hooks/useProductAnalytics';
+import {
+  AnalyticsChart,
+  TrafficSourceChart,
+  RealtimeMetrics,
+} from '@/components/analytics/AnalyticsCharts';
+import { ReportsSection } from '@/components/analytics/ReportsSection';
 
 /**
  * Interface stricte pour les données du formulaire produit (Analytics)
  */
 interface ProductFormData {
   id?: string;
-  
+
   // Analytics configuration
   tracking_enabled?: boolean;
   track_views?: boolean;
@@ -45,7 +54,7 @@ interface ProductFormData {
   track_errors?: boolean;
   advanced_tracking?: boolean;
   custom_events?: string[];
-  
+
   // External analytics
   google_analytics_id?: string;
   facebook_pixel_id?: string;
@@ -53,7 +62,7 @@ interface ProductFormData {
   tiktok_pixel_id?: string;
   pinterest_pixel_id?: string;
   linkedin_insight_tag?: string;
-  
+
   // Goals
   goal_views?: number | null;
   goal_revenue?: number | null;
@@ -64,16 +73,13 @@ interface ProductFormData {
 
 interface ProductAnalyticsTabProps {
   formData: ProductFormData;
-  updateFormData: <K extends keyof ProductFormData>(
-    field: K,
-    value: ProductFormData[K]
-  ) => void;
+  updateFormData: <K extends keyof ProductFormData>(field: K, value: ProductFormData[K]) => void;
 }
 
 export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyticsTabProps) => {
   const { toast } = useToast();
-  const [selectedPeriod, setSelectedPeriod] = useState<"7d" | "30d" | "90d">("7d");
-  const [selectedChart, setSelectedChart] = useState<"line" | "area" | "bar">("line");
+  const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '30d' | '90d'>('7d');
+  const [selectedChart, setSelectedChart] = useState<'line' | 'area' | 'bar'>('line');
 
   // Utiliser les hooks d'analytics réels
   const {
@@ -83,13 +89,18 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
     isRealTimeActive,
     setIsRealTimeActive,
     updateAnalytics,
-    changePercentages
+    changePercentages,
   } = useProductAnalytics(formData.id);
 
   const { trackView, trackClick, trackConversion, trackCustomEvent } = useAnalyticsTracking();
-  
-  const { dailyData, loading: historyLoading } = useAnalyticsHistory(formData.id, 
-    selectedPeriod === "7d" ? 7 : selectedPeriod === "30d" ? 30 : 90
+
+  const periodDays = selectedPeriod === '7d' ? 7 : selectedPeriod === '30d' ? 30 : 90;
+
+  const { dailyData, loading: historyLoading } = useAnalyticsHistory(formData.id, periodDays);
+
+  const { data: trafficSourceData = [], isLoading: trafficLoading } = useProductTrafficSources(
+    formData.id,
+    periodDays
   );
 
   /**
@@ -98,29 +109,24 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
   const toggleRealTime = useCallback(() => {
     setIsRealTimeActive(!isRealTimeActive);
     toast({
-      title: isRealTimeActive ? "Temps réel désactivé" : "Temps réel activé",
-      description: isRealTimeActive 
-        ? "Les données ne sont plus mises à jour en temps réel." 
-        : "Les données sont maintenant mises à jour en temps réel.",
+      title: isRealTimeActive ? 'Temps réel désactivé' : 'Temps réel activé',
+      description: isRealTimeActive
+        ? 'Les données ne sont plus mises à jour en temps réel.'
+        : 'Les données sont maintenant mises à jour en temps réel.',
     });
   }, [isRealTimeActive, setIsRealTimeActive, toast]);
 
   /**
    * Statistiques calculées à partir des analytics
    */
-  const trafficSourceData = [
-    { name: "Recherche organique", value: 45, color: "#3b82f6" },
-    { name: "Réseaux sociaux", value: 30, color: "#10b981" },
-    { name: "Direct", value: 15, color: "#8b5cf6" },
-    { name: "Référencement", value: 10, color: "#f59e0b" }
-  ];
-
-  const secondaryMetrics = analytics ? {
-    revenue: analytics.total_revenue,
-    bounceRate: analytics.bounce_rate,
-    avgSessionDuration: analytics.avg_session_duration,
-    returningVisitors: analytics.returning_visitors
-  } : null;
+  const secondaryMetrics = analytics
+    ? {
+        revenue: analytics.total_revenue,
+        bounceRate: analytics.bounce_rate,
+        avgSessionDuration: analytics.avg_session_duration,
+        returningVisitors: analytics.returning_visitors,
+      }
+    : null;
 
   return (
     <TooltipProvider>
@@ -134,7 +140,9 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                   <BarChart3 className="h-6 w-6 text-blue-400" />
                 </div>
                 <div>
-                  <CardTitle className="text-xl font-semibold text-white">Analytics & Tracking</CardTitle>
+                  <CardTitle className="text-xl font-semibold text-white">
+                    Analytics & Tracking
+                  </CardTitle>
                   <CardDescription className="text-gray-400">
                     Surveillez les performances de votre produit en temps réel
                   </CardDescription>
@@ -142,12 +150,14 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
               </div>
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2">
-                  <div className={cn(
-                    "w-3 h-3 rounded-full",
-                    isRealTimeActive ? "bg-green-500 animate-pulse" : "bg-gray-500"
-                  )} />
+                  <div
+                    className={cn(
+                      'w-3 h-3 rounded-full',
+                      isRealTimeActive ? 'bg-green-500 animate-pulse' : 'bg-gray-500'
+                    )}
+                  />
                   <span className="text-sm text-gray-400">
-                    {isRealTimeActive ? "Temps réel" : "Statique"}
+                    {isRealTimeActive ? 'Temps réel' : 'Statique'}
                   </span>
                 </div>
                 <Button
@@ -155,7 +165,9 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                   size="sm"
                   onClick={toggleRealTime}
                   className="bg-gray-700/50 border-gray-600 text-white hover:bg-gray-700 hover:text-white min-h-[44px]"
-                  aria-label={isRealTimeActive ? "Désactiver le temps réel" : "Activer le temps réel"}
+                  aria-label={
+                    isRealTimeActive ? 'Désactiver le temps réel' : 'Activer le temps réel'
+                  }
                 >
                   {isRealTimeActive ? (
                     <>
@@ -212,7 +224,9 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-gray-400">Revenus</p>
-                    <p className="text-lg font-semibold text-white">{secondaryMetrics.revenue.toLocaleString()} XOF</p>
+                    <p className="text-lg font-semibold text-white">
+                      {secondaryMetrics.revenue.toLocaleString()} XOF
+                    </p>
                   </div>
                   <DollarSign className="h-5 w-5 text-green-400" aria-hidden="true" />
                 </div>
@@ -224,7 +238,9 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-gray-400">Taux de rebond</p>
-                    <p className="text-lg font-semibold text-white">{secondaryMetrics.bounceRate.toFixed(1)}%</p>
+                    <p className="text-lg font-semibold text-white">
+                      {secondaryMetrics.bounceRate.toFixed(1)}%
+                    </p>
                   </div>
                   <TrendingUp className="h-5 w-5 text-red-400" aria-hidden="true" />
                 </div>
@@ -237,7 +253,8 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                   <div>
                     <p className="text-sm text-gray-400">Durée moyenne</p>
                     <p className="text-lg font-semibold text-white">
-                      {Math.floor(secondaryMetrics.avgSessionDuration / 60)}m {secondaryMetrics.avgSessionDuration % 60}s
+                      {Math.floor(secondaryMetrics.avgSessionDuration / 60)}m{' '}
+                      {secondaryMetrics.avgSessionDuration % 60}s
                     </p>
                   </div>
                   <Clock className="h-5 w-5 text-blue-400" aria-hidden="true" />
@@ -250,7 +267,9 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-gray-400">Visiteurs récurrents</p>
-                    <p className="text-lg font-semibold text-white">{secondaryMetrics.returningVisitors}</p>
+                    <p className="text-lg font-semibold text-white">
+                      {secondaryMetrics.returningVisitors}
+                    </p>
                   </div>
                   <Users className="h-5 w-5 text-purple-400" aria-hidden="true" />
                 </div>
@@ -268,10 +287,16 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
             <TabsTrigger value="tracking" className="data-[state=active]:bg-gray-700 text-white">
               Tracking
             </TabsTrigger>
-            <TabsTrigger value="integrations" className="data-[state=active]:bg-gray-700 text-white hidden sm:block">
+            <TabsTrigger
+              value="integrations"
+              className="data-[state=active]:bg-gray-700 text-white hidden sm:block"
+            >
               Intégrations
             </TabsTrigger>
-            <TabsTrigger value="goals" className="data-[state=active]:bg-gray-700 text-white hidden sm:block">
+            <TabsTrigger
+              value="goals"
+              className="data-[state=active]:bg-gray-700 text-white hidden sm:block"
+            >
               Objectifs
             </TabsTrigger>
             <TabsTrigger value="reports" className="data-[state=active]:bg-gray-700 text-white">
@@ -297,7 +322,7 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
               {/* Répartition des sources */}
               <TrafficSourceChart
                 data={trafficSourceData}
-                loading={analyticsLoading}
+                loading={trafficLoading || analyticsLoading}
               />
             </div>
           </TabsContent>
@@ -311,7 +336,9 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                     <Settings className="h-5 w-5 text-yellow-400" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg font-semibold text-white">Configuration du tracking</CardTitle>
+                    <CardTitle className="text-lg font-semibold text-white">
+                      Configuration du tracking
+                    </CardTitle>
                     <CardDescription className="text-gray-400">
                       Surveillez les interactions des utilisateurs avec votre produit
                     </CardDescription>
@@ -323,7 +350,10 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                   <div className="flex items-center justify-between p-4 bg-gray-700/30 rounded-lg border border-gray-600">
                     <div className="space-y-1 flex-1">
                       <div className="flex items-center gap-2">
-                        <Label htmlFor="tracking_enabled" className="text-sm font-medium text-white">
+                        <Label
+                          htmlFor="tracking_enabled"
+                          className="text-sm font-medium text-white"
+                        >
                           Tracking des événements
                         </Label>
                         <Tooltip>
@@ -335,12 +365,14 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                           </TooltipContent>
                         </Tooltip>
                       </div>
-                      <p className="text-xs text-gray-400">Enregistrer les événements personnalisés</p>
+                      <p className="text-xs text-gray-400">
+                        Enregistrer les événements personnalisés
+                      </p>
                     </div>
                     <Switch
                       id="tracking_enabled"
                       checked={analytics?.tracking_enabled || false}
-                      onCheckedChange={(checked) => updateAnalytics({ tracking_enabled: checked })}
+                      onCheckedChange={checked => updateAnalytics({ tracking_enabled: checked })}
                       aria-label="Activer le tracking des événements"
                       className="touch-manipulation"
                     />
@@ -356,7 +388,7 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                     <Switch
                       id="track_views"
                       checked={analytics?.track_views || false}
-                      onCheckedChange={(checked) => updateAnalytics({ track_views: checked })}
+                      onCheckedChange={checked => updateAnalytics({ track_views: checked })}
                       aria-label="Activer le tracking des vues"
                       className="touch-manipulation"
                     />
@@ -367,12 +399,14 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                       <Label htmlFor="track_clicks" className="text-sm font-medium text-white">
                         Tracking des clics
                       </Label>
-                      <p className="text-xs text-gray-400">Enregistrer les clics sur les boutons et liens</p>
+                      <p className="text-xs text-gray-400">
+                        Enregistrer les clics sur les boutons et liens
+                      </p>
                     </div>
                     <Switch
                       id="track_clicks"
                       checked={analytics?.track_clicks || false}
-                      onCheckedChange={(checked) => updateAnalytics({ track_clicks: checked })}
+                      onCheckedChange={checked => updateAnalytics({ track_clicks: checked })}
                       aria-label="Activer le tracking des clics"
                       className="touch-manipulation"
                     />
@@ -383,12 +417,14 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                       <Label htmlFor="track_conversions" className="text-sm font-medium text-white">
                         Tracking des achats
                       </Label>
-                      <p className="text-xs text-gray-400">Enregistrer les conversions et revenus</p>
+                      <p className="text-xs text-gray-400">
+                        Enregistrer les conversions et revenus
+                      </p>
                     </div>
                     <Switch
                       id="track_conversions"
                       checked={analytics?.track_conversions || false}
-                      onCheckedChange={(checked) => updateAnalytics({ track_conversions: checked })}
+                      onCheckedChange={checked => updateAnalytics({ track_conversions: checked })}
                       aria-label="Activer le tracking des conversions"
                       className="touch-manipulation"
                     />
@@ -404,7 +440,7 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                     <Switch
                       id="track_time_spent"
                       checked={analytics?.track_time_spent || false}
-                      onCheckedChange={(checked) => updateAnalytics({ track_time_spent: checked })}
+                      onCheckedChange={checked => updateAnalytics({ track_time_spent: checked })}
                       aria-label="Activer le tracking du temps passé"
                       className="touch-manipulation"
                     />
@@ -420,7 +456,7 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                     <Switch
                       id="track_errors"
                       checked={analytics?.track_errors || false}
-                      onCheckedChange={(checked) => updateAnalytics({ track_errors: checked })}
+                      onCheckedChange={checked => updateAnalytics({ track_errors: checked })}
                       aria-label="Activer le tracking des erreurs"
                       className="touch-manipulation"
                     />
@@ -429,23 +465,25 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
 
                 {/* Tracking avancé */}
                 <Separator className="bg-gray-700" />
-                
+
                 <div className="flex items-center justify-between p-4 bg-gray-700/30 rounded-lg border border-gray-600">
                   <div className="space-y-1 flex-1">
                     <Label htmlFor="advanced_tracking" className="text-sm font-medium text-white">
                       Tracking avancé
                     </Label>
-                    <p className="text-xs text-gray-400">Événements personnalisés et configurations spécifiques</p>
+                    <p className="text-xs text-gray-400">
+                      Événements personnalisés et configurations spécifiques
+                    </p>
                   </div>
                   <Switch
                     id="advanced_tracking"
                     checked={analytics?.advanced_tracking || false}
-                    onCheckedChange={(checked) => updateAnalytics({ advanced_tracking: checked })}
+                    onCheckedChange={checked => updateAnalytics({ advanced_tracking: checked })}
                     aria-label="Activer le tracking avancé"
                     className="touch-manipulation"
                   />
                 </div>
-                
+
                 {analytics?.advanced_tracking && (
                   <div className="space-y-4">
                     <div className="space-y-2">
@@ -454,15 +492,22 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                       </Label>
                       <Input
                         id="custom_events"
-                        value={analytics?.custom_events?.join(",") || ""}
-                        onChange={(e) => updateAnalytics({ 
-                          custom_events: e.target.value.split(",").map(s => s.trim()).filter(s => s) 
-                        })}
+                        value={analytics?.custom_events?.join(',') || ''}
+                        onChange={e =>
+                          updateAnalytics({
+                            custom_events: e.target.value
+                              .split(',')
+                              .map(s => s.trim())
+                              .filter(s => s),
+                          })
+                        }
                         placeholder="event1,event2,event3"
                         aria-label="Événements personnalisés séparés par des virgules"
                         className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20 min-h-[44px]"
                       />
-                      <p className="text-xs text-gray-400">Séparez les événements personnalisés par des virgules.</p>
+                      <p className="text-xs text-gray-400">
+                        Séparez les événements personnalisés par des virgules.
+                      </p>
                     </div>
                   </div>
                 )}
@@ -479,7 +524,9 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                     <Activity className="h-5 w-5 text-green-400" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg font-semibold text-white">Analytics externes</CardTitle>
+                    <CardTitle className="text-lg font-semibold text-white">
+                      Analytics externes
+                    </CardTitle>
                     <CardDescription className="text-gray-400">
                       Intégrez votre produit avec des outils d'analyse tiers
                     </CardDescription>
@@ -489,7 +536,10 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="google_analytics_id" className="text-sm font-medium text-white flex items-center gap-2">
+                    <Label
+                      htmlFor="google_analytics_id"
+                      className="text-sm font-medium text-white flex items-center gap-2"
+                    >
                       Google Analytics ID
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -502,8 +552,8 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                     </Label>
                     <Input
                       id="google_analytics_id"
-                      value={analytics?.google_analytics_id || ""}
-                      onChange={(e) => updateAnalytics({ google_analytics_id: e.target.value })}
+                      value={analytics?.google_analytics_id || ''}
+                      onChange={e => updateAnalytics({ google_analytics_id: e.target.value })}
                       placeholder="UA-XXXXXXXXX-X ou G-XXXXXXXXXX"
                       aria-label="ID Google Analytics"
                       className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20 min-h-[44px]"
@@ -516,8 +566,8 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                     </Label>
                     <Input
                       id="facebook_pixel_id"
-                      value={analytics?.facebook_pixel_id || ""}
-                      onChange={(e) => updateAnalytics({ facebook_pixel_id: e.target.value })}
+                      value={analytics?.facebook_pixel_id || ''}
+                      onChange={e => updateAnalytics({ facebook_pixel_id: e.target.value })}
                       placeholder="123456789012345"
                       aria-label="ID Facebook Pixel"
                       className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20 min-h-[44px]"
@@ -525,13 +575,16 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="google_tag_manager_id" className="text-sm font-medium text-white">
+                    <Label
+                      htmlFor="google_tag_manager_id"
+                      className="text-sm font-medium text-white"
+                    >
                       Google Tag Manager ID
                     </Label>
                     <Input
                       id="google_tag_manager_id"
-                      value={analytics?.google_tag_manager_id || ""}
-                      onChange={(e) => updateAnalytics({ google_tag_manager_id: e.target.value })}
+                      value={analytics?.google_tag_manager_id || ''}
+                      onChange={e => updateAnalytics({ google_tag_manager_id: e.target.value })}
                       placeholder="GTM-XXXXXXX"
                       aria-label="ID Google Tag Manager"
                       className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20 min-h-[44px]"
@@ -544,8 +597,8 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                     </Label>
                     <Input
                       id="tiktok_pixel_id"
-                      value={analytics?.tiktok_pixel_id || ""}
-                      onChange={(e) => updateAnalytics({ tiktok_pixel_id: e.target.value })}
+                      value={analytics?.tiktok_pixel_id || ''}
+                      onChange={e => updateAnalytics({ tiktok_pixel_id: e.target.value })}
                       placeholder="CXXXXXXXXXXXXXXX"
                       aria-label="ID TikTok Pixel"
                       className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20 min-h-[44px]"
@@ -558,8 +611,8 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                     </Label>
                     <Input
                       id="pinterest_pixel_id"
-                      value={analytics?.pinterest_pixel_id || ""}
-                      onChange={(e) => updateAnalytics({ pinterest_pixel_id: e.target.value })}
+                      value={analytics?.pinterest_pixel_id || ''}
+                      onChange={e => updateAnalytics({ pinterest_pixel_id: e.target.value })}
                       placeholder="123456789012345"
                       aria-label="ID Pinterest Pixel"
                       className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20 min-h-[44px]"
@@ -567,13 +620,16 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="linkedin_insight_tag" className="text-sm font-medium text-white">
+                    <Label
+                      htmlFor="linkedin_insight_tag"
+                      className="text-sm font-medium text-white"
+                    >
                       LinkedIn Insight Tag
                     </Label>
                     <Input
                       id="linkedin_insight_tag"
-                      value={analytics?.linkedin_insight_tag || ""}
-                      onChange={(e) => updateAnalytics({ linkedin_insight_tag: e.target.value })}
+                      value={analytics?.linkedin_insight_tag || ''}
+                      onChange={e => updateAnalytics({ linkedin_insight_tag: e.target.value })}
                       placeholder="1234567"
                       aria-label="ID LinkedIn Insight Tag"
                       className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20 min-h-[44px]"
@@ -593,7 +649,9 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                     <Target className="h-5 w-5 text-purple-400" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg font-semibold text-white">Objectifs et alertes</CardTitle>
+                    <CardTitle className="text-lg font-semibold text-white">
+                      Objectifs et alertes
+                    </CardTitle>
                     <CardDescription className="text-gray-400">
                       Définissez des objectifs de performance pour ce produit et recevez des alertes
                     </CardDescription>
@@ -609,8 +667,10 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                     <Input
                       id="goal_views"
                       type="number"
-                      value={analytics?.goal_views || ""}
-                      onChange={(e) => updateAnalytics({ goal_views: parseInt(e.target.value) || null })}
+                      value={analytics?.goal_views || ''}
+                      onChange={e =>
+                        updateAnalytics({ goal_views: parseInt(e.target.value) || null })
+                      }
                       placeholder="1000"
                       aria-label="Objectif de vues mensuelles"
                       className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20 min-h-[44px]"
@@ -624,8 +684,10 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                     <Input
                       id="goal_revenue"
                       type="number"
-                      value={analytics?.goal_revenue || ""}
-                      onChange={(e) => updateAnalytics({ goal_revenue: parseFloat(e.target.value) || null })}
+                      value={analytics?.goal_revenue || ''}
+                      onChange={e =>
+                        updateAnalytics({ goal_revenue: parseFloat(e.target.value) || null })
+                      }
                       placeholder="5000"
                       aria-label="Objectif de revenus mensuels"
                       className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20 min-h-[44px]"
@@ -639,8 +701,10 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                     <Input
                       id="goal_conversions"
                       type="number"
-                      value={analytics?.goal_conversions || ""}
-                      onChange={(e) => updateAnalytics({ goal_conversions: parseInt(e.target.value) || null })}
+                      value={analytics?.goal_conversions || ''}
+                      onChange={e =>
+                        updateAnalytics({ goal_conversions: parseInt(e.target.value) || null })
+                      }
                       placeholder="50"
                       aria-label="Objectif de conversions mensuelles"
                       className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20 min-h-[44px]"
@@ -648,37 +712,45 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="goal_conversion_rate" className="text-sm font-medium text-white">
+                    <Label
+                      htmlFor="goal_conversion_rate"
+                      className="text-sm font-medium text-white"
+                    >
                       Objectif taux de conversion (%)
                     </Label>
                     <Input
                       id="goal_conversion_rate"
                       type="number"
                       step="0.1"
-                      value={analytics?.goal_conversion_rate || ""}
-                      onChange={(e) => updateAnalytics({ goal_conversion_rate: parseFloat(e.target.value) || null })}
+                      value={analytics?.goal_conversion_rate || ''}
+                      onChange={e =>
+                        updateAnalytics({
+                          goal_conversion_rate: parseFloat(e.target.value) || null,
+                        })
+                      }
                       placeholder="5.0"
                       aria-label="Objectif de taux de conversion"
                       className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20 min-h-[44px]"
                     />
                   </div>
                 </div>
-                
+
                 <Separator className="bg-gray-700" />
-                
+
                 <div className="flex items-center justify-between p-4 bg-gray-700/30 rounded-lg border border-gray-600">
                   <div className="space-y-1 flex-1">
                     <Label htmlFor="email_alerts" className="text-sm font-medium text-white">
                       Alertes par email
                     </Label>
                     <p className="text-xs text-gray-400">
-                      Recevez des notifications automatiques en cas de dépassement ou de non-atteinte des objectifs
+                      Recevez des notifications automatiques en cas de dépassement ou de
+                      non-atteinte des objectifs
                     </p>
                   </div>
                   <Switch
                     id="email_alerts"
                     checked={analytics?.email_alerts || false}
-                    onCheckedChange={(checked) => updateAnalytics({ email_alerts: checked })}
+                    onCheckedChange={checked => updateAnalytics({ email_alerts: checked })}
                     aria-label="Activer les alertes par email"
                     className="touch-manipulation"
                   />
@@ -696,9 +768,3 @@ export const ProductAnalyticsTab = ({ formData, updateFormData }: ProductAnalyti
     </TooltipProvider>
   );
 };
-
-
-
-
-
-

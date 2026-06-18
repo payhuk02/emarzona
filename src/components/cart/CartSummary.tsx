@@ -12,6 +12,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { useCart } from '@/hooks/cart/useCart';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { validateCheckoutCart } from '@/lib/checkout/cart-validation';
 import type { CartSummary as CartSummaryType } from '@/types/cart';
 
 interface CartSummaryProps {
@@ -47,6 +48,8 @@ const CartSummaryComponent = ({ summary, onCheckout }: CartSummaryProps) => {
     }
   }, [couponCode, applyCoupon, toast]);
 
+  const validation = useMemo(() => validateCheckoutCart(items), [items]);
+
   const handleCheckout = useCallback(() => {
     if (summary.item_count === 0) {
       toast({
@@ -57,11 +60,12 @@ const CartSummaryComponent = ({ summary, onCheckout }: CartSummaryProps) => {
       return;
     }
 
-    if (items?.some(item => item.product_type === 'service')) {
+    if (!validation.canCheckout) {
       toast({
-        title: 'Réservation requise',
+        title: 'Checkout impossible',
         description:
-          'Les services ne passent pas par le panier. Retirez-les ou réservez depuis la fiche du service.',
+          validation.message ||
+          'Vérifiez les réservations de services et les articles de votre panier.',
         variant: 'destructive',
       });
       return;
@@ -72,7 +76,7 @@ const CartSummaryComponent = ({ summary, onCheckout }: CartSummaryProps) => {
     } else {
       navigate('/checkout');
     }
-  }, [summary.item_count, items, onCheckout, navigate, toast]);
+  }, [summary.item_count, validation, onCheckout, navigate, toast]);
 
   return (
     <Card className="sticky top-4">
@@ -184,11 +188,11 @@ const CartSummaryComponent = ({ summary, onCheckout }: CartSummaryProps) => {
         {/* Bouton checkout */}
         <Button
           onClick={handleCheckout}
-          disabled={summary.item_count === 0 || isLoading}
+          disabled={summary.item_count === 0 || isLoading || !validation.canCheckout}
           className="w-full min-h-[44px] text-base sm:text-lg"
           size="lg"
         >
-          Procéder au paiement
+          {validation.hasMixedWithService ? 'Payer le panier mixte' : 'Procéder au paiement'}
           <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
         </Button>
 

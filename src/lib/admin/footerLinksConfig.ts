@@ -7,10 +7,12 @@
 export type FooterLinkKey =
   | 'features'
   | 'marketplace'
+  | 'courses'
   | 'pricing'
   | 'integrations'
   | 'blog'
   | 'docs'
+  | 'faq'
   | 'help'
   | 'community'
   | 'about'
@@ -51,6 +53,12 @@ export const FOOTER_COLUMNS: FooterColumnDefinition[] = [
         defaultHref: '/marketplace',
       },
       {
+        linkKey: 'courses',
+        labelKey: 'footer.columns.product.courses',
+        hrefKey: 'footer.links.product.courses',
+        defaultHref: '/courses',
+      },
+      {
         linkKey: 'pricing',
         labelKey: 'footer.columns.product.pricing',
         hrefKey: 'footer.links.product.pricing',
@@ -78,6 +86,12 @@ export const FOOTER_COLUMNS: FooterColumnDefinition[] = [
         labelKey: 'footer.columns.resources.docs',
         hrefKey: 'footer.links.resources.docs',
         defaultHref: '/docs',
+      },
+      {
+        linkKey: 'faq',
+        labelKey: 'footer.columns.resources.faq',
+        hrefKey: 'footer.links.resources.faq',
+        defaultHref: '/faq',
       },
       {
         linkKey: 'help',

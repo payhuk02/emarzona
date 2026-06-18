@@ -10,9 +10,33 @@ import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 import { useAwardPoints } from '@/hooks/courses/useGamification';
 
-const COURSE_QUIZ_FIELDS = 'id, course_id, title, description, passing_score, time_limit_minutes, total_questions, order_index, is_active, created_at, updated_at';
-const QUIZ_QUESTION_FIELDS = 'id, quiz_id, question_text, question_type, points, order_index, options, correct_answer, explanation, created_at, updated_at';
-const QUIZ_ATTEMPT_FIELDS = 'id, quiz_id, enrollment_id, user_id, score, passed, answers, detailed_results, created_at, updated_at';
+const COURSE_QUIZ_FIELDS =
+  'id, course_id, title, description, passing_score, time_limit_minutes, questions, max_attempts, show_correct_answers, shuffle_questions, lesson_id, created_at, updated_at';
+const QUIZ_QUESTION_FIELDS =
+  'id, quiz_id, question_text, question_type, points, order_index, options, correct_answer, explanation, created_at, updated_at';
+const QUIZ_ATTEMPT_FIELDS =
+  'id, quiz_id, enrollment_id, user_id, score, total_questions, correct_answers, passed, answers, started_at, completed_at, time_taken_seconds, created_at';
+
+function buildQuestionsJson(
+  questionsData: Array<{
+    text: string;
+    type: string;
+    points?: number;
+    options?: string[];
+    correctAnswer: unknown;
+    explanation?: string;
+  }>
+) {
+  return questionsData.map((q, index) => ({
+    id: `q-${index}`,
+    text: q.text,
+    type: q.type,
+    points: q.points || 1,
+    options: q.options,
+    correctAnswer: q.correctAnswer,
+    explanation: q.explanation,
+  }));
+}
 
 /**
  * Hook pour récupérer un quiz par son ID
@@ -49,7 +73,7 @@ export const useCourseQuizzes = (courseId: string | undefined) => {
         .from('course_quizzes')
         .select(COURSE_QUIZ_FIELDS)
         .eq('course_id', courseId)
-        .order('order_index', { ascending: true });
+        .order('created_at', { ascending: true });
 
       if (error) throw error;
       return data;
@@ -73,20 +97,30 @@ export const useCreateQuiz = () => {
       passingScore,
       timeLimit,
       questionsData,
-      orderIndex,
     }: {
       courseId: string;
       title: string;
       description?: string;
       passingScore: number;
       timeLimit?: number;
-      questionsData: any[];
-      orderIndex: number;
+      questionsData: Array<{
+        text: string;
+        type: string;
+        points?: number;
+        options?: string[];
+        correctAnswer: unknown;
+        explanation?: string;
+      }>;
+      /** @deprecated Ignoré — colonne absente du schéma course_quizzes */
+      orderIndex?: number;
     }) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
-      // 1. Créer le quiz
+      const questionsJson = buildQuestionsJson(questionsData);
+
       const { data: quiz, error: quizError } = await supabase
         .from('course_quizzes')
         .insert({
@@ -95,23 +129,21 @@ export const useCreateQuiz = () => {
           description,
           passing_score: passingScore,
           time_limit_minutes: timeLimit,
-          total_questions: questionsData.length,
-          order_index: orderIndex,
+          questions: questionsJson,
         })
         .select()
         .single();
 
       if (quizError) throw quizError;
 
-      // 2. Créer les questions avec leurs réponses
       const questionsToInsert = questionsData.map((q, index) => ({
         quiz_id: quiz.id,
         question_text: q.text,
         question_type: q.type,
         points: q.points || 1,
         order_index: index,
-        options: q.options, // JSON array pour les QCM
-        correct_answer: q.correctAnswer, // String ou JSON
+        options: q.options,
+        correct_answer: q.correctAnswer,
         explanation: q.explanation,
       }));
 
@@ -120,7 +152,6 @@ export const useCreateQuiz = () => {
         .insert(questionsToInsert);
 
       if (questionsError) {
-        // Rollback : supprimer le quiz
         await supabase.from('course_quizzes').delete().eq('id', quiz.id);
         throw questionsError;
       }
@@ -134,7 +165,7 @@ export const useCreateQuiz = () => {
         description: 'Le quiz a été créé avec succès.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: 'Erreur',
         description: error.message,
@@ -182,12 +213,13 @@ export const useSubmitQuiz = () => {
     }: {
       quizId: string;
       enrollmentId: string;
-      answers: Record<string, any>; // questionId -> answer
+      answers: Record<string, unknown>;
     }) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
-      // 1. Récupérer les questions avec réponses correctes
       const { data: questions, error: questionsError } = await supabase
         .from('quiz_questions')
         .select(QUIZ_QUESTION_FIELDS)
@@ -195,15 +227,19 @@ export const useSubmitQuiz = () => {
 
       if (questionsError) throw questionsError;
 
-      // 2. Calculer le score
-      let  score= 0;
-      let  totalPoints= 0;
-      const  detailedResults: any[] = [];
+      let score = 0;
+      let totalPoints = 0;
+      const detailedResults: Array<{
+        question_id: string;
+        user_answer: unknown;
+        is_correct: boolean;
+        points_earned: number;
+      }> = [];
 
-      questions?.forEach((question) => {
+      questions?.forEach(question => {
         const userAnswer = answers[question.id];
         const isCorrect = checkAnswer(question, userAnswer);
-        
+
         totalPoints += question.points;
         if (isCorrect) {
           score += question.points;
@@ -219,7 +255,6 @@ export const useSubmitQuiz = () => {
 
       const scorePercentage = totalPoints > 0 ? Math.round((score / totalPoints) * 100) : 0;
 
-      // 3. Récupérer le passing score du quiz
       const { data: quiz } = await supabase
         .from('course_quizzes')
         .select('passing_score')
@@ -228,8 +263,10 @@ export const useSubmitQuiz = () => {
 
       const passed = scorePercentage >= (quiz?.passing_score || 70);
       const isPerfect = scorePercentage === 100;
+      const now = new Date().toISOString();
+      const questionCount = questions?.length ?? 0;
+      const correctCount = detailedResults.filter(r => r.is_correct).length;
 
-      // 4. Enregistrer la tentative
       const { data: attempt, error: attemptError } = await supabase
         .from('quiz_attempts')
         .insert({
@@ -237,21 +274,25 @@ export const useSubmitQuiz = () => {
           enrollment_id: enrollmentId,
           user_id: user.id,
           score: scorePercentage,
+          total_questions: questionCount,
+          correct_answers: correctCount,
           passed,
-          answers: answers, // JSON
-          detailed_results: detailedResults, // JSON
+          answers: {
+            responses: answers,
+            detailed_results: detailedResults,
+          },
+          started_at: now,
+          completed_at: now,
+          time_taken_seconds: null,
         })
         .select()
         .single();
 
       if (attemptError) throw attemptError;
 
-      // 5. Attribuer des points automatiquement si le quiz est réussi
       if (passed) {
         try {
-          // Points de base pour avoir réussi le quiz
           const basePoints = 20;
-          // Bonus pour score parfait
           const bonusPoints = isPerfect ? 10 : 0;
           const totalPointsToAward = basePoints + bonusPoints;
 
@@ -261,13 +302,16 @@ export const useSubmitQuiz = () => {
             points: totalPointsToAward,
             sourceType: isPerfect ? 'quiz_perfect' : 'quiz_passed',
             sourceId: quizId,
-            sourceDescription: isPerfect 
-              ? `Quiz réussi avec score parfait (100%)` 
+            sourceDescription: isPerfect
+              ? 'Quiz réussi avec score parfait (100%)'
               : `Quiz réussi avec ${scorePercentage}%`,
           });
         } catch (pointsError) {
-          // Ne pas bloquer si l'attribution de points échoue
-          logger.error('Error awarding points for quiz', { error: pointsError, quizId, enrollmentId });
+          logger.error('Error awarding points for quiz', {
+            error: pointsError,
+            quizId,
+            enrollmentId,
+          });
         }
       }
 
@@ -280,16 +324,18 @@ export const useSubmitQuiz = () => {
         earnedPoints: score,
       };
     },
-    onSuccess: (result) => {
+    onSuccess: result => {
       queryClient.invalidateQueries({ queryKey: ['quiz-attempts'] });
-      queryClient.invalidateQueries({ queryKey: ['student-points', result.attempt?.enrollment_id] });
+      queryClient.invalidateQueries({
+        queryKey: ['student-points', result.attempt?.enrollment_id],
+      });
       queryClient.invalidateQueries({ queryKey: ['course-leaderboard'] });
-      
+
       if (result.passed) {
         toast({
           title: 'Félicitations ! 🎉',
-          description: result.isPerfect 
-            ? `Score parfait ! +30 points gagnés !` 
+          description: result.isPerfect
+            ? 'Score parfait ! +30 points gagnés !'
             : `Vous avez réussi avec ${result.score}% ! +20 points gagnés !`,
         });
       } else {
@@ -300,7 +346,7 @@ export const useSubmitQuiz = () => {
         });
       }
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: 'Erreur',
         description: error.message,
@@ -310,21 +356,27 @@ export const useSubmitQuiz = () => {
   });
 };
 
-/**
- * Fonction helper pour vérifier une réponse
- */
-function checkAnswer(question: any, userAnswer: any): boolean {
+function checkAnswer(
+  question: { question_type: string; correct_answer: unknown },
+  userAnswer: unknown
+): boolean {
   switch (question.question_type) {
     case 'multiple_choice':
       return userAnswer === question.correct_answer;
-    
+
     case 'true_false':
       return userAnswer === question.correct_answer;
-    
+
     case 'text':
-      // Comparaison simple (à améliorer avec fuzzy matching)
-      return userAnswer?.toLowerCase().trim() === question.correct_answer?.toLowerCase().trim();
-    
+      return (
+        String(userAnswer ?? '')
+          .toLowerCase()
+          .trim() ===
+        String(question.correct_answer ?? '')
+          .toLowerCase()
+          .trim()
+      );
+
     default:
       return false;
   }
@@ -339,7 +391,9 @@ export const useQuizAttempts = (quizId: string | undefined, enrollmentId: string
     queryFn: async () => {
       if (!quizId || !enrollmentId) return [];
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return [];
 
       const { data, error } = await supabase
@@ -360,20 +414,13 @@ export const useQuizAttempts = (quizId: string | undefined, enrollmentId: string
 /**
  * Hook pour récupérer la meilleure tentative
  */
-export const useBestQuizAttempt = (quizId: string | undefined, enrollmentId: string | undefined) => {
+export const useBestQuizAttempt = (
+  quizId: string | undefined,
+  enrollmentId: string | undefined
+) => {
   const { data: attempts } = useQuizAttempts(quizId, enrollmentId);
-  
+
   if (!attempts || attempts.length === 0) return null;
-  
-  // Retourner la tentative avec le meilleur score
-  return attempts.reduce((best, current) => 
-    current.score > best.score ? current : best
-  );
+
+  return attempts.reduce((best, current) => (current.score > best.score ? current : best));
 };
-
-
-
-
-
-
-

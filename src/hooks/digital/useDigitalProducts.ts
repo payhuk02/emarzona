@@ -5,6 +5,7 @@ import { logger } from '@/lib/logger';
 import { useStoreContext } from '@/contexts/StoreContext';
 import { shouldRetryError, getRetryDelay } from '@/lib/error-handling';
 import { PAID_REVENUE_ELIGIBLE_STATUSES } from '@/lib/orders/order-status';
+import { mapRemainingDownloadsResult } from '@/lib/digital/remaining-downloads';
 
 /**
  * Produit digital complet
@@ -878,35 +879,24 @@ export const useRemainingDownloads = (digitalProductId: string | undefined) => {
       } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
-      // Get product download limits
-      const { data: product, error: productError } = await supabase
-        .from('digital_products')
-        .select('max_licenses, current_licenses')
-        .eq('id', digitalProductId)
-        .single();
+      const [{ data: product, error: productError }, { data: remaining, error: rpcError }] =
+        await Promise.all([
+          supabase
+            .from('digital_products')
+            .select('download_limit')
+            .eq('id', digitalProductId)
+            .single(),
+          supabase.rpc('get_remaining_downloads', {
+            p_digital_product_id: digitalProductId,
+            p_user_id: user.id,
+          }),
+        ]);
 
       if (productError) throw productError;
+      if (rpcError) throw rpcError;
 
-      // Count user's downloads for this product
-      const { count, error: countError } = await supabase
-        .from('digital_product_downloads')
-        .select('id', { count: 'exact', head: true })
-        .eq('digital_product_id', digitalProductId)
-        .eq('user_id', user.id);
-
-      if (countError) throw countError;
-
-      const downloadCount = count || 0;
-      const maxDownloads = product?.max_licenses || Infinity;
-      const remaining =
-        maxDownloads === Infinity ? Infinity : Math.max(0, maxDownloads - downloadCount);
-
-      return {
-        downloadCount,
-        maxDownloads,
-        remaining,
-        hasRemainingDownloads: remaining > 0 || remaining === Infinity,
-      };
+      const downloadLimit = product?.download_limit;
+      return mapRemainingDownloadsResult(downloadLimit, remaining as number | null);
     },
     enabled: !!digitalProductId,
   });

@@ -77,6 +77,7 @@ import {
   HardDrive,
   PackageCheck,
   MessageSquare as LucideMessageSquare,
+  CircleHelp,
 } from 'lucide-react';
 import type { RawNavSection } from '@/config/navigation.enrich';
 
@@ -1180,6 +1181,11 @@ export const adminMenuSections = [
         title: 'Personnalisation',
         url: '/admin/platform-customization',
         icon: Sparkles,
+      },
+      {
+        title: 'FAQ plateforme',
+        url: '/admin/platform-faq',
+        icon: CircleHelp,
       },
       {
         title: 'Newsletter',

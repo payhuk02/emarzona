@@ -131,7 +131,9 @@ Besoin d'aide ?
 
 Si vous ne trouvez pas la réponse dans la documentation, consultez le Centre d'aide ou contactez support@emarzona.com.`,
 
-  help: `Le centre d'aide Emarzona réunit les réponses aux questions les plus fréquentes des vendeurs et des acheteurs.
+  help: `Pour des réponses structurées par thème (paiements, livraison, cours, compte…), consultez la FAQ complète : /faq
+
+Le centre d'aide Emarzona réunit les réponses aux questions les plus fréquentes des vendeurs et des acheteurs.
 
 Vendeurs — questions fréquentes
 

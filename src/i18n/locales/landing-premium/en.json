@@ -1,6 +1,8 @@
 {
   "nav": {
     "marketplace": "Marketplace",
+    "courses": "Online courses",
+    "faq": "FAQ",
     "features": "Features",
     "solutions": "Solutions",
     "pricing": "Pricing",
@@ -259,6 +261,7 @@
         "title": "Product",
         "features": "Features",
         "marketplace": "Marketplace",
+        "courses": "Online courses",
         "pricing": "Pricing",
         "integrations": "Integrations"
       },
@@ -266,6 +269,7 @@
         "title": "Resources",
         "blog": "Blog",
         "docs": "Documentation",
+        "faq": "FAQ",
         "help": "Help center",
         "community": "Community"
       },
@@ -291,6 +295,32 @@
   "seo": {
     "title": "Emarzona — Sell everything. Manage everything. Without limits.",
     "description": "Premium e-commerce platform: digital and physical products, services, courses and artist works. Secure payments, integrated marketing, Africa marketplace."
+  },
+  "faq": {
+    "backHome": "Back to home",
+    "searchPlaceholder": "Search a question…",
+    "searchAria": "Search the FAQ",
+    "audience": {
+      "all": "All",
+      "seller": "Sellers",
+      "buyer": "Buyers"
+    },
+    "resultsCount": "{{count}} question shown",
+    "resultsCount_plural": "{{count}} questions shown",
+    "loadError": "Unable to load the FAQ right now. Try again later or visit the",
+    "helpCenter": "help center",
+    "noResults": "No questions match your search.",
+    "resetFilters": "Reset filters",
+    "breadcrumb": {
+      "home": "Home",
+      "faq": "FAQ"
+    },
+    "cta": {
+      "title": "Need personalized help?",
+      "body": "The FAQ covers common cases. For detailed tutorials or order follow-up, use the help center or contact our team.",
+      "help": "Help center",
+      "contact": "Contact us"
+    }
   },
   "logoAlt": "Emarzona — e-commerce platform"
 }

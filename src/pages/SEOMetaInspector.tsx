@@ -67,6 +67,7 @@ const DEFAULT_PATHS = [
   '/blog',
   '/docs',
   '/help',
+  '/faq',
   '/integrations',
   '/careers',
   '/press',

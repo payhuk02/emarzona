@@ -17,6 +17,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 import { assertCanAddServiceToCart } from '@/lib/cart/service-cart-policy';
+import { assertCompatibleCartAddition } from '@/lib/cart/mixed-cart-policy';
+import { getCartItemStoreId } from '@/lib/checkout/cart-validation';
 import type { User } from '@supabase/supabase-js';
 import type { CartItem, CartSummary, AddToCartOptions, UpdateCartItemOptions } from '@/types/cart';
 import type { Database, Json } from '@/integrations/supabase/types';
@@ -121,7 +123,7 @@ export function useCart() {
       // Récupérer les détails du produit
       const { data: product, error: productError } = await supabase
         .from('products')
-        .select('id, name, image_url, price, currency, promotional_price, product_type')
+        .select('id, name, image_url, price, currency, promotional_price, product_type, store_id')
         .eq('id', options.product_id)
         .single();
 
@@ -131,6 +133,29 @@ export function useCart() {
 
       if (options.product_type === 'service') {
         assertCanAddServiceToCart(options.metadata);
+      }
+
+      assertCompatibleCartAddition(items, {
+        product_type: options.product_type,
+        metadata: options.metadata,
+        storeId: product.store_id,
+      });
+
+      const metadataRecord =
+        options.metadata && typeof options.metadata === 'object' && !Array.isArray(options.metadata)
+          ? { ...(options.metadata as Record<string, unknown>) }
+          : {};
+
+      if (
+        !getCartItemStoreId({
+          product_id: options.product_id,
+          product_type: options.product_type,
+          quantity: options.quantity ?? 1,
+          unit_price: 0,
+          metadata: metadataRecord,
+        } as CartItem)
+      ) {
+        metadataRecord.store_id = product.store_id;
       }
 
       // Prix final (promotional ou normal)
@@ -186,7 +211,7 @@ export function useCart() {
         unit_price: finalPrice,
         currency: product.currency || 'XOF',
         coupon_code: options.coupon_code || null,
-        metadata: (options.metadata ?? null) as Json,
+        metadata: (Object.keys(metadataRecord).length > 0 ? metadataRecord : null) as Json,
       };
 
       const { data: inserted, error: insertError } = await supabase

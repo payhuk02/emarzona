@@ -19,7 +19,7 @@ test.describe('Online Courses', () => {
   });
 
   test('should create online course', async ({ page }) => {
-    await page.goto('/courses/create');
+    await page.goto('/dashboard/courses/new');
 
     // Step 1: Basic Info
     await page.fill('input[name="title"]', 'Test Course E2E');
@@ -63,8 +63,8 @@ test.describe('Online Courses', () => {
     await expect(page.locator('text=Test Course E2E')).toBeVisible();
     await page.click('button:has-text("Publier")');
 
-    // Should redirect to courses list
-    await expect(page).toHaveURL(/\/courses/, { timeout: 10000 });
+    // Should redirect to courses list or dashboard
+    await expect(page).toHaveURL(/\/(dashboard\/courses|courses)/, { timeout: 10000 });
     await expect(page.locator('text=/succès|success/i')).toBeVisible({ timeout: 5000 });
   });
 
@@ -88,14 +88,14 @@ test.describe('Online Courses', () => {
   });
 
   test('should display my courses', async ({ page }) => {
-    await page.goto('/my-courses');
+    await page.goto('/dashboard/my-courses');
 
     // Should see enrolled courses
     await expect(page.locator('text=/mes cours|my courses/i')).toBeVisible();
   });
 
   test('should watch course lesson', async ({ page }) => {
-    await page.goto('/my-courses');
+    await page.goto('/dashboard/my-courses');
 
     // Click on first enrolled course
     const firstCourse = page.locator('[data-testid="enrolled-course"]').first();
@@ -116,7 +116,7 @@ test.describe('Online Courses', () => {
   });
 
   test('should track course progression', async ({ page }) => {
-    await page.goto('/my-courses');
+    await page.goto('/dashboard/my-courses');
 
     // Should see progress indicators
     const progressBar = page.locator('[data-testid="progress-bar"], .progress');
@@ -128,7 +128,7 @@ test.describe('Online Courses', () => {
 
   test('should complete quiz', async ({ page }) => {
     // Navigate to course with quiz
-    await page.goto('/my-courses');
+    await page.goto('/dashboard/my-courses');
 
     const firstCourse = page.locator('[data-testid="enrolled-course"]').first();
     if (await firstCourse.isVisible()) {
@@ -157,7 +157,7 @@ test.describe('Online Courses', () => {
   });
 
   test('should download certificate', async ({ page }) => {
-    await page.goto('/my-courses');
+    await page.goto('/dashboard/my-courses');
 
     // Find completed course
     const completedCourse = page.locator('[data-testid="completed-course"]').first();

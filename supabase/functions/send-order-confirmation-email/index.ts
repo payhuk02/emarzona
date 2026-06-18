@@ -1,6 +1,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { getProjectRefFromSupabaseUrl, isServiceRoleJwt } from '../_shared/edge-auth-utils.ts';
+import { mintOrderDownloadLink } from '../_shared/mint-download-token.ts';
 
 const ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGINS') || '')
   .split(',')
@@ -298,10 +299,11 @@ async function sendDigitalEmail(
   item: any,
   payload: EmailPayload
 ): Promise<boolean> {
-  // Récupérer les détails du produit digital
   const { data: digitalProduct } = await supabase
     .from('digital_products')
-    .select('*, license:digital_licenses(*)')
+    .select(
+      'id, product_id, main_file_url, main_file_format, main_file_size_mb, total_size_mb, digital_type, license_type'
+    )
     .eq('product_id', item.product_id)
     .single();
 
@@ -311,6 +313,38 @@ async function sendDigitalEmail(
   }
 
   const siteUrl = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
+  const customerId = payload.customer_id || order.customer_id || order.customer?.id;
+
+  let downloadLink = `${siteUrl}/account/digital`;
+  let downloadExpiresAt: string | undefined;
+
+  if (customerId && digitalProduct.main_file_url) {
+    const { data: license } = await supabase
+      .from('digital_licenses')
+      .select('id')
+      .eq('order_id', order.id)
+      .eq('digital_product_id', digitalProduct.id)
+      .maybeSingle();
+
+    const secureLink = await mintOrderDownloadLink(supabase, {
+      siteUrl,
+      productId: item.product_id,
+      fileUrl: digitalProduct.main_file_url,
+      customerId,
+      licenseId: license?.id ?? null,
+      expiresHours: 48,
+    });
+
+    if (secureLink) {
+      downloadLink = secureLink;
+      downloadExpiresAt = new Date(Date.now() + 48 * 3600 * 1000).toISOString();
+    } else {
+      console.warn(
+        `Secure download link not minted for order ${order.id}, product ${item.product_id}`
+      );
+    }
+  }
+
   const fileSizeLabel =
     digitalProduct.total_size_mb != null
       ? `${digitalProduct.total_size_mb} MB`
@@ -331,7 +365,8 @@ async function sendDigitalEmail(
       user_name: payload.customer_name,
       order_id: order.id,
       product_name: item.product_name,
-      download_link: `${siteUrl}/account/digital`,
+      download_link: downloadLink,
+      download_expires_at: downloadExpiresAt,
       file_format: digitalProduct.main_file_format || digitalProduct.digital_type || 'digital',
       file_size: fileSizeLabel,
       licensing_type: digitalProduct.license_type,

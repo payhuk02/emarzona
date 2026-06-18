@@ -12,6 +12,7 @@ const allowOrigin = Deno.env.get('SITE_URL') || SITE;
 const STATIC_PAGES: Array<{ path: string; changefreq: string; priority: string }> = [
   { path: '/', changefreq: 'daily', priority: '1.0' },
   { path: '/marketplace', changefreq: 'hourly', priority: '0.9' },
+  { path: '/courses', changefreq: 'daily', priority: '0.85' },
   { path: '/collections', changefreq: 'daily', priority: '0.8' },
   { path: '/auctions', changefreq: 'daily', priority: '0.8' },
   { path: '/community', changefreq: 'daily', priority: '0.7' },
@@ -27,6 +28,7 @@ const STATIC_PAGES: Array<{ path: string; changefreq: string; priority: string }
   { path: '/blog', changefreq: 'weekly', priority: '0.6' },
   { path: '/docs', changefreq: 'weekly', priority: '0.6' },
   { path: '/help', changefreq: 'weekly', priority: '0.6' },
+  { path: '/faq', changefreq: 'weekly', priority: '0.75' },
   { path: '/integrations', changefreq: 'monthly', priority: '0.6' },
   { path: '/pricing', changefreq: 'weekly', priority: '0.7' },
   { path: '/legal/terms', changefreq: 'yearly', priority: '0.3' },

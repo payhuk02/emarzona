@@ -131,6 +131,11 @@ export const PAGE_SEO_CONFIG: Record<string, PageSEOEntry> = {
     title: "Centre d'aide | Emarzona",
     description: 'FAQ et assistance pour vendeurs et acheteurs Emarzona.',
   },
+  '/faq': {
+    title: 'FAQ — Questions fréquentes | Emarzona',
+    description:
+      'Réponses sur Emarzona : boutique en ligne, paiements Moneroo, livraison FedEx, cours, produits digitaux et compte acheteur.',
+  },
   '/integrations': {
     title: 'Intégrations | Emarzona',
     description: 'Paiements, logistique et outils connectés à votre boutique Emarzona.',

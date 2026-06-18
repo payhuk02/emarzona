@@ -9,15 +9,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import {
-  Trophy,
-  XCircle,
-  CheckCircle2,
-  AlertCircle,
-  RotateCcw,
-  Download
-} from 'lucide-react';
+import { Trophy, XCircle, CheckCircle2, AlertCircle, RotateCcw, Download } from 'lucide-react';
 import { useQuizQuestions } from '@/hooks/courses/useQuiz';
+import { getQuizAttemptDetailedResults } from '@/lib/courses/quiz-attempt';
 import { QuizAttempt, QuizQuestion } from '@/types/courses';
 
 interface DetailedResult {
@@ -27,7 +21,7 @@ interface DetailedResult {
 }
 
 interface QuizAttemptWithDetails extends QuizAttempt {
-  detailed_results?: DetailedResult[];
+  answers?: Record<string, unknown> | QuizAttempt['answers'];
 }
 
 interface QuizResultsProps {
@@ -38,12 +32,12 @@ interface QuizResultsProps {
   showCertificateButton?: boolean;
 }
 
-export const QuizResults = ({ 
-  quizId, 
-  attempt, 
+export const QuizResults = ({
+  quizId,
+  attempt,
   onRetry,
   onDownloadCertificate,
-  showCertificateButton = false
+  showCertificateButton = false,
 }: QuizResultsProps) => {
   const { data: questions } = useQuizQuestions(quizId);
 
@@ -53,7 +47,9 @@ export const QuizResults = ({
 
   const passed = attempt.passed;
   const score = attempt.score;
-  const detailedResults = attempt.detailed_results || [];
+  const detailedResults = getQuizAttemptDetailedResults(attempt.answers);
+  const correctCount =
+    attempt.correct_answers ?? detailedResults.filter((r: DetailedResult) => r.is_correct).length;
 
   return (
     <div className="space-y-6">
@@ -74,10 +70,7 @@ export const QuizResults = ({
                 </>
               )}
             </CardTitle>
-            <Badge 
-              variant={passed ? 'default' : 'destructive'}
-              className="text-2xl px-6 py-2"
-            >
+            <Badge variant={passed ? 'default' : 'destructive'} className="text-2xl px-6 py-2">
               {score}%
             </Badge>
           </div>
@@ -88,11 +81,11 @@ export const QuizResults = ({
             <div className="flex items-center justify-between text-sm">
               <span className="font-medium">Score obtenu</span>
               <span className="text-muted-foreground">
-                {detailedResults.filter((r: DetailedResult) => r.is_correct).length}/{questions.length} correct(s)
+                {correctCount}/{questions.length} correct(s)
               </span>
             </div>
-            <Progress 
-              value={score} 
+            <Progress
+              value={score}
               className={`h-3 ${passed ? '[&>div]:bg-green-600' : '[&>div]:bg-orange-600'}`}
             />
           </div>
@@ -103,7 +96,7 @@ export const QuizResults = ({
               <CheckCircle2 className="h-4 w-4 text-green-600" />
               <AlertDescription className="text-green-800">
                 Félicitations ! Vous avez réussi ce quiz.
-                {showCertificateButton && " Vous pouvez télécharger votre certificat."}
+                {showCertificateButton && ' Vous pouvez télécharger votre certificat.'}
               </AlertDescription>
             </Alert>
           ) : (
@@ -136,7 +129,7 @@ export const QuizResults = ({
       {/* Détail des réponses */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold">Détail des réponses</h3>
-        
+
         {questions.map((question: QuizQuestion, index: number) => {
           const result = detailedResults.find((r: DetailedResult) => r.question_id === question.id);
           const isCorrect = result?.is_correct;
@@ -174,7 +167,9 @@ export const QuizResults = ({
                 {/* Bonne réponse si incorrect */}
                 {!isCorrect && (
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground mb-1">Bonne réponse :</p>
+                    <p className="text-sm font-medium text-muted-foreground mb-1">
+                      Bonne réponse :
+                    </p>
                     <p className="font-medium text-green-600">
                       {formatAnswer(question, question.correct_answer)}
                     </p>
@@ -200,7 +195,10 @@ export const QuizResults = ({
 /**
  * Formatte une réponse selon le type de question
  */
-function formatAnswer(question: QuizQuestion, answer: string | number | boolean | null | undefined): string {
+function formatAnswer(
+  question: QuizQuestion,
+  answer: string | number | boolean | null | undefined
+): string {
   switch (question.type) {
     case 'multiple_choice':
       if (question.options && typeof answer === 'number') {
@@ -208,21 +206,14 @@ function formatAnswer(question: QuizQuestion, answer: string | number | boolean 
         return option?.text || 'Aucune réponse';
       }
       return 'Aucune réponse';
-    
+
     case 'true_false':
       return answer === true ? 'Vrai' : answer === false ? 'Faux' : 'Aucune réponse';
-    
+
     case 'text':
       return String(answer || 'Aucune réponse');
-    
+
     default:
       return String(answer || 'Aucune réponse');
   }
 }
-
-
-
-
-
-
-

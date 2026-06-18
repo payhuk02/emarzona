@@ -62,6 +62,13 @@ vi.mock('@/hooks/useProductAnalytics', () => ({
     ],
     loading: false,
   })),
+  useProductTrafficSources: vi.fn(() => ({
+    data: [
+      { name: 'Direct', value: 60, color: '#8b5cf6' },
+      { name: 'Recherche organique', value: 40, color: '#3b82f6' },
+    ],
+    isLoading: false,
+  })),
 }));
 
 vi.mock('@/hooks/use-toast', () => ({

@@ -95,6 +95,7 @@ const AdminOrders = lazyPage(() => import('@/pages/admin/AdminOrders'));
 const AdminErrorMonitoring = lazyPage(() => import('@/pages/admin/AdminErrorMonitoring'));
 const AdminMonitoring = lazyPage(() => import('@/pages/admin/AdminMonitoring'));
 const AdminFulfillmentAlerts = lazyPage(() => import('@/pages/admin/AdminFulfillmentAlerts'));
+const AdminPlatformFaq = lazyPage(() => import('@/pages/admin/AdminPlatformFaq'));
 const AdminAccessibilityReport = lazyPage(() => import('@/pages/admin/AdminAccessibilityReport'));
 const AdminDataStorage = lazyPage(() => import('@/pages/admin/AdminDataStorage'));
 const OfflineQueueManager = lazyPage(() => import('@/pages/admin/OfflineQueueManager'));
@@ -130,6 +131,7 @@ export const adminRoutes = (
     {pr('/admin/commission-settings', AdminCommissionSettings)}
     {pr('/admin/commission-payments', AdminCommissionPayments)}
     {pr('/admin/platform-customization', PlatformCustomization)}
+    {pr('/admin/platform-faq', AdminPlatformFaq)}
     {pr('/admin/newsletter-subscribers', AdminNewsletterSubscribers)}
     {pr('/admin/moneroo-analytics', MonerooAnalytics)}
     {pr('/admin/moneroo-reconciliation', MonerooReconciliation)}

@@ -52,6 +52,7 @@ import {
   Zap,
   LayoutGrid,
   Mail,
+  CircleHelp,
 } from 'lucide-react';
 
 export type AdminNavItem = {
@@ -467,6 +468,12 @@ export const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
         icon: Sparkles,
         label: 'Personnalisation',
         path: '/admin/platform-customization',
+        permissions: ['settings.manage'],
+      },
+      {
+        icon: CircleHelp,
+        label: 'FAQ plateforme',
+        path: '/admin/platform-faq',
         permissions: ['settings.manage'],
       },
       {

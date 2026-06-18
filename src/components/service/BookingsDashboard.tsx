@@ -21,7 +21,7 @@ import {
   Activity,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Booking } from '@/hooks/services/useBookings';
+import type { ServiceBookingListItem } from '@/types/service-booking-dashboard';
 
 /**
  * Booking statistics
@@ -48,22 +48,22 @@ export interface BookingsDashboardStats {
 export interface BookingsDashboardProps {
   /** Statistiques du dashboard */
   stats: BookingsDashboardStats;
-  
+
   /** Réservations récentes pour affichage */
-  recentBookings?: Partial<Booking>[];
-  
+  recentBookings?: Partial<ServiceBookingListItem>[];
+
   /** Période sélectionnée */
   period?: 'today' | 'week' | 'month' | 'year';
-  
+
   /** Callback pour changer de période */
   onPeriodChange?: (period: 'today' | 'week' | 'month' | 'year') => void;
-  
+
   /** Callback pour voir les détails d'une réservation */
   onViewBooking?: (bookingId: string) => void;
-  
+
   /** Loading state */
   isLoading?: boolean;
-  
+
   /** Classe CSS personnalisée */
   className?: string;
 }
@@ -71,7 +71,7 @@ export interface BookingsDashboardProps {
 /**
  * Configuration des statuts
  */
-const  STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ElementType }> = {
+const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ElementType }> = {
   pending: { label: 'En attente', color: 'bg-yellow-100 text-yellow-700', icon: Clock },
   confirmed: { label: 'Confirmée', color: 'bg-green-100 text-green-700', icon: CheckCircle2 },
   in_progress: { label: 'En cours', color: 'bg-blue-100 text-blue-700', icon: Package },
@@ -83,7 +83,7 @@ const  STATUS_CONFIG: Record<string, { label: string; color: string; icon: React
 /**
  * BookingsDashboard - Dashboard complet des réservations
  */
-export const BookingsDashboard : React.FC<BookingsDashboardProps> = ({
+export const BookingsDashboard: React.FC<BookingsDashboardProps> = ({
   stats,
   recentBookings = [],
   period = 'month',
@@ -94,17 +94,18 @@ export const BookingsDashboard : React.FC<BookingsDashboardProps> = ({
 }) => {
   // Calculer des métriques supplémentaires
   const metrics = useMemo(() => {
-    const conversionRate = stats.totalBookings > 0
-      ? ((stats.confirmedBookings + stats.completedBookings) / stats.totalBookings) * 100
-      : 0;
+    const conversionRate =
+      stats.totalBookings > 0
+        ? ((stats.confirmedBookings + stats.completedBookings) / stats.totalBookings) * 100
+        : 0;
 
-    const cancellationRate = stats.totalBookings > 0
-      ? ((stats.cancelledBookings + stats.noShowBookings) / stats.totalBookings) * 100
-      : 0;
+    const cancellationRate =
+      stats.totalBookings > 0
+        ? ((stats.cancelledBookings + stats.noShowBookings) / stats.totalBookings) * 100
+        : 0;
 
-    const completionRate = stats.totalBookings > 0
-      ? (stats.completedBookings / stats.totalBookings) * 100
-      : 0;
+    const completionRate =
+      stats.totalBookings > 0 ? (stats.completedBookings / stats.totalBookings) * 100 : 0;
 
     // Mock trend data (à calculer réellement à partir des données historiques)
     const bookingsTrend = 12; // +12%
@@ -161,14 +162,15 @@ export const BookingsDashboard : React.FC<BookingsDashboardProps> = ({
             <Calendar className="h-8 w-8" />
             Dashboard Réservations
           </h1>
-          <p className="text-muted-foreground mt-1">
-            Suivi temps réel de toutes vos réservations
-          </p>
+          <p className="text-muted-foreground mt-1">Suivi temps réel de toutes vos réservations</p>
         </div>
 
         {/* Period selector */}
         {onPeriodChange && (
-          <Tabs value={period} onValueChange={onPeriodChange as any}>
+          <Tabs
+            value={period}
+            onValueChange={v => onPeriodChange(v as 'today' | 'week' | 'month' | 'year')}
+          >
             <TabsList>
               <TabsTrigger value="today">Aujourd'hui</TabsTrigger>
               <TabsTrigger value="week">Semaine</TabsTrigger>
@@ -196,7 +198,8 @@ export const BookingsDashboard : React.FC<BookingsDashboardProps> = ({
                 <TrendingDown className="h-3 w-3 text-red-600 mr-1" />
               )}
               <span className={metrics.bookingsTrend >= 0 ? 'text-green-600' : 'text-red-600'}>
-                {metrics.bookingsTrend >= 0 ? '+' : ''}{metrics.bookingsTrend}%
+                {metrics.bookingsTrend >= 0 ? '+' : ''}
+                {metrics.bookingsTrend}%
               </span>
               <span className="text-muted-foreground ml-1">vs période précédente</span>
             </div>
@@ -212,8 +215,8 @@ export const BookingsDashboard : React.FC<BookingsDashboardProps> = ({
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(stats.totalRevenue)}</div>
             <div className="flex items-center text-xs text-green-600 mt-1">
-              <TrendingUp className="h-3 w-3 mr-1" />
-              +{metrics.revenueTrend}% ce {period === 'today' ? 'jour' : period === 'week' ? 'semaine' : 'mois'}
+              <TrendingUp className="h-3 w-3 mr-1" />+{metrics.revenueTrend}% ce{' '}
+              {period === 'today' ? 'jour' : period === 'week' ? 'semaine' : 'mois'}
             </div>
           </CardContent>
         </Card>
@@ -251,9 +254,7 @@ export const BookingsDashboard : React.FC<BookingsDashboardProps> = ({
           <Card>
             <CardHeader>
               <CardTitle>Répartition par statut</CardTitle>
-              <CardDescription>
-                Vue d'ensemble de toutes les réservations
-              </CardDescription>
+              <CardDescription>Vue d'ensemble de toutes les réservations</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -266,8 +267,8 @@ export const BookingsDashboard : React.FC<BookingsDashboardProps> = ({
                     </div>
                     <span className="font-medium">{stats.confirmedBookings}</span>
                   </div>
-                  <Progress 
-                    value={(stats.confirmedBookings / stats.totalBookings) * 100} 
+                  <Progress
+                    value={(stats.confirmedBookings / stats.totalBookings) * 100}
                     className="h-2 bg-green-100"
                   />
                 </div>
@@ -281,8 +282,8 @@ export const BookingsDashboard : React.FC<BookingsDashboardProps> = ({
                     </div>
                     <span className="font-medium">{stats.completedBookings}</span>
                   </div>
-                  <Progress 
-                    value={(stats.completedBookings / stats.totalBookings) * 100} 
+                  <Progress
+                    value={(stats.completedBookings / stats.totalBookings) * 100}
                     className="h-2"
                   />
                 </div>
@@ -296,8 +297,8 @@ export const BookingsDashboard : React.FC<BookingsDashboardProps> = ({
                     </div>
                     <span className="font-medium">{stats.pendingBookings}</span>
                   </div>
-                  <Progress 
-                    value={(stats.pendingBookings / stats.totalBookings) * 100} 
+                  <Progress
+                    value={(stats.pendingBookings / stats.totalBookings) * 100}
                     className="h-2 bg-yellow-100"
                   />
                 </div>
@@ -311,8 +312,8 @@ export const BookingsDashboard : React.FC<BookingsDashboardProps> = ({
                     </div>
                     <span className="font-medium">{stats.cancelledBookings}</span>
                   </div>
-                  <Progress 
-                    value={(stats.cancelledBookings / stats.totalBookings) * 100} 
+                  <Progress
+                    value={(stats.cancelledBookings / stats.totalBookings) * 100}
                     className="h-2 bg-red-100"
                   />
                 </div>
@@ -394,7 +395,7 @@ export const BookingsDashboard : React.FC<BookingsDashboardProps> = ({
             <CardContent>
               <ScrollArea className="h-[400px] pr-4">
                 <div className="space-y-3">
-                  {recentBookings.slice(0, 10).map((booking) => {
+                  {recentBookings.slice(0, 10).map(booking => {
                     const statusConfig = STATUS_CONFIG[booking.status || 'pending'];
                     const StatusIcon = statusConfig.icon;
 
@@ -406,9 +407,7 @@ export const BookingsDashboard : React.FC<BookingsDashboardProps> = ({
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <p className="font-medium text-sm">
-                              {booking.customer_id || 'Client'}
-                            </p>
+                            <p className="font-medium text-sm">{booking.customer_id || 'Client'}</p>
                             <p className="text-xs text-muted-foreground mt-0.5">
                               {booking.service_id || 'Service'}
                             </p>
@@ -459,9 +458,11 @@ export const BookingsDashboard : React.FC<BookingsDashboardProps> = ({
                     <div className="text-right">
                       <p className="font-bold text-sm">{formatCurrency(customer.revenue)}</p>
                       <div className="flex items-center gap-0.5 mt-0.5">
-                        {Array.from({ length: Math.min(5, Math.floor(customer.bookings / 2)) }).map((_, i) => (
-                          <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                        ))}
+                        {Array.from({ length: Math.min(5, Math.floor(customer.bookings / 2)) }).map(
+                          (_, i) => (
+                            <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                          )
+                        )}
                       </div>
                     </div>
                   </div>
@@ -487,8 +488,9 @@ export const BookingsDashboard : React.FC<BookingsDashboardProps> = ({
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Meilleur jour</span>
                 <span className="font-semibold">
-                  {stats.bookingsByDay.length > 0 
-                    ? stats.bookingsByDay.reduce((max, day) => day.count > max.count ? day : max).date 
+                  {stats.bookingsByDay.length > 0
+                    ? stats.bookingsByDay.reduce((max, day) => (day.count > max.count ? day : max))
+                        .date
                     : 'N/A'}
                 </span>
               </div>
@@ -503,11 +505,3 @@ export const BookingsDashboard : React.FC<BookingsDashboardProps> = ({
 BookingsDashboard.displayName = 'BookingsDashboard';
 
 export default BookingsDashboard;
-
-
-
-
-
-
-
-

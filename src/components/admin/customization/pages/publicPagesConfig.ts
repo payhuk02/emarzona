@@ -6,6 +6,7 @@ import {
 } from '@/lib/admin/landingPremiumCustomization';
 import { buildPlatformMarketingPageConfigs } from '@/lib/admin/platformMarketingPagesConfig';
 import { buildPlatformLegalPageConfigs } from '@/lib/admin/platformLegalPagesConfig';
+import { buildPlatformFaqPageConfig } from '@/lib/admin/platformFaqPageConfig';
 import { STORE_FOOTER_PAGE_ID, STORE_FOOTER_SECTIONS } from '@/lib/admin/storeFooterCustomization';
 
 const landingPremiumPage: PageConfig = {
@@ -32,6 +33,7 @@ const landingPremiumPage: PageConfig = {
 export const publicPagesConfig: PageConfig[] = [
   landingPremiumPage,
   ...buildPlatformMarketingPageConfigs(),
+  buildPlatformFaqPageConfig(),
   ...buildPlatformLegalPageConfigs(),
   {
     id: STORE_FOOTER_PAGE_ID,

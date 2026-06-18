@@ -161,4 +161,34 @@ describe('buildOrderItemRows', () => {
     expect(serviceRow?.booking_id).toBe('bk-1');
     expect(serviceRow?.service_product_id).toBe('svc-1');
   });
+
+  it('construit les 4 verticaux dans un même checkout', async () => {
+    const rows = await buildOrderItemRows('order-1', [
+      baseItem({
+        product_id: 'p-dig',
+        product_type: 'digital',
+        metadata: { digital_product_id: 'dig-1' },
+      }),
+      baseItem({
+        product_id: 'p-phys',
+        product_type: 'physical',
+        metadata: { physical_product_id: 'phys-1' },
+      }),
+      baseItem({
+        product_id: 'p-course',
+        product_type: 'course',
+        metadata: { course_id: 'course-1' },
+      }),
+      baseItem({
+        product_id: 'p-art',
+        product_type: 'artist',
+        metadata: { artist_product_id: 'art-1' },
+      }),
+    ]);
+
+    expect(rows).toHaveLength(4);
+    expect(rows.map(r => r.product_type).sort()).toEqual(
+      ['artist', 'course', 'digital', 'physical'].sort()
+    );
+  });
 });

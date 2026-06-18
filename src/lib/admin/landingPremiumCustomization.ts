@@ -106,6 +106,8 @@ export const LANDING_PREMIUM_SECTIONS: LandingPremiumSection[] = [
     icon: Menu,
     elements: [
       text('nav.marketplace', 'Lien Marketplace', lp.nav.marketplace),
+      text('nav.courses', 'Lien Cours en ligne', lp.nav.courses),
+      text('nav.faq', 'Lien FAQ', lp.nav.faq),
       text('nav.features', 'Lien Fonctionnalités', lp.nav.features),
       text('nav.solutions', 'Lien Solutions', lp.nav.solutions),
       text('nav.pricing', 'Lien Tarifs', lp.nav.pricing),
@@ -392,6 +394,11 @@ export const LANDING_PREMIUM_SECTIONS: LandingPremiumSection[] = [
         'Lien Marketplace',
         lp.footer.columns.product.marketplace
       ),
+      text(
+        'footer.columns.product.courses',
+        'Lien Cours en ligne',
+        lp.footer.columns.product.courses
+      ),
       text('footer.columns.product.pricing', 'Lien Tarifs', lp.footer.columns.product.pricing),
       text(
         'footer.columns.product.integrations',
@@ -405,6 +412,7 @@ export const LANDING_PREMIUM_SECTIONS: LandingPremiumSection[] = [
       ),
       text('footer.columns.resources.blog', 'Lien Blog', lp.footer.columns.resources.blog),
       text('footer.columns.resources.docs', 'Lien Documentation', lp.footer.columns.resources.docs),
+      text('footer.columns.resources.faq', 'Lien FAQ', lp.footer.columns.resources.faq),
       text('footer.columns.resources.help', "Lien Centre d'aide", lp.footer.columns.resources.help),
       text(
         'footer.columns.resources.community',

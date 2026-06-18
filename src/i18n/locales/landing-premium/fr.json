@@ -1,6 +1,8 @@
 {
   "nav": {
     "marketplace": "Marketplace",
+    "courses": "Cours en ligne",
+    "faq": "FAQ",
     "features": "Fonctionnalités",
     "solutions": "Solutions",
     "pricing": "Tarifs",
@@ -270,6 +272,7 @@
         "title": "Produit",
         "features": "Fonctionnalités",
         "marketplace": "Marketplace",
+        "courses": "Cours en ligne",
         "pricing": "Tarifs",
         "integrations": "Intégrations"
       },
@@ -277,6 +280,7 @@
         "title": "Ressources",
         "blog": "Blog",
         "docs": "Documentation",
+        "faq": "FAQ",
         "help": "Centre d'aide",
         "community": "Communauté"
       },
@@ -302,6 +306,32 @@
   "seo": {
     "title": "Emarzona — Vendez tout. Gérez tout. Sans limites.",
     "description": "Plateforme e-commerce premium : produits digitaux, physiques, services, cours et œuvres d'artiste. Paiements sécurisés, marketing intégré, marketplace Afrique."
+  },
+  "faq": {
+    "backHome": "Retour à l'accueil",
+    "searchPlaceholder": "Rechercher une question…",
+    "searchAria": "Rechercher dans la FAQ",
+    "audience": {
+      "all": "Tous",
+      "seller": "Vendeurs",
+      "buyer": "Acheteurs"
+    },
+    "resultsCount": "{{count}} question affichée",
+    "resultsCount_plural": "{{count}} questions affichées",
+    "loadError": "Impossible de charger la FAQ pour le moment. Réessayez plus tard ou consultez le",
+    "helpCenter": "centre d'aide",
+    "noResults": "Aucune question ne correspond à votre recherche.",
+    "resetFilters": "Réinitialiser les filtres",
+    "breadcrumb": {
+      "home": "Accueil",
+      "faq": "FAQ"
+    },
+    "cta": {
+      "title": "Besoin d'une aide personnalisée ?",
+      "body": "La FAQ couvre les cas les plus courants. Pour les tutoriels détaillés ou un suivi de commande, utilisez le centre d'aide ou contactez notre équipe.",
+      "help": "Centre d'aide",
+      "contact": "Nous contacter"
+    }
   },
   "logoAlt": "Emarzona — plateforme e-commerce"
 }

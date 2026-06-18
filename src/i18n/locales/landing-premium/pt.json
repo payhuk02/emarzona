@@ -1,6 +1,7 @@
 {
   "nav": {
     "marketplace": "Marketplace",
+    "faq": "FAQ",
     "features": "Funcionalidades",
     "solutions": "Soluções",
     "pricing": "Preços",
@@ -266,6 +267,7 @@
         "title": "Recursos",
         "blog": "Blog",
         "docs": "Documentação",
+        "faq": "FAQ",
         "help": "Centro de ajuda",
         "community": "Comunidade"
       },

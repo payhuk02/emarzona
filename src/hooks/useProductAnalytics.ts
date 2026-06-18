@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useVisibilityAwarePolling } from '@/hooks/useVisibilityAwarePolling';
 import { logger } from '@/lib/logger';
+import { aggregateTrafficSources } from '@/lib/analytics/traffic-sources';
 
 const PRODUCT_ANALYTICS_FIELDS =
   'id, product_id, store_id, total_views, total_clicks, total_conversions, total_revenue, conversion_rate, bounce_rate, avg_session_duration, returning_visitors, views_today, clicks_today, conversions_today, revenue_today, views_yesterday, clicks_yesterday, conversions_yesterday, revenue_yesterday, tracking_enabled, track_views, track_clicks, track_conversions, track_time_spent, track_errors, advanced_tracking, custom_events, google_analytics_id, facebook_pixel_id, google_tag_manager_id, tiktok_pixel_id, pinterest_pixel_id, linkedin_insight_tag, goal_views, goal_revenue, goal_conversions, goal_conversion_rate, email_alerts, last_updated, created_at, updated_at';
@@ -662,4 +664,48 @@ export const useAnalyticsHistory = (productId: string, days: number = 30) => {
     error,
     loadHistory,
   };
+};
+
+/** Sources de trafic réelles (user_sessions, fallback analytics_events views). */
+export const useProductTrafficSources = (productId: string | undefined, days: number = 30) => {
+  return useQuery({
+    queryKey: ['product-traffic-sources', productId, days],
+    queryFn: async () => {
+      if (!productId) return [];
+
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - days);
+
+      const { data: sessions, error: sessionsError } = await supabase
+        .from('user_sessions')
+        .select('referrer, utm_source, utm_medium')
+        .eq('product_id', productId)
+        .gte('start_time', startDate.toISOString());
+
+      if (sessionsError) throw sessionsError;
+
+      if (sessions && sessions.length > 0) {
+        return aggregateTrafficSources(sessions);
+      }
+
+      const { data: events, error: eventsError } = await supabase
+        .from('analytics_events')
+        .select('referrer')
+        .eq('product_id', productId)
+        .eq('event_type', 'view')
+        .gte('created_at', startDate.toISOString());
+
+      if (eventsError) throw eventsError;
+
+      return aggregateTrafficSources(
+        (events ?? []).map(event => ({
+          referrer: event.referrer,
+          utm_source: null,
+          utm_medium: null,
+        }))
+      );
+    },
+    enabled: !!productId,
+    staleTime: 5 * 60 * 1000,
+  });
 };

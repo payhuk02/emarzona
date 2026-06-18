@@ -397,7 +397,11 @@ export default function PhysicalProductDetail() {
   const physicalWeightLabel = formatPhysicalWeight(product?.physical);
   const physicalDimensionsLabel = formatPhysicalDimensions(product?.physical);
   const availability = stockQuantity > 0 ? 'instock' : 'outofstock';
-  const currentPrice = product?.promotional_price || product?.price;
+  const displayPrice = product?.promotional_price ?? product?.price;
+  const compareAtPrice =
+    product?.promotional_price != null && product.promotional_price < product.price
+      ? product.price
+      : null;
   const productUrl = `${window.location.origin}/physical/${productId}`;
 
   return (
@@ -415,7 +419,7 @@ export default function PhysicalProductDetail() {
         image={images[0]}
         imageAlt={product.name}
         type="product"
-        price={currentPrice}
+        price={displayPrice}
         currency={product.currency}
         availability={availability}
       />
@@ -428,7 +432,7 @@ export default function PhysicalProductDetail() {
             name: product.name,
             slug: product.slug,
             description: product.description || product.short_description || '',
-            price: currentPrice,
+            price: displayPrice,
             currency: product.currency,
             image_url: images[0],
             images: images.map((url: string) => ({ url })),
@@ -480,13 +484,13 @@ export default function PhysicalProductDetail() {
           </div>
 
           {/* Price */}
-          <div className="flex items-center gap-4">
-            <span className="text-lg sm:text-2xl md:text-3xl font-bold">
-              {product?.price.toLocaleString()} {product?.currency}
+          <div className="flex items-baseline gap-3 flex-wrap">
+            <span className="text-2xl sm:text-3xl font-bold tracking-tight">
+              {displayPrice.toLocaleString('fr-FR')} {product?.currency}
             </span>
-            {product?.promotional_price && (
-              <span className="text-xl line-through text-gray-500">
-                {product.promotional_price.toLocaleString()} {product?.currency}
+            {compareAtPrice != null && (
+              <span className="text-lg text-muted-foreground line-through">
+                {compareAtPrice.toLocaleString('fr-FR')} {product?.currency}
               </span>
             )}
           </div>
@@ -542,6 +546,23 @@ export default function PhysicalProductDetail() {
             currency={product?.currency}
           />
 
+          {productId && <PhysicalProductDeliveryEstimate productId={productId} />}
+
+          <div className="grid grid-cols-3 gap-2 text-center">
+            <div className="rounded-lg border bg-muted/30 p-3">
+              <Truck className="h-4 w-4 mx-auto mb-1 text-primary" aria-hidden="true" />
+              <p className="text-[11px] font-medium leading-tight">Livraison suivie</p>
+            </div>
+            <div className="rounded-lg border bg-muted/30 p-3">
+              <Shield className="h-4 w-4 mx-auto mb-1 text-primary" aria-hidden="true" />
+              <p className="text-[11px] font-medium leading-tight">Paiement sécurisé</p>
+            </div>
+            <div className="rounded-lg border bg-muted/30 p-3">
+              <Package className="h-4 w-4 mx-auto mb-1 text-primary" aria-hidden="true" />
+              <p className="text-[11px] font-medium leading-tight">Stock vérifié</p>
+            </div>
+          </div>
+
           {/* Actions */}
           <div className="space-y-3">
             <PhysicalProductWhatsAppButton
@@ -593,9 +614,6 @@ export default function PhysicalProductDetail() {
             </div>
           </div>
 
-          {productId && <PhysicalProductDeliveryEstimate productId={productId} />}
-
-          {/* Features */}
           {product?.physical && (
             <Card>
               <CardHeader>

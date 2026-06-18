@@ -48,6 +48,7 @@ test.describe('Routing', () => {
       '/about',
       '/contact',
       '/help',
+      '/faq',
       '/integrations',
     ];
 

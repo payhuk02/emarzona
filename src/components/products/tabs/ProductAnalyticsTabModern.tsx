@@ -1,18 +1,18 @@
-import { useState, useEffect } from "react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
-import { 
-  BarChart3, 
-  Eye, 
-  MousePointer, 
-  TrendingUp, 
-  Users, 
-  ShoppingCart, 
+import { useState } from 'react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
+import {
+  BarChart3,
+  Eye,
+  MousePointer,
+  TrendingUp,
+  Users,
+  ShoppingCart,
   Target,
   Zap,
   Settings,
@@ -20,54 +20,46 @@ import {
   PieChart,
   Calendar,
   ArrowUpRight,
-  ArrowDownRight
-} from "lucide-react";
-import "@/styles/modern-product-creation.css";
+  ArrowDownRight,
+} from 'lucide-react';
+import '@/styles/modern-product-creation.css';
 import { ProductFormData } from '@/types/product-form';
 import type { LucideIcon } from 'lucide-react';
+import { useProductAnalytics } from '@/hooks/useProductAnalytics';
 
 interface ProductAnalyticsTabModernProps {
   formData: ProductFormData;
   updateFormData: (field: string, value: string | number | boolean | null | undefined) => void;
 }
 
-export const ProductAnalyticsTabModern = ({ formData, updateFormData }: ProductAnalyticsTabModernProps) => {
-  const [analyticsData, setAnalyticsData] = useState({
-    views: 0,
-    clicks: 0,
-    conversions: 0,
-    conversionRate: 0,
-    revenue: 0
-  });
+export const ProductAnalyticsTabModern = ({
+  formData,
+  updateFormData,
+}: ProductAnalyticsTabModernProps) => {
+  const { analytics } = useProductAnalytics(formData.id ?? '');
 
-  // Simulation de données d'analytics
-  useEffect(() => {
-    const mockData = {
-      views: Math.floor(Math.random() * 1000) + 100,
-      clicks: Math.floor(Math.random() * 200) + 20,
-      conversions: Math.floor(Math.random() * 50) + 5,
-      conversionRate: 0,
-      revenue: Math.floor(Math.random() * 5000) + 500
-    };
-    
-    mockData.conversionRate = mockData.clicks > 0 ? (mockData.conversions / mockData.clicks) * 100 : 0;
-    setAnalyticsData(mockData);
-  }, []);
+  const analyticsData = {
+    views: analytics?.total_views ?? 0,
+    clicks: analytics?.total_clicks ?? 0,
+    conversions: analytics?.total_conversions ?? 0,
+    conversionRate: analytics?.conversion_rate ?? 0,
+    revenue: analytics?.total_revenue ?? 0,
+  };
 
-  const StatCard = ({ 
-    title, 
-    value, 
-    change, 
-    icon: Icon, 
-    className = "",
-    trend = "positive" 
+  const StatCard = ({
+    title,
+    value,
+    change,
+    icon: Icon,
+    className = '',
+    trend = 'positive',
   }: {
     title: string;
     value: string | number;
     change: string;
     icon: LucideIcon;
     className?: string;
-    trend?: "positive" | "negative";
+    trend?: 'positive' | 'negative';
   }) => (
     <div className={`modern-stats-card ${className} modern-animate-in`}>
       <CardContent className="p-6">
@@ -83,7 +75,7 @@ export const ProductAnalyticsTabModern = ({ formData, updateFormData }: ProductA
           </div>
         </div>
         <div className={`modern-stat-change ${trend}`}>
-          {trend === "positive" ? (
+          {trend === 'positive' ? (
             <ArrowUpRight className="h-4 w-4" />
           ) : (
             <ArrowDownRight className="h-4 w-4" />
@@ -115,7 +107,7 @@ export const ProductAnalyticsTabModern = ({ formData, updateFormData }: ProductA
             </p>
           </div>
         </div>
-        
+
         <div className="modern-grid modern-grid-cols-4">
           <StatCard
             title="Vues"
@@ -164,7 +156,7 @@ export const ProductAnalyticsTabModern = ({ formData, updateFormData }: ProductA
               </p>
             </div>
           </div>
-          
+
           <div className="space-y-4">
             <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
               <div>
@@ -173,7 +165,7 @@ export const ProductAnalyticsTabModern = ({ formData, updateFormData }: ProductA
               </div>
               <Switch
                 checked={formData.track_views || false}
-                onCheckedChange={(checked) => updateFormData("track_views", checked)}
+                onCheckedChange={checked => updateFormData('track_views', checked)}
                 className="modern-switch"
               />
             </div>
@@ -185,7 +177,7 @@ export const ProductAnalyticsTabModern = ({ formData, updateFormData }: ProductA
               </div>
               <Switch
                 checked={formData.track_clicks || false}
-                onCheckedChange={(checked) => updateFormData("track_clicks", checked)}
+                onCheckedChange={checked => updateFormData('track_clicks', checked)}
                 className="modern-switch"
               />
             </div>
@@ -197,7 +189,7 @@ export const ProductAnalyticsTabModern = ({ formData, updateFormData }: ProductA
               </div>
               <Switch
                 checked={formData.track_purchases || false}
-                onCheckedChange={(checked) => updateFormData("track_purchases", checked)}
+                onCheckedChange={checked => updateFormData('track_purchases', checked)}
                 className="modern-switch"
               />
             </div>
@@ -209,7 +201,7 @@ export const ProductAnalyticsTabModern = ({ formData, updateFormData }: ProductA
               </div>
               <Switch
                 checked={formData.track_time_spent || false}
-                onCheckedChange={(checked) => updateFormData("track_time_spent", checked)}
+                onCheckedChange={checked => updateFormData('track_time_spent', checked)}
                 className="modern-switch"
               />
             </div>
@@ -221,41 +213,45 @@ export const ProductAnalyticsTabModern = ({ formData, updateFormData }: ProductA
             <PieChart className="h-6 w-6 text-purple-600" />
             <div>
               <h3 className="modern-section-title">Analytics Externes</h3>
-              <p className="modern-section-description">
-                Intégration avec des outils tiers
-              </p>
+              <p className="modern-section-description">Intégration avec des outils tiers</p>
             </div>
           </div>
-          
+
           <div className="space-y-4">
             <div>
-              <Label htmlFor="google_analytics_id" className="modern-title-md">Google Analytics ID</Label>
+              <Label htmlFor="google_analytics_id" className="modern-title-md">
+                Google Analytics ID
+              </Label>
               <Input
                 id="google_analytics_id"
-                value={formData.google_analytics_id || ""}
-                onChange={(e) => updateFormData("google_analytics_id", e.target.value)}
+                value={formData.google_analytics_id || ''}
+                onChange={e => updateFormData('google_analytics_id', e.target.value)}
                 placeholder="GA-XXXXXXXXX"
                 className="modern-input"
               />
             </div>
 
             <div>
-              <Label htmlFor="facebook_pixel_id" className="modern-title-md">Facebook Pixel ID</Label>
+              <Label htmlFor="facebook_pixel_id" className="modern-title-md">
+                Facebook Pixel ID
+              </Label>
               <Input
                 id="facebook_pixel_id"
-                value={formData.facebook_pixel_id || ""}
-                onChange={(e) => updateFormData("facebook_pixel_id", e.target.value)}
+                value={formData.facebook_pixel_id || ''}
+                onChange={e => updateFormData('facebook_pixel_id', e.target.value)}
                 placeholder="123456789012345"
                 className="modern-input"
               />
             </div>
 
             <div>
-              <Label htmlFor="google_tag_manager_id" className="modern-title-md">Google Tag Manager ID</Label>
+              <Label htmlFor="google_tag_manager_id" className="modern-title-md">
+                Google Tag Manager ID
+              </Label>
               <Input
                 id="google_tag_manager_id"
-                value={formData.google_tag_manager_id || ""}
-                onChange={(e) => updateFormData("google_tag_manager_id", e.target.value)}
+                value={formData.google_tag_manager_id || ''}
+                onChange={e => updateFormData('google_tag_manager_id', e.target.value)}
                 placeholder="GTM-XXXXXXX"
                 className="modern-input"
               />
@@ -268,7 +264,7 @@ export const ProductAnalyticsTabModern = ({ formData, updateFormData }: ProductA
               </div>
               <Switch
                 checked={formData.advanced_tracking || false}
-                onCheckedChange={(checked) => updateFormData("advanced_tracking", checked)}
+                onCheckedChange={checked => updateFormData('advanced_tracking', checked)}
                 className="modern-switch"
               />
             </div>
@@ -287,53 +283,65 @@ export const ProductAnalyticsTabModern = ({ formData, updateFormData }: ProductA
             </p>
           </div>
         </div>
-        
+
         <div className="modern-grid modern-grid-cols-2 gap-6">
           <div className="space-y-4">
             <div>
-              <Label htmlFor="target_views" className="modern-title-md">Objectif vues (mensuel)</Label>
+              <Label htmlFor="target_views" className="modern-title-md">
+                Objectif vues (mensuel)
+              </Label>
               <Input
                 id="target_views"
                 type="number"
-                value={formData.target_views || ""}
-                onChange={(e) => updateFormData("target_views", parseInt(e.target.value) || null)}
+                value={formData.target_views || ''}
+                onChange={e => updateFormData('target_views', parseInt(e.target.value) || null)}
                 placeholder="1000"
                 className="modern-input"
               />
             </div>
             <div>
-              <Label htmlFor="target_conversions" className="modern-title-md">Objectif conversions (mensuel)</Label>
+              <Label htmlFor="target_conversions" className="modern-title-md">
+                Objectif conversions (mensuel)
+              </Label>
               <Input
                 id="target_conversions"
                 type="number"
-                value={formData.target_conversions || ""}
-                onChange={(e) => updateFormData("target_conversions", parseInt(e.target.value) || null)}
+                value={formData.target_conversions || ''}
+                onChange={e =>
+                  updateFormData('target_conversions', parseInt(e.target.value) || null)
+                }
                 placeholder="50"
                 className="modern-input"
               />
             </div>
           </div>
-          
+
           <div className="space-y-4">
             <div>
-              <Label htmlFor="target_revenue" className="modern-title-md">Objectif revenus (mensuel)</Label>
+              <Label htmlFor="target_revenue" className="modern-title-md">
+                Objectif revenus (mensuel)
+              </Label>
               <Input
                 id="target_revenue"
                 type="number"
-                value={formData.target_revenue || ""}
-                onChange={(e) => updateFormData("target_revenue", parseFloat(e.target.value) || null)}
+                value={formData.target_revenue || ''}
+                onChange={e => updateFormData('target_revenue', parseFloat(e.target.value) || null)}
                 placeholder="5000"
                 className="modern-input"
               />
             </div>
             <div>
-              <Label htmlFor="target_conversion_rate" className="modern-title-md">Objectif taux de conversion (%)</Label>
+              <Label htmlFor="target_conversion_rate" className="modern-title-md">
+                Objectif taux de conversion (%)
+              </Label>
               <Input
                 id="target_conversion_rate"
                 type="number"
                 step="0.1"
-                value={formData.target_conversion_rate || ""}
-                onChange={(e) => updateFormData("target_conversion_rate", parseFloat(e.target.value) || null)}
+                value={formData.target_conversion_rate || ''}
+                onChange={e =>
+                  updateFormData('target_conversion_rate', parseFloat(e.target.value) || null)
+                }
                 placeholder="5.0"
                 className="modern-input"
               />
@@ -349,7 +357,7 @@ export const ProductAnalyticsTabModern = ({ formData, updateFormData }: ProductA
             </div>
             <Switch
               checked={formData.email_alerts || false}
-              onCheckedChange={(checked) => updateFormData("email_alerts", checked)}
+              onCheckedChange={checked => updateFormData('email_alerts', checked)}
               className="modern-switch"
             />
           </div>
@@ -367,16 +375,14 @@ export const ProductAnalyticsTabModern = ({ formData, updateFormData }: ProductA
             </p>
           </div>
         </div>
-        
+
         <div className="modern-grid modern-grid-cols-3 gap-6">
           <div className="modern-card p-6 text-center">
             <div className="p-3 bg-blue-100 rounded-full w-fit mx-auto mb-4">
               <Calendar className="h-8 w-8 text-blue-600" />
             </div>
             <h3 className="modern-title-md mb-2">Rapport Quotidien</h3>
-            <p className="modern-description mb-4">
-              Résumé des performances du jour
-            </p>
+            <p className="modern-description mb-4">Résumé des performances du jour</p>
             <Button className="modern-button w-full">
               <BarChart3 className="h-4 w-4" />
               Générer
@@ -388,9 +394,7 @@ export const ProductAnalyticsTabModern = ({ formData, updateFormData }: ProductA
               <TrendingUp className="h-8 w-8 text-green-600" />
             </div>
             <h3 className="modern-title-md mb-2">Rapport Mensuel</h3>
-            <p className="modern-description mb-4">
-              Analyse complète du mois
-            </p>
+            <p className="modern-description mb-4">Analyse complète du mois</p>
             <Button className="modern-button w-full">
               <Activity className="h-4 w-4" />
               Générer
@@ -402,9 +406,7 @@ export const ProductAnalyticsTabModern = ({ formData, updateFormData }: ProductA
               <Zap className="h-8 w-8 text-purple-600" />
             </div>
             <h3 className="modern-title-md mb-2">Export CSV</h3>
-            <p className="modern-description mb-4">
-              Données brutes pour analyse
-            </p>
+            <p className="modern-description mb-4">Données brutes pour analyse</p>
             <Button className="modern-button w-full">
               <Download className="h-4 w-4" />
               Exporter
@@ -419,12 +421,10 @@ export const ProductAnalyticsTabModern = ({ formData, updateFormData }: ProductA
           <Activity className="h-6 w-6 text-cyan-600" />
           <div>
             <h2 className="modern-section-title">Données en Temps Réel</h2>
-            <p className="modern-section-description">
-              Activité actuelle sur ce produit
-            </p>
+            <p className="modern-section-description">Activité actuelle sur ce produit</p>
           </div>
         </div>
-        
+
         <div className="modern-grid modern-grid-cols-4 gap-6">
           <div className="text-center p-4 bg-blue-50 rounded-lg">
             <div className="modern-stat-value text-blue-600">{analyticsData.views}</div>
@@ -439,7 +439,9 @@ export const ProductAnalyticsTabModern = ({ formData, updateFormData }: ProductA
             <div className="modern-stat-label">Conversions aujourd'hui</div>
           </div>
           <div className="text-center p-4 bg-orange-50 rounded-lg">
-            <div className="modern-stat-value text-orange-600">{analyticsData.conversionRate.toFixed(1)}%</div>
+            <div className="modern-stat-value text-orange-600">
+              {analyticsData.conversionRate.toFixed(1)}%
+            </div>
             <div className="modern-stat-label">Taux de conversion</div>
           </div>
         </div>
@@ -447,9 +449,3 @@ export const ProductAnalyticsTabModern = ({ formData, updateFormData }: ProductA
     </div>
   );
 };
-
-
-
-
-
-
