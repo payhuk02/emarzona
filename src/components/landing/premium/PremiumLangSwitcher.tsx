@@ -1,5 +1,6 @@
 import { useCallback, useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 import { ChevronDown, Globe } from 'lucide-react';
 import { AVAILABLE_LANGUAGES, type LanguageCode } from '@/i18n/languages';
 import { ensureLandingPremiumLocale } from '@/i18n/landing-premium-loader';
@@ -13,6 +14,7 @@ interface PremiumLangSwitcherProps {
 
 export function PremiumLangSwitcher({ className, fullWidth = false }: PremiumLangSwitcherProps) {
   const { i18n } = useTranslation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -29,9 +31,12 @@ export function PremiumLangSwitcher({ className, fullWidth = false }: PremiumLan
       i18n.changeLanguage(code);
       localStorage.setItem('emarzona_language', code);
       document.documentElement.lang = code;
+      const next = new URLSearchParams(searchParams);
+      next.set('lang', code);
+      setSearchParams(next, { replace: true });
       setOpen(false);
     },
-    [i18n]
+    [i18n, searchParams, setSearchParams]
   );
 
   useEffect(() => {

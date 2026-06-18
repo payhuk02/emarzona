@@ -100,7 +100,7 @@ const typeAssertions: Record<
     forbiddenDirectPath: '/dashboard/shipping',
   },
   artist: {
-    mustHave: ['/dashboard/auctions', '/dashboard/portfolios'],
+    mustHave: ['/dashboard/artist-products', '/dashboard/auctions', '/dashboard/portfolios'],
     mustNotHave: [
       '/dashboard/shipping',
       '/dashboard/digital-products',
@@ -202,6 +202,11 @@ test.describe('Commerce type gating (E2E minimal)', () => {
       const wrongCreatePath = WRONG_CREATE_PATH_BY_TYPE[commerceType];
       await page.goto(wrongCreatePath, { waitUntil: 'domcontentloaded' });
       await expect(page).toHaveURL('/dashboard', { timeout: 20_000 });
+
+      if (commerceType === 'artist') {
+        await page.goto('/dashboard/products', { waitUntil: 'domcontentloaded' });
+        await expect(page).toHaveURL('/dashboard/artist-products', { timeout: 20_000 });
+      }
 
       // Cleanup best-effort (do not fail test run on cleanup errors)
       try {

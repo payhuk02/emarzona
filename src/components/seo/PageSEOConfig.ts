@@ -3,6 +3,8 @@
  * Évite la duplication et facilite la maintenance
  */
 
+import { LANDING_SEO_DEFAULTS } from '@/lib/landing-seo';
+
 export interface PageSEOEntry {
   title: string;
   description: string;
@@ -19,11 +21,9 @@ export interface PageSEOEntry {
 export const PAGE_SEO_CONFIG: Record<string, PageSEOEntry> = {
   // === Pages publiques indexables ===
   '/': {
-    title: 'Emarzona - Plateforme de ecommerce et marketing',
-    description:
-      "Vendez vos produits digitaux, physiques, services, cours en ligne et œuvres d'artistes. Solution e-commerce moderne et sécurisée pour l'Afrique de l'Ouest.",
-    keywords:
-      "ecommerce, marketplace, produits digitaux, produits physiques, services, cours en ligne, œuvres d'artistes, Afrique de l'Ouest",
+    title: LANDING_SEO_DEFAULTS.title,
+    description: LANDING_SEO_DEFAULTS.description,
+    keywords: LANDING_SEO_DEFAULTS.keywords,
   },
   '/marketplace': {
     title: 'Marketplace - Explorer les produits | Emarzona',

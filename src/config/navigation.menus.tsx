@@ -51,6 +51,7 @@ import {
   FileBarChart,
   ShoppingBag,
   Camera,
+  Palette,
   Globe,
   Trophy,
   AlertTriangle,
@@ -230,6 +231,11 @@ export const userMenuSections = [
         title: "Créer une œuvre d'artiste",
         url: '/dashboard/products/new/artist',
         icon: Camera,
+      },
+      {
+        title: "Mes œuvres d'artiste",
+        url: '/dashboard/artist-products',
+        icon: Palette,
       },
       {
         title: 'Mes cours en ligne',

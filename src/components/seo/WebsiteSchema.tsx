@@ -5,16 +5,16 @@
  */
 
 import { Helmet } from 'react-helmet-async';
+import { LANDING_SEO_DEFAULTS } from '@/lib/landing-seo';
 
 export const WebsiteSchema = () => {
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: 'Emarzona',
-    alternateName: 'Emarzona - Plateforme de ecommerce et marketing',
+    alternateName: 'Emarzona',
     url: window.location.origin,
-    description:
-      "Plateforme de ecommerce et marketing. Vendez vos produits digitaux, physiques, services, cours en ligne et œuvres d'artistes. Solution e-commerce moderne et sécurisée.",
+    description: LANDING_SEO_DEFAULTS.description,
     inLanguage: 'fr-FR',
     potentialAction: {
       '@type': 'SearchAction',

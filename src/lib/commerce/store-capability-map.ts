@@ -33,7 +33,7 @@ export const VENDOR_PRODUCT_LIST_PATH_BY_TYPE: Record<StoreCommerceType, string>
   digital: '/dashboard/digital-products',
   service: '/dashboard/services',
   course: '/dashboard/courses',
-  artist: '/dashboard/products',
+  artist: '/dashboard/artist-products',
 };
 
 export function getVendorProductListPath(commerceType?: StoreCommerceType | null): string {
@@ -115,7 +115,13 @@ const ROUTE_CAPABILITY_RULES: readonly RouteRule[] = [
   {
     label: "Modules Oeuvres d'artiste",
     allowedTypes: ['artist'],
-    pathPrefixes: ['/dashboard/portfolios', '/dashboard/auctions', '/collections', '/auctions'],
+    pathPrefixes: [
+      '/dashboard/artist-products',
+      '/dashboard/portfolios',
+      '/dashboard/auctions',
+      '/collections',
+      '/auctions',
+    ],
   },
   {
     label: 'Fonctionnalites communes',

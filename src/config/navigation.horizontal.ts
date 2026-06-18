@@ -176,6 +176,7 @@ export const HORIZONTAL_MEGA_SUBGROUPS: Partial<
         '/dashboard/products',
         '/dashboard/digital-products',
         '/dashboard/courses',
+        '/dashboard/artist-products',
         '/dashboard/auctions',
         '/dashboard/portfolios',
       ],

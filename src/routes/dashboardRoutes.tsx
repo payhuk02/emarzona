@@ -43,9 +43,9 @@ const Dashboard = lazyPage(() =>
       };
     })
 );
-const Products = lazyPage(() =>
-  import('@/pages/Products').catch(error => {
-    logger.error('Erreur lors du chargement de Products:', error);
+const VendorProductsListGate = lazyPage(() =>
+  import('@/pages/products/VendorProductsListGate').catch(error => {
+    logger.error('Erreur lors du chargement VendorProductsListGate:', error);
     return {
       default: () => (
         <div className="flex min-h-screen items-center justify-center">
@@ -160,6 +160,7 @@ const NotificationsManagement = lazyPage(
 const NotificationSettings = lazyPage(() => import('@/pages/settings/NotificationSettings'));
 const MyCoursesRedirect = lazyPage(() => import('@/pages/courses/MyCoursesRedirect'));
 const SellerCoursesList = lazyPage(() => import('@/pages/courses/SellerCoursesList'));
+const SellerArtistProductsList = lazyPage(() => import('@/pages/artist/SellerArtistProductsList'));
 const CreateCourse = lazyPage(() => import('@/pages/courses/CreateCourse'));
 const CourseAnalytics = lazyPage(() => import('@/pages/courses/CourseAnalytics'));
 const CohortsManagementPage = lazyPage(() => import('@/pages/courses/CohortsManagementPage'));
@@ -252,7 +253,7 @@ export const dashboardRoutes = (
     {pr('/dashboard/store', Store)}
     {pr('/dashboard/store/team', StoreTeamManagement)}
     {pr('/dashboard/tasks', MyTasks)}
-    {pr('/dashboard/products', Products)}
+    {pr('/dashboard/products', VendorProductsListGate)}
     {pr('/dashboard/orders', Orders)}
     {pr('/dashboard/withdrawals', Withdrawals)}
     {pr('/dashboard/payment-methods', PaymentMethods)}
@@ -349,6 +350,7 @@ export const dashboardRoutes = (
 
     {/* Courses */}
     {pr('/dashboard/courses', SellerCoursesList)}
+    {pr('/dashboard/artist-products', SellerArtistProductsList)}
     {pr('/dashboard/my-courses', MyCoursesRedirect)}
     {pr('/dashboard/courses/new', CreateCourse)}
     {pr('/dashboard/courses/live-sessions', LiveSessionsManagement)}

@@ -77,6 +77,7 @@ createRoot(document.getElementById('root')!).render(<App />);
 if (typeof document !== 'undefined') {
   const seoFallback = document.getElementById('seo-fallback');
   if (seoFallback) seoFallback.remove();
+  document.querySelectorAll('script[data-seo-static]').forEach(el => el.remove());
 }
 
 // ✅ PERFORMANCE: Initialisations non-critiques après le premier render

@@ -11,8 +11,12 @@ import { PAGE_SEO_CONFIG } from './PageSEOConfig';
 export const AutoSEO = () => {
   const { pathname } = useLocation();
 
+  // La landing gère son propre SEOMeta + JSON-LD (évite conflit de titres)
+  if (pathname === '/') return null;
+
   // Origine dynamique : preview, lovable.app, custom domain — jamais hardcodée
-  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.emarzona.com';
+  const origin =
+    typeof window !== 'undefined' ? window.location.origin : 'https://www.emarzona.com';
 
   // Chercher une config exacte ou la route parente la plus proche
   const config = PAGE_SEO_CONFIG[pathname];

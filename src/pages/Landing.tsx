@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import { SEOMeta } from '@/components/seo/SEOMeta';
 import { WebsiteSchema } from '@/components/seo/WebsiteSchema';
 import { OrganizationSchema } from '@/components/seo/OrganizationSchema';
@@ -6,6 +7,12 @@ import { PremiumLandingPage } from '@/components/landing/premium/PremiumLandingP
 import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
 import { injectLandingCriticalCSS } from '@/lib/landing-critical-css';
 import { ensureLandingPremiumLocale } from '@/i18n/landing-premium-loader';
+import i18n from '@/i18n/config';
+import {
+  getLandingSEO,
+  buildLandingHreflangAlternates,
+  parseLandingLangFromSearch,
+} from '@/lib/landing-seo';
 import heroGlobeWebpSm from '@/assets/landing/hero-globe-320.webp';
 
 const LANDING_FONTS_ID = 'landing-premium-fonts';
@@ -63,13 +70,21 @@ function LandingShell() {
 
 const Landing = () => {
   const [ready, setReady] = useState(false);
+  const location = useLocation();
   useLandingAssets();
+
+  const hreflangAlternates = useMemo(() => buildLandingHreflangAlternates(), []);
 
   useEffect(() => {
     let cancelled = false;
+    const langFromUrl = parseLandingLangFromSearch(location.search);
 
-    ensureLandingPremiumLocale()
-      .then(() => {
+    ensureLandingPremiumLocale(langFromUrl ?? undefined)
+      .then(async () => {
+        if (langFromUrl && i18n.language !== langFromUrl) {
+          await i18n.changeLanguage(langFromUrl);
+          document.documentElement.lang = langFromUrl;
+        }
         if (!cancelled) setReady(true);
       })
       .catch(() => {
@@ -79,33 +94,48 @@ const Landing = () => {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [location.search]);
 
   if (!ready) {
+    const seo = getLandingSEO();
     return (
       <>
         <SEOMeta
-          title="Emarzona — Plateforme e-commerce tout-en-un"
-          description="Vendez produits digitaux, physiques, services, cours et œuvres d'artiste. Une plateforme e-commerce moderne pour l'Afrique et le monde."
-          url="https://www.emarzona.com/"
+          title={seo.title}
+          description={seo.description}
+          keywords={seo.keywords}
+          url={seo.url}
+          imageAlt={seo.imageAlt}
+          hreflangAlternates={hreflangAlternates}
         />
         <LandingShell />
       </>
     );
   }
 
-  return <LandingContent />;
+  return <LandingContent hreflangAlternates={hreflangAlternates} />;
 };
 
-function LandingContent() {
+function LandingContent({
+  hreflangAlternates,
+}: {
+  hreflangAlternates: ReturnType<typeof buildLandingHreflangAlternates>;
+}) {
   const { t } = useLandingPremiumT();
+  const seo = getLandingSEO({
+    title: t('seo.title'),
+    description: t('seo.description'),
+  });
 
   return (
     <>
       <SEOMeta
-        title={t('seo.title')}
-        description={t('seo.description')}
-        url="https://www.emarzona.com/"
+        title={seo.title}
+        description={seo.description}
+        keywords={seo.keywords}
+        url={seo.url}
+        imageAlt={seo.imageAlt}
+        hreflangAlternates={hreflangAlternates}
       />
       <WebsiteSchema />
       <OrganizationSchema />

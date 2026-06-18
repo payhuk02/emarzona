@@ -2,6 +2,7 @@
   "artist": [
     "/dashboard",
     "/dashboard/analytics",
+    "/dashboard/artist-products",
     "/dashboard/auctions",
     "/dashboard/coupons",
     "/dashboard/customers",

@@ -130,7 +130,12 @@ export const CONTEXT_SIDEBAR_CONFIGS = {
       {
         groupKey: 'artiste_encheres',
         defaultLabel: 'Artiste & Enchères',
-        paths: ['/dashboard/auctions', '/dashboard/auctions/watchlist', '/dashboard/portfolios'],
+        paths: [
+          '/dashboard/artist-products',
+          '/dashboard/auctions',
+          '/dashboard/auctions/watchlist',
+          '/dashboard/portfolios',
+        ],
       },
       {
         groupKey: 'produits_physiques',

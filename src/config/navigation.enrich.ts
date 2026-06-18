@@ -46,6 +46,7 @@ export const SELLER_PRIMARY_PATHS = new Set([
   '/dashboard/products/new/service',
   '/dashboard/courses/new',
   '/dashboard/products/new/artist',
+  '/dashboard/artist-products',
   '/dashboard/products',
   '/dashboard/digital-products',
   '/dashboard/courses',

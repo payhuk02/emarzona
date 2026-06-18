@@ -4,6 +4,7 @@ import {
   canAccessProductCreateNavPath,
   getPrimaryProductCreatePath,
   getRouteCapabilityRule,
+  getVendorProductListPath,
   isGenericProductCreateChooser,
   resolveStoreCommerceTypeFromStore,
 } from '@/lib/commerce/store-capability-map';
@@ -49,6 +50,9 @@ describe('store-capability-map', () => {
     expect(canAccessCommercePath('/dashboard/courses', 'course')).toBe(true);
     expect(canAccessCommercePath('/dashboard/courses', 'artist')).toBe(false);
 
+    expect(canAccessCommercePath('/dashboard/artist-products', 'artist')).toBe(true);
+    expect(canAccessCommercePath('/dashboard/artist-products', 'course')).toBe(false);
+
     expect(canAccessCommercePath('/dashboard/auctions', 'artist')).toBe(true);
     expect(canAccessCommercePath('/dashboard/auctions', 'physical')).toBe(false);
   });
@@ -74,6 +78,12 @@ describe('store-capability-map', () => {
     expect(canAccessCommercePath('/dashboard/products/new/service', 'course')).toBe(false);
     expect(canAccessCommercePath('/dashboard/courses/new', 'course')).toBe(true);
     expect(canAccessCommercePath('/dashboard/products/new/artist', 'artist')).toBe(true);
+  });
+
+  it('maps vendor product list path per commerce type', () => {
+    expect(getVendorProductListPath('course')).toBe('/dashboard/courses');
+    expect(getVendorProductListPath('artist')).toBe('/dashboard/artist-products');
+    expect(getVendorProductListPath('digital')).toBe('/dashboard/digital-products');
   });
 
   it('maps primary product create path per commerce type', () => {
