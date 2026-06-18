@@ -346,6 +346,37 @@
     "breadcrumb": {
       "home": "Accueil",
       "blog": "Blog"
+    },
+    "relatedTitle": "Articles similaires",
+    "engagement": {
+      "likes": "j'aime",
+      "comments": "commentaires",
+      "views": "vues",
+      "share": "Partager",
+      "copyLink": "Copier le lien",
+      "nativeShare": "Partager via…",
+      "login": "Connectez-vous",
+      "loginHint": "pour aimer cet article et suivre vos interactions.",
+      "loginToLike": "Connexion requise",
+      "loginToLikeDesc": "Créez un compte ou connectez-vous pour aimer cet article.",
+      "linkCopied": "Lien copié dans le presse-papiers",
+      "commentsTitle": "Commentaires",
+      "commentsSubtitle": "Partagez votre avis ou posez une question à la communauté.",
+      "commentsDisabled": "Les commentaires sont désactivés sur cet article.",
+      "yourName": "Votre nom",
+      "namePlaceholder": "Jean Dupont",
+      "yourComment": "Votre commentaire",
+      "commentPlaceholder": "Écrivez votre message…",
+      "publishComment": "Publier",
+      "loadingComments": "Chargement des commentaires…",
+      "noComments": "Soyez le premier à commenter cet article.",
+      "reply": "Répondre",
+      "replyingTo": "Réponse à",
+      "cancelReply": "Annuler",
+      "commentPendingTitle": "Commentaire en attente",
+      "commentPendingDesc": "Votre message sera visible après modération.",
+      "commentPublished": "Commentaire publié",
+      "commentError": "Impossible de publier le commentaire"
     }
   },
   "logoAlt": "Emarzona — plateforme e-commerce"

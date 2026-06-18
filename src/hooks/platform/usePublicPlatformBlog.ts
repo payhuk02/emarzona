@@ -20,6 +20,10 @@ export interface PublicBlogPostSummary {
   is_featured: boolean;
   reading_time_minutes: number;
   published_at: string | null;
+  like_count: number;
+  comment_count: number;
+  share_count: number;
+  view_count: number;
   category: PublicBlogCategoryRef | null;
 }
 

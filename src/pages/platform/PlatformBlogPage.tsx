@@ -15,6 +15,7 @@ import { usePlatformBlogPage } from '@/hooks/usePlatformBlogPage';
 import { usePlatformBlogT } from '@/hooks/usePlatformBlogT';
 import { usePublicPlatformBlogPosts } from '@/hooks/platform/usePublicPlatformBlog';
 import { PLATFORM_BLOG_ROUTE } from '@/lib/admin/platformBlogPageConfig';
+import { BlogEngagementStats } from '@/components/platform/blog/BlogArticleEngagement';
 import { cn } from '@/lib/utils';
 
 const SITE = 'https://www.emarzona.com';
@@ -176,6 +177,13 @@ export default function PlatformBlogPage() {
                       </h2>
                       <p className="mt-3 text-sm text-white/65 line-clamp-3">{featured.excerpt}</p>
                       <PostMeta post={featured} dateLocale={dateLocale} t={t} className="mt-4" />
+                      <BlogEngagementStats
+                        likes={featured.like_count ?? 0}
+                        comments={featured.comment_count ?? 0}
+                        views={featured.view_count ?? 0}
+                        t={t}
+                        className="mt-3"
+                      />
                     </div>
                   </div>
                 </Link>
@@ -202,7 +210,14 @@ function PostMeta({
   t,
   className,
 }: {
-  post: { published_at: string | null; reading_time_minutes: number; author_name: string };
+  post: {
+    published_at: string | null;
+    reading_time_minutes: number;
+    author_name: string;
+    like_count?: number;
+    comment_count?: number;
+    view_count?: number;
+  };
   dateLocale: typeof fr;
   t: (key: string, opts?: Record<string, unknown>) => string;
   className?: string;
@@ -237,6 +252,9 @@ function ArticleCard({
     published_at: string | null;
     reading_time_minutes: number;
     author_name: string;
+    like_count: number;
+    comment_count: number;
+    view_count: number;
   };
   dateLocale: typeof fr;
   t: (key: string, opts?: Record<string, unknown>) => string;
@@ -283,6 +301,13 @@ function ArticleCard({
           dateLocale={dateLocale}
           t={t}
           className="mt-4 border-t border-white/10 pt-3"
+        />
+        <BlogEngagementStats
+          likes={post.like_count ?? 0}
+          comments={post.comment_count ?? 0}
+          views={post.view_count ?? 0}
+          t={t}
+          className="mt-2"
         />
       </div>
     </Link>

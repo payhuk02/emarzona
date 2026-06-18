@@ -335,6 +335,37 @@
     "breadcrumb": {
       "home": "Home",
       "blog": "Blog"
+    },
+    "relatedTitle": "Related articles",
+    "engagement": {
+      "likes": "likes",
+      "comments": "comments",
+      "views": "views",
+      "share": "Share",
+      "copyLink": "Copy link",
+      "nativeShare": "Share via…",
+      "login": "Sign in",
+      "loginHint": "to like this article and track your activity.",
+      "loginToLike": "Sign in required",
+      "loginToLikeDesc": "Create an account or sign in to like this article.",
+      "linkCopied": "Link copied to clipboard",
+      "commentsTitle": "Comments",
+      "commentsSubtitle": "Share your thoughts or ask the community a question.",
+      "commentsDisabled": "Comments are disabled on this article.",
+      "yourName": "Your name",
+      "namePlaceholder": "Jane Doe",
+      "yourComment": "Your comment",
+      "commentPlaceholder": "Write your message…",
+      "publishComment": "Post",
+      "loadingComments": "Loading comments…",
+      "noComments": "Be the first to comment on this article.",
+      "reply": "Reply",
+      "replyingTo": "Replying to",
+      "cancelReply": "Cancel",
+      "commentPendingTitle": "Comment pending",
+      "commentPendingDesc": "Your message will appear after moderation.",
+      "commentPublished": "Comment posted",
+      "commentError": "Unable to post comment"
     }
   },
   "logoAlt": "Emarzona — e-commerce platform"

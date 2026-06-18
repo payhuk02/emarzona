@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { format } from 'date-fns';
 import { fr, enUS } from 'date-fns/locale';
@@ -11,8 +12,13 @@ import { ArticleSchema } from '@/components/seo/ArticleSchema';
 import { PageBodyContent } from '@/components/content/PageBodyContent';
 import { PremiumFooter } from '@/components/landing/premium/PremiumFooter';
 import { PremiumNav } from '@/components/landing/premium/PremiumNav';
+import { BlogArticleEngagement } from '@/components/platform/blog/BlogArticleEngagement';
+import { BlogCommentsSection } from '@/components/platform/blog/BlogCommentsSection';
 import { usePlatformBlogT } from '@/hooks/usePlatformBlogT';
-import { usePublicPlatformBlogPost } from '@/hooks/platform/usePublicPlatformBlog';
+import {
+  usePublicPlatformBlogPost,
+  usePublicPlatformBlogPosts,
+} from '@/hooks/platform/usePublicPlatformBlog';
 import { PLATFORM_BLOG_ROUTE } from '@/lib/admin/platformBlogPageConfig';
 import { resolvePlatformBlogLocale } from '@/lib/platform/platformBlogLocale';
 import NotFound from '@/pages/NotFound';
@@ -24,7 +30,13 @@ export default function PlatformBlogArticlePage() {
   const { t, i18n } = usePlatformBlogT();
   const locale = resolvePlatformBlogLocale(i18n.language);
   const { data: post, isLoading, isError } = usePublicPlatformBlogPost(slug);
+  const { data: allPosts = [] } = usePublicPlatformBlogPosts({ limit: 48 });
+  const commentsRef = useRef<HTMLDivElement>(null);
   const dateLocale = locale === 'en' ? enUS : fr;
+
+  const scrollToComments = () => {
+    commentsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   if (!isLoading && (isError || !post)) {
     return <NotFound />;
@@ -32,6 +44,14 @@ export default function PlatformBlogArticlePage() {
 
   const articleUrl = `${SITE}/blog/${slug ?? ''}`;
   const image = post?.og_image_url ?? post?.featured_image_url ?? `${SITE}/og-image.png`;
+
+  const relatedPosts = post
+    ? allPosts
+        .filter(
+          p => p.id !== post.id && (post.category ? p.category?.slug === post.category.slug : true)
+        )
+        .slice(0, 3)
+    : [];
 
   return (
     <>
@@ -79,37 +99,55 @@ export default function PlatformBlogArticlePage() {
         <PremiumNav />
 
         <article className="pt-[4.75rem]">
-          <div className="container mx-auto max-w-3xl px-4 py-10">
-            <Button
-              variant="ghost"
-              size="sm"
-              asChild
-              className="mb-6 text-white/70 hover:text-white"
-            >
-              <Link to={PLATFORM_BLOG_ROUTE}>
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                {t('backToBlog')}
-              </Link>
-            </Button>
+          {isLoading ? (
+            <div className="container mx-auto max-w-3xl px-4 py-10 space-y-4">
+              <Skeleton className="h-10 w-3/4 bg-white/10" />
+              <Skeleton className="h-4 w-1/2 bg-white/10" />
+              <Skeleton className="h-64 w-full bg-white/10" />
+            </div>
+          ) : post ? (
+            <>
+              {post.featured_image_url ? (
+                <div className="relative w-full overflow-hidden border-b border-white/10">
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#060608] via-[#060608]/40 to-transparent" />
+                  <img
+                    src={post.featured_image_url}
+                    alt={post.featured_image_alt ?? post.title}
+                    className="mx-auto max-h-[min(52vh,520px)] w-full max-w-6xl object-cover"
+                  />
+                </div>
+              ) : null}
 
-            {isLoading ? (
-              <div className="space-y-4">
-                <Skeleton className="h-10 w-3/4 bg-white/10" />
-                <Skeleton className="h-4 w-1/2 bg-white/10" />
-                <Skeleton className="h-64 w-full bg-white/10" />
-              </div>
-            ) : post ? (
-              <>
+              <div className="container mx-auto max-w-3xl px-4 py-10">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  asChild
+                  className="mb-6 text-white/70 hover:text-white"
+                >
+                  <Link to={PLATFORM_BLOG_ROUTE}>
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    {t('backToBlog')}
+                  </Link>
+                </Button>
+
                 <header className="mb-8 border-b border-white/10 pb-8">
                   {post.category ? (
-                    <Badge variant="secondary" className="mb-3 bg-white/10 text-white/80">
-                      {post.category.name}
-                    </Badge>
+                    <Link to={`${PLATFORM_BLOG_ROUTE}?category=${post.category.slug}`}>
+                      <Badge
+                        variant="secondary"
+                        className="mb-3 bg-white/10 text-white/80 hover:bg-white/15"
+                      >
+                        {post.category.name}
+                      </Badge>
+                    </Link>
                   ) : null}
-                  <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{post.title}</h1>
-                  <p className="mt-4 text-lg text-white/65">{post.excerpt}</p>
+                  <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-[2.75rem] lg:leading-tight">
+                    {post.title}
+                  </h1>
+                  <p className="mt-4 text-lg leading-relaxed text-white/65">{post.excerpt}</p>
                   <div className="mt-5 flex flex-wrap items-center gap-4 text-sm text-white/50">
-                    <span>{post.author_name}</span>
+                    <span className="font-medium text-white/70">{post.author_name}</span>
                     {post.published_at ? (
                       <span>
                         {format(new Date(post.published_at), 'PPP', { locale: dateLocale })}
@@ -126,7 +164,7 @@ export default function PlatformBlogArticlePage() {
                         <Link
                           key={tag}
                           to={`${PLATFORM_BLOG_ROUTE}?tag=${encodeURIComponent(tag)}`}
-                          className="inline-flex items-center gap-1 rounded-full border border-white/15 px-2.5 py-1 text-xs text-white/60 hover:text-white"
+                          className="inline-flex items-center gap-1 rounded-full border border-white/15 px-2.5 py-1 text-xs text-white/60 transition hover:border-white/30 hover:text-white"
                         >
                           <Tag className="h-3 w-3" />
                           {tag}
@@ -136,28 +174,73 @@ export default function PlatformBlogArticlePage() {
                   ) : null}
                 </header>
 
-                {post.featured_image_url ? (
-                  <img
-                    src={post.featured_image_url}
-                    alt={post.featured_image_alt ?? post.title}
-                    className="mb-8 aspect-video w-full rounded-2xl object-cover"
-                  />
-                ) : null}
-
                 <PageBodyContent
                   content={post.content}
-                  htmlClassName="prose-invert prose-lg prose-headings:text-white prose-a:text-[var(--lp-gold-bright)] prose-p:text-white/80 prose-li:text-white/80"
+                  htmlClassName="prose-invert prose-lg max-w-none prose-headings:text-white prose-a:text-[var(--lp-gold-bright)] prose-p:text-white/80 prose-li:text-white/80 prose-img:rounded-xl"
+                />
+
+                <BlogArticleEngagement
+                  postId={post.id}
+                  articleUrl={articleUrl}
+                  articleTitle={post.title}
+                  allowComments={post.allow_comments}
+                  onScrollToComments={scrollToComments}
+                  t={t}
+                  className="mt-10"
                 />
 
                 {post.author_bio ? (
-                  <aside className="mt-12 rounded-xl border border-white/10 bg-white/[0.03] p-6">
-                    <p className="text-sm font-medium">{post.author_name}</p>
-                    <p className="mt-2 text-sm text-white/60">{post.author_bio}</p>
+                  <aside className="mt-10 rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.05] to-transparent p-6">
+                    <p className="text-sm font-semibold text-white">{post.author_name}</p>
+                    <p className="mt-2 text-sm leading-relaxed text-white/60">{post.author_bio}</p>
                   </aside>
                 ) : null}
-              </>
-            ) : null}
-          </div>
+
+                <div ref={commentsRef}>
+                  <BlogCommentsSection
+                    postId={post.id}
+                    allowComments={post.allow_comments}
+                    locale={locale}
+                    t={t}
+                  />
+                </div>
+
+                {relatedPosts.length > 0 ? (
+                  <section className="mt-14 border-t border-white/10 pt-10">
+                    <h2 className="text-xl font-semibold">{t('relatedTitle')}</h2>
+                    <ul className="mt-6 grid gap-4 sm:grid-cols-3">
+                      {relatedPosts.map(related => (
+                        <li key={related.id}>
+                          <Link
+                            to={`/blog/${related.slug}`}
+                            className="group block overflow-hidden rounded-xl border border-white/10 bg-white/[0.02] transition hover:border-white/20"
+                          >
+                            {related.featured_image_url ? (
+                              <img
+                                src={related.featured_image_url}
+                                alt={related.featured_image_alt ?? related.title}
+                                className="aspect-[16/10] w-full object-cover"
+                              />
+                            ) : (
+                              <div className="aspect-[16/10] w-full bg-white/[0.04]" />
+                            )}
+                            <div className="p-4">
+                              <h3 className="text-sm font-semibold leading-snug group-hover:text-[var(--lp-gold-bright)] line-clamp-2">
+                                {related.title}
+                              </h3>
+                              <p className="mt-2 text-xs text-white/50 line-clamp-2">
+                                {related.excerpt}
+                              </p>
+                            </div>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                ) : null}
+              </div>
+            </>
+          ) : null}
         </article>
 
         <PremiumFooter />
