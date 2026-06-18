@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dialog';
 import { AlertCircle, Eye, EyeOff, Mail, CheckCircle2, Shield } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { EmarzonaBrandName } from '@/components/brand/EmarzonaBrandName';
 import {
   AUTH_LOGIN_PATH,
   AUTH_REGISTER_PATH,
@@ -552,9 +553,7 @@ const Auth = () => {
                 </div>
               )}
             </div>
-            <span className="relative z-10 pl-9 sm:pl-0 text-2xl sm:text-3xl font-bold">
-              Emarzona
-            </span>
+            <EmarzonaBrandName className="relative z-10 pl-9 text-2xl sm:pl-0 sm:text-3xl" />
           </Link>
         </div>
 

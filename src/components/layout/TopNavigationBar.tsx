@@ -6,6 +6,7 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { usePlatformLogo } from '@/hooks/usePlatformLogo';
+import { EmarzonaBrandName } from '@/components/brand/EmarzonaBrandName';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { UserUtilityActions } from '@/components/layout/UserUtilityActions';
 import { ThemeSelectorCompact } from '@/components/navigation/ThemeSelector';
@@ -109,7 +110,7 @@ export const TopNavigationBar = () => {
                   <span className="text-sm font-bold text-white">E</span>
                 </div>
               )}
-              <span className="hidden sm:inline-block text-lg font-bold">Emarzona</span>
+              <EmarzonaBrandName className="hidden text-lg sm:inline-block" />
             </NavLink>
 
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
@@ -140,7 +141,7 @@ export const TopNavigationBar = () => {
                           <span className="text-sm font-bold">E</span>
                         </div>
                       )}
-                      <span className="text-lg font-bold">Emarzona</span>
+                      <EmarzonaBrandName className="text-lg" />
                     </div>
                   </div>
                   <nav

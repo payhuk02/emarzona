@@ -1,0 +1,34 @@
+:root {
+  --emarzona-brand-emar: #f97316;
+  --emarzona-brand-zona: #2563eb;
+}
+
+.emarzona-brand-name {
+  font-weight: inherit;
+  letter-spacing: inherit;
+  white-space: nowrap;
+}
+
+.emarzona-brand-emar {
+  color: var(--emarzona-brand-emar);
+  font-weight: inherit;
+}
+
+.emarzona-brand-zona {
+  color: var(--emarzona-brand-zona);
+  font-weight: inherit;
+}
+
+/* Pied de page landing : seuls les titres de colonnes sont en gras */
+.landing-premium footer .lp-footer-col-title {
+  font-weight: 700;
+}
+
+.landing-premium footer .lp-footer-tagline,
+.landing-premium footer .lp-footer-body,
+.landing-premium footer .lp-footer-body a,
+.landing-premium footer .lp-footer-legal a,
+.landing-premium footer .lp-footer-bar,
+.landing-premium footer .lp-footer-bar button {
+  font-weight: 400;
+}

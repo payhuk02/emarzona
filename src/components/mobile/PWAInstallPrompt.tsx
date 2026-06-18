@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Download, X, Smartphone, Zap, Bell, Share2 } from 'lucide-react';
+import { EmarzonaInText } from '@/components/brand/EmarzonaInText';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
@@ -121,7 +122,9 @@ export const PWAInstallPrompt: React.FC<PWAInstallPromptProps> = ({
           <div className="flex items-center gap-3">
             <Smartphone className="h-6 w-6" />
             <div>
-              <p className="font-semibold">Installez Emarzona</p>
+              <p className="font-semibold">
+                <EmarzonaInText>Installez Emarzona</EmarzonaInText>
+              </p>
               <p className="text-sm opacity-90">Accès rapide et hors ligne</p>
             </div>
           </div>
@@ -151,7 +154,9 @@ export const PWAInstallPrompt: React.FC<PWAInstallPromptProps> = ({
         <div className="mx-auto mb-4 p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full w-fit">
           <Download className="h-8 w-8 text-white" />
         </div>
-        <CardTitle className="text-xl">Installez Emarzona</CardTitle>
+        <CardTitle className="text-xl">
+          <EmarzonaInText>Installez Emarzona</EmarzonaInText>
+        </CardTitle>
         <p className="text-muted-foreground">
           Profitez d'une expérience mobile optimale avec accès hors ligne
         </p>

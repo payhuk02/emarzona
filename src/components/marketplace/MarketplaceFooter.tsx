@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Facebook, Instagram, Twitter, Linkedin, Mail, Phone } from 'lucide-react';
 import { usePlatformLogo } from '@/hooks/usePlatformLogo';
+import { EmarzonaBrandName } from '@/components/brand/EmarzonaBrandName';
 
 const MarketplaceFooter = () => {
   const currentYear = new Date().getFullYear();
@@ -29,7 +30,7 @@ const MarketplaceFooter = () => {
                   <span className="text-sm font-bold text-primary-foreground">E</span>
                 </div>
               )}
-              <span className="text-xl sm:text-2xl font-bold">Emarzona</span>
+              <EmarzonaBrandName className="text-xl sm:text-2xl" />
             </Link>
             <p className="text-sm text-muted-foreground mb-4 max-w-xs">
               La plateforme tout-en-un pour vendre vos produits digitaux en Afrique
@@ -164,8 +165,7 @@ const MarketplaceFooter = () => {
 
         <div className="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-border text-center">
           <p className="text-xs sm:text-sm text-muted-foreground">
-            © {currentYear} <span className="font-semibold text-foreground">Emarzona</span>. Tous
-            droits réservés.
+            © {currentYear} <EmarzonaBrandName />. Tous droits réservés.
           </p>
         </div>
       </div>

@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useState } from 'react';
 import { EmarzonaBrandLogo } from './EmarzonaBrandLogo';
+import { EmarzonaInText } from '@/components/brand/EmarzonaInText';
 import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
 import { useFooterLinks } from '@/hooks/useFooterLinks';
 import { FooterLinkItem } from './FooterLinkItem';
@@ -49,7 +50,9 @@ export function PremiumFooter() {
             <Link to="/" className="lp-footer-logo inline-flex max-w-full">
               <EmarzonaBrandLogo variant="footer" />
             </Link>
-            <p className="mt-4 max-w-xs text-sm leading-relaxed">{t('footer.tagline')}</p>
+            <p className="lp-footer-tagline mt-4 max-w-xs text-sm leading-relaxed">
+              {t('footer.tagline')}
+            </p>
             {socials.length > 0 ? (
               <div className="mt-6 flex gap-3">
                 {socials.map(({ network, href, label, icon: Icon }) => (
@@ -68,10 +71,10 @@ export function PremiumFooter() {
             ) : null}
           </div>
 
-          <div className="grid grid-cols-3 gap-4 sm:gap-6 lg:col-span-6">
+          <div className="lp-footer-body grid grid-cols-3 gap-4 sm:gap-6 lg:col-span-6">
             {columns.map(col => (
               <div key={col.colKey} className="min-w-0">
-                <h4 className="text-[10px] font-semibold uppercase tracking-wider text-white sm:text-xs">
+                <h4 className="lp-footer-col-title text-[10px] uppercase tracking-wider text-white sm:text-xs">
                   {col.title}
                 </h4>
                 <ul className="mt-3 space-y-2 sm:mt-4 sm:space-y-2.5">
@@ -86,10 +89,10 @@ export function PremiumFooter() {
           </div>
 
           <div id="ressources" className="lg:col-span-2">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-white">
+            <h4 className="lp-footer-col-title text-xs uppercase tracking-wider text-white">
               {t('footer.newsletter')}
             </h4>
-            <p className="mt-4 text-sm">{t('footer.newsletterDesc')}</p>
+            <p className="lp-footer-body mt-4 text-sm">{t('footer.newsletterDesc')}</p>
             <form
               className="lp-footer-newsletter mt-4 flex flex-col gap-2.5 sm:flex-row sm:items-stretch sm:gap-2"
               onSubmit={handleNewsletterSubmit}
@@ -116,23 +119,26 @@ export function PremiumFooter() {
           </div>
         </div>
 
-        <div className="relative z-10 mt-14 flex flex-col gap-4 border-t border-white/[0.06] pt-8 text-xs sm:flex-row sm:items-center sm:justify-between">
+        <div className="lp-footer-bar relative z-10 mt-14 flex flex-col gap-4 border-t border-white/[0.06] pt-8 text-xs sm:flex-row sm:items-center sm:justify-between">
           <p>
-            {/* Texte i18n + fallback explicite pour les tests E2E Playwright */}
-            {t('footer.copyright', {
-              year: new Date().getFullYear(),
-            })}{' '}
-            — © {new Date().getFullYear()}{' '}
-            <span className="font-semibold text-white">Emarzona</span>
+            <EmarzonaInText>
+              {t('footer.copyright', {
+                year: new Date().getFullYear(),
+              })}
+            </EmarzonaInText>
           </p>
-          <div className="flex flex-wrap gap-6">
+          <div className="lp-footer-legal flex flex-wrap gap-6">
             {legalLinks.map(link => (
-              <FooterLinkItem key={link.linkKey} link={link} className="hover:text-white" />
+              <FooterLinkItem
+                key={link.linkKey}
+                link={link}
+                className="font-normal text-white/70 hover:text-white"
+              />
             ))}
             <button
               type="button"
               onClick={openCookieSettings}
-              className="text-xs text-white/90 transition-colors hover:text-white sm:text-sm"
+              className="font-normal text-xs text-white/70 transition-colors hover:text-white sm:text-sm"
             >
               {t('footer.manageCookies')}
             </button>

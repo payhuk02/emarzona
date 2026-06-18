@@ -1,4 +1,6 @@
 import React from 'react';
+import { EmarzonaBrandName } from '@/components/brand/EmarzonaBrandName';
+import { EmarzonaInText } from '@/components/brand/EmarzonaInText';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -151,9 +153,7 @@ export const StoreDashboardMockup = () => {
           <div className="h-7 w-7 rounded bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center">
             <span className="text-white text-xs font-bold">EZ</span>
           </div>
-          <span className="text-sm md:text-base font-bold text-gray-800 hidden sm:inline">
-            Emarzona
-          </span>
+          <EmarzonaBrandName className="text-sm md:text-base hidden sm:inline" />
         </div>
 
         {/* Navigation principale */}
@@ -203,7 +203,7 @@ export const StoreDashboardMockup = () => {
               <div className="h-8 w-8 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
                 <span className="text-white text-sm font-bold">EZ</span>
               </div>
-              <span className="text-sm font-bold text-white">Emarzona</span>
+              <EmarzonaBrandName className="text-sm" />
             </div>
             <div className="space-y-1.5">
               <div className="px-3 py-2 bg-white/10 backdrop-blur-sm rounded-md flex items-center justify-between border border-white/20 hover:bg-white/15 transition-colors">
@@ -921,7 +921,7 @@ export const SupportMockup = () => {
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1.5">
                 <span className="text-sm md:text-base font-bold text-gray-900">
-                  Équipe Emarzona
+                  <EmarzonaInText>Équipe Emarzona</EmarzonaInText>
                 </span>
                 <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 text-[9px] px-1.5 py-0 font-semibold">
                   En ligne

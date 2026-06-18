@@ -145,7 +145,7 @@ describe('AppSidebar', () => {
   it('should render the sidebar with logo', async () => {
     renderAppSidebar();
 
-    expect(await screen.findByText('Emarzona')).toBeInTheDocument();
+    expect(await screen.findByLabelText('Emarzona')).toBeInTheDocument();
   });
 
   it('should display menu sections', async () => {

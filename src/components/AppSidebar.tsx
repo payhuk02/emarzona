@@ -47,6 +47,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
+import { EmarzonaBrandName } from '@/components/brand/EmarzonaBrandName';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useAdmin } from '@/hooks/useAdmin';
@@ -449,12 +450,7 @@ export function AppSidebar() {
               </div>
             )}
             {!isCollapsed && (
-              <span
-                className="hidden sm:inline text-lg font-extrabold tracking-tight text-foreground"
-                style={{ fontFamily: 'Times New Roman, serif' }}
-              >
-                Emarzona
-              </span>
+              <EmarzonaBrandName className="hidden text-lg tracking-tight sm:inline" />
             )}
           </Link>
           {isCollapsed ? (

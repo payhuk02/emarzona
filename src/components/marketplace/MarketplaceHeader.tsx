@@ -7,6 +7,7 @@ import { Menu, X, ShoppingBag, Store, UserCircle } from 'lucide-react';
 import { ThemeToggle } from '@/components/navigation/ThemeToggle';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { usePlatformLogo } from '@/hooks/usePlatformLogo';
+import { EmarzonaBrandName } from '@/components/brand/EmarzonaBrandName';
 import {
   getPlatformLoginUrl,
   getPlatformRegisterUrl,
@@ -82,9 +83,7 @@ const MarketplaceHeader = () => {
                 <span className="text-xs sm:text-sm font-bold text-primary-foreground">E</span>
               </div>
             )}
-            <span className="truncate text-base font-bold text-foreground sm:text-lg md:text-xl lg:text-2xl">
-              Emarzona
-            </span>
+            <EmarzonaBrandName className="truncate text-base sm:text-lg md:text-xl lg:text-2xl" />
           </Link>
 
           {/* Desktop / tablet navigation */}
@@ -200,7 +199,7 @@ const MarketplaceHeader = () => {
                           <span className="text-xs font-bold text-primary-foreground">E</span>
                         </div>
                       )}
-                      <span className="text-xl font-bold truncate">Emarzona</span>
+                      <EmarzonaBrandName className="truncate text-xl" />
                     </div>
                     <Button
                       variant="ghost"

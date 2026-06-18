@@ -26,6 +26,7 @@ import { Users, MessageSquare, Plus, Search, LogIn } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { AppPageShell } from '@/components/layout/AppPageShell';
+import { EmarzonaInText } from '@/components/brand/EmarzonaInText';
 
 export default function CommunityPage() {
   const { user } = useAuth();
@@ -94,8 +95,8 @@ export default function CommunityPage() {
                     />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent truncate">
-                      Communauté Emarzona
+                    <h1 className="text-xl sm:text-2xl font-bold truncate">
+                      <EmarzonaInText>Communauté Emarzona</EmarzonaInText>
                     </h1>
                     <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
                       Rejoignez notre communauté d'entrepreneurs et créateurs
@@ -146,8 +147,10 @@ export default function CommunityPage() {
                         Rejoignez la communauté
                       </h3>
                       <p className="text-xs sm:text-sm text-muted-foreground">
-                        Créez votre profil et commencez à partager avec d'autres membres de la
-                        communauté Emarzona.
+                        <EmarzonaInText>
+                          Créez votre profil et commencez à partager avec d'autres membres de la
+                          communauté Emarzona.
+                        </EmarzonaInText>
                       </p>
                     </div>
                     <Button
@@ -239,7 +242,9 @@ export default function CommunityPage() {
               <DialogHeader>
                 <DialogTitle>Rejoindre la communauté</DialogTitle>
                 <DialogDescription>
-                  Remplissez le formulaire pour demander à rejoindre la communauté Emarzona
+                  <EmarzonaInText>
+                    Remplissez le formulaire pour demander à rejoindre la communauté Emarzona
+                  </EmarzonaInText>
                 </DialogDescription>
               </DialogHeader>
               <CommunityMemberForm

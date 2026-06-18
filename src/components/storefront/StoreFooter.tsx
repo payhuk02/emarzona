@@ -14,6 +14,7 @@ import {
 import { useStoreTheme } from '@/hooks/useStoreTheme';
 import { useStoreFooterT } from '@/hooks/useStoreFooterT';
 import { useStoreFooterLinks } from '@/hooks/useStoreFooterLinks';
+import { EmarzonaBrandName } from '@/components/brand/EmarzonaBrandName';
 import { StoreFooterLinkItem } from '@/components/storefront/StoreFooterLinkItem';
 import type { Store } from '@/hooks/useStores';
 
@@ -201,10 +202,7 @@ const StoreFooter = ({
             {t('copyright', { year: currentYear, storeName })}
           </p>
           <p className="text-[10px] sm:text-xs" style={{ color: theme.textSecondaryColor }}>
-            {t('poweredBy')}{' '}
-            <span className="font-semibold" style={{ color: theme.primaryColor }}>
-              Emarzona
-            </span>
+            {t('poweredBy')} <EmarzonaBrandName />
           </p>
         </div>
       </div>

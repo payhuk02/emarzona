@@ -6,6 +6,7 @@ import { usePlatformStatus, type PlatformServiceStatus } from '@/hooks/platform/
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import { EmarzonaInText } from '@/components/brand/EmarzonaInText';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const STATUS_META: Record<
@@ -59,7 +60,9 @@ export default function StatusPage() {
             <Activity className="h-6 w-6 text-primary" aria-hidden />
           </div>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Statut Emarzona</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+              <EmarzonaInText>Statut Emarzona</EmarzonaInText>
+            </h1>
             <p className="text-sm text-muted-foreground mt-1">
               Disponibilité plateforme et incidents en cours
             </p>

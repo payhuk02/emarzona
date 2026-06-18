@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
+import { EmarzonaInText } from '@/components/brand/EmarzonaInText';
 import { usePremiumReveal } from './usePremiumReveal';
 import { PremiumCtaGlobeVisual } from './PremiumCtaGlobeVisual';
 
@@ -24,10 +25,10 @@ export function FinalCtaSection() {
               <h2 className="lp-serif text-2xl text-white sm:text-3xl md:text-4xl lg:text-[2.75rem]">
                 {t('cta.titleLine1')}
                 <br />
-                {t('cta.titleLine2')}
+                <EmarzonaInText>{t('cta.titleLine2')}</EmarzonaInText>
               </h2>
               <p className="mx-auto mt-4 max-w-md text-[var(--lp-text-dim)] lg:mx-0">
-                {t('cta.subtitle')}
+                <EmarzonaInText>{t('cta.subtitle')}</EmarzonaInText>
               </p>
               <div className="mt-8 flex flex-wrap justify-center gap-4 lg:justify-start">
                 <Link
