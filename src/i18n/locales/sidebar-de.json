@@ -337,6 +337,7 @@
       "admin_referrals": "Parrainages",
       "admin_analytics": "Analytics",
       "admin_monitoring": "Monitoring",
+      "admin_fulfillment_alerts": "Fulfillment alerts",
       "admin_error_monitoring": "Monitoring Erreurs",
       "admin_transaction_monitoring": "Monitoring Transactions",
       "admin_kyc": "Admin KYC",
@@ -353,6 +354,7 @@
       "admin_commission_settings": "Commissions",
       "admin_commission_payments": "Paiements Commissions",
       "admin_platform_customization": "Personnalisation",
+      "admin_platform_faq": "Plattform-FAQ",
       "admin_newsletter_subscribers": "Newsletter"
     }
   }
