@@ -29,6 +29,8 @@ import { useSpaceInputFix } from '@/hooks/useSpaceInputFix';
 import { logger } from '@/lib/logger';
 import { generateProductUrl } from '@/lib/store-utils';
 import { ImageStudioField } from '@/components/images/ImageStudioField';
+import { AIContentGenerator } from '@/components/products/AIContentGenerator';
+import { buildSeoFromGenerated, mergeImages } from '@/lib/ai-product-apply';
 import { ArtistFormField } from './ArtistFormField';
 import { getFieldHelpHint, formatHelpHint } from '@/lib/artist-product-help-hints';
 import { generateSlug } from '@/lib/validation-utils';
@@ -864,7 +866,29 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate, storeSlug }: ArtistBasic
 
       {/* Description */}
       <div className="space-y-2">
-        <Label htmlFor="description">Description complète de l'œuvre</Label>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <Label htmlFor="description">Description complète de l&apos;œuvre</Label>
+          <AIContentGenerator
+            productInfo={{
+              name: data.artwork_title || data.name || '',
+              type: 'artist',
+              slug: data.slug,
+              category: data.artist_type,
+              price: data.price,
+              artistName: data.artist_name,
+              artworkMedium: data.artwork_medium,
+            }}
+            onContentGenerated={content => {
+              const seo = buildSeoFromGenerated(content);
+              onUpdate({
+                short_description: content.shortDescription,
+                description: content.longDescription,
+                seo: { ...data.seo, ...seo },
+                images: mergeImages(data.images, content.imageUrl),
+              });
+            }}
+          />
+        </div>
         <RichTextEditorPro
           content={data.description || ''}
           onChange={value => onUpdate({ description: value })}

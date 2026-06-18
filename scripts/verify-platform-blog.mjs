@@ -120,10 +120,149 @@ function checkNav() {
   }
 }
 
+function checkBlogAiCode() {
+  const files = [
+    'src/lib/ai-blog-generator.ts',
+    'src/components/admin/platform/BlogAIGeneratorDialog.tsx',
+    'src/components/admin/PlatformAiApiKeysPanel.tsx',
+    'supabase/functions/ai-generate-blog-post/index.ts',
+    'supabase/functions/manage-ai-api-keys/index.ts',
+    'supabase/migrations/20260620120000__platform_blog_ai_and_api_keys.sql',
+  ];
+  for (const f of files) {
+    const path = resolve(process.cwd(), f);
+    if (existsSync(path)) {
+      pass(`fichier ${f}`);
+    } else {
+      fail(`fichier ${f}`, 'manquant');
+    }
+  }
+
+  const adminBlog = readFileSync(
+    resolve(process.cwd(), 'src/pages/admin/AdminPlatformBlog.tsx'),
+    'utf8'
+  );
+  if (adminBlog.includes('BlogAIGeneratorDialog') && adminBlog.includes('Générer avec IA')) {
+    pass('AdminPlatformBlog intégration IA');
+  } else {
+    fail('AdminPlatformBlog intégration IA');
+  }
+
+  const aiPage = readFileSync(
+    resolve(process.cwd(), 'src/pages/admin/AIManagementPage.tsx'),
+    'utf8'
+  );
+  if (aiPage.includes('blogGenerator') && aiPage.includes('PlatformAiApiKeysPanel')) {
+    pass('AIManagementPage onglet Blog IA + clés API');
+  } else {
+    fail('AIManagementPage onglet Blog IA + clés API');
+  }
+}
+
+async function checkBlogAiSettings() {
+  const settingsRes = await rpc('get_ai_management_settings');
+  if (!settingsRes.ok) {
+    fail('RPC get_ai_management_settings', JSON.stringify(settingsRes.data).slice(0, 120));
+    return;
+  }
+  pass('RPC get_ai_management_settings');
+  const bg = settingsRes.data?.blogGenerator;
+  if (bg && bg.enabled !== undefined && bg.textModel) {
+    pass('blogGenerator dans ai_management_settings', bg.textModel);
+  } else {
+    fail(
+      'blogGenerator dans ai_management_settings',
+      'migration 20260620120000 peut-être non appliquée'
+    );
+  }
+}
+
+async function checkListAiKeysRpc() {
+  const res = await rpc('list_platform_ai_api_keys');
+  if (!res.ok) {
+    const msg = JSON.stringify(res.data);
+    if (msg.includes('Could not find the function') || res.status === 404) {
+      fail('RPC list_platform_ai_api_keys', 'migration 20260620120000 non appliquée');
+    } else if (msg.includes('Accès refusé') || res.status === 400) {
+      pass('RPC list_platform_ai_api_keys', 'existe (accès admin requis — normal en anon)');
+    } else {
+      fail('RPC list_platform_ai_api_keys', msg.slice(0, 120));
+    }
+  } else {
+    pass('RPC list_platform_ai_api_keys', `${Array.isArray(res.data) ? res.data.length : 0} clé(s)`);
+  }
+}
+
+async function checkEdgeFunctionsDeployed() {
+  const fns = ['ai-generate-blog-post', 'manage-ai-api-keys'];
+  for (const fn of fns) {
+    const res = await fetch(`${url}/functions/v1/${fn}`, {
+      method: 'OPTIONS',
+      headers: { apikey: key },
+    });
+    if (res.status === 404) {
+      fail(`edge function ${fn}`, 'non déployée — npx supabase functions deploy');
+    } else {
+      pass(`edge function ${fn}`, `HTTP ${res.status}`);
+    }
+  }
+}
+
+async function checkProductAiSettings() {
+  const settingsRes = await rpc('get_ai_management_settings');
+  if (!settingsRes.ok) return;
+  const cg = settingsRes.data?.contentGenerator;
+  if (cg?.supportedTypes?.includes('artist') && cg?.generateProductImage !== undefined) {
+    pass('contentGenerator 5 verticales + images', cg.model);
+  } else {
+    fail('contentGenerator produits', 'migration 20260620140000 peut-être non appliquée');
+  }
+
+  const files = [
+    'src/lib/ai-product-apply.ts',
+    'supabase/functions/_shared/product-ai-prompts.ts',
+  ];
+  for (const f of files) {
+    if (existsSync(resolve(process.cwd(), f))) pass(`fichier ${f}`);
+    else fail(`fichier ${f}`, 'manquant');
+  }
+
+  const edgeRes = await fetch(`${url}/functions/v1/ai-generate-content`, {
+    method: 'OPTIONS',
+    headers: { apikey: key },
+  });
+  const wizardFiles = [
+    'src/components/products/create/digital/DigitalBasicInfoForm.tsx',
+    'src/components/products/create/physical/PhysicalBasicInfoForm.tsx',
+    'src/components/products/create/service/ServiceBasicInfoForm.tsx',
+    'src/components/courses/create/CourseBasicInfoForm.tsx',
+    'src/components/products/create/artist/ArtistBasicInfoForm.tsx',
+  ];
+  for (const f of wizardFiles) {
+    const src = readFileSync(resolve(process.cwd(), f), 'utf8');
+    if (src.includes('AIContentGenerator') && src.includes('buildSeoFromGenerated')) {
+      pass(`wizard IA ${f.split('/').pop()}`);
+    } else {
+      fail(`wizard IA ${f.split('/').pop()}`, 'intégration incomplète');
+    }
+  }
+
+  const edgeRes = await fetch(`${url}/functions/v1/ai-generate-content`, {
+    method: 'OPTIONS',
+    headers: { apikey: key },
+  });
+  if (edgeRes.status === 404) {
+    fail('edge function ai-generate-content', 'non déployée');
+  } else {
+    pass('edge function ai-generate-content', `HTTP ${edgeRes.status}`);
+  }
+}
+
 async function main() {
   checkI18n();
   checkRoutes();
   checkNav();
+  checkBlogAiCode();
 
   if (!url || !key) {
     fail('Supabase env', 'VITE_SUPABASE_URL ou clé anon manquante');
@@ -233,12 +372,17 @@ async function main() {
     fail('RPC get_public_platform_faqs', JSON.stringify(faqRes.data).slice(0, 120));
   }
 
+  await checkBlogAiSettings();
+  await checkListAiKeysRpc();
+  await checkEdgeFunctionsDeployed();
+  await checkProductAiSettings();
+
   printReport();
   process.exit(failed > 0 ? 1 : 0);
 }
 
 function printReport() {
-  console.log('\n=== Vérification Blog plateforme ===\n');
+  console.log('\n=== Vérification Blog + IA plateforme ===\n');
   for (const r of results) {
     const icon = r.ok ? '✓' : '✗';
     const detail = r.detail ? ` — ${r.detail}` : '';

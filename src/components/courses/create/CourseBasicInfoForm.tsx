@@ -18,6 +18,8 @@ import { useProductImageUpload } from '@/hooks/useProductImageUpload';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
+import { buildSeoFromGenerated, mergeImages } from '@/lib/ai-product-apply';
+import type { CourseSEOData } from '@/components/courses/create/CourseSEOForm';
 import { ImageStudioField } from '@/components/images/ImageStudioField';
 
 interface CourseBasicInfoFormProps {
@@ -41,6 +43,7 @@ interface CourseBasicInfoFormProps {
     images?: string[];
   };
   onChange: (field: string, value: string | number | boolean | string[] | null | undefined) => void;
+  onSeoGenerated?: (seo: Partial<CourseSEOData>) => void;
   errors?: Record<string, string>;
 }
 
@@ -74,6 +77,7 @@ const CATEGORIES = [
 export const CourseBasicInfoForm = ({
   formData,
   onChange,
+  onSeoGenerated,
   errors = {},
 }: CourseBasicInfoFormProps) => {
   const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
@@ -280,14 +284,27 @@ export const CourseBasicInfoForm = ({
               <AIContentGenerator
                 productInfo={{
                   name: formData.title || '',
-                  type: 'service',
-                  // Cours: on assimile à 'service' pour le ton marketing
+                  type: 'course',
+                  slug: formData.slug,
                   category: formData.category,
-                  features: [],
+                  courseLevel: formData.level,
+                  price: formData.price,
                 }}
                 onContentGenerated={content => {
                   onChange('short_description', content.shortDescription);
                   onChange('description', content.longDescription);
+                  if (content.imageUrl) {
+                    onChange('image_url', content.imageUrl);
+                    onChange('images', mergeImages(formData.images, content.imageUrl));
+                  }
+                  onSeoGenerated?.({
+                    meta_title: content.metaTitle,
+                    meta_description: content.metaDescription,
+                    meta_keywords: content.keywords.join(', '),
+                    og_title: content.ogTitle || content.metaTitle,
+                    og_description: content.ogDescription || content.metaDescription,
+                    og_image: content.imageUrl || formData.image_url,
+                  });
                 }}
               />
             </div>

@@ -133,6 +133,48 @@ export async function uploadBlogImageFromDataUrl(
   return publicUrl;
 }
 
+const CATALOG_PREFIX: Record<string, string> = {
+  digital: 'digital',
+  products: 'products',
+  services: 'services',
+  courses: 'courses',
+  artist: 'artist',
+};
+
+export async function uploadCatalogImageFromDataUrl(
+  admin: SupabaseClient,
+  dataUrl: string,
+  catalogPath: string,
+  productSlug: string
+): Promise<string> {
+  const [header, b64] = dataUrl.split(',');
+  if (!b64) throw new Error('Data URL invalide');
+  const mime = header.match(/data:(.*?);/)?.[1] || 'image/png';
+  const ext =
+    mime.includes('jpeg') || mime.includes('jpg') ? 'jpg' : mime.includes('webp') ? 'webp' : 'png';
+  const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+  const prefix = CATALOG_PREFIX[catalogPath] || catalogPath;
+  const safeSlug =
+    productSlug
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9-]+/g, '-')
+      .replace(/^-|-$/g, '') || 'product';
+  const path = `${prefix}/ai-${safeSlug}-${Date.now()}.${ext}`;
+
+  const { error } = await admin.storage.from('product-images').upload(path, bytes, {
+    contentType: mime,
+    cacheControl: '3600',
+    upsert: false,
+  });
+  if (error) throw error;
+
+  const {
+    data: { publicUrl },
+  } = admin.storage.from('product-images').getPublicUrl(path);
+  return publicUrl;
+}
+
 export function fillTemplate(template: string, vars: Record<string, string>): string {
   return template.replace(/\{\{(\w+)\}\}/g, (_, key) => vars[key] ?? '');
 }

@@ -1,29 +1,30 @@
 /**
  * Module: AI Content Generator
- * Description: Génération de contenu par IA (descriptions, titres, meta tags)
- * Date: 25/10/2025
- * Impact: -80% temps de création, +40% qualité SEO
+ * Génération premium pour les 5 verticales e-commerce Emarzona.
  */
-
 import { logger } from './logger';
 import { supabase } from '@/integrations/supabase/client';
 
 export type AIProvider = 'lovable' | 'templates' | 'fallback';
+export type ProductType = 'digital' | 'physical' | 'service' | 'course' | 'artist';
 
 export interface AIGenerationOptions {
   provider?: AIProvider;
-  temperature?: number;
-  maxTokens?: number;
   language?: string;
+  generateImage?: boolean;
 }
 
 export interface ProductInfo {
   name: string;
-  type: 'digital' | 'physical' | 'service';
+  type: ProductType;
+  slug?: string;
   category?: string;
   price?: number;
   features?: string[];
   targetAudience?: string;
+  artistName?: string;
+  artworkMedium?: string;
+  courseLevel?: string;
 }
 
 export interface GeneratedContent {
@@ -33,26 +34,33 @@ export interface GeneratedContent {
   metaTitle: string;
   metaDescription: string;
   keywords: string[];
+  ogTitle?: string;
+  ogDescription?: string;
+  imageUrl?: string | null;
+  imagePrompt?: string;
 }
 
-/**
- * Génère du contenu intelligent basé sur les informations du produit
- * Utilise des templates si l'API IA n'est pas disponible
- */
+export const PRODUCT_TYPE_LABELS: Record<ProductType, string> = {
+  digital: 'Produit numérique',
+  physical: 'Produit physique',
+  service: 'Service',
+  course: 'Cours en ligne',
+  artist: "Œuvre d'artiste",
+};
+
 export const generateProductContent = async (
   productInfo: ProductInfo,
   options: AIGenerationOptions = {}
 ): Promise<GeneratedContent> => {
-  const { provider = 'lovable', language = 'fr' } = options;
+  const { provider = 'lovable', language = 'fr', generateImage = true } = options;
 
   if (provider === 'templates' || provider === 'fallback') {
     return generateWithTemplates(productInfo, language);
   }
 
-  // Use Lovable AI Gateway via secure edge function
   try {
     const { data, error } = await supabase.functions.invoke('ai-generate-content', {
-      body: { productInfo, language },
+      body: { productInfo, language, generateImage },
     });
 
     if (error) throw error;
@@ -69,202 +77,91 @@ export const generateProductContent = async (
   }
 };
 
-/**
- * Génère avec des templates intelligents (fallback sans IA)
- * Utilise des règles linguistiques et des templates pour créer du contenu cohérent
- */
-const generateWithTemplates = (
-  productInfo: ProductInfo,
-  language: string
-): GeneratedContent => {
+const generateWithTemplates = (productInfo: ProductInfo, _language: string): GeneratedContent => {
   const { name, type, category, price, features } = productInfo;
 
-  // Templates par type de produit
-  const templates = {
-    digital: {
-      shortIntro: [
-        `Découvrez ${name}, la solution numérique qui transforme votre`,
-        `${name} est le produit digital qu'il vous faut pour`,
-        `Accédez instantanément à ${name} et`,
-      ],
-      benefits: [
-        'Téléchargement immédiat après achat',
-        'Mises à jour gratuites incluses',
-        'Support client réactif',
-        'Accès illimité à vie',
-      ],
-      cta: [
-        'Commandez maintenant et recevez votre produit instantanément !',
-        'Profitez de cette opportunité dès aujourd\'hui !',
-        'Transformez votre expérience dès maintenant !',
-      ],
-    },
-    physical: {
-      shortIntro: [
-        `${name} - Le produit qui allie qualité et`,
-        `Découvrez ${name}, conçu avec soin pour`,
-        `${name} apporte excellence et`,
-      ],
-      benefits: [
-        'Qualité premium garantie',
-        'Expédition rapide et sécurisée',
-        'Garantie satisfait ou remboursé',
-        'Packaging soigné',
-      ],
-      cta: [
-        'Commandez dès maintenant avec livraison rapide !',
-        'Ajoutez au panier et recevez-le rapidement !',
-        'Profitez de notre service de livraison express !',
-      ],
-    },
-    service: {
-      shortIntro: [
-        `${name} - Le service professionnel qui`,
-        `Bénéficiez de ${name} pour`,
-        `${name} vous accompagne dans`,
-      ],
-      benefits: [
-        'Expertise professionnelle reconnue',
-        'Résultats garantis',
-        'Accompagnement personnalisé',
-        'Satisfaction client prioritaire',
-      ],
-      cta: [
-        'Réservez votre consultation dès maintenant !',
-        'Contactez-nous pour démarrer !',
-        'Profitez de notre expertise aujourd\'hui !',
-      ],
-    },
+  const intros: Record<ProductType, string[]> = {
+    digital: [
+      `Découvrez ${name}, la ressource numérique premium pour`,
+      `${name} — téléchargement instantané pour`,
+    ],
+    physical: [`${name} allie qualité et design pour`, `Découvrez ${name}, conçu pour`],
+    service: [`${name} — expertise professionnelle pour`, `Bénéficiez de ${name} pour`],
+    course: [`${name} — formation complète pour`, `Maîtrisez ${name} avec ce cours pour`],
+    artist: [`${name} — œuvre authentique pour`, `Collectionnez ${name}, une pièce unique pour`],
   };
 
-  const template = templates[type];
-  const randomIndex = Math.floor(Math.random() * template.shortIntro.length);
+  const benefits: Record<ProductType, string[]> = {
+    digital: ['Accès immédiat', 'Mises à jour incluses', 'Support vendeur', 'Licence claire'],
+    physical: ['Qualité premium', 'Expédition sécurisée', 'Garantie satisfait', 'Packaging soigné'],
+    service: ['Experts certifiés', 'Résultats mesurables', 'Suivi personnalisé', 'Flexibilité'],
+    course: ['Modules structurés', 'Progression suivie', 'Contenu à vie', 'Certificat'],
+    artist: [
+      'Authenticité garantie',
+      'Certificat disponible',
+      'Édition limitée',
+      'Valeur patrimoniale',
+    ],
+  };
 
-  // Description courte
-  const shortDescription = `${template.shortIntro[randomIndex]} ${category || 'votre activité'}.`;
+  const idx = Math.floor(Math.random() * 2);
+  const shortDescription = `${intros[type][idx]} ${category || 'votre projet'}.`.slice(0, 160);
 
-  // Description longue
-  const longDescription = `# Présentation de ${name}
+  const featureList = features?.length ? features : benefits[type];
+  const longDescription = `<h2>${name}</h2>
+<p>${shortDescription}</p>
+<h3>Points forts</h3>
+<ul>${featureList.map(f => `<li>${f}</li>`).join('')}</ul>
+${price ? `<p><strong>Prix :</strong> ${price.toLocaleString()} XOF</p>` : ''}
+<p>Disponible sur Emarzona — la marketplace de confiance.</p>`;
 
-${template.shortIntro[randomIndex]} ${category || 'votre activité'}.
-
-## Caractéristiques principales
-
-${features?.length 
-  ? features.map(f => `- ${f}`).join('\n')
-  : template.benefits.map(b => `- ${b}`).join('\n')}
-
-## Pourquoi choisir ${name} ?
-
-Ce ${type === 'digital' ? 'produit numérique' : type === 'physical' ? 'produit' : 'service'} a été conçu pour répondre à vos besoins spécifiques. Avec ${name}, vous bénéficiez d'une solution complète et professionnelle.
-
-${price ? `## Prix exceptionnel\n\nPour seulement ${price.toLocaleString()} XOF, accédez à une qualité supérieure.\n\n` : ''}${template.cta[randomIndex]}`;
-
-  // Caractéristiques
-  const generatedFeatures = features?.length 
-    ? features 
-    : template.benefits;
-
-  // Meta title
-  const metaTitle = `${name}${category ? ` - ${category}` : ''} | Emarzona`;
-
-  // Meta description
-  const metaDescription = `${shortDescription.slice(0, 140)}... ${template.cta[randomIndex]}`.slice(0, 160);
-
-  // Keywords
+  const metaTitle = `${name}${category ? ` — ${category}` : ''} | Emarzona`.slice(0, 60);
+  const metaDescription = `${shortDescription} Commandez sur Emarzona.`.slice(0, 160);
   const keywords = [
     name.toLowerCase(),
-    type === 'digital' ? 'produit numérique' : type === 'physical' ? 'produit physique' : 'service',
+    type,
     category?.toLowerCase() || '',
     'emarzona',
-    'boutique en ligne',
-    'acheter',
-    ...(features?.slice(0, 3) || []).map(f => f.toLowerCase()),
+    'acheter en ligne',
+    ...featureList.slice(0, 4).map(f => f.toLowerCase()),
   ].filter(Boolean);
 
   return {
-    shortDescription: shortDescription.slice(0, 160),
+    shortDescription,
     longDescription,
-    features: generatedFeatures,
-    metaTitle: metaTitle.slice(0, 60),
+    features: featureList,
+    metaTitle,
     metaDescription,
     keywords,
+    ogTitle: metaTitle,
+    ogDescription: metaDescription,
   };
 };
 
-/**
- * Génère des suggestions de mots-clés
- */
-export const generateKeywordSuggestions = (productInfo: ProductInfo): string[] => {
-  const { name, type, category } = productInfo;
-  
-  const base = [name.toLowerCase()];
-  const typeKeywords = {
-    digital: ['ebook', 'pdf', 'formation', 'cours', 'téléchargement', 'numérique'],
-    physical: ['produit', 'achat', 'livraison', 'qualité', 'original'],
-    service: ['professionnel', 'expert', 'consultation', 'accompagnement', 'conseil'],
-  };
-
-  return [
-    ...base,
-    ...typeKeywords[type],
-    category?.toLowerCase() || '',
-    'emarzona',
-    'en ligne',
-  ].filter(Boolean);
-};
-
-/**
- * Analyse la qualité d'une description
- */
-export const analyzeDescriptionQuality = (description: string): {
+export const analyzeDescriptionQuality = (
+  description: string
+): {
   score: number;
   issues: string[];
   suggestions: string[];
 } => {
-  const  issues: string[] = [];
-  const  suggestions: string[] = [];
-  let  score= 100;
+  const issues: string[] = [];
+  const suggestions: string[] = [];
+  let score = 100;
 
-  // Longueur
   if (description.length < 200) {
     issues.push('Description trop courte');
-    suggestions.push('Ajoutez plus de détails sur les bénéfices du produit');
+    suggestions.push('Ajoutez plus de détails sur les bénéfices');
     score -= 20;
   }
-
-  // Mots-clés
-  const hasKeywords = /qualité|professionnel|garantie|satisfait/i.test(description);
-  if (!hasKeywords) {
-    suggestions.push('Ajoutez des mots-clés de confiance (qualité, garantie, etc.)');
+  if (!/qualité|premium|garantie|expert|professionnel/i.test(description)) {
+    suggestions.push('Ajoutez des mots-clés de confiance');
     score -= 10;
   }
-
-  // Call-to-action
-  const hasCTA = /commander|acheter|profiter|découvrir|réserver/i.test(description);
-  if (!hasCTA) {
-    issues.push('Aucun appel à l\'action détecté');
-    suggestions.push('Ajoutez un CTA clair (Commander maintenant, etc.)');
+  if (!/commander|acheter|profiter|découvrir|réserver|inscrire/i.test(description)) {
+    issues.push("Aucun appel à l'action détecté");
     score -= 15;
   }
 
-  // Structure
-  const hasParagraphs = description.split('\n\n').length > 1;
-  if (!hasParagraphs) {
-    suggestions.push('Structurez le texte en plusieurs paragraphes');
-    score -= 10;
-  }
-
-  return {
-    score: Math.max(0, score),
-    issues,
-    suggestions,
-  };
+  return { score: Math.max(0, score), issues, suggestions };
 };
-
-
-
-
-
-
-

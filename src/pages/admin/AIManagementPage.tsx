@@ -69,6 +69,12 @@ export interface AIManagementSettings {
     systemPrompt: string;
     temperature: number;
     maxTokens: number;
+    generateProductImage?: boolean;
+    imageModel?: string;
+    imagePromptTemplate?: string;
+    minWords?: number;
+    supportedTypes?: string[];
+    typeSystemPrompts?: Record<string, string>;
   };
   imageEnhancer: {
     enabled: boolean;
@@ -125,10 +131,24 @@ const DEFAULTS: AIManagementSettings = {
   contentGenerator: {
     enabled: true,
     provider: 'lovable',
-    model: 'google/gemini-3-flash-preview',
-    systemPrompt: 'Tu es un expert en rédaction e-commerce SEO. Tu réponds avec du JSON valide.',
+    model: 'google/gemini-3.1-pro-preview',
+    systemPrompt:
+      "Tu es un expert copywriter e-commerce premium pour Emarzona. Tu maîtrises les 5 verticales : produits digitaux, physiques, services, cours en ligne et œuvres d'artiste.",
     temperature: 0.7,
-    maxTokens: 2000,
+    maxTokens: 4000,
+    generateProductImage: true,
+    imageModel: 'google/gemini-3.1-flash-image-preview',
+    imagePromptTemplate:
+      'Premium e-commerce product photo for {{typeLabel}}: {{name}}. {{category}}. Studio lighting, no text.',
+    minWords: 350,
+    supportedTypes: ['digital', 'physical', 'service', 'course', 'artist'],
+    typeSystemPrompts: {
+      digital: 'Produit numérique : téléchargement, licence, accès immédiat.',
+      physical: 'Produit physique : qualité, expédition, variantes.',
+      service: 'Service : réservation, expertise, résultats.',
+      course: 'Cours en ligne : modules, objectifs, certification.',
+      artist: "Œuvre d'artiste : authenticité, édition, valeur.",
+    },
   },
   imageEnhancer: {
     enabled: true,
@@ -296,6 +316,14 @@ const AIManagementPage: React.FC = () => {
             blogGenerator: {
               ...DEFAULTS.blogGenerator,
               ...partial.blogGenerator,
+            },
+            contentGenerator: {
+              ...DEFAULTS.contentGenerator,
+              ...partial.contentGenerator,
+              typeSystemPrompts: {
+                ...DEFAULTS.contentGenerator.typeSystemPrompts,
+                ...(partial.contentGenerator?.typeSystemPrompts ?? {}),
+              },
             },
           });
         }
@@ -705,8 +733,8 @@ const AIManagementPage: React.FC = () => {
                   <Sparkles className="h-5 w-5" /> Génération de contenu produit
                 </CardTitle>
                 <CardDescription>
-                  Descriptions, meta SEO, mots-clés générés automatiquement lors de la création de
-                  produits.
+                  Descriptions premium, SEO et images pour les 5 verticales : digital, physique,
+                  service, cours en ligne et œuvres d&apos;artiste.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-5">
@@ -768,9 +796,68 @@ const AIManagementPage: React.FC = () => {
                         value={settings.contentGenerator.maxTokens}
                         onChange={v => update('contentGenerator', { maxTokens: v })}
                         min={500}
-                        max={4000}
-                        step={100}
+                        max={8000}
+                        step={250}
                       />
+                    </div>
+                    <NumberSlider
+                      label="Mots minimum (description)"
+                      value={settings.contentGenerator.minWords ?? 350}
+                      onChange={v => update('contentGenerator', { minWords: v })}
+                      min={200}
+                      max={1200}
+                      step={50}
+                    />
+                    <div className="flex items-center justify-between p-3 border rounded-lg">
+                      <Label>Image produit premium (IA)</Label>
+                      <Switch
+                        checked={settings.contentGenerator.generateProductImage !== false}
+                        onCheckedChange={v =>
+                          update('contentGenerator', { generateProductImage: v })
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Modèle image</Label>
+                      <ModelSelect
+                        value={settings.contentGenerator.imageModel ?? IMAGE_MODELS[0].id}
+                        onChange={v => update('contentGenerator', { imageModel: v })}
+                        options={IMAGE_MODELS}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>
+                        Template prompt image ({'{{name}}'}, {'{{typeLabel}}'})
+                      </Label>
+                      <Textarea
+                        rows={2}
+                        value={settings.contentGenerator.imagePromptTemplate ?? ''}
+                        onChange={e =>
+                          update('contentGenerator', { imagePromptTemplate: e.target.value })
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>
+                        Prompts par verticale (digital, physical, service, course, artist)
+                      </Label>
+                      {(['digital', 'physical', 'service', 'course', 'artist'] as const).map(t => (
+                        <div key={t} className="space-y-1">
+                          <Label className="text-xs capitalize">{t}</Label>
+                          <Textarea
+                            rows={2}
+                            value={settings.contentGenerator.typeSystemPrompts?.[t] ?? ''}
+                            onChange={e =>
+                              update('contentGenerator', {
+                                typeSystemPrompts: {
+                                  ...settings.contentGenerator.typeSystemPrompts,
+                                  [t]: e.target.value,
+                                },
+                              })
+                            }
+                          />
+                        </div>
+                      ))}
                     </div>
                   </>
                 )}

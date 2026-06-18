@@ -273,7 +273,7 @@ export const CreateCourseWizard = ({
    * Load draft from localStorage
    */
   useEffect(() => {
-    let  savedDraft: string | null = null;
+    let savedDraft: string | null = null;
     try {
       savedDraft = localStorage.getItem('course-draft');
     } catch {
@@ -308,7 +308,7 @@ export const CreateCourseWizard = ({
    */
   const validateStep = useCallback(
     (step: number): boolean => {
-      const  newErrors: Record<string, string> = {};
+      const newErrors: Record<string, string> = {};
 
       if (step === 1) {
         if (!formData.title)
@@ -611,7 +611,12 @@ export const CreateCourseWizard = ({
     switch (currentStep) {
       case 1:
         return (
-          <CourseBasicInfoForm formData={formData} onChange={handleFieldChange} errors={errors} />
+          <CourseBasicInfoForm
+            formData={formData}
+            onChange={handleFieldChange}
+            onSeoGenerated={seo => setSeoData(prev => ({ ...prev, ...seo }))}
+            errors={errors}
+          />
         );
       case 2:
         return <CourseCurriculumBuilder sections={sections} onSectionsChange={setSections} />;
@@ -1121,9 +1126,3 @@ export const CreateCourseWizard = ({
     </div>
   );
 };
-
-
-
-
-
-

@@ -1,10 +1,6 @@
 /**
- * Component: AIContentGenerator
- * Description: Interface pour générer du contenu avec l'IA
- * Date: 25/10/2025
- * Impact: -80% temps de création
+ * Générateur de contenu IA — 5 verticales e-commerce Emarzona
  */
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,7 +8,14 @@ import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -31,51 +34,47 @@ import {
   Loader2,
   RefreshCw,
   Copy,
-  Info
+  Image as ImageIcon,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  generateProductContent, 
+import {
+  generateProductContent,
   analyzeDescriptionQuality,
+  PRODUCT_TYPE_LABELS,
   type ProductInfo,
-  type AIProvider
+  type ProductType,
+  type GeneratedContent,
+  type AIProvider,
 } from '@/lib/ai-content-generator';
 
-interface AIContentGeneratorProps {
-  productInfo: {
-    name: string;
-    type: 'digital' | 'physical' | 'service';
-    category?: string;
-    price?: number;
-    features?: string[];
-  };
-  onContentGenerated: (content: {
-    shortDescription: string;
-    longDescription: string;
-    features: string[];
-    metaTitle: string;
-    metaDescription: string;
-    keywords: string[];
-  }) => void;
+export interface AIContentGeneratorProps {
+  productInfo: ProductInfo;
+  onContentGenerated: (content: GeneratedContent) => void;
+  /** Libellé bouton */
+  triggerLabel?: string;
 }
 
 export const AIContentGenerator = ({
   productInfo,
   onContentGenerated,
+  triggerLabel = "Générer avec l'IA",
 }: AIContentGeneratorProps) => {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [generating, setGenerating] = useState(false);
-  const [provider, setProvider] = useState<AIProvider>('fallback');
+  const [provider, setProvider] = useState<AIProvider>('lovable');
   const [targetAudience, setTargetAudience] = useState('');
-  const [generatedContent, setGeneratedContent] = useState<any>(null);
-  const [analysisResult, setAnalysisResult] = useState<any>(null);
+  const [generateImage, setGenerateImage] = useState(true);
+  const [generatedContent, setGeneratedContent] = useState<GeneratedContent | null>(null);
+  const [analysisResult, setAnalysisResult] = useState<ReturnType<
+    typeof analyzeDescriptionQuality
+  > | null>(null);
 
   const handleGenerate = async () => {
-    if (!productInfo.name) {
+    if (!productInfo.name?.trim()) {
       toast({
-        title: 'Nom du produit requis',
-        description: 'Veuillez d\'abord renseigner le nom du produit',
+        title: 'Nom requis',
+        description: "Renseignez d'abord le nom du produit",
         variant: 'destructive',
       });
       return;
@@ -86,28 +85,22 @@ export const AIContentGenerator = ({
 
     try {
       const content = await generateProductContent(
-        {
-          ...productInfo,
-          targetAudience: targetAudience || undefined,
-        },
-        { provider }
+        { ...productInfo, targetAudience: targetAudience || undefined },
+        { provider, generateImage }
       );
 
       setGeneratedContent(content);
-
-      // Analyser la qualité
-      const analysis = analyzeDescriptionQuality(content.longDescription);
-      setAnalysisResult(analysis);
+      setAnalysisResult(analyzeDescriptionQuality(content.longDescription));
 
       toast({
-        title: 'Contenu généré !',
-        description: `Score qualité: ${analysis.score}/100`,
+        title: 'Contenu généré',
+        description: `Score qualité : ${analyzeDescriptionQuality(content.longDescription).score}/100`,
       });
-    } catch ( _error: any) {
-      logger.error('Generation error', { error, type: selectedType });
+    } catch (error: unknown) {
+      logger.error('Generation error', { error, type: productInfo.type });
       toast({
         title: 'Erreur de génération',
-        description: error.message || 'Une erreur est survenue',
+        description: error instanceof Error ? error.message : 'Une erreur est survenue',
         variant: 'destructive',
       });
     } finally {
@@ -119,111 +112,88 @@ export const AIContentGenerator = ({
     if (generatedContent) {
       onContentGenerated(generatedContent);
       setOpen(false);
-      toast({
-        title: 'Contenu appliqué !',
-        description: 'Le contenu a été ajouté à votre produit',
-      });
+      toast({ title: 'Contenu appliqué', description: 'Description, SEO et image intégrés' });
     }
   };
 
   const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast({
-      title: 'Copié !',
-      description: 'Texte copié dans le presse-papiers',
-    });
+    void navigator.clipboard.writeText(text);
+    toast({ title: 'Copié' });
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="gap-2">
+        <Button type="button" variant="outline" className="gap-2">
           <Sparkles className="h-4 w-4" />
-          Générer avec l'IA
+          {triggerLabel}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Wand2 className="h-5 w-5 text-primary" />
-            Générateur de contenu IA
+            IA Emarzona — {PRODUCT_TYPE_LABELS[productInfo.type]}
           </DialogTitle>
           <DialogDescription>
-            Générez automatiquement des descriptions optimisées SEO pour votre produit
+            Description premium, SEO optimisé et image produit via le contexte plateforme (RAG)
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
-          {/* Configuration */}
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Configuration</CardTitle>
+              <CardDescription>
+                L&apos;IA connaît les 5 systèmes Emarzona : digital, physique, service, cours,
+                artiste
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Provider */}
               <div>
-                <Label>Mode de génération</Label>
-                <Select value={provider} onValueChange={(v) => setProvider(v as AIProvider)}>
+                <Label>Mode</Label>
+                <Select value={provider} onValueChange={v => setProvider(v as AIProvider)}>
                   <SelectTrigger className="mt-2">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="fallback">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline">Gratuit</Badge>
-                        Templates intelligents
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="openai">
-                      <div className="flex items-center gap-2">
-                        <Badge>Premium</Badge>
-                        OpenAI GPT-4
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="claude">
-                      <div className="flex items-center gap-2">
-                        <Badge>Premium</Badge>
-                        Claude 3 Sonnet
-                      </div>
-                    </SelectItem>
+                    <SelectItem value="lovable">Lovable AI (premium, RAG)</SelectItem>
+                    <SelectItem value="fallback">Templates intelligents (gratuit)</SelectItem>
                   </SelectContent>
                 </Select>
-                {provider !== 'fallback' && (
-                  <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                    <Info className="h-3 w-3" />
-                    Nécessite une clé API configurée dans les paramètres
-                  </p>
-                )}
               </div>
 
-              {/* Informations produit */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>Nom du produit</Label>
+                  <Label>Nom</Label>
                   <Input value={productInfo.name} disabled className="mt-2" />
                 </div>
                 <div>
                   <Label>Type</Label>
-                  <Input value={productInfo.type} disabled className="mt-2" />
+                  <Input value={PRODUCT_TYPE_LABELS[productInfo.type]} disabled className="mt-2" />
                 </div>
               </div>
 
-              {/* Public cible (optionnel) */}
               <div>
                 <Label>Public cible (optionnel)</Label>
                 <Input
                   value={targetAudience}
-                  onChange={(e) => setTargetAudience(e.target.value)}
-                  placeholder="Ex: Entrepreneurs, Étudiants, Parents..."
+                  onChange={e => setTargetAudience(e.target.value)}
+                  placeholder="Entrepreneurs, collectionneurs, étudiants…"
                   className="mt-2"
                 />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Aide l'IA à personnaliser le contenu
-                </p>
               </div>
 
-              {/* Bouton génération */}
+              <div className="flex items-center justify-between rounded-lg border p-3">
+                <Label className="flex items-center gap-2">
+                  <ImageIcon className="h-4 w-4" />
+                  Générer image produit premium
+                </Label>
+                <Switch checked={generateImage} onCheckedChange={setGenerateImage} />
+              </div>
+
               <Button
+                type="button"
                 onClick={handleGenerate}
                 disabled={generating}
                 className="w-full"
@@ -232,67 +202,51 @@ export const AIContentGenerator = ({
                 {generating ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Génération en cours...
+                    Génération (30–90 s)…
                   </>
                 ) : (
                   <>
                     <Sparkles className="h-4 w-4 mr-2" />
-                    Générer le contenu
+                    Générer description + SEO{generateImage ? ' + image' : ''}
                   </>
                 )}
               </Button>
             </CardContent>
           </Card>
 
-          {/* Résultats */}
-          {generatedContent && (
+          {generatedContent ? (
             <div className="space-y-4">
-              {/* Score qualité */}
-              {analysisResult && (
-                <Card className={analysisResult.score >= 80 ? 'border-green-500' : analysisResult.score >= 60 ? 'border-yellow-500' : 'border-red-500'}>
-                  <CardHeader>
+              {analysisResult ? (
+                <Card
+                  className={analysisResult.score >= 80 ? 'border-green-500' : 'border-yellow-500'}
+                >
+                  <CardHeader className="pb-2">
                     <CardTitle className="text-base flex items-center gap-2">
                       {analysisResult.score >= 80 ? (
                         <CheckCircle2 className="h-5 w-5 text-green-500" />
                       ) : (
                         <AlertCircle className="h-5 w-5 text-yellow-500" />
                       )}
-                      Score qualité : {analysisResult.score}/100
+                      Score : {analysisResult.score}/100
                     </CardTitle>
                   </CardHeader>
-                  {(analysisResult.issues.length > 0 || analysisResult.suggestions.length > 0) && (
-                    <CardContent>
-                      {analysisResult.issues.length > 0 && (
-                        <div className="mb-2">
-                          <p className="text-sm font-medium text-red-600">Problèmes détectés :</p>
-                          <ul className="text-sm text-red-600 list-disc list-inside">
-                            {analysisResult.issues.map((issue: string, i: number) => (
-                              <li key={i}>{issue}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                      {analysisResult.suggestions.length > 0 && (
-                        <div>
-                          <p className="text-sm font-medium text-yellow-600">Suggestions :</p>
-                          <ul className="text-sm text-yellow-600 list-disc list-inside">
-                            {analysisResult.suggestions.map((suggestion: string, i: number) => (
-                              <li key={i}>{suggestion}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </CardContent>
-                  )}
                 </Card>
-              )}
+              ) : null}
 
-              {/* Description courte */}
+              {generatedContent.imageUrl ? (
+                <img
+                  src={generatedContent.imageUrl}
+                  alt="Aperçu IA"
+                  className="w-full max-h-48 rounded-lg object-cover border"
+                />
+              ) : null}
+
               <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between">
                     <CardTitle className="text-base">Description courte</CardTitle>
                     <Button
+                      type="button"
                       variant="ghost"
                       size="sm"
                       onClick={() => copyToClipboard(generatedContent.shortDescription)}
@@ -303,101 +257,60 @@ export const AIContentGenerator = ({
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm">{generatedContent.shortDescription}</p>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    {generatedContent.shortDescription.length} caractères
-                  </p>
                 </CardContent>
               </Card>
 
-              {/* Description longue */}
               <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-base">Description longue</CardTitle>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => copyToClipboard(generatedContent.longDescription)}
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                  </div>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">Description longue</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <Textarea
                     value={generatedContent.longDescription}
                     readOnly
-                    rows={10}
-                    className="font-mono text-xs"
+                    rows={8}
+                    className="text-xs"
                   />
                 </CardContent>
               </Card>
 
-              {/* Caractéristiques */}
               <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Caractéristiques suggérées</CardTitle>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">SEO</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <ul className="text-sm space-y-1">
-                    {generatedContent.features.map((feature: string, i: number) => (
-                      <li key={i} className="flex items-start gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                        {feature}
-                      </li>
+                <CardContent className="space-y-2 text-sm">
+                  <p>
+                    <strong>Title:</strong> {generatedContent.metaTitle}
+                  </p>
+                  <p>
+                    <strong>Description:</strong> {generatedContent.metaDescription}
+                  </p>
+                  <div className="flex flex-wrap gap-1">
+                    {generatedContent.keywords.map(k => (
+                      <Badge key={k} variant="secondary">
+                        {k}
+                      </Badge>
                     ))}
-                  </ul>
-                </CardContent>
-              </Card>
-
-              {/* SEO */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Métadonnées SEO</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div>
-                    <Label className="text-xs">Meta Title ({generatedContent.metaTitle.length}/60)</Label>
-                    <Input value={generatedContent.metaTitle} readOnly className="mt-1" />
-                  </div>
-                  <div>
-                    <Label className="text-xs">Meta Description ({generatedContent.metaDescription.length}/160)</Label>
-                    <Textarea value={generatedContent.metaDescription} readOnly rows={2} className="mt-1" />
-                  </div>
-                  <div>
-                    <Label className="text-xs">Mots-clés</Label>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {generatedContent.keywords.map((keyword: string, i: number) => (
-                        <Badge key={i} variant="secondary">{keyword}</Badge>
-                      ))}
-                    </div>
                   </div>
                 </CardContent>
               </Card>
             </div>
-          )}
+          ) : null}
         </div>
 
         <DialogFooter>
-          <div className="flex items-center justify-between w-full">
-            <Button
-              variant="outline"
-              onClick={handleGenerate}
-              disabled={generating}
-            >
+          <div className="flex w-full justify-between gap-2">
+            <Button type="button" variant="outline" onClick={handleGenerate} disabled={generating}>
               <RefreshCw className="h-4 w-4 mr-2" />
               Régénérer
             </Button>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setOpen(false)}>
+              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
                 Annuler
               </Button>
-              <Button
-                onClick={handleApply}
-                disabled={!generatedContent}
-              >
+              <Button type="button" onClick={handleApply} disabled={!generatedContent}>
                 <CheckCircle2 className="h-4 w-4 mr-2" />
-                Appliquer
+                Appliquer tout
               </Button>
             </div>
           </div>
@@ -407,9 +320,4 @@ export const AIContentGenerator = ({
   );
 };
 
-
-
-
-
-
-
+export type { ProductType, GeneratedContent, ProductInfo };

@@ -1,13 +1,31 @@
 /**
  * Edge function `ai-generate-content`
- * Génère du contenu produit (description, SEO, keywords) via Lovable AI Gateway.
- * Body: { productInfo: { name, type, category?, price?, features?, targetAudience? } }
- * Response: { shortDescription, longDescription, features[], metaTitle, metaDescription, keywords[] }
+ * Génère descriptions premium + SEO + image pour les 5 verticales Emarzona.
  */
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { requireAuthenticatedUser } from '../_shared/edge-auth-utils.ts';
 import { retrievePlatformRagContext, type RagSettings } from '../_shared/platform-rag.ts';
+import {
+  callImageGeneration,
+  callTextCompletion,
+  ensureDataUrl,
+  fillTemplate,
+  mapGatewayError,
+  resolveAiApiKey,
+  uploadCatalogImageFromDataUrl,
+  type AiProvider,
+} from '../_shared/ai-gateway.ts';
+import {
+  buildProductSystemPrompt,
+  buildProductUserPrompt,
+  CATALOG_PATH_BY_TYPE,
+  PRODUCT_CONTENT_TOOL,
+  PRODUCT_TYPE_LABELS,
+  type ProductAiType,
+} from '../_shared/product-ai-prompts.ts';
+
+const VALID_TYPES = ['digital', 'physical', 'service', 'course', 'artist'] as const;
 
 const defaultAllowedOrigin = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
 const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || defaultAllowedOrigin)
@@ -29,23 +47,6 @@ function buildCorsHeaders(originHeader: string | null) {
   };
 }
 
-function buildPrompt(p: any, language = 'fr') {
-  const types: Record<string, string> = {
-    digital: 'numérique',
-    physical: 'physique',
-    service: 'service',
-  };
-  return `Génère du contenu e-commerce SEO en ${language} pour ce produit:
-- Nom: ${p.name}
-- Type: ${types[p.type] || p.type}
-- Catégorie: ${p.category || 'non spécifiée'}
-- Prix: ${p.price ? `${p.price} XOF` : 'non défini'}
-${p.features?.length ? `- Caractéristiques: ${p.features.join(', ')}` : ''}
-${p.targetAudience ? `- Public cible: ${p.targetAudience}` : ''}
-
-Sois concret, intègre des mots-clés naturellement, mets en avant les bénéfices.`;
-}
-
 serve(async (req: Request) => {
   const corsHeaders = buildCorsHeaders(req.headers.get('origin'));
 
@@ -57,15 +58,9 @@ serve(async (req: Request) => {
   if (authResult instanceof Response) return authResult;
 
   try {
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      return new Response(JSON.stringify({ error: 'LOVABLE_API_KEY non configurée' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+    const body = await req.json();
+    const { productInfo, language, generateImage } = body;
 
-    const { productInfo, language } = await req.json();
     if (!productInfo?.name || !productInfo?.type) {
       return new Response(
         JSON.stringify({ error: 'productInfo.name et productInfo.type requis' }),
@@ -73,9 +68,21 @@ serve(async (req: Request) => {
       );
     }
 
+    const productType = productInfo.type as string;
+    if (!VALID_TYPES.includes(productType as (typeof VALID_TYPES)[number])) {
+      return new Response(
+        JSON.stringify({
+          error: `Type invalide. Valeurs : ${VALID_TYPES.join(', ')}`,
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
     const anonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+    const admin = createClient(supabaseUrl, serviceKey);
+
     let allSettings: Record<string, unknown> = {};
     let config: Record<string, unknown> = {};
     try {
@@ -97,119 +104,93 @@ serve(async (req: Request) => {
       );
     }
 
-    const model = (config?.model as string) || 'google/gemini-3-flash-preview';
-    let systemPrompt =
-      (config?.systemPrompt as string) || 'Tu es un expert en rédaction e-commerce SEO.';
-    const temperature = typeof config?.temperature === 'number' ? config.temperature : 0.7;
-    const maxTokens = typeof config?.maxTokens === 'number' ? config.maxTokens : 2000;
+    const { key: apiKey } = await resolveAiApiKey(
+      admin,
+      (config.provider as AiProvider) || 'lovable'
+    );
+    const model = (config.model as string) || 'google/gemini-3.1-pro-preview';
+    const imageModel = (config.imageModel as string) || 'google/gemini-3.1-flash-image-preview';
+    const minWords = typeof config.minWords === 'number' ? config.minWords : 350;
+    const typePrompts = (config.typeSystemPrompts as Record<string, string>) ?? {};
+
+    let systemPrompt = buildProductSystemPrompt(
+      (config.systemPrompt as string) ||
+        'Tu es un expert copywriter e-commerce premium pour Emarzona, marketplace multi-boutiques.',
+      productType as ProductAiType,
+      typePrompts
+    );
 
     const ragConfig = (allSettings.rag ?? {}) as RagSettings;
     if (ragConfig.enabled !== false && serviceKey) {
       try {
-        const admin = createClient(supabaseUrl, serviceKey);
         const query = [
           productInfo.name,
           productInfo.category,
           productInfo.type,
           productInfo.targetAudience,
+          productInfo.artistName,
         ]
           .filter(Boolean)
           .join(' — ');
-        const ragContext = await retrievePlatformRagContext(admin, query, LOVABLE_API_KEY, {
+        const ragContext = await retrievePlatformRagContext(admin, query, apiKey, {
           ...ragConfig,
           locale: language || 'fr',
         });
         if (ragContext) {
-          systemPrompt = `${systemPrompt}
-
-Contexte plateforme Emarzona (RAG) :
-${ragContext}`;
+          systemPrompt += `\n\nContexte plateforme Emarzona (RAG) :\n${ragContext}`;
         }
       } catch (ragError) {
         console.warn('RAG product generation skipped', ragError);
       }
     }
 
-    const tools = [
+    const userPrompt = buildProductUserPrompt(
       {
-        type: 'function',
-        function: {
-          name: 'output_product_content',
-          description: 'Retourne le contenu structuré du produit',
-          parameters: {
-            type: 'object',
-            properties: {
-              shortDescription: { type: 'string', description: '120-150 caractères, accrocheuse' },
-              longDescription: { type: 'string', description: '250-400 mots, structurée, SEO' },
-              features: {
-                type: 'array',
-                items: { type: 'string' },
-                description: '5-8 points clés',
-              },
-              metaTitle: { type: 'string', description: '50-60 caractères' },
-              metaDescription: { type: 'string', description: '150-160 caractères avec CTA' },
-              keywords: {
-                type: 'array',
-                items: { type: 'string' },
-                description: '10 mots-clés pertinents',
-              },
-            },
-            required: [
-              'shortDescription',
-              'longDescription',
-              'features',
-              'metaTitle',
-              'metaDescription',
-              'keywords',
-            ],
-            additionalProperties: false,
-          },
-        },
+        name: productInfo.name,
+        type: productType as ProductAiType,
+        category: productInfo.category,
+        price: productInfo.price,
+        features: productInfo.features,
+        targetAudience: productInfo.targetAudience,
+        artistName: productInfo.artistName,
+        artworkMedium: productInfo.artworkMedium,
+        courseLevel: productInfo.courseLevel,
       },
-    ];
+      language || 'fr',
+      minWords
+    );
 
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: buildPrompt(productInfo, language || 'fr') },
-        ],
-        tools,
-        tool_choice: { type: 'function', function: { name: 'output_product_content' } },
-        temperature,
-        max_tokens: maxTokens,
-      }),
+    const textRes = await callTextCompletion({
+      apiKey,
+      model,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ],
+      temperature: typeof config.temperature === 'number' ? config.temperature : 0.7,
+      maxTokens: typeof config.maxTokens === 'number' ? config.maxTokens : 4000,
+      tools: [PRODUCT_CONTENT_TOOL],
+      toolChoice: { type: 'function', function: { name: 'output_product_content' } },
     });
 
-    if (response.status === 429) {
-      return new Response(JSON.stringify({ error: 'Limite de requêtes atteinte.' }), {
-        status: 429,
+    const mapped = mapGatewayError(textRes.status);
+    if (mapped) {
+      return new Response(JSON.stringify({ error: mapped.message }), {
+        status: mapped.status,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-    if (response.status === 402) {
-      return new Response(JSON.stringify({ error: 'Crédits IA épuisés.' }), {
-        status: 402,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-    if (!response.ok) {
-      const t = await response.text();
-      console.error('AI gateway error', response.status, t);
+    if (!textRes.ok) {
+      const t = await textRes.text();
+      console.error('AI gateway error', textRes.status, t);
       return new Response(JSON.stringify({ error: 'Échec génération' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const data = await response.json();
-    const toolCall = data?.choices?.[0]?.message?.tool_calls?.[0];
+    const textData = await textRes.json();
+    const toolCall = textData?.choices?.[0]?.message?.tool_calls?.[0];
     if (!toolCall?.function?.arguments) {
       return new Response(JSON.stringify({ error: 'Réponse IA invalide' }), {
         status: 500,
@@ -217,8 +198,49 @@ ${ragContext}`;
       });
     }
 
-    const content = JSON.parse(toolCall.function.arguments);
-    return new Response(JSON.stringify({ content, model }), {
+    const parsed = JSON.parse(toolCall.function.arguments);
+    const content = {
+      shortDescription: String(parsed.shortDescription),
+      longDescription: String(parsed.longDescription),
+      features: Array.isArray(parsed.features) ? parsed.features.map(String) : [],
+      metaTitle: String(parsed.metaTitle),
+      metaDescription: String(parsed.metaDescription),
+      keywords: Array.isArray(parsed.keywords) ? parsed.keywords.map(String) : [],
+      ogTitle: String(parsed.ogTitle || parsed.metaTitle),
+      ogDescription: String(parsed.ogDescription || parsed.metaDescription),
+      imagePrompt: String(parsed.imagePrompt || ''),
+    };
+
+    let imageUrl: string | null = null;
+    const shouldGenerateImage = generateImage !== false && config.generateProductImage !== false;
+    if (shouldGenerateImage) {
+      const imageTemplate =
+        (config.imagePromptTemplate as string) ||
+        'Premium product photo for {{typeLabel}}: {{name}}. {{category}}. Studio lighting, no text.';
+      const imagePrompt =
+        content.imagePrompt ||
+        fillTemplate(imageTemplate, {
+          name: productInfo.name,
+          category: productInfo.category || '',
+          typeLabel: PRODUCT_TYPE_LABELS[productType as ProductAiType],
+        });
+
+      try {
+        const rawUrl = await callImageGeneration({
+          apiKey,
+          model: imageModel,
+          prompt: imagePrompt,
+        });
+        const dataUrl = await ensureDataUrl(rawUrl);
+        const catalogPath = CATALOG_PATH_BY_TYPE[productType as ProductAiType];
+        const slug = productInfo.slug || productInfo.name;
+        imageUrl = await uploadCatalogImageFromDataUrl(admin, dataUrl, catalogPath, slug);
+      } catch (imgErr) {
+        console.warn('Product image generation failed', imgErr);
+      }
+    }
+
+    return new Response(JSON.stringify({ content: { ...content, imageUrl }, model }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {

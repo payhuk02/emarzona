@@ -26,6 +26,7 @@ import { useProductImageUpload } from '@/hooks/useProductImageUpload';
 import type { ServiceProductFormData } from '@/types/service-product';
 import { logger } from '@/lib/logger';
 import { useSpaceInputFix } from '@/hooks/useSpaceInputFix';
+import { buildSeoFromGenerated, mergeImages } from '@/lib/ai-product-apply';
 import { ImageStudioField } from '@/components/images/ImageStudioField';
 
 interface ServiceBasicInfoFormProps {
@@ -141,10 +142,12 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
               features: data.features,
             }}
             onContentGenerated={content => {
+              const seo = buildSeoFromGenerated(content);
               onUpdate({
                 short_description: content.shortDescription,
                 description: content.longDescription,
-                features: content.features,
+                seo: { ...data.seo, ...seo },
+                images: mergeImages(data.images, content.imageUrl),
               });
             }}
           />

@@ -31,6 +31,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { getCategoriesForProductType } from '@/constants/product-categories';
+import { buildSeoFromGenerated, mergeImages } from '@/lib/ai-product-apply';
 import { ImageStudioField } from '@/components/images/ImageStudioField';
 
 import type {
@@ -337,10 +338,14 @@ export const DigitalBasicInfoForm = ({
               features: formData.features,
             }}
             onContentGenerated={content => {
+              const seo = buildSeoFromGenerated(content);
               updateFormData({
                 short_description: content.shortDescription,
                 description: content.longDescription,
                 features: content.features,
+                seo: { ...formData.seo, ...seo },
+                image_url: content.imageUrl || formData.image_url,
+                images: mergeImages(formData.images, content.imageUrl),
               });
             }}
           />
