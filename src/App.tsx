@@ -16,6 +16,7 @@ import { usePrefetch } from '@/hooks/usePrefetch';
 import { useAuth } from '@/contexts/AuthContext';
 import { useStoreContext } from '@/contexts/StoreContext';
 import { getRoutePrefetchConfig } from '@/lib/route-prefetch-config';
+import { resolveStoreCommerceTypeFromStore } from '@/lib/commerce/store-capability-map';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useBehavioralAnalytics } from '@/hooks/useBehavioralAnalytics';
 
@@ -215,8 +216,16 @@ const AppContent = () => {
   useScrollRestoration();
   useDarkMode();
   const { user, loading: authLoading } = useAuth();
-  const { stores, loading: storeLoading } = useStoreContext();
-  const routePrefetch = getRoutePrefetchConfig(authLoading, storeLoading, user?.id, stores.length);
+  const { stores, loading: storeLoading, selectedStore } = useStoreContext();
+  const activeStore = selectedStore ?? stores[0] ?? null;
+  const commerceType = activeStore ? resolveStoreCommerceTypeFromStore(activeStore) : null;
+  const routePrefetch = getRoutePrefetchConfig(
+    authLoading,
+    storeLoading,
+    user?.id,
+    stores.length,
+    commerceType
+  );
   const isMobile = useIsMobile();
   const location = useLocation();
   const isBottomNavVisible = isMobile && shouldShowBottomNavigation(location.pathname);
@@ -239,6 +248,8 @@ const AppContent = () => {
     idleRoutes: routePrefetch.idleRoutes,
     hoverRoutes: routePrefetch.hoverRoutes,
     idleDelayMs: routePrefetch.idleDelayMs,
+    commerceType,
+    prefetchWizardChunks: stores.length > 0,
   });
 
   useEffect(() => {

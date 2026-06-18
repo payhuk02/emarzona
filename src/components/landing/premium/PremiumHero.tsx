@@ -1,13 +1,23 @@
+import { lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { CreditCard, Zap, Headphones } from 'lucide-react';
-import { PremiumCompassHeroVisual } from './PremiumCompassHeroVisual';
 import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
+
+const PremiumCompassHeroVisual = lazy(() =>
+  import('./PremiumCompassHeroVisual').then(m => ({ default: m.PremiumCompassHeroVisual }))
+);
 
 const trustIcons = [CreditCard, Zap, Headphones] as const;
 const trustKeys = ['noCard', 'instant', 'support'] as const;
 
-const ease = [0.22, 1, 0.36, 1] as const;
+function CompassFallback() {
+  return (
+    <div
+      className="mx-auto aspect-square w-full max-w-[min(100%,320px)] min-[380px]:max-w-[min(100%,380px)] sm:max-w-[min(100%,460px)] lg:max-w-[min(100%,560px)] rounded-full bg-white/[0.04]"
+      aria-hidden
+    />
+  );
+}
 
 export function PremiumHero() {
   const { t } = useLandingPremiumT();
@@ -26,43 +36,23 @@ export function PremiumHero() {
 
       <div className="relative mx-auto flex max-w-7xl flex-col gap-12 px-4 py-12 sm:px-5 sm:py-14 lg:grid lg:grid-cols-[1fr_1.05fr] lg:items-center lg:gap-8 lg:px-8 lg:py-20 xl:py-24">
         <div className="flex flex-col text-center lg:text-left">
-          <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease }}
-            className="lp-eyebrow mb-5 self-center lg:self-start"
-          >
+          <p className="lp-hero-animate lp-eyebrow mb-5 self-center lg:self-start">
             {t('hero.eyebrow')}
-          </motion.p>
+          </p>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.85, delay: 0.08, ease }}
-            className="lp-serif text-[2.5rem] leading-[1.08] text-white sm:text-[2.85rem] md:text-[3.35rem] lg:text-[4.5rem] xl:text-[5rem]"
-          >
+          <h1 className="lp-hero-animate lp-hero-animate--delay-1 lp-serif text-[2.5rem] leading-[1.08] text-white sm:text-[2.85rem] md:text-[3.35rem] lg:text-[4.5rem] xl:text-[5rem]">
             {t('hero.titleLine1')}
             <br />
             {t('hero.titleLine2')}
             <br />
             <span className="lp-gold-text italic">{t('hero.titleHighlight')}</span>
-          </motion.h1>
+          </h1>
 
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.16, ease }}
-            className="mx-auto mt-5 max-w-lg text-[15px] leading-relaxed text-[var(--lp-text-dim)] sm:text-lg lg:mx-0"
-          >
+          <p className="lp-hero-animate lp-hero-animate--delay-2 mx-auto mt-5 max-w-lg text-[15px] leading-relaxed text-[var(--lp-text-dim)] sm:text-lg lg:mx-0">
             {t('hero.subtitle')}
-          </motion.p>
+          </p>
 
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.75, delay: 0.24, ease }}
-            className="mt-8 flex flex-wrap items-center justify-center gap-3 sm:mt-10 sm:gap-4 lg:justify-start"
-          >
+          <div className="lp-hero-animate lp-hero-animate--delay-3 mt-8 flex flex-wrap items-center justify-center gap-3 sm:mt-10 sm:gap-4 lg:justify-start">
             <Link
               to="/register"
               className="lp-btn-primary inline-flex rounded-full px-6 py-3 text-sm font-semibold sm:px-7 sm:py-3.5"
@@ -75,14 +65,9 @@ export function PremiumHero() {
             >
               {t('hero.ctaSecondary')}
             </a>
-          </motion.div>
+          </div>
 
-          <motion.ul
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.4, ease }}
-            className="mt-8 flex flex-col items-center gap-3 text-sm text-white/45 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-6 lg:items-start lg:justify-start"
-          >
+          <ul className="lp-hero-animate lp-hero-animate--delay-4 mt-8 flex flex-col items-center gap-3 text-sm text-white/45 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-6 lg:items-start lg:justify-start">
             {trustKeys.map((key, i) => {
               const Icon = trustIcons[i];
               return (
@@ -92,20 +77,17 @@ export function PremiumHero() {
                 </li>
               );
             })}
-          </motion.ul>
+          </ul>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.96 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1, delay: 0.2, ease }}
-          className="flex w-full flex-col items-center lg:items-end"
-        >
-          <PremiumCompassHeroVisual />
+        <div className="lp-hero-animate-scale flex w-full flex-col items-center lg:items-end">
+          <Suspense fallback={<CompassFallback />}>
+            <PremiumCompassHeroVisual />
+          </Suspense>
           <p className="lp-hero-caption mt-5 text-center lg:mt-6 lg:text-right">
             {t('hero.caption')}
           </p>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

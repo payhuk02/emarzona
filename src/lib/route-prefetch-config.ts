@@ -2,6 +2,9 @@
  * Routes à prefetch selon le profil utilisateur (scale: évite le prefetch dashboard pour les anonymes).
  */
 
+import type { StoreCommerceType } from '@/constants/store-commerce-types';
+import { getVendorWizardPrefetchRoutes } from '@/lib/wizard/prefetch-product-wizards';
+
 export const PUBLIC_IDLE_ROUTES = ['/marketplace', '/cart'] as const;
 export const PUBLIC_HOVER_ROUTES = ['/marketplace', '/cart', '/checkout'] as const;
 
@@ -26,7 +29,8 @@ export function getRoutePrefetchConfig(
   authLoading: boolean,
   storeLoading: boolean,
   userId: string | null | undefined,
-  storeCount: number
+  storeCount: number,
+  commerceType?: StoreCommerceType | null
 ): RoutePrefetchConfig {
   if (authLoading || storeLoading) {
     return { enabled: false, idleRoutes: [], hoverRoutes: [], idleDelayMs: 0 };
@@ -42,10 +46,13 @@ export function getRoutePrefetchConfig(
   }
 
   if (storeCount > 0) {
+    const wizardRoutes = getVendorWizardPrefetchRoutes(commerceType);
+    const idleRoutes = [...new Set([...VENDOR_IDLE_ROUTES, ...wizardRoutes])];
+    const hoverRoutes = [...new Set([...VENDOR_HOVER_ROUTES, ...wizardRoutes])];
     return {
       enabled: true,
-      idleRoutes: VENDOR_IDLE_ROUTES,
-      hoverRoutes: VENDOR_HOVER_ROUTES,
+      idleRoutes,
+      hoverRoutes,
       idleDelayMs: 2500,
     };
   }

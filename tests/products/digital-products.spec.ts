@@ -19,17 +19,7 @@ test.describe('Digital Products', () => {
   });
 
   test('should navigate to create digital product', async ({ page }) => {
-    // Navigate to products page
-    await page.click('text=/produits|products/i');
-
-    // Click create product
-    await page.click('text=/créer|create|ajouter/i');
-
-    // Should show product type selector
-    await expect(page.locator('text=/type de produit|product type/i')).toBeVisible();
-
-    // Select digital product
-    await page.click('text=/numérique|digital/i');
+    await page.goto('/dashboard/products/new/digital');
 
     // Should show digital product wizard
     await expect(page.locator('text=/informations de base|basic info/i')).toBeVisible();
@@ -37,8 +27,7 @@ test.describe('Digital Products', () => {
 
   test('should create digital product with all steps', async ({ page }) => {
     // Navigate to product creation
-    await page.goto('/products/create');
-    await page.click('text=/numérique|digital/i');
+    await page.goto('/dashboard/products/new/digital');
 
     // Step 1: Basic Info
     await page.fill('input[name="title"], input[placeholder*="titre"]', 'Test Digital Product E2E');
@@ -91,8 +80,7 @@ test.describe('Digital Products', () => {
   });
 
   test('should validate required fields', async ({ page }) => {
-    await page.goto('/products/create');
-    await page.click('text=/numérique|digital/i');
+    await page.goto('/dashboard/products/new/digital');
 
     // Try to submit without filling fields
     await page.click('button:has-text("Suivant"), button:has-text("Next")');

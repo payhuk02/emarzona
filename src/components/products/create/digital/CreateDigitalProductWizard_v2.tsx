@@ -38,23 +38,24 @@ import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { cn } from '@/lib/utils';
 import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
+import { createDigitalProductTx } from '@/lib/products/product-create-rpc';
 import type {
   DigitalProductFormData,
   DigitalProductFormDataUpdate,
   DigitalProductDownloadableFile,
 } from '@/types/digital-product-form';
 
-// Step components
-import { DigitalBasicInfoForm } from './DigitalBasicInfoForm';
-import { DigitalFilesUploader } from './DigitalFilesUploader';
-import { DigitalLicenseConfig } from './DigitalLicenseConfig';
-import { DigitalAffiliateSettings } from './DigitalAffiliateSettings';
-import { DigitalPreview } from './DigitalPreview';
-
-// Shared components
-import { ProductSEOForm } from '../shared/ProductSEOForm';
-import { ProductFAQForm } from '../shared/ProductFAQForm';
-import { ProductStatisticsDisplaySettings } from '../shared/ProductStatisticsDisplaySettings';
+import { WizardStepSuspense } from '../shared/WizardStepSuspense';
+import {
+  LazyDigitalBasicInfoForm,
+  LazyDigitalFilesUploader,
+  LazyDigitalLicenseConfig,
+  LazyDigitalAffiliateSettings,
+  LazyDigitalPreview,
+  LazyProductSEOForm,
+  LazyProductFAQForm,
+  LazyProductStatisticsDisplaySettings,
+} from './digital-wizard-steps';
 
 const createDefaultAffiliate = () => ({
   enabled: false,
@@ -343,8 +344,8 @@ export const CreateDigitalProductWizard = ({
    * Load draft from localStorage
    */
   useEffect(() => {
-    let  savedDraft: string | null = null;
-    let  savedStep: string | null = null;
+    let savedDraft: string | null = null;
+    let savedStep: string | null = null;
     try {
       savedDraft = localStorage.getItem('digital-product-draft');
       savedStep = localStorage.getItem('digital-product-current-step');
@@ -453,7 +454,7 @@ export const CreateDigitalProductWizard = ({
             }
 
             // Ne pas inclure le prix dans la validation si le modèle est "free"
-            const  validationData: Partial<DigitalProductFormData> = {
+            const validationData: Partial<DigitalProductFormData> = {
               name: nameValue,
             };
 
@@ -532,7 +533,7 @@ export const CreateDigitalProductWizard = ({
               const versionError = getFieldError(result.errors, 'version');
 
               // Construire un message d'erreur détaillé avec tous les champs en erreur
-              const  errorMessages: string[] = [];
+              const errorMessages: string[] = [];
               if (nameError) errorMessages.push(`Nom: ${nameError}`);
               if (priceError) errorMessages.push(`Prix: ${priceError}`);
               if (slugError) errorMessages.push(`Slug: ${slugError}`);
@@ -672,7 +673,7 @@ export const CreateDigitalProductWizard = ({
             // Les étapes 3-6 sont déjà gérées en haut de la fonction
             return true;
         }
-      } catch ( _error: unknown) {
+      } catch (_error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Erreur lors du chargement des modules de validation', {
           error,
@@ -727,7 +728,7 @@ export const CreateDigitalProductWizard = ({
         logger.warn('Validation échouée, navigation bloquée', { step: currentStep });
         // Le toast est déjà affiché par validateStep
       }
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Erreur lors de la validation/navigation', {
         error,
@@ -788,10 +789,10 @@ export const CreateDigitalProductWizard = ({
         }
 
         // Générer un slug unique
-        let  slug= formData.slug || generateSlug(formData.name);
+        let slug = formData.slug || generateSlug(formData.name);
 
         // Vérifier l'unicité du slug et générer un nouveau si nécessaire
-        let  attempts= 0;
+        let attempts = 0;
         const maxAttempts = 10;
         while (attempts < maxAttempts) {
           const { data: existing } = await supabase
@@ -818,143 +819,69 @@ export const CreateDigitalProductWizard = ({
           );
         }
 
-        // 1. Create base product
-        const { data: product, error: productError } = await supabase
-          .from('products')
-          .insert({
-            store_id: storeId,
-            name: formData.name,
-            slug,
-            description: formData.description,
-            short_description: formData.short_description,
-            category: formData.category,
-            product_type: 'digital',
-            price: formData.pricing_model === 'free' ? 0 : formData.price,
-            promotional_price: formData.promotional_price,
-            currency: formData.currency,
-            pricing_model: formData.pricing_model || 'one-time',
-            image_url:
-              formData.image_url ||
-              (formData.images && formData.images.length > 0 ? formData.images[0] : ''),
-            images: formData.images || (formData.image_url ? [formData.image_url] : []),
-            licensing_type: formData.licensing_type || 'standard',
-            license_terms: formData.license_terms || null,
-            is_active: !isDraft,
-            is_draft: isDraft,
-            // SEO fields (only fields that exist in products table)
-            meta_title: formData.seo?.meta_title || formData.name,
-            meta_description: formData.seo?.meta_description || formData.short_description,
-            og_image: formData.seo?.og_image,
-            // Note: meta_keywords, og_title, og_description are not saved to DB (columns don't exist)
-            // FAQs
-            faqs: formData.faqs || [],
-          })
-          .select()
-          .single();
-
-        if (productError) {
-          // Gestion améliorée des erreurs de contrainte unique
-          if (productError.code === '23505' || productError.message?.includes('duplicate key')) {
-            const constraintMatch = productError.message?.match(/constraint ['"]([^'"]+)['"]/);
-            const constraintName = constraintMatch ? constraintMatch[1] : 'unknown';
-
-            if (constraintName.includes('slug')) {
-              throw new Error(
-                "Ce slug est déjà utilisé par un autre produit de votre boutique. Veuillez modifier le nom ou l'URL du produit."
-              );
-            }
-          }
-          throw productError;
-        }
-
-        // 2. Calculate file info
-        const totalSizeMB =
-          formData.downloadable_files?.reduce(
-            (sum: number, file: DigitalProductDownloadableFile) => {
-              return sum + file.size / (1024 * 1024);
-            },
-            0
-          ) || 0;
-
         const mainFile = formData.downloadable_files?.[0];
         const mainFileFormat =
           mainFile?.type?.split('/')[1] || mainFile?.name?.split('.').pop() || 'unknown';
+        const totalSizeMB =
+          formData.downloadable_files?.reduce(
+            (sum: number, file: DigitalProductDownloadableFile) => sum + file.size / (1024 * 1024),
+            0
+          ) || 0;
 
-        // 3. Create digital_product (CORRECTION: Sauvegarde complète dans digital_products)
-        const { data: digitalProduct, error: digitalError } = await supabase
-          .from('digital_products')
-          .insert({
-            product_id: product.id,
-            digital_type: formData.digital_type || 'other',
-            license_type: formData.license_type || 'single',
-            license_duration_days: formData.license_duration_days || null, // NULL = lifetime
-            max_activations:
-              formData.max_activations ||
-              (formData.license_type === 'unlimited'
-                ? -1
-                : formData.license_type === 'multi'
-                  ? 5
-                  : 1),
-            allow_license_transfer: formData.allow_license_transfer || false,
-            license_key_format: formData.license_key_format || 'XXXX-XXXX-XXXX-XXXX',
-            auto_generate_keys: formData.auto_generate_keys !== false,
-            main_file_url: formData.main_file_url || mainFile?.url || '',
-            main_file_size_mb: mainFile ? mainFile.size / (1024 * 1024) : 0,
-            main_file_format: mainFileFormat,
-            main_file_version: formData.main_file_version || '1.0',
-            main_file_hash: formData.main_file_hash || null, // Hash pour intégrité
-            total_files: formData.downloadable_files?.length || 1,
-            total_size_mb: totalSizeMB,
-            additional_files: formData.additional_files || [],
-            download_limit: formData.download_limit || 5,
-            download_expiry_days: formData.download_expiry_days || 30,
-            require_registration: formData.require_registration !== false,
-            watermark_enabled: formData.watermark_enabled || false,
-            watermark_text: formData.watermark_text || '',
-            // Protection avancée
-            ip_restriction_enabled: formData.ip_restriction_enabled || false,
-            max_ips_allowed: formData.max_ips_allowed || 3,
-            geo_restriction_enabled: formData.geo_restriction_enabled || false,
-            allowed_countries: formData.allowed_countries || null,
-            blocked_countries: formData.blocked_countries || null,
-            // Updates & Versioning
-            version: formData.version || '1.0',
-            changelog: formData.changelog || null,
-            auto_update_enabled: formData.auto_update_enabled || false,
-            update_notifications: formData.update_notifications !== false,
-            // Preview & Demo
-            has_preview: formData.has_preview || false,
-            preview_url: formData.preview_url || null,
-            preview_duration_seconds: formData.preview_duration_seconds || null,
-            demo_available: formData.demo_available || false,
-            demo_url: formData.demo_url || null,
-            trial_period_days: formData.trial_period_days || null,
-            // Advanced Features
-            source_code_included: formData.source_code_included || false,
-            documentation_url: formData.documentation_url || null,
-            support_period_days: formData.support_period_days || null,
-            support_email: formData.support_email || null,
-            compatible_os: formData.compatible_os || null,
-            minimum_requirements: formData.minimum_requirements || null,
-            // Statistics (initialisés à 0)
-            total_downloads: 0,
-            unique_downloaders: 0,
-            total_revenue: 0,
-            average_download_time_seconds: 0,
-            bounce_rate: 0,
-            average_rating: 0,
-            total_reviews: 0,
-          })
-          .select()
-          .single();
+        const productPayload: Record<string, unknown> = {
+          name: formData.name,
+          slug,
+          description: formData.description,
+          short_description: formData.short_description,
+          category: formData.category,
+          price: formData.pricing_model === 'free' ? 0 : formData.price,
+          promotional_price: formData.promotional_price,
+          currency: formData.currency,
+          pricing_model: formData.pricing_model || 'one-time',
+          image_url:
+            formData.image_url ||
+            (formData.images && formData.images.length > 0 ? formData.images[0] : ''),
+          images: formData.images || (formData.image_url ? [formData.image_url] : []),
+          licensing_type: formData.licensing_type || 'standard',
+          license_terms: formData.license_terms || null,
+          is_active: !isDraft,
+          is_draft: isDraft,
+          meta_title: formData.seo?.meta_title || formData.name,
+          meta_description: formData.seo?.meta_description || formData.short_description,
+          og_image: formData.seo?.og_image,
+          faqs: formData.faqs || [],
+        };
 
-        if (digitalError) throw digitalError;
+        const digitalPayload: Record<string, unknown> = {
+          digital_type: formData.digital_type || 'other',
+          license_type: formData.license_type || 'single',
+          license_duration_days: formData.license_duration_days || null,
+          max_activations:
+            formData.max_activations ||
+            (formData.license_type === 'unlimited'
+              ? -1
+              : formData.license_type === 'multi'
+                ? 5
+                : 1),
+          allow_license_transfer: formData.allow_license_transfer || false,
+          auto_generate_keys: formData.auto_generate_keys !== false,
+          main_file_url: formData.main_file_url || mainFile?.url || '',
+          main_file_size_mb: mainFile ? mainFile.size / (1024 * 1024) : 0,
+          main_file_format: mainFileFormat,
+          main_file_version: formData.main_file_version || '1.0',
+          total_files: formData.downloadable_files?.length || 1,
+          total_size_mb: totalSizeMB,
+          download_limit: formData.download_limit || 5,
+          download_expiry_days: formData.download_expiry_days || 30,
+          require_registration: formData.require_registration !== false,
+          watermark_enabled: formData.watermark_enabled || false,
+          watermark_text: formData.watermark_text || '',
+          version: formData.version || '1.0',
+        };
 
-        // 4. Create digital_product_files
-        if (formData.downloadable_files && formData.downloadable_files.length > 0) {
-          const filesData = formData.downloadable_files.map(
+        const filesPayload =
+          formData.downloadable_files?.map(
             (file: DigitalProductDownloadableFile, index: number) => ({
-              digital_product_id: digitalProduct.id,
               name: file.name,
               file_url: file.url,
               file_type: file.type,
@@ -965,13 +892,53 @@ export const CreateDigitalProductWizard = ({
               requires_purchase: file.requires_purchase !== false && !file.is_preview,
               version: '1.0',
             })
-          );
+          ) || [];
 
-          const { error: filesError } = await supabase
-            .from('digital_product_files')
-            .insert(filesData);
+        const rpcResult = await createDigitalProductTx(
+          storeId,
+          productPayload,
+          digitalPayload,
+          filesPayload
+        );
 
-          if (filesError) throw filesError;
+        const product = {
+          id: rpcResult.product_id,
+          name: formData.name,
+          product_type: 'digital' as const,
+          price: formData.pricing_model === 'free' ? 0 : formData.price,
+          currency: formData.currency,
+        };
+
+        // Enrichissement digital_products (champs hors transaction RPC)
+        if (rpcResult.digital_product_id) {
+          await supabase
+            .from('digital_products')
+            .update({
+              license_key_format: formData.license_key_format || 'XXXX-XXXX-XXXX-XXXX',
+              main_file_hash: formData.main_file_hash || null,
+              additional_files: formData.additional_files || [],
+              ip_restriction_enabled: formData.ip_restriction_enabled || false,
+              max_ips_allowed: formData.max_ips_allowed || 3,
+              geo_restriction_enabled: formData.geo_restriction_enabled || false,
+              allowed_countries: formData.allowed_countries || null,
+              blocked_countries: formData.blocked_countries || null,
+              changelog: formData.changelog || null,
+              auto_update_enabled: formData.auto_update_enabled || false,
+              update_notifications: formData.update_notifications !== false,
+              has_preview: formData.has_preview || false,
+              preview_url: formData.preview_url || null,
+              preview_duration_seconds: formData.preview_duration_seconds || null,
+              demo_available: formData.demo_available || false,
+              demo_url: formData.demo_url || null,
+              trial_period_days: formData.trial_period_days || null,
+              source_code_included: formData.source_code_included || false,
+              documentation_url: formData.documentation_url || null,
+              support_period_days: formData.support_period_days || null,
+              support_email: formData.support_email || null,
+              compatible_os: formData.compatible_os || null,
+              minimum_requirements: formData.minimum_requirements || null,
+            })
+            .eq('id', rpcResult.digital_product_id);
         }
 
         // 5. Create affiliate settings if enabled
@@ -997,7 +964,7 @@ export const CreateDigitalProductWizard = ({
             logger.error('Affiliate settings error', {
               error: affiliateError.message,
               code: affiliateError.code,
-              productId: createdProduct?.id,
+              productId: product.id,
             });
           }
         }
@@ -1021,7 +988,7 @@ export const CreateDigitalProductWizard = ({
             } else {
               logger.info('Free preview product created', { previewProductId });
             }
-          } catch ( _error: unknown) {
+          } catch (_error: unknown) {
             const errorMessage = error instanceof Error ? error.message : String(error);
             logger.error('Exception creating preview product', { error: errorMessage });
             // Ne pas faire échouer la création du produit principal
@@ -1045,15 +1012,15 @@ export const CreateDigitalProductWizard = ({
               product_type: product.product_type,
               price: product.price,
               currency: product.currency,
-              created_at: product.created_at,
-            }).catch( err => {
+              created_at: new Date().toISOString(),
+            }).catch(err => {
               logger.error('Error triggering webhook', { error: err, productId: product.id });
             });
           });
         }
 
         return product;
-      } catch ( _error: unknown) {
+      } catch (_error: unknown) {
         logger.error('Erreur lors de la sauvegarde du produit', {
           error: error instanceof Error ? error.message : String(error),
         });
@@ -1085,7 +1052,7 @@ export const CreateDigitalProductWizard = ({
         // Rediriger vers la liste des produits digitaux
         navigate('/dashboard/digital-products', { replace: true });
       }
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Erreur lors de la sauvegarde du brouillon', { error: errorMessage });
       toast({
@@ -1124,7 +1091,7 @@ export const CreateDigitalProductWizard = ({
         // Fallback vers la liste des produits digitaux si storeSlug n'est pas disponible
         navigate('/dashboard/digital-products', { replace: true });
       }
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Erreur lors de la publication', { error: errorMessage });
       toast({
@@ -1184,19 +1151,19 @@ export const CreateDigitalProductWizard = ({
     switch (currentStep) {
       case 1:
         return (
-          <DigitalBasicInfoForm
+          <LazyDigitalBasicInfoForm
             formData={formData}
             updateFormData={updateFormData}
             storeSlug={storeSlug || ''}
           />
         );
       case 2:
-        return <DigitalFilesUploader formData={formData} updateFormData={updateFormData} />;
+        return <LazyDigitalFilesUploader formData={formData} updateFormData={updateFormData} />;
       case 3:
         return (
           <div className="space-y-6">
-            <DigitalLicenseConfig formData={formData} updateFormData={updateFormData} />
-            <ProductStatisticsDisplaySettings
+            <LazyDigitalLicenseConfig formData={formData} updateFormData={updateFormData} />
+            <LazyProductStatisticsDisplaySettings
               formData={{
                 hide_purchase_count: formData.hide_purchase_count,
                 hide_likes_count: formData.hide_likes_count,
@@ -1213,7 +1180,7 @@ export const CreateDigitalProductWizard = ({
         );
       case 4:
         return (
-          <DigitalAffiliateSettings
+          <LazyDigitalAffiliateSettings
             productPrice={formData.price || 0}
             productName={formData.name || 'Produit'}
             data={formData.affiliate}
@@ -1233,7 +1200,7 @@ export const CreateDigitalProductWizard = ({
               </AlertDescription>
             </Alert>
 
-            <ProductSEOForm
+            <LazyProductSEOForm
               productName={formData.name || ''}
               productDescription={formData.description || ''}
               productPrice={formData.price || 0}
@@ -1241,14 +1208,14 @@ export const CreateDigitalProductWizard = ({
               onUpdate={seoData => updateFormData({ seo: seoData })}
             />
 
-            <ProductFAQForm
+            <LazyProductFAQForm
               data={formData.faqs || []}
               onUpdate={faqs => updateFormData({ faqs })}
             />
           </div>
         );
       case 6:
-        return <DigitalPreview formData={formData} />;
+        return <LazyDigitalPreview formData={formData} />;
       default:
         return null;
     }
@@ -1432,7 +1399,7 @@ export const CreateDigitalProductWizard = ({
           className="mb-4 sm:mb-6 lg:mb-8 border-border/50 bg-card/50 backdrop-blur-sm shadow-lg animate-in fade-in slide-in-from-bottom-4 duration-700"
         >
           <CardContent className="pt-4 sm:pt-6 px-3 sm:px-4 lg:px-6 pb-4 sm:pb-6">
-            {renderStepContent()}
+            <WizardStepSuspense>{renderStepContent()}</WizardStepSuspense>
           </CardContent>
         </Card>
 
@@ -1568,9 +1535,3 @@ export const CreateDigitalProductWizard = ({
     </div>
   );
 };
-
-
-
-
-
-

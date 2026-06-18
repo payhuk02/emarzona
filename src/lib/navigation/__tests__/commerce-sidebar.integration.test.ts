@@ -95,7 +95,7 @@ describe('commerce sidebar integration', () => {
     expect(service).toContain('/dashboard/bookings');
     expect(service).not.toContain('/dashboard/digital-products');
 
-    expect(course).toContain('/dashboard/my-courses');
+    expect(course).toContain('/dashboard/courses');
     expect(course).not.toContain('/dashboard/services');
 
     expect(artist).toContain('/dashboard/auctions');

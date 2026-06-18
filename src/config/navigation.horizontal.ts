@@ -175,7 +175,7 @@ export const HORIZONTAL_MEGA_SUBGROUPS: Partial<
       paths: [
         '/dashboard/products',
         '/dashboard/digital-products',
-        '/dashboard/my-courses',
+        '/dashboard/courses',
         '/dashboard/auctions',
         '/dashboard/portfolios',
       ],

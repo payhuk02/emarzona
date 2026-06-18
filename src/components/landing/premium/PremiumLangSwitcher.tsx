@@ -1,7 +1,8 @@
 import { useCallback, useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronDown, Globe } from 'lucide-react';
-import { AVAILABLE_LANGUAGES, type LanguageCode } from '@/i18n/config';
+import { AVAILABLE_LANGUAGES, type LanguageCode } from '@/i18n/languages';
+import { ensureLandingPremiumLocale } from '@/i18n/landing-premium-loader';
 import { cn } from '@/lib/utils';
 
 interface PremiumLangSwitcherProps {
@@ -23,7 +24,8 @@ export function PremiumLangSwitcher({ className, fullWidth = false }: PremiumLan
   const current = AVAILABLE_LANGUAGES.find(l => l.code === i18n.language) ?? fallbackLang;
 
   const changeLanguage = useCallback(
-    (code: LanguageCode) => {
+    async (code: LanguageCode) => {
+      await ensureLandingPremiumLocale(code);
       i18n.changeLanguage(code);
       localStorage.setItem('emarzona_language', code);
       document.documentElement.lang = code;

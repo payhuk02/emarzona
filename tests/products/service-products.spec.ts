@@ -19,8 +19,7 @@ test.describe('Service Products', () => {
   });
 
   test('should create service product', async ({ page }) => {
-    await page.goto('/products/create');
-    await page.click('text=/service/i');
+    await page.goto('/dashboard/products/new/service');
 
     // Step 1: Basic Info
     await page.fill('input[name="title"]', 'Test Service E2E');

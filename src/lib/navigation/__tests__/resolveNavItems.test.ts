@@ -145,7 +145,7 @@ describe('resolveNavItems', () => {
     });
 
     const paths = items.map(i => i.path);
-    expect(paths).toContain('/dashboard/my-courses');
+    expect(paths).toContain('/dashboard/courses');
     expect(paths).not.toContain('/dashboard/services');
   });
 

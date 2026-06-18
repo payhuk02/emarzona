@@ -64,7 +64,7 @@ const typeAssertions: Record<
     mustNotHave: [
       '/dashboard/digital-products',
       '/dashboard/bookings',
-      '/dashboard/my-courses',
+      '/dashboard/courses',
       '/dashboard/auctions',
     ],
     forbiddenDirectPath: '/dashboard/digital-products',
@@ -74,7 +74,7 @@ const typeAssertions: Record<
     mustNotHave: [
       '/dashboard/shipping',
       '/dashboard/bookings',
-      '/dashboard/my-courses',
+      '/dashboard/courses',
       '/dashboard/auctions',
     ],
     forbiddenDirectPath: '/dashboard/shipping',
@@ -84,13 +84,13 @@ const typeAssertions: Record<
     mustNotHave: [
       '/dashboard/shipping',
       '/dashboard/digital-products',
-      '/dashboard/my-courses',
+      '/dashboard/courses',
       '/dashboard/auctions',
     ],
     forbiddenDirectPath: '/dashboard/digital-products',
   },
   course: {
-    mustHave: ['/dashboard/my-courses'],
+    mustHave: ['/dashboard/courses'],
     mustNotHave: [
       '/dashboard/shipping',
       '/dashboard/digital-products',
@@ -105,7 +105,7 @@ const typeAssertions: Record<
       '/dashboard/shipping',
       '/dashboard/digital-products',
       '/dashboard/bookings',
-      '/dashboard/my-courses',
+      '/dashboard/courses',
     ],
     forbiddenDirectPath: '/dashboard/digital-products',
   },

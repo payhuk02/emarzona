@@ -6,6 +6,8 @@ import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { logger } from '@/lib/logger';
 import { usePrefetchRoutes, type PrefetchRoutesOptions } from '@/hooks/usePrefetchRoutes';
+import type { StoreCommerceType } from '@/constants/store-commerce-types';
+import { prefetchProductWizardChunks } from '@/lib/wizard/prefetch-product-wizards';
 
 export interface PrefetchOptions extends PrefetchRoutesOptions {
   /**
@@ -17,6 +19,9 @@ export interface PrefetchOptions extends PrefetchRoutesOptions {
     queryFn: () => Promise<unknown>;
   }>;
   delay?: number;
+  /** Commerce type actif — précharge les chunks wizard après idle */
+  commerceType?: StoreCommerceType | null;
+  prefetchWizardChunks?: boolean;
 }
 
 /**
@@ -45,6 +50,15 @@ export const usePrefetch = (options: PrefetchOptions = {}) => {
       });
     });
   }, [queries, queryClient, options.enabled]);
+
+  useEffect(() => {
+    if (options.enabled === false || options.prefetchWizardChunks === false) return;
+    const delayMs = options.idleDelayMs ?? 2500;
+    const timer = window.setTimeout(() => {
+      prefetchProductWizardChunks(options.commerceType);
+    }, delayMs);
+    return () => window.clearTimeout(timer);
+  }, [options.enabled, options.prefetchWizardChunks, options.commerceType, options.idleDelayMs]);
 };
 
 /**

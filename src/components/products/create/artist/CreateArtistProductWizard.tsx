@@ -65,6 +65,7 @@ import { generateSlug } from '@/lib/validation-utils';
 import { saveDraftHybrid, loadDraftHybrid, clearDraft } from '@/lib/artist-product-draft';
 import { validateAndSanitizeArtistProduct } from '@/lib/artist-product-sanitizer';
 import { validateArtistProduct } from '@/lib/validation/centralized-validation';
+import { createArtistProductTx } from '@/lib/products/product-create-rpc';
 import {
   getRequiredFieldError,
   getPriceError,
@@ -462,11 +463,21 @@ const CreateArtistProductWizardComponent = ({
         const validationResult = await validateArtistProduct(
           {
             name: sanitizedData.artwork_title || sanitizedData.name || '',
-            slug: slug, // Slug généré et validé
+            slug: slug,
             description: sanitizedData.description || '',
             price: sanitizedData.price || 0,
             artist_name: sanitizedData.artist_name || '',
             artwork_title: sanitizedData.artwork_title || '',
+            artist_type: sanitizedData.artist_type || '',
+            artwork_year: sanitizedData.artwork_year,
+            artwork_dimensions: sanitizedData.artwork_dimensions,
+            edition_type: sanitizedData.edition_type,
+            edition_number: sanitizedData.edition_number,
+            total_editions: sanitizedData.total_editions,
+            requires_shipping: sanitizedData.requires_shipping,
+            artwork_link_url: sanitizedData.artwork_link_url,
+            shipping_handling_time: sanitizedData.shipping_handling_time,
+            shipping_insurance_amount: sanitizedData.shipping_insurance_amount,
           },
           store.id
         );
@@ -480,17 +491,13 @@ const CreateArtistProductWizardComponent = ({
         }
       }
 
-      // Create product (utiliser données sanitizées)
-      // Préparer les données d'insertion (exclure les colonnes qui pourraient ne pas exister)
-      const productData: Record<string, unknown> = {
-        store_id: store.id,
+      const productPayload: Record<string, unknown> = {
         name: sanitizedData.artwork_title || sanitizedData.name,
         slug,
-        description: sanitizedData.description, // Déjà sanitizé avec DOMPurify
+        description: sanitizedData.description,
         short_description: sanitizedData.short_description || null,
         price: sanitizedData.price || 0,
         currency: 'XOF',
-        product_type: 'artist',
         category_id: sanitizedData.category_id || null,
         image_url: sanitizedData.images?.[0] || null,
         images: sanitizedData.images || [],
@@ -504,72 +511,14 @@ const CreateArtistProductWizardComponent = ({
         is_active: !isDraft,
       };
 
-      // Ajouter compare_at_price et cost_per_item seulement s'ils ont une valeur
-      // (pour éviter les erreurs si les colonnes n'existent pas encore)
       if (sanitizedData.compare_at_price != null && sanitizedData.compare_at_price > 0) {
-        productData.compare_at_price = sanitizedData.compare_at_price;
+        productPayload.compare_at_price = sanitizedData.compare_at_price;
       }
       if (sanitizedData.cost_per_item != null && sanitizedData.cost_per_item > 0) {
-        productData.cost_per_item = sanitizedData.cost_per_item;
+        productPayload.cost_per_item = sanitizedData.cost_per_item;
       }
 
-      const { data: product, error: productError } = await supabase
-        .from('products')
-        .insert(productData)
-        .select()
-        .single();
-
-      if (productError) {
-        logger.error('Error inserting product', {
-          error: productError,
-          code: productError.code,
-          message: productError.message,
-          details: productError.details,
-          hint: productError.hint,
-        });
-
-        // Gestion améliorée des erreurs de contrainte unique
-        if (productError.code === '23505' || productError.message?.includes('duplicate key')) {
-          const constraintMatch = productError.message?.match(/constraint ['"]([^'"]+)['"]/);
-          const constraintName = constraintMatch ? constraintMatch[1] : 'unknown';
-
-          if (constraintName.includes('slug')) {
-            throw new Error(
-              "Ce slug est déjà utilisé par un autre produit de votre boutique. Veuillez modifier le nom ou l'URL du produit."
-            );
-          }
-        }
-
-        // Gestion des erreurs de validation (400)
-        if (productError.code === '23502' || productError.message?.includes('null value')) {
-          const columnMatch = productError.message?.match(/column ['"]([^'"]+)['"]/);
-          const columnName = columnMatch ? columnMatch[1] : 'unknown';
-          throw new Error(
-            `Le champ "${columnName}" est requis mais n'a pas été fourni. Veuillez compléter toutes les informations requises.`
-          );
-        }
-
-        // Gestion des erreurs de format
-        if (productError.code === '22P02' || productError.message?.includes('invalid input')) {
-          throw new Error(
-            `Format de données invalide. Veuillez vérifier les valeurs saisies. ${productError.message || ''}`
-          );
-        }
-
-        // Message d'erreur générique avec détails
-        const errorMessage =
-          productError.message ||
-          productError.details ||
-          productError.hint ||
-          'Une erreur est survenue lors de la création du produit';
-
-        throw new Error(errorMessage);
-      }
-
-      // Create artist_product (utiliser données sanitizées)
-      const { error: artistError } = await supabase.from('artist_products').insert({
-        product_id: product.id,
-        store_id: store.id,
+      const artistPayload: Record<string, unknown> = {
         artist_type: sanitizedData.artist_type,
         artist_name: sanitizedData.artist_name,
         artist_bio: sanitizedData.artist_bio,
@@ -582,6 +531,7 @@ const CreateArtistProductWizardComponent = ({
         artwork_dimensions: sanitizedData.artwork_dimensions,
         artwork_link_url: sanitizedData.artwork_link_url || null,
         artwork_edition_type: sanitizedData.edition_type,
+        edition_type: sanitizedData.edition_type,
         edition_number: sanitizedData.edition_number,
         total_editions: sanitizedData.total_editions,
         writer_specific: sanitizedData.writer_specific || null,
@@ -598,20 +548,21 @@ const CreateArtistProductWizardComponent = ({
         certificate_file_url: sanitizedData.certificate_file_url,
         signature_authenticated: sanitizedData.signature_authenticated,
         signature_location: sanitizedData.signature_location,
-      });
+      };
 
-      if (artistError) throw artistError;
+      const rpcResult = await createArtistProductTx(store.id, productPayload, artistPayload);
+      const product = { id: rpcResult.product_id };
 
       // Déclencher webhook product.created (asynchrone)
       if (product && !isDraft) {
         import('@/lib/webhooks/webhook-system').then(({ triggerWebhook }) => {
           triggerWebhook(store.id, 'product.created', {
             product_id: product.id,
-            name: product.name,
-            product_type: product.product_type,
-            price: product.price,
-            currency: product.currency,
-            created_at: product.created_at,
+            name: sanitizedData.artwork_title || sanitizedData.name || '',
+            product_type: 'artist',
+            price: sanitizedData.price || 0,
+            currency: 'XOF',
+            created_at: new Date().toISOString(),
           }).catch(err => {
             logger.error('Error triggering webhook', { error: err, productId: product.id });
           });

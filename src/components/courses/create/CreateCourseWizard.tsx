@@ -25,13 +25,20 @@ import {
   Keyboard,
   Info,
 } from 'lucide-react';
-import { CourseBasicInfoForm } from './CourseBasicInfoForm';
-import { CourseCurriculumBuilder } from './CourseCurriculumBuilder';
-import { CourseAdvancedConfig } from './CourseAdvancedConfig';
-import { CourseSEOForm, CourseSEOData } from './CourseSEOForm';
-import { CourseFAQForm, FAQ } from './CourseFAQForm';
-import { CourseAffiliateSettings, CourseAffiliateData } from './CourseAffiliateSettings';
-import { CoursePixelsConfig, CoursePixelsData } from './CoursePixelsConfig';
+import { WizardStepSuspense } from '@/components/products/create/shared/WizardStepSuspense';
+import {
+  LazyCourseBasicInfoForm,
+  LazyCourseCurriculumBuilder,
+  LazyCourseAdvancedConfig,
+  LazyCourseSEOForm,
+  LazyCourseFAQForm,
+  LazyCourseAffiliateSettings,
+  LazyCoursePixelsConfig,
+} from './course-wizard-steps';
+import type { CourseSEOData } from './CourseSEOForm';
+import type { FAQ } from './CourseFAQForm';
+import type { CourseAffiliateData } from './CourseAffiliateSettings';
+import type { CoursePixelsData } from './CoursePixelsConfig';
 import { useToast } from '@/hooks/use-toast';
 import { useCreateFullCourse } from '@/hooks/courses/useCreateFullCourse';
 import { useAuth } from '@/contexts/AuthContext';
@@ -611,7 +618,7 @@ export const CreateCourseWizard = ({
     switch (currentStep) {
       case 1:
         return (
-          <CourseBasicInfoForm
+          <LazyCourseBasicInfoForm
             formData={formData}
             onChange={handleFieldChange}
             onSeoGenerated={seo => setSeoData(prev => ({ ...prev, ...seo }))}
@@ -619,14 +626,14 @@ export const CreateCourseWizard = ({
           />
         );
       case 2:
-        return <CourseCurriculumBuilder sections={sections} onSectionsChange={setSections} />;
+        return <LazyCourseCurriculumBuilder sections={sections} onSectionsChange={setSections} />;
       case 3:
-        return <CourseAdvancedConfig formData={formData} onChange={handleFieldChange} />;
+        return <LazyCourseAdvancedConfig formData={formData} onChange={handleFieldChange} />;
       case 4:
         return (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             <div>
-              <CourseSEOForm
+              <LazyCourseSEOForm
                 data={seoData}
                 onChange={setSeoData}
                 courseTitle={formData.title}
@@ -634,20 +641,20 @@ export const CreateCourseWizard = ({
               />
             </div>
             <div>
-              <CourseFAQForm data={faqs} onChange={setFaqs} />
+              <LazyCourseFAQForm data={faqs} onChange={setFaqs} />
             </div>
           </div>
         );
       case 5:
         return (
-          <CourseAffiliateSettings
+          <LazyCourseAffiliateSettings
             data={affiliateData}
             onChange={setAffiliateData}
             coursePrice={formData.price}
           />
         );
       case 6:
-        return <CoursePixelsConfig data={pixelsData} onChange={setPixelsData} />;
+        return <LazyCoursePixelsConfig data={pixelsData} onChange={setPixelsData} />;
       case 7:
         return (
           <div className="space-y-4 sm:space-y-6">
@@ -1011,7 +1018,7 @@ export const CreateCourseWizard = ({
         className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 animate-in fade-in slide-in-from-bottom-4 duration-700"
       >
         <CardContent className="pt-4 sm:pt-6 px-3 sm:px-4 lg:px-6">
-          {renderStepContent()}
+          <WizardStepSuspense>{renderStepContent()}</WizardStepSuspense>
         </CardContent>
       </Card>
 

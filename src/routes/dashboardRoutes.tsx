@@ -158,7 +158,8 @@ const NotificationsManagement = lazyPage(
   () => import('@/pages/notifications/NotificationsManagement')
 );
 const NotificationSettings = lazyPage(() => import('@/pages/settings/NotificationSettings'));
-const MyCourses = lazyPage(() => import('@/pages/courses/MyCourses'));
+const MyCoursesRedirect = lazyPage(() => import('@/pages/courses/MyCoursesRedirect'));
+const SellerCoursesList = lazyPage(() => import('@/pages/courses/SellerCoursesList'));
 const CreateCourse = lazyPage(() => import('@/pages/courses/CreateCourse'));
 const CourseAnalytics = lazyPage(() => import('@/pages/courses/CourseAnalytics'));
 const CohortsManagementPage = lazyPage(() => import('@/pages/courses/CohortsManagementPage'));
@@ -347,7 +348,8 @@ export const dashboardRoutes = (
     {pr('/settings/notifications', NotificationSettings)}
 
     {/* Courses */}
-    {pr('/dashboard/my-courses', MyCourses)}
+    {pr('/dashboard/courses', SellerCoursesList)}
+    {pr('/dashboard/my-courses', MyCoursesRedirect)}
     {pr('/dashboard/courses/new', CreateCourse)}
     {pr('/dashboard/courses/live-sessions', LiveSessionsManagement)}
     {pr('/dashboard/courses/assignments', AssignmentsManagement)}

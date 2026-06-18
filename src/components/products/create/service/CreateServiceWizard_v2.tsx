@@ -36,18 +36,22 @@ import {
   Loader2,
   Keyboard,
 } from 'lucide-react';
-import { ServiceBasicInfoForm } from './ServiceBasicInfoForm';
-import { ServiceDurationAvailabilityForm } from './ServiceDurationAvailabilityForm';
-import { ServiceStaffResourcesForm } from './ServiceStaffResourcesForm';
-import { ServicePricingOptionsForm } from './ServicePricingOptionsForm';
-import { ServiceAffiliateSettings } from './ServiceAffiliateSettings';
-import { ServiceSEOAndFAQs } from './ServiceSEOAndFAQs';
-import { ServicePreview } from './ServicePreview';
-import { PaymentOptionsForm } from '../shared/PaymentOptionsForm';
-import { ProductStatisticsDisplaySettings } from '../shared/ProductStatisticsDisplaySettings';
+import { WizardStepSuspense } from '../shared/WizardStepSuspense';
+import {
+  LazyServiceBasicInfoForm,
+  LazyServiceDurationAvailabilityForm,
+  LazyServiceStaffResourcesForm,
+  LazyServicePricingOptionsForm,
+  LazyServiceAffiliateSettings,
+  LazyServiceSEOAndFAQs,
+  LazyServicePreview,
+  LazyPaymentOptionsForm,
+  LazyProductStatisticsDisplaySettings,
+} from './service-wizard-steps';
 import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/hooks/useStore';
 import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
+import { createServiceProductTx } from '@/lib/products/product-create-rpc';
 import { supabase } from '@/integrations/supabase/client';
 import {
   validateWithZod,
@@ -99,56 +103,56 @@ const STEPS = [
     title: 'Informations de base',
     description: 'Nom, description, type de service',
     icon: Info,
-    component: ServiceBasicInfoForm,
+    component: LazyServiceBasicInfoForm,
   },
   {
     id: 2,
     title: 'Durée & Disponibilité',
     description: 'Horaires, créneaux, localisation',
     icon: Clock,
-    component: ServiceDurationAvailabilityForm,
+    component: LazyServiceDurationAvailabilityForm,
   },
   {
     id: 3,
     title: 'Personnel & Ressources',
     description: 'Staff, capacité, équipement',
     icon: Users,
-    component: ServiceStaffResourcesForm,
+    component: LazyServiceStaffResourcesForm,
   },
   {
     id: 4,
     title: 'Tarification & Options',
     description: 'Prix, acompte, réservations',
     icon: DollarSign,
-    component: ServicePricingOptionsForm,
+    component: LazyServicePricingOptionsForm,
   },
   {
     id: 5,
     title: 'Affiliation',
     description: 'Commission, affiliés (optionnel)',
     icon: Share2,
-    component: ServiceAffiliateSettings,
+    component: LazyServiceAffiliateSettings,
   },
   {
     id: 6,
     title: 'SEO & FAQs',
     description: 'Référencement, questions',
     icon: Search,
-    component: ServiceSEOAndFAQs,
+    component: LazyServiceSEOAndFAQs,
   },
   {
     id: 7,
     title: 'Options de Paiement',
     description: 'Complet, partiel, escrow',
     icon: CreditCard,
-    component: PaymentOptionsForm,
+    component: LazyPaymentOptionsForm,
   },
   {
     id: 8,
     title: 'Aperçu & Validation',
     description: 'Vérifier et publier',
     icon: Eye,
-    component: ServicePreview,
+    component: LazyServicePreview,
   },
 ];
 
@@ -649,84 +653,57 @@ export const CreateServiceWizard = ({
         );
       }
 
-      // 2. Create base product avec SEO
-      const { data: product, error: productError } = await supabase
-        .from('products')
-        .insert({
-          store_id: store.id,
-          name: formData.name,
-          slug,
-          description: formData.description,
-          price: formData.pricing_model === 'free' ? 0 : formData.price || 0,
-          currency: formData.currency || 'XOF',
-          promotional_price: formData.promotional_price || null,
-          pricing_model: formData.pricing_model || 'one-time',
-          product_type: 'service',
-          category_id: formData.category_id,
-          image_url: formData.images?.[0] || null,
-          images: formData.images || [],
-          // SEO fields (only fields that exist in products table)
-          meta_title: formData.seo?.meta_title,
-          meta_description: formData.seo?.meta_description,
-          og_image: formData.seo?.og_image,
-          // Note: meta_keywords, og_title, og_description are not saved to DB (columns don't exist)
-          // FAQs
-          faqs: formData.faqs || [],
-          // Payment Options
-          payment_options: formData.payment || {
-            payment_type: 'full',
-            percentage_rate: 30,
-          },
-          is_draft: isDraft,
-          is_active: !isDraft,
-        })
-        .select()
-        .single();
+      const productPayload: Record<string, unknown> = {
+        name: formData.name,
+        slug,
+        description: formData.description,
+        price: formData.pricing_model === 'free' ? 0 : formData.price || 0,
+        currency: formData.currency || 'XOF',
+        promotional_price: formData.promotional_price || null,
+        pricing_model: formData.pricing_model || 'one-time',
+        category_id: formData.category_id,
+        image_url: formData.images?.[0] || null,
+        images: formData.images || [],
+        meta_title: formData.seo?.meta_title,
+        meta_description: formData.seo?.meta_description,
+        og_image: formData.seo?.og_image,
+        faqs: formData.faqs || [],
+        payment_options: formData.payment || { payment_type: 'full', percentage_rate: 30 },
+        is_draft: isDraft,
+        is_active: !isDraft,
+      };
 
-      if (productError) {
-        // Gestion améliorée des erreurs de contrainte unique
-        if (productError.code === '23505' || productError.message?.includes('duplicate key')) {
-          const constraintMatch = productError.message?.match(/constraint ['"]([^'"]+)['"]/);
-          const constraintName = constraintMatch ? constraintMatch[1] : 'unknown';
+      const servicePayload: Record<string, unknown> = {
+        service_type: formData.service_type || 'appointment',
+        duration_minutes: formData.duration || 60,
+        location_type: formData.location_type || 'on_site',
+        location_address: formData.location_address,
+        meeting_url: formData.meeting_url,
+        timezone: formData.timezone || 'UTC',
+        requires_staff: formData.requires_staff !== false,
+        max_participants: formData.max_participants || 1,
+        pricing_type: formData.pricing_type || 'fixed',
+        deposit_required: formData.deposit_required || false,
+        deposit_amount: formData.deposit_amount,
+        deposit_type: formData.deposit_type,
+        allow_booking_cancellation: formData.allow_booking_cancellation !== false,
+        cancellation_deadline_hours: formData.cancellation_deadline_hours || 24,
+        require_approval: formData.require_approval || false,
+        buffer_time_before: formData.buffer_time_before || 0,
+        buffer_time_after: formData.buffer_time_after || 0,
+        max_bookings_per_day: formData.max_bookings_per_day,
+        advance_booking_days: formData.advance_booking_days || 30,
+      };
 
-          if (constraintName.includes('slug')) {
-            throw new Error(
-              "Ce slug est déjà utilisé par un autre produit de votre boutique. Veuillez modifier le nom ou l'URL du produit."
-            );
-          }
-        }
-        throw productError;
-      }
-
-      // 3. Create service_product
-      const { data: serviceProduct, error: serviceError } = await supabase
-        .from('service_products')
-        .insert({
-          product_id: product.id,
-          service_type: formData.service_type || 'appointment',
-          duration_minutes: formData.duration || 60,
-          location_type: formData.location_type || 'on_site',
-          location_address: formData.location_address,
-          meeting_url: formData.meeting_url,
-          timezone: formData.timezone || 'UTC',
-          requires_staff: formData.requires_staff !== false,
-          max_participants: formData.max_participants || 1,
-          pricing_type: formData.pricing_type || 'fixed',
-          deposit_required: formData.deposit_required || false,
-          deposit_amount: formData.deposit_amount,
-          deposit_type: formData.deposit_type,
-          allow_booking_cancellation: formData.allow_booking_cancellation !== false,
-          cancellation_deadline_hours: formData.cancellation_deadline_hours || 24,
-          require_approval: formData.require_approval || false,
-          buffer_time_before: formData.buffer_time_before || 0,
-          buffer_time_after: formData.buffer_time_after || 0,
-          max_bookings_per_day: formData.max_bookings_per_day,
-          advance_booking_days: formData.advance_booking_days || 30,
-        })
-        .select()
-        .single();
-
-      if (serviceError) throw serviceError;
+      const rpcResult = await createServiceProductTx(store.id, productPayload, servicePayload);
+      const product = {
+        id: rpcResult.product_id,
+        name: formData.name,
+        product_type: 'service' as const,
+        price: formData.pricing_model === 'free' ? 0 : formData.price || 0,
+        currency: formData.currency || 'XOF',
+      };
+      const serviceProduct = { id: rpcResult.service_product_id! };
 
       // 4. Create staff members
       if (formData.staff_members && formData.staff_members.length > 0) {
@@ -883,7 +860,7 @@ export const CreateServiceWizard = ({
             product_type: product.product_type,
             price: product.price,
             currency: product.currency,
-            created_at: product.created_at,
+            created_at: new Date().toISOString(),
           }).catch(err => {
             logger.error('Error triggering webhook', { error: err, productId: product.id });
           });
@@ -1334,26 +1311,28 @@ export const CreateServiceWizard = ({
             </CardDescription>
           </CardHeader>
           <CardContent className="p-3 sm:p-4 lg:p-6 pt-0">
-            {currentStep === 6 ? (
-              <div className="space-y-6">
+            <WizardStepSuspense>
+              {currentStep === 6 ? (
+                <div className="space-y-6">
+                  <CurrentStepComponent {...getStepProps()} />
+                  <LazyProductStatisticsDisplaySettings
+                    formData={{
+                      hide_purchase_count: formData.hide_purchase_count,
+                      hide_likes_count: formData.hide_likes_count,
+                      hide_recommendations_count: formData.hide_recommendations_count,
+                      hide_downloads_count: formData.hide_downloads_count,
+                      hide_reviews_count: formData.hide_reviews_count,
+                      hide_rating: formData.hide_rating,
+                    }}
+                    updateFormData={(field, value) => handleUpdateFormData({ [field]: value })}
+                    productType="service"
+                    variant="compact"
+                  />
+                </div>
+              ) : (
                 <CurrentStepComponent {...getStepProps()} />
-                <ProductStatisticsDisplaySettings
-                  formData={{
-                    hide_purchase_count: formData.hide_purchase_count,
-                    hide_likes_count: formData.hide_likes_count,
-                    hide_recommendations_count: formData.hide_recommendations_count,
-                    hide_downloads_count: formData.hide_downloads_count,
-                    hide_reviews_count: formData.hide_reviews_count,
-                    hide_rating: formData.hide_rating,
-                  }}
-                  updateFormData={(field, value) => handleUpdateFormData({ [field]: value })}
-                  productType="service"
-                  variant="compact"
-                />
-              </div>
-            ) : (
-              <CurrentStepComponent {...getStepProps()} />
-            )}
+              )}
+            </WizardStepSuspense>
           </CardContent>
         </Card>
 

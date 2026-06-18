@@ -9,6 +9,8 @@ import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import type { Product } from '@/types/marketplace';
+import { logger } from '@/lib/logger';
+import { FormErrorBoundary } from '@/components/errors/FormErrorBoundary';
 
 // Lazy load all edit wizards
 const EditPhysicalProductWizard = lazy(() =>
@@ -196,7 +198,13 @@ const EditProduct = () => {
     onBack: handleBack,
   };
 
-  const SuspenseWrapper = ({ children }: { children: React.ReactNode }) => (
+  const SuspenseWrapper = ({
+    children,
+    formName,
+  }: {
+    children: React.ReactNode;
+    formName: string;
+  }) => (
     <Suspense
       fallback={
         <div className="flex items-center justify-center min-h-screen">
@@ -204,7 +212,7 @@ const EditProduct = () => {
         </div>
       }
     >
-      {children}
+      <FormErrorBoundary formName={formName}>{children}</FormErrorBoundary>
     </Suspense>
   );
 
@@ -226,34 +234,34 @@ const EditProduct = () => {
   return (
     <AppPageShell>
       {product.product_type === 'physical' && (
-        <SuspenseWrapper>
+        <SuspenseWrapper formName="Édition produit physique">
           <EditPhysicalProductWizard {...wizardProps} />
         </SuspenseWrapper>
       )}
       {product.product_type === 'digital' && (
-        <SuspenseWrapper>
+        <SuspenseWrapper formName="Édition produit digital">
           <EditDigitalProductWizard {...wizardProps} />
         </SuspenseWrapper>
       )}
       {product.product_type === 'service' && (
-        <SuspenseWrapper>
+        <SuspenseWrapper formName="Édition service">
           <EditServiceProductWizard {...wizardProps} />
         </SuspenseWrapper>
       )}
       {product.product_type === 'course' && (
-        <SuspenseWrapper>
+        <SuspenseWrapper formName="Édition cours en ligne">
           <EditCourseProductWizard {...wizardProps} />
         </SuspenseWrapper>
       )}
       {product.product_type === 'artist' && (
-        <SuspenseWrapper>
+        <SuspenseWrapper formName="Édition œuvre d'artiste">
           <EditArtistProductWizard {...wizardProps} />
         </SuspenseWrapper>
       )}
       {!['physical', 'digital', 'service', 'course', 'artist'].includes(
         product.product_type || ''
       ) && (
-        <SuspenseWrapper>
+        <SuspenseWrapper formName="Édition produit">
           <EditGenericProductWizard {...wizardProps} />
         </SuspenseWrapper>
       )}

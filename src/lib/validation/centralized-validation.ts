@@ -9,6 +9,7 @@
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
+import { validateArtistProductRpc } from '@/lib/server-validation';
 
 // =====================================================
 // TYPES
@@ -355,7 +356,7 @@ export async function validateWithSchema<T extends z.ZodTypeAny>(
   const clientResult = schema.safeParse(data);
 
   if (!clientResult.success) {
-    const  errors: Record<string, string> = {};
+    const errors: Record<string, string> = {};
     clientResult.error.errors.forEach(err => {
       const path = err.path.join('.');
       errors[path] = err.message;
@@ -570,6 +571,17 @@ export async function validateArtistProduct(
     price: baseSchemas.price,
     artist_name: z.string().min(2, "Le nom de l'artiste est requis"),
     artwork_title: z.string().min(2, "Le titre de l'œuvre est requis"),
+    artist_type: z.string().optional(),
+    artwork_year: z.number().nullable().optional(),
+    artwork_dimensions: z.record(z.unknown()).nullable().optional(),
+    edition_type: z.string().optional(),
+    artwork_edition_type: z.string().optional(),
+    edition_number: z.number().nullable().optional(),
+    total_editions: z.number().nullable().optional(),
+    requires_shipping: z.boolean().optional(),
+    artwork_link_url: z.string().nullable().optional(),
+    shipping_handling_time: z.number().nullable().optional(),
+    shipping_insurance_amount: z.number().nullable().optional(),
   });
 
   return validateWithSchema(schema, data, {
@@ -583,6 +595,31 @@ export async function validateArtistProduct(
 
       if (!slugResult.valid) {
         return slugResult;
+      }
+
+      if (validatedData.artist_type) {
+        const rpcResult = await validateArtistProductRpc({
+          artist_type: validatedData.artist_type,
+          artist_name: validatedData.artist_name,
+          artwork_title: validatedData.artwork_title,
+          artwork_year: validatedData.artwork_year,
+          artwork_dimensions: validatedData.artwork_dimensions,
+          artwork_edition_type: validatedData.artwork_edition_type ?? validatedData.edition_type,
+          edition_number: validatedData.edition_number,
+          total_editions: validatedData.total_editions,
+          requires_shipping: validatedData.requires_shipping,
+          artwork_link_url: validatedData.artwork_link_url,
+          shipping_handling_time: validatedData.shipping_handling_time,
+          shipping_insurance_amount: validatedData.shipping_insurance_amount,
+        });
+
+        if (!rpcResult.valid) {
+          return {
+            valid: false,
+            error: rpcResult.message || rpcResult.error,
+            errors: rpcResult.errors,
+          };
+        }
       }
 
       return { valid: true };
@@ -613,9 +650,3 @@ export const centralizedValidation = {
   validateCourse,
   validateArtistProduct,
 };
-
-
-
-
-
-

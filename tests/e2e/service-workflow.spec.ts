@@ -73,17 +73,14 @@ test.describe('Workflow Service Complet', () => {
    */
   test('1. Créer service - Informations de base', async ({ page }) => {
     // Se connecter en tant que vendeur
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[type="email"]', TEST_CONFIG.vendorEmail);
     await page.fill('input[type="password"]', TEST_CONFIG.vendorPassword);
     await page.click('button[type="submit"]');
     await page.waitForURL('**/dashboard**');
 
     // Naviguer vers création de service
-    await page.goto('/dashboard/products/create');
-
-    // Sélectionner "Service"
-    await page.click('button:has-text("Service")');
+    await page.goto('/dashboard/products/new/service');
 
     // Remplir le formulaire - Étape 1
     await page.selectOption('select[name="service_type"]', TEST_CONFIG.serviceType);
@@ -103,13 +100,12 @@ test.describe('Workflow Service Complet', () => {
    */
   test('2. Configurer durée et créneaux de disponibilité', async ({ page }) => {
     // Setup
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[type="email"]', TEST_CONFIG.vendorEmail);
     await page.fill('input[type="password"]', TEST_CONFIG.vendorPassword);
     await page.click('button[type="submit"]');
     await page.waitForURL('**/dashboard**');
-    await page.goto('/dashboard/products/create');
-    await page.click('button:has-text("Service")');
+    await page.goto('/dashboard/products/new/service');
 
     // Étape 1
     await page.selectOption('select[name="service_type"]', TEST_CONFIG.serviceType);
@@ -148,13 +144,12 @@ test.describe('Workflow Service Complet', () => {
    */
   test('3. Configurer staff et ressources', async ({ page }) => {
     // Setup jusqu'à l'étape personnel
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[type="email"]', TEST_CONFIG.vendorEmail);
     await page.fill('input[type="password"]', TEST_CONFIG.vendorPassword);
     await page.click('button[type="submit"]');
     await page.waitForURL('**/dashboard**');
-    await page.goto('/dashboard/products/create');
-    await page.click('button:has-text("Service")');
+    await page.goto('/dashboard/products/new/service');
 
     // Étapes 1 et 2 (simplifiées)
     await page.fill('input[name="name"]', TEST_CONFIG.serviceName);
@@ -186,13 +181,12 @@ test.describe('Workflow Service Complet', () => {
    */
   test('4. Configurer tarification et options', async ({ page }) => {
     // Setup jusqu'à l'étape tarification
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[type="email"]', TEST_CONFIG.vendorEmail);
     await page.fill('input[type="password"]', TEST_CONFIG.vendorPassword);
     await page.click('button[type="submit"]');
     await page.waitForURL('**/dashboard**');
-    await page.goto('/dashboard/products/create');
-    await page.click('button:has-text("Service")');
+    await page.goto('/dashboard/products/new/service');
 
     // Étapes 1, 2, 3
     await page.fill('input[name="name"]', TEST_CONFIG.serviceName);
@@ -225,13 +219,12 @@ test.describe('Workflow Service Complet', () => {
    * TEST 5: Workflow complet de création et publication
    */
   test('5. Créer service complet et publier', async ({ page }) => {
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[type="email"]', TEST_CONFIG.vendorEmail);
     await page.fill('input[type="password"]', TEST_CONFIG.vendorPassword);
     await page.click('button[type="submit"]');
     await page.waitForURL('**/dashboard**');
-    await page.goto('/dashboard/products/create');
-    await page.click('button:has-text("Service")');
+    await page.goto('/dashboard/products/new/service');
 
     // Étape 1: Basic Info
     await page.selectOption('select[name="service_type"]', TEST_CONFIG.serviceType);
@@ -270,7 +263,7 @@ test.describe('Workflow Service Complet', () => {
    */
   test('6. Réserver un créneau pour le service', async ({ page }) => {
     // Se connecter en tant que client
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[type="email"]', TEST_CONFIG.clientEmail);
     await page.fill('input[type="password"]', TEST_CONFIG.clientPassword);
     await page.click('button[type="submit"]');
@@ -321,7 +314,7 @@ test.describe('Workflow Service Complet', () => {
     // Note: Ce test nécessite que la réservation précédente soit complétée
 
     // Se connecter en tant que client
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[type="email"]', TEST_CONFIG.clientEmail);
     await page.fill('input[type="password"]', TEST_CONFIG.clientPassword);
     await page.click('button[type="submit"]');
@@ -343,7 +336,7 @@ test.describe('Workflow Service Complet', () => {
    */
   test('8. Vérifier calendrier du vendeur avec les réservations', async ({ page }) => {
     // Se connecter en tant que vendeur
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[type="email"]', TEST_CONFIG.vendorEmail);
     await page.fill('input[type="password"]', TEST_CONFIG.vendorPassword);
     await page.click('button[type="submit"]');
@@ -364,7 +357,7 @@ test.describe('Workflow Service Complet', () => {
    */
   test('9. Annuler une réservation (si autorisé)', async ({ page }) => {
     // Se connecter en tant que client
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[type="email"]', TEST_CONFIG.clientEmail);
     await page.fill('input[type="password"]', TEST_CONFIG.clientPassword);
     await page.click('button[type="submit"]');
@@ -393,7 +386,7 @@ test.describe('Workflow Service Complet', () => {
    */
   test('10. Vérifier analytics service pour le vendeur', async ({ page }) => {
     // Se connecter en tant que vendeur
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[type="email"]', TEST_CONFIG.vendorEmail);
     await page.fill('input[type="password"]', TEST_CONFIG.vendorPassword);
     await page.click('button[type="submit"]');
@@ -419,7 +412,7 @@ test.describe('Workflow Service Complet', () => {
   test.afterAll(async ({ browser }) => {
     const page = await browser.newPage();
 
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[type="email"]', TEST_CONFIG.vendorEmail);
     await page.fill('input[type="password"]', TEST_CONFIG.vendorPassword);
     await page.click('button[type="submit"]');
@@ -465,7 +458,7 @@ test.describe('Validations services', () => {
   });
 
   test('Validation nombre de participants max', async ({ page }) => {
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[type="email"]', TEST_CONFIG.clientEmail);
     await page.fill('input[type="password"]', TEST_CONFIG.clientPassword);
     await page.click('button[type="submit"]');
@@ -485,7 +478,7 @@ test.describe('Validations services', () => {
     // Ce test vérifierait que l'annulation n'est pas possible
     // si le délai minimum n'est pas respecté
 
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[type="email"]', TEST_CONFIG.clientEmail);
     await page.fill('input[type="password"]', TEST_CONFIG.clientPassword);
     await page.click('button[type="submit"]');

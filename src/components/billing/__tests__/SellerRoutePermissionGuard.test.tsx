@@ -137,10 +137,10 @@ describe('SellerRoutePermissionGuard', () => {
 
   it('allows course store on course route', async () => {
     mockCommerceType = 'course';
-    renderGuard('/dashboard/my-courses');
+    renderGuard('/dashboard/courses');
 
     await waitFor(() => {
-      expect(screen.getByTestId('location')).toHaveTextContent('/dashboard/my-courses');
+      expect(screen.getByTestId('location')).toHaveTextContent('/dashboard/courses');
     });
   });
 

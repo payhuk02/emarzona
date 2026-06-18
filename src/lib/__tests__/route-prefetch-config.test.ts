@@ -20,6 +20,18 @@ describe('getRoutePrefetchConfig', () => {
     expect(cfg.idleRoutes).not.toContain('/dashboard/analytics');
   });
 
+  it('prefetch routes wizard selon commerce_type digital', () => {
+    const cfg = getRoutePrefetchConfig(false, false, 'u1', 1, 'digital');
+    expect(cfg.idleRoutes).toContain('/dashboard/products/new/digital');
+    expect(cfg.idleRoutes).toContain('/dashboard/digital-products');
+  });
+
+  it('prefetch routes wizard selon commerce_type physique', () => {
+    const cfg = getRoutePrefetchConfig(false, false, 'u1', 1, 'physical');
+    expect(cfg.idleRoutes).toContain('/dashboard/products/new/physical');
+    expect(cfg.idleRoutes).toContain('/dashboard/physical-products');
+  });
+
   it('prefetch client connecté sans boutique', () => {
     const cfg = getRoutePrefetchConfig(false, false, 'u1', 0);
     expect(cfg.idleRoutes).toContain('/account');

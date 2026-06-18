@@ -18,6 +18,7 @@ import { useNavigate } from 'react-router-dom';
 import { getPrimaryProductCreatePath } from '@/lib/commerce/store-capability-map';
 import { useStoreContext } from '@/contexts/StoreContext';
 import { parseStoreCommerceType } from '@/lib/billing/store-commerce-access';
+import { FormErrorBoundary } from '@/components/errors/FormErrorBoundary';
 
 // Lazy loading des wizards pour optimiser les performances
 const CreateCourseWizard = lazy(() =>
@@ -185,54 +186,66 @@ export const ProductCreationRouter = ({
   return (
     <Suspense fallback={<LoadingFallback />}>
       {selectedType === 'course' && (
-        <CreateCourseWizard storeId={storeId} onSuccess={onSuccess} onBack={handleBack} />
+        <FormErrorBoundary formName="Création cours en ligne">
+          <CreateCourseWizard storeId={storeId} onSuccess={onSuccess} onBack={handleBack} />
+        </FormErrorBoundary>
       )}
 
       {selectedType === 'digital' && (
-        <CreateDigitalProductWizard
-          storeId={storeId}
-          storeSlug={storeSlug}
-          onSuccess={onSuccess}
-          onBack={handleBack}
-        />
+        <FormErrorBoundary formName="Création produit digital">
+          <CreateDigitalProductWizard
+            storeId={storeId}
+            storeSlug={storeSlug}
+            onSuccess={onSuccess}
+            onBack={handleBack}
+          />
+        </FormErrorBoundary>
       )}
 
       {selectedType === 'physical' && (
-        <CreatePhysicalProductWizard
-          storeId={storeId}
-          storeSlug={storeSlug}
-          onSuccess={onSuccess}
-          onBack={handleBack}
-        />
+        <FormErrorBoundary formName="Création produit physique">
+          <CreatePhysicalProductWizard
+            storeId={storeId}
+            storeSlug={storeSlug}
+            onSuccess={onSuccess}
+            onBack={handleBack}
+          />
+        </FormErrorBoundary>
       )}
 
       {selectedType === 'service' && (
-        <CreateServiceWizard
-          storeId={storeId}
-          storeSlug={storeSlug}
-          onSuccess={onSuccess}
-          onBack={handleBack}
-        />
+        <FormErrorBoundary formName="Création service">
+          <CreateServiceWizard
+            storeId={storeId}
+            storeSlug={storeSlug}
+            onSuccess={onSuccess}
+            onBack={handleBack}
+          />
+        </FormErrorBoundary>
       )}
 
       {selectedType === 'artist' && (
-        <CreateArtistProductWizard
-          storeId={storeId}
-          storeSlug={storeSlug}
-          onSuccess={onSuccess}
-          onBack={handleBack}
-        />
+        <FormErrorBoundary formName="Création œuvre d'artiste">
+          <CreateArtistProductWizard
+            storeId={storeId}
+            storeSlug={storeSlug}
+            onSuccess={onSuccess}
+            onBack={handleBack}
+          />
+        </FormErrorBoundary>
       )}
 
       {/* Fallback vers formulaire classique pour types non reconnus */}
       {!['course', 'digital', 'physical', 'service', 'artist'].includes(selectedType) && (
-        <div className="container mx-auto px-4 py-8 max-w-5xl">
-          <Button variant="ghost" onClick={handleBack} className="mb-6">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            {t('common.back', 'Retour')}
-          </Button>
-          <ProductForm storeId={storeId} storeSlug={storeSlug} onSuccess={onSuccess} />
-        </div>
+        <FormErrorBoundary formName="Création produit">
+          <div className="container mx-auto px-4 py-8 max-w-5xl">
+            <Button variant="ghost" onClick={handleBack} className="mb-6">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              {t('common.back', 'Retour')}
+            </Button>
+            <ProductForm storeId={storeId} storeSlug={storeSlug} onSuccess={onSuccess} />
+          </div>
+        </FormErrorBoundary>
       )}
     </Suspense>
   );

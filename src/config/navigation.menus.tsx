@@ -232,8 +232,8 @@ export const userMenuSections = [
         icon: Camera,
       },
       {
-        title: 'Mes Cours (Vendeur)',
-        url: '/dashboard/my-courses',
+        title: 'Mes cours en ligne',
+        url: '/dashboard/courses',
         icon: GraduationCap,
       },
       {

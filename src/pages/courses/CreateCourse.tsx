@@ -1,11 +1,17 @@
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useTranslation } from 'react-i18next';
-import { CreateCourseWizard } from '@/components/courses/create/CreateCourseWizard';
-import { GraduationCap, ArrowLeft, Sparkles } from 'lucide-react';
+import { GraduationCap, ArrowLeft, Sparkles, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { FormErrorBoundary } from '@/components/errors/FormErrorBoundary';
+
+const CreateCourseWizard = lazy(() =>
+  import('@/components/courses/create/CreateCourseWizard').then(m => ({
+    default: m.CreateCourseWizard,
+  }))
+);
 
 const CreateCourse = () => {
   const { t } = useTranslation();
@@ -72,11 +78,22 @@ const CreateCourse = () => {
 
         {/* Wizard - Header caché car déjà affiché dans la page */}
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
-          <CreateCourseWizard
-            hideHeader={true}
-            templateSelectorOpen={showTemplateSelector}
-            onTemplateSelectorOpenChange={setShowTemplateSelector}
-          />
+          <FormErrorBoundary formName="Création cours en ligne">
+            <Suspense
+              fallback={
+                <div className="flex min-h-[40vh] items-center justify-center">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" aria-hidden />
+                  <span className="sr-only">{t('wizard.loading', 'Chargement du wizard...')}</span>
+                </div>
+              }
+            >
+              <CreateCourseWizard
+                hideHeader={true}
+                templateSelectorOpen={showTemplateSelector}
+                onTemplateSelectorOpenChange={setShowTemplateSelector}
+              />
+            </Suspense>
+          </FormErrorBoundary>
         </div>
       </div>
     </AppPageShell>

@@ -27,6 +27,19 @@ export const PRIMARY_PRODUCT_CREATE_PATH_BY_TYPE: Record<StoreCommerceType, stri
   artist: '/dashboard/products/new/artist',
 };
 
+/** Liste produits / module principal par verticale (prefetch vendeur). */
+export const VENDOR_PRODUCT_LIST_PATH_BY_TYPE: Record<StoreCommerceType, string> = {
+  physical: '/dashboard/physical-products',
+  digital: '/dashboard/digital-products',
+  service: '/dashboard/services',
+  course: '/dashboard/courses',
+  artist: '/dashboard/products',
+};
+
+export function getVendorProductListPath(commerceType?: StoreCommerceType | null): string {
+  return VENDOR_PRODUCT_LIST_PATH_BY_TYPE[parseStoreCommerceType(commerceType)];
+}
+
 const PRODUCT_CREATE_ROUTE_RULES: readonly RouteRule[] = [
   {
     label: 'Creation produit physique',
@@ -92,9 +105,8 @@ const ROUTE_CAPABILITY_RULES: readonly RouteRule[] = [
     label: 'Modules Cours en ligne',
     allowedTypes: ['course'],
     pathPrefixes: [
-      '/dashboard/my-courses',
-      '/dashboard/courses/',
       '/dashboard/courses',
+      '/dashboard/courses/',
       '/dashboard/cohorts',
       '/courses/',
       '/affiliate/courses',

@@ -42,63 +42,68 @@ function PricingCard({
   const features = t(`pricing.${planKey}.features`, { returnObjects: true }) as string[];
 
   return (
-    <article
-      className={`lp-pricing-dark relative flex h-full flex-col overflow-hidden rounded-2xl p-6 sm:p-7 ${
-        highlight ? 'lp-pricing-dark--highlight' : ''
-      }`}
-    >
-      <div
-        className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full opacity-25 blur-3xl"
-        style={{ background: highlight ? 'var(--lp-gold)' : 'var(--lp-purple)' }}
-        aria-hidden
-      />
+    <div className="relative h-full pt-5">
       <span
-        className={`absolute -top-3 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-full px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+        className={`absolute top-0 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${
           highlight
             ? 'bg-[var(--lp-gold)] text-[#0a0a0c]'
-            : 'border border-white/15 bg-white/5 text-[var(--lp-gold-bright)]'
+            : 'border border-white/15 bg-[#15151c] text-[var(--lp-gold-bright)]'
         }`}
       >
         {t(`pricing.${planKey}.badge`)}
       </span>
 
-      <div className="relative mb-4 flex items-start justify-between gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/5">
-          <Package className="h-5 w-5 text-[var(--lp-gold-bright)]" strokeWidth={1.5} />
-        </div>
-        <span className="lp-serif text-2xl text-white/25">{tier}</span>
-      </div>
-
-      <h3 className="relative text-lg font-semibold text-white">{t(`pricing.${planKey}.name`)}</h3>
-      <p className="relative mt-2 min-h-[2.75rem] text-sm leading-relaxed text-white/70">
-        {t(`pricing.${planKey}.desc`)}
-      </p>
-
-      <div className="relative mt-6 border-t border-white/10 pt-5">
-        <p className="lp-serif text-3xl text-white sm:text-[2rem]">
-          {formatFcfa(price)}
-          <span className="text-base font-sans text-white/60">{t('pricing.periodMonth')}</span>
-        </p>
-      </div>
-
-      <ul className="relative mt-6 flex-1 space-y-2.5">
-        {features.map(f => (
-          <li key={f} className="flex items-start gap-2 text-sm text-white/90">
-            <Check className="mt-0.5 h-4 w-4 shrink-0 text-[var(--lp-gold-bright)]" />
-            {f}
-          </li>
-        ))}
-      </ul>
-
-      <Link
-        to="/register"
-        className={`relative mt-8 inline-flex justify-center rounded-full py-3 text-sm font-semibold transition-transform active:scale-[0.98] ${
-          highlight ? 'lp-btn-primary text-white' : 'lp-btn-outline-dark'
+      <article
+        className={`lp-pricing-dark relative flex h-full flex-col overflow-hidden rounded-2xl p-6 sm:p-7 ${
+          highlight ? 'lp-pricing-dark--highlight' : ''
         }`}
       >
-        {t(`pricing.${planKey}.cta`)}
-      </Link>
-    </article>
+        <div
+          className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full opacity-25 blur-3xl"
+          style={{ background: highlight ? 'var(--lp-gold)' : 'var(--lp-purple)' }}
+          aria-hidden
+        />
+
+        <div className="relative mb-4 flex items-start justify-between gap-3 pt-1">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/5">
+            <Package className="h-5 w-5 text-[var(--lp-gold-bright)]" strokeWidth={1.5} />
+          </div>
+          <span className="lp-serif text-2xl text-white/25">{tier}</span>
+        </div>
+
+        <h3 className="relative text-lg font-semibold text-white">
+          {t(`pricing.${planKey}.name`)}
+        </h3>
+        <p className="relative mt-2 min-h-[2.75rem] text-sm leading-relaxed text-white/70">
+          {t(`pricing.${planKey}.desc`)}
+        </p>
+
+        <div className="relative mt-6 border-t border-white/10 pt-5">
+          <p className="lp-serif text-3xl text-white sm:text-[2rem]">
+            {formatFcfa(price)}
+            <span className="text-base font-sans text-white/60">{t('pricing.periodMonth')}</span>
+          </p>
+        </div>
+
+        <ul className="relative mt-6 flex-1 space-y-2.5">
+          {features.map(f => (
+            <li key={f} className="flex items-start gap-2 text-sm text-white/90">
+              <Check className="mt-0.5 h-4 w-4 shrink-0 text-[var(--lp-gold-bright)]" />
+              {f}
+            </li>
+          ))}
+        </ul>
+
+        <Link
+          to="/register"
+          className={`relative mt-8 inline-flex justify-center rounded-full py-3 text-sm font-semibold transition-transform active:scale-[0.98] ${
+            highlight ? 'lp-btn-primary text-white' : 'lp-btn-outline-dark'
+          }`}
+        >
+          {t(`pricing.${planKey}.cta`)}
+        </Link>
+      </article>
+    </div>
   );
 }
 
@@ -129,7 +134,7 @@ export function PricingSection() {
             {t('pricing.physicalGroupLabel')}
           </p>
 
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+          <div className="grid gap-5 overflow-visible pt-1 md:grid-cols-2 lg:grid-cols-3 lg:gap-6">
             {physicalPlans.map(plan => (
               <PricingCard
                 key={plan.key}

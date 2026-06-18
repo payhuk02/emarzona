@@ -46,8 +46,8 @@ describe('store-capability-map', () => {
     expect(canAccessCommercePath('/dashboard/services/calendar', 'service')).toBe(true);
     expect(canAccessCommercePath('/dashboard/services/calendar', 'course')).toBe(false);
 
-    expect(canAccessCommercePath('/dashboard/my-courses', 'course')).toBe(true);
-    expect(canAccessCommercePath('/dashboard/my-courses', 'artist')).toBe(false);
+    expect(canAccessCommercePath('/dashboard/courses', 'course')).toBe(true);
+    expect(canAccessCommercePath('/dashboard/courses', 'artist')).toBe(false);
 
     expect(canAccessCommercePath('/dashboard/auctions', 'artist')).toBe(true);
     expect(canAccessCommercePath('/dashboard/auctions', 'physical')).toBe(false);

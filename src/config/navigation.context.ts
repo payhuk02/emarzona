@@ -107,7 +107,7 @@ export const CONTEXT_SIDEBAR_CONFIGS = {
           '/dashboard/products/new/service',
           '/dashboard/products/new/artist',
           '/dashboard/courses/new',
-          '/dashboard/my-courses',
+          '/dashboard/courses',
           '/dashboard/courses/live-sessions',
           '/dashboard/courses/assignments',
           '/dashboard/reviews',

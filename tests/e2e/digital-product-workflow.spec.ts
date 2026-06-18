@@ -48,7 +48,7 @@ test.describe('Workflow Produit Digital Complet', () => {
    * TEST 1: Connexion vendeur
    */
   test('1. Connexion en tant que vendeur', async ({ page }) => {
-    await page.goto('/auth/login');
+    await page.goto('/login');
 
     // Remplir formulaire de connexion
     await page.fill('input[type="email"]', TEST_CONFIG.vendorEmail);
@@ -67,20 +67,17 @@ test.describe('Workflow Produit Digital Complet', () => {
    */
   test('2. Naviguer vers la création de produit digital', async ({ page }) => {
     // Se connecter d'abord
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[type="email"]', TEST_CONFIG.vendorEmail);
     await page.fill('input[type="password"]', TEST_CONFIG.vendorPassword);
     await page.click('button[type="submit"]');
     await page.waitForURL('**/dashboard**');
 
     // Aller à la page de création de produit
-    await page.goto('/dashboard/products/create');
+    await page.goto('/dashboard/products/new/digital');
 
     // Vérifier que le sélecteur de type est visible
     await expect(page.locator('text=Type de produit')).toBeVisible();
-
-    // Sélectionner "Produit Digital"
-    await page.click('button:has-text("Produit Digital")');
 
     // Vérifier que le wizard s'affiche
     await expect(page.locator('text=Informations')).toBeVisible();
@@ -91,13 +88,12 @@ test.describe('Workflow Produit Digital Complet', () => {
    */
   test('3. Créer produit digital - Étape 1 (Informations)', async ({ page }) => {
     // Se connecter et naviguer
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[type="email"]', TEST_CONFIG.vendorEmail);
     await page.fill('input[type="password"]', TEST_CONFIG.vendorPassword);
     await page.click('button[type="submit"]');
     await page.waitForURL('**/dashboard**');
-    await page.goto('/dashboard/products/create');
-    await page.click('button:has-text("Produit Digital")');
+    await page.goto('/dashboard/products/new/digital');
 
     // Remplir le formulaire
     await page.fill('input[name="name"]', TEST_CONFIG.productName);
@@ -119,15 +115,14 @@ test.describe('Workflow Produit Digital Complet', () => {
    */
   test('4. Créer produit digital complet (tous les steps)', async ({ page }) => {
     // Se connecter
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[type="email"]', TEST_CONFIG.vendorEmail);
     await page.fill('input[type="password"]', TEST_CONFIG.vendorPassword);
     await page.click('button[type="submit"]');
     await page.waitForURL('**/dashboard**');
 
     // Naviguer vers création
-    await page.goto('/dashboard/products/create');
-    await page.click('button:has-text("Produit Digital")');
+    await page.goto('/dashboard/products/new/digital');
 
     // ===== ÉTAPE 1: Basic Info =====
     await page.fill('input[name="name"]', TEST_CONFIG.productName);
@@ -185,7 +180,7 @@ test.describe('Workflow Produit Digital Complet', () => {
    */
   test('6. Acheter le produit digital', async ({ page }) => {
     // Se connecter en tant qu'acheteur
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[type="email"]', TEST_CONFIG.buyerEmail);
     await page.fill('input[type="password"]', TEST_CONFIG.buyerPassword);
     await page.click('button[type="submit"]');
@@ -221,7 +216,7 @@ test.describe('Workflow Produit Digital Complet', () => {
     // En environnement de test, on pourrait simuler un webhook Moneroo
 
     // Se connecter en tant qu'acheteur
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[type="email"]', TEST_CONFIG.buyerEmail);
     await page.fill('input[type="password"]', TEST_CONFIG.buyerPassword);
     await page.click('button[type="submit"]');
@@ -245,7 +240,7 @@ test.describe('Workflow Produit Digital Complet', () => {
    */
   test('8. Télécharger le fichier après achat', async ({ page }) => {
     // Se connecter en tant qu'acheteur
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[type="email"]', TEST_CONFIG.buyerEmail);
     await page.fill('input[type="password"]', TEST_CONFIG.buyerPassword);
     await page.click('button[type="submit"]');
@@ -276,7 +271,7 @@ test.describe('Workflow Produit Digital Complet', () => {
    */
   test('9. Vérifier analytics pour le vendeur', async ({ page }) => {
     // Se connecter en tant que vendeur
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[type="email"]', TEST_CONFIG.vendorEmail);
     await page.fill('input[type="password"]', TEST_CONFIG.vendorPassword);
     await page.click('button[type="submit"]');
@@ -303,7 +298,7 @@ test.describe('Workflow Produit Digital Complet', () => {
     const page = await browser.newPage();
 
     // Se connecter en tant que vendeur
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[type="email"]', TEST_CONFIG.vendorEmail);
     await page.fill('input[type="password"]', TEST_CONFIG.vendorPassword);
     await page.click('button[type="submit"]');
@@ -356,7 +351,7 @@ test.describe("Validations et cas d'erreur", () => {
 
   test('Empêcher téléchargement sans achat', async ({ page }) => {
     // Se connecter avec un utilisateur qui n'a pas acheté
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[type="email"]', 'no-purchase@test.com');
     await page.fill('input[type="password"]', 'Test123!');
     await page.click('button[type="submit"]');

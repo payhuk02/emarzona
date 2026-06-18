@@ -62,7 +62,7 @@ const CourseAnalytics = () => {
             {error?.message || t('courses.analytics.courseNotFound')}
           </AlertDescription>
         </Alert>
-        <Button onClick={() => navigate('/dashboard/my-courses')} className="mt-4">
+        <Button onClick={() => navigate('/dashboard/courses')} className="mt-4">
           {t('courses.analytics.backToMyCourses')}
         </Button>
       </div>
@@ -80,7 +80,7 @@ const CourseAnalytics = () => {
           <AlertTitle>{t('courses.analytics.accessDenied')}</AlertTitle>
           <AlertDescription>{t('courses.analytics.noPermission')}</AlertDescription>
         </Alert>
-        <Button onClick={() => navigate('/dashboard/my-courses')} className="mt-4">
+        <Button onClick={() => navigate('/dashboard/courses')} className="mt-4">
           {t('courses.analytics.backToMyCourses')}
         </Button>
       </div>

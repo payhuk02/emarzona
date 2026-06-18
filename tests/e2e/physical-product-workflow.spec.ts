@@ -75,17 +75,14 @@ test.describe('Workflow Produit Physique Complet', () => {
    */
   test('1. Créer produit physique - Informations de base', async ({ page }) => {
     // Se connecter en tant que vendeur
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[type="email"]', TEST_CONFIG.vendorEmail);
     await page.fill('input[type="password"]', TEST_CONFIG.vendorPassword);
     await page.click('button[type="submit"]');
     await page.waitForURL('**/dashboard**');
 
     // Naviguer vers création de produit
-    await page.goto('/dashboard/products/create');
-
-    // Sélectionner "Produit Physique"
-    await page.click('button:has-text("Produit Physique")');
+    await page.goto('/dashboard/products/new/physical');
 
     // Remplir le formulaire - Étape 1
     await page.fill('input[name="name"]', TEST_CONFIG.productName);
@@ -105,13 +102,12 @@ test.describe('Workflow Produit Physique Complet', () => {
    */
   test('2. Configurer variantes (tailles et couleurs)', async ({ page }) => {
     // Setup
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[type="email"]', TEST_CONFIG.vendorEmail);
     await page.fill('input[type="password"]', TEST_CONFIG.vendorPassword);
     await page.click('button[type="submit"]');
     await page.waitForURL('**/dashboard**');
-    await page.goto('/dashboard/products/create');
-    await page.click('button:has-text("Produit Physique")');
+    await page.goto('/dashboard/products/new/physical');
 
     // Étape 1
     await page.fill('input[name="name"]', TEST_CONFIG.productName);
@@ -154,13 +150,12 @@ test.describe('Workflow Produit Physique Complet', () => {
    */
   test('3. Configurer inventaire et stock', async ({ page }) => {
     // Setup jusqu'à l'étape inventaire
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[type="email"]', TEST_CONFIG.vendorEmail);
     await page.fill('input[type="password"]', TEST_CONFIG.vendorPassword);
     await page.click('button[type="submit"]');
     await page.waitForURL('**/dashboard**');
-    await page.goto('/dashboard/products/create');
-    await page.click('button:has-text("Produit Physique")');
+    await page.goto('/dashboard/products/new/physical');
 
     // Étapes 1 et 2 (simplifiées)
     await page.fill('input[name="name"]', TEST_CONFIG.productName);
@@ -188,13 +183,12 @@ test.describe('Workflow Produit Physique Complet', () => {
    */
   test('4. Configurer zones et tarifs de livraison', async ({ page }) => {
     // Setup jusqu'à l'étape livraison
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[type="email"]', TEST_CONFIG.vendorEmail);
     await page.fill('input[type="password"]', TEST_CONFIG.vendorPassword);
     await page.click('button[type="submit"]');
     await page.waitForURL('**/dashboard**');
-    await page.goto('/dashboard/products/create');
-    await page.click('button:has-text("Produit Physique")');
+    await page.goto('/dashboard/products/new/physical');
 
     // Étapes 1, 2, 3
     await page.fill('input[name="name"]', TEST_CONFIG.productName);
@@ -230,13 +224,12 @@ test.describe('Workflow Produit Physique Complet', () => {
    * TEST 5: Workflow complet de création
    */
   test('5. Créer produit physique complet et publier', async ({ page }) => {
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[type="email"]', TEST_CONFIG.vendorEmail);
     await page.fill('input[type="password"]', TEST_CONFIG.vendorPassword);
     await page.click('button[type="submit"]');
     await page.waitForURL('**/dashboard**');
-    await page.goto('/dashboard/products/create');
-    await page.click('button:has-text("Produit Physique")');
+    await page.goto('/dashboard/products/new/physical');
 
     // Étape 1: Basic Info
     await page.fill('input[name="name"]', TEST_CONFIG.productName);
@@ -276,7 +269,7 @@ test.describe('Workflow Produit Physique Complet', () => {
    */
   test('6. Acheter produit physique avec adresse de livraison', async ({ page }) => {
     // Se connecter en tant qu'acheteur
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[type="email"]', TEST_CONFIG.buyerEmail);
     await page.fill('input[type="password"]', TEST_CONFIG.buyerPassword);
     await page.click('button[type="submit"]');
@@ -322,7 +315,7 @@ test.describe('Workflow Produit Physique Complet', () => {
     // Note: Ce test nécessite que l'achat précédent soit complété
 
     // Se connecter en tant que vendeur
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[type="email"]', TEST_CONFIG.vendorEmail);
     await page.fill('input[type="password"]', TEST_CONFIG.vendorPassword);
     await page.click('button[type="submit"]');
@@ -348,7 +341,7 @@ test.describe('Workflow Produit Physique Complet', () => {
    */
   test('8. Vérifier alerte stock faible', async ({ page }) => {
     // Se connecter en tant que vendeur
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[type="email"]', TEST_CONFIG.vendorEmail);
     await page.fill('input[type="password"]', TEST_CONFIG.vendorPassword);
     await page.click('button[type="submit"]');
@@ -371,7 +364,7 @@ test.describe('Workflow Produit Physique Complet', () => {
    * TEST 9: Vérifier historique des commandes vendeur
    */
   test('9. Vérifier historique commandes pour le vendeur', async ({ page }) => {
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[type="email"]', TEST_CONFIG.vendorEmail);
     await page.fill('input[type="password"]', TEST_CONFIG.vendorPassword);
     await page.click('button[type="submit"]');
@@ -393,7 +386,7 @@ test.describe('Workflow Produit Physique Complet', () => {
   test.afterAll(async ({ browser }) => {
     const page = await browser.newPage();
 
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[type="email"]', TEST_CONFIG.vendorEmail);
     await page.fill('input[type="password"]', TEST_CONFIG.vendorPassword);
     await page.click('button[type="submit"]');
@@ -438,7 +431,7 @@ test.describe('Validations produits physiques', () => {
   });
 
   test('Validation adresse de livraison requise', async ({ page }) => {
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[type="email"]', TEST_CONFIG.buyerEmail);
     await page.fill('input[type="password"]', TEST_CONFIG.buyerPassword);
     await page.click('button[type="submit"]');
@@ -458,14 +451,13 @@ test.describe('Validations produits physiques', () => {
     const duplicateSKU = 'DUPLICATE-SKU-123';
 
     // Créer un premier produit avec ce SKU
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.fill('input[type="email"]', TEST_CONFIG.vendorEmail);
     await page.fill('input[type="password"]', TEST_CONFIG.vendorPassword);
     await page.click('button[type="submit"]');
     await page.waitForURL('**/dashboard**');
 
-    await page.goto('/dashboard/products/create');
-    await page.click('button:has-text("Produit Physique")');
+    await page.goto('/dashboard/products/new/physical');
 
     await page.fill('input[name="name"]', 'Produit Test SKU');
     await page.fill('input[name="price"]', '1000');

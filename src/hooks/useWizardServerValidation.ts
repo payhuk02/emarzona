@@ -15,6 +15,7 @@ import {
   validateDigitalProduct,
   validatePhysicalProduct,
   validateService,
+  validateArtistProductRpc,
   ServerValidationResult,
 } from '@/lib/server-validation';
 import { normalizeError, ErrorSeverity } from '@/lib/error-handling';
@@ -229,7 +230,7 @@ export function useWizardServerValidation(options: ServerValidationOptions = {})
         });
 
         if (!result.valid && result.errors) {
-          const  errors: Record<string, string> = {};
+          const errors: Record<string, string> = {};
           // Filtrer les erreurs de prix si le prix est 0 (produit gratuit)
           const filteredErrors =
             data.price === 0
@@ -314,7 +315,7 @@ export function useWizardServerValidation(options: ServerValidationOptions = {})
         });
 
         if (!result.valid && result.errors) {
-          const  errors: Record<string, string> = {};
+          const errors: Record<string, string> = {};
           result.errors.forEach(err => {
             errors[err.field] = err.message;
           });
@@ -391,7 +392,7 @@ export function useWizardServerValidation(options: ServerValidationOptions = {})
         });
 
         if (!result.valid && result.errors) {
-          const  errors: Record<string, string> = {};
+          const errors: Record<string, string> = {};
           result.errors.forEach(err => {
             errors[err.field] = err.message;
           });
@@ -433,6 +434,46 @@ export function useWizardServerValidation(options: ServerValidationOptions = {})
   );
 
   /**
+   * Valider une œuvre artiste via RPC Postgres
+   */
+  const validateArtistProductData = useCallback(
+    async (data: {
+      artist_type: string;
+      artist_name: string;
+      artwork_title: string;
+      artwork_year?: number | null;
+      artwork_dimensions?: Record<string, unknown> | null;
+      artwork_edition_type?: string;
+      edition_number?: number | null;
+      total_editions?: number | null;
+      requires_shipping?: boolean;
+      artwork_link_url?: string | null;
+      shipping_handling_time?: number | null;
+      shipping_insurance_amount?: number | null;
+    }): Promise<ServerValidationResult> => {
+      setIsValidating(true);
+      setServerErrors({});
+
+      try {
+        const result = await validateArtistProductRpc(data);
+
+        if (!result.valid) {
+          const msg = result.message || result.errors?.[0]?.message || 'Validation artiste échouée';
+          setServerErrors({ artist: msg });
+          if (showToasts) {
+            toast({ title: 'Validation œuvre', description: msg, variant: 'destructive' });
+          }
+        }
+
+        return result;
+      } finally {
+        setIsValidating(false);
+      }
+    },
+    [showToasts, toast]
+  );
+
+  /**
    * Réinitialiser les erreurs serveur
    */
   const clearServerErrors = useCallback(() => {
@@ -448,12 +489,7 @@ export function useWizardServerValidation(options: ServerValidationOptions = {})
     validateDigitalProduct: validateDigitalProductData,
     validatePhysicalProduct: validatePhysicalProductData,
     validateService: validateServiceData,
+    validateArtistProduct: validateArtistProductData,
     clearServerErrors,
   };
 }
-
-
-
-
-
-

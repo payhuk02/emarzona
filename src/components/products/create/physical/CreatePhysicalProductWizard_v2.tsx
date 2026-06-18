@@ -38,21 +38,25 @@ import {
   Keyboard,
   Ruler,
 } from 'lucide-react';
-import { PhysicalBasicInfoForm } from './PhysicalBasicInfoForm';
-import { PhysicalVariantsBuilder } from './PhysicalVariantsBuilder';
-import { PhysicalInventoryConfig } from './PhysicalInventoryConfig';
-import { PhysicalShippingConfig } from './PhysicalShippingConfig';
-import { PhysicalSizeChartSelector } from './PhysicalSizeChartSelector';
-import { PhysicalAffiliateSettings } from './PhysicalAffiliateSettings';
-import { PhysicalSEOAndFAQs } from './PhysicalSEOAndFAQs';
-import { PhysicalPreview } from './PhysicalPreview';
-import { PhysicalCheckoutOptionsForm } from './PhysicalCheckoutOptionsForm';
-import { ProductStatisticsDisplaySettings } from '../shared/ProductStatisticsDisplaySettings';
-import { PhysicalWhatsAppContactConfig } from '@/components/physical/PhysicalWhatsAppContactConfig';
+import { WizardStepSuspense } from '../shared/WizardStepSuspense';
+import {
+  LazyPhysicalBasicInfoForm,
+  LazyPhysicalVariantsBuilder,
+  LazyPhysicalInventoryConfig,
+  LazyPhysicalShippingConfig,
+  LazyPhysicalAffiliateSettings,
+  LazyPhysicalSEOAndFAQs,
+  LazyPhysicalCheckoutOptionsForm,
+  LazyPhysicalPreview,
+  LazyPhysicalSizeChartSelector,
+  LazyPhysicalWhatsAppContactConfig,
+  LazyProductStatisticsDisplaySettings,
+} from './physical-wizard-steps';
 import { hasPhysicalFeatureAccess } from '@/lib/billing/physical-plan-capabilities';
 import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/hooks/useStore';
 import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
+import { createPhysicalProductTx } from '@/lib/products/product-create-rpc';
 import { useStorePhysicalAccess } from '@/hooks/billing/useStorePhysicalAccess';
 import { useStorePhysicalPlanLimits } from '@/hooks/billing/useStorePhysicalPlanLimits';
 import { isWithinProductLimit, productLimitMessage } from '@/lib/billing/physical-plan-limits';
@@ -86,28 +90,28 @@ const STEPS = [
     title: 'Informations de base',
     description: 'Nom, description, prix, images',
     icon: Info,
-    component: PhysicalBasicInfoForm,
+    component: LazyPhysicalBasicInfoForm,
   },
   {
     id: 2,
     title: 'Variantes & Options',
     description: 'Couleurs, tailles, options',
     icon: Palette,
-    component: PhysicalVariantsBuilder,
+    component: LazyPhysicalVariantsBuilder,
   },
   {
     id: 3,
     title: 'Inventaire',
     description: 'Stock, SKU, tracking',
     icon: Warehouse,
-    component: PhysicalInventoryConfig,
+    component: LazyPhysicalInventoryConfig,
   },
   {
     id: 4,
     title: 'Expédition',
     description: 'Poids, dimensions, frais',
     icon: Truck,
-    component: PhysicalShippingConfig,
+    component: LazyPhysicalShippingConfig,
   },
   {
     id: 5,
@@ -121,28 +125,28 @@ const STEPS = [
     title: 'Affiliation',
     description: 'Commission, affiliés (optionnel)',
     icon: Users,
-    component: PhysicalAffiliateSettings,
+    component: LazyPhysicalAffiliateSettings,
   },
   {
     id: 7,
     title: 'SEO & FAQs',
     description: 'Référencement, questions',
     icon: Search,
-    component: PhysicalSEOAndFAQs,
+    component: LazyPhysicalSEOAndFAQs,
   },
   {
     id: 8,
     title: 'Checkout & Bouton',
     description: 'Paiement en ligne ou à la livraison, libellé du bouton',
     icon: CreditCard,
-    component: PhysicalCheckoutOptionsForm,
+    component: LazyPhysicalCheckoutOptionsForm,
   },
   {
     id: 9,
     title: 'Aperçu & Validation',
     description: 'Vérifier et publier',
     icon: Eye,
-    component: PhysicalPreview,
+    component: LazyPhysicalPreview,
   },
 ];
 
@@ -699,68 +703,60 @@ export const CreatePhysicalProductWizard = ({
         );
       }
 
-      // 2. Create base product avec SEO
-      const { data: product, error: productError } = await supabase
-        .from('products')
-        .insert({
-          store_id: store.id,
-          name: formData.name,
-          slug,
-          description: formData.description,
-          short_description: formData.short_description || null,
-          price: formData.price || 0,
-          currency: 'XOF',
-          product_type: 'physical',
-          category_id: formData.category_id,
-          image_url: formData.images?.[0] || null,
-          images: formData.images || [],
-          // SEO fields (only fields that exist in products table)
-          meta_title: formData.seo?.meta_title,
-          meta_description: formData.seo?.meta_description,
-          og_image: formData.seo?.og_image,
-          // Note: meta_keywords, og_title, og_description are not saved to DB (columns don't exist)
-          // FAQs
-          faqs: formData.faqs || [],
-          // Payment Options
-          payment_options: formData.payment || {
-            checkout_method: 'online',
-            cta_button_label: 'Commander',
-            payment_type: 'full',
-            percentage_rate: 30,
-          },
-          is_draft: isDraft,
-          is_active: !isDraft,
-        })
-        .select()
-        .single();
+      const productPayload: Record<string, unknown> = {
+        name: formData.name,
+        slug,
+        description: formData.description,
+        short_description: formData.short_description || null,
+        price: formData.price || 0,
+        currency: 'XOF',
+        category_id: formData.category_id,
+        image_url: formData.images?.[0] || null,
+        images: formData.images || [],
+        meta_title: formData.seo?.meta_title,
+        meta_description: formData.seo?.meta_description,
+        og_image: formData.seo?.og_image,
+        faqs: formData.faqs || [],
+        payment_options: formData.payment || {
+          checkout_method: 'online',
+          cta_button_label: 'Commander',
+          payment_type: 'full',
+          percentage_rate: 30,
+        },
+        is_draft: isDraft,
+        is_active: !isDraft,
+      };
 
-      if (productError) {
-        if (isPhysicalSubscriptionError(productError.message)) {
-          throw new Error(formatPhysicalSubscriptionError());
-        }
-        // Gestion améliorée des erreurs de contrainte unique
-        if (productError.code === '23505' || productError.message?.includes('duplicate key')) {
-          const constraintMatch = productError.message?.match(/constraint ['"]([^'"]+)['"]/);
-          const constraintName = constraintMatch ? constraintMatch[1] : 'unknown';
+      const physicalPayload: Record<string, unknown> = {
+        sku: formData.sku,
+        weight: formData.weight,
+        weight_unit: formData.weight_unit || 'kg',
+        dimensions: {
+          length: formData.dimensions?.length,
+          width: formData.dimensions?.width,
+          height: formData.dimensions?.height,
+          unit: formData.dimensions?.unit || 'cm',
+        },
+        quantity: formData.quantity || 0,
+        track_inventory: formData.track_inventory !== false,
+        low_stock_threshold: formData.low_stock_threshold || 5,
+      };
 
-          if (constraintName.includes('slug')) {
-            throw new Error(
-              "Ce slug est déjà utilisé par un autre produit de votre boutique. Veuillez modifier le nom ou l'URL du produit."
-            );
-          }
-        }
-        throw productError;
-      }
+      const rpcResult = await createPhysicalProductTx(store.id, productPayload, physicalPayload);
+      const product = {
+        id: rpcResult.product_id,
+        name: formData.name,
+        product_type: 'physical' as const,
+        price: formData.price || 0,
+        currency: 'XOF',
+      };
+      const physicalRow = { id: rpcResult.physical_product_id! };
 
-      // 3. Create physical_product
-      const { data: physicalRow, error: physicalError } = await supabase
+      // Champs physique hors transaction RPC
+      await supabase
         .from('physical_products')
-        .insert({
-          product_id: product.id,
-          sku: formData.sku,
+        .update({
           barcode: formData.barcode,
-          weight: formData.weight,
-          weight_unit: formData.weight_unit || 'kg',
           length: formData.dimensions?.length,
           width: formData.dimensions?.width,
           height: formData.dimensions?.height,
@@ -773,11 +769,7 @@ export const CreatePhysicalProductWizard = ({
           whatsapp_number: formData.whatsapp_number?.trim() || null,
           whatsapp_enabled: Boolean(formData.whatsapp_enabled && formData.whatsapp_number?.trim()),
         })
-        .select('id')
-        .single();
-
-      if (physicalError || !physicalRow)
-        throw physicalError || new Error('Produit physique non créé');
+        .eq('id', physicalRow.id);
 
       // 4. Create variants if any
       if (formData.variants && formData.variants.length > 0) {
@@ -862,7 +854,7 @@ export const CreatePhysicalProductWizard = ({
             product_type: product.product_type,
             price: product.price,
             currency: product.currency,
-            created_at: product.created_at,
+            created_at: new Date().toISOString(),
           }).catch(err => {
             logger.error('Error triggering webhook', { error: err, productId: product.id });
           });
@@ -1262,47 +1254,49 @@ export const CreatePhysicalProductWizard = ({
             </CardDescription>
           </CardHeader>
           <CardContent className="p-3 sm:p-4 lg:p-6 pt-0">
-            {currentStep === 5 ? (
-              <PhysicalSizeChartSelector
-                selectedSizeChartId={formData.size_chart_id || undefined}
-                onSelectSizeChart={sizeChartId => {
-                  handleUpdateFormData({ size_chart_id: sizeChartId });
-                }}
-              />
-            ) : currentStep === 7 ? (
-              <div className="space-y-6">
-                <CurrentStepComponent {...getStepProps()} />
-                {hasPhysicalFeatureAccess(
-                  (planLimits?.plan_slug as
-                    | 'physical_basic'
-                    | 'physical_standard'
-                    | 'physical_premium') ?? null,
-                  'whatsapp.product_button'
-                ) && (
-                  <PhysicalWhatsAppContactConfig
-                    whatsappNumber={formData.whatsapp_number || ''}
-                    whatsappEnabled={Boolean(formData.whatsapp_enabled)}
-                    onChange={patch => handleUpdateFormData(patch)}
-                    disabled={isSaving}
-                  />
-                )}
-                <ProductStatisticsDisplaySettings
-                  formData={{
-                    hide_purchase_count: formData.hide_purchase_count,
-                    hide_likes_count: formData.hide_likes_count,
-                    hide_recommendations_count: formData.hide_recommendations_count,
-                    hide_downloads_count: formData.hide_downloads_count,
-                    hide_reviews_count: formData.hide_reviews_count,
-                    hide_rating: formData.hide_rating,
+            <WizardStepSuspense>
+              {currentStep === 5 ? (
+                <LazyPhysicalSizeChartSelector
+                  selectedSizeChartId={formData.size_chart_id || undefined}
+                  onSelectSizeChart={sizeChartId => {
+                    handleUpdateFormData({ size_chart_id: sizeChartId });
                   }}
-                  updateFormData={(field, value) => handleUpdateFormData({ [field]: value })}
-                  productType="physical"
-                  variant="compact"
                 />
-              </div>
-            ) : CurrentStepComponent ? (
-              <CurrentStepComponent {...getStepProps()} />
-            ) : null}
+              ) : currentStep === 7 ? (
+                <div className="space-y-6">
+                  <CurrentStepComponent {...getStepProps()} />
+                  {hasPhysicalFeatureAccess(
+                    (planLimits?.plan_slug as
+                      | 'physical_basic'
+                      | 'physical_standard'
+                      | 'physical_premium') ?? null,
+                    'whatsapp.product_button'
+                  ) && (
+                    <LazyPhysicalWhatsAppContactConfig
+                      whatsappNumber={formData.whatsapp_number || ''}
+                      whatsappEnabled={Boolean(formData.whatsapp_enabled)}
+                      onChange={patch => handleUpdateFormData(patch)}
+                      disabled={isSaving}
+                    />
+                  )}
+                  <LazyProductStatisticsDisplaySettings
+                    formData={{
+                      hide_purchase_count: formData.hide_purchase_count,
+                      hide_likes_count: formData.hide_likes_count,
+                      hide_recommendations_count: formData.hide_recommendations_count,
+                      hide_downloads_count: formData.hide_downloads_count,
+                      hide_reviews_count: formData.hide_reviews_count,
+                      hide_rating: formData.hide_rating,
+                    }}
+                    updateFormData={(field, value) => handleUpdateFormData({ [field]: value })}
+                    productType="physical"
+                    variant="compact"
+                  />
+                </div>
+              ) : CurrentStepComponent ? (
+                <CurrentStepComponent {...getStepProps()} />
+              ) : null}
+            </WizardStepSuspense>
           </CardContent>
         </Card>
 

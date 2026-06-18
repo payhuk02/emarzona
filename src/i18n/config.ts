@@ -19,28 +19,26 @@ import sidebarEN from './locales/sidebar-en.json';
 import sidebarES from './locales/sidebar-es.json';
 import sidebarDE from './locales/sidebar-de.json';
 import sidebarPT from './locales/sidebar-pt.json';
-import landingPremiumFR from './locales/landing-premium/fr.json';
-import landingPremiumEN from './locales/landing-premium/en.json';
-import landingPremiumES from './locales/landing-premium/es.json';
-import landingPremiumDE from './locales/landing-premium/de.json';
-import landingPremiumPT from './locales/landing-premium/pt.json';
+import { AVAILABLE_LANGUAGES, type LanguageCode } from './languages';
 
-// Les ressources de traduction
+export { AVAILABLE_LANGUAGES, type LanguageCode };
+
+// Les ressources de traduction (landingPremium chargé à la demande — voir landing-premium-loader.ts)
 const resources = {
   fr: {
-    translation: { ...translationFR, ...sidebarFR, landingPremium: landingPremiumFR },
+    translation: { ...translationFR, ...sidebarFR },
   },
   en: {
-    translation: { ...translationEN, ...sidebarEN, landingPremium: landingPremiumEN },
+    translation: { ...translationEN, ...sidebarEN },
   },
   es: {
-    translation: { ...translationES, ...sidebarES, landingPremium: landingPremiumES },
+    translation: { ...translationES, ...sidebarES },
   },
   de: {
-    translation: { ...translationDE, ...sidebarDE, landingPremium: landingPremiumDE },
+    translation: { ...translationDE, ...sidebarDE },
   },
   pt: {
-    translation: { ...translationPT, ...sidebarPT, landingPremium: landingPremiumPT },
+    translation: { ...translationPT, ...sidebarPT },
   },
 };
 
@@ -78,19 +76,3 @@ i18n
   });
 
 export default i18n;
-
-/**
- * Langues disponibles
- */
-export const AVAILABLE_LANGUAGES = [
-  { code: 'fr', name: 'Français', flag: '🇫🇷' },
-  { code: 'en', name: 'English', flag: '🇬🇧' },
-  { code: 'es', name: 'Español', flag: '🇪🇸' },
-  { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
-  { code: 'pt', name: 'Português', flag: '🇵🇹' },
-] as const;
-
-/**
- * Type pour les codes de langue
- */
-export type LanguageCode = (typeof AVAILABLE_LANGUAGES)[number]['code'];

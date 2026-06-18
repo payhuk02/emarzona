@@ -20,8 +20,8 @@ export function AdaptSection() {
               <img
                 src={adaptPremiumPng}
                 alt={t('adapt.photoAlt')}
-                loading="eager"
-                fetchPriority="high"
+                loading="lazy"
+                fetchPriority="low"
                 width={1024}
                 height={686}
                 sizes="(max-width: 1024px) 100vw, 50vw"

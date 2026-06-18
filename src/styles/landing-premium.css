@@ -46,6 +46,53 @@
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
+/* Hero — animations CSS (sans framer-motion sur le chemin critique) */
+@keyframes lp-hero-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes lp-hero-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.landing-premium .lp-hero-animate {
+  animation: lp-hero-fade-up 0.75s var(--lp-ease) both;
+}
+
+.landing-premium .lp-hero-animate--delay-1 {
+  animation-delay: 0.08s;
+}
+
+.landing-premium .lp-hero-animate--delay-2 {
+  animation-delay: 0.16s;
+}
+
+.landing-premium .lp-hero-animate--delay-3 {
+  animation-delay: 0.24s;
+}
+
+.landing-premium .lp-hero-animate--delay-4 {
+  animation-delay: 0.4s;
+}
+
+.landing-premium .lp-hero-animate-scale {
+  animation: lp-hero-scale-in 1s var(--lp-ease) 0.2s both;
+}
+
 .landing-premium .lp-section-light {
   background: var(--lp-surface-elevated);
 }
@@ -853,6 +900,13 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .landing-premium .lp-hero-animate,
+  .landing-premium .lp-hero-animate-scale {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
   .landing-premium .lp-reveal {
     opacity: 1;
     transform: none;

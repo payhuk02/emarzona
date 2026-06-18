@@ -307,7 +307,7 @@ export const PHASE6_CONTEXT_CONFIGS = {
     includePaths: [
       '/account/courses',
       '/dashboard/courses/new',
-      '/dashboard/my-courses',
+      '/dashboard/courses',
       '/dashboard/courses/live-sessions',
       '/dashboard/courses/assignments',
       '/dashboard/cohorts',
@@ -324,7 +324,7 @@ export const PHASE6_CONTEXT_CONFIGS = {
         defaultLabel: 'Gestion (vendeur)',
         paths: [
           '/dashboard/courses/new',
-          '/dashboard/my-courses',
+          '/dashboard/courses',
           '/dashboard/courses/live-sessions',
           '/dashboard/courses/assignments',
           '/dashboard/cohorts',

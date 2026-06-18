@@ -19,8 +19,7 @@ test.describe('Physical Products', () => {
   });
 
   test('should create physical product with inventory', async ({ page }) => {
-    await page.goto('/products/create');
-    await page.click('text=/physique|physical/i');
+    await page.goto('/dashboard/products/new/physical');
 
     // Step 1: Basic Info
     await page.fill('input[name="title"]', 'Test Physical Product E2E');
@@ -109,8 +108,7 @@ test.describe('Physical Products', () => {
   });
 
   test('should create product variant', async ({ page }) => {
-    await page.goto('/products/create');
-    await page.click('text=/physique|physical/i');
+    await page.goto('/dashboard/products/new/physical');
 
     // Fill basic info
     await page.fill('input[name="title"]', 'Test Product with Variants');
