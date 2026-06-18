@@ -19,6 +19,13 @@ import { cn } from '@/lib/utils';
 
 const SITE = 'https://www.emarzona.com';
 
+function blogTagButtonClass(active: boolean) {
+  return cn(
+    'h-8 border-white/20 bg-transparent text-white/70 hover:bg-white/[0.08] hover:text-white',
+    active && 'border-white/30 bg-white/15 text-white hover:bg-white/15'
+  );
+}
+
 export default function PlatformBlogPage() {
   const { t } = usePlatformBlogT();
   const [searchParams] = useSearchParams();
@@ -106,8 +113,8 @@ export default function PlatformBlogPage() {
                 <div className="flex flex-wrap gap-2">
                   <Button
                     size="sm"
-                    variant={activeTag === null ? 'secondary' : 'outline'}
-                    className={activeTag === null ? '' : 'border-white/20 text-white'}
+                    variant="outline"
+                    className={blogTagButtonClass(activeTag === null)}
                     onClick={() => setActiveTag(null)}
                   >
                     {t('allTags')}
@@ -116,8 +123,8 @@ export default function PlatformBlogPage() {
                     <Button
                       key={tag}
                       size="sm"
-                      variant={activeTag === tag ? 'secondary' : 'outline'}
-                      className={activeTag === tag ? '' : 'border-white/20 text-white'}
+                      variant="outline"
+                      className={blogTagButtonClass(activeTag === tag)}
                       onClick={() => setActiveTag(tag)}
                     >
                       #{tag}

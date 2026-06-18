@@ -120,7 +120,7 @@ export function PremiumFooter() {
         </div>
 
         <div className="lp-footer-bar relative z-10 mt-14 flex flex-col gap-4 border-t border-white/[0.06] pt-8 text-xs sm:flex-row sm:items-center sm:justify-between">
-          <p>
+          <p className="lp-footer-bar">
             <EmarzonaInText>
               {t('footer.copyright', {
                 year: new Date().getFullYear(),
@@ -129,16 +129,12 @@ export function PremiumFooter() {
           </p>
           <div className="lp-footer-legal flex flex-wrap gap-6">
             {legalLinks.map(link => (
-              <FooterLinkItem
-                key={link.linkKey}
-                link={link}
-                className="font-normal text-white/70 hover:text-white"
-              />
+              <FooterLinkItem key={link.linkKey} link={link} />
             ))}
             <button
               type="button"
               onClick={openCookieSettings}
-              className="font-normal text-xs text-white/70 transition-colors hover:text-white sm:text-sm"
+              className="lp-footer-sublink text-xs sm:text-sm"
             >
               {t('footer.manageCookies')}
             </button>

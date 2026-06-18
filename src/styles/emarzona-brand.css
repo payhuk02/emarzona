@@ -19,16 +19,30 @@
   font-weight: inherit;
 }
 
-/* Pied de page landing : seuls les titres de colonnes sont en gras */
+/* Pied de page landing : titres en gras, sous-éléments grisés */
 .landing-premium footer .lp-footer-col-title {
   font-weight: 700;
+  color: #fff;
 }
 
 .landing-premium footer .lp-footer-tagline,
 .landing-premium footer .lp-footer-body,
-.landing-premium footer .lp-footer-body a,
-.landing-premium footer .lp-footer-legal a,
-.landing-premium footer .lp-footer-bar,
-.landing-premium footer .lp-footer-bar button {
+.landing-premium footer .lp-footer-bar {
+  font-weight: 400;
+  color: var(--lp-text-dim);
+}
+
+.landing-premium footer .lp-footer-sublink {
+  font-weight: 400;
+  color: var(--lp-text-dim);
+  transition: color 0.2s ease;
+}
+
+.landing-premium footer .lp-footer-sublink:hover {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.landing-premium footer .lp-footer-legal .lp-footer-sublink,
+.landing-premium footer .lp-footer-legal button.lp-footer-sublink {
   font-weight: 400;
 }

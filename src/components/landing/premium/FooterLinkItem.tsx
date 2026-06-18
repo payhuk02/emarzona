@@ -7,9 +7,7 @@ interface FooterLinkItemProps {
 }
 
 export function FooterLinkItem({ link, className }: FooterLinkItemProps) {
-  const cls =
-    className ??
-    'lp-footer-body font-normal text-xs text-white/90 transition-colors hover:text-white sm:text-sm';
+  const cls = className ?? 'lp-footer-sublink text-xs sm:text-sm';
 
   if (link.type === 'route') {
     return (
