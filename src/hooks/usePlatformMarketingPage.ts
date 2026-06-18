@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { usePageCustomization } from '@/hooks/usePageCustomization';
 import { getPageCustomizationValue } from '@/lib/admin/pageCustomizationKeys';
 import { LANDING_PREMIUM_PAGE_ID } from '@/lib/admin/landingPremiumCustomization';
-import { normalizeContentForDisplay } from '@/lib/content/plain-text-content';
+import { looksLikeHtml } from '@/lib/content/plain-text-content';
 import type { PlatformMarketingPageMeta } from '@/lib/admin/platformMarketingPagesConfig';
 
 export function usePlatformMarketingPage(meta: PlatformMarketingPageMeta) {
@@ -23,10 +23,13 @@ export function usePlatformMarketingPage(meta: PlatformMarketingPageMeta) {
       ) ?? 'contact@emarzona.com';
 
     let body = read('content.body', meta.defaultBody);
-    body = normalizeContentForDisplay(body);
 
     if (meta.slug === 'contact' && !body.includes(contactEmail)) {
-      body = `E-mail général : ${contactEmail}\n\n${body}`;
+      if (looksLikeHtml(body)) {
+        body = `<p><strong>E-mail général :</strong> <a href="mailto:${contactEmail}">${contactEmail}</a></p>${body}`;
+      } else {
+        body = `E-mail général : ${contactEmail}\n\n${body}`;
+      }
     }
 
     return {

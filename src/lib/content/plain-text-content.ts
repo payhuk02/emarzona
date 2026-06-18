@@ -66,3 +66,39 @@ export function isPlainTextSectionHeading(block: string): boolean {
   const firstLine = block.split('\n')[0]?.trim() ?? '';
   return /^\d+\.\s+\S/.test(firstLine) && !block.includes('\n\n') && block.split('\n').length === 1;
 }
+
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/** Convertit un contenu texte brut structuré en HTML pour l'éditeur riche et l'affichage. */
+export function plainTextToPageHtml(text: string): string {
+  const blocks = splitPlainTextParagraphs(text);
+  if (blocks.length === 0) return '';
+
+  return blocks
+    .map(block => {
+      if (isPlainTextListBlock(block)) {
+        const items = listItemsFromBlock(block)
+          .map(item => `<li>${escapeHtml(item)}</li>`)
+          .join('');
+        return `<ul>${items}</ul>`;
+      }
+      if (isPlainTextSectionHeading(block)) {
+        return `<h2>${escapeHtml(block)}</h2>`;
+      }
+      return `<p>${escapeHtml(block).replace(/\n/g, '<br>')}</p>`;
+    })
+    .join('');
+}
+
+/** Prépare le contenu pour l'éditeur riche : conserve le HTML existant ou convertit le texte brut. */
+export function toRichEditorContent(content: string): string {
+  const trimmed = content.trim();
+  if (!trimmed) return '';
+  return looksLikeHtml(trimmed) ? trimmed : plainTextToPageHtml(trimmed);
+}

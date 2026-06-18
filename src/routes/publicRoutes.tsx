@@ -95,6 +95,7 @@ const PlatformMarketingPage = lazyPage(() => import('@/pages/platform/PlatformMa
 
 // Pages Légales
 const TermsOfService = lazyPage(() => import('@/pages/legal/TermsOfService'));
+const TermsOfSale = lazyPage(() => import('@/pages/legal/TermsOfSale'));
 const PrivacyPolicy = lazyPage(() => import('@/pages/legal/PrivacyPolicy'));
 const CookiePolicy = lazyPage(() => import('@/pages/legal/CookiePolicy'));
 const RefundPolicy = lazyPage(() => import('@/pages/legal/RefundPolicy'));
@@ -236,6 +237,7 @@ export const publicRoutes = (
 
     {/* Légal */}
     <Route path="/legal/terms" element={<TermsOfService />} />
+    <Route path="/legal/cgv" element={<TermsOfSale />} />
     <Route path="/legal/privacy" element={<PrivacyPolicy />} />
     <Route path="/legal/cookies" element={<CookiePolicy />} />
     <Route path="/legal/refund" element={<RefundPolicy />} />

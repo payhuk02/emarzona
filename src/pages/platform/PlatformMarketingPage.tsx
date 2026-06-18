@@ -6,7 +6,7 @@ import { PremiumFooter } from '@/components/landing/premium/PremiumFooter';
 import { getPlatformMarketingPageBySlug } from '@/lib/admin/platformMarketingPagesConfig';
 import { usePlatformMarketingPage } from '@/hooks/usePlatformMarketingPage';
 import NotFound from '@/pages/NotFound';
-import { PlainTextContent } from '@/components/content/PlainTextContent';
+import { PageBodyContent } from '@/components/content/PageBodyContent';
 
 export default function PlatformMarketingPage() {
   const location = useLocation();
@@ -56,8 +56,9 @@ function PlatformMarketingPageContent({
           </div>
         </div>
         <div className="container mx-auto max-w-4xl px-4 py-10">
-          <PlainTextContent
-            text={body}
+          <PageBodyContent
+            content={body}
+            htmlClassName="prose-invert prose-a:text-[var(--lp-blue)] prose-headings:text-white prose-p:text-white/80 prose-li:text-white/80"
             headingClassName="text-white"
             paragraphClassName="text-white/80"
             listClassName="text-white/80"

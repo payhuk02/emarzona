@@ -62,6 +62,7 @@ const DEFAULT_PATHS = [
   '/community',
   '/products/compare',
   '/legal/terms',
+  '/legal/cgv',
   '/legal/privacy',
   '/legal/cookies',
   '/legal/refund',

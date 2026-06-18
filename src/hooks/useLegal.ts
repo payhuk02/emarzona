@@ -103,10 +103,9 @@ export const useUserConsents = (userId: string | undefined) => {
 // Hook: Gérer les préférences cookies
 export const useCookiePreferences = (userId: string | undefined) => {
   return useQuery({
-    queryKey: ['cookie-preferences', userId],
+    queryKey: ['cookie-preferences', userId ?? 'anonymous'],
     queryFn: async (): Promise<CookiePreferences | null> => {
       if (!userId) {
-        // Vérifier localStorage pour utilisateurs non connectés
         const saved = localStorage.getItem('cookiePreferences');
         return saved ? JSON.parse(saved) : null;
       }
@@ -153,7 +152,6 @@ export const useCookiePreferences = (userId: string | undefined) => {
         return null;
       }
     },
-    enabled: !!userId,
   });
 };
 

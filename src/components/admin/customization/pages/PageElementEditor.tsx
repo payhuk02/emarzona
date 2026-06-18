@@ -2,6 +2,7 @@
  * Éditeur d'éléments de page - Rendu des différents types de champs
  */
 
+import { lazy, Suspense } from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -15,7 +16,12 @@ import {
 } from '@/components/ui/select';
 import { RefreshCw, Upload, X } from 'lucide-react';
 import { LazyImage } from '@/components/ui/lazy-image';
+import { toRichEditorContent } from '@/lib/content/plain-text-content';
 import type { PageElement } from './types';
+
+const RichTextEditorPro = lazy(() =>
+  import('@/components/ui/rich-text-editor-pro').then(m => ({ default: m.RichTextEditorPro }))
+);
 
 interface PageElementEditorProps {
   pageId: string;
@@ -58,6 +64,27 @@ export const PageElementEditor = ({
           className="text-sm"
         />
       );
+
+    case 'richtext': {
+      const editorContent = toRichEditorContent(stringValue || element.defaultValue || '');
+      return (
+        <Suspense
+          fallback={
+            <div className="flex h-48 items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
+              Chargement de l&apos;éditeur…
+            </div>
+          }
+        >
+          <RichTextEditorPro
+            content={editorContent}
+            onChange={html => onChange(pageId, element.key, html)}
+            placeholder={element.description ?? 'Rédigez le contenu de la page…'}
+            maxHeight="600px"
+            className="text-sm"
+          />
+        </Suspense>
+      );
+    }
 
     case 'color':
       return (

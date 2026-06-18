@@ -141,6 +141,10 @@ export const PAGE_SEO_CONFIG: Record<string, PageSEOEntry> = {
     title: "Conditions générales d'utilisation | Emarzona",
     description: "Consultez les conditions générales d'utilisation de la plateforme Emarzona.",
   },
+  '/legal/cgv': {
+    title: 'Conditions générales de vente | Emarzona',
+    description: 'Consultez les conditions générales de vente applicables aux achats sur Emarzona.',
+  },
   '/legal/privacy': {
     title: 'Politique de confidentialité | Emarzona',
     description: 'Découvrez comment Emarzona protège vos données personnelles.',

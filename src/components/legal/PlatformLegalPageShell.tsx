@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SEOMeta } from '@/components/seo/SEOMeta';
-import { PlainTextContent } from '@/components/content/PlainTextContent';
+import { PageBodyContent } from '@/components/content/PageBodyContent';
 import { useLegalDocument } from '@/hooks/useLegal';
 import { usePlatformLegalPage } from '@/hooks/usePlatformLegalPage';
 import type { PlatformLegalPageMeta } from '@/lib/admin/platformLegalPagesConfig';
@@ -52,8 +52,9 @@ export function PlatformLegalPageShell({ meta, headerIcon }: PlatformLegalPageSh
 
         <div className="container mx-auto max-w-4xl px-4 py-8">
           <div className="rounded-lg bg-white p-8 shadow-sm">
-            <PlainTextContent
-              text={body}
+            <PageBodyContent
+              content={body}
+              htmlClassName="prose-blue prose-headings:text-gray-900 prose-p:text-gray-700 prose-li:text-gray-700"
               headingClassName="text-gray-900"
               paragraphClassName="text-gray-700"
               listClassName="text-gray-700"

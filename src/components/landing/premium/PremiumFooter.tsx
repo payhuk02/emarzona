@@ -5,6 +5,7 @@ import { EmarzonaBrandLogo } from './EmarzonaBrandLogo';
 import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
 import { useFooterLinks } from '@/hooks/useFooterLinks';
 import { FooterLinkItem } from './FooterLinkItem';
+import { openCookieSettings } from '@/lib/cookie-consent';
 import { useSubscribePlatformNewsletter } from '@/hooks/usePlatformNewsletter';
 import { useToast } from '@/hooks/use-toast';
 
@@ -128,6 +129,13 @@ export function PremiumFooter() {
             {legalLinks.map(link => (
               <FooterLinkItem key={link.linkKey} link={link} className="hover:text-white" />
             ))}
+            <button
+              type="button"
+              onClick={openCookieSettings}
+              className="text-xs text-white/90 transition-colors hover:text-white sm:text-sm"
+            >
+              {t('footer.manageCookies')}
+            </button>
           </div>
         </div>
       </div>

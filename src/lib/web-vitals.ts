@@ -1,6 +1,7 @@
 import { onCLS, onINP, onLCP, onFCP, onTTFB, Metric } from 'web-vitals';
 import * as Sentry from '@sentry/react';
 import { logger } from './logger';
+import { getStoredCookiePreferences, hasAnalyticsCookieConsent } from './cookie-consent';
 
 /**
  * Configuration Web Vitals pour surveiller les performances
@@ -12,7 +13,7 @@ import { logger } from './logger';
 function sendToSentry(metric: Metric) {
   const metricValue = metric.value;
   const metricName = metric.name;
-  
+
   // Ajouter comme breadcrumb Sentry
   Sentry.addBreadcrumb({
     category: 'web-vitals',
@@ -25,7 +26,7 @@ function sendToSentry(metric: Metric) {
       delta: metric.delta,
     },
   });
-  
+
   // Envoyer comme mesure personnalisée
   Sentry.setMeasurement(metricName, metricValue, 'millisecond');
 }
@@ -34,8 +35,12 @@ function sendToSentry(metric: Metric) {
  * Envoyer vers Google Analytics (si configuré)
  */
 function sendToAnalytics(metric: Metric) {
+  if (!hasAnalyticsCookieConsent(getStoredCookiePreferences())) return;
+
   if (typeof window !== 'undefined') {
-    const windowWithGtag = window as typeof window & { gtag?: (command: string, eventName: string, params: Record<string, unknown>) => void };
+    const windowWithGtag = window as typeof window & {
+      gtag?: (command: string, eventName: string, params: Record<string, unknown>) => void;
+    };
     if (windowWithGtag.gtag) {
       windowWithGtag.gtag('event', metric.name, {
         value: Math.round(metric.name === 'CLS' ? metric.value * 1000 : metric.value),
@@ -52,7 +57,8 @@ function sendToAnalytics(metric: Metric) {
  */
 function logMetric(metric: Metric) {
   if (import.meta.env.DEV) {
-    const emoji = metric.rating === 'good' ? '✅' : metric.rating === 'needs-improvement' ? '⚠️' : '❌';
+    const emoji =
+      metric.rating === 'good' ? '✅' : metric.rating === 'needs-improvement' ? '⚠️' : '❌';
     logger.log(`${emoji} ${metric.name}:`, {
       value: metric.value,
       rating: metric.rating,
@@ -77,48 +83,44 @@ export const initWebVitals = () => {
   // CLS - Cumulative Layout Shift (Stabilité visuelle)
   // Bon: < 0.1, Needs improvement: 0.1-0.25, Poor: > 0.25
   onCLS(handleMetric);
-  
+
   // INP - Interaction to Next Paint (Interactivité - remplace FID)
   // Bon: < 200ms, Needs improvement: 200-500ms, Poor: > 500ms
   onINP(handleMetric);
-  
+
   // LCP - Largest Contentful Paint (Performance de chargement)
   // Bon: < 2.5s, Needs improvement: 2.5-4s, Poor: > 4s
   onLCP(handleMetric);
-  
+
   // FCP - First Contentful Paint (Première peinture)
   // Bon: < 1.8s, Needs improvement: 1.8-3s, Poor: > 3s
   onFCP(handleMetric);
-  
+
   // TTFB - Time to First Byte (Temps de réponse serveur)
   // Bon: < 800ms, Needs improvement: 800-1800ms, Poor: > 1800ms
   onTTFB(handleMetric);
-  
+
   logger.info('✅ Web Vitals tracking initialisé');
 };
 
 /**
  * Obtenir un résumé des métriques (pour affichage)
  */
-export const getVitalsRating = (value: number, metricName: string): 'good' | 'needs-improvement' | 'poor' => {
-  const  thresholds: Record<string, [number, number]> = {
+export const getVitalsRating = (
+  value: number,
+  metricName: string
+): 'good' | 'needs-improvement' | 'poor' => {
+  const thresholds: Record<string, [number, number]> = {
     CLS: [0.1, 0.25],
     INP: [200, 500],
     LCP: [2500, 4000],
     FCP: [1800, 3000],
     TTFB: [800, 1800],
   };
-  
+
   const [good, needsImprovement] = thresholds[metricName] || [0, 0];
-  
+
   if (value <= good) return 'good';
   if (value <= needsImprovement) return 'needs-improvement';
   return 'poor';
 };
-
-
-
-
-
-
-

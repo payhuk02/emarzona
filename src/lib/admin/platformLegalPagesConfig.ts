@@ -2,7 +2,7 @@
  * Pages légales liées au pied de page (contenu éditable depuis Admin > Personnalisation > Pages).
  */
 
-import { Cookie, FileText, RefreshCw, Shield } from 'lucide-react';
+import { Cookie, FileText, RefreshCw, Shield, ShoppingBag } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { PageConfig } from '@/components/admin/customization/pages/types';
 import type { LegalDocumentType } from '@/types/legal';
@@ -32,6 +32,18 @@ export const PLATFORM_LEGAL_PAGES: PlatformLegalPageMeta[] = [
     defaultBody: LEGAL_PAGE_BODIES.terms,
     defaultSeoDescription:
       "Conditions générales d'utilisation de la plateforme Emarzona. Règles, droits et obligations des utilisateurs vendeurs et acheteurs.",
+  },
+  {
+    documentType: 'sales',
+    pageId: 'platformLegalSales',
+    route: '/legal/cgv',
+    name: 'Conditions générales de vente',
+    icon: ShoppingBag,
+    defaultTitle: 'Conditions Générales de Vente',
+    defaultSubtitle: 'Modalités applicables aux achats réalisés sur la plateforme Emarzona.',
+    defaultBody: LEGAL_PAGE_BODIES.sales,
+    defaultSeoDescription:
+      'Conditions générales de vente Emarzona : prix, commande, livraison, rétractation et responsabilités.',
   },
   {
     documentType: 'privacy',
@@ -132,13 +144,12 @@ export function buildPlatformLegalPageConfigs(): PageConfig[] {
           },
           {
             id: 'content.body',
-            label: 'Corps (texte)',
-            type: 'textarea' as const,
+            label: 'Corps (éditeur riche)',
+            type: 'richtext' as const,
             key: `${page.pageId}.content.body`,
             defaultValue: page.defaultBody,
             description:
-              'Texte brut uniquement. Séparez les paragraphes par une ligne vide. Listes : commencez chaque ligne par « - ».',
-            rows: 16,
+              'Titres, listes, liens, images, tableaux… Le contenu est mis en forme automatiquement sur la page publique.',
           },
         ],
       },

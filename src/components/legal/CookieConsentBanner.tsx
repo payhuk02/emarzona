@@ -1,11 +1,10 @@
 /**
  * Cookie Consent Banner - Conformité RGPD
- * Affiche un banner pour accepter/personnaliser les cookies
- * Date: 27 octobre 2025
  */
 
 import { useState, useEffect } from 'react';
-import { X, Settings, Check } from '@/components/icons';
+import { Settings, Check } from '@/components/icons';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -18,7 +17,19 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUpdateCookiePreferences, useCookiePreferences } from '@/hooks/useLegal';
+import {
+  getStoredCookiePreferences,
+  hasCookieConsentGiven,
+  OPEN_COOKIE_SETTINGS_EVENT,
+} from '@/lib/cookie-consent';
 import type { CookiePreferences } from '@/types/legal';
+
+const DEFAULT_PREFERENCES: Partial<CookiePreferences> = {
+  necessary: true,
+  functional: false,
+  analytics: false,
+  marketing: false,
+};
 
 export const CookieConsentBanner = () => {
   const { user } = useAuth();
@@ -27,173 +38,177 @@ export const CookieConsentBanner = () => {
 
   const [showBanner, setShowBanner] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const [preferences, setPreferences] = useState<Partial<CookiePreferences>>({
-    necessary: true, // Toujours true
-    functional: false,
-    analytics: false,
-    marketing: false,
-  });
+  const [preferences, setPreferences] = useState<Partial<CookiePreferences>>(DEFAULT_PREFERENCES);
 
   useEffect(() => {
-    // Vérifier si l'utilisateur a déjà donné son consentement
-    const hasConsent = localStorage.getItem('cookieConsentGiven');
+    if (hasCookieConsentGiven() || currentPreferences) return;
 
-    if (!hasConsent && !currentPreferences) {
-      // Afficher le banner après 2 secondes
-      const timer = setTimeout(() => {
-        setShowBanner(true);
-      }, 2000);
-      return () => clearTimeout(timer);
+    const timer = setTimeout(() => {
+      setShowBanner(true);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [currentPreferences]);
+
+  useEffect(() => {
+    const stored = currentPreferences ?? getStoredCookiePreferences();
+    if (stored) {
+      setPreferences({
+        necessary: true,
+        functional: stored.functional ?? false,
+        analytics: stored.analytics ?? false,
+        marketing: stored.marketing ?? false,
+      });
     }
   }, [currentPreferences]);
 
-  const handleAcceptAll = async () => {
-    const allAccepted: Partial<CookiePreferences> = {
+  useEffect(() => {
+    const openSettings = () => {
+      const stored = currentPreferences ?? getStoredCookiePreferences();
+      if (stored) {
+        setPreferences({
+          necessary: true,
+          functional: stored.functional ?? false,
+          analytics: stored.analytics ?? false,
+          marketing: stored.marketing ?? false,
+        });
+      }
+      setShowSettings(true);
+      setShowBanner(false);
+    };
+
+    window.addEventListener(OPEN_COOKIE_SETTINGS_EVENT, openSettings);
+    return () => window.removeEventListener(OPEN_COOKIE_SETTINGS_EVENT, openSettings);
+  }, [currentPreferences]);
+
+  const persistPreferences = async (next: Partial<CookiePreferences>) => {
+    setIsSaving(true);
+    try {
+      await updatePreferences.mutateAsync({
+        userId: user?.id,
+        preferences: next,
+      });
+      localStorage.setItem('cookieConsentGiven', 'true');
+      setShowSettings(false);
+      setShowBanner(false);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleAcceptAll = () =>
+    persistPreferences({
       necessary: true,
       functional: true,
       analytics: true,
       marketing: true,
-    };
-
-    await updatePreferences.mutateAsync({
-      userId: user?.id,
-      preferences: allAccepted,
     });
 
-    localStorage.setItem('cookieConsentGiven', 'true');
-    setShowBanner(false);
+  const handleRejectAll = () => persistPreferences(DEFAULT_PREFERENCES);
+
+  const handleSavePreferences = () => persistPreferences({ ...preferences, necessary: true });
+
+  const handleSettingsOpenChange = (open: boolean) => {
+    setShowSettings(open);
+    if (!open && !hasCookieConsentGiven()) {
+      setShowBanner(true);
+    }
   };
-
-  const handleRejectAll = async () => {
-    const allRejected: Partial<CookiePreferences> = {
-      necessary: true, // Obligatoire
-      functional: false,
-      analytics: false,
-      marketing: false,
-    };
-
-    await updatePreferences.mutateAsync({
-      userId: user?.id,
-      preferences: allRejected,
-    });
-
-    localStorage.setItem('cookieConsentGiven', 'true');
-    setShowBanner(false);
-  };
-
-  const handleSavePreferences = async () => {
-    await updatePreferences.mutateAsync({
-      userId: user?.id,
-      preferences,
-    });
-
-    localStorage.setItem('cookieConsentGiven', 'true');
-    setShowSettings(false);
-    setShowBanner(false);
-  };
-
-  if (!showBanner) return null;
 
   return (
     <>
-      {/* Banner fixe en bas */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t shadow-lg">
-        <div className="container mx-auto px-4 py-4 max-w-7xl">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div className="flex-1">
-              <div className="flex items-start gap-3">
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-1">
-                    🍪 Nous utilisons des cookies
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    Nous utilisons des cookies pour améliorer votre expérience, analyser notre
-                    trafic et personnaliser le contenu. Vous pouvez accepter tous les cookies ou les
-                    personnaliser.{' '}
-                    <a
-                      href="/legal/cookies"
-                      className="font-medium text-blue-800 underline decoration-blue-800/80 hover:text-blue-900"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      En savoir plus
-                    </a>
-                  </p>
-                </div>
+      {showBanner ? (
+        <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-white shadow-lg">
+          <div className="container mx-auto max-w-7xl px-4 py-4">
+            <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+              <div className="flex-1">
+                <h3 className="mb-1 font-semibold text-gray-900">🍪 Nous utilisons des cookies</h3>
+                <p className="text-sm text-gray-600">
+                  Nous utilisons des cookies pour améliorer votre expérience, analyser notre trafic
+                  et personnaliser le contenu. Vous pouvez accepter tous les cookies ou les
+                  personnaliser.{' '}
+                  <Link
+                    to="/legal/cookies"
+                    className="font-medium text-blue-800 underline decoration-blue-800/80 hover:text-blue-900"
+                  >
+                    En savoir plus
+                  </Link>
+                </p>
               </div>
-            </div>
 
-            <div className="flex flex-wrap items-center gap-3">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setShowSettings(true);
-                  setShowBanner(false);
-                }}
-                className="whitespace-nowrap"
-              >
-                <Settings className="w-4 h-4 mr-2" />
-                Personnaliser
-              </Button>
+              <div className="flex flex-wrap items-center gap-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={isSaving}
+                  onClick={() => {
+                    setShowSettings(true);
+                    setShowBanner(false);
+                  }}
+                  className="whitespace-nowrap"
+                >
+                  <Settings className="mr-2 h-4 w-4" />
+                  Personnaliser
+                </Button>
 
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleRejectAll}
-                className="whitespace-nowrap"
-              >
-                Tout refuser
-              </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={isSaving}
+                  onClick={handleRejectAll}
+                  className="whitespace-nowrap"
+                >
+                  Tout refuser
+                </Button>
 
-              <Button
-                size="sm"
-                onClick={handleAcceptAll}
-                className="whitespace-nowrap bg-blue-700 text-white hover:bg-blue-800"
-              >
-                <Check className="w-4 h-4 mr-2" />
-                Tout accepter
-              </Button>
+                <Button
+                  size="sm"
+                  disabled={isSaving}
+                  onClick={handleAcceptAll}
+                  className="whitespace-nowrap bg-blue-700 text-white hover:bg-blue-800"
+                >
+                  <Check className="mr-2 h-4 w-4" />
+                  Tout accepter
+                </Button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      ) : null}
 
-      {/* Modal Paramètres */}
-      <Dialog open={showSettings} onOpenChange={setShowSettings}>
-        <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[80vh] overflow-y-auto">
+      <Dialog open={showSettings} onOpenChange={handleSettingsOpenChange}>
+        <DialogContent className="max-h-[80vh] max-w-[95vw] overflow-y-auto sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>Paramètres des cookies</DialogTitle>
             <DialogDescription>
-              Choisissez les catégories de cookies que vous souhaitez autoriser.
+              Choisissez les catégories de cookies que vous souhaitez autoriser.{' '}
+              <Link to="/legal/cookies" className="text-blue-800 underline hover:text-blue-900">
+                Politique des cookies
+              </Link>
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-6 py-4">
-            {/* Cookies nécessaires (toujours activés) */}
-            <div className="flex items-start justify-between gap-4 pb-4 border-b">
+            <div className="flex items-start justify-between gap-4 border-b pb-4">
               <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
+                <div className="mb-1 flex items-center gap-2">
                   <Label className="font-semibold">Cookies nécessaires</Label>
-                  <span className="text-xs bg-gray-100 px-2 py-0.5 rounded">Toujours actifs</span>
+                  <span className="rounded bg-gray-100 px-2 py-0.5 text-xs">Toujours actifs</span>
                 </div>
                 <p className="text-sm text-gray-600">
                   Ces cookies sont essentiels au fonctionnement du site et ne peuvent pas être
-                  désactivés. Ils permettent la navigation et l'utilisation des fonctionnalités de
-                  base.
+                  désactivés.
                 </p>
               </div>
-              <Switch checked={true} disabled />
+              <Switch checked disabled />
             </div>
 
-            {/* Cookies fonctionnels */}
-            <div className="flex items-start justify-between gap-4 pb-4 border-b">
+            <div className="flex items-start justify-between gap-4 border-b pb-4">
               <div className="flex-1">
-                <Label className="font-semibold mb-1 block">Cookies fonctionnels</Label>
+                <Label className="mb-1 block font-semibold">Cookies fonctionnels</Label>
                 <p className="text-sm text-gray-600">
-                  Ces cookies permettent d'améliorer votre expérience en mémorisant vos préférences
-                  (langue, thème, etc.).
+                  Mémorisent vos préférences (langue, thème) et activent le chat support.
                 </p>
               </div>
               <Switch
@@ -202,13 +217,11 @@ export const CookieConsentBanner = () => {
               />
             </div>
 
-            {/* Cookies analytics */}
-            <div className="flex items-start justify-between gap-4 pb-4 border-b">
+            <div className="flex items-start justify-between gap-4 border-b pb-4">
               <div className="flex-1">
-                <Label className="font-semibold mb-1 block">Cookies analytics</Label>
+                <Label className="mb-1 block font-semibold">Cookies analytics</Label>
                 <p className="text-sm text-gray-600">
-                  Ces cookies nous permettent de mesurer l'audience et d'améliorer notre site en
-                  analysant comment vous l'utilisez.
+                  Mesurent l&apos;audience et améliorent le site en analysant son utilisation.
                 </p>
               </div>
               <Switch
@@ -217,13 +230,11 @@ export const CookieConsentBanner = () => {
               />
             </div>
 
-            {/* Cookies marketing */}
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
-                <Label className="font-semibold mb-1 block">Cookies marketing</Label>
+                <Label className="mb-1 block font-semibold">Cookies marketing</Label>
                 <p className="text-sm text-gray-600">
-                  Ces cookies sont utilisés pour afficher des publicités pertinentes et mesurer
-                  l'efficacité de nos campagnes.
+                  Publicités pertinentes et mesure de l&apos;efficacité des campagnes.
                 </p>
               </div>
               <Switch
@@ -233,11 +244,17 @@ export const CookieConsentBanner = () => {
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t">
-            <Button variant="outline" onClick={() => setShowSettings(false)}>
+          <div className="flex justify-end gap-3 border-t pt-4">
+            <Button
+              variant="outline"
+              disabled={isSaving}
+              onClick={() => handleSettingsOpenChange(false)}
+            >
               Annuler
             </Button>
-            <Button onClick={handleSavePreferences}>Sauvegarder mes préférences</Button>
+            <Button disabled={isSaving} onClick={handleSavePreferences}>
+              {isSaving ? 'Enregistrement…' : 'Sauvegarder mes préférences'}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

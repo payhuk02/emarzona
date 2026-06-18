@@ -259,9 +259,12 @@
     "emailPlaceholder": "Votre e-mail",
     "subscribe": "S'inscrire",
     "copyright": "© {{year}} Emarzona. Tous droits réservés.",
-    "terms": "Conditions d'utilisation",
+    "terms": "CGU",
+    "cgv": "CGV",
     "privacy": "Confidentialité",
     "cookies": "Cookies",
+    "refund": "Remboursement",
+    "manageCookies": "Gérer les cookies",
     "columns": {
       "product": {
         "title": "Produit",

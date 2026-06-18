@@ -349,6 +349,50 @@ Vous pouvez à tout moment modifier vos choix via le lien « Gérer les cookies 
 
 Pour toute question : privacy@emarzona.com`,
 
+  sales: `1. Objet
+
+Les présentes Conditions Générales de Vente (« CGV ») régissent les ventes de produits et services réalisées sur la plateforme Emarzona entre les vendeurs et les acheteurs, ainsi que les prestations facturées directement par Emarzona le cas échéant.
+
+2. Rôle d'Emarzona
+
+Emarzona met à disposition une infrastructure technique de mise en relation, de paiement et de gestion des commandes. Sauf mention contraire, le contrat de vente est conclu entre l'acheteur et le vendeur. Emarzona n'est pas partie au contrat de vente des produits proposés par les boutiques tierces.
+
+3. Prix et paiement
+
+Les prix affichés sont indiqués dans la devise choisie sur la boutique, hors frais éventuels de livraison ou taxes locales non incluses le cas échéant. Le paiement est exigible lors de la commande via les moyens de paiement proposés au checkout. La commande n'est confirmée qu'après validation du paiement.
+
+4. Commande et livraison
+
+Après validation, l'acheteur reçoit une confirmation par e-mail. Les délais et modalités de livraison ou d'accès au contenu digital sont précisés sur la fiche produit et peuvent varier selon le vendeur.
+
+5. Droit de rétractation
+
+Pour les produits physiques et certains services, le droit de rétractation applicable est celui de la réglementation en vigueur dans le pays de l'acheteur, sous réserve des exceptions légales (contenus numériques fournis immédiatement, prestations personnalisées, etc.).
+
+6. Garanties et conformité
+
+Les vendeurs sont responsables de la conformité des produits vendus et des informations publiées sur leurs fiches. L'acheteur est invité à contacter le vendeur en cas de défaut ou de non-conformité avant toute action.
+
+7. Remboursements
+
+Les conditions de remboursement sont détaillées dans la Politique de remboursement accessible depuis le pied de page du site.
+
+8. Responsabilité
+
+Emarzona s'efforce d'assurer la disponibilité de la plateforme mais ne saurait être tenue responsable des contenus publiés par les vendeurs ni des litiges commerciaux entre acheteurs et vendeurs, dans les limites prévues par la loi.
+
+9. Données personnelles
+
+Les données collectées lors de l'achat sont traitées conformément à notre Politique de confidentialité.
+
+10. Contact
+
+Pour toute question relative aux présentes CGV :
+- E-mail : legal@emarzona.com
+- Support acheteur : support@emarzona.com
+
+Note : ce document est un modèle à adapter à votre activité et à faire valider par un conseil juridique.`,
+
   refund: `1. Champ d'application
 
 Cette politique décrit les conditions de remboursement applicables aux achats effectués sur la plateforme Emarzona, sous réserve des règles propres à chaque vendeur lorsque la loi le permet.

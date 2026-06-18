@@ -371,9 +371,12 @@ export const LANDING_PREMIUM_SECTIONS: LandingPremiumSection[] = [
       text('footer.emailPlaceholder', 'Placeholder e-mail', lp.footer.emailPlaceholder),
       text('footer.subscribe', 'Bouton inscription', lp.footer.subscribe),
       text('footer.copyright', 'Copyright (utiliser {{year}})', lp.footer.copyright),
-      text('footer.terms', 'Conditions', lp.footer.terms),
+      text('footer.terms', 'CGU', lp.footer.terms),
+      text('footer.cgv', 'CGV', lp.footer.cgv),
       text('footer.privacy', 'Confidentialité', lp.footer.privacy),
       text('footer.cookies', 'Cookies', lp.footer.cookies),
+      text('footer.refund', 'Remboursement', lp.footer.refund),
+      text('footer.manageCookies', 'Gérer les cookies', lp.footer.manageCookies),
       text(
         'footer.columns.product.title',
         'Colonne Produit — titre',

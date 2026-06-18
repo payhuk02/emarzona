@@ -21,7 +21,16 @@ export interface PageSection {
 export interface PageElement {
   id: string;
   label: string;
-  type: 'text' | 'textarea' | 'image' | 'color' | 'font' | 'number' | 'url' | 'boolean';
+  type:
+    | 'text'
+    | 'textarea'
+    | 'richtext'
+    | 'image'
+    | 'color'
+    | 'font'
+    | 'number'
+    | 'url'
+    | 'boolean';
   key: string;
   defaultValue?: string;
   description?: string;

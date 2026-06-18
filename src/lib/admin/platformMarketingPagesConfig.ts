@@ -159,13 +159,12 @@ export function buildPlatformMarketingPageConfigs(): PageConfig[] {
           },
           {
             id: 'content.body',
-            label: 'Corps (texte)',
-            type: 'textarea' as const,
+            label: 'Corps (éditeur riche)',
+            type: 'richtext' as const,
             key: `${page.pageId}.content.body`,
             defaultValue: page.defaultBody,
             description:
-              'Texte brut uniquement. Séparez les paragraphes par une ligne vide. Listes : commencez chaque ligne par « - ».',
-            rows: 12,
+              'Titres, listes, liens, images, tableaux… Le contenu est mis en forme automatiquement sur la page publique.',
           },
         ],
       },

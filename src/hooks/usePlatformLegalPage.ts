@@ -1,8 +1,6 @@
 import { useMemo } from 'react';
 import { usePageCustomization } from '@/hooks/usePageCustomization';
 import { getPageCustomizationValue } from '@/lib/admin/pageCustomizationKeys';
-import { LANDING_PREMIUM_PAGE_ID } from '@/lib/admin/landingPremiumCustomization';
-import { normalizeContentForDisplay } from '@/lib/content/plain-text-content';
 import type { PlatformLegalPageMeta } from '@/lib/admin/platformLegalPagesConfig';
 import type { LegalDocument } from '@/types/legal';
 
@@ -25,9 +23,9 @@ export function usePlatformLegalPage(
 
     let body = meta.defaultBody;
     if (adminBody) {
-      body = normalizeContentForDisplay(adminBody);
+      body = adminBody;
     } else if (dbDocument?.content?.trim()) {
-      body = normalizeContentForDisplay(dbDocument.content);
+      body = dbDocument.content;
     }
 
     const effectiveDate = dbDocument?.effective_date

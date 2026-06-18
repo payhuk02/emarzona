@@ -1,7 +1,6 @@
 /**
  * Composant : CrispChat
- * Intégration Live Chat Crisp - Universel pour tous types de produits
- * Date : 27 octobre 2025
+ * Chargé uniquement après consentement cookies fonctionnel.
  */
 
 import { useEffect } from 'react';
@@ -15,37 +14,31 @@ import {
 } from '@/lib/crisp';
 import { useLocation } from 'react-router-dom';
 import { logger } from '@/lib/logger';
+import { useCookiePreferences } from '@/hooks/useLegal';
+import { hasFunctionalCookieConsent } from '@/lib/cookie-consent';
 
 export const CrispChat: React.FC = () => {
   const { user } = useAuth();
   const location = useLocation();
+  const { data: cookiePreferences } = useCookiePreferences(user?.id);
   const CRISP_WEBSITE_ID = import.meta.env.VITE_CRISP_WEBSITE_ID;
+  const crispAllowed = hasFunctionalCookieConsent(cookiePreferences);
 
-  // Initialiser Crisp au montage
   useEffect(() => {
-    if (!CRISP_WEBSITE_ID) {
-      if (import.meta.env.DEV) {
-        logger.debug('VITE_CRISP_WEBSITE_ID non configuré — live chat désactivé en dev.');
-      }
-      return;
-    }
-
+    if (!CRISP_WEBSITE_ID || !crispAllowed) return;
     initCrisp(CRISP_WEBSITE_ID);
-  }, [CRISP_WEBSITE_ID]);
+  }, [CRISP_WEBSITE_ID, crispAllowed]);
 
-  // Synchroniser l'utilisateur avec Crisp
   useEffect(() => {
-    if (!CRISP_WEBSITE_ID) return;
+    if (!CRISP_WEBSITE_ID || !crispAllowed) return;
 
     if (user) {
-      // Utilisateur connecté
       setCrispUser({
         email: user.email,
         nickname: user.user_metadata?.name || user.email?.split('@')[0] || 'Utilisateur',
         avatar: user.user_metadata?.avatar_url,
       });
 
-      // Déterminer le rôle (simplifié, ajuster selon votre logique)
       const role = user.user_metadata?.role || 'buyer';
       configureCrispForRole(role);
 
@@ -54,33 +47,40 @@ export const CrispChat: React.FC = () => {
         locale: navigator.language || 'fr',
       });
     } else {
-      // Visiteur non connecté
       configureCrispForRole('visitor');
       setCrispSessionData({
         locale: navigator.language || 'fr',
       });
     }
-  }, [user, CRISP_WEBSITE_ID]);
+  }, [user, CRISP_WEBSITE_ID, crispAllowed]);
 
-  // Réinitialiser lors du logout
   useEffect(() => {
     if (!CRISP_WEBSITE_ID) return;
+
+    if (!crispAllowed) {
+      resetCrisp();
+      return;
+    }
 
     return () => {
       if (!user) {
         resetCrisp();
       }
     };
-  }, [user, CRISP_WEBSITE_ID]);
+  }, [user, CRISP_WEBSITE_ID, crispAllowed]);
 
-  // Tracking de la page actuelle
   useEffect(() => {
-    if (!CRISP_WEBSITE_ID || !window.$crisp) return;
+    if (!CRISP_WEBSITE_ID || !crispAllowed || !window.$crisp) return;
 
-    // Envoyer l'événement de navigation
     window.$crisp.push(['set', 'session:event', [['page_view', { path: location.pathname }]]]);
-  }, [location.pathname, CRISP_WEBSITE_ID]);
+  }, [location.pathname, CRISP_WEBSITE_ID, crispAllowed]);
 
-  // Composant invisible (Crisp se charge tout seul)
+  useEffect(() => {
+    if (!CRISP_WEBSITE_ID || crispAllowed) return;
+    if (import.meta.env.DEV) {
+      logger.debug('Crisp désactivé — consentement cookies fonctionnel non accordé.');
+    }
+  }, [CRISP_WEBSITE_ID, crispAllowed]);
+
   return null;
 };

@@ -132,6 +132,12 @@ export const FOOTER_LEGAL_LINKS = [
     defaultHref: '/legal/terms',
   },
   {
+    linkKey: 'cgv' as const,
+    labelKey: 'footer.cgv',
+    hrefKey: 'footer.links.legal.cgv',
+    defaultHref: '/legal/cgv',
+  },
+  {
     linkKey: 'privacy' as const,
     labelKey: 'footer.privacy',
     hrefKey: 'footer.links.legal.privacy',
@@ -142,6 +148,12 @@ export const FOOTER_LEGAL_LINKS = [
     labelKey: 'footer.cookies',
     hrefKey: 'footer.links.legal.cookies',
     defaultHref: '/legal/cookies',
+  },
+  {
+    linkKey: 'refund' as const,
+    labelKey: 'footer.refund',
+    hrefKey: 'footer.links.legal.refund',
+    defaultHref: '/legal/refund',
   },
 ] as const;
 

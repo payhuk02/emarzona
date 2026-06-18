@@ -5,7 +5,9 @@ import {
   isPlainTextSectionHeading,
   looksLikeHtml,
   normalizeContentForDisplay,
+  plainTextToPageHtml,
   splitPlainTextParagraphs,
+  toRichEditorContent,
 } from '@/lib/content/plain-text-content';
 
 describe('plain-text-content', () => {
@@ -33,5 +35,19 @@ describe('plain-text-content', () => {
 
   it('strips tags from htmlToPlainText', () => {
     expect(htmlToPlainText('<strong>Test</strong>')).toBe('Test');
+  });
+
+  it('converts structured plain text to HTML', () => {
+    const plain = '1. Introduction\n\nParagraphe.\n\n- Un\n- Deux';
+    const html = plainTextToPageHtml(plain);
+    expect(html).toContain('<h2>1. Introduction</h2>');
+    expect(html).toContain('<p>Paragraphe.</p>');
+    expect(html).toContain('<ul>');
+    expect(html).toContain('<li>Un</li>');
+  });
+
+  it('toRichEditorContent preserves HTML and converts plain text', () => {
+    expect(toRichEditorContent('<p>Hi</p>')).toBe('<p>Hi</p>');
+    expect(toRichEditorContent('Hello')).toContain('<p>Hello</p>');
   });
 });

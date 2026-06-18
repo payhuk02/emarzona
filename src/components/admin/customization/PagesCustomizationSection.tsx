@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Layout, RefreshCw } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { PAGES_CONFIG } from './pages/pagesConfig';
 import { PageElementEditor } from './pages/PageElementEditor';
 import { usePageCustomization } from './pages/usePageCustomization';
@@ -123,7 +124,10 @@ export const PagesCustomizationSection = ({ onChange }: PagesCustomizationSectio
                 <TabsContent key={section.id} value={section.id} className="space-y-4 mt-4">
                   <div className="space-y-4">
                     {section.elements.map(element => (
-                      <div key={element.id} className="space-y-2">
+                      <div
+                        key={element.id}
+                        className={cn('space-y-2', element.type === 'richtext' && 'col-span-full')}
+                      >
                         <div className="flex items-center justify-between">
                           <Label
                             htmlFor={`${selectedPage}-${element.id}`}

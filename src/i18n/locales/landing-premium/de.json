@@ -255,8 +255,11 @@
     "subscribe": "Abonnieren",
     "copyright": "© {{year}} Emarzona. Alle Rechte vorbehalten.",
     "terms": "Nutzungsbedingungen",
+    "cgv": "Verkaufsbedingungen",
     "privacy": "Datenschutz",
     "cookies": "Cookies",
+    "refund": "Erstattung",
+    "manageCookies": "Cookies verwalten",
     "columns": {
       "product": {
         "title": "Produkt",

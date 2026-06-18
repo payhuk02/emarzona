@@ -5,7 +5,7 @@
 
 import type { RecordString } from './common';
 
-export type LegalDocumentType = 'terms' | 'privacy' | 'cookies' | 'refund';
+export type LegalDocumentType = 'terms' | 'sales' | 'privacy' | 'cookies' | 'refund';
 export type ConsentMethod = 'signup' | 'banner' | 'settings' | 'checkout';
 export type GDPRRequestType = 'data_export' | 'data_deletion' | 'data_rectification';
 export type GDPRRequestStatus = 'pending' | 'processing' | 'completed' | 'rejected';
@@ -62,10 +62,3 @@ export interface GDPRRequest {
 export interface LegalPageProps {
   language?: 'fr' | 'en' | 'es' | 'pt';
 }
-
-
-
-
-
-
-
