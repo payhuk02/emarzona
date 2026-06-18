@@ -51,6 +51,7 @@ import {
   parseTagsInput,
   slugifyBlog,
 } from '@/lib/platform/platformBlogUtils';
+import { PlatformBlogImageField } from '@/components/admin/platform/PlatformBlogImageField';
 
 const STATUS_OPTIONS: { value: BlogPostStatus; label: string }[] = [
   { value: 'draft', label: 'Brouillon' },
@@ -339,6 +340,20 @@ export default function AdminPlatformBlog() {
                     <Label>Tags (séparés par des virgules)</Label>
                     <Input value={tagsText} onChange={e => setTagsText(e.target.value)} />
                   </div>
+                  <PlatformBlogImageField
+                    label="Image à la une"
+                    value={draft.featured_image_url ?? ''}
+                    onChange={featured_image_url => setDraft({ ...draft, featured_image_url })}
+                    slug={draft.slug || slugifyBlog(draft.title)}
+                    purpose="featured"
+                  />
+                  <div className="space-y-2">
+                    <Label>Alt image à la une</Label>
+                    <Input
+                      value={draft.featured_image_alt ?? ''}
+                      onChange={e => setDraft({ ...draft, featured_image_alt: e.target.value })}
+                    />
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -381,27 +396,28 @@ export default function AdminPlatformBlog() {
                     />
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label>Image Open Graph</Label>
-                      <Input
-                        value={draft.og_image_url ?? ''}
-                        onChange={e => setDraft({ ...draft, og_image_url: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Image à la une</Label>
-                      <Input
-                        value={draft.featured_image_url ?? ''}
-                        onChange={e => setDraft({ ...draft, featured_image_url: e.target.value })}
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Alt image</Label>
-                    <Input
-                      value={draft.featured_image_alt ?? ''}
-                      onChange={e => setDraft({ ...draft, featured_image_alt: e.target.value })}
+                    <PlatformBlogImageField
+                      label="Image Open Graph"
+                      value={draft.og_image_url ?? ''}
+                      onChange={og_image_url => setDraft({ ...draft, og_image_url })}
+                      slug={draft.slug || slugifyBlog(draft.title)}
+                      purpose="og"
                     />
+                    <div className="space-y-2">
+                      <Label className="invisible sm:visible">Copie</Label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="w-full sm:mt-8"
+                        disabled={!draft.featured_image_url}
+                        onClick={() =>
+                          setDraft({ ...draft, og_image_url: draft.featured_image_url ?? '' })
+                        }
+                      >
+                        Utiliser l&apos;image à la une
+                      </Button>
+                    </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <Switch

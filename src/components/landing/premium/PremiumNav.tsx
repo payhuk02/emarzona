@@ -8,13 +8,13 @@ import { cn } from '@/lib/utils';
 
 const navItems = [
   { key: 'marketplace', href: '/marketplace', route: true },
-  { key: 'courses', href: '/courses', route: true },
-  { key: 'faq', href: '/faq', route: true },
   { key: 'features', href: '#fonctionnalites' },
   { key: 'solutions', href: '#solutions' },
   { key: 'pricing', href: '#tarifs' },
   { key: 'resources', href: '#ressources' },
   { key: 'about', href: '#apropos' },
+  { key: 'blog', href: '/blog', route: true },
+  { key: 'faq', href: '/faq', route: true },
 ] as const;
 
 function NavLinkItem({

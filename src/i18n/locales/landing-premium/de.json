@@ -1,12 +1,13 @@
 {
   "nav": {
     "marketplace": "Marktplatz",
-    "faq": "FAQ",
     "features": "Funktionen",
     "solutions": "Lösungen",
     "pricing": "Preise",
     "resources": "Ressourcen",
     "about": "Über uns",
+    "blog": "Blog",
+    "faq": "FAQs",
     "login": "Anmelden",
     "getStarted": "Kostenlos starten",
     "getStartedShort": "Starten",

@@ -1,13 +1,13 @@
 {
   "nav": {
     "marketplace": "Marketplace",
-    "courses": "Online courses",
-    "faq": "FAQ",
     "features": "Features",
     "solutions": "Solutions",
     "pricing": "Pricing",
     "resources": "Resources",
     "about": "About",
+    "blog": "Blog",
+    "faq": "FAQs",
     "login": "Log in",
     "getStarted": "Start for free",
     "getStartedShort": "Start",
