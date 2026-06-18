@@ -5,7 +5,9 @@
  * Response: { shortDescription, longDescription, features[], metaTitle, metaDescription, keywords[] }
  */
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { requireAuthenticatedUser } from '../_shared/edge-auth-utils.ts';
+import { retrievePlatformRagContext, type RagSettings } from '../_shared/platform-rag.ts';
 
 const defaultAllowedOrigin = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
 const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || defaultAllowedOrigin)
@@ -71,14 +73,16 @@ serve(async (req: Request) => {
       );
     }
 
-    // Charger config admin
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
     const anonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
-    let config: any = {};
+    let allSettings: Record<string, unknown> = {};
+    let config: Record<string, unknown> = {};
     try {
       const sb = createClient(supabaseUrl, anonKey);
       const { data } = await sb.rpc('get_ai_management_settings');
-      config = (data as any)?.contentGenerator ?? {};
+      allSettings = (data as Record<string, unknown> | null) ?? {};
+      config = (allSettings.contentGenerator as Record<string, unknown>) ?? {};
     } catch (e) {
       console.warn('Could not load AI config, using defaults', e);
     }
@@ -93,10 +97,38 @@ serve(async (req: Request) => {
       );
     }
 
-    const model = config?.model || 'google/gemini-3-flash-preview';
-    const systemPrompt = config?.systemPrompt || 'Tu es un expert en rédaction e-commerce SEO.';
+    const model = (config?.model as string) || 'google/gemini-3-flash-preview';
+    let systemPrompt =
+      (config?.systemPrompt as string) || 'Tu es un expert en rédaction e-commerce SEO.';
     const temperature = typeof config?.temperature === 'number' ? config.temperature : 0.7;
     const maxTokens = typeof config?.maxTokens === 'number' ? config.maxTokens : 2000;
+
+    const ragConfig = (allSettings.rag ?? {}) as RagSettings;
+    if (ragConfig.enabled !== false && serviceKey) {
+      try {
+        const admin = createClient(supabaseUrl, serviceKey);
+        const query = [
+          productInfo.name,
+          productInfo.category,
+          productInfo.type,
+          productInfo.targetAudience,
+        ]
+          .filter(Boolean)
+          .join(' — ');
+        const ragContext = await retrievePlatformRagContext(admin, query, LOVABLE_API_KEY, {
+          ...ragConfig,
+          locale: language || 'fr',
+        });
+        if (ragContext) {
+          systemPrompt = `${systemPrompt}
+
+Contexte plateforme Emarzona (RAG) :
+${ragContext}`;
+        }
+      } catch (ragError) {
+        console.warn('RAG product generation skipped', ragError);
+      }
+    }
 
     const tools = [
       {

@@ -37,6 +37,7 @@ import {
   ExternalLink,
   Activity,
   Loader2,
+  Library,
 } from 'lucide-react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
@@ -78,6 +79,14 @@ export interface AIManagementSettings {
     enabled: boolean;
     configRef: string;
   };
+  rag: {
+    enabled: boolean;
+    embeddingModel: string;
+    matchCount: number;
+    matchThreshold: number;
+    sourceTypes: Array<'blog' | 'faq' | 'product'>;
+    locale: string;
+  };
 }
 
 const DEFAULTS: AIManagementSettings = {
@@ -108,6 +117,14 @@ const DEFAULTS: AIManagementSettings = {
     inferenceMaxPx: 2048,
   },
   recommendations: { enabled: true, configRef: 'ai_recommendation_settings' },
+  rag: {
+    enabled: true,
+    embeddingModel: 'openai/text-embedding-3-small',
+    matchCount: 8,
+    matchThreshold: 0.55,
+    sourceTypes: ['blog', 'faq', 'product'],
+    locale: 'fr',
+  },
 };
 
 // Modèles disponibles via Lovable AI Gateway
@@ -201,6 +218,7 @@ const AIManagementPage: React.FC = () => {
   const [pinging, setPinging] = useState(false);
   const [imagePing, setImagePing] = useState<{ ok: boolean; message: string } | null>(null);
   const [imagePinging, setImagePinging] = useState(false);
+  const [indexingRag, setIndexingRag] = useState(false);
 
   const _lovableKeyConfigured = true; // Géré côté serveur, toujours présent dans Lovable Cloud
 
@@ -222,6 +240,13 @@ const AIManagementPage: React.FC = () => {
               presets: partial.imageEnhancer?.presets?.length
                 ? partial.imageEnhancer.presets
                 : DEFAULT_STUDIO_PRESETS,
+            },
+            rag: {
+              ...DEFAULTS.rag,
+              ...partial.rag,
+              sourceTypes: partial.rag?.sourceTypes?.length
+                ? partial.rag.sourceTypes
+                : DEFAULTS.rag.sourceTypes,
             },
           });
         }
@@ -315,6 +340,31 @@ const AIManagementPage: React.FC = () => {
     }
   }, [settings.imageEnhancer.defaultInstruction]);
 
+  const reindexRag = useCallback(async () => {
+    try {
+      setIndexingRag(true);
+      const { data, error } = await supabase.functions.invoke('index-platform-content', {
+        body: {
+          sources: settings.rag.sourceTypes,
+          locales: ['fr', 'en'],
+        },
+      });
+      if (error) throw error;
+      toast({
+        title: 'Index RAG mis à jour',
+        description: `${(data as { totalChunks?: number })?.totalChunks ?? 0} morceaux vectorisés.`,
+      });
+    } catch (e) {
+      toast({
+        title: 'Échec indexation RAG',
+        description: e instanceof Error ? e.message : 'Erreur inconnue',
+        variant: 'destructive',
+      });
+    } finally {
+      setIndexingRag(false);
+    }
+  }, [settings.rag.sourceTypes, toast]);
+
   const systems = useMemo(
     () => [
       {
@@ -351,6 +401,14 @@ const AIManagementPage: React.FC = () => {
         enabled: settings.recommendations.enabled,
         model: 'Algorithmes pondérés',
         color: 'text-emerald-500',
+      },
+      {
+        key: 'rag',
+        icon: Library,
+        label: 'RAG profond',
+        enabled: settings.rag.enabled,
+        model: settings.rag.embeddingModel,
+        color: 'text-amber-500',
       },
     ],
     [settings]
@@ -413,11 +471,12 @@ const AIManagementPage: React.FC = () => {
         )}
 
         <Tabs defaultValue="overview" className="space-y-4">
-          <TabsList className="grid grid-cols-3 lg:grid-cols-6 gap-1 h-auto">
+          <TabsList className="grid grid-cols-3 lg:grid-cols-7 gap-1 h-auto">
             <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
             <TabsTrigger value="chatbot">Chatbot</TabsTrigger>
             <TabsTrigger value="content">Contenu</TabsTrigger>
             <TabsTrigger value="image">Image</TabsTrigger>
+            <TabsTrigger value="rag">RAG</TabsTrigger>
             <TabsTrigger value="recommendations">Reco.</TabsTrigger>
             <TabsTrigger value="keys">Clés & API</TabsTrigger>
           </TabsList>
@@ -750,6 +809,99 @@ const AIManagementPage: React.FC = () => {
                       {imagePing.message}
                     </Badge>
                   )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* RAG profond */}
+          <TabsContent value="rag" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Library className="h-5 w-5" /> RAG profond (pgvector)
+                </CardTitle>
+                <CardDescription>
+                  Index sémantique du blog, de la FAQ et des fiches produits pour enrichir le
+                  chatbot et la génération de contenu.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-5">
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <Label className="font-medium">RAG activé</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Injecte du contexte pertinent dans ai-chat et ai-generate-content.
+                    </p>
+                  </div>
+                  <Switch
+                    checked={settings.rag.enabled}
+                    onCheckedChange={v => update('rag', { enabled: v })}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Modèle d&apos;embedding (1536D)</Label>
+                  <Input
+                    value={settings.rag.embeddingModel}
+                    onChange={e => update('rag', { embeddingModel: e.target.value })}
+                  />
+                </div>
+
+                <NumberSlider
+                  label="Nombre de morceaux (top-K)"
+                  value={settings.rag.matchCount}
+                  onChange={v => update('rag', { matchCount: v })}
+                  min={3}
+                  max={20}
+                  step={1}
+                />
+
+                <NumberSlider
+                  label="Seuil de similarité (0–1)"
+                  value={settings.rag.matchThreshold}
+                  onChange={v => update('rag', { matchThreshold: v })}
+                  min={0.3}
+                  max={0.95}
+                  step={0.05}
+                />
+
+                <div className="space-y-2">
+                  <Label>Sources indexées</Label>
+                  <div className="flex flex-wrap gap-4">
+                    {(['blog', 'faq', 'product'] as const).map(source => {
+                      const checked = settings.rag.sourceTypes.includes(source);
+                      return (
+                        <label key={source} className="flex items-center gap-2 text-sm">
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() => {
+                              const next = checked
+                                ? settings.rag.sourceTypes.filter(s => s !== source)
+                                : [...settings.rag.sourceTypes, source];
+                              update('rag', { sourceTypes: next });
+                            }}
+                          />
+                          {source === 'blog' ? 'Blog' : source === 'faq' ? 'FAQ' : 'Produits'}
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-2 items-center pt-2">
+                  <Button type="button" onClick={reindexRag} disabled={indexingRag}>
+                    {indexingRag ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <Library className="h-4 w-4 mr-2" />
+                    )}
+                    Réindexer la base de connaissances
+                  </Button>
+                  <p className="text-xs text-muted-foreground">
+                    Vectorise blog + FAQ + produits actifs (FR/EN). Nécessite la migration pgvector.
+                  </p>
                 </div>
               </CardContent>
             </Card>

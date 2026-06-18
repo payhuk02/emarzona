@@ -6,6 +6,7 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { requireAuthenticatedUser } from '../_shared/edge-auth-utils.ts';
 import { enforceRateLimit, getClientIp, RATE_LIMIT_PRESETS } from '../_shared/rate-limit.ts';
+import { retrievePlatformRagContext, type RagSettings } from '../_shared/platform-rag.ts';
 
 const defaultAllowedOrigin = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
 const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || defaultAllowedOrigin)
@@ -86,11 +87,13 @@ serve(async (req: Request) => {
     }
 
     const anonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+    let allSettings: Record<string, unknown> = {};
     let config: Record<string, unknown> = {};
     try {
       const sb = createClient(supabaseUrl, anonKey);
       const { data } = await sb.rpc('get_ai_management_settings');
-      config = ((data as Record<string, unknown> | null)?.chatbot as Record<string, unknown>) ?? {};
+      allSettings = (data as Record<string, unknown> | null) ?? {};
+      config = (allSettings.chatbot as Record<string, unknown>) ?? {};
     } catch (e) {
       console.warn('Could not load AI config, using defaults', e);
     }
@@ -103,9 +106,43 @@ serve(async (req: Request) => {
     }
 
     const model = (config?.model as string) || 'google/gemini-3-flash-preview';
-    const systemPrompt = (config?.systemPrompt as string) || FALLBACK_SYSTEM_PROMPT;
+    let systemPrompt = (config?.systemPrompt as string) || FALLBACK_SYSTEM_PROMPT;
     const temperature = typeof config?.temperature === 'number' ? config.temperature : 0.7;
     const maxTokens = typeof config?.maxTokens === 'number' ? config.maxTokens : 800;
+
+    const ragConfig = (allSettings.rag ?? {}) as RagSettings;
+    const lastUserMessage = [...messages]
+      .reverse()
+      .find((m: { role?: string; content?: string }) => m.role === 'user')?.content;
+
+    if (
+      ragConfig.enabled !== false &&
+      typeof lastUserMessage === 'string' &&
+      lastUserMessage.trim()
+    ) {
+      try {
+        const admin = createClient(supabaseUrl, serviceKey);
+        const ragContext = await retrievePlatformRagContext(
+          admin,
+          lastUserMessage,
+          LOVABLE_API_KEY,
+          {
+            ...ragConfig,
+            locale: ragConfig.locale ?? (config?.language as string) ?? 'fr',
+          }
+        );
+        if (ragContext) {
+          systemPrompt = `${systemPrompt}
+
+## Contexte plateforme (RAG — sources internes)
+Utilise ces extraits pour répondre avec précision. Si le contexte ne suffit pas, dis-le clairement.
+
+${ragContext}`;
+        }
+      } catch (ragError) {
+        console.warn('RAG retrieval skipped', ragError);
+      }
+    }
 
     const start = Date.now();
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
