@@ -94,6 +94,7 @@ const AdminBatchShipping = lazyPage(() => import('@/pages/admin/AdminBatchShippi
 const AdminOrders = lazyPage(() => import('@/pages/admin/AdminOrders'));
 const AdminErrorMonitoring = lazyPage(() => import('@/pages/admin/AdminErrorMonitoring'));
 const AdminMonitoring = lazyPage(() => import('@/pages/admin/AdminMonitoring'));
+const AdminFulfillmentAlerts = lazyPage(() => import('@/pages/admin/AdminFulfillmentAlerts'));
 const AdminAccessibilityReport = lazyPage(() => import('@/pages/admin/AdminAccessibilityReport'));
 const AdminDataStorage = lazyPage(() => import('@/pages/admin/AdminDataStorage'));
 const OfflineQueueManager = lazyPage(() => import('@/pages/admin/OfflineQueueManager'));
@@ -177,6 +178,7 @@ export const adminRoutes = (
     {pr('/admin/offline-queue', OfflineQueueManager)}
     {pr('/admin/orders', AdminOrders)}
     {pr('/admin/error-monitoring', AdminErrorMonitoring)}
+    {pr('/admin/fulfillment-alerts', AdminFulfillmentAlerts)}
     {pr('/admin/monitoring', AdminMonitoring)}
     {pr('/admin/accessibility', AdminAccessibilityReport)}
     {pr('/admin/storage-diagnostic', StorageDiagnosticPage)}

@@ -8,22 +8,22 @@ Tarifs et suivi **FedEx API réels** en production. Les réponses mock sont **in
 
 Configurer dans **Supabase Dashboard → Project Settings → Edge Functions → Secrets** :
 
-| Secret                 | Production                | Staging               |
-| ---------------------- | ------------------------- | --------------------- |
-| `FEDEX_API_KEY`        | Client ID FedEx prod      | Client ID sandbox     |
-| `FEDEX_API_SECRET`     | Client secret prod        | Client secret sandbox |
-| `FEDEX_ACCOUNT_NUMBER` | Compte marchand           | Compte test           |
-| `FEDEX_TEST_MODE`      | `false`                   | `true`                |
-| `FEDEX_ALLOW_MOCK`     | **non défini** ou `false` | `true` (optionnel)    |
+| Secret                 | Production                                                 | Staging               |
+| ---------------------- | ---------------------------------------------------------- | --------------------- |
+| `FEDEX_API_KEY`        | Client ID FedEx prod                                       | Client ID sandbox     |
+| `FEDEX_API_SECRET`     | Client secret prod                                         | Client secret sandbox |
+| `FEDEX_ACCOUNT_NUMBER` | Compte marchand                                            | Compte test           |
+| `FEDEX_TEST_MODE`      | `false` en **production** (défaut auto) ; `true` = sandbox |
+| `FEDEX_ALLOW_MOCK`     | **non défini** ou `false` en prod ; `true` = mock Edge     |
 
 ## Garde-fous
 
-| Couche                         | Comportement                                                                  |
-| ------------------------------ | ----------------------------------------------------------------------------- |
-| Edge `_shared/fedex-policy.ts` | Mock autorisé si `ENVIRONMENT` ≠ production **ou** `FEDEX_ALLOW_MOCK=true`    |
-| Client `fedex-policy.ts`       | Mock si `!import.meta.env.PROD` **ou** `VITE_FEDEX_ALLOW_MOCK=true`           |
-| `fedex-rates-client`           | `assertFedexResponseNotMock(source)` — rejette `source: mock` en prod         |
-| Plan vendeur                   | `shipping.fedex_live` requis (Professional+) via `store_has_physical_feature` |
+| Couche                         | Comportement                                                                                               |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| Edge `_shared/fedex-policy.ts` | `resolveFedexTestMode()` : prod → API FedEx prod par défaut ; mock si hors prod ou `FEDEX_ALLOW_MOCK=true` |
+| Client `fedex-policy.ts`       | Mock si `!import.meta.env.PROD` **ou** `VITE_FEDEX_ALLOW_MOCK=true`                                        |
+| `fedex-rates-client`           | `assertFedexResponseNotMock(source)` — rejette `source: mock` en prod                                      |
+| Plan vendeur                   | `shipping.fedex_live` requis (Professional+) via `store_has_physical_feature`                              |
 
 ## Déploiement
 
@@ -32,6 +32,12 @@ npx supabase functions deploy fedex-rates fedex-track --project-ref hbdnzajbyjak
 ```
 
 ## Vérification prod
+
+```bash
+npm run verify:fedex-prod
+```
+
+La sonde **FedEx Shipping** apparaît sur `/status` (via `platform-health` → OAuth FedEx).
 
 ```sql
 -- Pas de test API depuis SQL ; vérifier secrets présents côté dashboard

@@ -72,6 +72,9 @@ import { PaymentOptionsBadge, getPaymentOptions } from '@/components/products/Pa
 import { PricingModelBadge } from '@/components/products/PricingModelBadge';
 import { useCreateCourseOrder } from '@/hooks/orders/useCreateCourseOrder';
 import { logSupabaseRuntimeProbe } from '@/lib/debug/supabase-runtime-probe';
+import { enrollUserInCourse } from '@/lib/courses/enroll-user';
+import { buildCourseLearnUrl } from '@/lib/courses/course-learn-redirect';
+import { isFreeCourse } from '@/lib/courses/is-free-course';
 
 interface CourseDetailProps {
   /** Route /learn/:slug — focalise l'expérience sur le lecteur si inscrit */
@@ -209,7 +212,19 @@ const CourseDetail = ({ learnMode = false }: CourseDetailProps) => {
   const handleEnroll = async () => {
     if (!isEnrolled && !isEnrolling) {
       const checkoutEmail = user?.email || guestEmail;
-      if (!checkoutEmail) {
+      const courseIsFree = isFreeCourse(product);
+
+      if (courseIsFree && !user) {
+        toast({
+          title: 'Connexion requise',
+          description: 'Connectez-vous pour accéder gratuitement à ce cours.',
+          variant: 'destructive',
+        });
+        navigate(`/login?redirect=${encodeURIComponent(location.pathname)}`);
+        return;
+      }
+
+      if (!courseIsFree && !checkoutEmail) {
         toast({
           title: 'Connexion requise',
           description: 'Veuillez vous connecter pour vous inscrire au cours.',
@@ -219,7 +234,6 @@ const CourseDetail = ({ learnMode = false }: CourseDetailProps) => {
         return;
       }
 
-      // Vérifier que les données nécessaires sont disponibles
       if (!product?.store_id || !course?.id || !product?.id) {
         toast({
           title: 'Erreur',
@@ -231,7 +245,6 @@ const CourseDetail = ({ learnMode = false }: CourseDetailProps) => {
 
       setIsEnrolling(true);
 
-      // Tracker le clic sur "S'inscrire"
       trackEvent.mutate({
         product_id: product.id,
         event_type: 'click',
@@ -241,20 +254,34 @@ const CourseDetail = ({ learnMode = false }: CourseDetailProps) => {
           source: 'enroll_button',
           course_id: course.id,
           guest_checkout: !user,
+          free_enrollment: courseIsFree,
         },
       });
 
       try {
-        // Créer la commande et initier le paiement
+        if (courseIsFree) {
+          await enrollUserInCourse({
+            courseId: course.id,
+            userId: user?.id,
+          });
+
+          toast({
+            title: 'Inscription réussie',
+            description: 'Bienvenue dans le cours. Bon apprentissage !',
+          });
+          navigate(buildCourseLearnUrl(product.slug || slug || ''));
+          return;
+        }
+
         const result = await createCourseOrder.mutateAsync({
           courseId: course.id,
           productId: product.id,
           storeId: product.store_id,
-          customerEmail: checkoutEmail,
-          customerName: user?.user_metadata?.name || guestName || checkoutEmail.split('@')[0] || '',
+          customerEmail: checkoutEmail!,
+          customerName:
+            user?.user_metadata?.name || guestName || checkoutEmail!.split('@')[0] || '',
         });
 
-        // Rediriger vers la page de paiement Moneroo
         if (result.checkoutUrl) {
           window.location.href = result.checkoutUrl;
         } else {
@@ -846,8 +873,16 @@ const CourseDetail = ({ learnMode = false }: CourseDetailProps) => {
                     onClick={handleEnroll}
                     disabled={isEnrolling}
                   >
-                    <ShoppingCart className="w-5 h-5 mr-2" />
-                    {isEnrolling ? 'Inscription en cours...' : "S'inscrire maintenant"}
+                    {isFreeCourse(product) ? (
+                      <Gift className="w-5 h-5 mr-2" />
+                    ) : (
+                      <ShoppingCart className="w-5 h-5 mr-2" />
+                    )}
+                    {isEnrolling
+                      ? 'Inscription en cours...'
+                      : isFreeCourse(product)
+                        ? "S'inscrire gratuitement"
+                        : "S'inscrire maintenant"}
                   </Button>
                 )}
 

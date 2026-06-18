@@ -49,6 +49,7 @@ const CartCheckoutLegacyRedirect = lazyPage(() =>
 const NotFound = lazyPage(() => import('@/pages/NotFound'));
 const StatusPage = lazyPage(() => import('@/pages/StatusPage'));
 const CourseDetail = lazyPage(() => import('@/pages/courses/CourseDetail'));
+const CoursesCatalog = lazyPage(() => import('@/pages/courses/CoursesCatalog'));
 const DigitalProductDetail = lazyPage(() => import('@/pages/digital/DigitalProductDetail'));
 const DigitalProductsSearch = lazyPage(() =>
   import('@/pages/digital/DigitalProductsSearch').then(
@@ -263,6 +264,7 @@ export const publicRoutes = (
     <Route path="/service/:serviceId" element={<ServiceDetail />} />
     <Route path="/artist/:productId" element={<ArtistProductDetail />} />
     <Route path="/portfolio/:slug" element={<ArtistPortfolioPage />} />
+    <Route path="/courses" element={<CoursesCatalog />} />
     <Route path="/courses/:slug" element={<CourseDetail />} />
     <Route path="/learn/:slug" element={<CourseDetail learnMode />} />
 

@@ -62,17 +62,22 @@ import {
 } from '@/components/physical/PhysicalProductRecommendations';
 import { PhysicalProductWhatsAppButton } from '@/components/physical/PhysicalProductWhatsAppButton';
 import type { PhysicalProductVariant } from '@/types/physical-product';
-import type { InventoryItem } from '@/hooks/physical/useInventory';
+import {
+  formatPhysicalDimensions,
+  formatPhysicalWeight,
+  getPhysicalSellableQuantity,
+  type PhysicalInventoryRow,
+} from '@/lib/physical/physical-product-display';
 
 const STORE_PUBLIC_FIELDS = 'id, name, slug, logo_url';
 const PRODUCT_PHYSICAL_FIELDS =
-  'id, store_id, slug, name, description, short_description, category, tags, product_type, is_active, price, promotional_price, currency, image_url, images, created_at, updated_at, payment_options, pricing_model, licensing_type, license_terms';
+  'id, store_id, slug, name, description, short_description, category, tags, product_type, is_active, price, promotional_price, currency, image_url, images, stock, created_at, updated_at, payment_options, pricing_model, licensing_type, license_terms';
 const PHYSICAL_PRODUCT_FIELDS =
-  'id, product_id, store_id, sku, manufacturer, country_of_origin, weight_kg, length_cm, width_cm, height_cm, dimensions, total_stock, whatsapp_number, whatsapp_enabled, created_at, updated_at';
+  'id, product_id, store_id, sku, manufacturer, country_of_origin, weight, weight_unit, height, length, width, dimensions_unit, whatsapp_number, whatsapp_enabled, created_at, updated_at';
 const PHYSICAL_VARIANT_FIELDS =
   'id, physical_product_id, store_id, name, sku, price, compare_at_price, is_active, attributes, created_at, updated_at';
 const PHYSICAL_INVENTORY_FIELDS =
-  'id, physical_product_id, product_id, store_id, variant_id, quantity, reserved_quantity, low_stock_threshold, warehouse_location, last_restocked_at, created_at, updated_at';
+  'id, physical_product_id, product_id, store_id, variant_id, quantity, quantity_available, available_quantity, reserved_quantity, quantity_reserved, low_stock_threshold, location, warehouse_id, created_at, updated_at';
 
 // Types pour les APIs externes de tracking
 interface WindowWithGtag extends Window {
@@ -292,10 +297,11 @@ export default function PhysicalProductDetail() {
     }
 
     // Vérifier le stock
-    const availableStock = selectedVariant
-      ? product?.inventory?.find((inv: InventoryItem) => inv.variant_id === selectedVariant.id)
-          ?.quantity || 0
-      : product?.physical?.total_stock || 0;
+    const availableStock = getPhysicalSellableQuantity(
+      product?.inventory as PhysicalInventoryRow[] | undefined,
+      selectedVariant?.id,
+      product?.stock
+    );
 
     if (availableStock < quantity) {
       toast({
@@ -383,10 +389,13 @@ export default function PhysicalProductDetail() {
   }
 
   const images = product?.images || [product?.image_url] || [];
-  const stockQuantity = selectedVariant
-    ? product?.inventory?.find((inv: InventoryItem) => inv.variant_id === selectedVariant.id)
-        ?.quantity || 0
-    : product?.physical?.total_stock || 0;
+  const stockQuantity = getPhysicalSellableQuantity(
+    product?.inventory as PhysicalInventoryRow[] | undefined,
+    selectedVariant?.id,
+    product?.stock
+  );
+  const physicalWeightLabel = formatPhysicalWeight(product?.physical);
+  const physicalDimensionsLabel = formatPhysicalDimensions(product?.physical);
   const availability = stockQuantity > 0 ? 'instock' : 'outofstock';
   const currentPrice = product?.promotional_price || product?.price;
   const productUrl = `${window.location.origin}/physical/${productId}`;
@@ -593,19 +602,16 @@ export default function PhysicalProductDetail() {
                 <CardTitle className="text-lg">Caractéristiques</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                {product.physical.weight_kg && (
+                {physicalWeightLabel && (
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Poids</span>
-                    <span className="font-medium">{product.physical.weight_kg} kg</span>
+                    <span className="font-medium">{physicalWeightLabel}</span>
                   </div>
                 )}
-                {product.physical.dimensions && (
+                {physicalDimensionsLabel && (
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Dimensions</span>
-                    <span className="font-medium">
-                      {product.physical.length_cm} x {product.physical.width_cm} x{' '}
-                      {product.physical.height_cm} cm
-                    </span>
+                    <span className="font-medium">{physicalDimensionsLabel}</span>
                   </div>
                 )}
                 {product.physical.sku && (
@@ -672,23 +678,18 @@ export default function PhysicalProductDetail() {
             <CardContent className="space-y-4">
               {product?.physical && (
                 <>
-                  {product.physical.weight_kg && (
+                  {physicalWeightLabel && (
                     <div className="flex justify-between py-2 border-b">
                       <span className="text-muted-foreground">Poids</span>
-                      <span className="font-medium">{product.physical.weight_kg} kg</span>
+                      <span className="font-medium">{physicalWeightLabel}</span>
                     </div>
                   )}
-                  {product.physical.length_cm &&
-                    product.physical.width_cm &&
-                    product.physical.height_cm && (
-                      <div className="flex justify-between py-2 border-b">
-                        <span className="text-muted-foreground">Dimensions</span>
-                        <span className="font-medium">
-                          {product.physical.length_cm} x {product.physical.width_cm} x{' '}
-                          {product.physical.height_cm} cm
-                        </span>
-                      </div>
-                    )}
+                  {physicalDimensionsLabel && (
+                    <div className="flex justify-between py-2 border-b">
+                      <span className="text-muted-foreground">Dimensions</span>
+                      <span className="font-medium">{physicalDimensionsLabel}</span>
+                    </div>
+                  )}
                   {product.physical.sku && (
                     <div className="flex justify-between py-2 border-b">
                       <span className="text-muted-foreground">SKU</span>

@@ -374,6 +374,12 @@ export const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
         permissions: ['analytics.view'],
       },
       {
+        icon: PackageCheck,
+        label: 'Alertes fulfillment',
+        path: '/admin/fulfillment-alerts',
+        permissions: ['analytics.view'],
+      },
+      {
         icon: AlertTriangle,
         label: 'Monitoring erreurs',
         path: '/admin/error-monitoring',

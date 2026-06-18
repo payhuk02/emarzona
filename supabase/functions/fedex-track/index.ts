@@ -8,6 +8,7 @@ import {
   allowFedexMockResponses,
   fedexMockDisabledError,
   hasFedexTrackCredentials,
+  resolveFedexTestMode,
 } from '../_shared/fedex-policy.ts';
 
 const defaultAllowedOrigin = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
@@ -137,7 +138,7 @@ function mockTracking(trackingNumber: string): TrackResponse {
 async function fetchFedExTracking(trackingNumber: string): Promise<TrackResponse> {
   const apiKey = Deno.env.get('FEDEX_API_KEY') || '';
   const apiSecret = Deno.env.get('FEDEX_API_SECRET') || '';
-  const testMode = (Deno.env.get('FEDEX_TEST_MODE') || 'true').toLowerCase() !== 'false';
+  const testMode = resolveFedexTestMode();
 
   if (!apiKey || !apiSecret) {
     if (!allowFedexMockResponses()) {

@@ -75,6 +75,7 @@ import {
   Activity,
   WifiOff,
   HardDrive,
+  PackageCheck,
   MessageSquare as LucideMessageSquare,
 } from 'lucide-react';
 import type { RawNavSection } from '@/config/navigation.enrich';
@@ -1084,6 +1085,11 @@ export const adminMenuSections = [
         title: 'Monitoring',
         url: '/admin/monitoring',
         icon: Activity,
+      },
+      {
+        title: 'Alertes Fulfillment',
+        url: '/admin/fulfillment-alerts',
+        icon: PackageCheck,
       },
       {
         title: 'Monitoring Erreurs',

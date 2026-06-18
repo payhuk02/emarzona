@@ -1,6 +1,6 @@
 /**
  * Admin Courses Dashboard
- * Vue globale des cours en ligne de tous les instructeurs
+ * Vue globale des cours en ligne (schéma product-centric : courses.product_id → products)
  */
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
@@ -21,23 +21,53 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { GraduationCap, Search, Users, BookOpen, Star, TrendingUp } from 'lucide-react';
+import { GraduationCap, Search, Users, BookOpen, Star } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+
+type CourseProductRow = {
+  id: string;
+  name: string;
+  slug: string;
+  price: number | null;
+  promotional_price: number | null;
+  currency: string | null;
+  is_active: boolean | null;
+  is_draft: boolean | null;
+  reviews_count: number | null;
+  rating: number | null;
+  store: { id: string; name: string } | null;
+};
+
+type AdminCourseRow = {
+  id: string;
+  level: string;
+  language: string;
+  average_rating: number | null;
+  total_enrollments: number | null;
+  created_at: string;
+  product: CourseProductRow | null;
+  enrollments: { count: number }[];
+};
+
+function deriveCourseStatus(product: CourseProductRow | null): 'published' | 'draft' | 'archived' {
+  if (!product) return 'archived';
+  if (product.is_draft) return 'draft';
+  if (product.is_active) return 'published';
+  return 'archived';
+}
 
 export default function AdminCourses() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const isMobile = useIsMobile();
 
-  // Animations au scroll
   const headerRef = useScrollAnimation<HTMLDivElement>();
   const statsRef = useScrollAnimation<HTMLDivElement>();
   const tableRef = useScrollAnimation<HTMLDivElement>();
 
-  // Fetch all courses
   const { data: courses, isLoading } = useQuery({
     queryKey: ['admin-courses'],
     queryFn: async () => {
@@ -45,33 +75,48 @@ export default function AdminCourses() {
         .from('courses')
         .select(
           `
-          *,
-          instructor:profiles!courses_instructor_id_fkey(full_name),
-          enrollments:course_enrollments(count),
-          reviews:course_reviews(rating)
+          id,
+          level,
+          language,
+          average_rating,
+          total_enrollments,
+          created_at,
+          product:products!courses_product_id_fkey (
+            id,
+            name,
+            slug,
+            price,
+            promotional_price,
+            currency,
+            is_active,
+            is_draft,
+            reviews_count,
+            rating,
+            store:stores (
+              id,
+              name
+            )
+          ),
+          enrollments:course_enrollments (count)
         `
         )
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data || [];
+      return (data || []) as AdminCourseRow[];
     },
   });
 
-  // Stats optimisées avec useMemo
   const stats = useMemo(
     () => ({
       totalCourses: courses?.length || 0,
-      publishedCourses: courses?.filter(c => c.status === 'published').length || 0,
+      publishedCourses:
+        courses?.filter(c => deriveCourseStatus(c.product) === 'published').length || 0,
       totalStudents: courses?.reduce((sum, c) => sum + (c.enrollments?.[0]?.count || 0), 0) || 0,
       averageRating: courses?.length
         ? courses.reduce((sum, c) => {
-            const ratings = c.reviews || [];
-            const avgRating = ratings.length
-              ? ratings.reduce((s: number, r: { rating?: number }) => s + (r.rating || 0), 0) /
-                ratings.length
-              : 0;
-            return sum + avgRating;
+            const rating = c.average_rating ?? c.product?.rating ?? 0;
+            return sum + Number(rating);
           }, 0) / courses.length
         : 0,
     }),
@@ -100,15 +145,19 @@ export default function AdminCourses() {
   const filteredCourses = useMemo(
     () =>
       courses?.filter(course => {
+        const title = course.product?.name || '';
+        const instructor = course.product?.store?.name || '';
+        const status = deriveCourseStatus(course.product);
+
         const matchesSearch =
-          course.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          course.instructor?.full_name?.toLowerCase().includes(searchQuery.toLowerCase());
+          title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          instructor.toLowerCase().includes(searchQuery.toLowerCase());
 
         const matchesTab =
           activeTab === 'all' ||
-          (activeTab === 'published' && course.status === 'published') ||
-          (activeTab === 'draft' && course.status === 'draft') ||
-          (activeTab === 'archived' && course.status === 'archived');
+          (activeTab === 'published' && status === 'published') ||
+          (activeTab === 'draft' && status === 'draft') ||
+          (activeTab === 'archived' && status === 'archived');
 
         return matchesSearch && matchesTab;
       }) || [],
@@ -118,7 +167,6 @@ export default function AdminCourses() {
   return (
     <AdminLayout>
       <div className="container mx-auto p-6 space-y-6">
-        {/* Header */}
         <div ref={headerRef} role="banner">
           <h1
             className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold tracking-tight"
@@ -131,7 +179,6 @@ export default function AdminCourses() {
           </p>
         </div>
 
-        {/* Stats Cards */}
         <div
           ref={statsRef}
           className="grid gap-4 md:grid-cols-4"
@@ -198,15 +245,14 @@ export default function AdminCourses() {
           </Card>
         </div>
 
-        {/* Filters & Table */}
-        <Card>
+        <Card ref={tableRef}>
           <CardHeader>
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-1">
                 <div className="relative">
                   <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Rechercher cours ou instructeur..."
+                    placeholder="Rechercher cours ou boutique..."
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
                     className="pl-8 min-h-[40px] text-[10px] sm:text-[11px] md:text-xs"
@@ -235,18 +281,22 @@ export default function AdminCourses() {
           <CardContent>
             {isLoading ? (
               <div className="text-center py-8">Chargement...</div>
-            ) : filteredCourses && filteredCourses.length > 0 ? (
+            ) : filteredCourses.length > 0 ? (
               isMobile ? (
                 <MobileTableCard
                   data={filteredCourses.map(c => {
-                    const ratings = c.reviews || [];
-                    const avgRating = ratings.length
-                      ? ratings.reduce(
-                          (s: number, r: { rating?: number }) => s + (r.rating || 0),
-                          0
-                        ) / ratings.length
-                      : 0;
-                    return { id: c.id, ...c, avgRating };
+                    const price = c.product?.promotional_price ?? c.product?.price ?? 0;
+                    const rating = c.average_rating ?? c.product?.rating ?? 0;
+                    return {
+                      id: c.id,
+                      title: c.product?.name || 'Sans titre',
+                      instructor: c.product?.store?.name || 'N/A',
+                      price,
+                      enrollments: c.enrollments,
+                      avgRating: rating,
+                      status: deriveCourseStatus(c.product),
+                      created_at: c.created_at,
+                    };
                   })}
                   columns={[
                     {
@@ -257,22 +307,21 @@ export default function AdminCourses() {
                     },
                     {
                       key: 'instructor',
-                      header: 'Instructeur',
+                      header: 'Boutique',
                       priority: 'medium',
-                      render: (value, row) => row.instructor?.full_name || 'N/A',
                     },
                     {
                       key: 'price',
                       header: 'Prix',
                       priority: 'high',
-                      render: value => `${Number(value || 0).toLocaleString()} FCFA`,
+                      render: value => `${Number(value || 0).toLocaleString('fr-FR')} FCFA`,
                       className: 'font-medium',
                     },
                     {
                       key: 'enrollments',
                       header: 'Étudiants',
                       priority: 'high',
-                      render: (value, row) => (
+                      render: (_value, row) => (
                         <div className="flex items-center gap-1">
                           <Users className="h-3 w-3" />
                           {row.enrollments?.[0]?.count || 0}
@@ -310,7 +359,7 @@ export default function AdminCourses() {
                     <TableRow>
                       <TableHead className="text-xs sm:text-sm">Titre</TableHead>
                       <TableHead className="hidden md:table-cell text-xs sm:text-sm">
-                        Instructeur
+                        Boutique
                       </TableHead>
                       <TableHead className="text-xs sm:text-sm">Prix</TableHead>
                       <TableHead className="text-xs sm:text-sm">Étudiants</TableHead>
@@ -325,24 +374,20 @@ export default function AdminCourses() {
                   </TableHeader>
                   <TableBody>
                     {filteredCourses.map(course => {
-                      const ratings = course.reviews || [];
-                      const avgRating = ratings.length
-                        ? ratings.reduce(
-                            (s: number, r: { rating?: number }) => s + (r.rating || 0),
-                            0
-                          ) / ratings.length
-                        : 0;
+                      const price = course.product?.promotional_price ?? course.product?.price ?? 0;
+                      const rating = course.average_rating ?? course.product?.rating ?? 0;
+                      const status = deriveCourseStatus(course.product);
 
                       return (
                         <TableRow key={course.id}>
                           <TableCell className="font-medium text-xs sm:text-sm">
-                            {course.title}
+                            {course.product?.name || 'Sans titre'}
                           </TableCell>
                           <TableCell className="hidden md:table-cell text-xs sm:text-sm">
-                            {course.instructor?.full_name || 'N/A'}
+                            {course.product?.store?.name || 'N/A'}
                           </TableCell>
                           <TableCell className="text-xs sm:text-sm">
-                            {course.price?.toLocaleString()} FCFA
+                            {Number(price).toLocaleString('fr-FR')} FCFA
                           </TableCell>
                           <TableCell className="text-xs sm:text-sm">
                             <div className="flex items-center gap-1">
@@ -353,11 +398,11 @@ export default function AdminCourses() {
                           <TableCell className="hidden sm:table-cell text-xs sm:text-sm">
                             <div className="flex items-center gap-1">
                               <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
-                              {avgRating > 0 ? avgRating.toFixed(1) : '-'}
+                              {rating > 0 ? Number(rating).toFixed(1) : '-'}
                             </div>
                           </TableCell>
                           <TableCell className="text-xs sm:text-sm">
-                            {getStatusBadge(course.status)}
+                            {getStatusBadge(status)}
                           </TableCell>
                           <TableCell className="hidden lg:table-cell text-xs sm:text-sm">
                             {format(new Date(course.created_at), 'PP', { locale: fr })}

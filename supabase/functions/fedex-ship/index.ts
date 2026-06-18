@@ -8,6 +8,7 @@ import {
   allowFedexMockResponses,
   fedexMockDisabledError,
   hasFedexApiCredentials,
+  resolveFedexTestMode,
 } from '../_shared/fedex-policy.ts';
 
 const defaultAllowedOrigin = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
@@ -122,7 +123,7 @@ async function createFedExShipment(body: ShipRequestBody): Promise<ShipResponse>
   const apiKey = Deno.env.get('FEDEX_API_KEY') || '';
   const apiSecret = Deno.env.get('FEDEX_API_SECRET') || '';
   const accountNumber = Deno.env.get('FEDEX_ACCOUNT_NUMBER') || '';
-  const testMode = (Deno.env.get('FEDEX_TEST_MODE') || 'true').toLowerCase() !== 'false';
+  const testMode = resolveFedexTestMode();
 
   if (!apiKey || !apiSecret || !accountNumber) {
     if (!allowFedexMockResponses()) {

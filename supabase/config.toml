@@ -43,6 +43,9 @@ verify_jwt = false
 [functions.platform-health]
 verify_jwt = false
 
+[functions.process-order-fulfillment-monitor]
+verify_jwt = false
+
 [functions.google-indexing-submit]
 verify_jwt = false
 

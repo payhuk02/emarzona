@@ -4,6 +4,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createSupabaseAdmin } from '../_shared/supabase-admin.ts';
 import { buildCorsHeaders, jsonResponse } from '../_shared/cors.ts';
+import { getFedexConfigSummary, probeFedexOAuth } from '../_shared/fedex-policy.ts';
 
 type ServiceStatus = 'operational' | 'degraded' | 'outage' | 'maintenance';
 
@@ -113,6 +114,83 @@ async function probeEdgeFunctions(): Promise<ProbeResult> {
   }
 }
 
+async function probeFedex(): Promise<ProbeResult> {
+  const config = getFedexConfigSummary();
+  const start = Date.now();
+
+  if (!config.credentials_present) {
+    const status: ServiceStatus = config.production_environment ? 'outage' : 'degraded';
+    return {
+      service_key: 'fedex',
+      service_label: 'FedEx Shipping',
+      status,
+      latency_ms: Date.now() - start,
+      message: config.production_environment
+        ? 'Credentials FedEx manquants en production'
+        : 'Credentials FedEx non configurés (mock autorisé hors prod)',
+    };
+  }
+
+  const oauth = await probeFedexOAuth();
+  const status: ServiceStatus = oauth.ok
+    ? oauth.latency_ms < 3000
+      ? 'operational'
+      : 'degraded'
+    : config.production_environment
+      ? 'outage'
+      : 'degraded';
+
+  return {
+    service_key: 'fedex',
+    service_label: 'FedEx Shipping',
+    status,
+    latency_ms: oauth.latency_ms,
+    message: oauth.ok ? `OAuth OK (${config.test_mode ? 'sandbox' : 'production'})` : oauth.message,
+  };
+}
+
+async function probeFulfillment(
+  supabase: ReturnType<typeof createSupabaseAdmin>
+): Promise<ProbeResult> {
+  const start = Date.now();
+  try {
+    const { data, error } = await supabase.rpc('detect_stale_order_fulfillment', {
+      p_stale_minutes: 5,
+    });
+
+    if (error) {
+      return {
+        service_key: 'fulfillment',
+        service_label: 'Fulfillment commandes',
+        status: 'degraded',
+        latency_ms: Date.now() - start,
+        message: error.message,
+      };
+    }
+
+    const staleCount = Number((data as { stale_count?: number })?.stale_count ?? 0);
+    const status: ServiceStatus =
+      staleCount === 0 ? 'operational' : staleCount <= 3 ? 'degraded' : 'outage';
+
+    return {
+      service_key: 'fulfillment',
+      service_label: 'Fulfillment commandes',
+      status,
+      latency_ms: Date.now() - start,
+      message:
+        staleCount === 0 ? null : `${staleCount} commande(s) > 5 min sans fulfillment complet`,
+    };
+  } catch (err) {
+    return {
+      service_key: 'fulfillment',
+      service_label: 'Fulfillment commandes',
+      status: 'outage',
+      latency_ms: Date.now() - start,
+      message: String(err),
+    };
+  }
+}
+
 serve(async req => {
   const origin = req.headers.get('Origin');
   if (req.method === 'OPTIONS') {
@@ -126,7 +204,13 @@ serve(async req => {
     req.headers.get('Authorization')?.replace('Bearer ', '') === cronSecret;
 
   if (isCron || req.method === 'POST') {
-    const probes = await Promise.all([probeSupabase(), probeSite(), probeEdgeFunctions()]);
+    const probes = await Promise.all([
+      probeSupabase(),
+      probeSite(),
+      probeEdgeFunctions(),
+      probeFedex(),
+      probeFulfillment(supabase),
+    ]);
     for (const probe of probes) {
       await supabase.rpc('record_platform_sla_check', {
         p_service_key: probe.service_key,

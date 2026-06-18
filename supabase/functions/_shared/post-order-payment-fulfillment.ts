@@ -10,6 +10,21 @@ import { triggerEmailWorkflowsForEvent } from './workflow-executor.ts';
 const ORDER_SELECT =
   'id, store_id, order_number, customer_id, total_amount, currency, status, payment_status, created_at, metadata, customer_email, shipping_address, expected_delivery_date, tracking_number, tracking_link';
 
+function parseOrderMetadata(metadata: unknown): Record<string, unknown> {
+  if (metadata == null) return {};
+  if (typeof metadata === 'string') {
+    try {
+      return JSON.parse(metadata) as Record<string, unknown>;
+    } catch {
+      return {};
+    }
+  }
+  if (typeof metadata === 'object' && !Array.isArray(metadata)) {
+    return metadata as Record<string, unknown>;
+  }
+  return {};
+}
+
 function parseOrderItemMetadata(item: {
   item_metadata?: unknown;
   metadata?: unknown;
@@ -412,6 +427,14 @@ export async function runPostOrderPaymentFulfillment(
     return;
   }
 
+  const orderMetadata = parseOrderMetadata((order as Record<string, unknown>).metadata);
+  if (orderMetadata.post_payment_fulfillment_at) {
+    console.log(
+      `Post-payment fulfillment already completed for order ${orderId} at ${orderMetadata.post_payment_fulfillment_at}`
+    );
+    return;
+  }
+
   const { data: transaction } = await supabase
     .from('transactions')
     .select('id, amount, currency, payment_provider, customer_id')
@@ -437,6 +460,17 @@ export async function runPostOrderPaymentFulfillment(
     transactionId,
     paymentProvider
   );
+
+  await supabase
+    .from('orders')
+    .update({
+      metadata: {
+        ...orderMetadata,
+        post_payment_fulfillment_at: new Date().toISOString(),
+        post_payment_fulfillment_tx: transactionId,
+      },
+    })
+    .eq('id', orderId);
 
   console.log(`Post-payment fulfillment completed for order ${orderId} (tx ${transactionId})`);
 }

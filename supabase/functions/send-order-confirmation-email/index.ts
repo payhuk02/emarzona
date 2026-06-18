@@ -32,6 +32,21 @@ interface EmailPayload {
   customer_id?: string;
 }
 
+function parseOrderMetadata(metadata: unknown): Record<string, unknown> {
+  if (metadata == null) return {};
+  if (typeof metadata === 'string') {
+    try {
+      return JSON.parse(metadata) as Record<string, unknown>;
+    } catch {
+      return {};
+    }
+  }
+  if (typeof metadata === 'object' && !Array.isArray(metadata)) {
+    return metadata as Record<string, unknown>;
+  }
+  return {};
+}
+
 const EDGE_INTERNAL_SECRET = Deno.env.get('EDGE_INTERNAL_SECRET');
 
 async function invokeSendEmail(
@@ -152,6 +167,25 @@ serve(async req => {
       );
     }
 
+    const orderMetadata = parseOrderMetadata(order.metadata);
+    if (orderMetadata.confirmation_email_sent_at) {
+      console.log(
+        `Confirmation email already sent for order ${payload.order_id} at ${orderMetadata.confirmation_email_sent_at}`
+      );
+      return new Response(
+        JSON.stringify({
+          success: true,
+          orderId: payload.order_id,
+          message: 'Confirmation email already sent',
+          duplicate: true,
+        }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
     // Grouper les items par type de produit
     const itemsByType: Record<string, typeof order.order_items> = {};
 
@@ -215,11 +249,26 @@ serve(async req => {
       }
     }
 
+    const emailsSentCount = emailResults.filter(r => r.emailSent).length;
+
+    if (emailsSentCount > 0) {
+      await supabase
+        .from('orders')
+        .update({
+          metadata: {
+            ...orderMetadata,
+            confirmation_email_sent_at: new Date().toISOString(),
+            confirmation_emails_sent: emailsSentCount,
+          },
+        })
+        .eq('id', payload.order_id);
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
         orderId: payload.order_id,
-        emailsSent: emailResults.filter(r => r.emailSent).length,
+        emailsSent: emailsSentCount,
         totalItems: emailResults.length,
         results: emailResults,
       }),
@@ -261,6 +310,14 @@ async function sendDigitalEmail(
     return false;
   }
 
+  const siteUrl = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
+  const fileSizeLabel =
+    digitalProduct.total_size_mb != null
+      ? `${digitalProduct.total_size_mb} MB`
+      : digitalProduct.main_file_size_mb != null
+        ? `${digitalProduct.main_file_size_mb} MB`
+        : undefined;
+
   const result = await invokeSendEmail(supabase, {
     templateSlug: 'order-confirmation-digital',
     to: payload.customer_email,
@@ -274,9 +331,9 @@ async function sendDigitalEmail(
       user_name: payload.customer_name,
       order_id: order.id,
       product_name: item.product_name,
-      download_link: digitalProduct.download_url || '#',
-      file_format: digitalProduct.file_format,
-      file_size: digitalProduct.file_size,
+      download_link: `${siteUrl}/account/digital`,
+      file_format: digitalProduct.main_file_format || digitalProduct.digital_type || 'digital',
+      file_size: fileSizeLabel,
       licensing_type: digitalProduct.license_type,
     },
   });

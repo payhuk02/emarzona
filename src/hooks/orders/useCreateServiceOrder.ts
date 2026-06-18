@@ -420,30 +420,7 @@ export const useCreateServiceOrder = () => {
           }
         }
 
-        // 4b. Vérifier également le buffer_time si configuré
-        if (serviceProduct.buffer_time_before > 0 || serviceProduct.buffer_time_after > 0) {
-          const bufferStart =
-            bookingStartDateTime.getTime() - serviceProduct.buffer_time_before * 60000;
-          const bufferEnd = bookingEndDateTime.getTime() + serviceProduct.buffer_time_after * 60000;
-
-          const hasBufferConflict = conflictingBookings?.some(booking => {
-            const existingStart = new Date(
-              `${booking.scheduled_date}T${booking.scheduled_start_time}`
-            ).getTime();
-            const existingEnd = new Date(
-              `${booking.scheduled_date}T${booking.scheduled_end_time}`
-            ).getTime();
-
-            // Vérifier si une réservation existante chevauche avec le buffer
-            return existingStart < bufferEnd && existingEnd > bufferStart;
-          });
-
-          if (hasBufferConflict) {
-            throw new Error(
-              `Ce créneau n'est pas disponible en raison du temps de préparation nécessaire. Veuillez choisir un créneau avec au moins ${serviceProduct.buffer_time_before + serviceProduct.buffer_time_after} minutes d'écart.`
-            );
-          }
-        }
+        // 4b. buffer_time : couvert par la vérification globale (4c) ci-dessous
       }
 
       // 4c. Vérifier buffer_time pour TOUS les bookings (même sans staff spécifique)

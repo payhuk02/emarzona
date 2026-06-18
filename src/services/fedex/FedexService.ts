@@ -14,8 +14,8 @@ import {
 } from './mockFedexService';
 
 /**
- * Minimal real FedEx service wrapper (skeleton).
- * If VITE_FEDEX_API_KEY is not set, we transparently fallback to mock service.
+ * FedEx service wrapper — tarifs / expédition / suivi via Edge Functions sécurisées.
+ * En production : pas de mock sauf VITE_FEDEX_ALLOW_MOCK=true ; fallback forfait si Edge indisponible.
  */
 export class FedexService {
   private get useEdgeFedex(): boolean {
