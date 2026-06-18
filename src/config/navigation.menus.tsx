@@ -78,6 +78,7 @@ import {
   PackageCheck,
   MessageSquare as LucideMessageSquare,
   CircleHelp,
+  Newspaper,
 } from 'lucide-react';
 import type { RawNavSection } from '@/config/navigation.enrich';
 
@@ -1186,6 +1187,11 @@ export const adminMenuSections = [
         title: 'FAQ plateforme',
         url: '/admin/platform-faq',
         icon: CircleHelp,
+      },
+      {
+        title: 'Blog plateforme',
+        url: '/admin/platform-blog',
+        icon: Newspaper,
       },
       {
         title: 'Newsletter',

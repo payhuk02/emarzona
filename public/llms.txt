@@ -14,7 +14,7 @@ Emarzona permet aux créateurs, artistes et entrepreneurs de lancer une boutique
 - [Centre d'aide](https://www.emarzona.com/help): Tutoriels et assistance générale
 - [FAQ](https://www.emarzona.com/faq): Questions fréquentes structurées (vendeurs et acheteurs)
 - [Documentation](https://www.emarzona.com/docs): Guides de démarrage
-- [Blog](https://www.emarzona.com/blog): Conseils e-commerce et actualités
+- [Blog](https://www.emarzona.com/blog): Articles e-commerce, guides vendeurs et actualités produit
 
 ## Pages légales
 

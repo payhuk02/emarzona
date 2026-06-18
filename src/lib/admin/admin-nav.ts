@@ -53,6 +53,7 @@ import {
   LayoutGrid,
   Mail,
   CircleHelp,
+  Newspaper,
 } from 'lucide-react';
 
 export type AdminNavItem = {
@@ -474,6 +475,12 @@ export const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
         icon: CircleHelp,
         label: 'FAQ plateforme',
         path: '/admin/platform-faq',
+        permissions: ['settings.manage'],
+      },
+      {
+        icon: Newspaper,
+        label: 'Blog plateforme',
+        path: '/admin/platform-blog',
         permissions: ['settings.manage'],
       },
       {

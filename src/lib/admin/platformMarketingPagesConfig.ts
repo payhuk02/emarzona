@@ -62,16 +62,6 @@ export const PLATFORM_MARKETING_PAGES: PlatformMarketingPageMeta[] = [
     defaultBody: MARKETING_PAGE_BODIES.press,
   },
   {
-    slug: 'blog',
-    pageId: 'platformBlog',
-    route: '/blog',
-    name: 'Blog',
-    icon: FileText,
-    defaultTitle: 'Blog Emarzona',
-    defaultSubtitle: 'Conseils e-commerce, études de cas et nouveautés produit.',
-    defaultBody: MARKETING_PAGE_BODIES.blog,
-  },
-  {
     slug: 'docs',
     pageId: 'platformDocs',
     route: '/docs',

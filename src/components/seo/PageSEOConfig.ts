@@ -120,8 +120,9 @@ export const PAGE_SEO_CONFIG: Record<string, PageSEOEntry> = {
     description: 'Espace presse Emarzona : communiqués et contacts médias.',
   },
   '/blog': {
-    title: 'Blog | Emarzona',
-    description: 'Conseils e-commerce, études de cas et nouveautés produit.',
+    title: 'Blog e-commerce | Emarzona',
+    description:
+      'Articles Emarzona : lancer une boutique, SEO, panier multi-types, paiements Moneroo et croissance en Afrique.',
   },
   '/docs': {
     title: 'Documentation | Emarzona',

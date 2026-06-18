@@ -25,7 +25,7 @@ const STATIC_PAGES: Array<{ path: string; changefreq: string; priority: string }
   { path: '/contact', changefreq: 'monthly', priority: '0.6' },
   { path: '/careers', changefreq: 'monthly', priority: '0.5' },
   { path: '/press', changefreq: 'monthly', priority: '0.5' },
-  { path: '/blog', changefreq: 'weekly', priority: '0.6' },
+  { path: '/blog', changefreq: 'daily', priority: '0.8' },
   { path: '/docs', changefreq: 'weekly', priority: '0.6' },
   { path: '/help', changefreq: 'weekly', priority: '0.6' },
   { path: '/faq', changefreq: 'weekly', priority: '0.75' },
@@ -75,6 +75,20 @@ serve(async () => {
   for (const p of products ?? []) {
     if (!p.slug) continue;
     urls.push(urlNode(`${SITE}/product/${p.slug}`, p.updated_at, 'weekly', '0.7'));
+  }
+
+  const { data: blogPosts } = await supabase
+    .from('platform_blog_posts')
+    .select('slug, updated_at, published_at')
+    .eq('status', 'published')
+    .eq('noindex', false)
+    .order('published_at', { ascending: false })
+    .limit(5000);
+
+  for (const post of blogPosts ?? []) {
+    if (!post.slug) continue;
+    const lastmod = post.updated_at ?? post.published_at ?? today;
+    urls.push(urlNode(`${SITE}/blog/${post.slug}`, lastmod, 'weekly', '0.7'));
   }
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>

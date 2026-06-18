@@ -322,5 +322,20 @@
       "contact": "Contact us"
     }
   },
+  "blog": {
+    "backHome": "Back to home",
+    "backToBlog": "Back to blog",
+    "searchPlaceholder": "Search an article…",
+    "allTags": "All",
+    "featured": "Featured",
+    "loadError": "Unable to load the blog right now.",
+    "noResults": "No articles match your search.",
+    "readingTime": "{{count}} min read",
+    "readingTime_plural": "{{count}} min read",
+    "breadcrumb": {
+      "home": "Home",
+      "blog": "Blog"
+    }
+  },
   "logoAlt": "Emarzona — e-commerce platform"
 }
