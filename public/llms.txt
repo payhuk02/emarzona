@@ -1,0 +1,29 @@
+# Emarzona
+
+> Plateforme e-commerce et marketing tout-en-un pour vendre des produits digitaux, physiques, services, cours en ligne et œuvres d'artistes. Paiements sécurisés, marketplace, programme d'affiliation.
+
+Emarzona permet aux créateurs, artistes et entrepreneurs de lancer une boutique en ligne, gérer commandes et clients, et développer leur activité en Afrique et à l'international.
+
+## Pages principales
+
+- [Accueil](https://www.emarzona.com/): Présentation de la plateforme, tarifs et fonctionnalités
+- [Marketplace](https://www.emarzona.com/marketplace): Catalogue public de produits et services
+- [À propos](https://www.emarzona.com/about): Mission et valeurs d'Emarzona
+- [Contact](https://www.emarzona.com/contact): Support, partenariats et presse
+- [Tarifs](https://www.emarzona.com/pricing): Plans et commissions
+- [Centre d'aide](https://www.emarzona.com/help): FAQ vendeurs et acheteurs
+- [Documentation](https://www.emarzona.com/docs): Guides de démarrage
+- [Blog](https://www.emarzona.com/blog): Conseils e-commerce et actualités
+
+## Pages légales
+
+- [CGU](https://www.emarzona.com/legal/terms): Conditions générales d'utilisation
+- [CGV](https://www.emarzona.com/legal/cgv): Conditions générales de vente
+- [Confidentialité](https://www.emarzona.com/legal/privacy): Politique de confidentialité (RGPD)
+- [Cookies](https://www.emarzona.com/legal/cookies): Politique des cookies
+- [Remboursement](https://www.emarzona.com/legal/refund): Politique de remboursement
+
+## Contact
+
+- Site: https://www.emarzona.com
+- E-mail: contact@emarzona.com

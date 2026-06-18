@@ -30,6 +30,7 @@ const STATIC_PAGES: Array<{ path: string; changefreq: string; priority: string }
   { path: '/integrations', changefreq: 'monthly', priority: '0.6' },
   { path: '/pricing', changefreq: 'weekly', priority: '0.7' },
   { path: '/legal/terms', changefreq: 'yearly', priority: '0.3' },
+  { path: '/legal/cgv', changefreq: 'yearly', priority: '0.3' },
   { path: '/legal/privacy', changefreq: 'yearly', priority: '0.3' },
   { path: '/legal/cookies', changefreq: 'yearly', priority: '0.3' },
   { path: '/legal/refund', changefreq: 'yearly', priority: '0.3' },

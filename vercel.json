@@ -2,31 +2,31 @@
   "rewrites": [
     {
       "source": "/sitemap.xml",
-      "destination": "https://hbdnzajbyjakdhuavrvb.supabase.co/functions/v1/sitemap-main"
+      "destination": "/api/sitemap"
     },
     {
       "source": "/sitemap-stores.xml",
-      "destination": "https://hbdnzajbyjakdhuavrvb.supabase.co/functions/v1/sitemap-stores"
+      "destination": "/api/sitemap-stores"
     },
     {
       "source": "/sitemap.xml",
       "has": [{ "type": "host", "value": "(?<sub>[^.]+)\\.myemarzona\\.shop" }],
-      "destination": "https://hbdnzajbyjakdhuavrvb.supabase.co/functions/v1/sitemap-stores?slug=:sub"
+      "destination": "/api/sitemap-stores?slug=:sub"
     },
     {
       "source": "/sitemap.xml",
       "has": [{ "type": "host", "value": "myemarzona\\.shop" }],
-      "destination": "https://hbdnzajbyjakdhuavrvb.supabase.co/functions/v1/sitemap-stores"
+      "destination": "/api/sitemap-stores"
     },
     {
       "source": "/robots.txt",
       "has": [{ "type": "host", "value": "(?<sub>[^.]+)\\.myemarzona\\.shop" }],
-      "destination": "https://hbdnzajbyjakdhuavrvb.supabase.co/functions/v1/store-robots?slug=:sub"
+      "destination": "/api/store-robots?slug=:sub"
     },
     {
       "source": "/robots.txt",
       "has": [{ "type": "host", "value": "myemarzona\\.shop" }],
-      "destination": "https://hbdnzajbyjakdhuavrvb.supabase.co/functions/v1/store-robots?slug=myemarzona.shop"
+      "destination": "/api/store-robots?slug=myemarzona.shop"
     },
     { "source": "/((?!api|supabase).*)", "destination": "/index.html" }
   ],

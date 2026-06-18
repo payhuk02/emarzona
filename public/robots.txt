@@ -50,6 +50,9 @@ Allow: /
 User-agent: OAI-SearchBot
 Allow: /
 
+# Fichier d'aide pour les crawlers IA (llms.txt)
+# https://www.emarzona.com/llms.txt
+
 User-agent: CCBot
 Disallow: /
 
@@ -63,6 +66,6 @@ Disallow: /*?sort=*
 Disallow: /*?filter=*
 Disallow: /*?page=*&*
 
-# Sitemaps servis directement par les Edge Functions Supabase
-Sitemap: https://hbdnzajbyjakdhuavrvb.supabase.co/functions/v1/sitemap-main
-Sitemap: https://hbdnzajbyjakdhuavrvb.supabase.co/functions/v1/sitemap-stores
+# Sitemaps (domaine principal — réécriture Vercel vers Edge Functions Supabase)
+Sitemap: https://www.emarzona.com/sitemap.xml
+Sitemap: https://www.emarzona.com/sitemap-stores.xml
