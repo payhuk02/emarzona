@@ -139,7 +139,7 @@ const DEFAULTS: AIManagementSettings = {
     generateProductImage: true,
     imageModel: 'google/gemini-3.1-flash-image-preview',
     imagePromptTemplate:
-      'Premium e-commerce product photo for {{typeLabel}}: {{name}}. {{category}}. Studio lighting, no text.',
+      'Premium e-commerce product photo for {{typeLabel}}: {{name}}. {{category}}. Studio lighting, no text, 3:2 landscape (1536×1024 px).',
     minWords: 350,
     supportedTypes: ['digital', 'physical', 'service', 'course', 'artist'],
     typeSystemPrompts: {

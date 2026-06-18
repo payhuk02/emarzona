@@ -153,6 +153,17 @@ export async function uploadCatalogImageFromDataUrl(
   const ext =
     mime.includes('jpeg') || mime.includes('jpg') ? 'jpg' : mime.includes('webp') ? 'webp' : 'png';
   const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+  return uploadCatalogImageBytes(admin, bytes, catalogPath, productSlug, ext, mime);
+}
+
+export async function uploadCatalogImageBytes(
+  admin: SupabaseClient,
+  bytes: Uint8Array,
+  catalogPath: string,
+  productSlug: string,
+  ext = 'jpg',
+  contentType = 'image/jpeg'
+): Promise<string> {
   const prefix = CATALOG_PREFIX[catalogPath] || catalogPath;
   const safeSlug =
     productSlug
@@ -163,7 +174,7 @@ export async function uploadCatalogImageFromDataUrl(
   const path = `${prefix}/ai-${safeSlug}-${Date.now()}.${ext}`;
 
   const { error } = await admin.storage.from('product-images').upload(path, bytes, {
-    contentType: mime,
+    contentType,
     cacheControl: '3600',
     upsert: false,
   });

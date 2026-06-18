@@ -8,7 +8,7 @@ SET ai_management_settings = jsonb_set(
     || '{
       "generateProductImage": true,
       "imageModel": "google/gemini-3.1-flash-image-preview",
-      "imagePromptTemplate": "Premium e-commerce product photo for {{typeLabel}}: {{name}}. {{category}}. Professional studio lighting, clean background, high-end marketplace listing, no text overlay, photorealistic.",
+      "imagePromptTemplate": "Premium e-commerce product photo for {{typeLabel}}: {{name}}. {{category}}. Professional studio lighting, clean background, high-end marketplace listing, no text overlay, photorealistic, wide landscape 3:2 aspect ratio (1536×1024 px).",
       "minWords": 350,
       "supportedTypes": ["digital", "physical", "service", "course", "artist"],
       "typeSystemPrompts": {

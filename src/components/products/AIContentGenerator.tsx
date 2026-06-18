@@ -157,7 +157,7 @@ export const AIContentGenerator = ({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="lovable">Lovable AI (premium, RAG)</SelectItem>
+                    <SelectItem value="lovable">AI Emarzona</SelectItem>
                     <SelectItem value="fallback">Templates intelligents (gratuit)</SelectItem>
                   </SelectContent>
                 </Select>

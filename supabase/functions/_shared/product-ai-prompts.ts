@@ -66,7 +66,7 @@ export function buildProductUserPrompt(
     `- 5-8 caractéristiques / bénéfices`,
     `- Meta title 50-60 car., meta description 150-160 car. avec CTA`,
     `- 10-15 mots-clés SEO`,
-    `- Prompt image produit premium (sans texte dans l'image)`
+    `- Prompt image produit premium (sans texte dans l'image), format paysage 3:2 (1536×1024 px)`
   );
   return lines.join('\n');
 }

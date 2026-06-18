@@ -43,47 +43,48 @@ function PricingCard({
 
   return (
     <article
-      className={`lp-pricing-card relative flex h-full flex-col p-6 sm:p-7 ${
-        highlight ? 'lp-pricing-card--highlight' : ''
+      className={`lp-pricing-dark relative flex h-full flex-col overflow-hidden rounded-2xl p-6 sm:p-7 ${
+        highlight ? 'lp-pricing-dark--highlight' : ''
       }`}
     >
+      <div
+        className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full opacity-25 blur-3xl"
+        style={{ background: highlight ? 'var(--lp-gold)' : 'var(--lp-purple)' }}
+        aria-hidden
+      />
       <span
-        className={`absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+        className={`absolute -top-3 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-full px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
           highlight
             ? 'bg-[var(--lp-gold)] text-[#0a0a0c]'
-            : 'border border-[var(--lp-border-light)] bg-white text-[var(--lp-text-muted)]'
+            : 'border border-white/15 bg-white/5 text-[var(--lp-gold-bright)]'
         }`}
       >
         {t(`pricing.${planKey}.badge`)}
       </span>
 
-      <div className="mb-4 flex items-start justify-between gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-[var(--lp-gold)]/15 bg-[var(--lp-cream)]">
-          <Package className="h-5 w-5 text-[var(--lp-gold-deep)]" strokeWidth={1.5} />
+      <div className="relative mb-4 flex items-start justify-between gap-3">
+        <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/5">
+          <Package className="h-5 w-5 text-[var(--lp-gold-bright)]" strokeWidth={1.5} />
         </div>
-        <span className="lp-serif text-2xl text-[var(--lp-gold-deep)]/40">{tier}</span>
+        <span className="lp-serif text-2xl text-white/25">{tier}</span>
       </div>
 
-      <h3 className="text-lg font-semibold text-[var(--lp-text)]">
-        {t(`pricing.${planKey}.name`)}
-      </h3>
-      <p className="mt-2 min-h-[2.75rem] text-sm leading-relaxed text-[var(--lp-text-muted)]">
+      <h3 className="relative text-lg font-semibold text-white">{t(`pricing.${planKey}.name`)}</h3>
+      <p className="relative mt-2 min-h-[2.75rem] text-sm leading-relaxed text-white/70">
         {t(`pricing.${planKey}.desc`)}
       </p>
 
-      <div className="mt-6 border-t border-[var(--lp-border-light)] pt-5">
-        <p className="lp-serif text-3xl text-[var(--lp-text)] sm:text-[2rem]">
+      <div className="relative mt-6 border-t border-white/10 pt-5">
+        <p className="lp-serif text-3xl text-white sm:text-[2rem]">
           {formatFcfa(price)}
-          <span className="text-base font-sans text-[var(--lp-text-muted)]">
-            {t('pricing.periodMonth')}
-          </span>
+          <span className="text-base font-sans text-white/60">{t('pricing.periodMonth')}</span>
         </p>
       </div>
 
-      <ul className="mt-6 flex-1 space-y-2.5">
+      <ul className="relative mt-6 flex-1 space-y-2.5">
         {features.map(f => (
-          <li key={f} className="flex items-start gap-2 text-sm text-[var(--lp-text)]">
-            <Check className="mt-0.5 h-4 w-4 shrink-0 text-[var(--lp-gold-deep)]" />
+          <li key={f} className="flex items-start gap-2 text-sm text-white/90">
+            <Check className="mt-0.5 h-4 w-4 shrink-0 text-[var(--lp-gold-bright)]" />
             {f}
           </li>
         ))}
@@ -91,8 +92,8 @@ function PricingCard({
 
       <Link
         to="/register"
-        className={`mt-8 inline-flex justify-center rounded-full py-3 text-sm font-semibold transition-transform active:scale-[0.98] ${
-          highlight ? 'lp-btn-primary text-white' : 'lp-btn-outline-light'
+        className={`relative mt-8 inline-flex justify-center rounded-full py-3 text-sm font-semibold transition-transform active:scale-[0.98] ${
+          highlight ? 'lp-btn-primary text-white' : 'lp-btn-outline-dark'
         }`}
       >
         {t(`pricing.${planKey}.cta`)}
@@ -145,7 +146,7 @@ export function PricingSection() {
             {t('pricing.commissionGroupLabel')}
           </p>
 
-          <article className="lp-pricing-commission relative overflow-hidden rounded-2xl border border-[var(--lp-border-light)] bg-gradient-to-br from-[#0f0f12] via-[#15151c] to-[#1a1a24] p-6 text-white sm:p-8">
+          <article className="lp-pricing-dark lp-pricing-commission relative overflow-hidden rounded-2xl p-6 sm:p-8">
             <div
               className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full opacity-30 blur-3xl"
               style={{ background: 'var(--lp-purple)' }}

@@ -263,6 +263,38 @@
   color: var(--lp-text);
 }
 
+.landing-premium .lp-pricing-dark {
+  border: 1px solid var(--lp-border-light);
+  background: linear-gradient(135deg, #0f0f12 0%, #15151c 50%, #1a1a24 100%);
+  color: #fff;
+  box-shadow: 0 28px 56px -32px rgba(15, 15, 18, 0.45);
+  transition:
+    transform 0.45s var(--lp-ease),
+    box-shadow 0.45s var(--lp-ease);
+}
+
+.landing-premium .lp-pricing-dark:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 32px 64px -28px rgba(15, 15, 18, 0.55);
+}
+
+.landing-premium .lp-pricing-dark--highlight {
+  border-color: rgba(201, 162, 39, 0.45);
+  box-shadow:
+    0 28px 56px -32px rgba(15, 15, 18, 0.45),
+    0 0 0 1px rgba(201, 162, 39, 0.2);
+}
+
+.landing-premium .lp-btn-outline-dark {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: transparent;
+  color: #fff;
+}
+
+.landing-premium .lp-btn-outline-dark:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
 .landing-premium .lp-pricing-card {
   border-radius: 1.25rem;
   border: 1px solid var(--lp-border-light);

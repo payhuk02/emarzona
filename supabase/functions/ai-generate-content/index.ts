@@ -13,9 +13,10 @@ import {
   fillTemplate,
   mapGatewayError,
   resolveAiApiKey,
-  uploadCatalogImageFromDataUrl,
+  uploadCatalogImageBytes,
   type AiProvider,
 } from '../_shared/ai-gateway.ts';
+import { dataUrlToBytes, resizeToCatalogProductBytes } from '../_shared/resize-catalog-product.ts';
 import {
   buildProductSystemPrompt,
   buildProductUserPrompt,
@@ -216,14 +217,14 @@ serve(async (req: Request) => {
     if (shouldGenerateImage) {
       const imageTemplate =
         (config.imagePromptTemplate as string) ||
-        'Premium product photo for {{typeLabel}}: {{name}}. {{category}}. Studio lighting, no text.';
+        'Premium product photo for {{typeLabel}}: {{name}}. {{category}}. Studio lighting, no text. Wide landscape 3:2 aspect ratio (1536×1024 px).';
       const imagePrompt =
-        content.imagePrompt ||
-        fillTemplate(imageTemplate, {
-          name: productInfo.name,
-          category: productInfo.category || '',
-          typeLabel: PRODUCT_TYPE_LABELS[productType as ProductAiType],
-        });
+        (content.imagePrompt ||
+          fillTemplate(imageTemplate, {
+            name: productInfo.name,
+            category: productInfo.category || '',
+            typeLabel: PRODUCT_TYPE_LABELS[productType as ProductAiType],
+          })) + ' Output exactly 1536×1024 pixels, 3:2 landscape ratio.';
 
       try {
         const rawUrl = await callImageGeneration({
@@ -232,9 +233,18 @@ serve(async (req: Request) => {
           prompt: imagePrompt,
         });
         const dataUrl = await ensureDataUrl(rawUrl);
+        const rawBytes = dataUrlToBytes(dataUrl);
+        const catalogBytes = await resizeToCatalogProductBytes(rawBytes);
         const catalogPath = CATALOG_PATH_BY_TYPE[productType as ProductAiType];
         const slug = productInfo.slug || productInfo.name;
-        imageUrl = await uploadCatalogImageFromDataUrl(admin, dataUrl, catalogPath, slug);
+        imageUrl = await uploadCatalogImageBytes(
+          admin,
+          catalogBytes,
+          catalogPath,
+          slug,
+          'jpg',
+          'image/jpeg'
+        );
       } catch (imgErr) {
         console.warn('Product image generation failed', imgErr);
       }
