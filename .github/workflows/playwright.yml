@@ -91,6 +91,7 @@ jobs:
     - name: Validate commerce E2E secrets
       run: node scripts/verify-commerce-e2e-secrets.mjs
       env:
+        VITE_SUPABASE_TEST_URL: ${{ secrets.VITE_SUPABASE_TEST_URL }}
         VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_TEST_URL || secrets.VITE_SUPABASE_URL }}
         VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
         VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
@@ -100,6 +101,7 @@ jobs:
       run: npm run test:e2e:commerce-gating
       env:
         CI: true
+        VITE_SUPABASE_TEST_URL: ${{ secrets.VITE_SUPABASE_TEST_URL }}
         VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_TEST_URL || secrets.VITE_SUPABASE_URL }}
         VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
         VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}

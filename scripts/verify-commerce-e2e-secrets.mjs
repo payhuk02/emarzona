@@ -6,6 +6,7 @@
  */
 import { createClient } from '@supabase/supabase-js';
 import ws from 'ws';
+import { assertSafeE2ESupabaseUrl } from './e2e-supabase-guard.mjs';
 
 const required = [
   ['VITE_SUPABASE_URL', ['VITE_SUPABASE_URL', 'SUPABASE_URL']],
@@ -109,6 +110,15 @@ if (error) {
   console.error('');
   console.error('Ensure URL and service role secret belong to the same Supabase project.');
   console.error('Rotate CI secret: npm run setup:commerce-e2e-secret');
+  process.exit(1);
+}
+
+try {
+  assertSafeE2ESupabaseUrl(url, 'verify-commerce-e2e-secrets');
+} catch (guardError) {
+  console.error(String(guardError.message ?? guardError));
+  console.error('');
+  console.error('Les E2E commerce ne doivent pas cibler la prod. Configurez VITE_SUPABASE_TEST_URL.');
   process.exit(1);
 }
 

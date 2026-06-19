@@ -7,6 +7,7 @@
 
 import { test, expect } from '@playwright/test';
 import { createNodeSupabaseClient } from './helpers/create-node-supabase-client';
+import { assertSafeE2ESupabaseUrl, resolveE2ESupabaseUrl } from './helpers/e2e-supabase-guard';
 import {
   assertCourseEnrollment,
   cleanupPaidFixture,
@@ -18,8 +19,7 @@ import {
   formatSupabaseProbeSummary,
 } from './helpers/capture-supabase-probe';
 
-const supabaseUrl =
-  process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseUrl = resolveE2ESupabaseUrl() || undefined;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const canRun = Boolean(supabaseUrl && supabaseServiceKey);
 
@@ -27,7 +27,10 @@ test.describe('Course paid enrollment (E2E)', () => {
   test.setTimeout(120_000);
 
   test.beforeAll(() => {
-    if (canRun) return;
+    if (canRun) {
+      assertSafeE2ESupabaseUrl(supabaseUrl!, 'course-paid-enrollment E2E');
+      return;
+    }
     const message =
       'Requires SUPABASE_SERVICE_ROLE_KEY + VITE_SUPABASE_URL (test Supabase migrated).';
     if (process.env.CI) throw new Error(message);

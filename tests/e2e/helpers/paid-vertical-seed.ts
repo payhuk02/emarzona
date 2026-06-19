@@ -3,6 +3,7 @@
  */
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { E2E_TEST_CONFIG } from '../shared/e2e-test-config';
+import { assertSafeE2ESupabaseUrl, resolveE2ESupabaseUrl } from './e2e-supabase-guard';
 
 export type SeededUser = { id: string; email: string; password: string };
 export type SeededStore = { id: string; slug: string; userId: string };
@@ -149,6 +150,7 @@ export async function seedPaidCourseFixture(
   admin: SupabaseClient,
   runId: string
 ): Promise<PaidCourseFixture> {
+  assertSafeE2ESupabaseUrl(resolveE2ESupabaseUrl(), 'seedPaidCourseFixture');
   const vendor = await createE2EUser(admin, `e2e-course-vendor-${runId}@example.com`);
   const buyer = await createE2EUser(admin, `e2e-course-buyer-${runId}@example.com`);
   const store = await createStore(admin, vendor.id, 'course', runId);
@@ -230,6 +232,7 @@ export async function seedPaidArtistFixture(
   admin: SupabaseClient,
   runId: string
 ): Promise<PaidArtistFixture> {
+  assertSafeE2ESupabaseUrl(resolveE2ESupabaseUrl(), 'seedPaidArtistFixture');
   const vendor = await createE2EUser(admin, `e2e-artist-vendor-${runId}@example.com`);
   const buyer = await createE2EUser(admin, `e2e-artist-buyer-${runId}@example.com`);
   const store = await createStore(admin, vendor.id, 'artist', runId);

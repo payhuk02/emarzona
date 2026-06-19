@@ -5,6 +5,7 @@
  */
 import { test, expect } from '@playwright/test';
 import { createNodeSupabaseClient } from './helpers/create-node-supabase-client';
+import { assertSafeE2ESupabaseUrl, resolveE2ESupabaseUrl } from './helpers/e2e-supabase-guard';
 import { gotoApp, waitForReactApp } from './shared/e2e-test-config';
 
 function requiredEnv(name: string): string | null {
@@ -23,10 +24,7 @@ function slugify(input: string): string {
     .trim();
 }
 
-const supabaseUrl =
-  requiredEnv('VITE_SUPABASE_URL') ??
-  requiredEnv('SUPABASE_URL') ??
-  requiredEnv('NEXT_PUBLIC_SUPABASE_URL');
+const supabaseUrl = resolveE2ESupabaseUrl() || null;
 const supabaseServiceKey = requiredEnv('SUPABASE_SERVICE_ROLE_KEY');
 const canRun = Boolean(supabaseUrl && supabaseServiceKey);
 
@@ -34,7 +32,10 @@ test.describe('Artist vendor — redirect & RPC create', () => {
   test.setTimeout(120_000);
 
   test.beforeAll(() => {
-    if (canRun) return;
+    if (canRun) {
+      assertSafeE2ESupabaseUrl(supabaseUrl!, 'artist-product-create-rpc E2E');
+      return;
+    }
     const message =
       'Requires SUPABASE_SERVICE_ROLE_KEY + VITE_SUPABASE_URL (test Supabase migrated).';
     if (process.env.CI) {

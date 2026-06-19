@@ -55,6 +55,9 @@ import {
 
 type ViewMode = 'grid' | 'list';
 
+const ORDERS_PAGE_CLASS =
+  'w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4 lg:py-6 space-y-3 sm:space-y-4 lg:space-y-6 min-w-0';
+
 const Orders = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -299,8 +302,8 @@ const Orders = () => {
   // Loading state
   if (storeLoading) {
     return (
-      <AppPageShell layoutType="orders">
-        <div className="container mx-auto p-3 sm:p-4 lg:p-6">
+      <AppPageShell layoutType="orders" mainClassName="overflow-x-hidden">
+        <div className={ORDERS_PAGE_CLASS}>
           <Skeleton className="h-8 w-64 mb-6" />
           <Skeleton className="h-96 w-full" />
         </div>
@@ -311,8 +314,8 @@ const Orders = () => {
   // No store state
   if (!store) {
     return (
-      <AppPageShell layoutType="orders">
-        <div className="container mx-auto p-3 sm:p-4 lg:p-6">
+      <AppPageShell layoutType="orders" mainClassName="overflow-x-hidden">
+        <div className={ORDERS_PAGE_CLASS}>
           <Card className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -340,8 +343,8 @@ const Orders = () => {
   // Error state
   if (error) {
     return (
-      <AppPageShell layoutType="orders">
-        <div className="container mx-auto p-3 sm:p-4 lg:p-6">
+      <AppPageShell layoutType="orders" mainClassName="overflow-x-hidden">
+        <div className={ORDERS_PAGE_CLASS}>
           <Card className="border-red-500/50 bg-red-50 dark:bg-red-950/30 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-red-600 dark:text-red-400">
@@ -363,8 +366,8 @@ const Orders = () => {
   }
 
   return (
-    <AppPageShell layoutType="orders">
-      <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
+    <AppPageShell layoutType="orders" mainClassName="overflow-x-hidden">
+      <div className={ORDERS_PAGE_CLASS}>
         {/* Header - Responsive & Animated */}
         <div
           ref={headerRef}
@@ -392,12 +395,12 @@ const Orders = () => {
               </p>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-stretch sm:items-center gap-2 w-full sm:w-auto">
             <Button
               variant="outline"
               onClick={handleExportCSV}
               disabled={!orders || orders.length === 0}
-              className="min-h-[44px] h-11 sm:h-12 text-xs sm:text-sm"
+              className="min-h-[44px] h-11 sm:h-12 text-xs sm:text-sm flex-1 sm:flex-none"
               aria-label={t('orders.export', 'Exporter')}
             >
               <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
@@ -409,7 +412,7 @@ const Orders = () => {
                 setIsCreateDialogOpen(true);
                 logger.info('Ouverture dialog création commande');
               }}
-              className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 min-h-[44px] h-11 sm:h-12 text-xs sm:text-sm"
+              className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 min-h-[44px] h-11 sm:h-12 text-xs sm:text-sm flex-1 sm:flex-none"
               aria-label={t('orders.new', 'Nouvelle commande')}
             >
               <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
@@ -425,7 +428,7 @@ const Orders = () => {
         {/* Stats Cards - Responsive */}
         <div
           ref={statsRef}
-          className="grid gap-3 sm:gap-4 grid-cols-2 md:grid-cols-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
+          className="grid gap-2 sm:gap-3 md:gap-4 grid-cols-2 md:grid-cols-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
         >
           <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 sm:pb-2 p-2.5 sm:p-3 md:p-4">
@@ -469,7 +472,7 @@ const Orders = () => {
             </CardContent>
           </Card>
 
-          <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
+          <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02] col-span-2 md:col-span-1">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 sm:pb-2 p-2.5 sm:p-3 md:p-4">
               <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium">
                 {t('orders.stats.revenue', "Chiffre d'affaires")}
@@ -487,9 +490,9 @@ const Orders = () => {
         {/* Search, Filters & View Toggle - Responsive */}
         <Card className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
           <CardContent className="p-3 sm:p-4">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
               {/* Search */}
-              <div className="flex-1 relative">
+              <div className="flex-1 relative min-w-0">
                 <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
                 <Input
                   placeholder={t('orders.searchPlaceholder', 'Rechercher par numéro, client...')}
@@ -517,9 +520,9 @@ const Orders = () => {
                 </div>
               </div>
 
-              {/* View Toggle */}
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1 bg-muted/50 backdrop-blur-sm rounded-md p-1">
+              {/* View Toggle — desktop uniquement (mobile = cartes) */}
+              <div className="flex items-center gap-2 shrink-0">
+                <div className="hidden lg:flex items-center gap-1 bg-muted/50 backdrop-blur-sm rounded-md p-1">
                   <Button
                     variant={viewMode === 'list' ? 'default' : 'ghost'}
                     size="sm"
@@ -546,15 +549,15 @@ const Orders = () => {
                   </Button>
                 </div>
 
-                {/* Refresh */}
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleRefresh}
-                  className="min-h-[44px] h-11 sm:h-12"
+                  className="min-h-[44px] h-11 sm:h-12 flex-1 sm:flex-none"
                   aria-label={t('orders.refresh', 'Rafraîchir')}
                 >
                   <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="ml-2 lg:hidden">{t('orders.refresh', 'Rafraîchir')}</span>
                 </Button>
               </div>
             </div>
@@ -605,7 +608,10 @@ const Orders = () => {
                 )}
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
+            <SheetContent
+              side="bottom"
+              className="h-[min(85vh,640px)] rounded-t-2xl overflow-y-auto px-4 pb-6"
+            >
               <SheetHeader>
                 <SheetTitle>Filtres de recherche</SheetTitle>
                 <SheetDescription>
@@ -622,6 +628,7 @@ const Orders = () => {
                   onPaymentStatusChange={setPaymentStatusFilter}
                   dateRange={dateRange}
                   onDateRangeChange={setDateRange}
+                  hideSearch
                 />
               </div>
             </SheetContent>
@@ -654,6 +661,7 @@ const Orders = () => {
               sortBy={sortBy}
               sortDirection={sortDirection}
               onSort={handleSort}
+              viewMode={viewMode}
             />
             {totalCount > 10 && (
               <OrdersPagination

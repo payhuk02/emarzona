@@ -19,7 +19,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Eye, Trash2, Edit, Calendar, CreditCard, User, Package, DollarSign } from 'lucide-react';
+import { Eye, Trash2, Edit, Calendar, User, Package, DollarSign } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Order } from '@/hooks/useOrders';
@@ -156,30 +156,30 @@ const OrderCardComponent = ({ order, onUpdate, storeId }: OrderCardProps) => {
   return (
     <>
       <Card
-        className="w-full hover:shadow-lg transition-shadow"
+        className="w-full min-w-0 hover:shadow-lg transition-shadow border-border/60"
         style={{ willChange: 'transform' }}
       >
-        <CardHeader className="pb-3">
-          <div className="flex items-start justify-between">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <Package className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-                <span className="font-semibold text-sm">{order.order_number}</span>
+        <CardHeader className="pb-3 p-3 sm:p-4">
+          <div className="flex items-start justify-between gap-2 min-w-0">
+            <div className="space-y-1 min-w-0 flex-1">
+              <div className="flex items-center gap-2 min-w-0">
+                <Package className="h-4 w-4 text-muted-foreground shrink-0" aria-hidden="true" />
+                <span className="font-semibold text-sm truncate">{order.order_number}</span>
               </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Calendar className="h-3 w-3" aria-hidden="true" />
+              <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+                <Calendar className="h-3 w-3 shrink-0" aria-hidden="true" />
                 <span>{format(new Date(order.created_at), 'dd MMM yyyy', { locale: fr })}</span>
               </div>
             </div>
             <div
-              className={`px-2 py-1 rounded-md text-xs font-medium border ${getStatusColor(order.status)}`}
+              className={`shrink-0 px-2 py-1 rounded-md text-[10px] sm:text-xs font-medium border ${getStatusColor(order.status)}`}
             >
               {getStatusLabel(order.status)}
             </div>
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-4 pt-0">
           {/* Customer Info */}
           <div className="flex items-center gap-2 text-sm">
             <User className="h-4 w-4 text-muted-foreground flex-shrink-0" aria-hidden="true" />
@@ -187,12 +187,12 @@ const OrderCardComponent = ({ order, onUpdate, storeId }: OrderCardProps) => {
           </div>
 
           {/* Amount */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 min-w-0">
             <DollarSign
               className="h-4 w-4 text-muted-foreground flex-shrink-0"
               aria-hidden="true"
             />
-            <span className="font-semibold text-lg">
+            <span className="font-semibold text-base sm:text-lg truncate">
               {order.total_amount.toLocaleString('fr-FR', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
@@ -202,70 +202,69 @@ const OrderCardComponent = ({ order, onUpdate, storeId }: OrderCardProps) => {
           </div>
 
           {/* Payment Status */}
-          <div className="flex items-center gap-2">
-            <CreditCard
-              className="h-4 w-4 text-muted-foreground flex-shrink-0"
-              aria-hidden="true"
-            />
-            <Select value={order.payment_status} onValueChange={handlePaymentStatusChange}>
-              <SelectTrigger className="h-8 w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="pending">En attente</SelectItem>
-                <SelectItem value="paid">Payée</SelectItem>
-                <SelectItem value="failed">Échouée</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <label className="text-xs text-muted-foreground">Paiement</label>
+              <Select value={order.payment_status} onValueChange={handlePaymentStatusChange}>
+                <SelectTrigger className="min-h-[44px] w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pending">En attente</SelectItem>
+                  <SelectItem value="paid">Payée</SelectItem>
+                  <SelectItem value="failed">Échouée</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-          {/* Status Selector */}
-          <div className="space-y-2">
-            <label className="text-xs text-muted-foreground">Statut de la commande</label>
-            <Select value={order.status} onValueChange={handleStatusChange}>
-              <SelectTrigger className="h-8 w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="pending">En attente</SelectItem>
-                <SelectItem value="processing">En cours</SelectItem>
-                <SelectItem value="completed">Terminée</SelectItem>
-                <SelectItem value="cancelled">Annulée</SelectItem>
-              </SelectContent>
-            </Select>
+            {/* Status Selector */}
+            <div className="space-y-1.5">
+              <label className="text-xs text-muted-foreground">Statut de la commande</label>
+              <Select value={order.status} onValueChange={handleStatusChange}>
+                <SelectTrigger className="min-h-[44px] w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pending">En attente</SelectItem>
+                  <SelectItem value="processing">En cours</SelectItem>
+                  <SelectItem value="completed">Terminée</SelectItem>
+                  <SelectItem value="cancelled">Annulée</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* Actions */}
-          <div className="grid grid-cols-3 gap-2 pt-2">
+          <div className="flex flex-col gap-2 pt-1 sm:grid sm:grid-cols-3 sm:gap-2">
             <Button
               variant="outline"
               size="sm"
               onClick={() => setDetailDialogOpen(true)}
-              className="w-full"
+              className="w-full min-h-[44px] justify-center"
               aria-label="Voir les détails de la commande"
             >
-              <Eye className="h-4 w-4 mr-1" aria-hidden="true" />
-              <span className="text-xs">Détails</span>
+              <Eye className="h-4 w-4 mr-2 shrink-0" aria-hidden="true" />
+              <span className="text-sm">Détails</span>
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={() => setEditDialogOpen(true)}
-              className="w-full"
+              className="w-full min-h-[44px] justify-center"
               aria-label="Modifier la commande"
             >
-              <Edit className="h-4 w-4 mr-1" aria-hidden="true" />
-              <span className="text-xs">Modifier</span>
+              <Edit className="h-4 w-4 mr-2 shrink-0" aria-hidden="true" />
+              <span className="text-sm">Modifier</span>
             </Button>
             <Button
               variant="destructive"
               size="sm"
               onClick={() => setDeleteDialogOpen(true)}
-              className="w-full"
+              className="w-full min-h-[44px] justify-center"
               aria-label="Supprimer la commande"
             >
-              <Trash2 className="h-4 w-4 mr-1" aria-hidden="true" />
-              <span className="text-xs">Supprimer</span>
+              <Trash2 className="h-4 w-4 mr-2 shrink-0" aria-hidden="true" />
+              <span className="text-sm">Supprimer</span>
             </Button>
           </div>
         </CardContent>

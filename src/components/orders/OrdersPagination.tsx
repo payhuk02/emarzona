@@ -1,6 +1,12 @@
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 
 interface OrdersPaginationProps {
   currentPage: number;
@@ -19,26 +25,26 @@ export const OrdersPagination = ({
   onPageChange,
   onPageSizeChange,
 }: OrdersPaginationProps) => {
-  const startItem = currentPage * pageSize + 1;
+  const startItem = totalItems === 0 ? 0 : currentPage * pageSize + 1;
   const endItem = Math.min((currentPage + 1) * pageSize, totalItems);
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4">
-      {/* Info */}
-      <div className="text-sm text-muted-foreground">
-        Affichage de {startItem} à {endItem} sur {totalItems} commande{totalItems !== 1 ? 's' : ''}
+    <div className="flex flex-col gap-3 sm:gap-4 py-3 sm:py-4 w-full min-w-0">
+      <div className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left">
+        {startItem}–{endItem} sur {totalItems} commande{totalItems !== 1 ? 's' : ''}
       </div>
 
-      {/* Controls */}
-      <div className="flex items-center gap-4">
-        {/* Page size selector */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Lignes par page:</span>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center justify-center sm:justify-start gap-2">
+          <span className="text-xs sm:text-sm text-muted-foreground shrink-0">
+            <span className="sm:hidden">Par page</span>
+            <span className="hidden sm:inline">Lignes par page:</span>
+          </span>
           <Select
             value={pageSize.toString()}
-            onValueChange={(value) => onPageSizeChange(Number(value))}
+            onValueChange={value => onPageSizeChange(Number(value))}
           >
-            <SelectTrigger className="w-[70px] min-h-[44px] h-11">
+            <SelectTrigger className="w-[72px] min-h-[44px] h-11">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -50,12 +56,11 @@ export const OrdersPagination = ({
           </Select>
         </div>
 
-        {/* Page navigation */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center justify-center gap-1">
           <Button
             variant="outline"
             size="icon"
-            className="min-h-[44px] min-w-[44px] h-11 w-11"
+            className="hidden sm:inline-flex min-h-[44px] min-w-[44px] h-11 w-11"
             onClick={() => onPageChange(0)}
             disabled={currentPage === 0}
             aria-label="Première page"
@@ -73,11 +78,9 @@ export const OrdersPagination = ({
             <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
 
-          <div className="flex items-center gap-1 px-2">
-            <span className="text-sm">
-              Page {currentPage + 1} sur {totalPages || 1}
-            </span>
-          </div>
+          <span className="text-xs sm:text-sm px-2 tabular-nums whitespace-nowrap">
+            {currentPage + 1} / {totalPages || 1}
+          </span>
 
           <Button
             variant="outline"
@@ -92,7 +95,7 @@ export const OrdersPagination = ({
           <Button
             variant="outline"
             size="icon"
-            className="min-h-[44px] min-w-[44px] h-11 w-11"
+            className="hidden sm:inline-flex min-h-[44px] min-w-[44px] h-11 w-11"
             onClick={() => onPageChange(totalPages - 1)}
             disabled={currentPage >= totalPages - 1}
             aria-label="Dernière page"
@@ -104,10 +107,3 @@ export const OrdersPagination = ({
     </div>
   );
 };
-
-
-
-
-
-
-

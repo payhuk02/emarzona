@@ -1,5 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { createNodeSupabaseClient } from './helpers/create-node-supabase-client';
+import { assertSafeE2ESupabaseUrl, resolveE2ESupabaseUrl } from './helpers/e2e-supabase-guard';
 import { PRIMARY_PRODUCT_CREATE_PATH_BY_TYPE } from '../../src/lib/commerce/store-capability-map';
 
 type StoreCommerceType = 'physical' | 'digital' | 'service' | 'course' | 'artist';
@@ -111,17 +112,17 @@ const typeAssertions: Record<
   },
 };
 
-const supabaseUrl =
-  requiredEnv('VITE_SUPABASE_URL') ??
-  requiredEnv('SUPABASE_URL') ??
-  requiredEnv('NEXT_PUBLIC_SUPABASE_URL');
+const supabaseUrl = resolveE2ESupabaseUrl() || null;
 const supabaseServiceKey = requiredEnv('SUPABASE_SERVICE_ROLE_KEY');
 
 const canRun = Boolean(supabaseUrl && supabaseServiceKey);
 
 test.describe('Commerce type gating (E2E minimal)', () => {
   test.beforeAll(() => {
-    if (canRun) return;
+    if (canRun) {
+      assertSafeE2ESupabaseUrl(supabaseUrl!, 'commerce-type-gating E2E');
+      return;
+    }
     const message =
       'Requires SUPABASE_SERVICE_ROLE_KEY + VITE_SUPABASE_URL (test Supabase migrated).';
     if (process.env.CI) {
