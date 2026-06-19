@@ -2,6 +2,7 @@
  * Client — génération IA d'articles blog plateforme
  */
 import { supabase } from '@/integrations/supabase/client';
+import { extractDetailedMessage, extractErrorDetails } from '@/lib/moneroo-error-extractor';
 
 export interface BlogAIGenerateRequest {
   topic: string;
@@ -54,13 +55,39 @@ export interface PlatformAiApiKeyMeta {
   created_at: string;
 }
 
-function throwEdgeFunctionError(
+const AI_CREDITS_HINT =
+  ' Rechargez vos crédits Lovable ou ajoutez une clé API dans Administration → Gestion IA.';
+
+async function throwEdgeFunctionError(
   data: { error?: string } | null | undefined,
-  error: Error | null,
+  error: unknown,
   fallback: string
-): void {
-  if (data?.error) throw new Error(data.error);
-  if (error) throw new Error(error.message || fallback);
+): Promise<void> {
+  if (data?.error) {
+    throw new Error(
+      data.error.includes('Crédits IA') ? `${data.error.trim()}.${AI_CREDITS_HINT}` : data.error
+    );
+  }
+
+  if (!error) return;
+
+  const message = error instanceof Error ? error.message : String(error);
+  const details = await extractErrorDetails(error, message);
+  let detailed = extractDetailedMessage(details, fallback);
+
+  if (
+    detailed.includes('non-2xx') ||
+    detailed.includes('Edge Function returned') ||
+    detailed === fallback
+  ) {
+    detailed = fallback;
+  }
+
+  if (/crédits ia|402|payment required|épuisé/i.test(detailed)) {
+    detailed = `Crédits IA épuisés.${AI_CREDITS_HINT}`;
+  }
+
+  throw new Error(detailed);
 }
 
 export async function generateBlogArticleWithAI(
@@ -69,7 +96,7 @@ export async function generateBlogArticleWithAI(
   const { data, error } = await supabase.functions.invoke('ai-generate-blog-post', {
     body: request,
   });
-  throwEdgeFunctionError(data, error, 'Échec génération article IA');
+  await throwEdgeFunctionError(data, error, 'Échec génération article IA');
   return data as BlogAIGenerateResponse;
 }
 
@@ -77,7 +104,7 @@ export async function listPlatformAiApiKeys(): Promise<PlatformAiApiKeyMeta[]> {
   const { data, error } = await supabase.functions.invoke('manage-ai-api-keys', {
     body: { action: 'list' },
   });
-  throwEdgeFunctionError(data, error, 'Échec chargement des clés API IA');
+  await throwEdgeFunctionError(data, error, 'Échec chargement des clés API IA');
   return (data?.keys ?? []) as PlatformAiApiKeyMeta[];
 }
 
@@ -90,7 +117,7 @@ export async function addPlatformAiApiKey(payload: {
   const { data, error } = await supabase.functions.invoke('manage-ai-api-keys', {
     body: { action: 'add', ...payload },
   });
-  throwEdgeFunctionError(data, error, 'Échec ajout clé API IA');
+  await throwEdgeFunctionError(data, error, 'Échec ajout clé API IA');
   return data.key as PlatformAiApiKeyMeta;
 }
 
@@ -98,12 +125,12 @@ export async function deletePlatformAiApiKey(id: string): Promise<void> {
   const { data, error } = await supabase.functions.invoke('manage-ai-api-keys', {
     body: { action: 'delete', id },
   });
-  throwEdgeFunctionError(data, error, 'Échec suppression clé API IA');
+  await throwEdgeFunctionError(data, error, 'Échec suppression clé API IA');
 }
 
 export async function setDefaultPlatformAiApiKey(id: string): Promise<void> {
   const { data, error } = await supabase.functions.invoke('manage-ai-api-keys', {
     body: { action: 'setDefault', id },
   });
-  throwEdgeFunctionError(data, error, 'Échec mise à jour clé API IA');
+  await throwEdgeFunctionError(data, error, 'Échec mise à jour clé API IA');
 }
