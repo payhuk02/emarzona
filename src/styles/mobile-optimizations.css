@@ -201,7 +201,7 @@ select {
 
   img[loading='lazy'].loaded,
   img[loading='lazy'][data-no-mobile-opt],
-  .landing-premium img {
+  .landing-premium img[loading='lazy']:not([data-no-mobile-opt]) {
     opacity: 1;
   }
 }

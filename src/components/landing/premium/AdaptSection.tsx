@@ -20,12 +20,13 @@ export function AdaptSection() {
               <img
                 src={adaptPremiumPng}
                 alt={t('adapt.photoAlt')}
-                loading="lazy"
-                fetchPriority="low"
+                loading="eager"
+                fetchPriority="high"
                 width={1024}
                 height={686}
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 decoding="async"
+                data-no-mobile-opt
                 className="lp-adapt-photo__img"
               />
             </picture>
