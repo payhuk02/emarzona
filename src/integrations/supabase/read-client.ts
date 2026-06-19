@@ -43,3 +43,16 @@ export const supabaseRead = createClient<Database>(READ_URL, SUPABASE_PUBLISHABL
     autoRefreshToken: false,
   },
 });
+
+/**
+ * Appel RPC en mode lecture (GET) — requis pour router vers read replicas Supabase.
+ * @see https://supabase.com/docs/guides/platform/read-replicas
+ */
+export function supabaseReadRpc<Fn extends keyof Database['public']['Functions']>(
+  fn: Fn,
+  args?: Database['public']['Functions'][Fn]['Args']
+) {
+  return supabaseRead.rpc(fn, (args ?? undefined) as Record<string, unknown> | undefined, {
+    get: true,
+  });
+}

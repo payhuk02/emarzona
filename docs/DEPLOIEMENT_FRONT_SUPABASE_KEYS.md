@@ -41,6 +41,41 @@ Workflows `.github/workflows/playwright.yml` utilisent :
 
 Mettre à jour le secret si les tests REST échouent avec `401` / `Invalid API key`.
 
+## Read replica (marketplace)
+
+Le client `supabaseRead` (`src/integrations/supabase/read-client.ts`) sert les lectures marketplace. Il utilise `VITE_SUPABASE_READ_URL` si défini.
+
+### 1. Activer une read replica (Dashboard Supabase)
+
+1. [Dashboard](https://supabase.com/dashboard/project/hbdnzajbyjakdhuavrvb/settings/infrastructure) → **Project Settings** → **Infrastructure**
+2. **Add Read Replica** → choisir une région (ex. `eu-west-2` pour isolation analytics, ou région proche de vos utilisateurs Afrique/Europe)
+3. Attendre le statut **Active** (quelques minutes)
+
+### 2. URL à utiliser côté front
+
+| Option                         | URL                                                  | Quand l'utiliser                                               |
+| ------------------------------ | ---------------------------------------------------- | -------------------------------------------------------------- |
+| **Load balancer (recommandé)** | `https://hbdnzajbyjakdhuavrvb-all.supabase.co`       | Geo-routing automatique des GET vers la replica la plus proche |
+| **Replica dédiée**             | API Settings → Project URL → source **Read Replica** | Cibler une seule replica                                       |
+
+Les appels RPC marketplace passent par `supabaseReadRpc(..., { get: true })` (requis pour les replicas).
+
+### 3. Vercel
+
+```powershell
+.\scripts\set-vercel-read-replica-env.ps1
+# ou URL explicite :
+.\scripts\set-vercel-read-replica-env.ps1 -ReadUrl "https://hbdnzajbyjakdhuavrvb-all.supabase.co"
+```
+
+Puis **redéployer** Production et Preview (les `VITE_*` sont figées au build).
+
+Vérification :
+
+```bash
+npx vercel env ls production | findstr READ
+```
+
 ## Vérification locale / CI
 
 ```bash
