@@ -25,6 +25,7 @@ import {
 } from '@/lib/ai-blog-generator';
 
 const PROVIDERS = [
+  { id: 'openrouter', label: 'OpenRouter (recommandé)' },
   { id: 'lovable', label: 'Lovable AI Gateway' },
   { id: 'openai', label: 'OpenAI' },
   { id: 'anthropic', label: 'Anthropic' },
@@ -37,7 +38,7 @@ export function PlatformAiApiKeysPanel() {
   const [keys, setKeys] = useState<PlatformAiApiKeyMeta[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [provider, setProvider] = useState<string>('lovable');
+  const [provider, setProvider] = useState<string>('openrouter');
   const [label, setLabel] = useState('');
   const [apiKey, setApiKey] = useState('');
   const [isDefault, setIsDefault] = useState(false);
@@ -124,6 +125,21 @@ export function PlatformAiApiKeysPanel() {
     <div className="space-y-6">
       <div className="flex items-center justify-between p-4 border rounded-lg">
         <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-violet-500/10">
+            <Shield className="h-5 w-5 text-violet-500" />
+          </div>
+          <div>
+            <p className="font-medium">OpenRouter (serveur)</p>
+            <p className="text-xs text-muted-foreground">
+              OPENROUTER_API_KEY — variable Supabase Edge (fallback)
+            </p>
+          </div>
+        </div>
+        <Badge>Actif si configuré</Badge>
+      </div>
+
+      <div className="flex items-center justify-between p-4 border rounded-lg">
+        <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-emerald-500/10">
             <Shield className="h-5 w-5 text-emerald-500" />
           </div>
@@ -134,7 +150,7 @@ export function PlatformAiApiKeysPanel() {
             </p>
           </div>
         </div>
-        <Badge>Actif si configuré</Badge>
+        <Badge variant="outline">Optionnel</Badge>
       </div>
 
       <Alert>
@@ -188,7 +204,7 @@ export function PlatformAiApiKeysPanel() {
         </ul>
       ) : (
         <p className="text-sm text-muted-foreground">
-          Aucune clé personnalisée — LOVABLE_API_KEY utilisée.
+          Aucune clé personnalisée — OPENROUTER_API_KEY ou LOVABLE_API_KEY utilisée.
         </p>
       )}
 
@@ -227,7 +243,7 @@ export function PlatformAiApiKeysPanel() {
             type="password"
             value={apiKey}
             onChange={e => setApiKey(e.target.value)}
-            placeholder="sk-… ou clé provider"
+            placeholder="sk-or-… ou clé provider"
             autoComplete="off"
           />
         </div>

@@ -4,7 +4,42 @@
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { decryptApiKey } from './ai-crypto.ts';
 
-export type AiProvider = 'lovable' | 'openai' | 'anthropic' | 'google' | 'custom';
+export type AiProvider = 'lovable' | 'openrouter' | 'openai' | 'anthropic' | 'google' | 'custom';
+
+const PROVIDER_ENV_KEYS: Record<AiProvider, string> = {
+  lovable: 'LOVABLE_API_KEY',
+  openrouter: 'OPENROUTER_API_KEY',
+  openai: 'OPENAI_API_KEY',
+  anthropic: 'ANTHROPIC_API_KEY',
+  google: 'GOOGLE_API_KEY',
+  custom: 'CUSTOM_AI_API_KEY',
+};
+
+function resolveEnvApiKey(provider: AiProvider): string | undefined {
+  const value = Deno.env.get(PROVIDER_ENV_KEYS[provider])?.trim();
+  return value || undefined;
+}
+
+function chatCompletionsEndpoint(provider: AiProvider): {
+  url: string;
+  headers: Record<string, string>;
+} {
+  if (provider === 'openrouter') {
+    const siteUrl = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
+    return {
+      url: 'https://openrouter.ai/api/v1/chat/completions',
+      headers: {
+        'HTTP-Referer': siteUrl,
+        'X-Title': 'Emarzona',
+      },
+    };
+  }
+
+  return {
+    url: 'https://ai.gateway.lovable.dev/v1/chat/completions',
+    headers: {},
+  };
+}
 
 export async function resolveAiApiKey(
   admin: SupabaseClient,
@@ -19,23 +54,26 @@ export async function resolveAiApiKey(
   const match =
     list.find(r => r.provider === provider && r.is_default) ||
     list.find(r => r.provider === provider) ||
-    list.find(r => r.is_default);
+    (provider === 'lovable' ? list.find(r => r.is_default) : undefined);
 
   if (match?.encrypted_key) {
     const key = await decryptApiKey(match.encrypted_key as string);
     return { key, provider: match.provider as AiProvider, source: 'db' };
   }
 
-  const lovable = Deno.env.get('LOVABLE_API_KEY');
-  if (lovable) {
-    return { key: lovable, provider: 'lovable', source: 'env' };
+  const envKey = resolveEnvApiKey(provider);
+  if (envKey) {
+    return { key: envKey, provider, source: 'env' };
   }
 
-  throw new Error('Aucune clé API IA configurée (LOVABLE_API_KEY ou clé admin)');
+  throw new Error(
+    `Aucune clé API IA configurée pour « ${provider} » (${PROVIDER_ENV_KEYS[provider]} ou clé admin)`
+  );
 }
 
 export async function callTextCompletion(options: {
   apiKey: string;
+  provider?: AiProvider;
   model: string;
   messages: Array<{ role: string; content: string }>;
   temperature?: number;
@@ -43,11 +81,15 @@ export async function callTextCompletion(options: {
   tools?: unknown[];
   toolChoice?: unknown;
 }): Promise<Response> {
-  return fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+  const provider = options.provider ?? 'lovable';
+  const { url, headers: providerHeaders } = chatCompletionsEndpoint(provider);
+
+  return fetch(url, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${options.apiKey}`,
       'Content-Type': 'application/json',
+      ...providerHeaders,
     },
     body: JSON.stringify({
       model: options.model,
@@ -62,20 +104,33 @@ export async function callTextCompletion(options: {
 
 export async function callImageGeneration(options: {
   apiKey: string;
+  provider?: AiProvider;
   model: string;
   prompt: string;
 }): Promise<string> {
-  const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+  const provider = options.provider ?? 'lovable';
+  const { url, headers: providerHeaders } = chatCompletionsEndpoint(provider);
+
+  const body =
+    provider === 'openrouter'
+      ? {
+          model: options.model,
+          messages: [{ role: 'user', content: options.prompt }],
+        }
+      : {
+          model: options.model,
+          messages: [{ role: 'user', content: options.prompt }],
+          modalities: ['image', 'text'],
+        };
+
+  const response = await fetch(url, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${options.apiKey}`,
       'Content-Type': 'application/json',
+      ...providerHeaders,
     },
-    body: JSON.stringify({
-      model: options.model,
-      messages: [{ role: 'user', content: options.prompt }],
-      modalities: ['image', 'text'],
-    }),
+    body: JSON.stringify(body),
   });
 
   if (!response.ok) {
@@ -84,9 +139,20 @@ export async function callImageGeneration(options: {
   }
 
   const data = await response.json();
-  const url = data?.choices?.[0]?.message?.images?.[0]?.image_url?.url;
-  if (!url) throw new Error('Aucune image générée par le modèle');
-  return url as string;
+  const imageUrl =
+    data?.choices?.[0]?.message?.images?.[0]?.image_url?.url ??
+    data?.choices?.[0]?.message?.content;
+  if (!imageUrl || typeof imageUrl !== 'string') {
+    throw new Error('Aucune image générée par le modèle');
+  }
+  if (
+    imageUrl.startsWith('http://') ||
+    imageUrl.startsWith('https://') ||
+    imageUrl.startsWith('data:')
+  ) {
+    return imageUrl;
+  }
+  throw new Error('Réponse image IA invalide');
 }
 
 export async function ensureDataUrl(url: string): Promise<string> {

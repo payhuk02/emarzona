@@ -97,7 +97,7 @@ export interface AIManagementSettings {
   };
   blogGenerator: {
     enabled: boolean;
-    provider: 'lovable' | 'openai' | 'anthropic' | 'google' | 'custom';
+    provider: 'lovable' | 'openrouter' | 'openai' | 'anthropic' | 'google' | 'custom';
     textModel: string;
     imageModel: string;
     systemPrompt: string;
@@ -192,7 +192,16 @@ const DEFAULTS: AIManagementSettings = {
   },
 };
 
-// Modèles disponibles via Lovable AI Gateway
+const AI_GATEWAY_PROVIDERS = [
+  { id: 'openrouter', label: 'OpenRouter (recommandé)' },
+  { id: 'lovable', label: 'Lovable AI Gateway' },
+  { id: 'openai', label: 'OpenAI' },
+  { id: 'anthropic', label: 'Anthropic' },
+  { id: 'google', label: 'Google AI' },
+  { id: 'custom', label: 'Autre / Custom' },
+] as const;
+
+// Modèles disponibles via Lovable AI Gateway ou OpenRouter
 const TEXT_MODELS = [
   { id: 'google/gemini-3-flash-preview', label: 'Gemini 3 Flash (rapide, recommandé)' },
   { id: 'google/gemini-3.1-flash-lite-preview', label: 'Gemini 3.1 Flash Lite (économique)' },
@@ -982,6 +991,26 @@ const AIManagementPage: React.FC = () => {
 
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
+                    <Label>Provider IA</Label>
+                    <Select
+                      value={settings.blogGenerator.provider}
+                      onValueChange={(
+                        v: 'lovable' | 'openrouter' | 'openai' | 'anthropic' | 'google' | 'custom'
+                      ) => update('blogGenerator', { provider: v })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {AI_GATEWAY_PROVIDERS.map(p => (
+                          <SelectItem key={p.id} value={p.id}>
+                            {p.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
                     <Label>Modèle texte</Label>
                     <ModelSelect
                       value={settings.blogGenerator.textModel}
@@ -989,7 +1018,7 @@ const AIManagementPage: React.FC = () => {
                       options={TEXT_MODELS}
                     />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-2 sm:col-span-2">
                     <Label>Modèle image</Label>
                     <ModelSelect
                       value={settings.blogGenerator.imageModel}

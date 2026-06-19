@@ -23,7 +23,14 @@ function cors(origin: string | null) {
   };
 }
 
-const VALID_PROVIDERS = ['lovable', 'openai', 'anthropic', 'google', 'custom'] as const;
+const VALID_PROVIDERS = [
+  'lovable',
+  'openrouter',
+  'openai',
+  'anthropic',
+  'google',
+  'custom',
+] as const;
 
 serve(async (req: Request) => {
   const headers = cors(req.headers.get('origin'));

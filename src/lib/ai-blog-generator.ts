@@ -56,7 +56,7 @@ export interface PlatformAiApiKeyMeta {
 }
 
 const AI_CREDITS_HINT =
-  ' Rechargez vos crédits Lovable ou ajoutez une clé API dans Administration → Gestion IA.';
+  ' Rechargez vos crédits (OpenRouter ou Lovable) ou ajoutez une clé API dans Administration → Gestion IA.';
 
 async function throwEdgeFunctionError(
   data: { error?: string } | null | undefined,

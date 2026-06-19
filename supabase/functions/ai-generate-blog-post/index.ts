@@ -150,7 +150,7 @@ serve(async (req: Request) => {
     }
 
     const provider = (config.provider as AiProvider) || 'lovable';
-    const { key: apiKey } = await resolveAiApiKey(admin, provider);
+    const { key: apiKey, provider: resolvedProvider } = await resolveAiApiKey(admin, provider);
     const textModel = config.textModel || 'google/gemini-3.1-pro-preview';
     const imageModel = config.imageModel || 'google/gemini-3.1-flash-image-preview';
     const minWords = config.minWords ?? 1200;
@@ -196,6 +196,7 @@ serve(async (req: Request) => {
 
     const textRes = await callTextCompletion({
       apiKey,
+      provider: resolvedProvider,
       model: textModel,
       messages: [
         { role: 'system', content: systemPrompt },
@@ -256,6 +257,7 @@ serve(async (req: Request) => {
       try {
         const rawUrl = await callImageGeneration({
           apiKey,
+          provider: resolvedProvider,
           model: imageModel,
           prompt: finalImagePrompt,
         });
