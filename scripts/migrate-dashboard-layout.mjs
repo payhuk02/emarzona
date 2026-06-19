@@ -7,19 +7,19 @@ import path from 'node:path';
 const ROOT = path.resolve('src/pages');
 
 const FILES = [
-  'admin/PhysicalInventoryManagement.tsx',
-  'admin/PhysicalPromotions.tsx',
-  'admin/PhysicalProductsAnalytics.tsx',
-  'admin/PhysicalProductsLots.tsx',
-  'admin/PhysicalProductsSerialTracking.tsx',
-  'admin/PhysicalBarcodeScanner.tsx',
-  'admin/PhysicalPreOrders.tsx',
-  'admin/PhysicalBackorders.tsx',
-  'admin/PhysicalBundles.tsx',
-  'admin/PhysicalMultiCurrency.tsx',
-  'admin/PhysicalProductWebhooks.tsx',
+  'dashboard/physical/PhysicalInventoryManagement.tsx',
+  'dashboard/physical/PhysicalPromotions.tsx',
+  'dashboard/physical/PhysicalProductsAnalytics.tsx',
+  'dashboard/physical/PhysicalProductsLots.tsx',
+  'dashboard/physical/PhysicalProductsSerialTracking.tsx',
+  'dashboard/physical/PhysicalBarcodeScanner.tsx',
+  'dashboard/physical/PhysicalPreOrders.tsx',
+  'dashboard/physical/PhysicalBackorders.tsx',
+  'dashboard/physical/PhysicalBundles.tsx',
+  'dashboard/physical/PhysicalMultiCurrency.tsx',
+  'dashboard/physical/PhysicalProductWebhooks.tsx',
   'admin/DigitalProductWebhooks.tsx',
-  'admin/IntegrationsPage.tsx',
+  'dashboard/integrations/IntegrationsPage.tsx',
 ];
 
 const OPEN_PATTERNS = [

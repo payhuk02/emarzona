@@ -46,6 +46,19 @@ describe('resolveHorizontalNavDomains', () => {
     ]);
   });
 
+  it('résout rootPath Produits vers la liste verticale (course)', () => {
+    const domains = resolveHorizontalNavDomains({
+      isPlatformAdmin: false,
+      commerceType: 'course',
+      pathname: '/dashboard/courses',
+      search: '',
+      t: mockT as never,
+    });
+    const produits = domains.find(d => d.sectionKey === 'produits_cours');
+    expect(produits?.rootPath).toBe('/dashboard/courses');
+    expect(produits?.isActive).toBe(true);
+  });
+
   it('structure Finance en sous-groupes mega-menu', () => {
     const domains = resolveHorizontalNavDomains({
       isPlatformAdmin: false,

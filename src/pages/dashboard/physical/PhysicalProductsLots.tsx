@@ -1,5 +1,5 @@
 /**
- * Page Admin Gestion des Lots et Expiration
+ * Page vendeur — gestion des lots et expiration
  * Date: 28 Janvier 2025
  * Design responsive avec le même style que Mes Templates
  */

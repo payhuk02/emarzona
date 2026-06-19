@@ -156,7 +156,7 @@ export function setupPageHints(page: string): void {
       addNavigationHints(['/checkout', '/cart']);
       break;
     case 'dashboard':
-      addNavigationHints(['/dashboard/products', '/dashboard/orders', '/dashboard/analytics']);
+      addNavigationHints(['/dashboard/orders']);
       break;
     default:
       break;

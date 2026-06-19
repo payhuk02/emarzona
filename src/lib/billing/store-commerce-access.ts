@@ -13,6 +13,7 @@ export const PHYSICAL_ONLY_SELLER_PATHS = [
   '/dashboard/physical-inventory',
   '/dashboard/physical-analytics',
   '/dashboard/physical-lots',
+  '/dashboard/physical-lots-old',
   '/dashboard/physical-serial-tracking',
   '/dashboard/physical-barcode-scanner',
   '/dashboard/physical-preorders',

@@ -11,7 +11,7 @@
 
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AdminLayout } from '@/components/admin/AdminLayout';
+import { StoreScopedPageShell } from '@/components/seller/StoreScopedPageShell';
 import { BatchShippingManagement } from '@/components/physical/batch-shipping';
 import { Package, CheckCircle2, Clock, Download } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -41,7 +41,7 @@ export default function AdminBatchShipping() {
   // Loading state
   if (storeLoading || batchesLoading) {
     return (
-      <AdminLayout>
+      <StoreScopedPageShell>
         <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
           <Skeleton className="h-10 w-64" />
           <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4">
@@ -51,14 +51,14 @@ export default function AdminBatchShipping() {
           </div>
           <Skeleton className="h-96 w-full" />
         </div>
-      </AdminLayout>
+      </StoreScopedPageShell>
     );
   }
 
   // No store state
   if (!store) {
     return (
-      <AdminLayout>
+      <StoreScopedPageShell>
         <div className="container mx-auto p-3 sm:p-4 lg:p-6">
           <Card className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in zoom-in-95 duration-500">
             <CardContent className="pt-8 sm:pt-12 pb-8 sm:pb-12 text-center">
@@ -72,12 +72,12 @@ export default function AdminBatchShipping() {
             </CardContent>
           </Card>
         </div>
-      </AdminLayout>
+      </StoreScopedPageShell>
     );
   }
 
   return (
-    <AdminLayout>
+    <StoreScopedPageShell>
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
         {/* Header - Responsive & Animated */}
         <div
@@ -167,6 +167,6 @@ export default function AdminBatchShipping() {
           <BatchShippingManagement />
         </div>
       </div>
-    </AdminLayout>
+    </StoreScopedPageShell>
   );
 }

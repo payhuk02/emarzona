@@ -1,5 +1,5 @@
 /**
- * Page Admin Analytics Produits Physiques
+ * Page vendeur — Analytics produits physiques
  * Date: 28 Janvier 2025
  * Design responsive avec le même style que Mes Templates
  */

@@ -1,8 +1,6 @@
 /**
- * Integrations Configuration Page
- * Date: 30 Janvier 2025
- *
- * Page de configuration pour toutes les intégrations (Zoom, OpenAI, Shipping APIs)
+ * Intégrations boutique — Zoom, shipping, clés API store (P5).
+ * Canonique : pages/dashboard/integrations/
  */
 
 import { useState } from 'react';

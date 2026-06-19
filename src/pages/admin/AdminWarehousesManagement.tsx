@@ -9,7 +9,7 @@
  */
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AdminLayout } from '@/components/admin/AdminLayout';
+import { StoreScopedPageShell } from '@/components/seller/StoreScopedPageShell';
 import {
   WarehousesManagement,
   WarehouseInventory,
@@ -23,7 +23,7 @@ export default function AdminWarehousesManagement() {
   const tabsRef = useScrollAnimation<HTMLDivElement>();
 
   return (
-    <AdminLayout>
+    <StoreScopedPageShell>
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
         {/* Header - Responsive & Animated */}
         <div
@@ -100,6 +100,6 @@ export default function AdminWarehousesManagement() {
           </Tabs>
         </div>
       </div>
-    </AdminLayout>
+    </StoreScopedPageShell>
   );
 }

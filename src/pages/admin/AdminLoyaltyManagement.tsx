@@ -10,7 +10,7 @@
  */
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { AdminLayout } from '@/components/admin/AdminLayout';
+import { StoreScopedPageShell } from '@/components/seller/StoreScopedPageShell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -189,7 +189,7 @@ export default function AdminLoyaltyManagement() {
 
   if (storeLoading || tiersLoading || rewardsLoading) {
     return (
-      <AdminLayout>
+      <StoreScopedPageShell>
         <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
           <Skeleton className="h-8 sm:h-10 w-48 sm:w-64 mb-4 sm:mb-6" />
           <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-5">
@@ -199,13 +199,13 @@ export default function AdminLoyaltyManagement() {
           </div>
           <Skeleton className="h-64 sm:h-96 w-full" />
         </div>
-      </AdminLayout>
+      </StoreScopedPageShell>
     );
   }
 
   if (!currentStore) {
     return (
-      <AdminLayout>
+      <StoreScopedPageShell>
         <div className="container mx-auto p-3 sm:p-4 lg:p-6">
           <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
             <CardContent className="pt-6">
@@ -217,12 +217,12 @@ export default function AdminLoyaltyManagement() {
             </CardContent>
           </Card>
         </div>
-      </AdminLayout>
+      </StoreScopedPageShell>
     );
   }
 
   return (
-    <AdminLayout>
+    <StoreScopedPageShell>
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
         {/* Header - Responsive & Animated */}
         <div
@@ -1096,6 +1096,6 @@ export default function AdminLoyaltyManagement() {
           </DialogContent>
         </Dialog>
       </div>
-    </AdminLayout>
+    </StoreScopedPageShell>
   );
 }

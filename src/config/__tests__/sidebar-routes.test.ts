@@ -9,6 +9,7 @@ const ROUTE_FILES = [
   'src/routes/customerRoutes.tsx',
   'src/routes/adminRoutes.tsx',
   'src/routes/publicRoutes.tsx',
+  'src/routes/storeSubdomainRoutes.tsx',
 ];
 
 function loadRegisteredRoutePatterns(): string[] {

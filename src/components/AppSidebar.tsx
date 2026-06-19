@@ -69,6 +69,7 @@ import {
   canAccessCommercePath,
   getPrimaryProductCreatePath,
 } from '@/lib/commerce/store-capability-map';
+import { isSellerNavItemActive, resolveSellerNavUrl } from '@/lib/navigation/vendor-products-nav';
 import { logger } from '@/lib/logger';
 
 const MAX_RECENT_ITEMS = 2;
@@ -82,13 +83,16 @@ const isNavItemPlanLocked = (
 const buildDefaultCollapsedSections = (
   sections: NavSection[],
   pathname: string,
-  search: string
+  search: string,
+  commerceType?: StoreCommerceType | null
 ): string[] => {
   const openKeys = new Set(DEFAULT_OPEN_SECTION_KEYS);
   sections.forEach(s => {
     if (s.defaultOpen) openKeys.add(s.sectionKey);
   });
-  const activeKey = sections.find(s => sectionContainsPath(s, pathname, search))?.sectionKey;
+  const activeKey = sections.find(s =>
+    sectionContainsPath(s, pathname, search, commerceType)
+  )?.sectionKey;
   if (activeKey) openKeys.add(activeKey);
   return sections.map(s => s.sectionKey).filter(key => !openKeys.has(key));
 };
@@ -197,6 +201,12 @@ export function AppSidebar() {
 
   const showAdminMenu = isAdmin && persona === 'admin';
   const showUserMenu = !showAdminMenu;
+  const resolveNavHref = (url: string) =>
+    persona === 'seller' ? resolveSellerNavUrl(url, commerceType) : url;
+  const isNavLinkActive = (url: string, mode: 'exact' | 'prefix' = 'exact') =>
+    persona === 'seller'
+      ? isSellerNavItemActive(url, location.pathname, location.search, mode, commerceType)
+      : isNavItemActive(url, location.pathname, location.search, mode);
   const logoHome = resolveSidebarLogoHome(persona);
   const logoAriaKey = resolveSidebarLogoAriaKey(persona);
 
@@ -274,9 +284,7 @@ export function AppSidebar() {
   };
 
   const currentNavItem = useMemo(() => {
-    return allCurrentEntries.find(item =>
-      isNavItemActive(item.url, location.pathname, location.search)
-    );
+    return allCurrentEntries.find(item => isNavLinkActive(item.url, 'exact'));
   }, [allCurrentEntries, location.pathname, location.search]);
 
   useEffect(() => {
@@ -313,7 +321,12 @@ export function AppSidebar() {
     if (!prefsHydrated) return;
     if (hasSidebarJsonPref(SIDEBAR_PREF_KEYS.collapsedSections, userId)) return;
     setCollapsedSections(
-      buildDefaultCollapsedSections(activeSections, location.pathname, location.search)
+      buildDefaultCollapsedSections(
+        activeSections,
+        location.pathname,
+        location.search,
+        commerceType
+      )
     );
   }, [prefsHydrated, activeSections, location.pathname, location.search, userId]);
 
@@ -410,7 +423,7 @@ export function AppSidebar() {
       handleLockedNavClick(item.title, item.url);
       return;
     }
-    navigate(item.url);
+    navigate(resolveNavHref(item.url));
   };
 
   return (
@@ -759,11 +772,11 @@ export function AppSidebar() {
                         <SidebarMenuItem key={`${section.label}-${item.title}-${item.url}`}>
                           <SidebarMenuButton asChild tooltip={item.title}>
                             <NavLink
-                              to={parseNavTo(item.url)}
+                              to={parseNavTo(resolveNavHref(item.url))}
                               end
                               onClick={() => recordNavClick(item.url)}
                               className={
-                                isNavItemActive(item.url, location.pathname, location.search)
+                                isNavLinkActive(item.url)
                                   ? `transition-all duration-200 group relative flex items-center ${NAV_LINK_ACTIVE}`
                                   : `transition-all duration-200 group relative flex items-center ${NAV_LINK_INACTIVE}`
                               }

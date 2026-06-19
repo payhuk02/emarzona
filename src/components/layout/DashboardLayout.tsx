@@ -1,11 +1,11 @@
 import { ReactNode } from 'react';
-import { AppPageShell } from '@/components/layout/AppPageShell';
+import { StoreScopedPageShell } from '@/components/seller/StoreScopedPageShell';
 
 interface DashboardLayoutProps {
   children: ReactNode;
 }
 
-/** Shell vendeur unifié (sidebar dashboard + zone contenu). */
+/** Shell vendeur unifié — dual-mode si monté sous `/admin/*` (StoreScopedPageShell). */
 export function DashboardLayout({ children }: DashboardLayoutProps) {
-  return <AppPageShell>{children}</AppPageShell>;
+  return <StoreScopedPageShell>{children}</StoreScopedPageShell>;
 }

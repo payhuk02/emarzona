@@ -73,7 +73,7 @@ const ROUTE_CAPABILITY_RULES: readonly RouteRule[] = [
   {
     label: 'Modules Produits Physiques',
     allowedTypes: ['physical'],
-    pathPrefixes: [...PHYSICAL_ONLY_SELLER_PATHS, '/shipping', '/inventory'],
+    pathPrefixes: [...PHYSICAL_ONLY_SELLER_PATHS],
   },
   {
     label: 'Modules Produits Digitaux',
@@ -108,7 +108,6 @@ const ROUTE_CAPABILITY_RULES: readonly RouteRule[] = [
       '/dashboard/courses',
       '/dashboard/courses/',
       '/dashboard/cohorts',
-      '/courses/',
       '/affiliate/courses',
     ],
   },

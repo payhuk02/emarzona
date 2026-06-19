@@ -4,6 +4,7 @@ import {
   TOP_NAV_PRIMARY_PATHS,
   resolveNavItems,
 } from '@/lib/navigation/resolveNavItems';
+import { resolveSellerNavPath } from '@/lib/navigation/vendor-products-nav';
 import sidebarFR from '@/i18n/locales/sidebar-fr.json';
 
 const mockT = (key: string, opts?: { defaultValue?: string }) => {
@@ -27,10 +28,13 @@ describe('resolveNavItems', () => {
 
     const paths = items.map(i => i.path);
     expect(paths.length).toBeGreaterThan(0);
-    expect(paths).toEqual(TOP_NAV_PRIMARY_PATHS.filter(p => paths.includes(p)));
     expect(paths).toContain('/dashboard');
-    expect(paths).toContain('/dashboard/products');
+    expect(paths).toContain(resolveSellerNavPath('/dashboard/products', null));
     expect(paths).toContain('/dashboard/settings');
+    for (const hubPath of TOP_NAV_PRIMARY_PATHS) {
+      const resolved = resolveSellerNavPath(hubPath, null);
+      expect(paths).toContain(resolved);
+    }
   });
 
   it('excludes adminOnly items for non-platform-admin sellers in top nav', () => {
@@ -55,9 +59,13 @@ describe('resolveNavItems', () => {
     const paths = items.map(i => i.path);
     expect(paths).toContain('/cart');
     expect(paths).toContain('/account');
-    expect(paths.filter(p => BOTTOM_NAV_SPECS.some(s => s.path === p)).length).toBe(
-      BOTTOM_NAV_SPECS.length
-    );
+    for (const spec of BOTTOM_NAV_SPECS) {
+      if (spec.fromMenu) {
+        expect(paths).toContain(resolveSellerNavPath(spec.path, null));
+      } else {
+        expect(paths).toContain(spec.path);
+      }
+    }
   });
 
   it('translates bottom nav fallback labels', () => {
@@ -89,6 +97,28 @@ describe('resolveNavItems', () => {
       '/notifications',
     ]);
     expect(items.find(i => i.path === '/account')?.title).toBe('Compte');
+  });
+
+  it('résout le hub produits top nav vers la liste verticale', () => {
+    const digital = resolveNavItems({
+      surface: 'topnav',
+      persona: 'seller',
+      isPlatformAdmin: false,
+      commerceType: 'digital',
+      t: mockT,
+    });
+    const products = digital.find(i => i.path === '/dashboard/digital-products');
+    expect(products).toBeDefined();
+
+    const course = resolveNavItems({
+      surface: 'bottomnav',
+      persona: 'seller',
+      isPlatformAdmin: false,
+      commerceType: 'course',
+      t: mockT,
+    });
+    const courseProducts = course.find(i => i.path === '/dashboard/courses');
+    expect(courseProducts).toBeDefined();
   });
 
   it('keeps plan-locked top nav items visible with locked flag for physical stores', () => {

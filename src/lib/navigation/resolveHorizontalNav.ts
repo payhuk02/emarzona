@@ -16,6 +16,12 @@ import { userMenuSections } from '@/config/navigation.menus';
 import { filterSellerNavSectionsByAccess } from '@/config/navigation.rbac';
 import type { NavItem, NavSection, SidebarPersona } from '@/config/navigation.types';
 import { isNavPathPlanLocked } from '@/lib/navigation/plan-lock-nav';
+import {
+  VENDOR_PRODUCTS_HUB_PATH,
+  resolveSellerNavPath,
+  resolveSellerNavUrl,
+  isSellerNavItemActive,
+} from '@/lib/navigation/vendor-products-nav';
 import { ShoppingCart } from 'lucide-react';
 import type { ContextSidebarGroupConfig } from '@/config/navigation.context.types';
 
@@ -51,10 +57,10 @@ function toLink(
   planSlug: string | null | undefined,
   commerceType?: StoreCommerceType | null
 ): HorizontalNavLink {
-  const path = getNavItemPath(item.url);
+  const path = resolveSellerNavPath(getNavItemPath(item.url), commerceType);
   return {
     title: item.title,
-    url: item.url,
+    url: resolveSellerNavUrl(item.url, commerceType),
     path,
     icon: resolveNavItemIcon(item.url, item.icon),
     locked: isNavPathPlanLocked(path, planSlug, commerceType),
@@ -181,15 +187,29 @@ function resolveSellerHorizontalNavDomains(
     const items = section.items.map(item =>
       toLink(item, input.physicalPlanSlug, input.commerceType)
     );
-    const isActive = items.some(item =>
-      isNavItemActive(item.url, input.pathname, input.search, 'prefix')
-    );
+    const isActive =
+      items.some(item =>
+        isSellerNavItemActive(item.url, input.pathname, input.search, 'prefix', input.commerceType)
+      ) ||
+      (spec.sectionKey === 'produits_cours' &&
+        isSellerNavItemActive(
+          VENDOR_PRODUCTS_HUB_PATH,
+          input.pathname,
+          input.search,
+          'prefix',
+          input.commerceType
+        ));
+
     const shortLabel = spec.shortLabelKey
       ? input.t(spec.shortLabelKey, { defaultValue: spec.shortLabel })
       : spec.shortLabel;
 
     domains.push({
       ...spec,
+      rootPath:
+        spec.sectionKey === 'produits_cours'
+          ? resolveSellerNavPath(VENDOR_PRODUCTS_HUB_PATH, input.commerceType)
+          : spec.rootPath,
       shortLabel,
       label: section.label,
       items,

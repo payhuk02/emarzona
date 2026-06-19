@@ -3,6 +3,7 @@ import { lazyPage } from '@/routes/lazyPage';
 import { Route, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { SellerRoutePermissionGuard } from '@/components/billing/SellerRoutePermissionGuard';
+import { SellerLegacyPathRedirect } from '@/routes/SellerLegacyPathRedirect';
 import { logger } from '@/lib/logger';
 
 // Helper pour route protégée
@@ -117,34 +118,52 @@ const SEOAnalyzer = lazyPage(() => import('@/pages/SEOAnalyzer'));
 const SEOMetaInspector = lazyPage(() => import('@/pages/SEOMetaInspector'));
 const Pixels = lazyPage(() => import('@/pages/Pixels'));
 const AdvancedOrderManagement = lazyPage(() => import('@/pages/AdvancedOrderManagement'));
-const AdvancedOrderManagementSimple = lazyPage(
-  () => import('@/pages/AdvancedOrderManagementSimple')
+const SellerWebhookManagement = lazyPage(
+  () => import('@/pages/dashboard/seller/SellerWebhookManagement')
 );
-const AdminWebhookManagement = lazyPage(() => import('@/pages/admin/AdminWebhookManagement'));
-const PhysicalInventoryManagement = lazyPage(
-  () => import('@/pages/admin/PhysicalInventoryManagement')
+const SellerPhysicalInventoryManagement = lazyPage(
+  () => import('@/pages/dashboard/seller/SellerPhysicalInventoryManagement')
 );
-const PhysicalPromotions = lazyPage(() => import('@/pages/admin/PhysicalPromotions'));
-const PhysicalProductsAnalytics = lazyPage(() => import('@/pages/admin/PhysicalProductsAnalytics'));
-const PhysicalProductsLots = lazyPage(() => import('@/pages/admin/PhysicalProductsLots'));
-const PhysicalProductsSerialTracking = lazyPage(
-  () => import('@/pages/admin/PhysicalProductsSerialTracking')
+const SellerPhysicalPromotions = lazyPage(
+  () => import('@/pages/dashboard/seller/SellerPhysicalPromotions')
 );
-const PhysicalBarcodeScanner = lazyPage(() => import('@/pages/admin/PhysicalBarcodeScanner'));
-const PhysicalPreOrders = lazyPage(() => import('@/pages/admin/PhysicalPreOrders'));
-const PhysicalBackorders = lazyPage(() => import('@/pages/admin/PhysicalBackorders'));
-const PhysicalBundles = lazyPage(() => import('@/pages/admin/PhysicalBundles'));
-const PhysicalMultiCurrency = lazyPage(() => import('@/pages/admin/PhysicalMultiCurrency'));
-const AdminLoyaltyManagement = lazyPage(() => import('@/pages/admin/AdminLoyaltyManagement'));
-const AdminGiftCardManagement = lazyPage(() => import('@/pages/admin/AdminGiftCardManagement'));
-const AdminSuppliersManagement = lazyPage(() => import('@/pages/admin/AdminSuppliersManagement'));
-const AdminWarehousesManagement = lazyPage(() => import('@/pages/admin/AdminWarehousesManagement'));
-const AdminProductKitsManagement = lazyPage(
-  () => import('@/pages/admin/AdminProductKitsManagement')
+const SellerPhysicalProductsAnalytics = lazyPage(
+  () => import('@/pages/dashboard/seller/SellerPhysicalProductsAnalytics')
 );
-const AdminDemandForecasting = lazyPage(() => import('@/pages/admin/AdminDemandForecasting'));
-const AdminCostOptimization = lazyPage(() => import('@/pages/admin/AdminCostOptimization'));
-const AdminBatchShipping = lazyPage(() => import('@/pages/admin/AdminBatchShipping'));
+const SellerPhysicalSerialTracking = lazyPage(
+  () => import('@/pages/dashboard/seller/SellerPhysicalSerialTracking')
+);
+const SellerPhysicalBarcodeScanner = lazyPage(
+  () => import('@/pages/dashboard/seller/SellerPhysicalBarcodeScanner')
+);
+const SellerPhysicalPreOrders = lazyPage(
+  () => import('@/pages/dashboard/seller/SellerPhysicalPreOrders')
+);
+const SellerPhysicalBackorders = lazyPage(
+  () => import('@/pages/dashboard/seller/SellerPhysicalBackorders')
+);
+const SellerPhysicalBundles = lazyPage(
+  () => import('@/pages/dashboard/seller/SellerPhysicalBundles')
+);
+const SellerPhysicalMultiCurrency = lazyPage(
+  () => import('@/pages/dashboard/seller/SellerPhysicalMultiCurrency')
+);
+const SellerLoyaltyManagement = lazyPage(
+  () => import('@/pages/dashboard/seller/SellerLoyaltyManagement')
+);
+const SellerGiftCardManagement = lazyPage(
+  () => import('@/pages/dashboard/seller/SellerGiftCardManagement')
+);
+const SellerWarehousesManagement = lazyPage(
+  () => import('@/pages/dashboard/seller/SellerWarehousesManagement')
+);
+const SellerProductKitsManagement = lazyPage(
+  () => import('@/pages/dashboard/seller/SellerProductKitsManagement')
+);
+const SellerCostOptimization = lazyPage(
+  () => import('@/pages/dashboard/seller/SellerCostOptimization')
+);
+const SellerBatchShipping = lazyPage(() => import('@/pages/dashboard/seller/SellerBatchShipping'));
 const StoreAffiliateManagement = lazyPage(
   () => import('@/pages/dashboard/StoreAffiliateManagement')
 );
@@ -243,7 +262,9 @@ const ArtistPortfoliosManagement = lazyPage(
 );
 const AuctionsManagementPage = lazyPage(() => import('@/pages/artist/AuctionsManagementPage'));
 const AuctionsWatchlistPage = lazyPage(() => import('@/pages/artist/AuctionsWatchlistPage'));
-const IntegrationsPage = lazyPage(() => import('@/pages/admin/IntegrationsPage'));
+const SellerIntegrationsPage = lazyPage(
+  () => import('@/pages/dashboard/seller/SellerIntegrationsPage')
+);
 const CustomDomainManagement = lazyPage(() => import('@/pages/dashboard/CustomDomainManagement'));
 
 export const dashboardRoutes = (
@@ -259,7 +280,14 @@ export const dashboardRoutes = (
     {pr('/dashboard/payment-methods', PaymentMethods)}
     {pr('/dashboard/payment-connections', PaymentConnectionsPage)}
     {pr('/dashboard/advanced-orders', AdvancedOrderManagement)}
-    {pr('/dashboard/advanced-orders-test', AdvancedOrderManagementSimple)}
+    <Route
+      path="/dashboard/advanced-orders-test"
+      element={
+        <ProtectedRoute>
+          <Navigate to="/dashboard/advanced-orders" replace />
+        </ProtectedRoute>
+      }
+    />
     {pr('/dashboard/customers', Customers)}
     {pr('/dashboard/marketing', Marketing)}
     {pr('/dashboard/promotions', PromotionsPage)}
@@ -294,7 +322,7 @@ export const dashboardRoutes = (
     {pr('/dashboard/products/:id/edit', EditProduct)}
 
     {/* Webhooks */}
-    {pr('/dashboard/webhooks', AdminWebhookManagement)}
+    {pr('/dashboard/webhooks', SellerWebhookManagement)}
     <Route
       path="/dashboard/digital-webhooks"
       element={
@@ -314,27 +342,27 @@ export const dashboardRoutes = (
 
     {/* Physical Products */}
     {pr('/dashboard/physical-products', PhysicalProductsList)}
-    {pr('/dashboard/physical-inventory', PhysicalInventoryManagement)}
-    {pr('/dashboard/physical-promotions', PhysicalPromotions)}
-    {pr('/dashboard/physical-analytics', PhysicalProductsAnalytics)}
+    {pr('/dashboard/physical-inventory', SellerPhysicalInventoryManagement)}
+    {pr('/dashboard/physical-promotions', SellerPhysicalPromotions)}
+    {pr('/dashboard/physical-analytics', SellerPhysicalProductsAnalytics)}
     {pr('/dashboard/physical-lots', PhysicalProductsLotsManagement)}
     {pr('/dashboard/physical-lots/:productId', PhysicalProductsLotsManagement)}
-    {pr('/dashboard/physical-lots-old', PhysicalProductsLots)}
-    {pr('/dashboard/physical-serial-tracking', PhysicalProductsSerialTracking)}
+    {pr('/dashboard/physical-lots-old', PhysicalProductsLotsManagement)}
+    {pr('/dashboard/physical-serial-tracking', SellerPhysicalSerialTracking)}
     {pr('/dashboard/suppliers', SuppliersManagement)}
     {pr('/dashboard/demand-forecasting', DemandForecasting)}
     {pr('/dashboard/inventory-analytics', InventoryAnalytics)}
-    {pr('/dashboard/physical-barcode-scanner', PhysicalBarcodeScanner)}
-    {pr('/dashboard/physical-preorders', PhysicalPreOrders)}
-    {pr('/dashboard/physical-backorders', PhysicalBackorders)}
-    {pr('/dashboard/physical-bundles', PhysicalBundles)}
-    {pr('/dashboard/multi-currency', PhysicalMultiCurrency)}
-    {pr('/dashboard/loyalty', AdminLoyaltyManagement)}
-    {pr('/dashboard/gift-cards', AdminGiftCardManagement)}
-    {pr('/dashboard/warehouses', AdminWarehousesManagement)}
-    {pr('/dashboard/product-kits', AdminProductKitsManagement)}
-    {pr('/dashboard/cost-optimization', AdminCostOptimization)}
-    {pr('/dashboard/batch-shipping', AdminBatchShipping)}
+    {pr('/dashboard/physical-barcode-scanner', SellerPhysicalBarcodeScanner)}
+    {pr('/dashboard/physical-preorders', SellerPhysicalPreOrders)}
+    {pr('/dashboard/physical-backorders', SellerPhysicalBackorders)}
+    {pr('/dashboard/physical-bundles', SellerPhysicalBundles)}
+    {pr('/dashboard/multi-currency', SellerPhysicalMultiCurrency)}
+    {pr('/dashboard/loyalty', SellerLoyaltyManagement)}
+    {pr('/dashboard/gift-cards', SellerGiftCardManagement)}
+    {pr('/dashboard/warehouses', SellerWarehousesManagement)}
+    {pr('/dashboard/product-kits', SellerProductKitsManagement)}
+    {pr('/dashboard/cost-optimization', SellerCostOptimization)}
+    {pr('/dashboard/batch-shipping', SellerBatchShipping)}
 
     {/* Affiliation */}
     {pr('/dashboard/store-affiliates', StoreAffiliateManagement)}
@@ -356,7 +384,15 @@ export const dashboardRoutes = (
     {pr('/dashboard/courses/live-sessions', LiveSessionsManagement)}
     {pr('/dashboard/courses/assignments', AssignmentsManagement)}
     {pr('/dashboard/reviews', ReviewsManagement)}
-    {pr('/courses/:courseId/gamification', CourseGamificationDashboard)}
+    {pr('/dashboard/courses/:courseId/gamification', CourseGamificationDashboard)}
+    <Route
+      path="/courses/:courseId/gamification"
+      element={
+        <ProtectedRoute>
+          <SellerLegacyPathRedirect to="/dashboard/courses/:courseId/gamification" />
+        </ProtectedRoute>
+      }
+    />
     {pr('/dashboard/cohorts', CohortsManagementPage)}
     {pr('/dashboard/cohorts/:cohortId', CohortDetailPage)}
     {pr('/dashboard/courses/:courseId/cohorts', CohortsManagementPage)}
@@ -364,7 +400,15 @@ export const dashboardRoutes = (
     {pr('/dashboard/analytics/dashboards', AnalyticsDashboardsManagement)}
     {pr('/dashboard/abandoned-carts', AbandonedCartsManagement)}
     {pr('/dashboard/taxes', TaxManagement)}
-    {pr('/courses/:slug/analytics', CourseAnalytics)}
+    {pr('/dashboard/courses/:slug/analytics', CourseAnalytics)}
+    <Route
+      path="/courses/:slug/analytics"
+      element={
+        <ProtectedRoute>
+          <SellerLegacyPathRedirect to="/dashboard/courses/:slug/analytics" />
+        </ProtectedRoute>
+      }
+    />
 
     {/* Digital Products */}
     {pr('/dashboard/digital-products', DigitalProductsList)}
@@ -396,8 +440,22 @@ export const dashboardRoutes = (
     {pr('/payments/:orderId/manage', PaymentManagement)}
     {pr('/payments/:orderId/balance', PayBalance)}
     {pr('/disputes/:disputeId', DisputeDetail)}
-    {pr('/shipping', ShippingDashboard)}
-    {pr('/inventory', InventoryDashboard)}
+    <Route
+      path="/shipping"
+      element={
+        <ProtectedRoute>
+          <Navigate to="/dashboard/shipping" replace />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/inventory"
+      element={
+        <ProtectedRoute>
+          <Navigate to="/dashboard/inventory" replace />
+        </ProtectedRoute>
+      }
+    />
 
     {/* Dashboard Advanced */}
     {pr('/dashboard/payment-management', PaymentManagementList)}
@@ -417,6 +475,14 @@ export const dashboardRoutes = (
         </ProtectedRoute>
       }
     />
+    <Route
+      path="/dashboard/smart-notifications"
+      element={
+        <ProtectedRoute>
+          <Navigate to="/settings/notifications" replace />
+        </ProtectedRoute>
+      }
+    />
     {pr('/dashboard/bookings', BookingsManagement)}
     {pr('/dashboard/advanced-calendar', AdvancedCalendarPage)}
     {pr('/dashboard/recurring-bookings', RecurringBookingsPage)}
@@ -425,7 +491,7 @@ export const dashboardRoutes = (
     {pr('/dashboard/portfolios', ArtistPortfoliosManagement)}
     {pr('/dashboard/auctions', AuctionsManagementPage)}
     {pr('/dashboard/auctions/watchlist', AuctionsWatchlistPage)}
-    {pr('/dashboard/integrations', IntegrationsPage)}
+    {pr('/dashboard/integrations', SellerIntegrationsPage)}
     {pr('/dashboard/ai-chatbot', AIChatbotPage)}
     {pr('/dashboard/image-studio', ImageStudioPage)}
   </>

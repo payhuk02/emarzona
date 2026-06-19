@@ -1,6 +1,7 @@
 import { Plus } from '@/components/icons';
 import { sectionLabelToKey } from '@/config/navigation.i18n';
-import { isNavItemActive } from '@/config/navigation.helpers';
+import type { StoreCommerceType } from '@/constants/store-commerce-types';
+import { isSellerNavItemActive } from '@/lib/navigation/vendor-products-nav';
 import { isNavFeatureEnabled } from '@/lib/navigation/feature-flags';
 import type {
   FlatNavEntry,
@@ -265,7 +266,10 @@ export const DEFAULT_OPEN_SECTION_KEYS = new Set(['principal', 'administration',
 export function sectionContainsPath(
   section: { items: { url: string }[] },
   pathname: string,
-  search: string
+  search: string,
+  commerceType?: StoreCommerceType | null
 ): boolean {
-  return section.items.some(item => isNavItemActive(item.url, pathname, search));
+  return section.items.some(item =>
+    isSellerNavItemActive(item.url, pathname, search, 'exact', commerceType)
+  );
 }

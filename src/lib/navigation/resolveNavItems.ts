@@ -16,6 +16,7 @@ import {
 } from '@/config/navigation.rbac';
 import type { FlatNavEntry, NavItem, NavSection, SidebarPersona } from '@/config/navigation.types';
 import { isNavPathPlanLocked } from '@/lib/navigation/plan-lock-nav';
+import { resolveSellerNavPath, resolveSellerNavUrl } from '@/lib/navigation/vendor-products-nav';
 
 /** Ordered links for horizontal top nav (MainLayout seller chrome). */
 export const TOP_NAV_PRIMARY_PATHS = [
@@ -114,10 +115,10 @@ function toResolvedNavItem(
   planSlug?: string | null,
   commerceType?: StoreCommerceType | null
 ): ResolvedNavItem {
-  const path = getNavItemPath(entry.url);
+  const path = resolveSellerNavPath(getNavItemPath(entry.url), commerceType);
   return {
     title: entry.title,
-    url: entry.url,
+    url: resolveSellerNavUrl(entry.url, commerceType),
     path,
     icon: resolveNavItemIcon(entry.url, entry.icon),
     locked: isNavPathPlanLocked(path, planSlug, commerceType),

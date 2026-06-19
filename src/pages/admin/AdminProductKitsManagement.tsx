@@ -10,7 +10,7 @@
  */
 
 import { useMemo } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
+import { StoreScopedPageShell } from '@/components/seller/StoreScopedPageShell';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ProductKitsManagement, KitComponents, KitAssemblies } from '@/components/physical/kits';
 import { Package, Settings, Wrench, CheckCircle2 } from 'lucide-react';
@@ -40,7 +40,7 @@ export default function AdminProductKitsManagement() {
   // Loading state
   if (storeLoading || kitsLoading) {
     return (
-      <AdminLayout>
+      <StoreScopedPageShell>
         <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
           <Skeleton className="h-10 w-64" />
           <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4">
@@ -50,14 +50,14 @@ export default function AdminProductKitsManagement() {
           </div>
           <Skeleton className="h-96 w-full" />
         </div>
-      </AdminLayout>
+      </StoreScopedPageShell>
     );
   }
 
   // No store state
   if (!store) {
     return (
-      <AdminLayout>
+      <StoreScopedPageShell>
         <div className="container mx-auto p-3 sm:p-4 lg:p-6">
           <Card className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in zoom-in-95 duration-500">
             <CardContent className="pt-8 sm:pt-12 pb-8 sm:pb-12 text-center">
@@ -71,12 +71,12 @@ export default function AdminProductKitsManagement() {
             </CardContent>
           </Card>
         </div>
-      </AdminLayout>
+      </StoreScopedPageShell>
     );
   }
 
   return (
-    <AdminLayout>
+    <StoreScopedPageShell>
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
         {/* Header - Responsive & Animated */}
         <div
@@ -211,6 +211,6 @@ export default function AdminProductKitsManagement() {
           </Tabs>
         </div>
       </div>
-    </AdminLayout>
+    </StoreScopedPageShell>
   );
 }

@@ -48,6 +48,7 @@
     "test:e2e": "playwright test --grep-invert \"visual-regression|accessibility|responsive\"",
     "test:e2e:ci": "playwright test --config=playwright.ci.config.ts",
     "test:e2e:commerce-gating": "playwright test --config=playwright.commerce-gating.config.ts",
+    "test:e2e:routes-smoke": "playwright test --config=playwright.routes-smoke.config.ts",
     "test:e2e:vertical-paid": "playwright test --config=playwright.vertical-paid.config.ts",
     "env:e2e:pull": "powershell -NoProfile -File scripts/pull-e2e-env-from-vercel.ps1",
     "test:e2e:vertical-paid:local": "node scripts/run-e2e-with-vercel-env.mjs vertical-paid",

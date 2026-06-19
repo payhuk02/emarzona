@@ -3,7 +3,7 @@
  */
 
 import { useState } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
+import { StoreScopedPageShell } from '@/components/seller/StoreScopedPageShell';
 import { useQuery } from '@tanstack/react-query';
 import { useStore } from '@/hooks/useStore';
 import {
@@ -114,7 +114,7 @@ export default function AdminGiftCardManagement() {
 
   if (!currentStore) {
     return (
-      <AdminLayout>
+      <StoreScopedPageShell>
         <div className="container mx-auto p-3 sm:p-4 lg:p-6">
           <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
             <CardContent className="pt-6">
@@ -124,12 +124,12 @@ export default function AdminGiftCardManagement() {
             </CardContent>
           </Card>
         </div>
-      </AdminLayout>
+      </StoreScopedPageShell>
     );
   }
 
   return (
-    <AdminLayout>
+    <StoreScopedPageShell>
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
         {/* Header - Responsive & Animated */}
         <div
@@ -606,7 +606,7 @@ export default function AdminGiftCardManagement() {
           </TabsContent>
         </Tabs>
       </div>
-    </AdminLayout>
+    </StoreScopedPageShell>
   );
 }
 

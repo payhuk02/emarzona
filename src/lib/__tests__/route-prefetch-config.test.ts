@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getRoutePrefetchConfig } from '@/lib/route-prefetch-config';
+import { getRoutePrefetchConfig, getVendorIdleRoutes } from '@/lib/route-prefetch-config';
 
 describe('getRoutePrefetchConfig', () => {
   it('désactive le prefetch pendant le chargement auth/store', () => {
@@ -14,9 +14,10 @@ describe('getRoutePrefetchConfig', () => {
     expect(cfg.idleRoutes).not.toContain('/dashboard');
   });
 
-  it('prefetch vendeur sans analytics au boot', () => {
-    const cfg = getRoutePrefetchConfig(false, false, 'u1', 2);
-    expect(cfg.idleRoutes).toContain('/dashboard/products');
+  it('prefetch vendeur aligné sur liste verticale (pas /dashboard/products générique)', () => {
+    const cfg = getRoutePrefetchConfig(false, false, 'u1', 2, 'digital');
+    expect(cfg.idleRoutes).toContain('/dashboard/digital-products');
+    expect(cfg.idleRoutes).not.toContain('/dashboard/products');
     expect(cfg.idleRoutes).not.toContain('/dashboard/analytics');
   });
 
@@ -26,10 +27,20 @@ describe('getRoutePrefetchConfig', () => {
     expect(cfg.idleRoutes).toContain('/dashboard/digital-products');
   });
 
+  it('prefetch routes wizard selon commerce_type artiste', () => {
+    const cfg = getRoutePrefetchConfig(false, false, 'u1', 1, 'artist');
+    expect(cfg.idleRoutes).toContain('/dashboard/artist-products');
+    expect(cfg.idleRoutes).toContain('/dashboard/products/new/artist');
+  });
+
   it('prefetch routes wizard selon commerce_type physique', () => {
     const cfg = getRoutePrefetchConfig(false, false, 'u1', 1, 'physical');
     expect(cfg.idleRoutes).toContain('/dashboard/products/new/physical');
     expect(cfg.idleRoutes).toContain('/dashboard/physical-products');
+  });
+
+  it('getVendorIdleRoutes inclut physical-products pour physical', () => {
+    expect(getVendorIdleRoutes('physical')).toContain('/dashboard/physical-products');
   });
 
   it('prefetch client connecté sans boutique', () => {

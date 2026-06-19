@@ -215,7 +215,7 @@ export const publicRoutes = (
     <Route path="/personalization/recommendations" element={<PersonalizedRecommendationsPage />} />
     <Route path="/community" element={<CommunityPage />} />
     <Route path="/cart" element={<CartEnhanced />} />
-    <Route path="/cart-old" element={<Cart />} />
+    <Route path="/cart-old" element={<Navigate to="/cart" replace />} />
     <Route path="/checkout" element={<Checkout />} />
     <Route path="/checkout/cart" element={<CheckoutLegacyRedirect />} />
     <Route path="/cart/checkout" element={<CartCheckoutLegacyRedirect />} />

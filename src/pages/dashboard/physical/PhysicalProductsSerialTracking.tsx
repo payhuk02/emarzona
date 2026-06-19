@@ -1,5 +1,5 @@
 /**
- * Page Admin Numéros de Série et Traçabilité
+ * Page vendeur — numéros de série et traçabilité
  * Date: 28 Janvier 2025
  * Design responsive avec le même style que Mes Templates
  */
