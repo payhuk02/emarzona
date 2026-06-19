@@ -4,7 +4,7 @@
  */
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { authenticateAdminRequest } from '../_shared/admin-auth-utils.ts';
+import { authenticatePlatformAdminRequest } from '../_shared/admin-auth-utils.ts';
 import { retrievePlatformRagContext, type RagSettings } from '../_shared/platform-rag.ts';
 import {
   callImageGeneration,
@@ -106,7 +106,7 @@ serve(async (req: Request) => {
   const userClient = createClient(supabaseUrl, anonKey, {
     global: { headers: { Authorization: req.headers.get('authorization') ?? '' } },
   });
-  const auth = await authenticateAdminRequest(userClient, req, 'settings.manage');
+  const auth = await authenticatePlatformAdminRequest(userClient, req);
   if (!auth.ok) {
     return new Response(JSON.stringify({ error: auth.error }), {
       status: auth.status,

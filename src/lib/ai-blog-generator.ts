@@ -54,14 +54,22 @@ export interface PlatformAiApiKeyMeta {
   created_at: string;
 }
 
+function throwEdgeFunctionError(
+  data: { error?: string } | null | undefined,
+  error: Error | null,
+  fallback: string
+): void {
+  if (data?.error) throw new Error(data.error);
+  if (error) throw new Error(error.message || fallback);
+}
+
 export async function generateBlogArticleWithAI(
   request: BlogAIGenerateRequest
 ): Promise<BlogAIGenerateResponse> {
   const { data, error } = await supabase.functions.invoke('ai-generate-blog-post', {
     body: request,
   });
-  if (error) throw new Error(error.message || 'Échec génération article IA');
-  if (data?.error) throw new Error(data.error as string);
+  throwEdgeFunctionError(data, error, 'Échec génération article IA');
   return data as BlogAIGenerateResponse;
 }
 
@@ -69,7 +77,7 @@ export async function listPlatformAiApiKeys(): Promise<PlatformAiApiKeyMeta[]> {
   const { data, error } = await supabase.functions.invoke('manage-ai-api-keys', {
     body: { action: 'list' },
   });
-  if (error) throw new Error(error.message);
+  throwEdgeFunctionError(data, error, 'Échec chargement des clés API IA');
   return (data?.keys ?? []) as PlatformAiApiKeyMeta[];
 }
 
@@ -82,8 +90,7 @@ export async function addPlatformAiApiKey(payload: {
   const { data, error } = await supabase.functions.invoke('manage-ai-api-keys', {
     body: { action: 'add', ...payload },
   });
-  if (error) throw new Error(error.message);
-  if (data?.error) throw new Error(data.error as string);
+  throwEdgeFunctionError(data, error, 'Échec ajout clé API IA');
   return data.key as PlatformAiApiKeyMeta;
 }
 
@@ -91,14 +98,12 @@ export async function deletePlatformAiApiKey(id: string): Promise<void> {
   const { data, error } = await supabase.functions.invoke('manage-ai-api-keys', {
     body: { action: 'delete', id },
   });
-  if (error) throw new Error(error.message);
-  if (data?.error) throw new Error(data.error as string);
+  throwEdgeFunctionError(data, error, 'Échec suppression clé API IA');
 }
 
 export async function setDefaultPlatformAiApiKey(id: string): Promise<void> {
   const { data, error } = await supabase.functions.invoke('manage-ai-api-keys', {
     body: { action: 'setDefault', id },
   });
-  if (error) throw new Error(error.message);
-  if (data?.error) throw new Error(data.error as string);
+  throwEdgeFunctionError(data, error, 'Échec mise à jour clé API IA');
 }

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Check, Package, Layers, Sparkles } from 'lucide-react';
+import { Check, Package, Layers } from 'lucide-react';
 import { formatFcfa } from '@/lib/format/fcfa';
 import { PHYSICAL_PLAN_PRICES_XOF } from '@/lib/billing/platform-pricing';
 import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
@@ -131,6 +131,63 @@ export function PricingSection() {
 
         <div className="mx-auto mt-12 max-w-6xl sm:mt-14">
           <p className="mb-5 text-center text-xs font-semibold uppercase tracking-[0.2em] text-[var(--lp-text-muted)]">
+            {t('pricing.commissionGroupLabel')}
+          </p>
+
+          <div className="relative overflow-visible pt-1">
+            <div className="relative pt-5">
+              <span className="absolute top-0 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-full border border-white/15 bg-[#15151c] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[var(--lp-gold-bright)]">
+                {t('pricing.commission.badge')}
+              </span>
+
+              <article className="lp-pricing-dark lp-pricing-commission relative overflow-hidden rounded-2xl p-6 sm:p-8">
+                <div
+                  className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full opacity-30 blur-3xl"
+                  style={{ background: 'var(--lp-purple)' }}
+                  aria-hidden
+                />
+                <div className="relative grid gap-6 lg:grid-cols-[auto_1fr_auto] lg:items-center lg:gap-8">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/5">
+                    <Layers className="h-7 w-7 text-[var(--lp-gold-bright)]" strokeWidth={1.5} />
+                  </div>
+
+                  <div>
+                    <h3 className="text-xl font-semibold sm:text-2xl">
+                      {t('pricing.commission.name')}
+                    </h3>
+                    <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/70">
+                      {t('pricing.commission.desc')}
+                    </p>
+                    <ul className="mt-4 grid gap-2 sm:grid-cols-2">
+                      {commissionFeatures.map(f => (
+                        <li key={f} className="flex items-start gap-2 text-sm text-white/90">
+                          <Check className="mt-0.5 h-4 w-4 shrink-0 text-[var(--lp-gold-bright)]" />
+                          {f}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="flex flex-col items-start gap-4 lg:items-end lg:text-right">
+                    <p className="lp-serif text-4xl text-white">
+                      10 %
+                      <span className="block text-sm font-sans font-normal text-white/60">
+                        {t('pricing.periodSale')}
+                      </span>
+                    </p>
+                    <Link
+                      to="/register"
+                      className="lp-btn-primary inline-flex w-full justify-center rounded-full px-8 py-3 text-sm font-semibold lg:w-auto"
+                    >
+                      {t('pricing.commission.cta')}
+                    </Link>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+
+          <p className="mb-5 mt-12 text-center text-xs font-semibold uppercase tracking-[0.2em] text-[var(--lp-text-muted)]">
             {t('pricing.physicalGroupLabel')}
           </p>
 
@@ -146,61 +203,6 @@ export function PricingSection() {
               />
             ))}
           </div>
-
-          <p className="mb-5 mt-12 text-center text-xs font-semibold uppercase tracking-[0.2em] text-[var(--lp-text-muted)]">
-            {t('pricing.commissionGroupLabel')}
-          </p>
-
-          <article className="lp-pricing-dark lp-pricing-commission relative overflow-hidden rounded-2xl p-6 sm:p-8">
-            <div
-              className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full opacity-30 blur-3xl"
-              style={{ background: 'var(--lp-purple)' }}
-              aria-hidden
-            />
-            <div className="relative grid gap-6 lg:grid-cols-[auto_1fr_auto] lg:items-center lg:gap-8">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/5">
-                <Layers className="h-7 w-7 text-[var(--lp-gold-bright)]" strokeWidth={1.5} />
-              </div>
-
-              <div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/5 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[var(--lp-gold-bright)]">
-                    <Sparkles className="h-3 w-3" />
-                    {t('pricing.commission.badge')}
-                  </span>
-                </div>
-                <h3 className="mt-3 text-xl font-semibold sm:text-2xl">
-                  {t('pricing.commission.name')}
-                </h3>
-                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/70">
-                  {t('pricing.commission.desc')}
-                </p>
-                <ul className="mt-4 grid gap-2 sm:grid-cols-2">
-                  {commissionFeatures.map(f => (
-                    <li key={f} className="flex items-start gap-2 text-sm text-white/90">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-[var(--lp-gold-bright)]" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="flex flex-col items-start gap-4 lg:items-end lg:text-right">
-                <p className="lp-serif text-4xl text-white">
-                  10 %
-                  <span className="block text-sm font-sans font-normal text-white/60">
-                    {t('pricing.periodSale')}
-                  </span>
-                </p>
-                <Link
-                  to="/register"
-                  className="lp-btn-primary inline-flex w-full justify-center rounded-full px-8 py-3 text-sm font-semibold lg:w-auto"
-                >
-                  {t('pricing.commission.cta')}
-                </Link>
-              </div>
-            </div>
-          </article>
         </div>
 
         <p className="mx-auto mt-8 max-w-2xl text-center text-xs leading-relaxed text-[var(--lp-text-muted)]">
