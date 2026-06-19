@@ -22,6 +22,7 @@ import { useBehavioralAnalytics } from '@/hooks/useBehavioralAnalytics';
 
 import React, { Suspense, lazy, useEffect } from 'react';
 import { logger } from '@/lib/logger';
+import { canShowErrorDetails } from '@/lib/security/error-debug';
 import { SkipLink } from '@/components/accessibility/SkipLink';
 
 // Lazy-loaded non-critical components
@@ -125,7 +126,7 @@ const SentryFallbackWithNavReset = ({
 
 const ErrorFallbackComponent = ({ error, onRetry }: ErrorFallbackProps) => {
   const isDev = import.meta.env.DEV;
-  const showDetails = isDev || new URLSearchParams(window.location.search).has('debug');
+  const showDetails = canShowErrorDetails();
 
   const errorMessage =
     error instanceof Error ? error.message : error != null ? String(error) : null;
@@ -165,7 +166,7 @@ const ErrorFallbackComponent = ({ error, onRetry }: ErrorFallbackProps) => {
           <div className="mb-6 p-4 bg-accent/50 border border-border rounded-lg text-left">
             <p className="text-sm font-semibold text-foreground mb-2">Mode développement</p>
             <p className="text-xs text-muted-foreground">
-              Ajoutez ?debug=1 à l&apos;URL ou ouvrez la console (F12).
+              Ouvrez la console (F12) pour plus de détails.
             </p>
           </div>
         )}

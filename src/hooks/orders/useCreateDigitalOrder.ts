@@ -18,7 +18,8 @@ import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
 import { logger } from '@/lib/logger';
 import { isSupportedCurrency, type Currency } from '@/lib/currency-converter';
 import { validateCheckoutPromotion } from '@/lib/checkout/promotion';
-import { resolveOrderNumber } from '@/lib/orders/resolve-order-number';
+import { findOrCreateStoreCustomer } from '@/lib/orders/customers-data';
+import { generateOrderNumber } from '@/lib/orders/orders-data';
 
 const PRODUCT_FIELDS = 'id, name, price, promotional_price, currency';
 
@@ -167,36 +168,12 @@ export const useCreateDigitalOrder = () => {
         throw new Error('Produit non trouvé');
       }
 
-      // 2. Récupérer ou créer le customer
-      let customerId: string;
-
-      const { data: existingCustomer } = await supabase
-        .from('customers')
-        .select('id')
-        .eq('store_id', storeId)
-        .eq('email', customerEmail)
-        .single();
-
-      if (existingCustomer) {
-        customerId = existingCustomer.id;
-      } else {
-        const { data: newCustomer, error: customerError } = await supabase
-          .from('customers')
-          .insert({
-            store_id: storeId,
-            email: customerEmail,
-            name: customerName || customerEmail.split('@')[0],
-            phone: customerPhone,
-          })
-          .select('id')
-          .single();
-
-        if (customerError || !newCustomer) {
-          throw new Error('Erreur lors de la création du client');
-        }
-
-        customerId = newCustomer.id;
-      }
+      const customerId = await findOrCreateStoreCustomer({
+        storeId,
+        email: customerEmail,
+        name: customerName || customerEmail.split('@')[0],
+        phone: customerPhone,
+      });
 
       // 3. Générer une licence si nécessaire (AFTER purchase, with correct columns)
       let licenseId: string | undefined;
@@ -262,9 +239,7 @@ export const useCreateDigitalOrder = () => {
       const finalAmount = Math.max(0, baseAmount - promoDiscount - (giftCardAmount || 0));
 
       // 5. Générer un numéro de commande
-      const { data: orderNumberData, error: orderNumberError } =
-        await supabase.rpc('generate_order_number');
-      const orderNumber = resolveOrderNumber(orderNumberData, orderNumberError);
+      const orderNumber = await generateOrderNumber();
 
       // 6. Créer la commande
       // Récupérer le cookie d'affiliation s'il existe

@@ -16,7 +16,8 @@ import { initiatePayment } from '@/lib/payment-service';
 import { useToast } from '@/hooks/use-toast';
 import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
 import { logger } from '@/lib/logger';
-import { resolveOrderNumber } from '@/lib/orders/resolve-order-number';
+import { findOrCreateStoreCustomer } from '@/lib/orders/customers-data';
+import { generateOrderNumber } from '@/lib/orders/orders-data';
 
 const PRODUCT_FIELDS = 'id, name, price, promotional_price, currency, payment_options';
 const COURSE_FIELDS = 'id, product_id';
@@ -166,35 +167,12 @@ export const useCreateCourseOrder = () => {
         }
       }
 
-      // 4. Créer/récupérer customer
-      let customerId: string;
-      const { data: existingCustomer } = await supabase
-        .from('customers')
-        .select('id')
-        .eq('store_id', storeId)
-        .eq('email', customerEmail)
-        .single();
-
-      if (existingCustomer) {
-        customerId = existingCustomer.id;
-      } else {
-        const { data: newCustomer, error: customerError } = await supabase
-          .from('customers')
-          .insert({
-            store_id: storeId,
-            email: customerEmail,
-            name: customerName || customerEmail.split('@')[0],
-            phone: customerPhone,
-          })
-          .select('id')
-          .single();
-
-        if (customerError || !newCustomer) {
-          throw new Error('Erreur lors de la création du client');
-        }
-
-        customerId = newCustomer.id;
-      }
+      const customerId = await findOrCreateStoreCustomer({
+        storeId,
+        email: customerEmail,
+        name: customerName || customerEmail.split('@')[0],
+        phone: customerPhone,
+      });
 
       // 5. Calculer le prix total
       const basePrice = product.promotional_price || product.price;
@@ -220,9 +198,7 @@ export const useCreateCourseOrder = () => {
       const finalAmountToPay = Math.max(0, amountToPay - (giftCardAmount || 0));
 
       // 6. Générer un numéro de commande
-      const { data: orderNumberData, error: orderNumberError } =
-        await supabase.rpc('generate_order_number');
-      const orderNumber = resolveOrderNumber(orderNumberData, orderNumberError);
+      const orderNumber = await generateOrderNumber();
 
       // 7. Créer la commande (avec payment_type)
       // Récupérer le cookie d'affiliation s'il existe

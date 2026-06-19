@@ -39,4 +39,8 @@ test-results/
 # Backups
 emarzona-backup*/
 
+# Package managers non standardisés (projet : npm + package-lock.json)
+bun.lock
+bun.lockb
+
 .vercel

@@ -1,28 +1,36 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import { useCart } from '../useCart';
 import { supabase } from '@/integrations/supabase/client';
+import * as cartData from '@/lib/cart/cart-data';
 
-// Mock Supabase
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: {
-    from: vi.fn(),
     auth: {
       getUser: vi.fn(),
     },
   },
 }));
 
-// Mock logger
+vi.mock('@/lib/cart/cart-data', () => ({
+  fetchCartItems: vi.fn(),
+  fetchProductForCart: vi.fn(),
+  findExistingCartLine: vi.fn(),
+  updateCartItemQuantity: vi.fn(),
+  insertCartItem: vi.fn(),
+  patchCartItem: vi.fn(),
+  deleteCartItemById: vi.fn(),
+  clearCartItems: vi.fn(),
+}));
+
 vi.mock('@/lib/logger', () => ({
   logger: {
     error: vi.fn(),
   },
 }));
 
-// Mock toast
 vi.mock('@/hooks/use-toast', () => ({
   useToast: () => ({
     toast: vi.fn(),
@@ -30,61 +38,15 @@ vi.mock('@/hooks/use-toast', () => ({
 }));
 
 describe('useCart', () => {
-  let  queryClient: QueryClient;
-  let  mockFrom: ReturnType<typeof vi.fn>;
-  let  mockQuery: ReturnType<typeof vi.fn>;
-  let  mockSelect: ReturnType<typeof vi.fn>;
-  let  mockEq: ReturnType<typeof vi.fn>;
-  let  mockOrder: ReturnType<typeof vi.fn>;
-  let  mockInsert: ReturnType<typeof vi.fn>;
-  let  mockUpdate: ReturnType<typeof vi.fn>;
-  let  mockDelete: ReturnType<typeof vi.fn>;
-  let  mockSingle: ReturnType<typeof vi.fn>;
-  let  mockIs: ReturnType<typeof vi.fn>;
+  let queryClient: QueryClient;
 
   beforeEach(() => {
     queryClient = new QueryClient({
       defaultOptions: {
-        queries: {
-          retry: false,
-          gcTime: 0,
-        },
+        queries: { retry: false, gcTime: 0 },
       },
     });
 
-    // Setup mock chain
-    mockSingle = vi.fn();
-    mockIs = vi.fn().mockReturnThis();
-    mockEq = vi.fn().mockReturnThis();
-    mockOrder = vi.fn().mockReturnThis();
-    mockSelect = vi.fn().mockReturnThis();
-    mockInsert = vi.fn().mockReturnValue({
-      select: vi.fn().mockReturnThis(),
-      single: mockSingle,
-    });
-    mockUpdate = vi.fn().mockReturnValue({
-      eq: vi.fn().mockReturnThis(),
-      select: vi.fn().mockReturnThis(),
-      single: mockSingle,
-    });
-    mockDelete = vi.fn().mockReturnValue({
-      eq: vi.fn(),
-    });
-
-    mockQuery = {
-      select: mockSelect,
-      eq: mockEq,
-      is: mockIs,
-      order: mockOrder,
-      insert: mockInsert,
-      update: mockUpdate,
-      delete: mockDelete,
-    };
-
-    mockFrom = vi.fn().mockReturnValue(mockQuery);
-    (supabase.from as ReturnType<typeof vi.fn>) = mockFrom;
-
-    // Mock localStorage
     const localStorageMock = {
       getItem: vi.fn(() => null),
       setItem: vi.fn(),
@@ -93,15 +55,15 @@ describe('useCart', () => {
       length: 0,
       key: vi.fn(),
     };
-    Object.defineProperty(window, 'localStorage', {
-      value: localStorageMock,
-    });
+    Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 
-    // Mock auth.getUser
     (supabase.auth.getUser as ReturnType<typeof vi.fn>).mockResolvedValue({
       data: { user: null },
       error: null,
     });
+
+    vi.mocked(cartData.fetchCartItems).mockResolvedValue([]);
+    vi.mocked(cartData.findExistingCartLine).mockResolvedValue(null);
   });
 
   afterEach(() => {
@@ -114,23 +76,27 @@ describe('useCart', () => {
 
   describe('Cart Fetching', () => {
     it('should fetch cart items for anonymous user', async () => {
-      const mockCartItems = [
+      vi.mocked(cartData.fetchCartItems).mockResolvedValue([
         {
           id: 'item1',
           user_id: null,
           session_id: 'session_123',
           product_id: 'prod1',
+          product_type: 'digital',
           product_name: 'Test Product',
+          product_image_url: null,
+          variant_id: null,
+          variant_name: null,
           quantity: 2,
           unit_price: 1000,
+          discount_amount: 0,
+          coupon_code: null,
+          metadata: null,
           currency: 'XOF',
+          added_at: '',
+          updated_at: '',
         },
-      ];
-
-      mockOrder.mockResolvedValueOnce({
-        data: mockCartItems,
-        error: null,
-      });
+      ]);
 
       const { result } = renderHook(() => useCart(), { wrapper });
 
@@ -140,25 +106,31 @@ describe('useCart', () => {
 
       expect(result.current.items).toHaveLength(1);
       expect(result.current.items[0].product_name).toBe('Test Product');
+      expect(cartData.fetchCartItems).toHaveBeenCalled();
     });
 
     it('should calculate summary correctly', async () => {
-      const mockCartItems = [
+      vi.mocked(cartData.fetchCartItems).mockResolvedValue([
         {
           id: 'item1',
           product_id: 'prod1',
+          product_type: 'digital',
           product_name: 'Product 1',
+          product_image_url: null,
+          user_id: null,
+          session_id: 's1',
+          variant_id: null,
+          variant_name: null,
           quantity: 2,
           unit_price: 1000,
           discount_amount: 100,
+          coupon_code: null,
+          metadata: null,
           currency: 'XOF',
+          added_at: '',
+          updated_at: '',
         },
-      ];
-
-      mockOrder.mockResolvedValueOnce({
-        data: mockCartItems,
-        error: null,
-      });
+      ]);
 
       const { result } = renderHook(() => useCart(), { wrapper });
 
@@ -166,17 +138,12 @@ describe('useCart', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.summary.subtotal).toBe(1800); // (1000 - 100) * 2
-      expect(result.current.summary.discount_amount).toBe(200); // 100 * 2
+      expect(result.current.summary.subtotal).toBe(1800);
+      expect(result.current.summary.discount_amount).toBe(200);
       expect(result.current.summary.item_count).toBe(1);
     });
 
     it('should handle empty cart', async () => {
-      mockOrder.mockResolvedValueOnce({
-        data: [],
-        error: null,
-      });
-
       const { result } = renderHook(() => useCart(), { wrapper });
 
       await waitFor(() => {
@@ -191,60 +158,39 @@ describe('useCart', () => {
 
   describe('Add Item', () => {
     it('should add new item to cart', async () => {
-      // Mock empty cart
-      mockOrder.mockResolvedValue({
-        data: [],
-        error: null,
+      vi.mocked(cartData.fetchProductForCart).mockResolvedValue({
+        id: 'prod1',
+        name: 'Test Product',
+        image_url: null,
+        price: 1000,
+        currency: 'XOF',
+        promotional_price: null,
+        product_type: 'digital',
+        store_id: 'store-1',
       });
-
-      // Mock product fetch
-      const productQuery = {
-        select: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockReturnThis(),
-        single: vi.fn().mockResolvedValue({
-          data: {
-            id: 'prod1',
-            name: 'Test Product',
-            price: 1000,
-            currency: 'XOF',
-            promotional_price: null,
-            product_type: 'digital',
-          },
-          error: null,
-        }),
-      };
-      mockFrom.mockReturnValueOnce(productQuery);
-
-      // Mock existing items check (empty)
-      const existingItemsQuery = {
-        select: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockReturnThis(),
-        is: vi.fn().mockReturnThis(),
-        order: vi.fn().mockResolvedValue({
-          data: [],
-          error: null,
-        }),
-      };
-      mockFrom.mockReturnValueOnce(existingItemsQuery);
-
-      // Mock insert
-      mockSingle.mockResolvedValueOnce({
-        data: {
-          id: 'new-item',
-          product_id: 'prod1',
-          product_name: 'Test Product',
-          quantity: 1,
-          unit_price: 1000,
-          currency: 'XOF',
-        },
-        error: null,
+      vi.mocked(cartData.insertCartItem).mockResolvedValue({
+        id: 'new-item',
+        product_id: 'prod1',
+        product_name: 'Test Product',
+        product_type: 'digital',
+        product_image_url: null,
+        user_id: null,
+        session_id: 'session_x',
+        variant_id: null,
+        variant_name: null,
+        quantity: 1,
+        unit_price: 1000,
+        discount_amount: 0,
+        coupon_code: null,
+        metadata: null,
+        currency: 'XOF',
+        added_at: '',
+        updated_at: '',
       });
 
       const { result } = renderHook(() => useCart(), { wrapper });
 
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
 
       await result.current.addItem({
         product_id: 'prod1',
@@ -252,71 +198,62 @@ describe('useCart', () => {
         quantity: 1,
       });
 
-      await waitFor(() => {
-        expect(mockInsert).toHaveBeenCalled();
-      });
+      expect(cartData.insertCartItem).toHaveBeenCalled();
     });
 
     it('should update quantity if item already exists', async () => {
-      const existingItem = {
+      vi.mocked(cartData.fetchProductForCart).mockResolvedValue({
+        id: 'prod1',
+        name: 'Test Product',
+        image_url: null,
+        price: 1000,
+        currency: 'XOF',
+        promotional_price: null,
+        product_type: 'digital',
+        store_id: 'store-1',
+      });
+      vi.mocked(cartData.findExistingCartLine).mockResolvedValue({
         id: 'item1',
         product_id: 'prod1',
+        product_type: 'digital',
+        product_name: 'Test Product',
+        product_image_url: null,
+        user_id: null,
+        session_id: 's1',
+        variant_id: null,
+        variant_name: null,
         quantity: 1,
-      };
-
-      // Mock cart with existing item
-      mockOrder.mockResolvedValue({
-        data: [existingItem],
-        error: null,
+        unit_price: 1000,
+        discount_amount: 0,
+        coupon_code: null,
+        metadata: null,
+        currency: 'XOF',
+        added_at: '',
+        updated_at: '',
       });
-
-      // Mock product fetch
-      const productQuery = {
-        select: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockReturnThis(),
-        single: vi.fn().mockResolvedValue({
-          data: {
-            id: 'prod1',
-            name: 'Test Product',
-            price: 1000,
-            currency: 'XOF',
-          },
-          error: null,
-        }),
-      };
-      mockFrom.mockReturnValueOnce(productQuery);
-
-      // Mock existing items check
-      const existingItemsQuery = {
-        select: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockReturnThis(),
-        is: vi.fn().mockReturnThis(),
-        order: vi.fn().mockResolvedValue({
-          data: [existingItem],
-          error: null,
-        }),
-      };
-      mockFrom.mockReturnValueOnce(existingItemsQuery);
-
-      // Mock update
-      const updateSingle = vi.fn().mockResolvedValue({
-        data: {
-          ...existingItem,
-          quantity: 2,
-        },
-        error: null,
-      });
-      mockUpdate.mockReturnValue({
-        eq: vi.fn().mockReturnThis(),
-        select: vi.fn().mockReturnThis(),
-        single: updateSingle,
+      vi.mocked(cartData.updateCartItemQuantity).mockResolvedValue({
+        id: 'item1',
+        product_id: 'prod1',
+        product_type: 'digital',
+        product_name: 'Test Product',
+        product_image_url: null,
+        user_id: null,
+        session_id: 's1',
+        variant_id: null,
+        variant_name: null,
+        quantity: 2,
+        unit_price: 1000,
+        discount_amount: 0,
+        coupon_code: null,
+        metadata: null,
+        currency: 'XOF',
+        added_at: '',
+        updated_at: '',
       });
 
       const { result } = renderHook(() => useCart(), { wrapper });
 
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
 
       await result.current.addItem({
         product_id: 'prod1',
@@ -324,117 +261,84 @@ describe('useCart', () => {
         quantity: 1,
       });
 
-      await waitFor(() => {
-        expect(mockUpdate).toHaveBeenCalled();
-      });
+      expect(cartData.updateCartItemQuantity).toHaveBeenCalledWith('item1', 2);
     });
   });
 
   describe('Update Item', () => {
     it('should update item quantity', async () => {
-      const item = {
+      vi.mocked(cartData.fetchCartItems).mockResolvedValue([
+        {
+          id: 'item1',
+          product_id: 'prod1',
+          product_type: 'digital',
+          product_name: 'P',
+          product_image_url: null,
+          user_id: null,
+          session_id: 's1',
+          variant_id: null,
+          variant_name: null,
+          quantity: 1,
+          unit_price: 1000,
+          discount_amount: 0,
+          coupon_code: null,
+          metadata: null,
+          currency: 'XOF',
+          added_at: '',
+          updated_at: '',
+        },
+      ]);
+      vi.mocked(cartData.patchCartItem).mockResolvedValue({
         id: 'item1',
         product_id: 'prod1',
-        quantity: 1,
+        product_type: 'digital',
+        product_name: 'P',
+        product_image_url: null,
+        user_id: null,
+        session_id: 's1',
+        variant_id: null,
+        variant_name: null,
+        quantity: 3,
         unit_price: 1000,
-      };
-
-      mockOrder.mockResolvedValue({
-        data: [item],
-        error: null,
-      });
-
-      const updateSingle = vi.fn().mockResolvedValue({
-        data: { ...item, quantity: 3 },
-        error: null,
+        discount_amount: 0,
+        coupon_code: null,
+        metadata: null,
+        currency: 'XOF',
+        added_at: '',
+        updated_at: '',
       });
 
       const { result } = renderHook(() => useCart(), { wrapper });
 
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-      await result.current.updateItem({
-        item_id: 'item1',
-        quantity: 3,
-      });
+      await result.current.updateItem({ item_id: 'item1', quantity: 3 });
 
-      await waitFor(() => {
-        expect(mockUpdate).toHaveBeenCalled();
-      });
+      expect(cartData.patchCartItem).toHaveBeenCalledWith('item1', { quantity: 3 });
     });
   });
 
   describe('Remove Item', () => {
     it('should remove item from cart', async () => {
-      const item = {
-        id: 'item1',
-        product_id: 'prod1',
-        quantity: 1,
-      };
-
-      mockOrder.mockResolvedValue({
-        data: [item],
-        error: null,
-      });
-
-      mockDelete.mockReturnValue({
-        eq: vi.fn().mockResolvedValue({
-          data: null,
-          error: null,
-        }),
-      });
-
       const { result } = renderHook(() => useCart(), { wrapper });
 
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
 
       await result.current.removeItem('item1');
 
-      await waitFor(() => {
-        expect(mockDelete).toHaveBeenCalled();
-      });
+      expect(cartData.deleteCartItemById).toHaveBeenCalledWith('item1');
     });
   });
 
   describe('Clear Cart', () => {
     it('should clear all items from cart', async () => {
-      mockOrder.mockResolvedValue({
-        data: [
-          { id: 'item1', product_id: 'prod1' },
-          { id: 'item2', product_id: 'prod2' },
-        ],
-        error: null,
-      });
-
-      mockDelete.mockReturnValue({
-        eq: vi.fn().mockResolvedValue({
-          data: null,
-          error: null,
-        }),
-      });
-
       const { result } = renderHook(() => useCart(), { wrapper });
 
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
 
       await result.current.clearCart();
 
-      await waitFor(() => {
-        expect(mockDelete).toHaveBeenCalled();
-      });
+      expect(cartData.clearCartItems).toHaveBeenCalled();
     });
   });
 });
-
-
-
-
-
-
-

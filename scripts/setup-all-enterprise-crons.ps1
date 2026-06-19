@@ -15,4 +15,4 @@ if ($SyncGitHub) {
 }
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 Write-Host ''
-Write-Host 'OK — platform-health, google-indexing, verify-domains et jobs existants alignés.' -ForegroundColor Green
+Write-Host 'OK — platform-health, google-indexing, gdpr-account-deletion, verify-domains et jobs existants alignés.' -ForegroundColor Green

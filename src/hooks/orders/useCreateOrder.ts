@@ -16,7 +16,8 @@ import { useCreateArtistOrder, type CreateArtistOrderOptions } from './useCreate
 import { initiatePayment } from '@/lib/payment-service';
 import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
 import { logger } from '@/lib/logger';
-import { resolveOrderNumber } from '@/lib/orders/resolve-order-number';
+import { findOrCreateStoreCustomer } from '@/lib/orders/customers-data';
+import { generateOrderNumber } from '@/lib/orders/orders-data';
 
 const GENERIC_PRODUCT_FIELDS = 'id, name, price, promotional_price, currency, product_type';
 
@@ -255,40 +256,15 @@ export const useCreateOrder = () => {
             description: `Utilisation du flux générique pour ${productType}`,
           });
 
-          // Créer customer
-          let customerId: string;
-          const { data: existingCustomer } = await supabase
-            .from('customers')
-            .select('id')
-            .eq('store_id', storeId)
-            .eq('email', customerEmail)
-            .single();
-
-          if (existingCustomer) {
-            customerId = existingCustomer.id;
-          } else {
-            const { data: newCustomer, error: customerError } = await supabase
-              .from('customers')
-              .insert({
-                store_id: storeId,
-                email: customerEmail,
-                name: customerName || customerEmail.split('@')[0],
-                phone: customerPhone,
-              })
-              .select('id')
-              .single();
-
-            if (customerError || !newCustomer) {
-              throw new Error('Erreur lors de la création du client');
-            }
-
-            customerId = newCustomer.id;
-          }
+          const customerId = await findOrCreateStoreCustomer({
+            storeId,
+            email: customerEmail,
+            name: customerName || customerEmail.split('@')[0],
+            phone: customerPhone,
+          });
 
           // Créer order générique
-          const { data: orderNumberData, error: orderNumberError } =
-            await supabase.rpc('generate_order_number');
-          const orderNumber = resolveOrderNumber(orderNumberData, orderNumberError);
+          const orderNumber = await generateOrderNumber();
 
           const totalPrice = (product.promotional_price || product.price) * quantity;
 

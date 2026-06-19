@@ -188,7 +188,7 @@ npm update
 
 - [ ] Implémenter rate limiting avancé (Redis)
 - [ ] Ajouter Content Security Policy (CSP) stricte
-- [ ] Configurer Subresource Integrity (SRI)
+- [x] Configurer Subresource Integrity (SRI) — registre pour scripts à URL stable (Crisp, Meta, Pinterest) ; analytics dynamiques exemptés
 - [ ] Tests de pénétration automatisés
 - [ ] Scan de vulnérabilités CI/CD
 

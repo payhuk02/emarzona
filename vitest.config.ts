@@ -32,18 +32,28 @@ export default defineConfig({
       ],
       // Seuils de couverture minimum
       thresholds: isCiExecution
-        ? { lines: 0, functions: 0, branches: 0, statements: 0 }
+        ? { lines: 40, functions: 40, branches: 40, statements: 40 }
         : {
             lines: 80,
             functions: 80,
             branches: 75,
             statements: 80,
           },
-      // Scope couverture: complet en local, critique en mode CI
+      // Scope couverture: complet en local, critique + commerce en mode CI
       include: isCiExecution
         ? [
             'src/lib/checkout/**/*.{ts,tsx}',
             'src/lib/payments/**/*.{ts,tsx}',
+            'src/lib/cart/cart-data.ts',
+            'src/lib/orders/customers-data.ts',
+            'src/lib/orders/orders-data.ts',
+            'src/lib/orders/order-status.ts',
+            'src/lib/orders/resolve-order-number.ts',
+            'src/lib/shipping/fedex-policy.ts',
+            'src/lib/shipping/fedex-rates-client.ts',
+            'src/lib/shipping/fedex-ship-client.ts',
+            'src/lib/shipping/fedex-track-client.ts',
+            'src/lib/shipping/fedex-cancel-client.ts',
             'src/hooks/useRequire2FA.ts',
           ]
         : ['src/**/*.{ts,tsx}'],

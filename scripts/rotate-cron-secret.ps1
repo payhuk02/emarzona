@@ -125,6 +125,10 @@ SELECT public.setup_google_indexing_cron_jobs(
   '$ProjectRef',
   '$EscSecret'
 );
+SELECT public.setup_account_deletion_cron_job(
+  '$ProjectRef',
+  '$EscSecret'
+);
 COMMIT;
 "@
 

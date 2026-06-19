@@ -5,6 +5,7 @@
  */
 
 import { logger } from './logger';
+import { loadExternalScript } from '@/lib/security/load-external-script';
 
 type CrispCommand = unknown[];
 
@@ -51,19 +52,16 @@ export const initCrisp = (websiteId: string) => {
   window.$crisp = [];
   window.CRISP_WEBSITE_ID = websiteId;
 
-  // Charger le script Crisp
-  const script = document.createElement('script');
-  script.src = 'https://client.crisp.chat/l.js';
-  script.async = true;
-  document.head.appendChild(script);
-
-  script.onload = () => {
-    logger.info('Crisp Chat initialized successfully');
-  };
-
-  script.onerror = event => {
-    logger.error('Error loading Crisp', { event });
-  };
+  // Charger le script Crisp (SRI sur URL stable)
+  loadExternalScript('https://client.crisp.chat/l.js', {
+    id: 'crisp-chat-sdk',
+    onLoad: () => {
+      logger.info('Crisp Chat initialized successfully');
+    },
+    onError: event => {
+      logger.error('Error loading Crisp', { event });
+    },
+  });
 };
 
 /**

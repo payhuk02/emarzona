@@ -11,7 +11,7 @@
  * - Support paniers anonymes (session)
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -19,16 +19,23 @@ import { logger } from '@/lib/logger';
 import { assertCanAddServiceToCart } from '@/lib/cart/service-cart-policy';
 import { assertCompatibleCartAddition } from '@/lib/cart/mixed-cart-policy';
 import { getCartItemStoreId } from '@/lib/checkout/cart-validation';
+import {
+  fetchCartItems,
+  fetchProductForCart,
+  findExistingCartLine,
+  updateCartItemQuantity,
+  insertCartItem,
+  patchCartItem,
+  deleteCartItemById,
+  clearCartItems,
+  type CartItemInsert,
+  type CartItemUpdate,
+  type Json,
+} from '@/lib/cart/cart-data';
 import type { User } from '@supabase/supabase-js';
 import type { CartItem, CartSummary, AddToCartOptions, UpdateCartItemOptions } from '@/types/cart';
-import type { Database, Json } from '@/integrations/supabase/types';
-
-type CartItemInsert = Database['public']['Tables']['cart_items']['Insert'];
-type CartItemUpdate = Database['public']['Tables']['cart_items']['Update'];
 
 const CART_QUERY_KEY = ['cart'];
-const CART_ITEM_FIELDS =
-  'id, user_id, session_id, product_id, product_type, product_name, product_image_url, variant_id, variant_name, quantity, unit_price, discount_amount, coupon_code, metadata, currency, added_at, updated_at';
 
 /**
  * Génère ou récupère un session ID pour paniers anonymes
@@ -42,6 +49,10 @@ function getSessionId(): string {
   return sessionId;
 }
 
+function getCartScope(user: User | null, sessionId: string) {
+  return user ? { userId: user.id } : { sessionId };
+}
+
 /**
  * Hook principal useCart
  */
@@ -49,7 +60,6 @@ export function useCart() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [sessionId] = useState(() => getSessionId());
-  // Récupérer l'utilisateur de manière synchrone au besoin
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
@@ -58,7 +68,6 @@ export function useCart() {
     });
   }, []);
 
-  // Fetch cart items
   const {
     data: items = [],
     isLoading,
@@ -66,46 +75,29 @@ export function useCart() {
   } = useQuery({
     queryKey: CART_QUERY_KEY,
     queryFn: async (): Promise<CartItem[]> => {
-      let query = supabase
-        .from('cart_items')
-        .select(CART_ITEM_FIELDS)
-        .order('added_at', { ascending: false });
-
-      if (user) {
-        query = query.eq('user_id', user.id);
-      } else {
-        query = query.eq('session_id', sessionId);
+      try {
+        return await fetchCartItems(getCartScope(user, sessionId));
+      } catch (err) {
+        logger.error('Error fetching cart:', err);
+        throw err;
       }
-
-      const { data, error } = await query;
-
-      if (error) {
-        logger.error('Error fetching cart:', error);
-        throw error;
-      }
-
-      return (data as CartItem[]) || [];
     },
     enabled: true,
-    staleTime: 1000 * 60, // 1 minute
+    staleTime: 1000 * 60,
   });
 
-  // Calculer le summary
-  // NOTE: Les coupons sont maintenant gérés uniquement dans Checkout.tsx (nouveau système)
-  // Le summary ne contient que les remises sur items, pas les coupons
   const subtotal = items.reduce((sum, item) => {
     const itemPrice = (item.unit_price - (item.discount_amount || 0)) * item.quantity;
     return sum + itemPrice;
   }, 0);
 
-  // Calculer uniquement les remises sur items (sans coupons)
   const itemDiscounts = items.reduce((sum, item) => (item.discount_amount || 0) * item.quantity, 0);
 
   const summary: CartSummary = {
     subtotal,
-    discount_amount: itemDiscounts, // Uniquement les remises sur items, pas les coupons
-    tax_amount: 0, // Calculé côté checkout selon pays
-    shipping_amount: 0, // Calculé côté checkout selon adresse
+    discount_amount: itemDiscounts,
+    tax_amount: 0,
+    shipping_amount: 0,
     total: 0,
     item_count: items.length,
   };
@@ -115,21 +107,10 @@ export function useCart() {
     summary.subtotal - summary.discount_amount + summary.tax_amount + summary.shipping_amount
   );
 
-  /**
-   * Ajouter un produit au panier
-   */
   const addItem = useMutation({
     mutationFn: async (options: AddToCartOptions) => {
-      // Récupérer les détails du produit
-      const { data: product, error: productError } = await supabase
-        .from('products')
-        .select('id, name, image_url, price, currency, promotional_price, product_type, store_id')
-        .eq('id', options.product_id)
-        .single();
-
-      if (productError || !product) {
-        throw new Error('Produit non trouvé');
-      }
+      const scope = getCartScope(user, sessionId);
+      const product = await fetchProductForCart(options.product_id);
 
       if (options.product_type === 'service') {
         assertCanAddServiceToCart(options.metadata);
@@ -158,46 +139,19 @@ export function useCart() {
         metadataRecord.store_id = product.store_id;
       }
 
-      // Prix final (promotional ou normal)
       const finalPrice = product.promotional_price || product.price;
 
-      // Vérifier si le produit existe déjà dans le panier
-      let query = supabase
-        .from('cart_items')
-        .select(CART_ITEM_FIELDS)
-        .eq('product_id', options.product_id);
+      const existingItem = await findExistingCartLine(
+        scope,
+        options.product_id,
+        options.variant_id
+      );
 
-      if (user) {
-        query = query.eq('user_id', user.id);
-      } else {
-        query = query.eq('session_id', sessionId);
-      }
-
-      if (options.variant_id) {
-        query = query.eq('variant_id', options.variant_id);
-      } else {
-        query = query.is('variant_id', null);
-      }
-
-      const { data: existingItems } = await query;
-
-      // Si existe déjà, augmenter la quantité
-      if (existingItems && existingItems.length > 0) {
-        const existingItem = existingItems[0];
+      if (existingItem) {
         const newQuantity = existingItem.quantity + (options.quantity || 1);
-
-        const { data: updated, error: updateError } = await supabase
-          .from('cart_items')
-          .update({ quantity: newQuantity })
-          .eq('id', existingItem.id)
-          .select()
-          .single();
-
-        if (updateError) throw updateError;
-        return updated as CartItem;
+        return updateCartItemQuantity(existingItem.id, newQuantity);
       }
 
-      // Sinon, créer un nouvel item
       const newItem: CartItemInsert = {
         user_id: user?.id || null,
         session_id: user ? null : sessionId,
@@ -214,15 +168,7 @@ export function useCart() {
         metadata: (Object.keys(metadataRecord).length > 0 ? metadataRecord : null) as Json,
       };
 
-      const { data: inserted, error: insertError } = await supabase
-        .from('cart_items')
-        .insert(newItem)
-        .select()
-        .single();
-
-      if (insertError) throw insertError;
-
-      return inserted as CartItem;
+      return insertCartItem(newItem);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
@@ -243,16 +189,12 @@ export function useCart() {
     },
   });
 
-  /**
-   * Modifier un item du panier
-   */
   const updateItem = useMutation({
     mutationFn: async (options: UpdateCartItemOptions) => {
       const updates: CartItemUpdate = {};
 
       if (options.quantity !== undefined) {
         if (options.quantity <= 0) {
-          // Supprimer si quantité = 0
           return removeItem.mutateAsync(options.item_id);
         }
         updates.quantity = options.quantity;
@@ -262,15 +204,7 @@ export function useCart() {
         updates.variant_id = options.variant_id;
       }
 
-      const { data: updated, error } = await supabase
-        .from('cart_items')
-        .update(updates)
-        .eq('id', options.item_id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return updated as CartItem;
+      return patchCartItem(options.item_id, updates);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
@@ -285,14 +219,9 @@ export function useCart() {
     },
   });
 
-  /**
-   * Supprimer un item du panier
-   */
   const removeItem = useMutation({
     mutationFn: async (itemId: string) => {
-      const { error } = await supabase.from('cart_items').delete().eq('id', itemId);
-
-      if (error) throw error;
+      await deleteCartItemById(itemId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
@@ -311,21 +240,9 @@ export function useCart() {
     },
   });
 
-  /**
-   * Vider le panier
-   */
   const clearCart = useMutation({
     mutationFn: async () => {
-      let query = supabase.from('cart_items').delete();
-
-      if (user) {
-        query = query.eq('user_id', user.id);
-      } else {
-        query = query.eq('session_id', sessionId);
-      }
-
-      const { error } = await query;
-      if (error) throw error;
+      await clearCartItems(getCartScope(user, sessionId));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
@@ -344,9 +261,6 @@ export function useCart() {
     },
   });
 
-  // NOTE: Les coupons sont maintenant gérés uniquement dans Checkout.tsx via le nouveau système
-  // Les fonctions applyCoupon et removeCoupon de l'ancien système ont été supprimées
-
   return {
     items,
     summary,
@@ -356,7 +270,6 @@ export function useCart() {
     updateItem: updateItem.mutateAsync,
     removeItem: removeItem.mutateAsync,
     clearCart: clearCart.mutateAsync,
-    // NOTE: applyCoupon et removeCoupon supprimés - les coupons sont gérés dans Checkout.tsx
     itemCount: items.length,
     isEmpty: items.length === 0,
   };

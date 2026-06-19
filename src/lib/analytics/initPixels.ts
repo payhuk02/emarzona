@@ -3,8 +3,10 @@
  * Google Analytics, Facebook Pixel, Google Tag Manager, TikTok
  * Date : 27 octobre 2025
  */
+/* eslint-disable @typescript-eslint/no-explicit-any -- APIs tierces (gtag, fbq, ttq) sans typage officiel stable */
 
 import { logger } from '../logger';
+import { loadExternalScript } from '@/lib/security/load-external-script';
 
 // Déclarer les types pour window
 declare global {
@@ -28,12 +30,11 @@ export const initGoogleAnalytics = (measurementId: string) => {
     return;
   }
 
-  // Script GA4
-  const script = document.createElement('script');
-  script.id = `ga-${measurementId}`;
-  script.async = true;
-  script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
-  document.head.appendChild(script);
+  // Script GA4 (URL dynamique par measurement ID — pas de SRI, crossOrigin pour durcissement)
+  loadExternalScript(`https://www.googletagmanager.com/gtag/js?id=${measurementId}`, {
+    id: `ga-${measurementId}`,
+    integrity: null,
+  });
 
   // Configuration
   window.dataLayer = window.dataLayer || [];
@@ -62,33 +63,24 @@ export const initFacebookPixel = (pixelId: string) => {
     return;
   }
 
-  // Facebook Pixel Code
-  (function (f: any, b: any, e: any, v: any, n?: any, t?: any, s?: any) {
-    if (f.fbq) return;
-    n = f.fbq = function (...args: any[]) {
-      n.callMethod
-        ? n.callMethod(...args)
-        : n.queue.push(args);
-    };
-    if (!f._fbq) f.fbq = n;
-    n.push = n;
-    n.loaded = !0;
-    n.version = '2.0';
-    n.queue = [];
-    t = b.createElement(e);
-    t.async = !0;
-    t.src = v;
-    s = b.getElementsByTagName(e)[0];
-    s.parentNode.insertBefore(t, s);
-  })(
-    window,
-    document,
-    'script',
-    'https://connect.facebook.net/en_US/fbevents.js'
-  );
+  // Stub fbq (file d'attente avant chargement du script)
+  const fbq = function (...args: unknown[]) {
+    if (fbq.callMethod) {
+      fbq.callMethod(...args);
+    } else {
+      fbq.queue.push(args);
+    }
+  } as typeof window.fbq & { queue: unknown[]; callMethod?: (...args: unknown[]) => void };
+  fbq.queue = [];
+  window.fbq = fbq;
 
-  window.fbq!('init', pixelId);
-  window.fbq!('track', 'PageView');
+  loadExternalScript('https://connect.facebook.net/en_US/fbevents.js', {
+    id: `fb-pixel-${pixelId}`,
+    onLoad: () => {
+      window.fbq!('init', pixelId);
+      window.fbq!('track', 'PageView');
+    },
+  });
 
   logger.info('Facebook Pixel initialized', { pixelId });
 };
@@ -105,18 +97,14 @@ export const initGoogleTagManager = (containerId: string) => {
     return;
   }
 
-  // Google Tag Manager
-  (function (w: any, d: any, s: any, l: any, i: any) {
-    w[l] = w[l] || [];
-    w[l].push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
-    const f = d.getElementsByTagName(s)[0];
-    const j = d.createElement(s);
-    const dl = l != 'dataLayer' ? '&l=' + l : '';
-    j.async = true;
-    j.id = `gtm-${i}`;
-    j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
-    f.parentNode.insertBefore(j, f);
-  })(window, document, 'script', 'dataLayer', containerId);
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+
+  // Google Tag Manager (URL dynamique — pas de SRI)
+  loadExternalScript(`https://www.googletagmanager.com/gtm.js?id=${containerId}`, {
+    id: `gtm-${containerId}`,
+    integrity: null,
+  });
 
   logger.info('Google Tag Manager initialized', { containerId });
 };
@@ -157,12 +145,10 @@ export const initTikTokPixel = (pixelId: string) => {
         t.push([e, ...args]);
       };
     };
-    for (let  i= 0; i < ttq.methods.length; i++)
-      ttq.setAndDefer(ttq, ttq.methods[i]);
+    for (let i = 0; i < ttq.methods.length; i++) ttq.setAndDefer(ttq, ttq.methods[i]);
     ttq.instance = function (t: any) {
       const e = ttq._i[t] || [];
-      for (let  n= 0; n < ttq.methods.length; n++)
-        ttq.setAndDefer(e, ttq.methods[n]);
+      for (let n = 0; n < ttq.methods.length; n++) ttq.setAndDefer(e, ttq.methods[n]);
       return e;
     };
     ttq.load = function (e: any, n: any) {
@@ -192,10 +178,7 @@ export const initTikTokPixel = (pixelId: string) => {
 /**
  * Tracker un événement personnalisé vers tous les pixels actifs
  */
-export const trackEvent = (
-  eventName: string,
-  eventData?: Record<string, any>
-) => {
+export const trackEvent = (eventName: string, eventData?: Record<string, any>) => {
   if (typeof window === 'undefined') return;
 
   // Google Analytics
@@ -237,10 +220,3 @@ export const trackClick = (element: string, metadata?: Record<string, any>) => {
     ...metadata,
   });
 };
-
-
-
-
-
-
-

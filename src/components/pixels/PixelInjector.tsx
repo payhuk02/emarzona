@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { usePixels } from '@/hooks/usePixels';
 import { logger } from '@/lib/logger';
+import { loadExternalScript } from '@/lib/security/load-external-script';
 
 // Interfaces pour les APIs de tracking
 interface PixelEventData {
@@ -53,11 +54,11 @@ interface PixelInjectorProps {
   productPrice?: number;
 }
 
-export const PixelInjector = ({ 
-  storeUserId, 
-  productId, 
-  productName, 
-  productPrice 
+export const PixelInjector = ({
+  storeUserId,
+  productId,
+  productName,
+  productPrice,
 }: PixelInjectorProps) => {
   const { pixels, trackEvent } = usePixels();
 
@@ -115,26 +116,27 @@ export const PixelInjector = ({
 // Facebook Pixel injection
 const injectFacebookPixel = (pixelId: string) => {
   if (typeof window === 'undefined') return;
-  
-  // Check if already injected
+
   if (window.fbq) return;
 
-  const script = document.createElement('script');
-  script.innerHTML = `
-    !function(f,b,e,v,n,t,s)
-    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-    if(!f._fbq)f.fbq =n;n.push=n;n.loaded=!0;n.version='2.0';
-    n.queue=[];t=b.createElement(e);t.async=!0;
-    t.src=v;s=b.getElementsByTagName(e)[0];
-    s.parentNode.insertBefore(t,s)}(window, document,'script',
-    'https://connect.facebook.net/en_US/fbevents.js');
-    fbq('init', '${pixelId}');
-    fbq('track', 'PageView');
-  `;
-  document.head.appendChild(script);
+  const fbq = function (...args: unknown[]) {
+    if (fbq.callMethod) {
+      fbq.callMethod(...args);
+    } else {
+      fbq.queue.push(args);
+    }
+  } as typeof window.fbq & { queue: unknown[]; callMethod?: (...args: unknown[]) => void };
+  fbq.queue = [];
+  window.fbq = fbq;
 
-  // Add noscript pixel
+  loadExternalScript('https://connect.facebook.net/en_US/fbevents.js', {
+    id: `fb-pixel-injector-${pixelId}`,
+    onLoad: () => {
+      window.fbq?.('init', pixelId);
+      window.fbq?.('track', 'PageView');
+    },
+  });
+
   const noscript = document.createElement('noscript');
   noscript.innerHTML = `<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=${pixelId}&ev=PageView&noscript=1"/>`;
   document.body.appendChild(noscript);
@@ -143,14 +145,14 @@ const injectFacebookPixel = (pixelId: string) => {
 // Google Pixel injection
 const injectGooglePixel = (pixelId: string) => {
   if (typeof window === 'undefined') return;
-  
+
   // Check if already injected
   if (window.gtag) return;
 
-  const script1 = document.createElement('script');
-  script1.async = true;
-  script1.src = `https://www.googletagmanager.com/gtag/js?id=${pixelId}`;
-  document.head.appendChild(script1);
+  loadExternalScript(`https://www.googletagmanager.com/gtag/js?id=${pixelId}`, {
+    id: `ga-pixel-injector-${pixelId}`,
+    integrity: null,
+  });
 
   const script2 = document.createElement('script');
   script2.innerHTML = `
@@ -165,7 +167,7 @@ const injectGooglePixel = (pixelId: string) => {
 // TikTok Pixel injection
 const injectTikTokPixel = (pixelId: string) => {
   if (typeof window === 'undefined') return;
-  
+
   // Check if already injected
   if (window.ttq) return;
 
@@ -183,22 +185,24 @@ const injectTikTokPixel = (pixelId: string) => {
 // Pinterest Pixel injection
 const injectPinterestPixel = (pixelId: string) => {
   if (typeof window === 'undefined') return;
-  
+
   // Check if already injected
   if (window.pintrk) return;
 
-  const script = document.createElement('script');
-  script.innerHTML = `
-    !function(e){if(!window.pintrk){window.pintrk = function () {
-    window.pintrk.queue.push(Array.prototype.slice.call(arguments))};var
- n=window.pintrk;n.queue=[],n.version="3.0";var
- t=document.createElement("script");t.async=!0,t.src=e;var
- r=document.getElementsByTagName("script")[0];
-      r.parentNode.insertBefore(t,r)}}("https://s.pinimg.com/ct/core.js");
-    pintrk('load', '${pixelId}', {em: '<user_email_address>'});
-    pintrk('page');
-  `;
-  document.head.appendChild(script);
+  const pintrk = function (...args: unknown[]) {
+    pintrk.queue.push(args);
+  } as PinterestPixel & { queue: unknown[]; version?: string };
+  pintrk.queue = [];
+  pintrk.version = '3.0';
+  window.pintrk = pintrk;
+
+  loadExternalScript('https://s.pinimg.com/ct/core.js', {
+    id: `pinterest-pixel-${pixelId}`,
+    onLoad: () => {
+      window.pintrk?.('load', pixelId, { em: '<user_email_address>' });
+      window.pintrk?.('page');
+    },
+  });
 
   const noscript = document.createElement('noscript');
   noscript.innerHTML = `<img height="1" width="1" style="display:none;" alt="" src="https://ct.pinterest.com/v3/?event=init&tid=${pixelId}&noscript=1" />`;
@@ -223,11 +227,13 @@ export const trackAddToCart = (pixelId: string, pixelType: string, data: PixelEv
     case 'google':
       if (window.gtag) {
         window.gtag('event', 'add_to_cart', {
-          items: [{
-            id: data.product_id,
-            name: data.product_name,
-            price: data.amount,
-          }],
+          items: [
+            {
+              id: data.product_id,
+              name: data.product_name,
+              price: data.amount,
+            },
+          ],
         });
       }
       break;
@@ -262,11 +268,13 @@ export const trackPurchase = (pixelId: string, pixelType: string, data: PixelEve
           transaction_id: data.order_id,
           value: data.amount,
           currency: 'XOF',
-          items: [{
-            id: data.product_id,
-            name: data.product_name,
-            price: data.amount,
-          }],
+          items: [
+            {
+              id: data.product_id,
+              name: data.product_name,
+              price: data.amount,
+            },
+          ],
         });
       }
       break;
@@ -282,9 +290,3 @@ export const trackPurchase = (pixelId: string, pixelType: string, data: PixelEve
       break;
   }
 };
-
-
-
-
-
-
