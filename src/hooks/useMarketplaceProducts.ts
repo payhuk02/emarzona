@@ -41,7 +41,7 @@
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabaseRead } from '@/integrations/supabase/read-client';
 import { logger } from '@/lib/logger';
 import { Product, FilterState, PaginationState } from '@/types/marketplace';
 import { cacheStrategies } from '@/lib/cache-optimization';
@@ -138,7 +138,7 @@ export async function fetchMarketplaceProducts({
     try {
       logger.info('🔄 [useMarketplaceProducts] Utilisation de la fonction RPC optimisée');
 
-      const { data, error } = await supabase.rpc('get_marketplace_products_filtered', {
+      const { data, error } = await supabaseRead.rpc('get_marketplace_products_filtered', {
         p_limit: pagination.itemsPerPage,
         p_offset: startIndex,
         p_category:
@@ -298,7 +298,7 @@ export async function fetchMarketplaceProducts({
     selectQuery += `,artist_products!left(artist_type,artwork_edition_type,certificate_of_authenticity)`;
   }
 
-  let query = supabase
+  let query = supabaseRead
     .from('products')
     .select(selectQuery, { count: 'exact' }) // Obtenir le count total
     .eq('is_active', true)

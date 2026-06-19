@@ -129,6 +129,10 @@ SELECT public.setup_account_deletion_cron_job(
   '$ProjectRef',
   '$EscSecret'
 );
+SELECT public.setup_nightly_maintenance_cron_job(
+  '$ProjectRef',
+  '$EscSecret'
+);
 COMMIT;
 "@
 

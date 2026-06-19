@@ -33,6 +33,16 @@ Le client Supabase est configuré avec `auth.storage: sessionStorage` (voir `cli
 
 Variables requises en local : `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` (ou `VITE_SUPABASE_PUBLISHABLE_KEY`).
 
+## Read replica (Phase 3 scalabilité)
+
+Client dédié : `read-client.ts` — `supabaseRead` pour les lectures marketplace (RPC `get_marketplace_*`).
+
+| Variable                 | Rôle                                                                                    |
+| ------------------------ | --------------------------------------------------------------------------------------- |
+| `VITE_SUPABASE_READ_URL` | URL pooler read-only Supabase (optionnel). Si absent, fallback sur `VITE_SUPABASE_URL`. |
+
+Les écritures et l'auth restent sur `client.ts` (primary). Activer la replica côté Supabase Dashboard puis définir l'URL sur Vercel.
+
 ## Après régénération
 
 1. Exécuter les migrations locales non encore appliquées sur le projet distant si des colonnes manquent.

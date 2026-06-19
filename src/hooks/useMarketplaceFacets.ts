@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { supabaseRead } from '@/integrations/supabase/read-client';
 import { logger } from '@/lib/logger';
 import { FilterState } from '@/types/marketplace';
 import type { MarketplaceFacetsResponse } from '@/types/marketplace-facets';
@@ -42,7 +42,7 @@ export async function fetchMarketplaceFacetsData(
   filters: FilterState,
   searchQuery: string
 ): Promise<MarketplaceFacetsResponse> {
-  const { data, error } = await supabase.rpc('get_marketplace_facets', {
+  const { data, error } = await supabaseRead.rpc('get_marketplace_facets', {
     p_product_type: filters.productType !== 'all' ? filters.productType : null,
     p_category: filters.category !== 'all' ? filters.category : null,
     p_search_query: searchQuery.trim() || null,

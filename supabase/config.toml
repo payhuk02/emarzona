@@ -55,6 +55,9 @@ verify_jwt = false
 [functions.process-account-deletions]
 verify_jwt = false
 
+[functions.process-nightly-maintenance]
+verify_jwt = false
+
 # Sitemaps et robots boutiques : accès public (Google, Bing, bots IA)
 [functions.sitemap-main]
 verify_jwt = false
