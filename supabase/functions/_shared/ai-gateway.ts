@@ -147,10 +147,43 @@ export async function callImageGeneration(options: {
     throw new Error(`Image generation failed (${response.status}): ${t.slice(0, 200)}`);
   }
 
-  const data = await response.json();
+  const rawBody = await response.text();
+  if (!rawBody.trim()) {
+    throw new Error('Réponse image vide du modèle');
+  }
+
+  let data: Record<string, unknown>;
+  try {
+    data = JSON.parse(rawBody) as Record<string, unknown>;
+  } catch {
+    const directUrl = rawBody.trim();
+    if (
+      directUrl.startsWith('http://') ||
+      directUrl.startsWith('https://') ||
+      directUrl.startsWith('data:')
+    ) {
+      return directUrl;
+    }
+    throw new Error(`Réponse image invalide: ${directUrl.slice(0, 200)}`);
+  }
+
+  const content = data?.choices?.[0]?.message?.content;
+  const contentImageUrl =
+    Array.isArray(content) && content.length > 0
+      ? (
+          content.find(
+            part =>
+              typeof part === 'object' &&
+              part !== null &&
+              'type' in part &&
+              (part as { type?: string }).type === 'image_url'
+          ) as { image_url?: { url?: string } } | undefined
+        )?.image_url?.url
+      : undefined;
   const imageUrl =
     data?.choices?.[0]?.message?.images?.[0]?.image_url?.url ??
-    data?.choices?.[0]?.message?.content;
+    contentImageUrl ??
+    (typeof content === 'string' ? content : undefined);
   if (!imageUrl || typeof imageUrl !== 'string') {
     throw new Error('Aucune image générée par le modèle');
   }
@@ -337,7 +370,49 @@ export function parseJsonFromModelContent(content: string): Record<string, unkno
   const fenced = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i)?.[1]?.trim();
   const candidate = fenced || trimmed.match(/\{[\s\S]*\}/)?.[0];
   if (!candidate) throw new Error('Réponse IA invalide — JSON attendu');
-  return JSON.parse(candidate) as Record<string, unknown>;
+  return safeParseStructuredJson(candidate);
+}
+
+function safeParseStructuredJson(candidate: string): Record<string, unknown> {
+  const normalized = candidate.trim();
+  try {
+    return JSON.parse(normalized) as Record<string, unknown>;
+  } catch {
+    const repaired = repairPossiblyTruncatedJson(normalized);
+    return JSON.parse(repaired) as Record<string, unknown>;
+  }
+}
+
+function repairPossiblyTruncatedJson(input: string): string {
+  let text = input.trim();
+  text = text.replace(/,\s*([}\]])/g, '$1');
+
+  const stack: string[] = [];
+  let inString = false;
+  let escaped = false;
+
+  for (const ch of text) {
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
+    if (ch === '\\') {
+      escaped = true;
+      continue;
+    }
+    if (ch === '"') {
+      inString = !inString;
+      continue;
+    }
+    if (inString) continue;
+    if (ch === '{') stack.push('}');
+    else if (ch === '[') stack.push(']');
+    else if ((ch === '}' || ch === ']') && stack[stack.length - 1] === ch) stack.pop();
+  }
+
+  if (inString) text += '"';
+  while (stack.length > 0) text += stack.pop();
+  return text;
 }
 
 export async function completeStructuredWithToolFallback(options: {
@@ -394,7 +469,11 @@ export async function completeStructuredWithToolFallback(options: {
   const data = await response.json();
   const toolCall = data?.choices?.[0]?.message?.tool_calls?.[0];
   if (toolCall?.function?.arguments) {
-    return JSON.parse(toolCall.function.arguments) as Record<string, unknown>;
+    try {
+      return safeParseStructuredJson(toolCall.function.arguments);
+    } catch {
+      // Certains modèles renvoient des arguments d'outil tronqués ; on retombe sur le contenu texte.
+    }
   }
 
   const content = data?.choices?.[0]?.message?.content;
