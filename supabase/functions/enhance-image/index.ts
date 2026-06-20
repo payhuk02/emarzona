@@ -1,27 +1,18 @@
 /**
  * Edge function `enhance-image`
- * Améliore une image via Lovable AI (Gemini Nano Banana 2).
+ * Améliore une image via OpenRouter (modèles vision / image).
  * Body: { imageUrl: string, instruction?: string }
  * Response: { imageUrl: string } (data URL base64)
  */
 
-import { encode as base64Encode } from 'https://deno.land/std@0.168.0/encoding/base64.ts';
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
-/** L'IA renvoie parfois une URL HTTPS ; le navigateur ne peut pas la fetch (CSP). */
-async function ensureDataUrl(url: string): Promise<string> {
-  if (url.startsWith('data:')) return url;
-  if (!url.startsWith('http://') && !url.startsWith('https://')) return url;
-
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw new Error(`Impossible de télécharger l'image IA (${res.status})`);
-  }
-  const buf = await res.arrayBuffer();
-  const mime = res.headers.get('content-type')?.split(';')[0]?.trim() || 'image/png';
-  return `data:${mime};base64,${base64Encode(new Uint8Array(buf))}`;
-}
+import {
+  callMultimodalCompletion,
+  ensureDataUrl,
+  mapGatewayError,
+  resolveAiApiKey,
+} from '../_shared/ai-gateway.ts';
 
 const defaultAllowedOrigin = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
 const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || defaultAllowedOrigin)
@@ -76,13 +67,9 @@ serve(async (req: Request) => {
       });
     }
 
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      return new Response(JSON.stringify({ error: 'LOVABLE_API_KEY non configurée' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+    const admin = createClient(supabaseUrl, serviceKey);
+    const { key: apiKey } = await resolveAiApiKey(admin, 'openrouter');
 
     const body = await req.json();
     const inputImageUrl = body?.imageUrl;
@@ -127,38 +114,26 @@ serve(async (req: Request) => {
       defaultInstr ||
       DEFAULT_INSTRUCTION;
 
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model,
-        messages: [
-          {
-            role: 'user',
-            content: [
-              { type: 'text', text: finalInstruction },
-              { type: 'image_url', image_url: { url: inputImageUrl } },
-            ],
-          },
-        ],
-        modalities: ['image', 'text'],
-      }),
+    const response = await callMultimodalCompletion({
+      apiKey,
+      model,
+      messages: [
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: finalInstruction },
+            { type: 'image_url', image_url: { url: inputImageUrl } },
+          ],
+        },
+      ],
     });
 
-    if (response.status === 429) {
-      return new Response(
-        JSON.stringify({ error: 'Limite de requêtes atteinte. Réessayez dans un instant.' }),
-        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-    if (response.status === 402) {
-      return new Response(
-        JSON.stringify({ error: 'Crédits IA épuisés. Ajoutez du crédit dans les paramètres.' }),
-        { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    const mapped = mapGatewayError(response.status);
+    if (mapped) {
+      return new Response(JSON.stringify({ error: mapped.message }), {
+        status: mapped.status,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
     if (!response.ok) {
       const t = await response.text();
@@ -170,7 +145,10 @@ serve(async (req: Request) => {
     }
 
     const data = await response.json();
-    const out = data?.choices?.[0]?.message?.images?.[0]?.image_url?.url ?? null;
+    const out =
+      data?.choices?.[0]?.message?.images?.[0]?.image_url?.url ??
+      data?.choices?.[0]?.message?.content ??
+      null;
 
     if (!out) {
       return new Response(JSON.stringify({ error: 'Aucune image générée' }), {

@@ -56,7 +56,7 @@ export interface PlatformAiApiKeyMeta {
 }
 
 const AI_CREDITS_HINT =
-  ' Rechargez vos crédits (OpenRouter ou Lovable) ou ajoutez une clé API dans Administration → Gestion IA.';
+  ' Rechargez vos crédits OpenRouter ou ajoutez une clé API dans Administration → Gestion IA.';
 
 async function throwEdgeFunctionError(
   data: { error?: string } | null | undefined,
@@ -73,21 +73,22 @@ async function throwEdgeFunctionError(
 
   const message = error instanceof Error ? error.message : String(error);
   const details = await extractErrorDetails(error, message);
-  let detailed = extractDetailedMessage(details, fallback);
-
-  if (
-    detailed.includes('non-2xx') ||
-    detailed.includes('Edge Function returned') ||
-    detailed === fallback
-  ) {
-    detailed = fallback;
-  }
+  const detailed = extractDetailedMessage(details, fallback);
 
   if (/crédits ia|402|payment required|épuisé/i.test(detailed)) {
-    detailed = `Crédits IA épuisés.${AI_CREDITS_HINT}`;
+    throw new Error(`Crédits IA épuisés.${AI_CREDITS_HINT}`);
   }
 
-  throw new Error(detailed);
+  if (
+    detailed &&
+    !detailed.includes('non-2xx') &&
+    !detailed.includes('Edge Function returned') &&
+    detailed !== fallback
+  ) {
+    throw new Error(detailed);
+  }
+
+  throw new Error(error instanceof Error && error.message ? error.message : fallback);
 }
 
 export async function generateBlogArticleWithAI(

@@ -1,5 +1,5 @@
 /**
- * Panneau admin — gestion sécurisée des clés API IA
+ * Panneau admin — gestion sécurisée des clés API IA (OpenRouter)
  */
 import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -26,7 +26,6 @@ import {
 
 const PROVIDERS = [
   { id: 'openrouter', label: 'OpenRouter (recommandé)' },
-  { id: 'lovable', label: 'Lovable AI Gateway' },
   { id: 'openai', label: 'OpenAI' },
   { id: 'anthropic', label: 'Anthropic' },
   { id: 'google', label: 'Google AI' },
@@ -41,7 +40,7 @@ export function PlatformAiApiKeysPanel() {
   const [provider, setProvider] = useState<string>('openrouter');
   const [label, setLabel] = useState('');
   const [apiKey, setApiKey] = useState('');
-  const [isDefault, setIsDefault] = useState(false);
+  const [isDefault, setIsDefault] = useState(true);
 
   const load = useCallback(async () => {
     try {
@@ -64,6 +63,10 @@ export function PlatformAiApiKeysPanel() {
   }, [load]);
 
   const handleAdd = async () => {
+    if (!provider) {
+      toast({ title: 'Sélectionnez un provider', variant: 'destructive' });
+      return;
+    }
     if (!label.trim() || apiKey.trim().length < 8) {
       toast({ title: 'Label et clé requis (min 8 car.)', variant: 'destructive' });
       return;
@@ -84,7 +87,7 @@ export function PlatformAiApiKeysPanel() {
     } catch (e) {
       toast({
         title: 'Erreur',
-        description: e instanceof Error ? e.message : undefined,
+        description: e instanceof Error ? e.message : 'Erreur inconnue',
         variant: 'destructive',
       });
     } finally {
@@ -131,26 +134,11 @@ export function PlatformAiApiKeysPanel() {
           <div>
             <p className="font-medium">OpenRouter (serveur)</p>
             <p className="text-xs text-muted-foreground">
-              OPENROUTER_API_KEY — variable Supabase Edge (fallback)
+              OPENROUTER_API_KEY — secret Supabase Edge (fallback)
             </p>
           </div>
         </div>
         <Badge>Actif si configuré</Badge>
-      </div>
-
-      <div className="flex items-center justify-between p-4 border rounded-lg">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-emerald-500/10">
-            <Shield className="h-5 w-5 text-emerald-500" />
-          </div>
-          <div>
-            <p className="font-medium">Lovable AI Gateway (serveur)</p>
-            <p className="text-xs text-muted-foreground">
-              LOVABLE_API_KEY — variable Supabase Edge (fallback)
-            </p>
-          </div>
-        </div>
-        <Badge variant="outline">Optionnel</Badge>
       </div>
 
       <Alert>
@@ -158,7 +146,17 @@ export function PlatformAiApiKeysPanel() {
         <AlertTitle>Stockage sécurisé</AlertTitle>
         <AlertDescription>
           Les clés ajoutées ici sont chiffrées AES-GCM côté edge functions. Elles ne sont jamais
-          renvoyées au navigateur — seul un hint (4 derniers caractères) est affiché.
+          renvoyées au navigateur — seul un hint (4 derniers caractères) est affiché. Obtenez une
+          clé sur{' '}
+          <a
+            href="https://openrouter.ai/keys"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline"
+          >
+            openrouter.ai/keys
+          </a>
+          .
         </AlertDescription>
       </Alert>
 
@@ -204,7 +202,7 @@ export function PlatformAiApiKeysPanel() {
         </ul>
       ) : (
         <p className="text-sm text-muted-foreground">
-          Aucune clé personnalisée — OPENROUTER_API_KEY ou LOVABLE_API_KEY utilisée.
+          Aucune clé personnalisée — OPENROUTER_API_KEY utilisée si configurée.
         </p>
       )}
 
@@ -217,7 +215,7 @@ export function PlatformAiApiKeysPanel() {
             <Label>Provider</Label>
             <Select value={provider} onValueChange={setProvider}>
               <SelectTrigger>
-                <SelectValue />
+                <SelectValue placeholder="Choisir un provider" />
               </SelectTrigger>
               <SelectContent>
                 {PROVIDERS.map(p => (
@@ -233,7 +231,7 @@ export function PlatformAiApiKeysPanel() {
             <Input
               value={label}
               onChange={e => setLabel(e.target.value)}
-              placeholder="Ex. OpenAI production"
+              placeholder="Ex. OpenRouter production"
             />
           </div>
         </div>
@@ -243,7 +241,7 @@ export function PlatformAiApiKeysPanel() {
             type="password"
             value={apiKey}
             onChange={e => setApiKey(e.target.value)}
-            placeholder="sk-or-… ou clé provider"
+            placeholder="sk-or-…"
             autoComplete="off"
           />
         </div>

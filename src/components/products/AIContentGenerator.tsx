@@ -62,7 +62,7 @@ export const AIContentGenerator = ({
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [generating, setGenerating] = useState(false);
-  const [provider, setProvider] = useState<AIProvider>('lovable');
+  const [provider, setProvider] = useState<AIProvider>('openrouter');
   const [targetAudience, setTargetAudience] = useState('');
   const [generateImage, setGenerateImage] = useState(true);
   const [generatedContent, setGeneratedContent] = useState<GeneratedContent | null>(null);
@@ -157,7 +157,7 @@ export const AIContentGenerator = ({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="lovable">AI Emarzona</SelectItem>
+                    <SelectItem value="openrouter">AI Emarzona (OpenRouter)</SelectItem>
                     <SelectItem value="fallback">Templates intelligents (gratuit)</SelectItem>
                   </SelectContent>
                 </Select>

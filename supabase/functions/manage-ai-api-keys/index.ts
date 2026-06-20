@@ -5,8 +5,9 @@
  */
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { authenticateAdminRequest } from '../_shared/admin-auth-utils.ts';
+import { authenticatePlatformAdminRequest } from '../_shared/admin-auth-utils.ts';
 import { encryptApiKey, keyHint } from '../_shared/ai-crypto.ts';
+import { formatSupabaseError } from '../_shared/ai-gateway.ts';
 
 const defaultAllowedOrigin = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
 
@@ -23,14 +24,7 @@ function cors(origin: string | null) {
   };
 }
 
-const VALID_PROVIDERS = [
-  'lovable',
-  'openrouter',
-  'openai',
-  'anthropic',
-  'google',
-  'custom',
-] as const;
+const VALID_PROVIDERS = ['openrouter', 'openai', 'anthropic', 'google', 'custom'] as const;
 
 serve(async (req: Request) => {
   const headers = cors(req.headers.get('origin'));
@@ -46,7 +40,7 @@ serve(async (req: Request) => {
   const userClient = createClient(supabaseUrl, anonKey, {
     global: { headers: { Authorization: req.headers.get('authorization') ?? '' } },
   });
-  const auth = await authenticateAdminRequest(userClient, req, 'settings.manage');
+  const auth = await authenticatePlatformAdminRequest(userClient, req);
   if (!auth.ok) {
     return new Response(JSON.stringify({ error: auth.error }), {
       status: auth.status,
@@ -74,11 +68,16 @@ serve(async (req: Request) => {
       const apiKey = (body?.apiKey as string)?.trim();
       const isDefault = Boolean(body?.isDefault);
 
-      if (!VALID_PROVIDERS.includes(provider as (typeof VALID_PROVIDERS)[number])) {
-        return new Response(JSON.stringify({ error: 'Provider invalide' }), {
-          status: 400,
-          headers: { ...headers, 'Content-Type': 'application/json' },
-        });
+      if (!provider || !VALID_PROVIDERS.includes(provider as (typeof VALID_PROVIDERS)[number])) {
+        return new Response(
+          JSON.stringify({
+            error: `Provider invalide. Valeurs acceptées : ${VALID_PROVIDERS.join(', ')}`,
+          }),
+          {
+            status: 400,
+            headers: { ...headers, 'Content-Type': 'application/json' },
+          }
+        );
       }
       if (!label || !apiKey || apiKey.length < 8) {
         return new Response(JSON.stringify({ error: 'Label et clé API requis (min 8 car.)' }), {
@@ -164,9 +163,9 @@ serve(async (req: Request) => {
     });
   } catch (e) {
     console.error('manage-ai-api-keys error', e);
-    return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : 'Erreur inconnue' }),
-      { status: 500, headers: { ...headers, 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ error: formatSupabaseError(e) }), {
+      status: 500,
+      headers: { ...headers, 'Content-Type': 'application/json' },
+    });
   }
 });

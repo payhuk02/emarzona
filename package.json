@@ -206,7 +206,6 @@
     "input-otp": "^1.4.2",
     "jspdf": "^4.0.0",
     "jspdf-autotable": "^5.0.2",
-    "lovable-tagger": "^1.1.10",
     "lucide-react": "^0.462.0",
     "next-themes": "^0.3.0",
     "papaparse": "^5.5.3",

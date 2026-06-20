@@ -12,6 +12,7 @@ import {
   ensureDataUrl,
   fillTemplate,
   mapGatewayError,
+  normalizeAiProvider,
   resolveAiApiKey,
   uploadBlogImageFromDataUrl,
   type AiProvider,
@@ -149,7 +150,7 @@ serve(async (req: Request) => {
       });
     }
 
-    const provider = (config.provider as AiProvider) || 'lovable';
+    const provider = normalizeAiProvider(config.provider);
     const { key: apiKey, provider: resolvedProvider } = await resolveAiApiKey(admin, provider);
     const textModel = config.textModel || 'google/gemini-3.1-pro-preview';
     const imageModel = config.imageModel || 'google/gemini-3.1-flash-image-preview';

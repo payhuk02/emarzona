@@ -127,11 +127,11 @@ export class AIChatbot {
   public async processMessage(
     sessionId: string,
     userMessage: string,
-    userId?: string,
+    userId?: string
   ): Promise<ChatbotResponse> {
-      let session = this.sessions.get(sessionId);
+    let session = this.sessions.get(sessionId);
 
-      if (!session) {
+    if (!session) {
       logger.warn(`Session ${sessionId} non trouvée, création d'une nouvelle.`, { userId });
       session = this.createNewSession(userId);
     }
@@ -146,8 +146,8 @@ export class AIChatbot {
     const newUserMessage: ChatMessage = {
       id: uuidv4(),
       content: sanitizedMessage,
-        role: 'user',
-        timestamp: new Date(),
+      role: 'user',
+      timestamp: new Date(),
     };
     session.messages.push(newUserMessage);
 
@@ -157,7 +157,11 @@ export class AIChatbot {
       const intentAnalysis = await this.analyzeIntent(sanitizedMessage, session.context);
       session.context.currentIntent = intentAnalysis.intent;
       session.context = { ...session.context, ...intentAnalysis.entities }; // Fusionner les entités dans le contexte
-      newUserMessage.metadata = { ...newUserMessage.metadata, intent: intentAnalysis.intent, entities: intentAnalysis.entities };
+      newUserMessage.metadata = {
+        ...newUserMessage.metadata,
+        intent: intentAnalysis.intent,
+        entities: intentAnalysis.entities,
+      };
 
       assistantResponse = await this.generateResponse(sanitizedMessage, session, intentAnalysis);
     } catch (error) {
@@ -177,9 +181,9 @@ export class AIChatbot {
     const newAssistantMessage: ChatMessage = {
       id: uuidv4(),
       content: assistantResponse.message,
-        role: 'assistant',
-        timestamp: new Date(),
-        metadata: {
+      role: 'assistant',
+      timestamp: new Date(),
+      metadata: {
         actions: assistantResponse.actions,
         suggestions: assistantResponse.suggestions,
         ...assistantResponse.metadata,
@@ -187,7 +191,7 @@ export class AIChatbot {
     };
     session.messages.push(newAssistantMessage);
 
-      this.trimSessionHistory(session);
+    this.trimSessionHistory(session);
 
     session.metadata.lastActivity = new Date();
     if (session.userId) {
@@ -207,7 +211,10 @@ export class AIChatbot {
    * @param context Le contexte actuel de la session.
    * @returns Un objet IntentAnalysisResult.
    */
-  private async analyzeIntent(message: string, context: ChatSessionContext): Promise<IntentAnalysisResult> {
+  private async analyzeIntent(
+    message: string,
+    context: ChatSessionContext
+  ): Promise<IntentAnalysisResult> {
     const lowerMessage = message.toLowerCase();
     let intent = 'general';
     let confidence = 0.5;
@@ -239,9 +246,15 @@ export class AIChatbot {
     }
 
     // Détection d'intention pour la recherche de produits
-    if (lowerMessage.includes('produit') || lowerMessage.includes('cherche') || lowerMessage.includes('trouver')) {
+    if (
+      lowerMessage.includes('produit') ||
+      lowerMessage.includes('cherche') ||
+      lowerMessage.includes('trouver')
+    ) {
       intent = 'product_search';
-      const productQueryMatch = lowerMessage.match(/(produit|cherche|trouver)\s+(un|une|des|le|la|les)?\s*(.*)/);
+      const productQueryMatch = lowerMessage.match(
+        /(produit|cherche|trouver)\s+(un|une|des|le|la|les)?\s*(.*)/
+      );
       if (productQueryMatch?.[3]) {
         entities.productQuery = productQueryMatch[3].trim();
       } else {
@@ -257,7 +270,11 @@ export class AIChatbot {
     }
 
     // Détection d'intention d'aide
-    if (lowerMessage.includes('aide') || lowerMessage.includes('help') || lowerMessage.includes('comment faire')) {
+    if (
+      lowerMessage.includes('aide') ||
+      lowerMessage.includes('help') ||
+      lowerMessage.includes('comment faire')
+    ) {
       intent = 'help';
       confidence = Math.max(confidence, 0.7);
     }
@@ -281,7 +298,7 @@ export class AIChatbot {
   private async generateResponse(
     userMessage: string,
     session: ChatSession,
-    intentAnalysis: IntentAnalysisResult,
+    intentAnalysis: IntentAnalysisResult
   ): Promise<ChatbotResponse> {
     const { intent, entities } = intentAnalysis;
 
@@ -311,49 +328,56 @@ export class AIChatbot {
    * @param _context Le contexte de la session.
    * @returns Une réponse du chatbot.
    */
-  private async handleOrderInquiry(session: ChatSession, _context?: ChatSessionContext): Promise<ChatbotResponse> {
+  private async handleOrderInquiry(
+    session: ChatSession,
+    _context?: ChatSessionContext
+  ): Promise<ChatbotResponse> {
     if (!session.userId) {
       return {
         message: CHATBOT_RESPONSES.ORDER_NOT_LOGGED_IN,
-        actions: [{
-          label: CHATBOT_RESPONSES.ORDER_NOT_LOGGED_IN_ACTION_LABEL,
-          type: 'navigation',
-          payload: {
-            path: '/login'
-          }
-        }],
+        actions: [
+          {
+            label: CHATBOT_RESPONSES.ORDER_NOT_LOGGED_IN_ACTION_LABEL,
+            type: 'navigation',
+            payload: {
+              path: '/login',
+            },
+          },
+        ],
       };
     }
 
     const { data: orders, error } = await supabase
-        .from('orders')
+      .from('orders')
       .select('id,status,created_at')
       .eq('user_id', session.userId)
       .order('created_at', {
-        ascending: false
+        ascending: false,
       })
       .limit(1);
 
     if (error) {
       logger.error('Erreur lors de la récupération des commandes', {
         userId: session.userId,
-        error
+        error,
       });
-        return {
-        message: CHATBOT_RESPONSES.ORDER_FETCH_ERROR
+      return {
+        message: CHATBOT_RESPONSES.ORDER_FETCH_ERROR,
       };
     }
 
     if (!orders || orders.length === 0) {
       return {
         message: CHATBOT_RESPONSES.ORDER_NOT_FOUND,
-        actions: [{
-          label: CHATBOT_RESPONSES.ORDER_NOT_FOUND_ACTION_LABEL,
-          type: 'navigation',
-          payload: {
-            path: '/marketplace'
-          }
-        }],
+        actions: [
+          {
+            label: CHATBOT_RESPONSES.ORDER_NOT_FOUND_ACTION_LABEL,
+            type: 'navigation',
+            payload: {
+              path: '/marketplace',
+            },
+          },
+        ],
       };
     }
 
@@ -362,23 +386,26 @@ export class AIChatbot {
 
     return {
       message: orderStatusMessage,
-      actions: [{
-        label: CHATBOT_RESPONSES.ORDER_VIEW_ACTION_LABEL,
-        type: 'navigation',
-        payload: {
-          path: `/orders/${lastOrder.id}`
-        }
-      }, {
-        label: CHATBOT_RESPONSES.ORDER_ALL_ACTION_LABEL,
-        type: 'navigation',
-        payload: {
-          path: '/orders'
-        }
-      }],
+      actions: [
+        {
+          label: CHATBOT_RESPONSES.ORDER_VIEW_ACTION_LABEL,
+          type: 'navigation',
+          payload: {
+            path: `/orders/${lastOrder.id}`,
+          },
+        },
+        {
+          label: CHATBOT_RESPONSES.ORDER_ALL_ACTION_LABEL,
+          type: 'navigation',
+          payload: {
+            path: '/orders',
+          },
+        },
+      ],
       metadata: {
         lastOrder: {
-          productId: lastOrder.id
-        }
+          productId: lastOrder.id,
+        },
       }, // Supposons que nous voulons recommander basé sur la dernière commande
     };
   }
@@ -389,16 +416,21 @@ export class AIChatbot {
    * @param _context Le contexte de la session.
    * @returns Une réponse du chatbot.
    */
-  private async handleShippingInquiry(_session: ChatSession, _context?: ChatSessionContext): Promise<ChatbotResponse> {
+  private async handleShippingInquiry(
+    _session: ChatSession,
+    _context?: ChatSessionContext
+  ): Promise<ChatbotResponse> {
     return {
       message: CHATBOT_RESPONSES.SHIPPING_INFO,
-      actions: [{
-        label: CHATBOT_RESPONSES.SHIPPING_ACTION_LABEL,
-        type: 'navigation',
-        payload: {
-          path: '/shipping-policy'
-        }
-      }],
+      actions: [
+        {
+          label: CHATBOT_RESPONSES.SHIPPING_ACTION_LABEL,
+          type: 'navigation',
+          payload: {
+            path: '/shipping-policy',
+          },
+        },
+      ],
       suggestions: CHATBOT_RESPONSES.SHIPPING_SUGGESTIONS,
     };
   }
@@ -409,22 +441,28 @@ export class AIChatbot {
    * @param _context Le contexte de la session.
    * @returns Une réponse du chatbot.
    */
-  private async handleReturnInquiry(_session: ChatSession, _context?: ChatSessionContext): Promise<ChatbotResponse> {
+  private async handleReturnInquiry(
+    _session: ChatSession,
+    _context?: ChatSessionContext
+  ): Promise<ChatbotResponse> {
     return {
       message: CHATBOT_RESPONSES.RETURN_POLICY,
-      actions: [{
-        label: CHATBOT_RESPONSES.RETURN_POLICY_ACTION_LABEL,
-        type: 'navigation',
-        payload: {
-          path: '/return-policy'
-        }
-      }, {
-        label: CHATBOT_RESPONSES.RETURN_INITIATE_ACTION_LABEL,
-        type: 'navigation',
-        payload: {
-          path: '/returns/initiate'
-        }
-      }],
+      actions: [
+        {
+          label: CHATBOT_RESPONSES.RETURN_POLICY_ACTION_LABEL,
+          type: 'navigation',
+          payload: {
+            path: '/return-policy',
+          },
+        },
+        {
+          label: CHATBOT_RESPONSES.RETURN_INITIATE_ACTION_LABEL,
+          type: 'navigation',
+          payload: {
+            path: '/returns/initiate',
+          },
+        },
+      ],
     };
   }
 
@@ -435,7 +473,11 @@ export class AIChatbot {
    * @param _context Le contexte de la session.
    * @returns Une réponse du chatbot.
    */
-  private async handleProductSearch(userMessage: string, session: ChatSession, _context?: ChatSessionContext): Promise<ChatbotResponse> {
+  private async handleProductSearch(
+    userMessage: string,
+    session: ChatSession,
+    _context?: ChatSessionContext
+  ): Promise<ChatbotResponse> {
     const productQuery = session.context.productQuery || userMessage;
 
     if (!productQuery) {
@@ -446,31 +488,33 @@ export class AIChatbot {
     }
 
     const { data: products, error } = await supabase
-        .from('products')
-        .select('id, name, category')
+      .from('products')
+      .select('id, name, category')
       .ilike('name', `%${productQuery}%`)
-        .limit(3);
+      .limit(3);
 
     if (error) {
       logger.error('Erreur lors de la recherche de produits', {
         productQuery,
-        error
+        error,
       });
       return {
-        message: CHATBOT_RESPONSES.PRODUCT_SEARCH_ERROR
+        message: CHATBOT_RESPONSES.PRODUCT_SEARCH_ERROR,
       };
     }
 
     if (!products || products.length === 0) {
       return {
         message: CHATBOT_RESPONSES.PRODUCT_SEARCH_NOT_FOUND(productQuery),
-        actions: [{
-          label: CHATBOT_RESPONSES.PRODUCT_SEARCH_ALL_CATEGORIES_ACTION_LABEL,
-          type: 'navigation',
-          payload: {
-            path: '/marketplace'
-          }
-        }],
+        actions: [
+          {
+            label: CHATBOT_RESPONSES.PRODUCT_SEARCH_ALL_CATEGORIES_ACTION_LABEL,
+            type: 'navigation',
+            payload: {
+              path: '/marketplace',
+            },
+          },
+        ],
       };
     }
 
@@ -481,7 +525,7 @@ export class AIChatbot {
         label: CHATBOT_RESPONSES.PRODUCT_SEARCH_VIEW_ACTION_LABEL(p.name),
         type: 'product_recommendation',
         payload: {
-          productId: p.id
+          productId: p.id,
         },
       })),
     };
@@ -493,7 +537,10 @@ export class AIChatbot {
    * @param _context Le contexte de la session.
    * @returns Une réponse du chatbot.
    */
-  private async handleRecommendation(session: ChatSession, _context?: ChatSessionContext): Promise<ChatbotResponse> {
+  private async handleRecommendation(
+    session: ChatSession,
+    _context?: ChatSessionContext
+  ): Promise<ChatbotResponse> {
     try {
       const recommendations = await recommendationService.getRecommendations(
         session.userId,
@@ -504,13 +551,15 @@ export class AIChatbot {
       if (!recommendations || recommendations.length === 0) {
         return {
           message: CHATBOT_RESPONSES.RECOMMENDATION_NO_PRODUCTS,
-          actions: [{
-            label: CHATBOT_RESPONSES.RECOMMENDATION_EXPLORE_ACTION_LABEL,
-            type: 'navigation',
-            payload: {
-              path: '/marketplace'
-            }
-          }],
+          actions: [
+            {
+              label: CHATBOT_RESPONSES.RECOMMENDATION_EXPLORE_ACTION_LABEL,
+              type: 'navigation',
+              payload: {
+                path: '/marketplace',
+              },
+            },
+          ],
         };
       }
 
@@ -521,24 +570,26 @@ export class AIChatbot {
           label: CHATBOT_RESPONSES.RECOMMENDATION_VIEW_ACTION_LABEL(r.name),
           type: 'product_recommendation',
           payload: {
-            productId: r.id
+            productId: r.id,
           },
         })),
       };
     } catch (error) {
       logger.error('Erreur lors des recommandations', {
         userId: session.userId,
-        error
+        error,
       });
       return {
         message: CHATBOT_RESPONSES.RECOMMENDATION_ERROR,
-        actions: [{
-          label: CHATBOT_RESPONSES.RECOMMENDATION_EXPLORE_ACTION_LABEL,
-          type: 'navigation',
-          payload: {
-            path: '/marketplace'
-          }
-        }],
+        actions: [
+          {
+            label: CHATBOT_RESPONSES.RECOMMENDATION_EXPLORE_ACTION_LABEL,
+            type: 'navigation',
+            payload: {
+              path: '/marketplace',
+            },
+          },
+        ],
       };
     }
   }
@@ -560,7 +611,10 @@ export class AIChatbot {
    * @param _session La session de chat.
    * @returns Une réponse du chatbot.
    */
-  private async handleGeneralInquiry(userMessage: string, _session: ChatSession): Promise<ChatbotResponse> {
+  private async handleGeneralInquiry(
+    userMessage: string,
+    _session: ChatSession
+  ): Promise<ChatbotResponse> {
     const lowerMessage = userMessage.toLowerCase();
 
     if (['bonjour', 'salut', 'hello'].some(greeting => lowerMessage.includes(greeting))) {
@@ -576,7 +630,7 @@ export class AIChatbot {
       };
     }
 
-    // Fallback LLM via edge function ai-chat (Lovable AI Gateway)
+    // Fallback LLM via edge function ai-chat (OpenRouter)
     try {
       const history = (_session.messages || [])
         .slice(-6)
@@ -611,11 +665,11 @@ export class AIChatbot {
     }
 
     // Garder les N derniers messages
-      session.messages = session.messages.slice(-this.contextWindow);
+    session.messages = session.messages.slice(-this.contextWindow);
 
     logger.debug('Session history trimmed', {
       sessionId: session.id,
-      newLength: session.messages.length
+      newLength: session.messages.length,
     });
   }
 
@@ -625,31 +679,33 @@ export class AIChatbot {
    */
   private async _saveSession(session: ChatSession): Promise<void> {
     try {
-      const { error } = await supabase.from('chat_sessions').upsert({
-        id: session.id,
-        user_id: session.userId,
-        messages: session.messages,
-        context: session.context,
-        metadata: session.metadata,
-      },
-      {
-        onConflict: 'id'
-      });
+      const { error } = await supabase.from('chat_sessions').upsert(
+        {
+          id: session.id,
+          user_id: session.userId,
+          messages: session.messages,
+          context: session.context,
+          metadata: session.metadata,
+        },
+        {
+          onConflict: 'id',
+        }
+      );
 
       if (error) {
         logger.warn('Impossible de sauvegarder la session chat', {
           sessionId: session.id,
-          error
+          error,
         });
       } else {
         logger.debug('Session chat sauvegardée', {
-          sessionId: session.id
+          sessionId: session.id,
         });
       }
     } catch (error) {
       logger.error('Erreur inattendue lors de la sauvegarde de la session', {
         sessionId: session.id,
-        error
+        error,
       });
     }
   }

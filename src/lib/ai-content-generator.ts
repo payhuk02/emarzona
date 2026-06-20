@@ -5,7 +5,7 @@
 import { logger } from './logger';
 import { supabase } from '@/integrations/supabase/client';
 
-export type AIProvider = 'lovable' | 'templates' | 'fallback';
+export type AIProvider = 'openrouter' | 'templates' | 'fallback';
 export type ProductType = 'digital' | 'physical' | 'service' | 'course' | 'artist';
 
 export interface AIGenerationOptions {
@@ -52,7 +52,7 @@ export const generateProductContent = async (
   productInfo: ProductInfo,
   options: AIGenerationOptions = {}
 ): Promise<GeneratedContent> => {
-  const { provider = 'lovable', language = 'fr', generateImage = true } = options;
+  const { provider = 'openrouter', language = 'fr', generateImage = true } = options;
 
   if (provider === 'templates' || provider === 'fallback') {
     return generateWithTemplates(productInfo, language);

@@ -7,6 +7,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { requireAuthenticatedUser } from '../_shared/edge-auth-utils.ts';
 import { enforceRateLimit, getClientIp, RATE_LIMIT_PRESETS } from '../_shared/rate-limit.ts';
 import { retrievePlatformRagContext, type RagSettings } from '../_shared/platform-rag.ts';
+import { callTextCompletion, mapGatewayError, resolveAiApiKey } from '../_shared/ai-gateway.ts';
 
 const defaultAllowedOrigin = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
 const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || defaultAllowedOrigin)
@@ -68,14 +69,6 @@ serve(async (req: Request) => {
   }
 
   try {
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      return new Response(JSON.stringify({ error: 'LOVABLE_API_KEY non configurée' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
     const body = await req.json().catch(() => ({}));
     const messages = Array.isArray(body?.messages) ? body.messages : null;
     const wantStream = body?.stream === true;
@@ -85,6 +78,9 @@ serve(async (req: Request) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+
+    const admin = createClient(supabaseUrl, serviceKey);
+    const { key: apiKey } = await resolveAiApiKey(admin, 'openrouter');
 
     const anonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
     let allSettings: Record<string, unknown> = {};
@@ -121,16 +117,10 @@ serve(async (req: Request) => {
       lastUserMessage.trim()
     ) {
       try {
-        const admin = createClient(supabaseUrl, serviceKey);
-        const ragContext = await retrievePlatformRagContext(
-          admin,
-          lastUserMessage,
-          LOVABLE_API_KEY,
-          {
-            ...ragConfig,
-            locale: ragConfig.locale ?? (config?.language as string) ?? 'fr',
-          }
-        );
+        const ragContext = await retrievePlatformRagContext(admin, lastUserMessage, apiKey, {
+          ...ragConfig,
+          locale: ragConfig.locale ?? (config?.language as string) ?? 'fr',
+        });
         if (ragContext) {
           systemPrompt = `${systemPrompt}
 
@@ -145,32 +135,22 @@ ${ragContext}`;
     }
 
     const start = Date.now();
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model,
-        messages: [{ role: 'system', content: systemPrompt }, ...messages],
-        temperature,
-        max_tokens: maxTokens,
-        stream: wantStream,
-      }),
+    const response = await callTextCompletion({
+      apiKey,
+      provider: 'openrouter',
+      model,
+      messages: [{ role: 'system', content: systemPrompt }, ...messages],
+      temperature,
+      maxTokens,
+      stream: wantStream,
     });
 
-    if (response.status === 429) {
-      return new Response(
-        JSON.stringify({ error: 'Limite de requêtes atteinte. Réessayez dans un instant.' }),
-        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-    if (response.status === 402) {
-      return new Response(
-        JSON.stringify({ error: 'Crédits IA épuisés. Ajoutez du crédit dans les paramètres.' }),
-        { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    const mapped = mapGatewayError(response.status);
+    if (mapped) {
+      return new Response(JSON.stringify({ error: mapped.message }), {
+        status: mapped.status,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
     if (!response.ok) {
       const t = await response.text();

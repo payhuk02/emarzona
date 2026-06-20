@@ -1,13 +1,12 @@
 /**
- * Résolution clé API + appels passerelle IA (Lovable ou provider custom).
+ * Résolution clé API + appels passerelle IA (OpenRouter).
  */
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { decryptApiKey } from './ai-crypto.ts';
 
-export type AiProvider = 'lovable' | 'openrouter' | 'openai' | 'anthropic' | 'google' | 'custom';
+export type AiProvider = 'openrouter' | 'openai' | 'anthropic' | 'google' | 'custom';
 
 const PROVIDER_ENV_KEYS: Record<AiProvider, string> = {
-  lovable: 'LOVABLE_API_KEY',
   openrouter: 'OPENROUTER_API_KEY',
   openai: 'OPENAI_API_KEY',
   anthropic: 'ANTHROPIC_API_KEY',
@@ -15,35 +14,34 @@ const PROVIDER_ENV_KEYS: Record<AiProvider, string> = {
   custom: 'CUSTOM_AI_API_KEY',
 };
 
+const OPENROUTER_CHAT_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const OPENROUTER_EMBEDDINGS_URL = 'https://openrouter.ai/api/v1/embeddings';
+
+function openRouterHeaders(): Record<string, string> {
+  const siteUrl = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
+  return {
+    'HTTP-Referer': siteUrl,
+    'X-Title': 'Emarzona',
+  };
+}
+
 function resolveEnvApiKey(provider: AiProvider): string | undefined {
   const value = Deno.env.get(PROVIDER_ENV_KEYS[provider])?.trim();
   return value || undefined;
 }
 
-function chatCompletionsEndpoint(provider: AiProvider): {
-  url: string;
-  headers: Record<string, string>;
-} {
-  if (provider === 'openrouter') {
-    const siteUrl = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
-    return {
-      url: 'https://openrouter.ai/api/v1/chat/completions',
-      headers: {
-        'HTTP-Referer': siteUrl,
-        'X-Title': 'Emarzona',
-      },
-    };
+/** Normalise le provider IA stocké en settings (rétrocompatibilité base). */
+export function normalizeAiProvider(raw: unknown): AiProvider {
+  if (raw === 'openrouter' || !raw) return 'openrouter';
+  if (raw === 'openai' || raw === 'anthropic' || raw === 'google' || raw === 'custom') {
+    return raw;
   }
-
-  return {
-    url: 'https://ai.gateway.lovable.dev/v1/chat/completions',
-    headers: {},
-  };
+  return 'openrouter';
 }
 
 export async function resolveAiApiKey(
   admin: SupabaseClient,
-  provider: AiProvider = 'lovable'
+  provider: AiProvider = 'openrouter'
 ): Promise<{ key: string; provider: AiProvider; source: 'env' | 'db' }> {
   const { data: rows } = await admin
     .from('platform_ai_api_keys')
@@ -54,20 +52,25 @@ export async function resolveAiApiKey(
   const match =
     list.find(r => r.provider === provider && r.is_default) ||
     list.find(r => r.provider === provider) ||
-    (provider === 'lovable' ? list.find(r => r.is_default) : undefined);
+    list.find(r => r.provider === 'openrouter' && r.is_default) ||
+    list.find(r => r.is_default);
 
   if (match?.encrypted_key) {
     const key = await decryptApiKey(match.encrypted_key as string);
-    return { key, provider: match.provider as AiProvider, source: 'db' };
+    return { key, provider: normalizeAiProvider(match.provider), source: 'db' };
   }
 
-  const envKey = resolveEnvApiKey(provider);
+  const envKey = resolveEnvApiKey(provider) ?? resolveEnvApiKey('openrouter');
   if (envKey) {
-    return { key: envKey, provider, source: 'env' };
+    return {
+      key: envKey,
+      provider: envKey === resolveEnvApiKey(provider) ? provider : 'openrouter',
+      source: 'env',
+    };
   }
 
   throw new Error(
-    `Aucune clé API IA configurée pour « ${provider} » (${PROVIDER_ENV_KEYS[provider]} ou clé admin)`
+    `Aucune clé API IA configurée pour « ${provider} » (${PROVIDER_ENV_KEYS[provider]} ou clé admin OpenRouter)`
   );
 }
 
@@ -80,16 +83,14 @@ export async function callTextCompletion(options: {
   maxTokens?: number;
   tools?: unknown[];
   toolChoice?: unknown;
+  stream?: boolean;
 }): Promise<Response> {
-  const provider = options.provider ?? 'lovable';
-  const { url, headers: providerHeaders } = chatCompletionsEndpoint(provider);
-
-  return fetch(url, {
+  return fetch(OPENROUTER_CHAT_URL, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${options.apiKey}`,
       'Content-Type': 'application/json',
-      ...providerHeaders,
+      ...openRouterHeaders(),
     },
     body: JSON.stringify({
       model: options.model,
@@ -98,6 +99,26 @@ export async function callTextCompletion(options: {
       tool_choice: options.toolChoice,
       temperature: options.temperature ?? 0.7,
       max_tokens: options.maxTokens ?? 4000,
+      stream: options.stream ?? false,
+    }),
+  });
+}
+
+export async function callMultimodalCompletion(options: {
+  apiKey: string;
+  model: string;
+  messages: unknown[];
+}): Promise<Response> {
+  return fetch(OPENROUTER_CHAT_URL, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${options.apiKey}`,
+      'Content-Type': 'application/json',
+      ...openRouterHeaders(),
+    },
+    body: JSON.stringify({
+      model: options.model,
+      messages: options.messages,
     }),
   });
 }
@@ -108,29 +129,17 @@ export async function callImageGeneration(options: {
   model: string;
   prompt: string;
 }): Promise<string> {
-  const provider = options.provider ?? 'lovable';
-  const { url, headers: providerHeaders } = chatCompletionsEndpoint(provider);
-
-  const body =
-    provider === 'openrouter'
-      ? {
-          model: options.model,
-          messages: [{ role: 'user', content: options.prompt }],
-        }
-      : {
-          model: options.model,
-          messages: [{ role: 'user', content: options.prompt }],
-          modalities: ['image', 'text'],
-        };
-
-  const response = await fetch(url, {
+  const response = await fetch(OPENROUTER_CHAT_URL, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${options.apiKey}`,
       'Content-Type': 'application/json',
-      ...providerHeaders,
+      ...openRouterHeaders(),
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify({
+      model: options.model,
+      messages: [{ role: 'user', content: options.prompt }],
+    }),
   });
 
   if (!response.ok) {
@@ -153,6 +162,37 @@ export async function callImageGeneration(options: {
     return imageUrl;
   }
   throw new Error('Réponse image IA invalide');
+}
+
+export async function createOpenRouterEmbedding(
+  text: string,
+  apiKey: string,
+  model = 'openai/text-embedding-3-small'
+): Promise<number[]> {
+  const response = await fetch(OPENROUTER_EMBEDDINGS_URL, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+      ...openRouterHeaders(),
+    },
+    body: JSON.stringify({
+      model,
+      input: text.slice(0, 8000),
+    }),
+  });
+
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`Embedding API ${response.status}: ${body.slice(0, 300)}`);
+  }
+
+  const data = await response.json();
+  const embedding = data?.data?.[0]?.embedding;
+  if (!Array.isArray(embedding)) {
+    throw new Error('Réponse embedding invalide');
+  }
+  return embedding as number[];
 }
 
 export async function ensureDataUrl(url: string): Promise<string> {
@@ -260,4 +300,19 @@ export function mapGatewayError(status: number): { status: number; message: stri
   if (status === 429) return { status: 429, message: 'Limite de requêtes IA atteinte.' };
   if (status === 402) return { status: 402, message: 'Crédits IA épuisés.' };
   return null;
+}
+
+export function formatSupabaseError(e: unknown): string {
+  if (e instanceof Error && e.message) return e.message;
+  if (e && typeof e === 'object') {
+    const rec = e as Record<string, unknown>;
+    const parts = [rec.message, rec.details, rec.hint].filter(
+      (p): p is string => typeof p === 'string' && p.length > 0
+    );
+    if (parts.length > 0) return parts.join(' — ');
+    if (typeof rec.code === 'string') {
+      return `Erreur base de données (${rec.code})`;
+    }
+  }
+  return 'Erreur inconnue';
 }

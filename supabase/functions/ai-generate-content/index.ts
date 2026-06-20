@@ -12,9 +12,9 @@ import {
   ensureDataUrl,
   fillTemplate,
   mapGatewayError,
+  normalizeAiProvider,
   resolveAiApiKey,
   uploadCatalogImageBytes,
-  type AiProvider,
 } from '../_shared/ai-gateway.ts';
 import { dataUrlToBytes, resizeToCatalogProductBytes } from '../_shared/resize-catalog-product.ts';
 import {
@@ -105,9 +105,9 @@ serve(async (req: Request) => {
       );
     }
 
-    const { key: apiKey } = await resolveAiApiKey(
+    const { key: apiKey, provider: resolvedProvider } = await resolveAiApiKey(
       admin,
-      (config.provider as AiProvider) || 'lovable'
+      normalizeAiProvider(config.provider)
     );
     const model = (config.model as string) || 'google/gemini-3.1-pro-preview';
     const imageModel = (config.imageModel as string) || 'google/gemini-3.1-flash-image-preview';
@@ -163,6 +163,7 @@ serve(async (req: Request) => {
 
     const textRes = await callTextCompletion({
       apiKey,
+      provider: resolvedProvider,
       model,
       messages: [
         { role: 'system', content: systemPrompt },
@@ -229,6 +230,7 @@ serve(async (req: Request) => {
       try {
         const rawUrl = await callImageGeneration({
           apiKey,
+          provider: resolvedProvider,
           model: imageModel,
           prompt: imagePrompt,
         });

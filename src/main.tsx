@@ -35,32 +35,6 @@ try {
   }
 }
 
-const LOVABLE_HOST_REGEX = /(?:^|\.)lovable\.app$/i;
-
-const cleanupHostedServiceWorkerArtifacts = async () => {
-  try {
-    if ('serviceWorker' in navigator) {
-      const registrations = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(registrations.map(reg => reg.unregister()));
-    }
-
-    if ('caches' in window) {
-      const cacheNames = await caches.keys();
-      await Promise.all(
-        cacheNames.filter(name => name.startsWith('emarzona-')).map(name => caches.delete(name))
-      );
-    }
-
-    import('./lib/logger').then(({ logger }) =>
-      logger.info('Hosted SW artifacts cleared (lovable.app)')
-    );
-  } catch (error) {
-    import('./lib/logger').then(({ logger }) =>
-      logger.warn('Unable to clear hosted SW artifacts', { error })
-    );
-  }
-};
-
 // Install console guard first to neutralize console.* in production
 installConsoleGuard();
 
@@ -128,45 +102,39 @@ if (typeof window !== 'undefined') {
         });
     });
 
-    // Service Worker: désactivé sur lovable.app pour éviter les caches/chunks obsolètes
+    // Service Worker en production
     if ('serviceWorker' in navigator && import.meta.env.PROD) {
-      const isLovableHosted = LOVABLE_HOST_REGEX.test(window.location.hostname);
+      const swUrl = `/sw.js?v=${import.meta.env.VITE_BUILD_ID || 'dev'}`;
 
-      if (isLovableHosted) {
-        void cleanupHostedServiceWorkerArtifacts();
-      } else {
-        const swUrl = `/sw.js?v=${import.meta.env.VITE_BUILD_ID || 'dev'}`;
-
-        const registerServiceWorker = () => {
-          navigator.serviceWorker
-            .register(swUrl, {
-              scope: '/',
-              updateViaCache: 'none',
-            })
-            .then(registration => {
-              registration.addEventListener('updatefound', () => {
-                const worker = registration.installing;
-                if (!worker) return;
-                worker.addEventListener('statechange', () => {
-                  if (worker.state === 'installed' && navigator.serviceWorker.controller) {
-                    worker.postMessage({ type: 'SKIP_WAITING' });
-                    import('./lib/logger').then(({ logger }) => {
-                      logger.info('Service Worker update — reloading app');
-                    });
-                    window.location.reload();
-                  }
-                });
-              });
-            })
-            .catch(error => {
-              import('./lib/logger').then(({ logger }) => {
-                logger.warn('Service Worker registration failed', { error });
+      const registerServiceWorker = () => {
+        navigator.serviceWorker
+          .register(swUrl, {
+            scope: '/',
+            updateViaCache: 'none',
+          })
+          .then(registration => {
+            registration.addEventListener('updatefound', () => {
+              const worker = registration.installing;
+              if (!worker) return;
+              worker.addEventListener('statechange', () => {
+                if (worker.state === 'installed' && navigator.serviceWorker.controller) {
+                  worker.postMessage({ type: 'SKIP_WAITING' });
+                  import('./lib/logger').then(({ logger }) => {
+                    logger.info('Service Worker update — reloading app');
+                  });
+                  window.location.reload();
+                }
               });
             });
-        };
+          })
+          .catch(error => {
+            import('./lib/logger').then(({ logger }) => {
+              logger.warn('Service Worker registration failed', { error });
+            });
+          });
+      };
 
-        window.addEventListener('load', registerServiceWorker);
-      }
+      window.addEventListener('load', registerServiceWorker);
     }
   });
 }

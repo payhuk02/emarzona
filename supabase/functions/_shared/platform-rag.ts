@@ -2,8 +2,7 @@
  * RAG plateforme — chunking, embeddings (1536D) et retrieval via match_platform_content.
  */
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
-const LOVABLE_EMBEDDINGS_URL = 'https://ai.gateway.lovable.dev/v1/embeddings';
+import { createOpenRouterEmbedding } from './ai-gateway.ts';
 const DEFAULT_EMBEDDING_MODEL = 'openai/text-embedding-3-small';
 const CHUNK_SIZE = 900;
 const CHUNK_OVERLAP = 120;
@@ -82,29 +81,11 @@ export async function createEmbedding(
   apiKey: string,
   model = DEFAULT_EMBEDDING_MODEL
 ): Promise<number[]> {
-  const response = await fetch(LOVABLE_EMBEDDINGS_URL, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model,
-      input: text.slice(0, 8000),
-    }),
-  });
-
-  if (!response.ok) {
-    const body = await response.text();
-    throw new Error(`Embedding API ${response.status}: ${body.slice(0, 300)}`);
-  }
-
-  const json = await response.json();
-  const embedding = json?.data?.[0]?.embedding;
+  const embedding = await createOpenRouterEmbedding(text, apiKey, model);
   if (!Array.isArray(embedding) || embedding.length !== 1536) {
     throw new Error(`Embedding invalide (attendu 1536 dimensions, reçu ${embedding?.length ?? 0})`);
   }
-  return embedding as number[];
+  return embedding;
 }
 
 export async function upsertContentChunks(

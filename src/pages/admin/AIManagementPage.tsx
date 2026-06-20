@@ -55,7 +55,7 @@ import { invokeEnhanceImage } from '@/lib/images/enhance-image-client';
 export interface AIManagementSettings {
   chatbot: {
     enabled: boolean;
-    useLovableAIFallback: boolean;
+    useAiFallback: boolean;
     model: string;
     systemPrompt: string;
     temperature: number;
@@ -64,7 +64,7 @@ export interface AIManagementSettings {
   };
   contentGenerator: {
     enabled: boolean;
-    provider: 'lovable' | 'templates';
+    provider: 'openrouter' | 'templates';
     model: string;
     systemPrompt: string;
     temperature: number;
@@ -97,7 +97,7 @@ export interface AIManagementSettings {
   };
   blogGenerator: {
     enabled: boolean;
-    provider: 'lovable' | 'openrouter' | 'openai' | 'anthropic' | 'google' | 'custom';
+    provider: 'openrouter' | 'openai' | 'anthropic' | 'google' | 'custom';
     textModel: string;
     imageModel: string;
     systemPrompt: string;
@@ -120,7 +120,7 @@ export interface AIManagementSettings {
 const DEFAULTS: AIManagementSettings = {
   chatbot: {
     enabled: true,
-    useLovableAIFallback: false,
+    useAiFallback: false,
     model: 'google/gemini-3-flash-preview',
     systemPrompt:
       "Tu es l'assistant IA d'Emarzona, plateforme e-commerce multi-boutiques en Afrique de l'Ouest. Réponds en français de façon concise et professionnelle.",
@@ -130,7 +130,7 @@ const DEFAULTS: AIManagementSettings = {
   },
   contentGenerator: {
     enabled: true,
-    provider: 'lovable',
+    provider: 'openrouter',
     model: 'google/gemini-3.1-pro-preview',
     systemPrompt:
       "Tu es un expert copywriter e-commerce premium pour Emarzona. Tu maîtrises les 5 verticales : produits digitaux, physiques, services, cours en ligne et œuvres d'artiste.",
@@ -169,7 +169,7 @@ const DEFAULTS: AIManagementSettings = {
   },
   blogGenerator: {
     enabled: true,
-    provider: 'lovable',
+    provider: 'openrouter',
     textModel: 'google/gemini-3.1-pro-preview',
     imageModel: 'google/gemini-3.1-flash-image-preview',
     systemPrompt:
@@ -194,14 +194,13 @@ const DEFAULTS: AIManagementSettings = {
 
 const AI_GATEWAY_PROVIDERS = [
   { id: 'openrouter', label: 'OpenRouter (recommandé)' },
-  { id: 'lovable', label: 'Lovable AI Gateway' },
   { id: 'openai', label: 'OpenAI' },
   { id: 'anthropic', label: 'Anthropic' },
   { id: 'google', label: 'Google AI' },
   { id: 'custom', label: 'Autre / Custom' },
 ] as const;
 
-// Modèles disponibles via Lovable AI Gateway ou OpenRouter
+// Modèles disponibles via OpenRouter
 const TEXT_MODELS = [
   { id: 'google/gemini-3-flash-preview', label: 'Gemini 3 Flash (rapide, recommandé)' },
   { id: 'google/gemini-3.1-flash-lite-preview', label: 'Gemini 3.1 Flash Lite (économique)' },
@@ -294,7 +293,7 @@ const AIManagementPage: React.FC = () => {
   const [imagePinging, setImagePinging] = useState(false);
   const [indexingRag, setIndexingRag] = useState(false);
 
-  const _lovableKeyConfigured = true; // Géré côté serveur, toujours présent dans Lovable Cloud
+  const _openRouterKeyConfigured = true; // OPENROUTER_API_KEY ou clé admin chiffrée
 
   // Load settings
   useEffect(() => {
@@ -304,10 +303,23 @@ const AIManagementPage: React.FC = () => {
         const { data, error } = await supabase.rpc('get_ai_management_settings');
         if (error) throw error;
         if (data) {
-          const partial = data as Partial<AIManagementSettings>;
+          const partial = data as Partial<AIManagementSettings> & {
+            chatbot?: Partial<AIManagementSettings['chatbot']> & {
+              useLovableAIFallback?: boolean;
+            };
+          };
+          const legacyChatbot = partial.chatbot;
           setSettings({
             ...DEFAULTS,
             ...partial,
+            chatbot: {
+              ...DEFAULTS.chatbot,
+              ...legacyChatbot,
+              useAiFallback:
+                legacyChatbot?.useAiFallback ??
+                legacyChatbot?.useLovableAIFallback ??
+                DEFAULTS.chatbot.useAiFallback,
+            },
             imageEnhancer: {
               ...DEFAULTS.imageEnhancer,
               ...partial.imageEnhancer,
@@ -325,10 +337,18 @@ const AIManagementPage: React.FC = () => {
             blogGenerator: {
               ...DEFAULTS.blogGenerator,
               ...partial.blogGenerator,
+              provider:
+                (partial.blogGenerator?.provider as
+                  | AIManagementSettings['blogGenerator']['provider']
+                  | undefined) ?? DEFAULTS.blogGenerator.provider,
             },
             contentGenerator: {
               ...DEFAULTS.contentGenerator,
               ...partial.contentGenerator,
+              provider:
+                (partial.contentGenerator?.provider as
+                  | AIManagementSettings['contentGenerator']['provider']
+                  | undefined) ?? DEFAULTS.contentGenerator.provider,
               typeSystemPrompts: {
                 ...DEFAULTS.contentGenerator.typeSystemPrompts,
                 ...(partial.contentGenerator?.typeSystemPrompts ?? {}),
@@ -467,7 +487,7 @@ const AIManagementPage: React.FC = () => {
         label: 'Génération de contenu',
         enabled: settings.contentGenerator.enabled,
         model:
-          settings.contentGenerator.provider === 'lovable'
+          settings.contentGenerator.provider === 'openrouter'
             ? settings.contentGenerator.model
             : 'Templates',
         color: 'text-purple-500',
@@ -607,7 +627,7 @@ const AIManagementPage: React.FC = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Activity className="h-5 w-5" /> Test de connectivité Lovable AI
+                  <Activity className="h-5 w-5" /> Test de connectivité OpenRouter
                 </CardTitle>
                 <CardDescription>Vérifie l'accès à la passerelle IA et la latence.</CardDescription>
               </CardHeader>
@@ -666,15 +686,15 @@ const AIManagementPage: React.FC = () => {
 
                 <div className="flex items-center justify-between p-3 border rounded-lg">
                   <div>
-                    <Label className="font-medium">Fallback LLM (Lovable AI)</Label>
+                    <Label className="font-medium">Fallback API IA</Label>
                     <p className="text-xs text-muted-foreground">
                       Si activé, utilise un modèle IA pour les questions non couvertes par les
                       intentions.
                     </p>
                   </div>
                   <Switch
-                    checked={settings.chatbot.useLovableAIFallback}
-                    onCheckedChange={v => update('chatbot', { useLovableAIFallback: v })}
+                    checked={settings.chatbot.useAiFallback}
+                    onCheckedChange={v => update('chatbot', { useAiFallback: v })}
                   />
                 </div>
 
@@ -759,7 +779,7 @@ const AIManagementPage: React.FC = () => {
                   <Label>Provider</Label>
                   <Select
                     value={settings.contentGenerator.provider}
-                    onValueChange={(v: 'lovable' | 'templates') =>
+                    onValueChange={(v: 'openrouter' | 'templates') =>
                       update('contentGenerator', { provider: v })
                     }
                   >
@@ -767,13 +787,13 @@ const AIManagementPage: React.FC = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="lovable">Lovable AI (recommandé)</SelectItem>
+                      <SelectItem value="openrouter">OpenRouter (recommandé)</SelectItem>
                       <SelectItem value="templates">Templates statiques (sans IA)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
-                {settings.contentGenerator.provider === 'lovable' && (
+                {settings.contentGenerator.provider === 'openrouter' && (
                   <>
                     <div className="space-y-2">
                       <Label>Modèle IA</Label>
@@ -995,7 +1015,7 @@ const AIManagementPage: React.FC = () => {
                     <Select
                       value={settings.blogGenerator.provider}
                       onValueChange={(
-                        v: 'lovable' | 'openrouter' | 'openai' | 'anthropic' | 'google' | 'custom'
+                        v: 'openrouter' | 'openai' | 'anthropic' | 'google' | 'custom'
                       ) => update('blogGenerator', { provider: v })}
                     >
                       <SelectTrigger>

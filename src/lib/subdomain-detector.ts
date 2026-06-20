@@ -29,10 +29,7 @@ const PLATFORM_DOMAINS = [
   'emarzona.com',
   'www.emarzona.com',
   'api.emarzona.com',
-  'lovable.app', // Preview Lovable
-  'lovable.dev', // Lovable dev
-  'lovableproject.com', // Lovable project preview
-  'vercel.app', // Déploiements Vercel
+  'vercel.app', // Déploiements Vercel / preview
   'localhost', // Pour le développement local
 ];
 

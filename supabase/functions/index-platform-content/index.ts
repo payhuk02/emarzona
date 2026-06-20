@@ -5,7 +5,8 @@
  */
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { authenticateAdminRequest } from '../_shared/admin-auth-utils.ts';
+import { authenticatePlatformAdminRequest } from '../_shared/admin-auth-utils.ts';
+import { resolveAiApiKey } from '../_shared/ai-gateway.ts';
 import { createSupabaseAdmin } from '../_shared/supabase-admin.ts';
 import {
   indexBlogPosts,
@@ -45,13 +46,25 @@ serve(async (req: Request) => {
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
-  const lovableKey = Deno.env.get('LOVABLE_API_KEY') ?? '';
 
-  if (!supabaseUrl || !serviceKey || !lovableKey) {
+  if (!supabaseUrl || !serviceKey) {
     return new Response(JSON.stringify({ error: 'Configuration serveur incomplète' }), {
       status: 503,
       headers: { ...headers, 'Content-Type': 'application/json' },
     });
+  }
+
+  const admin = createSupabaseAdmin();
+  let openRouterKey: string;
+  try {
+    ({ key: openRouterKey } = await resolveAiApiKey(admin, 'openrouter'));
+  } catch (e) {
+    return new Response(
+      JSON.stringify({
+        error: e instanceof Error ? e.message : 'OPENROUTER_API_KEY non configurée',
+      }),
+      { status: 503, headers: { ...headers, 'Content-Type': 'application/json' } }
+    );
   }
 
   const authHeader = req.headers.get('authorization') ?? '';
@@ -61,7 +74,7 @@ serve(async (req: Request) => {
     const userClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY') ?? '', {
       global: { headers: { Authorization: authHeader } },
     });
-    const auth = await authenticateAdminRequest(userClient, req, 'settings.manage');
+    const auth = await authenticatePlatformAdminRequest(userClient, req);
     if (!auth.ok) {
       return new Response(JSON.stringify({ error: auth.error }), {
         status: auth.status,
@@ -80,7 +93,6 @@ serve(async (req: Request) => {
     ) as ContentSourceType[];
 
     let embeddingModel = 'openai/text-embedding-3-small';
-    const admin = createSupabaseAdmin();
     const { data: settings } = await admin.rpc('get_ai_management_settings');
     const rag = (settings as Record<string, unknown> | null)?.rag as
       | Record<string, unknown>
@@ -96,17 +108,17 @@ serve(async (req: Request) => {
       if (sources.includes('blog')) {
         const key = `blog_${loc}`;
         stats[key] =
-          (stats[key] ?? 0) + (await indexBlogPosts(admin, lovableKey, embeddingModel, loc));
+          (stats[key] ?? 0) + (await indexBlogPosts(admin, openRouterKey, embeddingModel, loc));
       }
       if (sources.includes('faq')) {
         const key = `faq_${loc}`;
         stats[key] =
-          (stats[key] ?? 0) + (await indexFaqItems(admin, lovableKey, embeddingModel, loc));
+          (stats[key] ?? 0) + (await indexFaqItems(admin, openRouterKey, embeddingModel, loc));
       }
       if (sources.includes('product')) {
         const key = `product_${loc}`;
         stats[key] =
-          (stats[key] ?? 0) + (await indexProducts(admin, lovableKey, embeddingModel, loc));
+          (stats[key] ?? 0) + (await indexProducts(admin, openRouterKey, embeddingModel, loc));
       }
     }
 

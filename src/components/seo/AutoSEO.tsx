@@ -14,7 +14,7 @@ export const AutoSEO = () => {
   // La landing gère son propre SEOMeta + JSON-LD (évite conflit de titres)
   if (pathname === '/') return null;
 
-  // Origine dynamique : preview, lovable.app, custom domain — jamais hardcodée
+  // Origine dynamique : preview, custom domain — jamais hardcodée
   const origin =
     typeof window !== 'undefined' ? window.location.origin : 'https://www.emarzona.com';
 
