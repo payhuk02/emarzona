@@ -20,7 +20,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
@@ -200,7 +202,7 @@ const AI_GATEWAY_PROVIDERS = [
   { id: 'custom', label: 'Autre / Custom' },
 ] as const;
 
-// Modèles disponibles via OpenRouter
+// Modèles payants via OpenRouter
 const TEXT_MODELS = [
   { id: 'google/gemini-3-flash-preview', label: 'Gemini 3 Flash (rapide, recommandé)' },
   { id: 'google/gemini-3.1-flash-lite-preview', label: 'Gemini 3.1 Flash Lite (économique)' },
@@ -211,6 +213,26 @@ const TEXT_MODELS = [
   { id: 'openai/gpt-5', label: 'GPT-5' },
   { id: 'openai/gpt-5.2', label: 'GPT-5.2 (raisonnement)' },
 ];
+
+/** Modèles OpenRouter gratuits (suffixe :free ou routeur openrouter/free). */
+const FREE_TEXT_MODELS = [
+  { id: 'openrouter/free', label: 'OpenRouter Free — sélection automatique' },
+  { id: 'deepseek/deepseek-r1:free', label: 'DeepSeek R1 — raisonnement, articles longs' },
+  { id: 'deepseek/deepseek-chat-v3-0324:free', label: 'DeepSeek Chat v3 — rédaction générale' },
+  { id: 'meta-llama/llama-3.3-70b-instruct:free', label: 'Llama 3.3 70B — bon compromis qualité' },
+  { id: 'qwen/qwen3-235b-a22b:free', label: 'Qwen3 235B — code et analyse' },
+  { id: 'google/gemma-3-27b-it:free', label: 'Gemma 3 27B — léger, résumés' },
+  {
+    id: 'mistralai/mistral-small-3.1-24b-instruct:free',
+    label: 'Mistral Small 3.1 — rédaction rapide',
+  },
+] as const;
+
+const FREE_TEXT_MODEL_IDS = new Set<string>(FREE_TEXT_MODELS.map(m => m.id));
+
+function isFreeOpenRouterModel(modelId: string): boolean {
+  return FREE_TEXT_MODEL_IDS.has(modelId) || modelId.endsWith(':free');
+}
 
 const IMAGE_MODELS = [
   { id: 'google/gemini-3.1-flash-image-preview', label: 'Gemini 3.1 Flash Image (Nano Banana 2)' },
@@ -242,6 +264,49 @@ function ModelSelect({
             {o.label}
           </SelectItem>
         ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
+function BlogTextModelSelect({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const knownIds = new Set([...FREE_TEXT_MODELS.map(m => m.id), ...TEXT_MODELS.map(m => m.id)]);
+  const isCustom = value.length > 0 && !knownIds.has(value);
+
+  return (
+    <Select value={value} onValueChange={onChange}>
+      <SelectTrigger className="w-full">
+        <SelectValue placeholder="Choisir un modèle texte" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup>
+          <SelectLabel>Modèles gratuits (OpenRouter)</SelectLabel>
+          {FREE_TEXT_MODELS.map(o => (
+            <SelectItem key={o.id} value={o.id}>
+              {o.label}
+            </SelectItem>
+          ))}
+        </SelectGroup>
+        <SelectGroup>
+          <SelectLabel>Modèles payants</SelectLabel>
+          {TEXT_MODELS.map(o => (
+            <SelectItem key={o.id} value={o.id}>
+              {o.label}
+            </SelectItem>
+          ))}
+        </SelectGroup>
+        {isCustom ? (
+          <SelectGroup>
+            <SelectLabel>Personnalisé</SelectLabel>
+            <SelectItem value={value}>{value}</SelectItem>
+          </SelectGroup>
+        ) : null}
       </SelectContent>
     </Select>
   );
@@ -1032,11 +1097,31 @@ const AIManagementPage: React.FC = () => {
                   </div>
                   <div className="space-y-2">
                     <Label>Modèle texte</Label>
-                    <ModelSelect
+                    <BlogTextModelSelect
                       value={settings.blogGenerator.textModel}
-                      onChange={v => update('blogGenerator', { textModel: v })}
-                      options={TEXT_MODELS}
+                      onChange={v => {
+                        const patch: Partial<AIManagementSettings['blogGenerator']> = {
+                          textModel: v,
+                        };
+                        if (isFreeOpenRouterModel(v)) {
+                          patch.generateFeaturedImage = false;
+                        }
+                        update('blogGenerator', patch);
+                      }}
                     />
+                    <p className="text-xs text-muted-foreground">
+                      Les modèles gratuits nécessitent une clé OpenRouter (sans crédits payants).
+                      Liste complète sur{' '}
+                      <a
+                        href="https://openrouter.ai/models?q=free"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline"
+                      >
+                        openrouter.ai/models
+                      </a>
+                      .
+                    </p>
                   </div>
                   <div className="space-y-2 sm:col-span-2">
                     <Label>Modèle image</Label>
@@ -1047,6 +1132,18 @@ const AIManagementPage: React.FC = () => {
                     />
                   </div>
                 </div>
+
+                {isFreeOpenRouterModel(settings.blogGenerator.textModel) ? (
+                  <Alert>
+                    <Sparkles className="h-4 w-4" />
+                    <AlertTitle>Modèle gratuit sélectionné</AlertTitle>
+                    <AlertDescription>
+                      Aucun crédit payant requis. L&apos;image hero a été désactivée (les modèles
+                      image sont payants). Quotas OpenRouter : ~20 req/min et ~200/jour selon le
+                      modèle. Pour les articles longs, préférez DeepSeek R1 ou OpenRouter Free.
+                    </AlertDescription>
+                  </Alert>
+                ) : null}
 
                 <div className="space-y-2">
                   <Label>Prompt système (rédacteur en chef)</Label>
