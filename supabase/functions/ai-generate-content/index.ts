@@ -7,14 +7,14 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { requireAuthenticatedUser } from '../_shared/edge-auth-utils.ts';
 import { retrievePlatformRagContext, type RagSettings } from '../_shared/platform-rag.ts';
 import {
-  callImageGeneration,
-  callTextCompletion,
+  callImageGenerationResilient,
+  callTextCompletionResilient,
   ensureDataUrl,
   fillTemplate,
   mapGatewayError,
   normalizeAiProvider,
   normalizeModelForProvider,
-  resolveAiApiKey,
+  resolveAiApiKeyPool,
   uploadCatalogImageBytes,
 } from '../_shared/ai-gateway.ts';
 import { defaultFreeTextModel } from '../_shared/ai-models.ts';
@@ -107,10 +107,14 @@ serve(async (req: Request) => {
       );
     }
 
-    const { key: apiKey, provider: resolvedProvider } = await resolveAiApiKey(
-      admin,
-      normalizeAiProvider(config.provider)
-    );
+    const resolvedProvider = normalizeAiProvider(config.provider);
+    const apiKeyPool = await resolveAiApiKeyPool(admin, resolvedProvider);
+    if (!apiKeyPool.length) {
+      return new Response(JSON.stringify({ error: 'Aucune clé API IA configurée' }), {
+        status: 503,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
     const model = normalizeModelForProvider(
       (config.model as string) || defaultFreeTextModel(resolvedProvider),
       resolvedProvider
@@ -144,7 +148,7 @@ serve(async (req: Request) => {
         ]
           .filter(Boolean)
           .join(' — ');
-        const ragContext = await retrievePlatformRagContext(admin, query, apiKey, {
+        const ragContext = await retrievePlatformRagContext(admin, query, apiKeyPool[0].key, {
           ...ragConfig,
           locale: language || 'fr',
         });
@@ -172,8 +176,7 @@ serve(async (req: Request) => {
       minWords
     );
 
-    const textRes = await callTextCompletion({
-      apiKey,
+    const { response: textRes, meta: textMeta } = await callTextCompletionResilient(admin, {
       provider: resolvedProvider,
       model,
       messages: [
@@ -184,6 +187,7 @@ serve(async (req: Request) => {
       maxTokens: typeof config.maxTokens === 'number' ? config.maxTokens : 4000,
       tools: [PRODUCT_CONTENT_TOOL],
       toolChoice: { type: 'function', function: { name: 'output_product_content' } },
+      apiKeyPool,
     });
 
     const mapped = mapGatewayError(textRes.status);
@@ -239,11 +243,11 @@ serve(async (req: Request) => {
           })) + ' Output exactly 1536×1024 pixels, 3:2 landscape ratio.';
 
       try {
-        const rawUrl = await callImageGeneration({
-          apiKey,
+        const { imageUrl: rawUrl } = await callImageGenerationResilient(admin, {
           provider: resolvedProvider,
           model: imageModel,
           prompt: imagePrompt,
+          apiKeyPool,
         });
         const dataUrl = await ensureDataUrl(rawUrl);
         const rawBytes = dataUrlToBytes(dataUrl);
@@ -263,9 +267,12 @@ serve(async (req: Request) => {
       }
     }
 
-    return new Response(JSON.stringify({ content: { ...content, imageUrl }, model }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({ content: { ...content, imageUrl }, model: textMeta.modelUsed }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    );
   } catch (error) {
     console.error('ai-generate-content error', error);
     return new Response(

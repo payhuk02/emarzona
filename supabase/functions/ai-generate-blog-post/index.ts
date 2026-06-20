@@ -7,7 +7,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { authenticatePlatformAdminRequest } from '../_shared/admin-auth-utils.ts';
 import { retrievePlatformRagContext, type RagSettings } from '../_shared/platform-rag.ts';
 import {
-  callImageGeneration,
+  callImageGenerationResilient,
   completeStructuredWithToolFallback,
   ensureDataUrl,
   fillTemplate,
@@ -15,7 +15,7 @@ import {
   mapGatewayError,
   normalizeAiProvider,
   normalizeModelForProvider,
-  resolveAiApiKey,
+  resolveAiApiKeyPool,
   uploadBlogImageFromDataUrl,
   type AiProvider,
 } from '../_shared/ai-gateway.ts';
@@ -174,7 +174,13 @@ serve(async (req: Request) => {
     }
 
     const provider = normalizeAiProvider(config.provider);
-    const { key: apiKey } = await resolveAiApiKey(admin, provider);
+    const apiKeyPool = await resolveAiApiKeyPool(admin, provider);
+    if (!apiKeyPool.length) {
+      return new Response(JSON.stringify({ error: `Aucune clé API pour ${provider}` }), {
+        status: 503,
+        headers: { ...headers, 'Content-Type': 'application/json' },
+      });
+    }
     const textModel = resolveBlogTextModel(config, allSettings, provider);
     const imageModel = config.imageModel || 'gemini-2.0-flash-preview-image-generation';
     const isFreeModel = isFreeAiModel(textModel, provider);
@@ -195,7 +201,7 @@ serve(async (req: Request) => {
         const ragContext = await retrievePlatformRagContext(
           admin,
           `${topic} ${brief} ${targetKeywords}`,
-          apiKey,
+          apiKeyPool[0].key,
           { ...ragConfig, locale: language }
         );
         if (ragContext) {
@@ -225,9 +231,10 @@ serve(async (req: Request) => {
     }
 
     const textRes = await completeStructuredWithToolFallback({
-      apiKey,
+      admin,
       provider,
       model: textModel,
+      apiKeyPool,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
@@ -264,11 +271,11 @@ serve(async (req: Request) => {
       const finalImagePrompt = String(article.image_prompt || imagePrompt);
 
       try {
-        const rawUrl = await callImageGeneration({
-          apiKey,
+        const { imageUrl: rawUrl } = await callImageGenerationResilient(admin, {
           provider,
           model: imageModel,
           prompt: finalImagePrompt,
+          apiKeyPool,
         });
         const dataUrl = await ensureDataUrl(rawUrl);
         featuredImageUrl = await uploadBlogImageFromDataUrl(admin, dataUrl, slug, 'featured');

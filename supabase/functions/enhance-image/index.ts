@@ -8,12 +8,12 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import {
-  callMultimodalCompletion,
+  callMultimodalCompletionResilient,
   ensureDataUrl,
   mapGatewayError,
   normalizeAiProvider,
   normalizeModelForProvider,
-  resolveAiApiKey,
+  resolveAiApiKeyPool,
 } from '../_shared/ai-gateway.ts';
 
 const defaultAllowedOrigin = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
@@ -89,7 +89,13 @@ serve(async (req: Request) => {
     }
 
     const provider = normalizeAiProvider(config.provider ?? 'openrouter');
-    const { key: apiKey } = await resolveAiApiKey(admin, provider);
+    const apiKeyPool = await resolveAiApiKeyPool(admin, provider);
+    if (!apiKeyPool.length) {
+      return new Response(JSON.stringify({ error: 'Aucune clé API IA configurée' }), {
+        status: 503,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     const body = await req.json();
     const inputImageUrl = body?.imageUrl;
@@ -122,8 +128,7 @@ serve(async (req: Request) => {
       defaultInstr ||
       DEFAULT_INSTRUCTION;
 
-    const response = await callMultimodalCompletion({
-      apiKey,
+    const { response, meta } = await callMultimodalCompletionResilient(admin, {
       provider,
       model,
       messages: [
@@ -168,7 +173,7 @@ serve(async (req: Request) => {
 
     const resultImageUrl = await ensureDataUrl(out);
 
-    return new Response(JSON.stringify({ imageUrl: resultImageUrl, model }), {
+    return new Response(JSON.stringify({ imageUrl: resultImageUrl, model: meta.modelUsed }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {

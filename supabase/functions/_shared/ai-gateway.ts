@@ -3,7 +3,22 @@
  */
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { decryptApiKey } from './ai-crypto.ts';
-import { defaultFreeTextModel, isFreeAiModel, normalizeGoogleModel } from './ai-models.ts';
+import {
+  defaultFreeTextModel,
+  isFreeAiModel,
+  normalizeGoogleModel,
+  resolveImageModelCandidates,
+  resolveTextModelCandidates,
+} from './ai-models.ts';
+
+export type ResolvedApiKey = {
+  id: string | null;
+  key: string;
+  label: string;
+  provider: AiProvider;
+  source: 'db' | 'env';
+  isDefault: boolean;
+};
 
 export type AiProvider = 'openrouter' | 'openai' | 'anthropic' | 'google' | 'custom';
 
@@ -229,34 +244,62 @@ export function normalizeAiProvider(raw: unknown): AiProvider {
   return 'openrouter';
 }
 
+export async function resolveAiApiKeyPool(
+  admin: SupabaseClient,
+  provider: AiProvider = 'openrouter'
+): Promise<ResolvedApiKey[]> {
+  const { data: rows } = await admin
+    .from('platform_ai_api_keys')
+    .select('id, provider, label, encrypted_key, is_default, created_at')
+    .eq('provider', provider)
+    .order('is_default', { ascending: false })
+    .order('created_at', { ascending: true });
+
+  const pool: ResolvedApiKey[] = [];
+  for (const row of rows ?? []) {
+    if (!row.encrypted_key) continue;
+    pool.push({
+      id: row.id as string,
+      key: await decryptApiKey(row.encrypted_key as string),
+      label: (row.label as string) || 'Clé admin',
+      provider,
+      source: 'db',
+      isDefault: Boolean(row.is_default),
+    });
+  }
+
+  const envKey = resolveEnvApiKey(provider);
+  if (envKey) {
+    pool.push({
+      id: null,
+      key: envKey,
+      label:
+        provider === 'google' ? 'Secret GEMINI/GOOGLE' : `Secret ${PROVIDER_ENV_KEYS[provider]}`,
+      provider,
+      source: 'env',
+      isDefault: pool.length === 0,
+    });
+  }
+
+  return pool;
+}
+
 export async function resolveAiApiKey(
   admin: SupabaseClient,
   provider: AiProvider = 'openrouter'
 ): Promise<{ key: string; provider: AiProvider; source: 'env' | 'db' }> {
-  const { data: rows } = await admin
-    .from('platform_ai_api_keys')
-    .select('provider, encrypted_key, is_default')
-    .order('is_default', { ascending: false });
-
-  const list = rows ?? [];
-  const match =
-    list.find(r => r.provider === provider && r.is_default) ||
-    list.find(r => r.provider === provider) ||
-    list.find(r => r.provider === 'openrouter' && r.is_default) ||
-    list.find(r => r.is_default);
-
-  if (match?.encrypted_key) {
-    const key = await decryptApiKey(match.encrypted_key as string);
-    return { key, provider: normalizeAiProvider(match.provider), source: 'db' };
+  const pool = await resolveAiApiKeyPool(admin, provider);
+  if (pool.length > 0) {
+    const first = pool[0];
+    return { key: first.key, provider: first.provider, source: first.source };
   }
 
-  const envKey = resolveEnvApiKey(provider) ?? resolveEnvApiKey('openrouter');
-  if (envKey) {
-    return {
-      key: envKey,
-      provider: envKey === resolveEnvApiKey(provider) ? provider : 'openrouter',
-      source: 'env',
-    };
+  // Rétrocompat : fallback OpenRouter si provider demandé sans clé
+  if (provider !== 'openrouter') {
+    const fallback = await resolveAiApiKeyPool(admin, 'openrouter');
+    if (fallback.length > 0) {
+      return { key: fallback[0].key, provider: 'openrouter', source: fallback[0].source };
+    }
   }
 
   const envHints =
@@ -265,6 +308,30 @@ export async function resolveAiApiKey(
       : `${PROVIDER_ENV_KEYS[provider]} ou clé admin OpenRouter`;
 
   throw new Error(`Aucune clé API IA configurée pour « ${provider} » (${envHints})`);
+}
+
+/** Erreur quota / rate-limit → essayer la clé ou le modèle suivant. */
+export function isRecoverableAiFailure(status: number, message: string): boolean {
+  if (status === 429 || status === 402 || status === 503) return true;
+  return /quota|rate.?limit|resource.?exhausted|too many requests|capacity|overloaded|billing|credit|exceeded|limit reached/i.test(
+    message
+  );
+}
+
+/** Erreur clé invalide / refusée → essayer la clé suivante du pool. */
+export function isKeyRotationFailure(status: number, message: string): boolean {
+  if (status === 401 || status === 403) return true;
+  return /api.?key|invalid key|permission denied|unauthorized|forbidden|suspended|disabled/i.test(
+    message
+  );
+}
+
+/** Modèle indisponible → essayer le modèle suivant (mode auto). */
+export function isModelFallbackFailure(status: number, message: string): boolean {
+  if (status === 404) return true;
+  return /model not found|not found for API version|unsupported model|no longer available/i.test(
+    message
+  );
 }
 
 export async function callTextCompletion(options: {
@@ -313,6 +380,98 @@ export async function callTextCompletion(options: {
       stream: options.stream ?? false,
     }),
   });
+}
+
+export type AiCallMeta = {
+  modelUsed: string;
+  keyLabel: string;
+  keySource: 'db' | 'env';
+  failoverAttempts: number;
+};
+
+/** Appel texte avec bascule clés (multi-comptes) + modèles (google/auto). */
+export async function callTextCompletionResilient(
+  admin: SupabaseClient,
+  options: {
+    provider: AiProvider;
+    model: string;
+    messages: Array<{ role: string; content: string }>;
+    temperature?: number;
+    maxTokens?: number;
+    tools?: unknown[];
+    toolChoice?: unknown;
+    stream?: boolean;
+    apiKeyPool?: ResolvedApiKey[];
+  }
+): Promise<{ response: Response; meta: AiCallMeta }> {
+  const provider = options.provider;
+  const pool = options.apiKeyPool ?? (await resolveAiApiKeyPool(admin, provider));
+  if (!pool.length) {
+    throw new Error(`Aucune clé API IA pour « ${provider} »`);
+  }
+
+  const models = resolveTextModelCandidates(options.model, provider);
+  let lastError = 'Échec appel IA';
+  let attempts = 0;
+
+  for (const keyEntry of pool) {
+    for (const model of models) {
+      attempts++;
+      const maxTokens = effectiveMaxTokens(model, options.maxTokens ?? 4000, provider);
+      const response = await callTextCompletion({
+        apiKey: keyEntry.key,
+        provider,
+        model,
+        messages: options.messages,
+        temperature: options.temperature,
+        maxTokens,
+        tools: options.tools,
+        toolChoice: options.toolChoice,
+        stream: options.stream,
+      });
+
+      if (response.ok) {
+        if (attempts > 1) {
+          console.info(
+            `AI failover OK: provider=${provider} key=${keyEntry.label} model=${model} after ${attempts} attempts`
+          );
+        }
+        return {
+          response,
+          meta: {
+            modelUsed: model,
+            keyLabel: keyEntry.label,
+            keySource: keyEntry.source,
+            failoverAttempts: attempts - 1,
+          },
+        };
+      }
+
+      const body = await response.text();
+      lastError = parseGatewayErrorBody(body, response.status);
+
+      const tryNextModel = isModelFallbackFailure(response.status, lastError);
+
+      console.warn(
+        `AI attempt failed: key=${keyEntry.label} model=${model} status=${response.status} — ${lastError.slice(0, 120)}`
+      );
+
+      if (tryNextModel && models.indexOf(model) < models.length - 1) continue;
+      if (
+        isRecoverableAiFailure(response.status, lastError) ||
+        isKeyRotationFailure(response.status, lastError)
+      ) {
+        break;
+      }
+      throw new Error(lastError);
+    }
+  }
+
+  throw new Error(
+    pool.length > 1 || models.length > 1
+      ? `Toutes les clés/modèles IA ont échoué (${attempts} tentatives). Dernière erreur : ${lastError}`
+      : lastError
+  );
 }
 
 export async function callMultimodalCompletion(options: {
@@ -397,6 +556,69 @@ export async function callMultimodalCompletion(options: {
       messages: options.messages,
     }),
   });
+}
+
+export async function callMultimodalCompletionResilient(
+  admin: SupabaseClient,
+  options: {
+    provider: AiProvider;
+    model: string;
+    messages: unknown[];
+    apiKeyPool?: ResolvedApiKey[];
+  }
+): Promise<{ response: Response; meta: AiCallMeta }> {
+  const pool = options.apiKeyPool ?? (await resolveAiApiKeyPool(admin, options.provider));
+  if (!pool.length) throw new Error(`Aucune clé API IA pour « ${options.provider} »`);
+
+  const models = resolveImageModelCandidates(options.model, options.provider);
+  let lastError = 'Échec appel multimodal';
+  let attempts = 0;
+
+  for (const keyEntry of pool) {
+    for (const model of models) {
+      attempts++;
+      const response = await callMultimodalCompletion({
+        apiKey: keyEntry.key,
+        provider: options.provider,
+        model,
+        messages: options.messages,
+      });
+
+      if (response.ok) {
+        return {
+          response,
+          meta: {
+            modelUsed: model,
+            keyLabel: keyEntry.label,
+            keySource: keyEntry.source,
+            failoverAttempts: attempts - 1,
+          },
+        };
+      }
+
+      const body = await response.text();
+      lastError = parseGatewayErrorBody(body, response.status);
+      console.warn(
+        `Multimodal AI failed: key=${keyEntry.label} model=${model} status=${response.status}`
+      );
+
+      if (
+        isModelFallbackFailure(response.status, lastError) &&
+        models.indexOf(model) < models.length - 1
+      ) {
+        continue;
+      }
+      if (
+        isRecoverableAiFailure(response.status, lastError) ||
+        isKeyRotationFailure(response.status, lastError)
+      ) {
+        break;
+      }
+      throw new Error(lastError);
+    }
+  }
+
+  throw new Error(`Toutes les clés/modèles image ont échoué. Dernière erreur : ${lastError}`);
 }
 
 export async function callImageGeneration(options: {
@@ -499,6 +721,61 @@ export async function callImageGeneration(options: {
     return imageUrl;
   }
   throw new Error('Réponse image IA invalide');
+}
+
+export async function callImageGenerationResilient(
+  admin: SupabaseClient,
+  options: {
+    provider: AiProvider;
+    model: string;
+    prompt: string;
+    apiKeyPool?: ResolvedApiKey[];
+  }
+): Promise<{ imageUrl: string; meta: AiCallMeta }> {
+  const pool = options.apiKeyPool ?? (await resolveAiApiKeyPool(admin, options.provider));
+  if (!pool.length) throw new Error(`Aucune clé API IA pour « ${options.provider} »`);
+
+  const models = resolveImageModelCandidates(options.model, options.provider);
+  let lastError = 'Échec génération image';
+  let attempts = 0;
+
+  for (const keyEntry of pool) {
+    for (const model of models) {
+      attempts++;
+      try {
+        const imageUrl = await callImageGeneration({
+          apiKey: keyEntry.key,
+          provider: options.provider,
+          model,
+          prompt: options.prompt,
+        });
+        return {
+          imageUrl,
+          meta: {
+            modelUsed: model,
+            keyLabel: keyEntry.label,
+            keySource: keyEntry.source,
+            failoverAttempts: attempts - 1,
+          },
+        };
+      } catch (e) {
+        lastError = e instanceof Error ? e.message : String(e);
+        const statusMatch = lastError.match(/\((\d{3})\)/);
+        const status = statusMatch ? Number(statusMatch[1]) : 500;
+        console.warn(
+          `Image gen failed: key=${keyEntry.label} model=${model} — ${lastError.slice(0, 120)}`
+        );
+
+        if (isModelFallbackFailure(status, lastError) && models.indexOf(model) < models.length - 1)
+          continue;
+        if (isRecoverableAiFailure(status, lastError) || isKeyRotationFailure(status, lastError))
+          break;
+        throw e instanceof Error ? e : new Error(lastError);
+      }
+    }
+  }
+
+  throw new Error(`Toutes les clés/modèles image ont échoué. Dernière erreur : ${lastError}`);
 }
 
 export async function createOpenRouterEmbedding(
@@ -732,7 +1009,8 @@ function repairPossiblyTruncatedJson(input: string): string {
 }
 
 export async function completeStructuredWithToolFallback(options: {
-  apiKey: string;
+  admin?: SupabaseClient;
+  apiKey?: string;
   provider?: AiProvider;
   model: string;
   messages: Array<{ role: string; content: string }>;
@@ -741,21 +1019,48 @@ export async function completeStructuredWithToolFallback(options: {
   tools: unknown[];
   toolName: string;
   jsonSchemaHint: string;
+  apiKeyPool?: ResolvedApiKey[];
 }): Promise<Record<string, unknown>> {
   const provider = options.provider ?? 'openrouter';
-  const model = normalizeModelForProvider(options.model, provider);
-  const maxTokens = effectiveMaxTokens(model, options.maxTokens ?? 4000, provider);
+  const models = resolveTextModelCandidates(options.model, provider);
+  const primaryModel = models[0];
+  const maxTokens = effectiveMaxTokens(primaryModel, options.maxTokens ?? 4000, provider);
 
-  let response = await callTextCompletion({
-    apiKey: options.apiKey,
-    provider,
-    model,
-    messages: options.messages,
-    temperature: options.temperature,
-    maxTokens,
-    tools: options.tools,
-    toolChoice: { type: 'function', function: { name: options.toolName } },
-  });
+  async function runCompletion(
+    messages: Array<{ role: string; content: string }>,
+    withTools: boolean
+  ): Promise<Response> {
+    if (options.admin) {
+      const { response } = await callTextCompletionResilient(options.admin, {
+        provider,
+        model: options.model,
+        messages,
+        temperature: options.temperature,
+        maxTokens,
+        tools: withTools ? options.tools : undefined,
+        toolChoice: withTools
+          ? { type: 'function', function: { name: options.toolName } }
+          : undefined,
+        apiKeyPool: options.apiKeyPool,
+      });
+      return response;
+    }
+    if (!options.apiKey) throw new Error('apiKey ou admin requis');
+    return callTextCompletion({
+      apiKey: options.apiKey,
+      provider,
+      model: primaryModel,
+      messages,
+      temperature: options.temperature,
+      maxTokens,
+      tools: withTools ? options.tools : undefined,
+      toolChoice: withTools
+        ? { type: 'function', function: { name: options.toolName } }
+        : undefined,
+    });
+  }
+
+  let response = await runCompletion(options.messages, true);
 
   if (!response.ok) {
     const firstError = await readGatewayError(response);
@@ -773,14 +1078,10 @@ export async function completeStructuredWithToolFallback(options: {
     }
 
     console.warn('Structured tool call failed, retrying JSON mode', response.status, firstError);
-    response = await callTextCompletion({
-      apiKey: options.apiKey,
-      provider,
-      model,
-      messages: [...options.messages, { role: 'system', content: options.jsonSchemaHint }],
-      temperature: options.temperature,
-      maxTokens,
-    });
+    response = await runCompletion(
+      [...options.messages, { role: 'system', content: options.jsonSchemaHint }],
+      false
+    );
 
     if (!response.ok) {
       throw new Error(await readGatewayError(response));

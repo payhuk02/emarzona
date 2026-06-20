@@ -166,9 +166,11 @@ export function PlatformAiApiKeysPanel() {
         <KeyRound className="h-4 w-4" />
         <AlertTitle>Multi-providers professionnel</AlertTitle>
         <AlertDescription>
-          Chaque service IA (blog, produits, chatbot) utilise le provider configuré dans son onglet.
-          Les clés sont chiffrées AES-GCM côté edge — seul un hint (4 derniers caractères) est
-          affiché. Ajoutez une clé par provider :{' '}
+          Chaque service IA utilise le provider configuré dans son onglet. Plusieurs clés du même
+          provider (comptes Google/OpenRouter différents) sont supportées : en cas de quota épuisé
+          (429/402), la suivante est utilisée automatiquement. Ordre : clé principale (⭐) puis clés
+          de secours par date d&apos;ajout. Modèle <strong>google/auto</strong> : essaie les modèles
+          Gemini gratuits dans l&apos;ordre. Obtenez des clés sur{' '}
           <a
             href="https://openrouter.ai/keys"
             target="_blank"
@@ -195,41 +197,69 @@ export function PlatformAiApiKeysPanel() {
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
         </div>
       ) : keys.length > 0 ? (
-        <ul className="space-y-2">
-          {keys.map(k => (
-            <li
-              key={k.id}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-lg border p-3"
-            >
-              <div>
-                <p className="font-medium text-sm">{k.label}</p>
-                <p className="text-xs text-muted-foreground">
-                  {k.provider} · {k.key_hint}
-                  {k.is_default ? ' · par défaut' : ''}
+        <div className="space-y-4">
+          {(['google', 'openrouter', 'openai', 'anthropic', 'custom'] as const).map(prov => {
+            const providerKeys = keys
+              .filter(k => k.provider === prov)
+              .sort((a, b) => {
+                if (a.is_default !== b.is_default) return a.is_default ? -1 : 1;
+                return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+              });
+            if (!providerKeys.length) return null;
+            return (
+              <div key={prov} className="space-y-2">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  {prov} — bascule automatique si quota épuisé (429/402)
                 </p>
+                <ul className="space-y-2">
+                  {providerKeys.map((k, index) => (
+                    <li
+                      key={k.id}
+                      className="flex flex-wrap items-center justify-between gap-2 rounded-lg border p-3"
+                    >
+                      <div>
+                        <p className="font-medium text-sm flex items-center gap-2">
+                          <Badge variant="outline" className="text-[10px]">
+                            #{index + 1}
+                          </Badge>
+                          {k.label}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {k.key_hint}
+                          {k.is_default ? ' · clé principale' : ' · clé de secours'}
+                        </p>
+                      </div>
+                      <div className="flex gap-1">
+                        {!k.is_default ? (
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => void handleSetDefault(k.id)}
+                            title="Promouvoir en clé principale"
+                          >
+                            <Star className="h-4 w-4" />
+                          </Button>
+                        ) : (
+                          <Badge variant="secondary" className="text-[10px]">
+                            principale
+                          </Badge>
+                        )}
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="text-destructive"
+                          onClick={() => void handleDelete(k.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <div className="flex gap-1">
-                {!k.is_default ? (
-                  <Button size="icon" variant="ghost" onClick={() => void handleSetDefault(k.id)}>
-                    <Star className="h-4 w-4" />
-                  </Button>
-                ) : (
-                  <Badge variant="secondary" className="text-[10px]">
-                    défaut
-                  </Badge>
-                )}
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="text-destructive"
-                  onClick={() => void handleDelete(k.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </li>
-          ))}
-        </ul>
+            );
+          })}
+        </div>
       ) : (
         <p className="text-sm text-muted-foreground">
           Aucune clé personnalisée — les secrets Supabase Edge (OPENROUTER_API_KEY, GEMINI_API_KEY)
@@ -301,7 +331,7 @@ export function PlatformAiApiKeysPanel() {
             checked={isDefault}
             onChange={e => setIsDefault(e.target.checked)}
           />
-          Définir comme clé par défaut pour ce provider
+          Définir comme clé principale (utilisée en premier ; les autres servent de secours)
         </label>
         <Button onClick={handleAdd} disabled={saving}>
           {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}

@@ -50,6 +50,7 @@ import { logger } from '@/lib/logger';
 import { DEFAULT_STUDIO_PRESETS, type StudioPreset } from '@/lib/images/studio-presets';
 import {
   defaultFreeTextModel,
+  GOOGLE_AUTO_MODEL_OPTION,
   GOOGLE_FREE_TEXT_MODELS,
   GOOGLE_IMAGE_MODELS,
   GOOGLE_PAID_TEXT_MODELS,
@@ -134,7 +135,7 @@ const DEFAULTS: AIManagementSettings = {
     enabled: true,
     useAiFallback: false,
     provider: 'google',
-    model: 'gemini-2.0-flash-lite',
+    model: 'google/auto',
     systemPrompt:
       "Tu es l'assistant IA d'Emarzona, plateforme e-commerce multi-boutiques en Afrique de l'Ouest. Réponds en français de façon concise et professionnelle.",
     temperature: 0.7,
@@ -184,7 +185,7 @@ const DEFAULTS: AIManagementSettings = {
   blogGenerator: {
     enabled: true,
     provider: 'google',
-    textModel: 'gemini-2.0-flash-lite',
+    textModel: 'google/auto',
     imageModel: 'gemini-2.0-flash-preview-image-generation',
     systemPrompt:
       'Tu es le rédacteur en chef du blog Emarzona, plateforme e-commerce multi-boutiques. Tu rédiges des articles premium en HTML sémantique, experts et orientés conversion.',
@@ -288,7 +289,11 @@ function BlogTextModelSelect({
   onChange: (v: string) => void;
   provider: AiGatewayProvider;
 }) {
-  const googleModels = [...GOOGLE_FREE_TEXT_MODELS, ...GOOGLE_PAID_TEXT_MODELS];
+  const googleModels = [
+    GOOGLE_AUTO_MODEL_OPTION,
+    ...GOOGLE_FREE_TEXT_MODELS,
+    ...GOOGLE_PAID_TEXT_MODELS,
+  ];
   const knownIds = new Set(
     provider === 'google'
       ? googleModels.map(m => m.id)
@@ -304,6 +309,12 @@ function BlogTextModelSelect({
       <SelectContent>
         {provider === 'google' ? (
           <>
+            <SelectGroup>
+              <SelectLabel>Sélection automatique</SelectLabel>
+              <SelectItem key={GOOGLE_AUTO_MODEL_OPTION.id} value={GOOGLE_AUTO_MODEL_OPTION.id}>
+                {GOOGLE_AUTO_MODEL_OPTION.label}
+              </SelectItem>
+            </SelectGroup>
             <SelectGroup>
               <SelectLabel>Modèles gratuits (Google AI Studio)</SelectLabel>
               {GOOGLE_FREE_TEXT_MODELS.map(o => (
@@ -1289,10 +1300,20 @@ const AIManagementPage: React.FC = () => {
                 isFreeAiModel(settings.blogGenerator.textModel, 'google') ? (
                   <Alert>
                     <Sparkles className="h-4 w-4" />
-                    <AlertTitle>Modèle Gemini gratuit (Google AI Studio)</AlertTitle>
+                    <AlertTitle>Gemini gratuit (Google AI Studio)</AlertTitle>
                     <AlertDescription>
-                      Niveau sans frais — quotas journaliers selon Google AI Studio. L&apos;image
-                      hero peut utiliser Gemini Image (limites du tier gratuit).
+                      {settings.blogGenerator.textModel === 'google/auto' ? (
+                        <>
+                          Mode <strong>Auto</strong> : le système essaie les modèles gratuits dans
+                          l&apos;ordre (Flash Lite → Flash → 2.5). Plusieurs clés Gemini de comptes
+                          différents basculent automatiquement si quota épuisé.
+                        </>
+                      ) : (
+                        <>
+                          Niveau sans frais — quotas journaliers Google AI Studio. Bascule
+                          automatique vers une autre clé Gemini si quota atteint.
+                        </>
+                      )}
                     </AlertDescription>
                   </Alert>
                 ) : null}

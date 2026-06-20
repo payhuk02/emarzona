@@ -8,11 +8,11 @@ import { requireAuthenticatedUser } from '../_shared/edge-auth-utils.ts';
 import { enforceRateLimit, getClientIp, RATE_LIMIT_PRESETS } from '../_shared/rate-limit.ts';
 import { retrievePlatformRagContext, type RagSettings } from '../_shared/platform-rag.ts';
 import {
-  callTextCompletion,
+  callTextCompletionResilient,
   mapGatewayError,
   normalizeAiProvider,
   normalizeModelForProvider,
-  resolveAiApiKey,
+  resolveAiApiKeyPool,
 } from '../_shared/ai-gateway.ts';
 import { defaultFreeTextModel } from '../_shared/ai-models.ts';
 
@@ -108,7 +108,13 @@ serve(async (req: Request) => {
     }
 
     const provider = normalizeAiProvider(config?.provider ?? 'openrouter');
-    const { key: apiKey } = await resolveAiApiKey(admin, provider);
+    const apiKeyPool = await resolveAiApiKeyPool(admin, provider);
+    if (!apiKeyPool.length) {
+      return new Response(JSON.stringify({ error: 'Aucune clé API IA configurée' }), {
+        status: 503,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     const model = normalizeModelForProvider(
       (config?.model as string) || defaultFreeTextModel(provider),
@@ -129,10 +135,15 @@ serve(async (req: Request) => {
       lastUserMessage.trim()
     ) {
       try {
-        const ragContext = await retrievePlatformRagContext(admin, lastUserMessage, apiKey, {
-          ...ragConfig,
-          locale: ragConfig.locale ?? (config?.language as string) ?? 'fr',
-        });
+        const ragContext = await retrievePlatformRagContext(
+          admin,
+          lastUserMessage,
+          apiKeyPool[0].key,
+          {
+            ...ragConfig,
+            locale: ragConfig.locale ?? (config?.language as string) ?? 'fr',
+          }
+        );
         if (ragContext) {
           systemPrompt = `${systemPrompt}
 
@@ -147,14 +158,14 @@ ${ragContext}`;
     }
 
     const start = Date.now();
-    const response = await callTextCompletion({
-      apiKey,
+    const { response, meta } = await callTextCompletionResilient(admin, {
       provider,
       model,
       messages: [{ role: 'system', content: systemPrompt }, ...messages],
       temperature,
       maxTokens,
       stream: wantStream,
+      apiKeyPool,
     });
 
     const mapped = mapGatewayError(response.status);
@@ -183,7 +194,7 @@ ${ragContext}`;
     const content = data?.choices?.[0]?.message?.content ?? '';
     const latencyMs = Date.now() - start;
 
-    return new Response(JSON.stringify({ content, model, latencyMs }), {
+    return new Response(JSON.stringify({ content, model: meta.modelUsed, latencyMs }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
