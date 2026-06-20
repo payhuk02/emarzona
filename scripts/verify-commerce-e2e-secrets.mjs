@@ -4,18 +4,25 @@
  *
  * Requires Node < 22: ws devDependency for Supabase realtime transport.
  */
+import { appendFileSync } from 'node:fs';
 import { createClient } from '@supabase/supabase-js';
 import ws from 'ws';
-import { assertSafeE2ESupabaseUrl } from './e2e-supabase-guard.mjs';
+import { assertSafeE2ESupabaseUrl, isProductionSupabaseUrl } from './e2e-supabase-guard.mjs';
 
 const required = [
-  ['VITE_SUPABASE_URL', ['VITE_SUPABASE_URL', 'SUPABASE_URL']],
+  ['VITE_SUPABASE_URL', ['VITE_SUPABASE_TEST_URL', 'VITE_SUPABASE_URL', 'SUPABASE_URL']],
   [
     'VITE_SUPABASE_ANON_KEY or VITE_SUPABASE_PUBLISHABLE_KEY',
     ['VITE_SUPABASE_ANON_KEY', 'VITE_SUPABASE_PUBLISHABLE_KEY'],
   ],
   ['SUPABASE_SERVICE_ROLE_KEY', ['SUPABASE_SERVICE_ROLE_KEY']],
 ];
+
+function markGithubOutput(key, value) {
+  if (process.env.GITHUB_OUTPUT) {
+    appendFileSync(process.env.GITHUB_OUTPUT, `${key}=${value}\n`);
+  }
+}
 
 function pick(...keys) {
   for (const key of keys) {
@@ -114,7 +121,17 @@ if (error) {
 }
 
 try {
-  assertSafeE2ESupabaseUrl(url, 'verify-commerce-e2e-secrets');
+  if (isProductionSupabaseUrl(url)) {
+    if (process.env.CI === 'true') {
+      console.log(
+        `Commerce E2E skipped: project « ${projectRef} » is production. ` +
+          'Set GitHub secret VITE_SUPABASE_TEST_URL to a dedicated non-production Supabase project.'
+      );
+      markGithubOutput('skipped', 'true');
+      process.exit(0);
+    }
+    assertSafeE2ESupabaseUrl(url, 'verify-commerce-e2e-secrets');
+  }
 } catch (guardError) {
   console.error(String(guardError.message ?? guardError));
   console.error('');
@@ -122,4 +139,5 @@ try {
   process.exit(1);
 }
 
+markGithubOutput('skipped', 'false');
 console.log(`Commerce E2E secrets OK (project ${projectRef}, service role validated)`);

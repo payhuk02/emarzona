@@ -34,19 +34,6 @@ export interface CartScope {
   sessionId?: string | null;
 }
 
-function applyCartScope<T extends { eq: (col: string, val: string) => T }>(
-  query: T,
-  scope: CartScope
-): T {
-  if (scope.userId) {
-    return query.eq('user_id', scope.userId);
-  }
-  if (scope.sessionId) {
-    return query.eq('session_id', scope.sessionId);
-  }
-  return query;
-}
-
 export async function fetchCartItems(
   scope: CartScope,
   client: DbClient = supabase
@@ -56,7 +43,11 @@ export async function fetchCartItems(
     .select(CART_ITEM_FIELDS)
     .order('added_at', { ascending: false });
 
-  query = applyCartScope(query, scope);
+  if (scope.userId) {
+    query = query.eq('user_id', scope.userId);
+  } else if (scope.sessionId) {
+    query = query.eq('session_id', scope.sessionId);
+  }
 
   const { data, error } = await query;
   if (error) throw error;
@@ -88,7 +79,11 @@ export async function findExistingCartLine(
 ): Promise<CartItem | null> {
   let query = client.from('cart_items').select(CART_ITEM_FIELDS).eq('product_id', productId);
 
-  query = applyCartScope(query, scope);
+  if (scope.userId) {
+    query = query.eq('user_id', scope.userId);
+  } else if (scope.sessionId) {
+    query = query.eq('session_id', scope.sessionId);
+  }
 
   if (variantId) {
     query = query.eq('variant_id', variantId);
@@ -152,7 +147,11 @@ export async function deleteCartItemById(
 
 export async function clearCartItems(scope: CartScope, client: DbClient = supabase): Promise<void> {
   let query = client.from('cart_items').delete();
-  query = applyCartScope(query, scope);
+  if (scope.userId) {
+    query = query.eq('user_id', scope.userId);
+  } else if (scope.sessionId) {
+    query = query.eq('session_id', scope.sessionId);
+  }
   const { error } = await query;
   if (error) throw error;
 }

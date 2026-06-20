@@ -89,6 +89,7 @@ jobs:
       run: npx playwright install --with-deps chromium
 
     - name: Validate commerce E2E secrets
+      id: commerce_e2e_secrets
       run: node scripts/verify-commerce-e2e-secrets.mjs
       env:
         VITE_SUPABASE_TEST_URL: ${{ secrets.VITE_SUPABASE_TEST_URL }}
@@ -98,6 +99,7 @@ jobs:
         SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_TEST_SERVICE_ROLE_KEY }}
 
     - name: Run commerce type gating E2E
+      if: steps.commerce_e2e_secrets.outputs.skipped != 'true'
       run: npm run test:e2e:commerce-gating
       env:
         CI: true
@@ -137,14 +139,17 @@ jobs:
       run: npx playwright install --with-deps chromium
 
     - name: Validate commerce E2E secrets
+      id: commerce_e2e_secrets
       run: node scripts/verify-commerce-e2e-secrets.mjs
       env:
+        VITE_SUPABASE_TEST_URL: ${{ secrets.VITE_SUPABASE_TEST_URL }}
         VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_TEST_URL || secrets.VITE_SUPABASE_URL }}
         VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
         VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
         SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_TEST_SERVICE_ROLE_KEY }}
 
     - name: Run vertical paid E2E
+      if: steps.commerce_e2e_secrets.outputs.skipped != 'true'
       run: npm run test:e2e:vertical-paid
       env:
         CI: true

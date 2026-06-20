@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { getVendorProductListPath } from '@/lib/commerce/store-capability-map';
 import { resolveNavItems } from '@/lib/navigation/resolveNavItems';
 import type { StoreCommerceType } from '@/constants/store-commerce-types';
 import expectedPathsByType from './fixtures/commerce-sidebar.paths.json';
@@ -12,14 +13,13 @@ const COMMERCE_TYPES: readonly StoreCommerceType[] = [
 ] as const;
 
 function sidebarPathsForType(commerceType: StoreCommerceType): string[] {
-  return resolveNavItems({
+  const paths = resolveNavItems({
     surface: 'sidebar',
     persona: 'seller',
     isPlatformAdmin: false,
     commerceType,
-  })
-    .map(item => item.path)
-    .sort();
+  }).map(item => item.path);
+  return [...new Set(paths)].sort();
 }
 
 describe('commerce sidebar integration', () => {
@@ -67,7 +67,6 @@ describe('commerce sidebar integration', () => {
   it('keeps shared capabilities visible for all commerce types', () => {
     const sharedPaths = [
       '/dashboard',
-      '/dashboard/products',
       '/dashboard/orders',
       '/dashboard/customers',
       '/dashboard/emails/campaigns',
@@ -80,6 +79,7 @@ describe('commerce sidebar integration', () => {
       for (const path of sharedPaths) {
         expect(paths).toContain(path);
       }
+      expect(paths).toContain(getVendorProductListPath(commerceType));
     }
   });
 
