@@ -1,8 +1,9 @@
 /**
- * Résolution clé API + appels passerelle IA (OpenRouter).
+ * Résolution clé API + appels multi-providers (OpenRouter, Google Gemini direct).
  */
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { decryptApiKey } from './ai-crypto.ts';
+import { defaultFreeTextModel, isFreeAiModel, normalizeGoogleModel } from './ai-models.ts';
 
 export type AiProvider = 'openrouter' | 'openai' | 'anthropic' | 'google' | 'custom';
 
@@ -16,6 +17,7 @@ const PROVIDER_ENV_KEYS: Record<AiProvider, string> = {
 
 const OPENROUTER_CHAT_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const OPENROUTER_EMBEDDINGS_URL = 'https://openrouter.ai/api/v1/embeddings';
+const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta';
 
 function openRouterHeaders(): Record<string, string> {
   const siteUrl = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
@@ -26,8 +28,196 @@ function openRouterHeaders(): Record<string, string> {
 }
 
 function resolveEnvApiKey(provider: AiProvider): string | undefined {
+  if (provider === 'google') {
+    const gemini = Deno.env.get('GEMINI_API_KEY')?.trim();
+    if (gemini) return gemini;
+  }
   const value = Deno.env.get(PROVIDER_ENV_KEYS[provider])?.trim();
   return value || undefined;
+}
+
+export function normalizeModelForProvider(model: string, provider: AiProvider): string {
+  const trimmed = model.trim();
+  if (!trimmed) return defaultFreeTextModel(provider);
+  if (provider === 'google') return normalizeGoogleModel(trimmed);
+  return trimmed;
+}
+
+type OpenAiCompatibleResponse = {
+  choices: Array<{
+    message: {
+      content?: string;
+      tool_calls?: Array<{
+        id: string;
+        type: 'function';
+        function: { name: string; arguments: string };
+      }>;
+    };
+  }>;
+};
+
+function buildGeminiContents(messages: Array<{ role: string; content: string }>) {
+  const systemMsg = messages.find(m => m.role === 'system');
+  const contents = messages
+    .filter(m => m.role !== 'system')
+    .map(m => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: m.content }],
+    }));
+
+  return { systemMsg, contents };
+}
+
+function geminiToolsFromOpenAi(tools?: unknown[]) {
+  if (!tools?.length) return undefined;
+  const declarations = (
+    tools as Array<{ function?: { name?: string; description?: string; parameters?: unknown } }>
+  )
+    .map(t => t.function)
+    .filter((fn): fn is { name: string; description?: string; parameters?: unknown } => !!fn?.name)
+    .map(fn => ({
+      name: fn.name,
+      description: fn.description,
+      parameters: fn.parameters,
+    }));
+  if (!declarations.length) return undefined;
+  return [{ functionDeclarations: declarations }];
+}
+
+function geminiToolConfig(toolChoice?: unknown) {
+  const fnName = (toolChoice as { function?: { name?: string } } | undefined)?.function?.name;
+  return {
+    functionCallingConfig: {
+      mode: 'ANY',
+      ...(fnName ? { allowedFunctionNames: [fnName] } : {}),
+    },
+  };
+}
+
+function wrapGeminiResponse(data: Record<string, unknown>): OpenAiCompatibleResponse {
+  const parts =
+    (
+      data?.candidates as
+        | Array<{ content?: { parts?: Array<Record<string, unknown>> } }>
+        | undefined
+    )?.[0]?.content?.parts ?? [];
+
+  let content = '';
+  const toolCalls: OpenAiCompatibleResponse['choices'][0]['message']['tool_calls'] = [];
+  const images: Array<{ image_url: { url: string } }> = [];
+
+  for (const part of parts) {
+    if (typeof part.text === 'string') content += part.text;
+    const fnCall = part.functionCall as
+      | { name?: string; args?: Record<string, unknown> }
+      | undefined;
+    if (fnCall?.name) {
+      toolCalls.push({
+        id: `call_${toolCalls.length}`,
+        type: 'function',
+        function: {
+          name: fnCall.name,
+          arguments: JSON.stringify(fnCall.args ?? {}),
+        },
+      });
+    }
+    const inline = part.inlineData as { mimeType?: string; data?: string } | undefined;
+    if (inline?.data) {
+      const mime = inline.mimeType || 'image/png';
+      images.push({ image_url: { url: `data:${mime};base64,${inline.data}` } });
+    }
+  }
+
+  return {
+    choices: [
+      {
+        message: {
+          ...(content ? { content } : {}),
+          ...(toolCalls.length ? { tool_calls: toolCalls } : {}),
+          ...(images.length ? { images, content: images[0]?.image_url?.url ?? content } : {}),
+        },
+      },
+    ],
+  };
+}
+
+async function callGeminiGenerateContent(options: {
+  apiKey: string;
+  model: string;
+  messages: Array<{ role: string; content: string }>;
+  temperature?: number;
+  maxTokens?: number;
+  tools?: unknown[];
+  toolChoice?: unknown;
+  responseModalities?: string[];
+}): Promise<Response> {
+  const model = normalizeGoogleModel(options.model);
+  const url = `${GEMINI_API_BASE}/models/${model}:generateContent?key=${encodeURIComponent(options.apiKey)}`;
+  const { systemMsg, contents } = buildGeminiContents(options.messages);
+  const tools = geminiToolsFromOpenAi(options.tools);
+
+  const body: Record<string, unknown> = {
+    contents,
+    generationConfig: {
+      temperature: options.temperature ?? 0.7,
+      maxOutputTokens: options.maxTokens ?? 4000,
+      ...(options.responseModalities?.length
+        ? { responseModalities: options.responseModalities }
+        : {}),
+    },
+  };
+
+  if (systemMsg) {
+    body.systemInstruction = { parts: [{ text: systemMsg.content }] };
+  }
+  if (tools) {
+    body.tools = tools;
+    body.toolConfig = geminiToolConfig(options.toolChoice);
+  }
+
+  const upstream = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+
+  const raw = await upstream.text();
+  if (!upstream.ok) {
+    return new Response(raw, {
+      status: upstream.status,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  let parsed: Record<string, unknown>;
+  try {
+    parsed = JSON.parse(raw) as Record<string, unknown>;
+  } catch {
+    return new Response(raw, { status: 502, headers: { 'Content-Type': 'text/plain' } });
+  }
+
+  return new Response(JSON.stringify(wrapGeminiResponse(parsed)), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+function parseGeminiImageDataUrl(data: Record<string, unknown>): string | undefined {
+  const parts =
+    (
+      data?.candidates as
+        | Array<{ content?: { parts?: Array<Record<string, unknown>> } }>
+        | undefined
+    )?.[0]?.content?.parts ?? [];
+
+  for (const part of parts) {
+    const inline = part.inlineData as { mimeType?: string; data?: string } | undefined;
+    if (inline?.data) {
+      const mime = inline.mimeType || 'image/png';
+      return `data:${mime};base64,${inline.data}`;
+    }
+  }
+  return undefined;
 }
 
 /** Normalise le provider IA stocké en settings (rétrocompatibilité base). */
@@ -69,9 +259,12 @@ export async function resolveAiApiKey(
     };
   }
 
-  throw new Error(
-    `Aucune clé API IA configurée pour « ${provider} » (${PROVIDER_ENV_KEYS[provider]} ou clé admin OpenRouter)`
-  );
+  const envHints =
+    provider === 'google'
+      ? 'GEMINI_API_KEY, GOOGLE_API_KEY ou clé admin Google AI'
+      : `${PROVIDER_ENV_KEYS[provider]} ou clé admin OpenRouter`;
+
+  throw new Error(`Aucune clé API IA configurée pour « ${provider} » (${envHints})`);
 }
 
 export async function callTextCompletion(options: {
@@ -85,6 +278,24 @@ export async function callTextCompletion(options: {
   toolChoice?: unknown;
   stream?: boolean;
 }): Promise<Response> {
+  const provider = options.provider ?? 'openrouter';
+  const model = normalizeModelForProvider(options.model, provider);
+
+  if (provider === 'google') {
+    if (options.stream) {
+      console.warn('Gemini direct API: streaming non supporté, mode synchrone utilisé');
+    }
+    return callGeminiGenerateContent({
+      apiKey: options.apiKey,
+      model,
+      messages: options.messages,
+      temperature: options.temperature,
+      maxTokens: options.maxTokens,
+      tools: options.tools,
+      toolChoice: options.toolChoice,
+    });
+  }
+
   return fetch(OPENROUTER_CHAT_URL, {
     method: 'POST',
     headers: {
@@ -93,7 +304,7 @@ export async function callTextCompletion(options: {
       ...openRouterHeaders(),
     },
     body: JSON.stringify({
-      model: options.model,
+      model,
       messages: options.messages,
       tools: options.tools,
       tool_choice: options.toolChoice,
@@ -106,9 +317,74 @@ export async function callTextCompletion(options: {
 
 export async function callMultimodalCompletion(options: {
   apiKey: string;
+  provider?: AiProvider;
   model: string;
   messages: unknown[];
 }): Promise<Response> {
+  const provider = options.provider ?? 'openrouter';
+  const model = normalizeModelForProvider(options.model, provider);
+
+  if (provider === 'google') {
+    const msgs = options.messages as Array<{
+      role: string;
+      content: string | Array<{ type?: string; text?: string; image_url?: { url?: string } }>;
+    }>;
+
+    const systemMsg = msgs.find(m => m.role === 'system');
+    const contents = msgs
+      .filter(m => m.role !== 'system')
+      .map(m => {
+        const parts: Array<Record<string, unknown>> = [];
+        if (typeof m.content === 'string') {
+          parts.push({ text: m.content });
+        } else if (Array.isArray(m.content)) {
+          for (const block of m.content) {
+            if (block.type === 'text' && block.text) parts.push({ text: block.text });
+            if (block.type === 'image_url' && block.image_url?.url) {
+              const url = block.image_url.url;
+              if (url.startsWith('data:')) {
+                const [header, b64] = url.split(',');
+                const mime = header.match(/data:(.*?);/)?.[1] || 'image/png';
+                parts.push({ inlineData: { mimeType: mime, data: b64 } });
+              } else {
+                parts.push({ text: `[Image: ${url}]` });
+              }
+            }
+          }
+        }
+        return {
+          role: m.role === 'assistant' ? 'model' : 'user',
+          parts,
+        };
+      });
+
+    const body: Record<string, unknown> = { contents };
+    if (systemMsg && typeof systemMsg.content === 'string') {
+      body.systemInstruction = { parts: [{ text: systemMsg.content }] };
+    }
+
+    const url = `${GEMINI_API_BASE}/models/${model}:generateContent?key=${encodeURIComponent(options.apiKey)}`;
+    const upstream = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+
+    const raw = await upstream.text();
+    if (!upstream.ok) {
+      return new Response(raw, {
+        status: upstream.status,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    return new Response(JSON.stringify(wrapGeminiResponse(parsed)), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   return fetch(OPENROUTER_CHAT_URL, {
     method: 'POST',
     headers: {
@@ -117,7 +393,7 @@ export async function callMultimodalCompletion(options: {
       ...openRouterHeaders(),
     },
     body: JSON.stringify({
-      model: options.model,
+      model,
       messages: options.messages,
     }),
   });
@@ -129,6 +405,34 @@ export async function callImageGeneration(options: {
   model: string;
   prompt: string;
 }): Promise<string> {
+  const provider = options.provider ?? 'openrouter';
+  const model = normalizeModelForProvider(options.model, provider);
+
+  if (provider === 'google') {
+    const imageModel = model.includes('image')
+      ? model
+      : 'gemini-2.0-flash-preview-image-generation';
+    const upstreamRaw = await fetch(
+      `${GEMINI_API_BASE}/models/${imageModel}:generateContent?key=${encodeURIComponent(options.apiKey)}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ role: 'user', parts: [{ text: options.prompt }] }],
+          generationConfig: { responseModalities: ['TEXT', 'IMAGE'], maxOutputTokens: 2048 },
+        }),
+      }
+    );
+    const rawBody = await upstreamRaw.text();
+    if (!upstreamRaw.ok) {
+      throw new Error(`Image generation failed (${upstreamRaw.status}): ${rawBody.slice(0, 200)}`);
+    }
+    const geminiData = JSON.parse(rawBody) as Record<string, unknown>;
+    const dataUrl = parseGeminiImageDataUrl(geminiData);
+    if (dataUrl) return dataUrl;
+    throw new Error('Aucune image générée par Gemini');
+  }
+
   const response = await fetch(OPENROUTER_CHAT_URL, {
     method: 'POST',
     headers: {
@@ -137,7 +441,7 @@ export async function callImageGeneration(options: {
       ...openRouterHeaders(),
     },
     body: JSON.stringify({
-      model: options.model,
+      model,
       messages: [{ role: 'user', content: options.prompt }],
     }),
   });
@@ -330,15 +634,21 @@ export function fillTemplate(template: string, vars: Record<string, string>): st
 }
 
 export function isFreeOpenRouterModel(model: string): boolean {
-  return model === 'openrouter/free' || model.endsWith(':free');
+  return isFreeAiModel(model, 'openrouter');
 }
 
-export function effectiveMaxTokens(model: string, requested: number): number {
-  if (isFreeOpenRouterModel(model)) return Math.min(requested, 4096);
+export { isFreeAiModel } from './ai-models.ts';
+
+export function effectiveMaxTokens(
+  model: string,
+  requested: number,
+  provider: AiProvider = 'openrouter'
+): number {
+  if (isFreeAiModel(model, provider)) return Math.min(requested, 4096);
   return requested;
 }
 
-export function parseOpenRouterErrorBody(body: string, status: number): string {
+export function parseGatewayErrorBody(body: string, status: number): string {
   const trimmed = body.trim();
   if (!trimmed) return `Erreur passerelle IA (${status})`;
   try {
@@ -359,11 +669,17 @@ export function parseOpenRouterErrorBody(body: string, status: number): string {
   return trimmed.slice(0, 500);
 }
 
-export async function readOpenRouterError(response: Response): Promise<string> {
+/** @deprecated Utiliser parseGatewayErrorBody */
+export const parseOpenRouterErrorBody = parseGatewayErrorBody;
+
+export async function readGatewayError(response: Response): Promise<string> {
   const mapped = mapGatewayError(response.status);
   if (mapped) return mapped.message;
-  return parseOpenRouterErrorBody(await response.text(), response.status);
+  return parseGatewayErrorBody(await response.text(), response.status);
 }
+
+/** @deprecated Utiliser readGatewayError */
+export const readOpenRouterError = readGatewayError;
 
 export function parseJsonFromModelContent(content: string): Record<string, unknown> {
   const trimmed = content.trim();
@@ -417,6 +733,7 @@ function repairPossiblyTruncatedJson(input: string): string {
 
 export async function completeStructuredWithToolFallback(options: {
   apiKey: string;
+  provider?: AiProvider;
   model: string;
   messages: Array<{ role: string; content: string }>;
   temperature?: number;
@@ -425,11 +742,14 @@ export async function completeStructuredWithToolFallback(options: {
   toolName: string;
   jsonSchemaHint: string;
 }): Promise<Record<string, unknown>> {
-  const maxTokens = effectiveMaxTokens(options.model, options.maxTokens ?? 4000);
+  const provider = options.provider ?? 'openrouter';
+  const model = normalizeModelForProvider(options.model, provider);
+  const maxTokens = effectiveMaxTokens(model, options.maxTokens ?? 4000, provider);
 
   let response = await callTextCompletion({
     apiKey: options.apiKey,
-    model: options.model,
+    provider,
+    model,
     messages: options.messages,
     temperature: options.temperature,
     maxTokens,
@@ -438,7 +758,7 @@ export async function completeStructuredWithToolFallback(options: {
   });
 
   if (!response.ok) {
-    const firstError = await readOpenRouterError(response);
+    const firstError = await readGatewayError(response);
     const mapped = mapGatewayError(response.status);
     if (mapped) throw new Error(mapped.message);
 
@@ -455,14 +775,15 @@ export async function completeStructuredWithToolFallback(options: {
     console.warn('Structured tool call failed, retrying JSON mode', response.status, firstError);
     response = await callTextCompletion({
       apiKey: options.apiKey,
-      model: options.model,
+      provider,
+      model,
       messages: [...options.messages, { role: 'system', content: options.jsonSchemaHint }],
       temperature: options.temperature,
       maxTokens,
     });
 
     if (!response.ok) {
-      throw new Error(await readOpenRouterError(response));
+      throw new Error(await readGatewayError(response));
     }
   }
 

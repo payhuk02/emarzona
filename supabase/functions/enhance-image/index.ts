@@ -11,6 +11,8 @@ import {
   callMultimodalCompletion,
   ensureDataUrl,
   mapGatewayError,
+  normalizeAiProvider,
+  normalizeModelForProvider,
   resolveAiApiKey,
 } from '../_shared/ai-gateway.ts';
 
@@ -69,7 +71,25 @@ serve(async (req: Request) => {
 
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
     const admin = createClient(supabaseUrl, serviceKey);
-    const { key: apiKey } = await resolveAiApiKey(admin, 'openrouter');
+
+    let config: Record<string, unknown> = {};
+    try {
+      const sb = createClient(supabaseUrl, anonKey);
+      const { data } = await sb.rpc('get_ai_management_settings');
+      config = ((data as Record<string, unknown>)?.imageEnhancer ?? {}) as Record<string, unknown>;
+    } catch (e) {
+      console.warn('Could not load AI config, using defaults', e);
+    }
+
+    if (config?.enabled === false) {
+      return new Response(
+        JSON.stringify({ error: "L'amélioration d'image est désactivée par l'administrateur" }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const provider = normalizeAiProvider(config.provider ?? 'openrouter');
+    const { key: apiKey } = await resolveAiApiKey(admin, provider);
 
     const body = await req.json();
     const inputImageUrl = body?.imageUrl;
@@ -89,26 +109,14 @@ serve(async (req: Request) => {
       );
     }
 
-    let config: Record<string, unknown> = {};
-    try {
-      const sb = createClient(supabaseUrl, anonKey);
-      const { data } = await sb.rpc('get_ai_management_settings');
-      config = ((data as Record<string, unknown>)?.imageEnhancer ?? {}) as Record<string, unknown>;
-    } catch (e) {
-      console.warn('Could not load AI config, using defaults', e);
-    }
-
-    if (config?.enabled === false) {
-      return new Response(
-        JSON.stringify({ error: "L'amélioration d'image est désactivée par l'administrateur" }),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const model =
-      (typeof config.model === 'string' && config.model) || 'google/gemini-3.1-flash-image-preview';
+    let imageConfig: Record<string, unknown> = config;
+    const model = normalizeModelForProvider(
+      (typeof imageConfig.model === 'string' && imageConfig.model) ||
+        'gemini-2.0-flash-preview-image-generation',
+      provider
+    );
     const defaultInstr =
-      typeof config.defaultInstruction === 'string' ? config.defaultInstruction : '';
+      typeof imageConfig.defaultInstruction === 'string' ? imageConfig.defaultInstruction : '';
     const finalInstruction =
       (typeof instruction === 'string' && instruction.trim()) ||
       defaultInstr ||
@@ -116,6 +124,7 @@ serve(async (req: Request) => {
 
     const response = await callMultimodalCompletion({
       apiKey,
+      provider,
       model,
       messages: [
         {

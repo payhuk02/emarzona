@@ -48,6 +48,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 import { DEFAULT_STUDIO_PRESETS, type StudioPreset } from '@/lib/images/studio-presets';
+import {
+  defaultFreeTextModel,
+  GOOGLE_FREE_TEXT_MODELS,
+  GOOGLE_IMAGE_MODELS,
+  GOOGLE_PAID_TEXT_MODELS,
+  isFreeAiModel,
+  type AiGatewayProvider,
+} from '@/lib/ai/ai-provider-models';
 import { invokeEnhanceImage } from '@/lib/images/enhance-image-client';
 
 // =============================================================================
@@ -58,6 +66,7 @@ export interface AIManagementSettings {
   chatbot: {
     enabled: boolean;
     useAiFallback: boolean;
+    provider: AiGatewayProvider;
     model: string;
     systemPrompt: string;
     temperature: number;
@@ -66,7 +75,7 @@ export interface AIManagementSettings {
   };
   contentGenerator: {
     enabled: boolean;
-    provider: 'openrouter' | 'templates';
+    provider: 'openrouter' | 'google' | 'templates';
     model: string;
     systemPrompt: string;
     temperature: number;
@@ -80,6 +89,7 @@ export interface AIManagementSettings {
   };
   imageEnhancer: {
     enabled: boolean;
+    provider: AiGatewayProvider;
     model: string;
     defaultInstruction: string;
     presets?: StudioPreset[];
@@ -123,7 +133,8 @@ const DEFAULTS: AIManagementSettings = {
   chatbot: {
     enabled: true,
     useAiFallback: false,
-    model: 'google/gemini-3-flash-preview',
+    provider: 'google',
+    model: 'gemini-2.0-flash-lite',
     systemPrompt:
       "Tu es l'assistant IA d'Emarzona, plateforme e-commerce multi-boutiques en Afrique de l'Ouest. Réponds en français de façon concise et professionnelle.",
     temperature: 0.7,
@@ -154,7 +165,8 @@ const DEFAULTS: AIManagementSettings = {
   },
   imageEnhancer: {
     enabled: true,
-    model: 'google/gemini-3.1-flash-image-preview',
+    provider: 'google',
+    model: 'gemini-2.0-flash-preview-image-generation',
     defaultInstruction:
       'Improve this image for a premium e-commerce listing: enhance lighting, contrast, sharpness, balance colors. Keep the subject identical.',
     presets: DEFAULT_STUDIO_PRESETS,
@@ -171,9 +183,9 @@ const DEFAULTS: AIManagementSettings = {
   },
   blogGenerator: {
     enabled: true,
-    provider: 'openrouter',
-    textModel: 'google/gemini-3.1-pro-preview',
-    imageModel: 'google/gemini-3.1-flash-image-preview',
+    provider: 'google',
+    textModel: 'gemini-2.0-flash-lite',
+    imageModel: 'gemini-2.0-flash-preview-image-generation',
     systemPrompt:
       'Tu es le rédacteur en chef du blog Emarzona, plateforme e-commerce multi-boutiques. Tu rédiges des articles premium en HTML sémantique, experts et orientés conversion.',
     articlePromptTemplate:
@@ -195,10 +207,10 @@ const DEFAULTS: AIManagementSettings = {
 };
 
 const AI_GATEWAY_PROVIDERS = [
-  { id: 'openrouter', label: 'OpenRouter (recommandé)' },
+  { id: 'google', label: 'Google AI Studio (Gemini gratuit)' },
+  { id: 'openrouter', label: 'OpenRouter' },
   { id: 'openai', label: 'OpenAI' },
   { id: 'anthropic', label: 'Anthropic' },
-  { id: 'google', label: 'Google AI' },
   { id: 'custom', label: 'Autre / Custom' },
 ] as const;
 
@@ -228,17 +240,15 @@ const FREE_TEXT_MODELS = [
   },
 ] as const;
 
-const FREE_TEXT_MODEL_IDS = new Set<string>(FREE_TEXT_MODELS.map(m => m.id));
-
-function isFreeOpenRouterModel(modelId: string): boolean {
-  return FREE_TEXT_MODEL_IDS.has(modelId) || modelId.endsWith(':free');
-}
-
-const IMAGE_MODELS = [
+const OPENROUTER_IMAGE_MODELS = [
   { id: 'google/gemini-3.1-flash-image-preview', label: 'Gemini 3.1 Flash Image (Nano Banana 2)' },
   { id: 'google/gemini-2.5-flash-image', label: 'Gemini 2.5 Flash Image (Nano Banana)' },
   { id: 'google/gemini-3-pro-image-preview', label: 'Gemini 3 Pro Image' },
 ];
+
+function imageModelsForProvider(provider: AiGatewayProvider) {
+  return provider === 'google' ? [...GOOGLE_IMAGE_MODELS] : OPENROUTER_IMAGE_MODELS;
+}
 
 // =============================================================================
 // Sub-components
@@ -272,11 +282,18 @@ function ModelSelect({
 function BlogTextModelSelect({
   value,
   onChange,
+  provider,
 }: {
   value: string;
   onChange: (v: string) => void;
+  provider: AiGatewayProvider;
 }) {
-  const knownIds = new Set([...FREE_TEXT_MODELS.map(m => m.id), ...TEXT_MODELS.map(m => m.id)]);
+  const googleModels = [...GOOGLE_FREE_TEXT_MODELS, ...GOOGLE_PAID_TEXT_MODELS];
+  const knownIds = new Set(
+    provider === 'google'
+      ? googleModels.map(m => m.id)
+      : [...FREE_TEXT_MODELS.map(m => m.id), ...TEXT_MODELS.map(m => m.id)]
+  );
   const isCustom = value.length > 0 && !knownIds.has(value);
 
   return (
@@ -285,22 +302,45 @@ function BlogTextModelSelect({
         <SelectValue placeholder="Choisir un modèle texte" />
       </SelectTrigger>
       <SelectContent>
-        <SelectGroup>
-          <SelectLabel>Modèles gratuits (OpenRouter)</SelectLabel>
-          {FREE_TEXT_MODELS.map(o => (
-            <SelectItem key={o.id} value={o.id}>
-              {o.label}
-            </SelectItem>
-          ))}
-        </SelectGroup>
-        <SelectGroup>
-          <SelectLabel>Modèles payants</SelectLabel>
-          {TEXT_MODELS.map(o => (
-            <SelectItem key={o.id} value={o.id}>
-              {o.label}
-            </SelectItem>
-          ))}
-        </SelectGroup>
+        {provider === 'google' ? (
+          <>
+            <SelectGroup>
+              <SelectLabel>Modèles gratuits (Google AI Studio)</SelectLabel>
+              {GOOGLE_FREE_TEXT_MODELS.map(o => (
+                <SelectItem key={o.id} value={o.id}>
+                  {o.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+            <SelectGroup>
+              <SelectLabel>Modèles payants</SelectLabel>
+              {GOOGLE_PAID_TEXT_MODELS.map(o => (
+                <SelectItem key={o.id} value={o.id}>
+                  {o.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </>
+        ) : (
+          <>
+            <SelectGroup>
+              <SelectLabel>Modèles gratuits (OpenRouter)</SelectLabel>
+              {FREE_TEXT_MODELS.map(o => (
+                <SelectItem key={o.id} value={o.id}>
+                  {o.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+            <SelectGroup>
+              <SelectLabel>Modèles payants</SelectLabel>
+              {TEXT_MODELS.map(o => (
+                <SelectItem key={o.id} value={o.id}>
+                  {o.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </>
+        )}
         {isCustom ? (
           <SelectGroup>
             <SelectLabel>Personnalisé</SelectLabel>
@@ -380,6 +420,9 @@ const AIManagementPage: React.FC = () => {
             chatbot: {
               ...DEFAULTS.chatbot,
               ...legacyChatbot,
+              provider:
+                (legacyChatbot?.provider as AiGatewayProvider | undefined) ??
+                DEFAULTS.chatbot.provider,
               useAiFallback:
                 legacyChatbot?.useAiFallback ??
                 legacyChatbot?.useLovableAIFallback ??
@@ -388,6 +431,9 @@ const AIManagementPage: React.FC = () => {
             imageEnhancer: {
               ...DEFAULTS.imageEnhancer,
               ...partial.imageEnhancer,
+              provider:
+                (partial.imageEnhancer?.provider as AiGatewayProvider | undefined) ??
+                DEFAULTS.imageEnhancer.provider,
               presets: partial.imageEnhancer?.presets?.length
                 ? partial.imageEnhancer.presets
                 : DEFAULT_STUDIO_PRESETS,
@@ -552,9 +598,9 @@ const AIManagementPage: React.FC = () => {
         label: 'Génération de contenu',
         enabled: settings.contentGenerator.enabled,
         model:
-          settings.contentGenerator.provider === 'openrouter'
-            ? settings.contentGenerator.model
-            : 'Templates',
+          settings.contentGenerator.provider === 'templates'
+            ? 'Templates'
+            : `${settings.contentGenerator.provider} · ${settings.contentGenerator.model}`,
         color: 'text-purple-500',
       },
       {
@@ -763,15 +809,33 @@ const AIManagementPage: React.FC = () => {
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label>Modèle IA</Label>
-                  <ModelSelect
-                    value={settings.chatbot.model}
-                    onChange={v => update('chatbot', { model: v })}
-                    options={TEXT_MODELS}
-                  />
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Provider IA</Label>
+                    <Select
+                      value={settings.chatbot.provider}
+                      onValueChange={(v: AiGatewayProvider) =>
+                        update('chatbot', { provider: v, model: defaultFreeTextModel(v) })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="google">Google AI Studio (Gemini gratuit)</SelectItem>
+                        <SelectItem value="openrouter">OpenRouter</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Modèle IA</Label>
+                    <BlogTextModelSelect
+                      provider={settings.chatbot.provider}
+                      value={settings.chatbot.model}
+                      onChange={v => update('chatbot', { model: v })}
+                    />
+                  </div>
                 </div>
-
                 <div className="space-y-2">
                   <Label>Prompt système</Label>
                   <Textarea
@@ -844,29 +908,46 @@ const AIManagementPage: React.FC = () => {
                   <Label>Provider</Label>
                   <Select
                     value={settings.contentGenerator.provider}
-                    onValueChange={(v: 'openrouter' | 'templates') =>
-                      update('contentGenerator', { provider: v })
+                    onValueChange={(v: 'openrouter' | 'google' | 'templates') =>
+                      update('contentGenerator', {
+                        provider: v,
+                        ...(v === 'google'
+                          ? { model: defaultFreeTextModel('google') }
+                          : v === 'openrouter'
+                            ? { model: defaultFreeTextModel('openrouter') }
+                            : {}),
+                      })
                     }
                   >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="openrouter">OpenRouter (recommandé)</SelectItem>
+                      <SelectItem value="google">Google AI Studio (Gemini gratuit)</SelectItem>
+                      <SelectItem value="openrouter">OpenRouter</SelectItem>
                       <SelectItem value="templates">Templates statiques (sans IA)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
-                {settings.contentGenerator.provider === 'openrouter' && (
+                {(settings.contentGenerator.provider === 'openrouter' ||
+                  settings.contentGenerator.provider === 'google') && (
                   <>
                     <div className="space-y-2">
                       <Label>Modèle IA</Label>
-                      <ModelSelect
-                        value={settings.contentGenerator.model}
-                        onChange={v => update('contentGenerator', { model: v })}
-                        options={TEXT_MODELS}
-                      />
+                      {settings.contentGenerator.provider === 'google' ? (
+                        <BlogTextModelSelect
+                          provider="google"
+                          value={settings.contentGenerator.model}
+                          onChange={v => update('contentGenerator', { model: v })}
+                        />
+                      ) : (
+                        <ModelSelect
+                          value={settings.contentGenerator.model}
+                          onChange={v => update('contentGenerator', { model: v })}
+                          options={[...FREE_TEXT_MODELS, ...TEXT_MODELS]}
+                        />
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label>Prompt système</Label>
@@ -914,9 +995,12 @@ const AIManagementPage: React.FC = () => {
                     <div className="space-y-2">
                       <Label>Modèle image</Label>
                       <ModelSelect
-                        value={settings.contentGenerator.imageModel ?? IMAGE_MODELS[0].id}
+                        value={
+                          settings.contentGenerator.imageModel ??
+                          imageModelsForProvider(settings.contentGenerator.provider)[0].id
+                        }
                         onChange={v => update('contentGenerator', { imageModel: v })}
-                        options={IMAGE_MODELS}
+                        options={imageModelsForProvider(settings.contentGenerator.provider)}
                       />
                     </div>
                     <div className="space-y-2">
@@ -978,13 +1062,35 @@ const AIManagementPage: React.FC = () => {
                     onCheckedChange={v => update('imageEnhancer', { enabled: v })}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label>Modèle d'image</Label>
-                  <ModelSelect
-                    value={settings.imageEnhancer.model}
-                    onChange={v => update('imageEnhancer', { model: v })}
-                    options={IMAGE_MODELS}
-                  />
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Provider IA</Label>
+                    <Select
+                      value={settings.imageEnhancer.provider}
+                      onValueChange={(v: AiGatewayProvider) =>
+                        update('imageEnhancer', {
+                          provider: v,
+                          model: imageModelsForProvider(v)[0].id,
+                        })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="google">Google AI Studio (Gemini)</SelectItem>
+                        <SelectItem value="openrouter">OpenRouter</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Modèle d'image</Label>
+                    <ModelSelect
+                      value={settings.imageEnhancer.model}
+                      onChange={v => update('imageEnhancer', { model: v })}
+                      options={imageModelsForProvider(settings.imageEnhancer.provider)}
+                    />
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label>Instruction par défaut</Label>
@@ -1081,7 +1187,21 @@ const AIManagementPage: React.FC = () => {
                       value={settings.blogGenerator.provider}
                       onValueChange={(
                         v: 'openrouter' | 'openai' | 'anthropic' | 'google' | 'custom'
-                      ) => update('blogGenerator', { provider: v })}
+                      ) =>
+                        update('blogGenerator', {
+                          provider: v,
+                          textModel:
+                            v === 'google'
+                              ? defaultFreeTextModel('google')
+                              : v === 'openrouter'
+                                ? defaultFreeTextModel('openrouter')
+                                : settings.blogGenerator.textModel,
+                          imageModel:
+                            v === 'google'
+                              ? GOOGLE_IMAGE_MODELS[0].id
+                              : OPENROUTER_IMAGE_MODELS[0].id,
+                        })
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -1098,29 +1218,49 @@ const AIManagementPage: React.FC = () => {
                   <div className="space-y-2">
                     <Label>Modèle texte</Label>
                     <BlogTextModelSelect
+                      provider={settings.blogGenerator.provider}
                       value={settings.blogGenerator.textModel}
                       onChange={v => {
                         const patch: Partial<AIManagementSettings['blogGenerator']> = {
                           textModel: v,
                         };
-                        if (isFreeOpenRouterModel(v)) {
+                        if (
+                          settings.blogGenerator.provider === 'openrouter' &&
+                          isFreeAiModel(v, 'openrouter')
+                        ) {
                           patch.generateFeaturedImage = false;
                         }
                         update('blogGenerator', patch);
                       }}
                     />
                     <p className="text-xs text-muted-foreground">
-                      Les modèles gratuits nécessitent une clé OpenRouter (sans crédits payants).
-                      Liste complète sur{' '}
-                      <a
-                        href="https://openrouter.ai/models?q=free"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="underline"
-                      >
-                        openrouter.ai/models
-                      </a>
-                      .
+                      {settings.blogGenerator.provider === 'google' ? (
+                        <>
+                          Modèles gratuits via Google AI Studio (niveau sans frais). Clé sur{' '}
+                          <a
+                            href="https://aistudio.google.com/apikey"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline"
+                          >
+                            aistudio.google.com/apikey
+                          </a>
+                          .
+                        </>
+                      ) : (
+                        <>
+                          Les modèles OpenRouter gratuits nécessitent une clé OpenRouter. Liste sur{' '}
+                          <a
+                            href="https://openrouter.ai/models?q=free"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline"
+                          >
+                            openrouter.ai/models
+                          </a>
+                          .
+                        </>
+                      )}
                     </p>
                   </div>
                   <div className="space-y-2 sm:col-span-2">
@@ -1128,19 +1268,31 @@ const AIManagementPage: React.FC = () => {
                     <ModelSelect
                       value={settings.blogGenerator.imageModel}
                       onChange={v => update('blogGenerator', { imageModel: v })}
-                      options={IMAGE_MODELS}
+                      options={imageModelsForProvider(settings.blogGenerator.provider)}
                     />
                   </div>
                 </div>
 
-                {isFreeOpenRouterModel(settings.blogGenerator.textModel) ? (
+                {settings.blogGenerator.provider === 'openrouter' &&
+                isFreeAiModel(settings.blogGenerator.textModel, 'openrouter') ? (
                   <Alert>
                     <Sparkles className="h-4 w-4" />
-                    <AlertTitle>Modèle gratuit sélectionné</AlertTitle>
+                    <AlertTitle>Modèle OpenRouter gratuit</AlertTitle>
                     <AlertDescription>
-                      Aucun crédit payant requis. L&apos;image hero a été désactivée (les modèles
-                      image sont payants). Quotas OpenRouter : ~20 req/min et ~200/jour selon le
-                      modèle. Pour les articles longs, préférez DeepSeek R1 ou OpenRouter Free.
+                      Aucun crédit payant requis. L&apos;image hero a été désactivée (modèles image
+                      payants via OpenRouter). Quotas : ~20 req/min selon le modèle.
+                    </AlertDescription>
+                  </Alert>
+                ) : null}
+
+                {settings.blogGenerator.provider === 'google' &&
+                isFreeAiModel(settings.blogGenerator.textModel, 'google') ? (
+                  <Alert>
+                    <Sparkles className="h-4 w-4" />
+                    <AlertTitle>Modèle Gemini gratuit (Google AI Studio)</AlertTitle>
+                    <AlertDescription>
+                      Niveau sans frais — quotas journaliers selon Google AI Studio. L&apos;image
+                      hero peut utiliser Gemini Image (limites du tier gratuit).
                     </AlertDescription>
                   </Alert>
                 ) : null}

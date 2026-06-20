@@ -7,7 +7,14 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { requireAuthenticatedUser } from '../_shared/edge-auth-utils.ts';
 import { enforceRateLimit, getClientIp, RATE_LIMIT_PRESETS } from '../_shared/rate-limit.ts';
 import { retrievePlatformRagContext, type RagSettings } from '../_shared/platform-rag.ts';
-import { callTextCompletion, mapGatewayError, resolveAiApiKey } from '../_shared/ai-gateway.ts';
+import {
+  callTextCompletion,
+  mapGatewayError,
+  normalizeAiProvider,
+  normalizeModelForProvider,
+  resolveAiApiKey,
+} from '../_shared/ai-gateway.ts';
+import { defaultFreeTextModel } from '../_shared/ai-models.ts';
 
 const defaultAllowedOrigin = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
 const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || defaultAllowedOrigin)
@@ -80,7 +87,6 @@ serve(async (req: Request) => {
     }
 
     const admin = createClient(supabaseUrl, serviceKey);
-    const { key: apiKey } = await resolveAiApiKey(admin, 'openrouter');
 
     const anonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
     let allSettings: Record<string, unknown> = {};
@@ -101,7 +107,13 @@ serve(async (req: Request) => {
       );
     }
 
-    const model = (config?.model as string) || 'google/gemini-3-flash-preview';
+    const provider = normalizeAiProvider(config?.provider ?? 'openrouter');
+    const { key: apiKey } = await resolveAiApiKey(admin, provider);
+
+    const model = normalizeModelForProvider(
+      (config?.model as string) || defaultFreeTextModel(provider),
+      provider
+    );
     let systemPrompt = (config?.systemPrompt as string) || FALLBACK_SYSTEM_PROMPT;
     const temperature = typeof config?.temperature === 'number' ? config.temperature : 0.7;
     const maxTokens = typeof config?.maxTokens === 'number' ? config.maxTokens : 800;
@@ -137,7 +149,7 @@ ${ragContext}`;
     const start = Date.now();
     const response = await callTextCompletion({
       apiKey,
-      provider: 'openrouter',
+      provider,
       model,
       messages: [{ role: 'system', content: systemPrompt }, ...messages],
       temperature,

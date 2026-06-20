@@ -13,9 +13,11 @@ import {
   fillTemplate,
   mapGatewayError,
   normalizeAiProvider,
+  normalizeModelForProvider,
   resolveAiApiKey,
   uploadCatalogImageBytes,
 } from '../_shared/ai-gateway.ts';
+import { defaultFreeTextModel } from '../_shared/ai-models.ts';
 import { dataUrlToBytes, resizeToCatalogProductBytes } from '../_shared/resize-catalog-product.ts';
 import {
   buildProductSystemPrompt,
@@ -109,8 +111,17 @@ serve(async (req: Request) => {
       admin,
       normalizeAiProvider(config.provider)
     );
-    const model = (config.model as string) || 'google/gemini-3.1-pro-preview';
-    const imageModel = (config.imageModel as string) || 'google/gemini-3.1-flash-image-preview';
+    const model = normalizeModelForProvider(
+      (config.model as string) || defaultFreeTextModel(resolvedProvider),
+      resolvedProvider
+    );
+    const imageModel = normalizeModelForProvider(
+      (config.imageModel as string) ||
+        (resolvedProvider === 'google'
+          ? 'gemini-2.0-flash-preview-image-generation'
+          : 'google/gemini-3.1-flash-image-preview'),
+      resolvedProvider
+    );
     const minWords = typeof config.minWords === 'number' ? config.minWords : 350;
     const typePrompts = (config.typeSystemPrompts as Record<string, string>) ?? {};
 

@@ -1,7 +1,7 @@
 /**
- * Panneau admin — gestion sécurisée des clés API IA (OpenRouter)
+ * Panneau admin — gestion sécurisée des clés API IA (multi-providers)
  */
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -23,12 +23,13 @@ import {
   setDefaultPlatformAiApiKey,
   type PlatformAiApiKeyMeta,
 } from '@/lib/ai-blog-generator';
+import { PROVIDER_KEY_HINTS } from '@/lib/ai/ai-provider-models';
 
 const PROVIDERS = [
-  { id: 'openrouter', label: 'OpenRouter (recommandé)' },
+  { id: 'openrouter', label: 'OpenRouter' },
+  { id: 'google', label: 'Google AI Studio (Gemini)' },
   { id: 'openai', label: 'OpenAI' },
   { id: 'anthropic', label: 'Anthropic' },
-  { id: 'google', label: 'Google AI' },
   { id: 'custom', label: 'Autre / Custom' },
 ] as const;
 
@@ -37,10 +38,16 @@ export function PlatformAiApiKeysPanel() {
   const [keys, setKeys] = useState<PlatformAiApiKeyMeta[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [provider, setProvider] = useState<string>('openrouter');
+  const [provider, setProvider] = useState<string>('google');
   const [label, setLabel] = useState('');
   const [apiKey, setApiKey] = useState('');
   const [isDefault, setIsDefault] = useState(true);
+
+  const providerHint = useMemo(
+    () =>
+      PROVIDER_KEY_HINTS[provider as keyof typeof PROVIDER_KEY_HINTS] ?? PROVIDER_KEY_HINTS.custom,
+    [provider]
+  );
 
   const load = useCallback(async () => {
     try {
@@ -126,35 +133,58 @@ export function PlatformAiApiKeysPanel() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between p-4 border rounded-lg">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-violet-500/10">
-            <Shield className="h-5 w-5 text-violet-500" />
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="flex items-center justify-between p-4 border rounded-lg">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-violet-500/10">
+              <Shield className="h-5 w-5 text-violet-500" />
+            </div>
+            <div>
+              <p className="font-medium">OpenRouter (serveur)</p>
+              <p className="text-xs text-muted-foreground">OPENROUTER_API_KEY — fallback edge</p>
+            </div>
           </div>
-          <div>
-            <p className="font-medium">OpenRouter (serveur)</p>
-            <p className="text-xs text-muted-foreground">
-              OPENROUTER_API_KEY — secret Supabase Edge (fallback)
-            </p>
-          </div>
+          <Badge variant="outline">Si configuré</Badge>
         </div>
-        <Badge>Actif si configuré</Badge>
+        <div className="flex items-center justify-between p-4 border rounded-lg">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-blue-500/10">
+              <Shield className="h-5 w-5 text-blue-500" />
+            </div>
+            <div>
+              <p className="font-medium">Google Gemini (serveur)</p>
+              <p className="text-xs text-muted-foreground">
+                GEMINI_API_KEY / GOOGLE_API_KEY — fallback edge
+              </p>
+            </div>
+          </div>
+          <Badge variant="outline">Si configuré</Badge>
+        </div>
       </div>
 
       <Alert>
         <KeyRound className="h-4 w-4" />
-        <AlertTitle>Stockage sécurisé</AlertTitle>
+        <AlertTitle>Multi-providers professionnel</AlertTitle>
         <AlertDescription>
-          Les clés ajoutées ici sont chiffrées AES-GCM côté edge functions. Elles ne sont jamais
-          renvoyées au navigateur — seul un hint (4 derniers caractères) est affiché. Obtenez une
-          clé sur{' '}
+          Chaque service IA (blog, produits, chatbot) utilise le provider configuré dans son onglet.
+          Les clés sont chiffrées AES-GCM côté edge — seul un hint (4 derniers caractères) est
+          affiché. Ajoutez une clé par provider :{' '}
           <a
             href="https://openrouter.ai/keys"
             target="_blank"
             rel="noopener noreferrer"
             className="underline"
           >
-            openrouter.ai/keys
+            OpenRouter
+          </a>{' '}
+          et/ou{' '}
+          <a
+            href="https://aistudio.google.com/apikey"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline"
+          >
+            Google AI Studio (Gemini gratuit)
           </a>
           .
         </AlertDescription>
@@ -202,7 +232,8 @@ export function PlatformAiApiKeysPanel() {
         </ul>
       ) : (
         <p className="text-sm text-muted-foreground">
-          Aucune clé personnalisée — OPENROUTER_API_KEY utilisée si configurée.
+          Aucune clé personnalisée — les secrets Supabase Edge (OPENROUTER_API_KEY, GEMINI_API_KEY)
+          sont utilisés si configurés.
         </p>
       )}
 
@@ -231,7 +262,9 @@ export function PlatformAiApiKeysPanel() {
             <Input
               value={label}
               onChange={e => setLabel(e.target.value)}
-              placeholder="Ex. OpenRouter production"
+              placeholder={
+                provider === 'google' ? 'Ex. Gemini production' : 'Ex. OpenRouter production'
+              }
             />
           </div>
         </div>
@@ -241,9 +274,26 @@ export function PlatformAiApiKeysPanel() {
             type="password"
             value={apiKey}
             onChange={e => setApiKey(e.target.value)}
-            placeholder="sk-or-…"
+            placeholder={providerHint.placeholder}
             autoComplete="off"
           />
+          <p className="text-xs text-muted-foreground">
+            Secret edge : {providerHint.env}
+            {providerHint.url ? (
+              <>
+                {' '}
+                —{' '}
+                <a
+                  href={providerHint.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline"
+                >
+                  Obtenir une clé
+                </a>
+              </>
+            ) : null}
+          </p>
         </div>
         <label className="flex items-center gap-2 text-sm">
           <input

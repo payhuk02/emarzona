@@ -11,13 +11,15 @@ import {
   completeStructuredWithToolFallback,
   ensureDataUrl,
   fillTemplate,
-  isFreeOpenRouterModel,
+  isFreeAiModel,
   mapGatewayError,
   normalizeAiProvider,
+  normalizeModelForProvider,
   resolveAiApiKey,
   uploadBlogImageFromDataUrl,
   type AiProvider,
 } from '../_shared/ai-gateway.ts';
+import { defaultFreeTextModel } from '../_shared/ai-models.ts';
 
 const defaultAllowedOrigin = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
 
@@ -100,10 +102,13 @@ et si demandé en_title, en_excerpt, en_content.`;
 
 function resolveBlogTextModel(
   config: BlogGeneratorConfig,
-  allSettings: Record<string, unknown>
+  allSettings: Record<string, unknown>,
+  provider: AiProvider
 ): string {
   const contentModel = (allSettings.contentGenerator as { model?: string } | undefined)?.model;
-  return config.textModel?.trim() || contentModel?.trim() || 'openrouter/free';
+  const raw = config.textModel?.trim() || contentModel?.trim();
+  if (raw) return normalizeModelForProvider(raw, provider);
+  return defaultFreeTextModel(provider);
 }
 
 serve(async (req: Request) => {
@@ -170,12 +175,13 @@ serve(async (req: Request) => {
 
     const provider = normalizeAiProvider(config.provider);
     const { key: apiKey } = await resolveAiApiKey(admin, provider);
-    const textModel = resolveBlogTextModel(config, allSettings);
-    const imageModel = config.imageModel || 'google/gemini-3.1-flash-image-preview';
-    const minWords = isFreeOpenRouterModel(textModel)
+    const textModel = resolveBlogTextModel(config, allSettings, provider);
+    const imageModel = config.imageModel || 'gemini-2.0-flash-preview-image-generation';
+    const isFreeModel = isFreeAiModel(textModel, provider);
+    const minWords = isFreeModel
       ? Math.min(config.minWords ?? 1200, 700)
       : (config.minWords ?? 1200);
-    const maxTokens = isFreeOpenRouterModel(textModel)
+    const maxTokens = isFreeModel
       ? Math.min(config.maxTokens ?? 8000, 4096)
       : (config.maxTokens ?? 8000);
 
@@ -220,6 +226,7 @@ serve(async (req: Request) => {
 
     const textRes = await completeStructuredWithToolFallback({
       apiKey,
+      provider,
       model: textModel,
       messages: [
         { role: 'system', content: systemPrompt },
@@ -243,7 +250,9 @@ serve(async (req: Request) => {
     let ogImageUrl: string | null = null;
 
     const shouldGenerateImage =
-      generateImage && config.generateFeaturedImage !== false && !isFreeOpenRouterModel(textModel);
+      generateImage &&
+      config.generateFeaturedImage !== false &&
+      !(provider === 'openrouter' && isFreeModel);
     if (shouldGenerateImage) {
       const imageTemplate =
         config.imagePromptTemplate ||
@@ -257,6 +266,7 @@ serve(async (req: Request) => {
       try {
         const rawUrl = await callImageGeneration({
           apiKey,
+          provider,
           model: imageModel,
           prompt: finalImagePrompt,
         });
