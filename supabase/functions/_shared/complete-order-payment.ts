@@ -11,6 +11,9 @@ export async function recordWebhookEvent(
   orderId?: string | null,
   transactionId?: string | null
 ): Promise<boolean> {
+  // ATOMIC FIX: If we only record here, there is a race condition.
+  // We keep this function for backward compatibility with non-payment events,
+  // but true idempotency is now handled in the atomic RPC inside completeTransactionAndOrder.
   const safePayload = sanitizePaymentWebhookPayload(provider, payload);
   const { error } = await supabase.from('payment_webhook_events').insert({
     provider,
@@ -51,8 +54,49 @@ export async function completeTransactionAndOrder(
     application_fee_amount?: number;
     webhookPayload?: Record<string, unknown>;
     paymentProviderUsed?: string;
+    externalEventId?: string; // Ajout pour l'idempotence stricte
+    eventType?: string; // Ajout pour l'idempotence stricte
   }
 ): Promise<{ orderId: string | null; alreadyCompleted: boolean }> {
+  const paymentProviderUsed = extras?.paymentProviderUsed ?? 'unknown';
+
+  const safePayload = extras?.webhookPayload
+    ? sanitizePaymentWebhookPayload(paymentProviderUsed, extras.webhookPayload)
+    : {};
+
+  // ATOMIC IDEMPOTENCY: Use the RPC to lock the transaction, insert the webhook event,
+  // and update the order/transaction all in one PostgreSQL transaction.
+  if (extras?.externalEventId && extras?.eventType) {
+    const { data: result, error: rpcError } = await supabase.rpc('process_moneroo_webhook_atomic', {
+      p_provider: paymentProviderUsed,
+      p_external_event_id: extras.externalEventId,
+      p_event_type: extras.eventType,
+      p_transaction_id: transactionId,
+      p_payload: safePayload,
+      p_mapped_status: 'completed',
+      p_provider_session_id: extras?.provider_session_id ?? null,
+      p_provider_payment_intent_id: extras?.provider_payment_intent_id ?? null,
+      p_connected_account_id: extras?.connected_account_id ?? null,
+      p_application_fee_amount: extras?.application_fee_amount ?? null,
+    });
+
+    if (rpcError) {
+      console.error('RPC process_moneroo_webhook_atomic error:', rpcError);
+      throw rpcError;
+    }
+
+    if (!result.success && result.reason === 'duplicate_webhook') {
+      console.warn('Duplicate webhook prevented by atomic RPC lock.');
+      return { orderId: null, alreadyCompleted: true };
+    }
+
+    return {
+      orderId: result.order_id,
+      alreadyCompleted: result.already_completed,
+    };
+  }
+
+  // FALLBACK for legacy callers that don't pass externalEventId
   const { data: transaction, error: txError } = await supabase
     .from('transactions')
     .select('id, order_id, status, payment_provider')
@@ -79,17 +123,9 @@ export async function completeTransactionAndOrder(
       provider_payment_intent_id: extras?.provider_payment_intent_id ?? null,
       connected_account_id: extras?.connected_account_id ?? null,
       application_fee_amount: extras?.application_fee_amount ?? null,
-      last_webhook_payload: extras?.webhookPayload
-        ? sanitizePaymentWebhookPayload(
-            extras.paymentProviderUsed ?? transaction.payment_provider ?? 'unknown',
-            extras.webhookPayload
-          )
-        : null,
+      last_webhook_payload: safePayload,
     })
     .eq('id', transactionId);
-
-  const paymentProviderUsed =
-    extras?.paymentProviderUsed ?? transaction.payment_provider ?? 'stripe_connect';
 
   let orderId: string | null = transaction.order_id;
   if (orderId) {
@@ -99,7 +135,8 @@ export async function completeTransactionAndOrder(
       .update({
         payment_status: 'paid',
         status: paidOrderStatus,
-        payment_provider_used: paymentProviderUsed,
+        payment_provider_used:
+          paymentProviderUsed !== 'unknown' ? paymentProviderUsed : transaction.payment_provider,
         updated_at: now,
       })
       .eq('id', orderId);

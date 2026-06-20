@@ -256,22 +256,27 @@ serve(async req => {
       payloadHash
     );
 
-    const isNewEvent = await recordWebhookEvent(
-      supabase,
-      'moneroo',
-      externalEventId,
-      String(status ?? 'unknown'),
-      safePayloadForLogs,
-      transaction.order_id,
-      transaction.id
-    );
-
-    if (!isNewEvent) {
-      console.log('Duplicate Moneroo webhook ignored', { externalEventId });
-      return new Response(
-        JSON.stringify({ success: true, message: 'Webhook already processed', duplicate: true }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    // For 'completed', we will handle idempotency inside the atomic RPC
+    // to prevent race conditions. For other statuses, we use the legacy approach.
+    let isNewEvent = true;
+    if (mappedStatus !== 'completed') {
+      isNewEvent = await recordWebhookEvent(
+        supabase,
+        'moneroo',
+        externalEventId,
+        String(status ?? 'unknown'),
+        safePayloadForLogs,
+        transaction.order_id,
+        transaction.id
       );
+
+      if (!isNewEvent) {
+        console.log('Duplicate Moneroo webhook ignored', { externalEventId });
+        return new Response(
+          JSON.stringify({ success: true, message: 'Webhook already processed', duplicate: true }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
     }
 
     // 🔒 Valider montant + devise avant mise à jour
@@ -292,13 +297,25 @@ serve(async req => {
           difference: paymentCheck.difference,
         });
 
-        await supabase
-          .from('payment_webhook_events')
-          .update({
+        if (mappedStatus === 'completed') {
+          await supabase.from('payment_webhook_events').insert({
+            provider: 'moneroo',
+            external_event_id: externalEventId,
+            event_type: String(status ?? 'unknown'),
+            payload: safePayloadForLogs,
             processing_error: paymentCheck.reason ?? 'payment_validation_failed',
-          })
-          .eq('provider', 'moneroo')
-          .eq('external_event_id', externalEventId);
+            transaction_id: transaction.id,
+            order_id: transaction.order_id,
+          });
+        } else {
+          await supabase
+            .from('payment_webhook_events')
+            .update({
+              processing_error: paymentCheck.reason ?? 'payment_validation_failed',
+            })
+            .eq('provider', 'moneroo')
+            .eq('external_event_id', externalEventId);
+        }
 
         await supabase.from('transaction_logs').insert({
           event_type: 'webhook_amount_mismatch',
@@ -380,6 +397,8 @@ serve(async req => {
           {
             webhookPayload: safePayloadForLogs,
             paymentProviderUsed: transaction.payment_provider || 'moneroo_platform',
+            externalEventId,
+            eventType: String(status ?? 'unknown'),
           }
         );
 
