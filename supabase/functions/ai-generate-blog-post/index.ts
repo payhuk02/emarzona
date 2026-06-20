@@ -8,9 +8,10 @@ import { authenticatePlatformAdminRequest } from '../_shared/admin-auth-utils.ts
 import { retrievePlatformRagContext, type RagSettings } from '../_shared/platform-rag.ts';
 import {
   callImageGeneration,
-  callTextCompletion,
+  completeStructuredWithToolFallback,
   ensureDataUrl,
   fillTemplate,
+  isFreeOpenRouterModel,
   mapGatewayError,
   normalizeAiProvider,
   resolveAiApiKey,
@@ -88,10 +89,22 @@ const BLOG_TOOL = {
         'featured_image_alt',
         'image_prompt',
       ],
-      additionalProperties: false,
     },
   },
 };
+
+const BLOG_JSON_HINT = `Réponds UNIQUEMENT avec un objet JSON valide (sans markdown) contenant :
+title, slug, excerpt, content (HTML h2/h3/p/ul, pas de h1), tags (array),
+seo_title, seo_description, seo_keywords, featured_image_alt, image_prompt,
+et si demandé en_title, en_excerpt, en_content.`;
+
+function resolveBlogTextModel(
+  config: BlogGeneratorConfig,
+  allSettings: Record<string, unknown>
+): string {
+  const contentModel = (allSettings.contentGenerator as { model?: string } | undefined)?.model;
+  return config.textModel?.trim() || contentModel?.trim() || 'openrouter/free';
+}
 
 serve(async (req: Request) => {
   const headers = cors(req.headers.get('origin'));
@@ -139,7 +152,12 @@ serve(async (req: Request) => {
     }
 
     let allSettings: Record<string, unknown> = {};
-    const { data: settingsData } = await userClient.rpc('get_ai_management_settings');
+    const { data: settingsData, error: settingsError } = await admin.rpc(
+      'get_ai_management_settings'
+    );
+    if (settingsError) {
+      console.warn('Could not load AI settings, using defaults', settingsError);
+    }
     allSettings = (settingsData as Record<string, unknown>) ?? {};
     const config = (allSettings.blogGenerator ?? {}) as BlogGeneratorConfig;
 
@@ -151,10 +169,15 @@ serve(async (req: Request) => {
     }
 
     const provider = normalizeAiProvider(config.provider);
-    const { key: apiKey, provider: resolvedProvider } = await resolveAiApiKey(admin, provider);
-    const textModel = config.textModel || 'google/gemini-3.1-pro-preview';
+    const { key: apiKey } = await resolveAiApiKey(admin, provider);
+    const textModel = resolveBlogTextModel(config, allSettings);
     const imageModel = config.imageModel || 'google/gemini-3.1-flash-image-preview';
-    const minWords = config.minWords ?? 1200;
+    const minWords = isFreeOpenRouterModel(textModel)
+      ? Math.min(config.minWords ?? 1200, 700)
+      : (config.minWords ?? 1200);
+    const maxTokens = isFreeOpenRouterModel(textModel)
+      ? Math.min(config.maxTokens ?? 8000, 4096)
+      : (config.maxTokens ?? 8000);
 
     let systemPrompt =
       config.systemPrompt ||
@@ -195,46 +218,21 @@ serve(async (req: Request) => {
         '\n\nInclus aussi en_title, en_excerpt et en_content (traduction anglaise complète du même article).';
     }
 
-    const textRes = await callTextCompletion({
+    const textRes = await completeStructuredWithToolFallback({
       apiKey,
-      provider: resolvedProvider,
       model: textModel,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
       ],
       temperature: config.temperature ?? 0.75,
-      maxTokens: config.maxTokens ?? 8000,
+      maxTokens,
       tools: [BLOG_TOOL],
-      toolChoice: { type: 'function', function: { name: 'output_blog_article' } },
+      toolName: 'output_blog_article',
+      jsonSchemaHint: BLOG_JSON_HINT,
     });
 
-    const mapped = mapGatewayError(textRes.status);
-    if (mapped) {
-      return new Response(JSON.stringify({ error: mapped.message }), {
-        status: mapped.status,
-        headers: { ...headers, 'Content-Type': 'application/json' },
-      });
-    }
-    if (!textRes.ok) {
-      const t = await textRes.text();
-      console.error('Blog text generation failed', textRes.status, t);
-      return new Response(JSON.stringify({ error: 'Échec génération article' }), {
-        status: 500,
-        headers: { ...headers, 'Content-Type': 'application/json' },
-      });
-    }
-
-    const textData = await textRes.json();
-    const toolCall = textData?.choices?.[0]?.message?.tool_calls?.[0];
-    if (!toolCall?.function?.arguments) {
-      return new Response(JSON.stringify({ error: 'Réponse IA invalide' }), {
-        status: 500,
-        headers: { ...headers, 'Content-Type': 'application/json' },
-      });
-    }
-
-    const article = JSON.parse(toolCall.function.arguments) as Record<string, unknown>;
+    const article = textRes;
     const slug = String(article.slug || topic)
       .toLowerCase()
       .replace(/[^a-z0-9-]+/g, '-')
@@ -244,7 +242,8 @@ serve(async (req: Request) => {
     let featuredImageUrl: string | null = null;
     let ogImageUrl: string | null = null;
 
-    const shouldGenerateImage = generateImage && config.generateFeaturedImage !== false;
+    const shouldGenerateImage =
+      generateImage && config.generateFeaturedImage !== false && !isFreeOpenRouterModel(textModel);
     if (shouldGenerateImage) {
       const imageTemplate =
         config.imagePromptTemplate ||
@@ -258,7 +257,6 @@ serve(async (req: Request) => {
       try {
         const rawUrl = await callImageGeneration({
           apiKey,
-          provider: resolvedProvider,
           model: imageModel,
           prompt: finalImagePrompt,
         });
@@ -333,9 +331,13 @@ serve(async (req: Request) => {
     );
   } catch (e) {
     console.error('ai-generate-blog-post error', e);
-    return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : 'Erreur inconnue' }),
-      { status: 500, headers: { ...headers, 'Content-Type': 'application/json' } }
+    const message = e instanceof Error ? e.message : 'Erreur inconnue';
+    const mapped = mapGatewayError(
+      /crédits|402|payment required/i.test(message) ? 402 : /limite|429/i.test(message) ? 429 : 500
     );
+    return new Response(JSON.stringify({ error: mapped?.message ?? message }), {
+      status: mapped?.status ?? 500,
+      headers: { ...headers, 'Content-Type': 'application/json' },
+    });
   }
 });

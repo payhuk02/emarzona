@@ -58,7 +58,7 @@ export function BlogAIGeneratorDialog({
   const [keywords, setKeywords] = useState('');
   const [categoryId, setCategoryId] = useState<string>('none');
   const [tone, setTone] = useState<'premium' | 'expert' | 'friendly' | 'educational'>('premium');
-  const [generateImage, setGenerateImage] = useState(true);
+  const [generateImage, setGenerateImage] = useState(false);
   const [generateEn, setGenerateEn] = useState(true);
   const [saveAsDraft, setSaveAsDraft] = useState(true);
   const [result, setResult] = useState<BlogAIGenerateResponse | null>(null);

@@ -296,6 +296,115 @@ export function fillTemplate(template: string, vars: Record<string, string>): st
   return template.replace(/\{\{(\w+)\}\}/g, (_, key) => vars[key] ?? '');
 }
 
+export function isFreeOpenRouterModel(model: string): boolean {
+  return model === 'openrouter/free' || model.endsWith(':free');
+}
+
+export function effectiveMaxTokens(model: string, requested: number): number {
+  if (isFreeOpenRouterModel(model)) return Math.min(requested, 4096);
+  return requested;
+}
+
+export function parseOpenRouterErrorBody(body: string, status: number): string {
+  const trimmed = body.trim();
+  if (!trimmed) return `Erreur passerelle IA (${status})`;
+  try {
+    const parsed = JSON.parse(trimmed) as {
+      error?: { message?: string } | string;
+      message?: string;
+    };
+    const nested =
+      typeof parsed.error === 'object' && parsed.error?.message
+        ? parsed.error.message
+        : typeof parsed.error === 'string'
+          ? parsed.error
+          : parsed.message;
+    if (typeof nested === 'string' && nested.trim()) return nested.trim();
+  } catch {
+    // corps non-JSON
+  }
+  return trimmed.slice(0, 500);
+}
+
+export async function readOpenRouterError(response: Response): Promise<string> {
+  const mapped = mapGatewayError(response.status);
+  if (mapped) return mapped.message;
+  return parseOpenRouterErrorBody(await response.text(), response.status);
+}
+
+export function parseJsonFromModelContent(content: string): Record<string, unknown> {
+  const trimmed = content.trim();
+  const fenced = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i)?.[1]?.trim();
+  const candidate = fenced || trimmed.match(/\{[\s\S]*\}/)?.[0];
+  if (!candidate) throw new Error('Réponse IA invalide — JSON attendu');
+  return JSON.parse(candidate) as Record<string, unknown>;
+}
+
+export async function completeStructuredWithToolFallback(options: {
+  apiKey: string;
+  model: string;
+  messages: Array<{ role: string; content: string }>;
+  temperature?: number;
+  maxTokens?: number;
+  tools: unknown[];
+  toolName: string;
+  jsonSchemaHint: string;
+}): Promise<Record<string, unknown>> {
+  const maxTokens = effectiveMaxTokens(options.model, options.maxTokens ?? 4000);
+
+  let response = await callTextCompletion({
+    apiKey: options.apiKey,
+    model: options.model,
+    messages: options.messages,
+    temperature: options.temperature,
+    maxTokens,
+    tools: options.tools,
+    toolChoice: { type: 'function', function: { name: options.toolName } },
+  });
+
+  if (!response.ok) {
+    const firstError = await readOpenRouterError(response);
+    const mapped = mapGatewayError(response.status);
+    if (mapped) throw new Error(mapped.message);
+
+    const retryWithoutTools =
+      response.status === 400 ||
+      response.status === 404 ||
+      response.status === 422 ||
+      /tool|function|unsupported|not support|no endpoints/i.test(firstError);
+
+    if (!retryWithoutTools) {
+      throw new Error(firstError);
+    }
+
+    console.warn('Structured tool call failed, retrying JSON mode', response.status, firstError);
+    response = await callTextCompletion({
+      apiKey: options.apiKey,
+      model: options.model,
+      messages: [...options.messages, { role: 'system', content: options.jsonSchemaHint }],
+      temperature: options.temperature,
+      maxTokens,
+    });
+
+    if (!response.ok) {
+      throw new Error(await readOpenRouterError(response));
+    }
+  }
+
+  const data = await response.json();
+  const toolCall = data?.choices?.[0]?.message?.tool_calls?.[0];
+  if (toolCall?.function?.arguments) {
+    return JSON.parse(toolCall.function.arguments) as Record<string, unknown>;
+  }
+
+  const content = data?.choices?.[0]?.message?.content;
+  if (typeof content === 'string' && content.trim()) {
+    return parseJsonFromModelContent(content);
+  }
+
+  throw new Error('Réponse IA invalide — aucun contenu structuré');
+}
+
 export function mapGatewayError(status: number): { status: number; message: string } | null {
   if (status === 429) return { status: 429, message: 'Limite de requêtes IA atteinte.' };
   if (status === 402) return { status: 402, message: 'Crédits IA épuisés.' };
