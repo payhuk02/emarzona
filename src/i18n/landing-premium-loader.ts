@@ -3,8 +3,12 @@
  */
 import i18n from './config';
 import { normalizeLanguageCode, type LanguageCode } from './languages';
+import {
+  isLandingPremiumLocaleTracked,
+  trackLandingPremiumLocale,
+} from './landing-premium-registry';
 
-const loadedLocales = new Set<LanguageCode>();
+export { isLandingPremiumLocaleLoaded } from './landing-premium-registry';
 
 const localeLoaders: Record<LanguageCode, () => Promise<{ default: Record<string, unknown> }>> = {
   fr: () => import('./locales/landing-premium/fr.json'),
@@ -17,17 +21,13 @@ const localeLoaders: Record<LanguageCode, () => Promise<{ default: Record<string
 export async function ensureLandingPremiumLocale(lng?: string): Promise<LanguageCode> {
   const code = normalizeLanguageCode(lng ?? i18n.language ?? 'fr');
 
-  if (loadedLocales.has(code)) {
+  if (isLandingPremiumLocaleTracked(code)) {
     return code;
   }
 
   const mod = await localeLoaders[code]();
   i18n.addResourceBundle(code, 'translation', { landingPremium: mod.default }, true, true);
-  loadedLocales.add(code);
+  trackLandingPremiumLocale(code);
 
   return code;
-}
-
-export function isLandingPremiumLocaleLoaded(lng?: string): boolean {
-  return loadedLocales.has(normalizeLanguageCode(lng ?? i18n.language ?? 'fr'));
 }

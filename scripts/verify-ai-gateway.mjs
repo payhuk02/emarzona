@@ -201,6 +201,14 @@ if (!SUPABASE_URL) {
         'Settings IA chargés',
         `chatbot=${chat.provider}/${chat.model} blog=${blog.provider}/${blog.textModel}`
       );
+      if (chat.useAiFallback === false && chat.useLovableAIFallback !== true) {
+        fail(
+          'Chatbot fallback IA',
+          'useAiFallback=false — le widget n’appellera pas ai-chat. Activez « Fallback API IA » dans Admin → Gestion IA.'
+        );
+      } else {
+        pass('Chatbot fallback IA', 'useAiFallback actif');
+      }
       if (blog.provider === 'google' && (blog.textModel === 'google/auto' || blog.textModel?.includes('gemini'))) {
         pass('Config blog Gemini', `${blog.provider} / ${blog.textModel}`);
       } else if (blog.provider === 'openrouter') {

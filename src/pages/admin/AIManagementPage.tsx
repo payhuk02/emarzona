@@ -133,7 +133,7 @@ export interface AIManagementSettings {
 const DEFAULTS: AIManagementSettings = {
   chatbot: {
     enabled: true,
-    useAiFallback: false,
+    useAiFallback: true,
     provider: 'google',
     model: 'google/auto',
     systemPrompt:

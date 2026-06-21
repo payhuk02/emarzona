@@ -1,8 +1,12 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation, type TFunction, type TOptions } from 'react-i18next';
 import { usePageCustomization } from '@/hooks/usePageCustomization';
 import { LANDING_PREMIUM_PAGE_ID } from '@/lib/admin/landingPremiumCustomization';
 import { getPageCustomizationValue } from '@/lib/admin/pageCustomizationKeys';
+import {
+  ensureLandingPremiumLocale,
+  isLandingPremiumLocaleLoaded,
+} from '@/i18n/landing-premium-loader';
 
 function applyArrayOverrides<T>(
   base: T[],
@@ -36,9 +40,22 @@ function applyArrayOverrides<T>(
 export function useLandingPremiumT(): {
   t: TFunction;
   i18n: ReturnType<typeof useTranslation>['i18n'];
+  localeReady: boolean;
 } {
   const { t: i18nT, i18n } = useTranslation('translation', { keyPrefix: 'landingPremium' });
   const { pageCustomization } = usePageCustomization(LANDING_PREMIUM_PAGE_ID);
+  const [localeReady, setLocaleReady] = useState(() => isLandingPremiumLocaleLoaded(i18n.language));
+
+  useEffect(() => {
+    let cancelled = false;
+    setLocaleReady(isLandingPremiumLocaleLoaded(i18n.language));
+    void ensureLandingPremiumLocale(i18n.language).then(() => {
+      if (!cancelled) setLocaleReady(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [i18n.language]);
 
   const t = useCallback(
     (key: string, options?: TOptions) => {
@@ -72,8 +89,8 @@ export function useLandingPremiumT(): {
 
       return i18nT(key, options);
     },
-    [pageCustomization, i18nT]
+    [pageCustomization, i18nT, localeReady]
   ) as TFunction;
 
-  return { t, i18n };
+  return { t, i18n, localeReady };
 }

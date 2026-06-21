@@ -19,17 +19,19 @@ import sidebarEN from './locales/sidebar-en.json';
 import sidebarES from './locales/sidebar-es.json';
 import sidebarDE from './locales/sidebar-de.json';
 import sidebarPT from './locales/sidebar-pt.json';
+import landingPremiumFR from './locales/landing-premium/fr.json';
+import landingPremiumEN from './locales/landing-premium/en.json';
 import { AVAILABLE_LANGUAGES, type LanguageCode } from './languages';
 
 export { AVAILABLE_LANGUAGES, type LanguageCode };
 
-// Les ressources de traduction (landingPremium chargé à la demande — voir landing-premium-loader.ts)
+// landingPremium FR/EN dans le bundle initial (pages publiques /blog sans passer par la landing)
 const resources = {
   fr: {
-    translation: { ...translationFR, ...sidebarFR },
+    translation: { ...translationFR, ...sidebarFR, landingPremium: landingPremiumFR },
   },
   en: {
-    translation: { ...translationEN, ...sidebarEN },
+    translation: { ...translationEN, ...sidebarEN, landingPremium: landingPremiumEN },
   },
   es: {
     translation: { ...translationES, ...sidebarES },

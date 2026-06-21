@@ -82,6 +82,37 @@ export interface ChatbotResponse {
 // =============================================================================
 
 export class AIChatbot {
+  private static CONFIG_TTL_MS = 60_000;
+
+  private chatbotConfigCache: { enabled: boolean; useAiFallback: boolean } | null = null;
+  private chatbotConfigLoadedAt = 0;
+
+  private async getChatbotRuntimeConfig(): Promise<{ enabled: boolean; useAiFallback: boolean }> {
+    const now = Date.now();
+    if (this.chatbotConfigCache && now - this.chatbotConfigLoadedAt < AIChatbot.CONFIG_TTL_MS) {
+      return this.chatbotConfigCache;
+    }
+
+    const defaults = { enabled: true, useAiFallback: true };
+    try {
+      const { data, error } = await supabase.rpc('get_ai_management_settings');
+      if (error) throw error;
+      const chatbot = (data as { chatbot?: Record<string, unknown> })?.chatbot;
+      this.chatbotConfigCache = {
+        enabled: chatbot?.enabled !== false,
+        useAiFallback:
+          (chatbot?.useAiFallback as boolean | undefined) ??
+          (chatbot?.useLovableAIFallback as boolean | undefined) ??
+          true,
+      };
+    } catch (error) {
+      logger.warn('Could not load chatbot AI settings, using defaults', { error });
+      this.chatbotConfigCache = defaults;
+    }
+
+    this.chatbotConfigLoadedAt = now;
+    return this.chatbotConfigCache;
+  }
   private sessions: Map<string, ChatSession> = new Map();
   private contextWindow = 10; // Number of messages to keep in context for intent analysis
 
@@ -630,7 +661,15 @@ export class AIChatbot {
       };
     }
 
-    // Fallback LLM via edge function ai-chat (OpenRouter)
+    const runtimeConfig = await this.getChatbotRuntimeConfig();
+    if (!runtimeConfig.enabled || !runtimeConfig.useAiFallback) {
+      return {
+        message: CHATBOT_RESPONSES.GENERAL_FALLBACK,
+        suggestions: CHATBOT_RESPONSES.GENERAL_FALLBACK_SUGGESTIONS,
+      };
+    }
+
+    // Fallback LLM via edge function ai-chat (provider/modèle configurés en admin)
     try {
       const history = (_session.messages || [])
         .slice(-6)

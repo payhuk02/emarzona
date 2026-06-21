@@ -227,10 +227,6 @@ async function checkProductAiSettings() {
     else fail(`fichier ${f}`, 'manquant');
   }
 
-  const edgeRes = await fetch(`${url}/functions/v1/ai-generate-content`, {
-    method: 'OPTIONS',
-    headers: { apikey: key },
-  });
   const wizardFiles = [
     'src/components/products/create/digital/DigitalBasicInfoForm.tsx',
     'src/components/products/create/physical/PhysicalBasicInfoForm.tsx',

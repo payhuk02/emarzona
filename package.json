@@ -64,6 +64,7 @@
     "test:e2e:email": "playwright test email-unsubscribe email-campaign-test-send --project=chromium",
     "verify:supabase-keys": "node scripts/verify-supabase-publishable-key.mjs",
     "verify:ai-gateway": "node scripts/verify-ai-gateway.mjs",
+    "verify:platform-blog": "node scripts/verify-platform-blog.mjs",
     "setup:commerce-e2e-secret": "node scripts/setup-commerce-e2e-github-secret.mjs",
     "cleanup:e2e-orphans": "node scripts/cleanup-e2e-orphans.mjs",
     "test:visual": "playwright test visual-regression",
