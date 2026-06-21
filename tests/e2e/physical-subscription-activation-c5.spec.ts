@@ -15,23 +15,24 @@ import {
 } from './helpers/supabase-staging';
 
 test.describe('C5 — Contrat abonnement physique', () => {
-  test('plans vendeur physical ont les prix attendus (7500/12500/15000)', async () => {
+  test('plans vendeur physical ont les prix attendus (25/49/79 USD)', async () => {
     test.skip(!hasStagingSupabaseCredentials(), 'E2E_STAGING_SUPABASE_* non configuré');
 
     const supabase = createStagingSupabaseClient();
     const { data: plans, error } = await supabase
       .from('platform_vendor_plans')
-      .select('slug, monthly_price, applies_to_product_type, is_active')
+      .select('slug, monthly_price, currency, applies_to_product_type, is_active')
       .in('slug', ['physical_basic', 'physical_standard', 'physical_premium'])
       .eq('is_active', true);
 
     expect(error).toBeNull();
     expect(plans?.length).toBe(3);
 
-    const bySlug = Object.fromEntries((plans ?? []).map(p => [p.slug, Number(p.monthly_price)]));
-    expect(bySlug.physical_basic).toBe(7500);
-    expect(bySlug.physical_standard).toBe(12500);
-    expect(bySlug.physical_premium).toBe(15000);
+    const bySlug = Object.fromEntries((plans ?? []).map(p => [p.slug, p]));
+    expect(Number(bySlug.physical_basic.monthly_price)).toBe(25);
+    expect(Number(bySlug.physical_standard.monthly_price)).toBe(49);
+    expect(Number(bySlug.physical_premium.monthly_price)).toBe(79);
+    expect(bySlug.physical_basic.currency).toBe('USD');
 
     for (const plan of plans ?? []) {
       expect(plan.applies_to_product_type).toBe('physical');
@@ -78,7 +79,10 @@ test.describe('C5 — Contrat abonnement physique', () => {
       .limit(10);
 
     expect(error).toBeNull();
-    test.skip(!subs?.length, 'Aucun abonnement activé via webhook en staging (OK si pas encore de paiement)');
+    test.skip(
+      !subs?.length,
+      'Aucun abonnement activé via webhook en staging (OK si pas encore de paiement)'
+    );
 
     for (const sub of subs ?? []) {
       expect(sub.status).toBe('active');

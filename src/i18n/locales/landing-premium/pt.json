@@ -181,46 +181,52 @@
     "subtitle": "Um modelo por tipo de produto — subscrição para físico, comissão para o resto.",
     "physicalGroupLabel": "Subscrição produtos físicos",
     "commissionGroupLabel": "Digital, serviços, cursos e obras — sem subscrição",
-    "footnote": "Valores em franco CFA (XOF). Comissão de 10 % apenas em vendas concluídas para produtos digitais, cursos, serviços e obras de artista.",
+    "footnote": "Subscrições físicas em USD ($25 / $49 / $79). Conversão automática para a sua moeda local no checkout. Comissão de 10 % apenas em vendas concluídas para produtos digitais, cursos, serviços e obras de artista.",
     "periodMonth": "/ mês",
     "periodSale": "por venda",
     "physicalBasic": {
       "name": "Físico — Starter",
       "badge": "1 mês de teste grátis",
-      "desc": "Para começar a vender produtos físicos (stock + envio).",
+      "desc": "Lance o seu e-commerce físico com o essencial para vender em escala.",
       "features": [
-        "Vender produtos físicos",
-        "Gestão de stock e variantes",
-        "Zonas e tarifas de envio",
-        "Teste grátis 30 dias"
+        "Produtos ilimitados",
+        "Encomendas ilimitadas",
+        "Gestão de stock",
+        "Domínio personalizado",
+        "Suporte standard"
       ],
       "cta": "Experimentar 1 mês grátis"
     },
     "physicalStandard": {
       "name": "Físico — Professional",
       "badge": "Recomendado",
-      "desc": "Para lojas em crescimento: mais encomendas, menos erros.",
+      "desc": "Acelere o crescimento com visibilidade no marketplace e marketing.",
       "features": [
         "Tudo do Starter",
-        "Tracking de envios",
-        "Devoluções (RMA) e políticas",
-        "Import/Export CSV inventário",
-        "Alertas de stock"
+        "Patrocinado no Marketplace",
+        "SEO avançado",
+        "Email marketing",
+        "Relatórios avançados",
+        "Vários administradores",
+        "Suporte prioritário"
       ],
       "cta": "Iniciar teste"
     },
     "physicalPremium": {
-      "name": "Físico — Enterprise",
+      "name": "Físico — Business",
       "badge": "Scale",
-      "desc": "Para escalar operações com logística avançada e otimização.",
+      "desc": "Operações avançadas: IA, automações, multi-armazéns e suporte VIP.",
       "features": [
         "Tudo do Professional",
-        "Envios em lote e etiquetas",
-        "Lotes / expiração / FEFO",
-        "Multi-armazéns e transferências",
-        "Previsão de procura"
+        "IA avançada",
+        "Recomendações AI",
+        "Automações de marketing",
+        "Estatísticas premium",
+        "Multi-armazéns",
+        "Gestor de conta dedicado",
+        "Suporte VIP"
       ],
-      "cta": "Ir para Enterprise"
+      "cta": "Ir para Business"
     },
     "commission": {
       "name": "Digital, serviços, cursos e obras de artista",

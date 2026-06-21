@@ -4,7 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { formatCurrency } from '@/lib/utils';
+import { formatPhysicalPlanPrice } from '@/lib/billing/physical-subscription-checkout';
+import { useUserCurrency } from '@/hooks/useCurrency';
+import { formatCurrencyCode } from '@/lib/currency-converter';
 import { PHYSICAL_PLAN_CARDS, physicalPlanLabel } from '@/lib/billing/physical-plan-display';
 import {
   initiatePhysicalPlanChange,
@@ -34,6 +36,7 @@ export function PhysicalPlanChangeSection({
 }: PhysicalPlanChangeSectionProps) {
   const { toast } = useToast();
   const [loadingSlug, setLoadingSlug] = useState<string | null>(null);
+  const userCurrency = useUserCurrency();
 
   if (!currentPlanSlug || !['active', 'trialing', 'past_due'].includes(subscriptionStatus)) {
     return null;
@@ -69,7 +72,12 @@ export function PhysicalPlanChangeSection({
                 {isCurrent && <Badge variant="secondary">Actuel</Badge>}
               </div>
               <p className="text-xs text-muted-foreground">{plan.tagline}</p>
-              <p className="text-lg font-bold">{formatCurrency(plan.price)}</p>
+              <p className="text-lg font-bold">{formatPhysicalPlanPrice(plan.priceUsd, 'USD')}</p>
+              {userCurrency !== 'USD' && (
+                <p className="text-xs text-muted-foreground">
+                  ≈ {formatPhysicalPlanPrice(plan.priceUsd, userCurrency)} au checkout
+                </p>
+              )}
               <p className="text-xs text-muted-foreground">/ mois</p>
 
               {!isCurrent && (
@@ -94,7 +102,7 @@ export function PhysicalPlanChangeSection({
 
                       if (preview.requires_payment && preview.prorated_amount > 0) {
                         const proceed = window.confirm(
-                          `Upgrade vers ${plan.label} : prorata de ${formatCurrency(preview.prorated_amount)} ${preview.currency} (${preview.days_remaining} j. restants). Continuer ?`
+                          `Upgrade vers ${plan.label} : prorata de ${formatCurrencyCode(preview.prorated_amount, preview.currency)} (${preview.days_remaining} j. restants). Continuer ?`
                         );
                         if (!proceed) return;
                       }

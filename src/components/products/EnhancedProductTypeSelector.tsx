@@ -295,7 +295,7 @@ export const EnhancedProductTypeSelector = ({
       if (type === 'physical' && !physicalAccess.loading && !physicalAccess.allowed) {
         toast({
           title: 'Abonnement produits physiques requis',
-          description: `Activez un plan (essai ${PHYSICAL_TRIAL_DAYS} jours, puis 7500 / 12500 / 15000 XOF).`,
+          description: `Activez un plan (essai ${PHYSICAL_TRIAL_DAYS} jours, puis $25 / $49 / $79 USD — conversion locale au checkout).`,
           variant: 'destructive',
         });
         navigate('/dashboard/billing/physical');

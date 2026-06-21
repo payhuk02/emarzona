@@ -1,6 +1,11 @@
 import { supabase } from '@/integrations/supabase/client';
 import { initiateMonerooPayment } from '@/lib/moneroo-payment';
 import { logger } from '@/lib/logger';
+import {
+  convertInvoiceAmountToCheckout,
+  detectUserCheckoutCurrency,
+} from '@/lib/billing/physical-subscription-checkout';
+import { isSupportedCurrency } from '@/lib/currency-converter';
 
 export interface SubscriptionInvoiceRow {
   id: string;
@@ -61,11 +66,18 @@ export async function initiateSubscriptionRenewalCheckout(
   }
 
   const row = invoice as { id: string; amount: number; currency: string };
+  const checkoutCurrency = detectUserCheckoutCurrency();
+  const invoiceCurrency = isSupportedCurrency(row.currency) ? row.currency : 'USD';
+  const checkoutAmount = convertInvoiceAmountToCheckout(
+    Number(row.amount),
+    invoiceCurrency,
+    checkoutCurrency
+  );
 
   const result = await initiateMonerooPayment({
     storeId,
-    amount: Number(row.amount),
-    currency: row.currency === 'XOF' ? 'XOF' : 'XOF',
+    amount: checkoutAmount,
+    currency: checkoutCurrency,
     description: 'Renouvellement abonnement produits physiques',
     customerEmail,
     customerName,

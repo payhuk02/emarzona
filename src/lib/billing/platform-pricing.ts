@@ -1,7 +1,7 @@
 /**
  * Règles tarifaires plateforme Emarzona (5 systèmes e-commerce).
  *
- * - Produits physiques : abonnement requis (essai 30 jours + 3 paliers)
+ * - Produits physiques : abonnement requis (essai 30 jours + 3 paliers en USD)
  * - Digital / services / cours / œuvres : commission 10% par vente réussie
  */
 
@@ -11,11 +11,16 @@ export const SUBSCRIPTION_PRODUCT_TYPE = 'physical' as const;
 
 export const PHYSICAL_TRIAL_DAYS = 30;
 
-export const PHYSICAL_PLAN_PRICES_XOF = {
-  basic: 7500,
-  standard: 12500,
-  premium: 15000,
+/** Devise de référence des plans abonnement produits physiques */
+export const PHYSICAL_PLAN_BASE_CURRENCY = 'USD' as const;
+
+export const PHYSICAL_PLAN_PRICES_USD = {
+  basic: 25,
+  standard: 49,
+  premium: 79,
 } as const;
+
+export type PhysicalPlanPriceKey = keyof typeof PHYSICAL_PLAN_PRICES_USD;
 
 export const PHYSICAL_SUBSCRIPTION_ERROR_CODE = 'PHYSICAL_SUBSCRIPTION_REQUIRED';
 

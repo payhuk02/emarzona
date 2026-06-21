@@ -187,46 +187,52 @@
     "subtitle": "Ein Modell pro Produkttyp — Abo für physisch, Provision für den Rest.",
     "physicalGroupLabel": "Abo für physische Produkte",
     "commissionGroupLabel": "Digital, Services, Kurse & Kunst — ohne Abo",
-    "footnote": "Beträge in CFA-Franc (XOF). 10 % Provision nur bei abgeschlossenen Verkäufen für digitale Produkte, Kurse, Services und Kunstwerke.",
+    "footnote": "Physische Abos in USD ($25 / $49 / $79). Automatische Umrechnung in Ihre lokale Währung beim Checkout. 10 % Provision nur bei abgeschlossenen Verkäufen für digitale Produkte, Kurse, Services und Kunstwerke.",
     "periodMonth": "/ Monat",
     "periodSale": "pro Verkauf",
     "physicalBasic": {
       "name": "Physisch — Starter",
       "badge": "1 Monat kostenlos testen",
-      "desc": "Zum Start: physische Produkte verkaufen (Lager + Versand).",
+      "desc": "Starten Sie Ihren physischen E-Commerce mit allem für den Verkauf in großem Maßstab.",
       "features": [
-        "Physische Produkte verkaufen",
-        "Lager- & Variantenverwaltung",
-        "Versandzonen und Tarife",
-        "30 Tage kostenlos testen"
+        "Unbegrenzte Produkte",
+        "Unbegrenzte Bestellungen",
+        "Lagerverwaltung",
+        "Eigene Domain",
+        "Standard-Support"
       ],
       "cta": "1 Monat gratis testen"
     },
     "physicalStandard": {
       "name": "Physisch — Professional",
       "badge": "Empfohlen",
-      "desc": "Für wachsende Shops: mehr Bestellungen, weniger Fehler.",
+      "desc": "Schneller wachsen mit Marketplace-Sichtbarkeit und Marketing-Tools.",
       "features": [
         "Alles aus Starter",
-        "Sendungsverfolgung",
-        "Retouren (RMA) & Richtlinien",
-        "CSV Import/Export Inventar",
-        "Bestandsalarme"
+        "Marketplace-Sponsoring",
+        "Erweitertes SEO",
+        "E-Mail-Marketing",
+        "Erweiterte Berichte",
+        "Mehrere Administratoren",
+        "Prioritäts-Support"
       ],
       "cta": "Test starten"
     },
     "physicalPremium": {
-      "name": "Physisch — Enterprise",
+      "name": "Physisch — Business",
       "badge": "Scale",
-      "desc": "Für skalierte Ops: erweiterte Logistik, Optimierung und Automationen.",
+      "desc": "Erweiterte Ops: KI, Automatisierungen, Multi-Lager und VIP-Support.",
       "features": [
         "Alles aus Professional",
-        "Batch-Versand & Labels",
-        "Chargen / Ablauf / FEFO",
-        "Multi-Lager & Transfers",
-        "Nachfrageprognose"
+        "Erweiterte KI",
+        "KI-Empfehlungen",
+        "Marketing-Automatisierungen",
+        "Premium-Statistiken",
+        "Multi-Lager",
+        "Dedizierter Account Manager",
+        "VIP-Support"
       ],
-      "cta": "Zu Enterprise"
+      "cta": "Zu Business"
     },
     "commission": {
       "name": "Digital, Services, Kurse & Kunstwerke",

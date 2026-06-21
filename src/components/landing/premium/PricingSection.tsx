@@ -1,7 +1,10 @@
 import { Link } from 'react-router-dom';
 import { Check, Package, Layers } from 'lucide-react';
-import { formatFcfa } from '@/lib/format/fcfa';
-import { PHYSICAL_PLAN_PRICES_XOF } from '@/lib/billing/platform-pricing';
+import { formatCurrencyCode } from '@/lib/currency-converter';
+import {
+  PHYSICAL_PLAN_BASE_CURRENCY,
+  PHYSICAL_PLAN_PRICES_USD,
+} from '@/lib/billing/platform-pricing';
 import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
 import { usePremiumReveal } from './usePremiumReveal';
 
@@ -10,19 +13,19 @@ const physicalPlans = [
     key: 'physicalBasic' as const,
     tier: '01',
     highlight: false,
-    price: PHYSICAL_PLAN_PRICES_XOF.basic,
+    priceUsd: PHYSICAL_PLAN_PRICES_USD.basic,
   },
   {
     key: 'physicalStandard' as const,
     tier: '02',
     highlight: true,
-    price: PHYSICAL_PLAN_PRICES_XOF.standard,
+    priceUsd: PHYSICAL_PLAN_PRICES_USD.standard,
   },
   {
     key: 'physicalPremium' as const,
     tier: '03',
     highlight: false,
-    price: PHYSICAL_PLAN_PRICES_XOF.premium,
+    priceUsd: PHYSICAL_PLAN_PRICES_USD.premium,
   },
 ] as const;
 
@@ -30,13 +33,13 @@ function PricingCard({
   planKey,
   tier,
   highlight,
-  price,
+  priceUsd,
   t,
 }: {
   planKey: (typeof physicalPlans)[number]['key'];
   tier: string;
   highlight: boolean;
-  price: number;
+  priceUsd: number;
   t: ReturnType<typeof useLandingPremiumT>['t'];
 }) {
   const features = t(`pricing.${planKey}.features`, { returnObjects: true }) as string[];
@@ -80,7 +83,7 @@ function PricingCard({
 
         <div className="relative mt-6 border-t border-white/10 pt-5">
           <p className="lp-serif text-3xl text-white sm:text-[2rem]">
-            {formatFcfa(price)}
+            {formatCurrencyCode(priceUsd, PHYSICAL_PLAN_BASE_CURRENCY)}
             <span className="text-base font-sans text-white/60">{t('pricing.periodMonth')}</span>
           </p>
         </div>
@@ -198,7 +201,7 @@ export function PricingSection() {
                 planKey={plan.key}
                 tier={plan.tier}
                 highlight={plan.highlight}
-                price={plan.price}
+                priceUsd={plan.priceUsd}
                 t={t}
               />
             ))}

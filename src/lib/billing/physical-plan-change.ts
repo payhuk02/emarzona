@@ -2,6 +2,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { initiateMonerooPayment } from '@/lib/moneroo-payment';
 import { logger } from '@/lib/logger';
 import { physicalPlanLabel } from '@/lib/billing/physical-plan-display';
+import {
+  convertInvoiceAmountToCheckout,
+  detectUserCheckoutCurrency,
+} from '@/lib/billing/physical-subscription-checkout';
+import { isSupportedCurrency } from '@/lib/currency-converter';
 
 export type PlanChangePreview = {
   change_type: 'upgrade' | 'downgrade' | 'same';
@@ -70,11 +75,18 @@ export async function initiatePhysicalPlanChange(
 
     const row = invoice as { id: string; amount: number; currency: string };
     const newLabel = physicalPlanLabel(newPlanSlug);
+    const checkoutCurrency = detectUserCheckoutCurrency();
+    const invoiceCurrency = isSupportedCurrency(row.currency) ? row.currency : 'USD';
+    const checkoutAmount = convertInvoiceAmountToCheckout(
+      Number(row.amount),
+      invoiceCurrency,
+      checkoutCurrency
+    );
 
     const payment = await initiateMonerooPayment({
       storeId,
-      amount: Number(row.amount),
-      currency: row.currency === 'XOF' ? 'XOF' : 'XOF',
+      amount: checkoutAmount,
+      currency: checkoutCurrency,
       description: `Upgrade abonnement — ${newLabel}`,
       customerEmail,
       customerName,

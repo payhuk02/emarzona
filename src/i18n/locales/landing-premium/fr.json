@@ -192,46 +192,52 @@
     "subtitle": "Un modèle adapté à chaque type de produit — abonnement pour le physique, commission pour le reste.",
     "physicalGroupLabel": "Abonnement produits physiques",
     "commissionGroupLabel": "Digital, services, cours & œuvres — sans abonnement",
-    "footnote": "Tous les montants sont en franc CFA (XOF). Commission de 10 % prélevée uniquement sur les ventes abouties pour les produits digitaux, cours, services et œuvres d'artistes.",
+    "footnote": "Abonnements produits physiques en USD ($25 / $49 / $79). Conversion automatique vers votre devise locale au checkout. Commission de 10 % prélevée uniquement sur les ventes abouties pour les produits digitaux, cours, services et œuvres d'artistes.",
     "periodMonth": "/ mois",
     "periodSale": "par vente",
     "physicalBasic": {
       "name": "Physique — Starter",
       "badge": "1 mois d'essai gratuit",
-      "desc": "Lancement e-commerce physique : stock, variantes et livraison.",
+      "desc": "Lancez votre e-commerce physique avec l'essentiel pour vendre à grande échelle.",
       "features": [
-        "Vendre des produits physiques",
-        "Gestion stock & variantes",
-        "Zones & tarifs de livraison",
-        "Essai gratuit 30 jours"
+        "Produits illimités",
+        "Commandes illimitées",
+        "Gestion du stock",
+        "Domaine personnalisé",
+        "Support standard"
       ],
       "cta": "Essayer Starter — 1 mois gratuit"
     },
     "physicalStandard": {
       "name": "Physique — Professional",
       "badge": "Recommandé",
-      "desc": "Croissance : logistique, fournisseurs et analytics intégrés.",
+      "desc": "Accélérez votre croissance avec visibilité marketplace et outils marketing.",
       "features": [
         "Tout Starter",
-        "Tracking expéditions",
-        "Retours (RMA) & politiques",
-        "Import/Export CSV inventaire",
-        "Alertes stock"
+        "Sponsorisé sur le Marketplace",
+        "SEO avancé",
+        "Marketing par email",
+        "Rapports avancés",
+        "Plusieurs administrateurs",
+        "Support prioritaire"
       ],
       "cta": "Démarrer Professional"
     },
     "physicalPremium": {
-      "name": "Physique — Enterprise",
+      "name": "Physique — Business",
       "badge": "Scale",
-      "desc": "Opérations avancées : entrepôts, lots, expédition groupée et prévisions.",
+      "desc": "Opérations avancées : IA, automatisations, multi-entrepôts et accompagnement dédié.",
       "features": [
         "Tout Professional",
-        "Batch shipping & étiquettes",
-        "Lots / expiration / FEFO",
-        "Multi-entrepôts & transferts",
-        "Prévisions demande"
+        "IA avancée",
+        "Recommandations AI",
+        "Automatisations marketing",
+        "Statistiques premium",
+        "Multi-entrepôts",
+        "Gestionnaire de compte dédié",
+        "Support VIP"
       ],
-      "cta": "Passer en Enterprise"
+      "cta": "Passer en Business"
     },
     "commission": {
       "name": "Digital, services, cours & œuvres",

@@ -1,6 +1,6 @@
 import type { PhysicalPlanSlug } from '@/lib/billing/physical-plan-capabilities';
 
-/** Limites par plan — miroir de platform_vendor_plans (E31). NULL = illimité. */
+/** Limites par plan — miroir de platform_vendor_plans. NULL = illimité. */
 export const PHYSICAL_PLAN_LIMITS: Record<
   Exclude<PhysicalPlanSlug, null>,
   {
@@ -10,14 +10,14 @@ export const PHYSICAL_PLAN_LIMITS: Record<
   }
 > = {
   physical_basic: {
-    maxProducts: 50,
-    maxVariantsPerProduct: 3,
+    maxProducts: null,
+    maxVariantsPerProduct: null,
     maxWarehouses: 0,
   },
   physical_standard: {
-    maxProducts: 200,
-    maxVariantsPerProduct: 10,
-    maxWarehouses: 1,
+    maxProducts: null,
+    maxVariantsPerProduct: null,
+    maxWarehouses: 0,
   },
   physical_premium: {
     maxProducts: null,
@@ -53,7 +53,7 @@ export function variantLimitMessage(max: number): string {
 
 export function warehouseLimitMessage(max: number): string {
   if (max === 0) {
-    return 'Les entrepôts nécessitent le plan Professional ou Enterprise.';
+    return 'Les entrepôts nécessitent le plan Business.';
   }
   return `Limite du plan atteinte : ${max} entrepôt(s) maximum.`;
 }

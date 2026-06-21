@@ -1,26 +1,32 @@
 import type { PhysicalPlanSlug } from '@/lib/billing/physical-plan-capabilities';
-import { PHYSICAL_PLAN_PRICES_XOF } from '@/lib/billing/platform-pricing';
+import {
+  PHYSICAL_PLAN_BASE_CURRENCY,
+  PHYSICAL_PLAN_PRICES_USD,
+} from '@/lib/billing/platform-pricing';
 
 export type PhysicalPlanDisplaySlug = Exclude<PhysicalPlanSlug, null>;
 
 export const PHYSICAL_PLAN_DISPLAY: Record<
   PhysicalPlanDisplaySlug,
-  { label: string; tagline: string; price: number }
+  { label: string; tagline: string; priceUsd: number; currency: typeof PHYSICAL_PLAN_BASE_CURRENCY }
 > = {
   physical_basic: {
     label: 'Starter',
-    tagline: 'Lancement e-commerce physique',
-    price: PHYSICAL_PLAN_PRICES_XOF.basic,
+    tagline: 'Lancement e-commerce — produits & commandes illimités',
+    priceUsd: PHYSICAL_PLAN_PRICES_USD.basic,
+    currency: PHYSICAL_PLAN_BASE_CURRENCY,
   },
   physical_standard: {
     label: 'Professional',
-    tagline: 'Logistique & fournisseurs',
-    price: PHYSICAL_PLAN_PRICES_XOF.standard,
+    tagline: 'Croissance — marketplace, SEO & marketing email',
+    priceUsd: PHYSICAL_PLAN_PRICES_USD.standard,
+    currency: PHYSICAL_PLAN_BASE_CURRENCY,
   },
   physical_premium: {
-    label: 'Enterprise',
-    tagline: 'Entrepôts & expédition avancée',
-    price: PHYSICAL_PLAN_PRICES_XOF.premium,
+    label: 'Business',
+    tagline: 'Scale — IA, multi-entrepôts & support VIP',
+    priceUsd: PHYSICAL_PLAN_PRICES_USD.premium,
+    currency: PHYSICAL_PLAN_BASE_CURRENCY,
   },
 };
 
@@ -33,7 +39,10 @@ export const PHYSICAL_PLAN_CARDS = (
   slug,
   label: info.label,
   tagline: info.tagline,
-  price: info.price,
+  priceUsd: info.priceUsd,
+  currency: info.currency,
+  /** @deprecated use priceUsd — compatibilité temporaire */
+  price: info.priceUsd,
 }));
 
 export function physicalPlanLabel(slug: PhysicalPlanSlug | string | null | undefined): string {

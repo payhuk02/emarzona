@@ -11,7 +11,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useStorePhysicalAccess } from '@/hooks/billing/useStorePhysicalAccess';
 import { PHYSICAL_TRIAL_DAYS } from '@/lib/billing/platform-pricing';
 import { PHYSICAL_PLAN_CARDS, physicalPlanLabel } from '@/lib/billing/physical-plan-display';
-import { formatCurrency } from '@/lib/utils';
+import {
+  detectUserCheckoutCurrency,
+  formatPhysicalPlanPrice,
+  resolvePhysicalPlanCheckout,
+} from '@/lib/billing/physical-subscription-checkout';
+import type { PhysicalPlanSlug } from '@/lib/billing/physical-plan-capabilities';
+import { useUserCurrency } from '@/hooks/useCurrency';
 import { Package, Lock, Sparkles, ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -34,6 +40,7 @@ export function PhysicalSubscriptionRequired({
   const access = useStorePhysicalAccess(storeId);
   const { toast } = useToast();
   const [checkingOutSlug, setCheckingOutSlug] = useState<string | null>(null);
+  const userCurrency = useUserCurrency();
 
   if (access.loading) {
     return (
@@ -117,7 +124,12 @@ export function PhysicalSubscriptionRequired({
               <CardDescription>{plan.tagline}</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">{formatCurrency(plan.price)}</p>
+              <p className="text-2xl font-bold">{formatPhysicalPlanPrice(plan.priceUsd, 'USD')}</p>
+              {userCurrency !== 'USD' && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  ≈ {formatPhysicalPlanPrice(plan.priceUsd, userCurrency)} au checkout
+                </p>
+              )}
               <p className="text-xs text-muted-foreground">
                 / mois
                 {access.status === 'trialing' ? ' (activation immédiate possible)' : ' après essai'}
@@ -140,8 +152,8 @@ export function PhysicalSubscriptionRequired({
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
                   {access.status === 'trialing'
-                    ? "Pas besoin d'attendre la fin de l'essai : choisissez Starter, Professional ou Enterprise pour débloquer plus de capacités."
-                    : 'Consultez votre facturation ou choisissez un plan Starter / Professional / Enterprise.'}
+                    ? "Pas besoin d'attendre la fin de l'essai : choisissez Starter, Professional ou Business pour débloquer plus de capacités."
+                    : 'Consultez votre facturation ou choisissez un plan Starter / Professional / Business.'}
                 </p>
               </div>
             </div>
@@ -187,10 +199,15 @@ export function PhysicalSubscriptionRequired({
                       throw new Error('Email requis pour initier le paiement.');
                     }
 
+                    const checkout = resolvePhysicalPlanCheckout(
+                      plan.slug as Exclude<PhysicalPlanSlug, null>,
+                      detectUserCheckoutCurrency()
+                    );
+
                     const result = await initiateMonerooPayment({
                       storeId,
-                      amount: plan.price,
-                      currency: 'XOF',
+                      amount: checkout.amount,
+                      currency: checkout.currency,
                       description: `Abonnement produits physiques — ${plan.label}`,
                       customerEmail: user.email,
                       customerName:

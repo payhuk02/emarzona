@@ -181,46 +181,52 @@
     "subtitle": "A model for every product type — subscription for physical, commission for the rest.",
     "physicalGroupLabel": "Physical products subscription",
     "commissionGroupLabel": "Digital, services, courses & art — no subscription",
-    "footnote": "All amounts in CFA franc (XOF). 10% commission only on completed sales for digital products, courses, services and artist works.",
+    "footnote": "Physical subscriptions in USD ($25 / $49 / $79). Automatic conversion to your local currency at checkout. 10% commission only on completed sales for digital products, courses, services and artist works.",
     "periodMonth": "/ month",
     "periodSale": "per sale",
     "physicalBasic": {
       "name": "Physical — Starter",
       "badge": "1 month free trial",
-      "desc": "Launch physical e-commerce: inventory, variants and shipping.",
+      "desc": "Launch physical e-commerce with everything you need to sell at scale.",
       "features": [
-        "Sell physical products",
-        "Stock & variant management",
-        "Shipping zones & rates",
-        "30-day free trial"
+        "Unlimited products",
+        "Unlimited orders",
+        "Stock management",
+        "Custom domain",
+        "Standard support"
       ],
       "cta": "Try Starter — 1 month free"
     },
     "physicalStandard": {
       "name": "Physical — Professional",
       "badge": "Recommended",
-      "desc": "Growth tier: logistics, suppliers and built-in analytics.",
+      "desc": "Grow faster with marketplace visibility and marketing tools.",
       "features": [
         "Everything in Starter",
-        "Shipping tracking",
-        "Returns (RMA) & policies",
-        "Inventory CSV import/export",
-        "Stock alerts"
+        "Marketplace sponsorship",
+        "Advanced SEO",
+        "Email marketing",
+        "Advanced reports",
+        "Multiple admins",
+        "Priority support"
       ],
       "cta": "Start Professional"
     },
     "physicalPremium": {
-      "name": "Physical — Enterprise",
+      "name": "Physical — Business",
       "badge": "Scale",
-      "desc": "Advanced ops: warehouses, lots, batch shipping and forecasting.",
+      "desc": "Advanced ops: AI, automations, multi-warehouses and dedicated support.",
       "features": [
         "Everything in Professional",
-        "Batch shipping & labels",
-        "Lots / expiration / FEFO",
-        "Multi-warehouses & transfers",
-        "Demand forecasting"
+        "Advanced AI",
+        "AI recommendations",
+        "Marketing automations",
+        "Premium analytics",
+        "Multi-warehouses",
+        "Dedicated account manager",
+        "VIP support"
       ],
-      "cta": "Go Enterprise"
+      "cta": "Go Business"
     },
     "commission": {
       "name": "Digital, services, courses & artist works",

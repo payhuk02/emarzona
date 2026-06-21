@@ -19,9 +19,10 @@ describe('physical-plan-capabilities (Epic 3.2.7)', () => {
     expect(requiredPlanForFeature('shipping.local_africa')).toBe('physical_standard');
   });
 
-  it('warehouses available from Professional (quota enforced in DB)', () => {
+  it('warehouses available from Business only', () => {
     expect(hasPhysicalFeatureAccess('physical_basic', 'warehouses.manage')).toBe(false);
-    expect(hasPhysicalFeatureAccess('physical_standard', 'warehouses.manage')).toBe(true);
+    expect(hasPhysicalFeatureAccess('physical_standard', 'warehouses.manage')).toBe(false);
+    expect(hasPhysicalFeatureAccess('physical_premium', 'warehouses.manage')).toBe(true);
   });
 
   it('FedEx live requires Professional', () => {
@@ -39,7 +40,7 @@ describe('physical-plan-capabilities (Epic 3.2.7)', () => {
     expect(hasPhysicalFeatureAccess('physical_standard', 'emails.manage')).toBe(true);
   });
 
-  it('premium-only features stay on Enterprise', () => {
+  it('premium-only features stay on Business', () => {
     expect(hasPhysicalFeatureAccess('physical_standard', 'forecasting.demand')).toBe(false);
     expect(hasPhysicalFeatureAccess('physical_premium', 'forecasting.demand')).toBe(true);
     expect(requiredPlanForFeature('forecasting.demand')).toBe('physical_premium');

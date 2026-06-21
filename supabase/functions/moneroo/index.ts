@@ -9,6 +9,10 @@ import {
 } from '../_shared/payment-log-sanitize.ts';
 import { authorizeCheckoutOrder } from '../_shared/order-checkout-auth.ts';
 import { enforceRateLimit, getClientIp, RATE_LIMIT_PRESETS } from '../_shared/rate-limit.ts';
+import {
+  convertPlanAmountToCurrency,
+  isAuthorizedPlanCheckoutAmount,
+} from '../_shared/physical-plan-pricing.ts';
 
 // ============================================================================
 // VALIDATION - Intégrée directement pour le déploiement via Dashboard
@@ -465,20 +469,27 @@ async function resolveAuthorizedPaymentAmount(
       return { valid: false, error: 'Plan non valide pour produits physiques' };
     }
 
-    const expected = Math.round(Number(plan.monthly_price));
-    if (Math.round(validated.amount) !== expected) {
+    const expected = Math.round(Number(plan.monthly_price) * 100) / 100;
+    const planCurrency = (plan.currency as string) || 'USD';
+    const clientCurrency = validated.currency || planCurrency;
+
+    if (!isAuthorizedPlanCheckoutAmount(expected, planCurrency, validated.amount, clientCurrency)) {
       console.warn('[Moneroo] Physical subscription amount mismatch', {
         clientAmount: validated.amount,
+        clientCurrency,
         serverAmount: expected,
+        serverCurrency: planCurrency,
         planSlug,
       });
       return { valid: false, error: 'Montant invalide pour ce plan' };
     }
 
+    const authorizedAmount = convertPlanAmountToCurrency(expected, planCurrency, clientCurrency);
+
     return {
       valid: true,
-      amount: expected,
-      currency: (plan.currency as string) || validated.currency,
+      amount: authorizedAmount,
+      currency: clientCurrency,
     };
   }
 
@@ -517,15 +528,20 @@ async function resolveAuthorizedPaymentAmount(
       return { valid: false, error: 'Boutique invalide pour cette facture' };
     }
 
-    const expected = Math.round(Number(invoice.amount));
-    if (Math.round(validated.amount) !== expected) {
+    const expected = Math.round(Number(invoice.amount) * 100) / 100;
+    const invoiceCurrency = (invoice.currency as string) || 'USD';
+    const clientCurrency = validated.currency || invoiceCurrency;
+
+    if (
+      !isAuthorizedPlanCheckoutAmount(expected, invoiceCurrency, validated.amount, clientCurrency)
+    ) {
       return { valid: false, error: 'Montant prorata invalide' };
     }
 
     return {
       valid: true,
-      amount: expected,
-      currency: (invoice.currency as string) || validated.currency,
+      amount: convertPlanAmountToCurrency(expected, invoiceCurrency, clientCurrency),
+      currency: clientCurrency,
     };
   }
 
@@ -558,15 +574,20 @@ async function resolveAuthorizedPaymentAmount(
       return { valid: false, error: 'Boutique invalide pour cette facture' };
     }
 
-    const expected = Math.round(Number(invoice.amount));
-    if (Math.round(validated.amount) !== expected) {
+    const expected = Math.round(Number(invoice.amount) * 100) / 100;
+    const invoiceCurrency = (invoice.currency as string) || 'USD';
+    const clientCurrency = validated.currency || invoiceCurrency;
+
+    if (
+      !isAuthorizedPlanCheckoutAmount(expected, invoiceCurrency, validated.amount, clientCurrency)
+    ) {
       return { valid: false, error: 'Montant invalide pour cette facture' };
     }
 
     return {
       valid: true,
-      amount: expected,
-      currency: (invoice.currency as string) || validated.currency,
+      amount: convertPlanAmountToCurrency(expected, invoiceCurrency, clientCurrency),
+      currency: clientCurrency,
     };
   }
 

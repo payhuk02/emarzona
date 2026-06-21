@@ -6,15 +6,15 @@ import {
 } from '@/lib/billing/physical-plan-display';
 
 describe('physical-plan-display', () => {
-  it('expose les libellés Starter / Professional / Enterprise', () => {
+  it('expose les libellés Starter / Professional / Business', () => {
     expect(PHYSICAL_PLAN_DISPLAY.physical_basic.label).toBe('Starter');
     expect(PHYSICAL_PLAN_DISPLAY.physical_standard.label).toBe('Professional');
-    expect(PHYSICAL_PLAN_DISPLAY.physical_premium.label).toBe('Enterprise');
+    expect(PHYSICAL_PLAN_DISPLAY.physical_premium.label).toBe('Business');
   });
 
-  it('conserve les prix 7500 / 12500 / 15000', () => {
-    const prices = PHYSICAL_PLAN_CARDS.map(p => p.price);
-    expect(prices).toEqual([7500, 12500, 15000]);
+  it('conserve les prix 25 / 49 / 79 USD', () => {
+    const prices = PHYSICAL_PLAN_CARDS.map(p => p.priceUsd);
+    expect(prices).toEqual([25, 49, 79]);
   });
 
   it('physicalPlanLabel retourne un libellé lisible', () => {
