@@ -53,6 +53,17 @@ export function convertPlanAmountToCurrency(
   return roundAmountForCurrency(converted, toCurrency);
 }
 
+/** Client (taux API live) vs serveur (fallback) — marge pour divergence FX légitime. */
+const FX_TOLERANCE_RATIO = 0.05;
+const FX_TOLERANCE_USD_MIN = 0.5;
+
+function amountInCurrency(amount: number, fromCurrency: string, toCurrency: string): number {
+  if (fromCurrency === toCurrency) {
+    return roundAmountForCurrency(amount, toCurrency);
+  }
+  return convertPlanAmountToCurrency(amount, fromCurrency, toCurrency);
+}
+
 /** Valide qu'un montant checkout correspond au montant plan (avec conversion). */
 export function isAuthorizedPlanCheckoutAmount(
   expectedAmount: number,
@@ -67,12 +78,26 @@ export function isAuthorizedPlanCheckoutAmount(
     return normalizedClient === normalizedExpected;
   }
 
-  const expectedInClientCurrency = convertPlanAmountToCurrency(
-    normalizedExpected,
-    expectedCurrency,
-    clientCurrency
+  // Compare in the plan's reference currency so client live FX and server fallback both work.
+  const clientInExpectedCurrency = amountInCurrency(
+    normalizedClient,
+    clientCurrency,
+    expectedCurrency
   );
+  const tolerance = Math.max(FX_TOLERANCE_USD_MIN, normalizedExpected * FX_TOLERANCE_RATIO);
 
-  const tolerance = ZERO_DECIMAL.has(clientCurrency) ? 2 : 0.05;
-  return Math.abs(normalizedClient - expectedInClientCurrency) <= tolerance;
+  return Math.abs(clientInExpectedCurrency - normalizedExpected) <= tolerance;
+}
+
+/** Montant autorisé pour Moneroo après validation (aligné sur ce que le client a affiché). */
+export function resolveAuthorizedCheckoutAmount(
+  expectedAmount: number,
+  expectedCurrency: string,
+  clientAmount: number,
+  clientCurrency: string
+): number {
+  if (expectedCurrency === clientCurrency) {
+    return roundAmountForCurrency(expectedAmount, expectedCurrency);
+  }
+  return roundAmountForCurrency(clientAmount, clientCurrency);
 }

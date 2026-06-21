@@ -10,8 +10,8 @@ import {
 import { authorizeCheckoutOrder } from '../_shared/order-checkout-auth.ts';
 import { enforceRateLimit, getClientIp, RATE_LIMIT_PRESETS } from '../_shared/rate-limit.ts';
 import {
-  convertPlanAmountToCurrency,
   isAuthorizedPlanCheckoutAmount,
+  resolveAuthorizedCheckoutAmount,
 } from '../_shared/physical-plan-pricing.ts';
 
 // ============================================================================
@@ -484,11 +484,14 @@ async function resolveAuthorizedPaymentAmount(
       return { valid: false, error: 'Montant invalide pour ce plan' };
     }
 
-    const authorizedAmount = convertPlanAmountToCurrency(expected, planCurrency, clientCurrency);
-
     return {
       valid: true,
-      amount: authorizedAmount,
+      amount: resolveAuthorizedCheckoutAmount(
+        expected,
+        planCurrency,
+        validated.amount,
+        clientCurrency
+      ),
       currency: clientCurrency,
     };
   }
@@ -540,7 +543,12 @@ async function resolveAuthorizedPaymentAmount(
 
     return {
       valid: true,
-      amount: convertPlanAmountToCurrency(expected, invoiceCurrency, clientCurrency),
+      amount: resolveAuthorizedCheckoutAmount(
+        expected,
+        invoiceCurrency,
+        validated.amount,
+        clientCurrency
+      ),
       currency: clientCurrency,
     };
   }
@@ -586,7 +594,12 @@ async function resolveAuthorizedPaymentAmount(
 
     return {
       valid: true,
-      amount: convertPlanAmountToCurrency(expected, invoiceCurrency, clientCurrency),
+      amount: resolveAuthorizedCheckoutAmount(
+        expected,
+        invoiceCurrency,
+        validated.amount,
+        clientCurrency
+      ),
       currency: clientCurrency,
     };
   }
