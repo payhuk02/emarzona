@@ -843,49 +843,52 @@
   outline-offset: 2px;
 }
 
-.landing-premium .lp-hero-globe {
-  border-radius: 50%;
-  overflow: hidden;
+/* Hero visuel droit — PNG transparent */
+.landing-premium .lp-hero-visual {
   isolation: isolate;
-  box-shadow:
-    0 0 0 1px rgba(201, 162, 39, 0.12),
-    0 0 48px rgba(124, 92, 255, 0.12),
-    0 28px 56px -16px rgba(0, 0, 0, 0.75);
+  max-width: min(100%, 480px);
 }
 
-.landing-premium .lp-hero-globe__img {
-  transform: scale(1.1);
-  mix-blend-mode: lighten;
-  filter: contrast(1.08) saturate(1.14) brightness(1.04);
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  will-change: transform;
-}
-
-.landing-premium .lp-hero-globe::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  pointer-events: none;
-  box-shadow:
-    inset 0 0 36px 10px rgba(8, 8, 10, 0.5),
-    inset 12px 8px 28px rgba(255, 255, 255, 0.06);
-}
-
-.landing-premium .lp-compass-glow {
-  animation: lp-compass-pulse 4s ease-in-out infinite;
-}
-
-@keyframes lp-compass-pulse {
-  0%,
-  100% {
-    opacity: 0.75;
-    transform: scale(1);
+@media (min-width: 640px) {
+  .landing-premium .lp-hero-visual {
+    max-width: min(100%, 520px);
   }
-  50% {
-    opacity: 1;
-    transform: scale(1.04);
+}
+
+@media (min-width: 1024px) {
+  .landing-premium .lp-hero-visual {
+    max-width: none;
+    width: 108%;
+    margin-right: -4%;
+  }
+}
+
+.landing-premium .lp-hero-visual__ambient {
+  background:
+    radial-gradient(ellipse 60% 50% at 55% 42%, rgba(124, 92, 255, 0.24) 0%, transparent 72%),
+    radial-gradient(ellipse 45% 38% at 52% 62%, rgba(201, 162, 39, 0.14) 0%, transparent 74%);
+  filter: blur(40px);
+}
+
+.landing-premium .lp-hero-visual__frame {
+  display: block;
+}
+
+.landing-premium .lp-hero-visual__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: clamp(380px, 52vh, 720px);
+  object-fit: contain;
+  object-position: center bottom;
+  filter: contrast(1.04) saturate(1.05);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+@media (min-width: 1024px) {
+  .landing-premium .lp-hero-visual__img {
+    max-height: clamp(440px, 58vh, 760px);
   }
 }
 

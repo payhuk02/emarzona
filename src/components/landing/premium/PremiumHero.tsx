@@ -3,17 +3,17 @@ import { Link } from 'react-router-dom';
 import { CreditCard, Zap, Headphones } from 'lucide-react';
 import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
 
-const PremiumCompassHeroVisual = lazy(() =>
-  import('./PremiumCompassHeroVisual').then(m => ({ default: m.PremiumCompassHeroVisual }))
+const PremiumHeroVisual = lazy(() =>
+  import('./PremiumHeroVisual').then(m => ({ default: m.PremiumHeroVisual }))
 );
 
 const trustIcons = [CreditCard, Zap, Headphones] as const;
 const trustKeys = ['noCard', 'instant', 'support'] as const;
 
-function CompassFallback() {
+function HeroVisualFallback() {
   return (
     <div
-      className="mx-auto aspect-square w-full max-w-[min(100%,320px)] min-[380px]:max-w-[min(100%,380px)] sm:max-w-[min(100%,460px)] lg:max-w-[min(100%,560px)] rounded-full bg-white/[0.04]"
+      className="lp-hero-visual-fallback mx-auto aspect-[2/3] w-full max-w-[min(100%,480px)] lg:max-w-[min(100%,520px)]"
       aria-hidden
     />
   );
@@ -80,9 +80,9 @@ export function PremiumHero() {
           </ul>
         </div>
 
-        <div className="lp-hero-animate-scale flex w-full flex-col items-center lg:items-end">
-          <Suspense fallback={<CompassFallback />}>
-            <PremiumCompassHeroVisual />
+        <div className="lp-hero-animate-scale flex w-full flex-col items-center lg:items-end lg:justify-center">
+          <Suspense fallback={<HeroVisualFallback />}>
+            <PremiumHeroVisual />
           </Suspense>
           <p className="lp-hero-caption mt-5 text-center lg:mt-6 lg:text-right">
             {t('hero.caption')}

@@ -43,4 +43,7 @@ emarzona-backup*/
 bun.lock
 bun.lockb
 
+# Artefacts Docker / uploads locaux (ne jamais versionner)
+blobs/
+
 .vercel
