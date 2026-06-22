@@ -26,6 +26,41 @@
     "photoAlt": "Emprendedora sonriente en su tienda artesanal con Emarzona",
     "bannerAlt": "Emarzona — La plataforma e-commerce que impulsa tus ambiciones. Compras seguras, entrega rápida, soporte dedicado.",
     "bannerHeadline": "La plataforma e-commerce que impulsa tus ambiciones",
+    "carousel": {
+      "navLabel": "Universos del carrusel hero",
+      "slides": {
+        "entrepreneur": {
+          "alt": "Emprendedora sonriente en su tienda artesanal con Emarzona",
+          "label": "Plataforma Emarzona",
+          "caption": "Tu éxito empieza aquí"
+        },
+        "physical": {
+          "alt": "Vende y envía productos físicos con Emarzona",
+          "label": "Productos físicos",
+          "caption": "Productos físicos — stock, envío, seguimiento"
+        },
+        "digital": {
+          "alt": "Vende tus productos digitales con Emarzona",
+          "label": "Productos digitales",
+          "caption": "Productos digitales — entrega instantánea"
+        },
+        "service": {
+          "alt": "Ofrece servicios profesionales en Emarzona",
+          "label": "Servicios",
+          "caption": "Servicios — talento verificado, pagos seguros"
+        },
+        "courses": {
+          "alt": "Crea y vende cursos online con Emarzona",
+          "label": "Cursos online",
+          "caption": "Cursos online — enseña, sigue, certifica"
+        },
+        "artist": {
+          "alt": "Expón y vende obras de artista con Emarzona",
+          "label": "Obras de artista",
+          "caption": "Obras de artista — galería y venta premium"
+        }
+      }
+    },
     "trust": {
       "noCard": "Sin tarjeta bancaria",
       "instant": "Instalación inmediata",

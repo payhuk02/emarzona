@@ -26,6 +26,41 @@
     "photoAlt": "Smiling entrepreneur in her artisan shop with Emarzona",
     "bannerAlt": "Emarzona — The e-commerce platform that powers your ambitions. Secure purchases, fast delivery, dedicated support.",
     "bannerHeadline": "The e-commerce platform that powers your ambitions",
+    "carousel": {
+      "navLabel": "Hero carousel product universes",
+      "slides": {
+        "entrepreneur": {
+          "alt": "Smiling entrepreneur in her artisan shop with Emarzona",
+          "label": "Emarzona platform",
+          "caption": "Your success starts here"
+        },
+        "physical": {
+          "alt": "Sell and ship physical products with Emarzona",
+          "label": "Physical products",
+          "caption": "Physical products — stock, shipping, tracking"
+        },
+        "digital": {
+          "alt": "Sell your digital products with Emarzona",
+          "label": "Digital products",
+          "caption": "Digital products — instant delivery"
+        },
+        "service": {
+          "alt": "Offer professional services on Emarzona",
+          "label": "Services",
+          "caption": "Services — verified talent, secure payments"
+        },
+        "courses": {
+          "alt": "Create and sell online courses with Emarzona",
+          "label": "Online courses",
+          "caption": "Online courses — teach, track, certify"
+        },
+        "artist": {
+          "alt": "Showcase and sell artwork with Emarzona",
+          "label": "Artist works",
+          "caption": "Artist works — premium gallery and sales"
+        }
+      }
+    },
     "trust": {
       "noCard": "No credit card required",
       "instant": "Instant setup",

@@ -26,6 +26,41 @@
     "photoAlt": "Lächelnde Unternehmerin in ihrem Handwerksladen mit Emarzona",
     "bannerAlt": "Emarzona — Die E-Commerce-Plattform, die Ihre Ambitionen vorantreibt. Sichere Einkäufe, schnelle Lieferung, dedizierter Support.",
     "bannerHeadline": "Die E-Commerce-Plattform, die Ihre Ambitionen vorantreibt",
+    "carousel": {
+      "navLabel": "Hero-Karussell Produktwelten",
+      "slides": {
+        "entrepreneur": {
+          "alt": "Lächelnde Unternehmerin in ihrem Handwerksladen mit Emarzona",
+          "label": "Emarzona Plattform",
+          "caption": "Ihr Erfolg beginnt hier"
+        },
+        "physical": {
+          "alt": "Physische Produkte mit Emarzona verkaufen und versenden",
+          "label": "Physische Produkte",
+          "caption": "Physische Produkte — Lager, Versand, Tracking"
+        },
+        "digital": {
+          "alt": "Digitale Produkte mit Emarzona verkaufen",
+          "label": "Digitale Produkte",
+          "caption": "Digitale Produkte — sofortige Lieferung"
+        },
+        "service": {
+          "alt": "Professionelle Dienstleistungen auf Emarzona anbieten",
+          "label": "Dienstleistungen",
+          "caption": "Dienstleistungen — geprüfte Talente, sichere Zahlungen"
+        },
+        "courses": {
+          "alt": "Online-Kurse mit Emarzona erstellen und verkaufen",
+          "label": "Online-Kurse",
+          "caption": "Online-Kurse — unterrichten, verfolgen, zertifizieren"
+        },
+        "artist": {
+          "alt": "Kunstwerke mit Emarzona präsentieren und verkaufen",
+          "label": "Künstlerwerke",
+          "caption": "Künstlerwerke — Premium-Galerie und Verkauf"
+        }
+      }
+    },
     "trust": {
       "noCard": "Keine Kreditkarte nötig",
       "instant": "Sofortige Einrichtung",

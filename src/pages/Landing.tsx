@@ -13,7 +13,7 @@ import {
   buildLandingHreflangAlternates,
   parseLandingLangFromSearch,
 } from '@/lib/landing-seo';
-import heroEntrepreneurWebp from '@/assets/landing/hero-entrepreneur.webp';
+import heroCarouselWebp from '@/assets/landing/hero-carousel-entrepreneur.webp';
 
 const LANDING_FONTS_ID = 'landing-premium-fonts';
 const LANDING_FONTS_PRELOAD_ID = 'landing-premium-fonts-preload';
@@ -51,7 +51,7 @@ function useLandingAssets() {
       imgPreload.id = HERO_VISUAL_PRELOAD_ID;
       imgPreload.rel = 'preload';
       imgPreload.as = 'image';
-      imgPreload.href = heroEntrepreneurWebp;
+      imgPreload.href = heroCarouselWebp;
       imgPreload.type = 'image/webp';
       document.head.appendChild(imgPreload);
     }

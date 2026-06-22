@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import { CreditCard, Zap, Headphones } from 'lucide-react';
 import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
 
-const PremiumHeroVisual = lazy(() =>
-  import('./PremiumHeroVisual').then(m => ({ default: m.PremiumHeroVisual }))
+const PremiumHeroCarousel = lazy(() =>
+  import('./PremiumHeroCarousel').then(m => ({ default: m.PremiumHeroCarousel }))
 );
 
 const trustIcons = [CreditCard, Zap, Headphones] as const;
@@ -13,7 +13,7 @@ const trustKeys = ['noCard', 'instant', 'support'] as const;
 function HeroVisualFallback() {
   return (
     <div
-      className="lp-hero-visual-fallback mx-auto aspect-[2/3] w-full max-w-[min(100%,480px)] lg:max-w-[min(100%,520px)]"
+      className="lp-hero-carousel-fallback mx-auto aspect-[16/10] w-full max-w-[min(100%,480px)] lg:max-w-none"
       aria-hidden
     />
   );
@@ -82,11 +82,8 @@ export function PremiumHero() {
 
         <div className="lp-hero-animate-scale flex w-full flex-col items-center lg:items-end lg:justify-center">
           <Suspense fallback={<HeroVisualFallback />}>
-            <PremiumHeroVisual />
+            <PremiumHeroCarousel />
           </Suspense>
-          <p className="lp-hero-caption mt-5 text-center lg:mt-6 lg:text-right">
-            {t('hero.caption')}
-          </p>
         </div>
       </div>
     </section>
