@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { CreditCard, Zap, Headphones } from 'lucide-react';
 import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
+import { PremiumHeroTypewriterBadge } from './PremiumHeroTypewriterBadge';
 
 const PremiumHeroCarousel = lazy(() =>
   import('./PremiumHeroCarousel').then(m => ({ default: m.PremiumHeroCarousel }))
@@ -11,12 +12,7 @@ const trustIcons = [CreditCard, Zap, Headphones] as const;
 const trustKeys = ['noCard', 'instant', 'support'] as const;
 
 function HeroVisualFallback() {
-  return (
-    <div
-      className="lp-hero-carousel-fallback mx-auto aspect-[16/10] w-full max-w-[min(100%,480px)] lg:max-w-none"
-      aria-hidden
-    />
-  );
+  return <div className="lp-hero-carousel-fallback mx-auto aspect-[1024/561] w-full" aria-hidden />;
 }
 
 export function PremiumHero() {
@@ -34,7 +30,7 @@ export function PremiumHero() {
         }}
       />
 
-      <div className="relative mx-auto flex max-w-7xl flex-col gap-12 px-4 py-12 sm:px-5 sm:py-14 lg:grid lg:grid-cols-[1fr_1.05fr] lg:items-center lg:gap-8 lg:px-8 lg:py-20 xl:py-24">
+      <div className="relative mx-auto flex max-w-7xl flex-col gap-12 px-4 py-12 sm:px-5 sm:py-14 lg:grid lg:grid-cols-[1fr_1.05fr] lg:items-start lg:gap-8 lg:px-8 lg:py-20 xl:py-24">
         <div className="flex flex-col text-center lg:text-left">
           <p className="lp-hero-animate lp-eyebrow mb-5 self-center lg:self-start">
             {t('hero.eyebrow')}
@@ -80,7 +76,8 @@ export function PremiumHero() {
           </ul>
         </div>
 
-        <div className="lp-hero-animate-scale flex w-full flex-col items-center lg:items-end lg:justify-center">
+        <div className="lp-hero-animate-scale flex w-full min-w-0 flex-col items-center lg:items-start">
+          <PremiumHeroTypewriterBadge />
           <Suspense fallback={<HeroVisualFallback />}>
             <PremiumHeroCarousel />
           </Suspense>

@@ -93,6 +93,14 @@
   animation: lp-hero-scale-in 1s var(--lp-ease) 0.2s both;
 }
 
+/* Hero — pas de mouvement à l'affichage */
+.landing-premium .lp-hero .lp-hero-animate,
+.landing-premium .lp-hero .lp-hero-animate-scale {
+  animation: none;
+  opacity: 1;
+  transform: none;
+}
+
 .landing-premium .lp-section-light {
   background: var(--lp-surface-elevated);
 }
@@ -843,24 +851,95 @@
   outline-offset: 2px;
 }
 
-/* Hero carrousel premium */
-.landing-premium .lp-hero-carousel {
-  isolation: isolate;
+/* Badge machine à écrire — hero droit */
+.landing-premium .lp-hero-typewriter-badge {
+  position: relative;
+  z-index: 2;
+  display: block;
+  align-self: center;
+  width: 100%;
   max-width: min(100%, 480px);
+  border-radius: 1rem;
+  border: 1px solid rgba(201, 162, 39, 0.45);
+  background: linear-gradient(
+    135deg,
+    rgba(201, 162, 39, 0.18) 0%,
+    rgba(124, 92, 255, 0.1) 55%,
+    rgba(8, 8, 10, 0.65) 100%
+  );
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.06) inset,
+    0 8px 24px -12px rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(10px);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.92);
 }
 
 @media (min-width: 640px) {
-  .landing-premium .lp-hero-carousel {
+  .landing-premium .lp-hero-typewriter-badge {
     max-width: min(100%, 540px);
+    font-size: 0.6875rem;
   }
 }
 
 @media (min-width: 1024px) {
-  .landing-premium .lp-hero-carousel {
-    max-width: none;
-    width: 108%;
-    margin-right: -4%;
+  .landing-premium .lp-hero-typewriter-badge {
+    align-self: flex-start;
+    max-width: 100%;
   }
+}
+
+.landing-premium .lp-hero-typewriter-badge__ghost {
+  display: block;
+  visibility: hidden;
+  padding: 0.5rem 1rem;
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+.landing-premium .lp-hero-typewriter-badge__live {
+  position: absolute;
+  inset: 0;
+  padding: 0.5rem 1rem;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow: hidden;
+}
+
+.landing-premium .lp-hero-typewriter-badge__cursor {
+  display: inline-block;
+  width: 1px;
+  height: 0.85em;
+  margin-left: 1px;
+  background: var(--lp-gold-bright);
+  animation: lp-typewriter-cursor 1s step-end infinite;
+  vertical-align: -0.05em;
+}
+
+@keyframes lp-typewriter-cursor {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-premium .lp-hero-typewriter-badge__cursor {
+    display: none;
+  }
+}
+
+/* Hero carrousel premium */
+.landing-premium .lp-hero-carousel {
+  isolation: isolate;
+  width: 100%;
+  max-width: 100%;
 }
 
 .landing-premium .lp-hero-carousel__ambient {
@@ -874,57 +953,54 @@
   position: relative;
   overflow: hidden;
   border-radius: 1.25rem;
-  min-height: clamp(220px, 34vw, 320px);
+  aspect-ratio: 1024 / 561;
+  width: 100%;
 }
 
 @media (min-width: 1024px) {
   .landing-premium .lp-hero-carousel__stage {
-    min-height: clamp(280px, 38vh, 420px);
     border-radius: 1.5rem;
   }
 }
 
 .landing-premium .lp-hero-carousel__slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.landing-premium .lp-hero-carousel__slide--card {
+  background: linear-gradient(180deg, #fafaf9 0%, #f3f2ef 100%);
+}
+
+.landing-premium .lp-hero-carousel__picture {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-}
-
-.landing-premium .lp-hero-carousel__slide--portrait {
-  min-height: clamp(320px, 48vw, 520px);
-  padding: 0.5rem 0;
-}
-
-@media (min-width: 1024px) {
-  .landing-premium .lp-hero-carousel__slide--portrait {
-    min-height: clamp(380px, 52vh, 620px);
-  }
-}
-
-.landing-premium .lp-hero-carousel__slide--banner {
-  background: linear-gradient(180deg, #fafaf9 0%, #f3f2ef 100%);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.9) inset,
-    0 24px 48px -24px rgba(0, 0, 0, 0.55);
+  height: 100%;
 }
 
 .landing-premium .lp-hero-carousel__img {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
   object-fit: contain;
+  object-position: center;
+  filter: contrast(1.04) saturate(1.05);
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
 }
 
-.landing-premium .lp-hero-carousel__slide--portrait .lp-hero-carousel__img {
-  max-height: clamp(360px, 52vh, 680px);
-  filter: contrast(1.04) saturate(1.05);
+.landing-premium .lp-hero-carousel__slide--transparent .lp-hero-carousel__img {
+  object-position: center bottom;
+  filter: contrast(1.05) saturate(1.06);
 }
 
-.landing-premium .lp-hero-carousel__slide--banner .lp-hero-carousel__img {
-  border-radius: inherit;
+.landing-premium .lp-hero-carousel__caption {
+  min-height: 2.75rem;
 }
 
 .landing-premium .lp-hero-carousel__progress {
@@ -945,7 +1021,7 @@
 
 @media (min-width: 1024px) {
   .landing-premium .lp-hero-carousel__dots {
-    justify-content: flex-end;
+    justify-content: flex-start;
   }
 }
 

@@ -126,6 +126,7 @@ export const LANDING_PREMIUM_SECTIONS: LandingPremiumSection[] = [
     icon: Home,
     elements: [
       text('hero.eyebrow', 'Surtitre', lp.hero.eyebrow),
+      text('hero.typewriterBadge', 'Badge machine à écrire (hero droit)', lp.hero.typewriterBadge),
       text('hero.titleLine1', 'Titre — ligne 1', lp.hero.titleLine1),
       text('hero.titleLine2', 'Titre — ligne 2', lp.hero.titleLine2),
       text('hero.titleHighlight', 'Titre — accent', lp.hero.titleHighlight),
