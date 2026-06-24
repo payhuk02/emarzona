@@ -23,6 +23,8 @@ export async function createMonerooPlatformPayment(
     customerEmail: request.customerEmail,
     customerName: request.customerName,
     customerPhone: request.customerPhone,
+    returnUrl: request.returnUrl,
+    cancelUrl: request.cancelUrl,
     metadata: {
       ...request.metadata,
       payment_orchestration_provider: 'moneroo_platform',

@@ -31,7 +31,18 @@ Configurer dans **Supabase Dashboard → Project Settings → Edge Functions →
 npx supabase functions deploy fedex-rates fedex-track --project-ref hbdnzajbyjakdhuavrvb
 ```
 
-## Vérification prod
+# Vérification prod (credentials Edge requis pour operational)
+
+```powershell
+# 1. Poser secrets (fichier local gitignored)
+.\scripts\setup-fedex-prod-secrets.ps1 -ProductionApi
+
+# 2. Smoke OAuth
+.\scripts\smoke-fedex-prod.ps1
+npm run verify:fedex-prod
+```
+
+Statut actuel staging : **degraded** si secrets absents (mock hors prod). En production sans `FEDEX_*` → **outage** sur `/status`.
 
 ```bash
 npm run verify:fedex-prod

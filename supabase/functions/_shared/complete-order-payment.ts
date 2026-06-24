@@ -67,7 +67,7 @@ export async function completeTransactionAndOrder(
   // ATOMIC IDEMPOTENCY: Use the RPC to lock the transaction, insert the webhook event,
   // and update the order/transaction all in one PostgreSQL transaction.
   if (extras?.externalEventId && extras?.eventType) {
-    const { data: result, error: rpcError } = await supabase.rpc('process_moneroo_webhook_atomic', {
+    const rpcArgs = {
       p_provider: paymentProviderUsed,
       p_external_event_id: extras.externalEventId,
       p_event_type: extras.eventType,
@@ -78,21 +78,39 @@ export async function completeTransactionAndOrder(
       p_provider_payment_intent_id: extras?.provider_payment_intent_id ?? null,
       p_connected_account_id: extras?.connected_account_id ?? null,
       p_application_fee_amount: extras?.application_fee_amount ?? null,
-    });
+    };
+
+    let result: {
+      success?: boolean;
+      reason?: string;
+      order_id?: string | null;
+      already_completed?: boolean;
+    } | null = null;
+    let rpcError: { message?: string } | null = null;
+
+    const primary = await supabase.rpc('process_payment_webhook_atomic', rpcArgs);
+    result = primary.data as typeof result;
+    rpcError = primary.error;
+
+    if (rpcError?.message?.includes('process_payment_webhook_atomic')) {
+      const fallback = await supabase.rpc('process_moneroo_webhook_atomic', rpcArgs);
+      result = fallback.data as typeof result;
+      rpcError = fallback.error;
+    }
 
     if (rpcError) {
-      console.error('RPC process_moneroo_webhook_atomic error:', rpcError);
+      console.error('RPC process_payment_webhook_atomic error:', rpcError);
       throw rpcError;
     }
 
-    if (!result.success && result.reason === 'duplicate_webhook') {
+    if (!result?.success && result?.reason === 'duplicate_webhook') {
       console.warn('Duplicate webhook prevented by atomic RPC lock.');
       return { orderId: null, alreadyCompleted: true };
     }
 
     return {
-      orderId: result.order_id,
-      alreadyCompleted: result.already_completed,
+      orderId: result?.order_id ?? null,
+      alreadyCompleted: Boolean(result?.already_completed),
     };
   }
 

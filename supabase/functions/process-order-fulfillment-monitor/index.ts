@@ -138,6 +138,10 @@ serve(async req => {
           : `${staleCount} commande(s) payée(s) > ${STALE_MINUTES} min sans fulfillment complet`,
     });
 
+    const { data: autoResolved } = await supabase.rpc('auto_resolve_fulfilled_order_alerts', {
+      p_stale_minutes: STALE_MINUTES,
+    });
+
     return new Response(
       JSON.stringify({
         success: true,
@@ -146,6 +150,7 @@ serve(async req => {
         orders: staleOrders,
         retries_attempted: retries.length,
         retries,
+        auto_resolved: autoResolved ?? null,
         sla_status: slaStatus,
       }),
       { status: 200, headers: { ...buildCorsHeaders(), 'Content-Type': 'application/json' } }

@@ -1,5 +1,4 @@
 import { supabase } from '@/integrations/supabase/client';
-import { initiateMonerooPayment } from '@/lib/moneroo-payment';
 import { logger } from '@/lib/logger';
 import { physicalPlanLabel } from '@/lib/billing/physical-plan-display';
 import {
@@ -7,6 +6,7 @@ import {
   detectUserCheckoutCurrency,
 } from '@/lib/billing/physical-subscription-checkout';
 import { isSupportedCurrency } from '@/lib/currency-converter';
+import { initiateBillingCheckout } from '@/lib/billing/initiate-billing-payment';
 
 export type PlanChangePreview = {
   change_type: 'upgrade' | 'downgrade' | 'same';
@@ -83,28 +83,20 @@ export async function initiatePhysicalPlanChange(
       checkoutCurrency
     );
 
-    const payment = await initiateMonerooPayment({
+    const checkoutUrl = await initiateBillingCheckout({
       storeId,
       amount: checkoutAmount,
       currency: checkoutCurrency,
       description: `Upgrade abonnement — ${newLabel}`,
       customerEmail,
       customerName,
-      metadata: {
-        purpose: 'physical_plan_change',
-        plan_slug: newPlanSlug,
-        invoice_id: row.id,
-        product_type: 'physical',
-      },
-      returnUrl: `${window.location.origin}/dashboard/billing/physical?success=1&plan_change=1`,
-      cancelUrl: `${window.location.origin}/dashboard/billing/physical?cancel=1`,
+      purpose: 'physical_plan_change',
+      planSlug: newPlanSlug,
+      invoiceId: row.id,
+      successQuery: { plan_change: '1' },
     });
 
-    if (!payment?.checkout_url) {
-      throw new Error("Impossible d'initier le paiement");
-    }
-
-    return { action: 'checkout_required', checkoutUrl: payment.checkout_url };
+    return { action: 'checkout_required', checkoutUrl };
   }
 
   return {

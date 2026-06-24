@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   Clock,
   PackageCheck,
+  Play,
   RefreshCw,
   Search,
   XCircle,
@@ -36,6 +37,7 @@ import {
   useFulfillmentAlerts,
   useFulfillmentSlaScan,
   useResolveFulfillmentAlert,
+  useRunFulfillmentMonitorSweep,
   type FulfillmentAlertRow,
 } from '@/hooks/admin/useFulfillmentAlerts';
 import {
@@ -76,6 +78,7 @@ export default function AdminFulfillmentAlerts() {
   } = useFulfillmentSlaScan(5);
 
   const resolveAlert = useResolveFulfillmentAlert();
+  const runMonitorSweep = useRunFulfillmentMonitorSweep();
   const stats = useFulfillmentAlertStats(alerts);
 
   const filteredAlerts = useMemo(() => {
@@ -112,7 +115,23 @@ export default function AdminFulfillmentAlerts() {
     }
   };
 
-  const isRefreshing = fetchingAlerts || fetchingScan;
+  const isRefreshing = fetchingAlerts || fetchingScan || runMonitorSweep.isPending;
+
+  const handleRunMonitor = async () => {
+    try {
+      const result = await runMonitorSweep.mutateAsync(5);
+      toast({
+        title: 'Monitor exécuté',
+        description: `${result.stale_count} commande(s) en retard · ${result.alerts_recorded} alerte(s) enregistrée(s) · SLA ${result.sla_status}`,
+      });
+    } catch {
+      toast({
+        title: 'Erreur monitor',
+        description: 'Vérifiez la migration E49 ops et vos droits admin.',
+        variant: 'destructive',
+      });
+    }
+  };
 
   return (
     <AdminLayout>
@@ -126,18 +145,34 @@ export default function AdminFulfillmentAlerts() {
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Alertes fulfillment</h1>
             <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
               Commandes payées dont le fulfillment (licences, stock, inscriptions, edge) dépasse le
-              SLA de 5 minutes.
+              SLA de 5 minutes. Le cron edge retente automatiquement les fulfillments en attente ;
+              le SLA public est visible sur{' '}
+              <Link to="/status" className="underline underline-offset-2 hover:text-foreground">
+                /status
+              </Link>
+              .
             </p>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => void handleRefresh()}
-            disabled={isRefreshing}
-          >
-            <RefreshCw className={cn('h-4 w-4 mr-2', isRefreshing && 'animate-spin')} />
-            Actualiser
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="default"
+              size="sm"
+              onClick={() => void handleRunMonitor()}
+              disabled={isRefreshing}
+            >
+              <Play className={cn('h-4 w-4 mr-2', runMonitorSweep.isPending && 'animate-pulse')} />
+              Lancer le monitor
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => void handleRefresh()}
+              disabled={isRefreshing}
+            >
+              <RefreshCw className={cn('h-4 w-4 mr-2', isRefreshing && 'animate-spin')} />
+              Actualiser
+            </Button>
+          </div>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

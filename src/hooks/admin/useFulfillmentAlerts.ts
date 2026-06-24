@@ -127,3 +127,31 @@ export function useFulfillmentAlertStats(alerts: FulfillmentAlertRow[] | undefin
     openInfo: open.filter(a => a.severity === 'info').length,
   };
 }
+
+export interface FulfillmentMonitorSweepResult {
+  stale_minutes: number;
+  stale_count: number;
+  alerts_recorded: number;
+  auto_resolved: { resolved_count?: number; stale_order_count?: number } | null;
+  sla_status: string;
+  checked_at?: string;
+}
+
+export function useRunFulfillmentMonitorSweep() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (staleMinutes = 5): Promise<FulfillmentMonitorSweepResult> => {
+      const { data, error } = await supabase.rpc('admin_run_fulfillment_monitor_sweep', {
+        p_stale_minutes: staleMinutes,
+      });
+
+      if (error) throw error;
+      return (data ?? {}) as FulfillmentMonitorSweepResult;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ALERTS_QUERY_KEY });
+      void queryClient.invalidateQueries({ queryKey: SCAN_QUERY_KEY });
+    },
+  });
+}

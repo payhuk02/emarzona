@@ -1,11 +1,11 @@
 import { supabase } from '@/integrations/supabase/client';
-import { initiateMonerooPayment } from '@/lib/moneroo-payment';
 import { logger } from '@/lib/logger';
 import {
   convertInvoiceAmountToCheckout,
   detectUserCheckoutCurrency,
 } from '@/lib/billing/physical-subscription-checkout';
 import { isSupportedCurrency } from '@/lib/currency-converter';
+import { initiateBillingCheckout } from '@/lib/billing/initiate-billing-payment';
 
 export interface SubscriptionInvoiceRow {
   id: string;
@@ -74,26 +74,15 @@ export async function initiateSubscriptionRenewalCheckout(
     checkoutCurrency
   );
 
-  const result = await initiateMonerooPayment({
+  return initiateBillingCheckout({
     storeId,
     amount: checkoutAmount,
     currency: checkoutCurrency,
     description: 'Renouvellement abonnement produits physiques',
     customerEmail,
     customerName,
-    metadata: {
-      purpose: 'physical_subscription_renewal',
-      plan_slug: planSlug,
-      invoice_id: row.id,
-      product_type: 'physical',
-    },
-    returnUrl: `${window.location.origin}/dashboard/billing/physical?success=1`,
-    cancelUrl: `${window.location.origin}/dashboard/billing/physical?cancel=1`,
+    purpose: 'physical_subscription_renewal',
+    planSlug,
+    invoiceId: row.id,
   });
-
-  if (!result?.checkout_url) {
-    throw new Error("Impossible d'initier le paiement de renouvellement");
-  }
-
-  return result.checkout_url;
 }

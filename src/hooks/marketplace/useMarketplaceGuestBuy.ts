@@ -1,8 +1,8 @@
 import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { initiateMonerooPayment } from '@/lib/moneroo-payment';
 import { isSupportedCurrency, type Currency } from '@/lib/currency-converter';
+import { initiateMarketplaceDirectBuy } from '@/lib/marketplace/initiate-direct-buy';
 import { useToast } from '@/hooks/use-toast';
 import { safeRedirect } from '@/lib/url-validator';
 import { getMarketplaceProductCTA } from '@/lib/marketplace-product-cta';
@@ -78,7 +78,7 @@ export function useMarketplaceGuestBuy({
         if (customer.phone) checkoutParams.set('guestPhone', customer.phone);
 
         if (cta.action === 'checkout') {
-          const result = await initiateMonerooPayment({
+          const result = await initiateMarketplaceDirectBuy({
             storeId: product.store_id,
             productId: product.id,
             amount: price,
@@ -86,12 +86,11 @@ export function useMarketplaceGuestBuy({
             description: `Achat de ${product.name}`,
             customerEmail: customer.email,
             customerName: customer.fullName,
-            metadata: {
-              productName: product.name,
-              storeSlug,
-              guest_checkout: true,
-              customer_phone: customer.phone,
-            },
+            customerPhone: customer.phone,
+            productName: product.name,
+            storeSlug,
+            productType: product.product_type,
+            guestCheckout: true,
           });
 
           if (result.success && result.checkout_url) {

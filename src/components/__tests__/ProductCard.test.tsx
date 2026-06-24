@@ -9,7 +9,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import ProductCard from '../storefront/ProductCard';
 import type { Product } from '@/hooks/useProducts';
-import { initiateMonerooPayment } from '@/lib/moneroo-payment';
+import { initiateMarketplaceDirectBuy } from '@/lib/marketplace/initiate-direct-buy';
 
 // ============================================================
 // MOCKS
@@ -38,10 +38,12 @@ vi.mock('@/hooks/use-toast', () => ({
   })),
 }));
 
-vi.mock('@/lib/moneroo-payment', () => ({
-  initiateMonerooPayment: vi.fn().mockResolvedValue({
+vi.mock('@/lib/marketplace/initiate-direct-buy', () => ({
+  initiateMarketplaceDirectBuy: vi.fn().mockResolvedValue({
     success: true,
     checkout_url: 'https://checkout.example.com',
+    transaction_id: 'tx-1',
+    provider: 'moneroo',
   }),
 }));
 
@@ -138,7 +140,7 @@ describe('ProductCard', () => {
     fireEvent.click(buyButton);
 
     await waitFor(() => {
-      expect(initiateMonerooPayment).toHaveBeenCalled();
+      expect(initiateMarketplaceDirectBuy).toHaveBeenCalled();
     });
   });
 

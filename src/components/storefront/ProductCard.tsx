@@ -45,7 +45,7 @@ import {
 import { Link } from 'react-router-dom';
 import { generateProductUrl } from '@/lib/store-utils';
 import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
-import { initiateMonerooPayment } from '@/lib/moneroo-payment';
+import { initiateMarketplaceDirectBuy } from '@/lib/marketplace/initiate-direct-buy';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { safeRedirect } from '@/lib/url-validator';
@@ -193,20 +193,19 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
       setLoading(true);
 
       try {
-        const result = await initiateMonerooPayment({
+        const result = await initiateMarketplaceDirectBuy({
           storeId: product.store_id,
           productId: product.id,
           amount: price,
-          currency: (product.currency ?? 'XOF') as import('@/lib/currency-converter').Currency,
+          currency: product.currency,
           description: `Achat de ${product.name}`,
           customerEmail: customer.email,
           customerName: customer.fullName,
-          metadata: {
-            productName: product.name,
-            storeSlug,
-            guest_checkout: true,
-            customer_phone: customer.phone,
-          },
+          customerPhone: customer.phone,
+          productName: product.name,
+          storeSlug,
+          productType: product.product_type,
+          guestCheckout: true,
         });
 
         if (result.success && result.checkout_url) {

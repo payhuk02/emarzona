@@ -32,6 +32,11 @@ export interface PaymentOptions {
   metadata?: Record<string, unknown>;
   checkoutToken?: string;
   provider?: PaymentProvider;
+  /** URLs de retour après checkout PSP (billing, abonnements) */
+  returnUrl?: string;
+  cancelUrl?: string;
+  /** Facturation plateforme : rail Moneroo Emarzona uniquement */
+  forcePlatformPayments?: boolean;
 }
 
 export interface PaymentResult {
@@ -125,6 +130,9 @@ export const initiatePayment = async (options: PaymentOptions): Promise<PaymentR
         customerName: resolvedOptions.customerName,
         customerPhone: resolvedOptions.customerPhone,
         metadata: resolvedOptions.metadata,
+        returnUrl: resolvedOptions.returnUrl,
+        cancelUrl: resolvedOptions.cancelUrl,
+        forcePlatformPayments: resolvedOptions.forcePlatformPayments,
         preferredProvider: toOrchestratorPreferred(resolvedOptions.provider),
       });
 
@@ -171,6 +179,8 @@ export const initiatePayment = async (options: PaymentOptions): Promise<PaymentR
     const monerooResult = await initiateMonerooPayment({
       ...resolvedOptions,
       currency,
+      returnUrl: resolvedOptions.returnUrl,
+      cancelUrl: resolvedOptions.cancelUrl,
     });
 
     return {

@@ -133,6 +133,10 @@ SELECT public.setup_nightly_maintenance_cron_job(
   '$ProjectRef',
   '$EscSecret'
 );
+SELECT public.setup_order_fulfillment_monitor_cron_job(
+  '$ProjectRef',
+  '$EscSecret'
+);
 COMMIT;
 "@
 

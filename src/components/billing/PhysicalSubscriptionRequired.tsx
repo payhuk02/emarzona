@@ -23,8 +23,8 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { initiateMonerooPayment } from '@/lib/moneroo-payment';
 import { useToast } from '@/hooks/use-toast';
+import { initiateBillingCheckout } from '@/lib/billing/initiate-billing-payment';
 
 type PhysicalSubscriptionRequiredProps = {
   storeId: string;
@@ -176,8 +176,8 @@ export function PhysicalSubscriptionRequired({
                 : 'Activer un plan'}
             </CardTitle>
             <CardDescription>
-              Paiement sécurisé via Moneroo. À confirmation, votre accès « produits physiques » est
-              activé automatiquement — y compris pendant votre essai gratuit.
+              Paiement sécurisé via la plateforme Emarzona. À confirmation, votre accès « produits
+              physiques » est activé automatiquement — y compris pendant votre essai gratuit.
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-3">
@@ -204,7 +204,7 @@ export function PhysicalSubscriptionRequired({
                       detectUserCheckoutCurrency()
                     );
 
-                    const result = await initiateMonerooPayment({
+                    const checkoutUrl = await initiateBillingCheckout({
                       storeId,
                       amount: checkout.amount,
                       currency: checkout.currency,
@@ -214,19 +214,11 @@ export function PhysicalSubscriptionRequired({
                         (user.user_metadata?.full_name as string | undefined) ||
                         user.email.split('@')[0] ||
                         undefined,
-                      metadata: {
-                        purpose: 'physical_subscription',
-                        plan_slug: plan.slug,
-                        product_type: 'physical',
-                      },
-                      returnUrl: `${window.location.origin}/dashboard/billing/physical?success=1`,
-                      cancelUrl: `${window.location.origin}/dashboard/billing/physical?cancel=1`,
+                      purpose: 'physical_subscription',
+                      planSlug: plan.slug,
                     });
 
-                    if (!result?.checkout_url) {
-                      throw new Error("Impossible d'initier le checkout.");
-                    }
-                    window.location.href = result.checkout_url;
+                    window.location.href = checkoutUrl;
                   } catch (e: unknown) {
                     toast({
                       title: 'Erreur checkout',

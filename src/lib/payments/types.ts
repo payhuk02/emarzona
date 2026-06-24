@@ -36,9 +36,13 @@ export interface OrchestratedPaymentRequest {
   customerName?: string;
   customerPhone?: string;
   metadata?: Record<string, unknown>;
+  /** URLs de retour checkout (abonnements, billing vendeur) */
+  returnUrl?: string;
+  cancelUrl?: string;
   /** Forcer un provider (tests / admin) */
   preferredProvider?: PaymentProviderCode;
   connections?: StorePaymentConnection[];
+  /** Abonnements plateforme : toujours Moneroo plateforme, jamais Stripe/PayPal vendeur */
   forcePlatformPayments?: boolean;
 }
 

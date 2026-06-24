@@ -28,8 +28,10 @@ async function completePayPalPayment(
     webhookPayload?: Record<string, unknown>;
     paidAmount?: number;
     paidCurrency?: string;
+    externalEventId?: string;
+    eventType?: string;
   }
-): Promise<void> {
+): Promise<{ alreadyCompleted: boolean; orderId: string | null }> {
   if (extras.paidAmount != null && Number.isFinite(extras.paidAmount)) {
     await assertOrderPaymentBeforeComplete(
       supabase,
@@ -44,11 +46,20 @@ async function completePayPalPayment(
     provider_payment_intent_id: extras.provider_payment_intent_id,
     webhookPayload: extras.webhookPayload,
     paymentProviderUsed: 'paypal_commerce',
+    externalEventId: extras.externalEventId,
+    eventType: extras.eventType,
   });
 
   if (orderId && !alreadyCompleted) {
     await runPostOrderPaymentFulfillment(supabase, orderId, transactionId);
+  } else if (alreadyCompleted) {
+    console.log('PayPal payment webhook replay ignored (idempotent)', {
+      transactionId,
+      eventId: extras.externalEventId,
+    });
   }
+
+  return { alreadyCompleted, orderId };
 }
 
 serve(async req => {
@@ -155,6 +166,8 @@ serve(async req => {
           webhookPayload: resource,
           paidAmount: captureAmount?.amount,
           paidCurrency: captureAmount?.currency,
+          externalEventId: event.id,
+          eventType: event.event_type,
         });
       }
     }
@@ -183,6 +196,8 @@ serve(async req => {
           webhookPayload: resource,
           paidAmount: captureAmount?.amount,
           paidCurrency: captureAmount?.currency,
+          externalEventId: event.id,
+          eventType: event.event_type,
         });
       }
     }

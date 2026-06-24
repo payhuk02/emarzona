@@ -28,6 +28,7 @@ import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { safeRedirect } from '@/lib/url-validator';
+import { initiateOrderBalancePayment } from '@/lib/checkout/initiate-balance-payment';
 
 const ORDER_FIELDS =
   'id, store_id, customer_id, customer_email, order_number, created_at, total_amount, currency, percentage_paid, remaining_amount, payment_status, status';
@@ -69,7 +70,7 @@ export default function PayBalance() {
     enabled: !!orderId,
   });
 
-  // Mutation pour initier le paiement Moneroo
+  // Mutation pour initier le paiement du solde (orchestrateur V2 ou Moneroo legacy)
   const payBalanceMutation = useMutation({
     mutationFn: async () => {
       if (!order || !orderId) {
@@ -89,34 +90,23 @@ export default function PayBalance() {
         throw new Error('Informations de commande incomplètes');
       }
 
-      // Utiliser initiateMonerooPayment pour initier le paiement
-      const { initiateMonerooPayment } = await import('@/lib/moneroo-payment');
-
-      const paymentResult = await initiateMonerooPayment({
+      const paymentResult = await initiateOrderBalancePayment({
         storeId,
         orderId,
         customerId,
         amount: order.remaining_amount,
-        currency: order.currency || 'XOF',
-        description: `Solde commande #${order.order_number}`,
+        currency: order.currency,
+        orderNumber: order.order_number,
         customerEmail,
         customerName: order.customers?.name || customerEmail.split('@')[0] || '',
-        metadata: {
-          order_id: orderId,
-          payment_type: 'balance',
-          initial_amount: order.total_amount,
-          percentage_paid: order.percentage_paid,
-          remaining_amount: order.remaining_amount,
-        },
+        totalAmount: order.total_amount,
+        percentagePaid: order.percentage_paid ?? 0,
+        remainingAmount: order.remaining_amount,
       });
 
-      if (!paymentResult.success || !paymentResult.checkout_url) {
-        throw new Error("Erreur lors de l'initialisation du paiement");
-      }
-
       return {
-        payment_url: paymentResult.checkout_url,
-        transaction_id: paymentResult.transaction_id,
+        payment_url: paymentResult.checkoutUrl,
+        transaction_id: paymentResult.transactionId,
       };
     },
     onSuccess: data => {
@@ -324,8 +314,8 @@ export default function PayBalance() {
             <Alert>
               <CheckCircle className="h-4 w-4" />
               <AlertDescription className="text-xs">
-                Paiement sécurisé via Moneroo. Vos informations de paiement sont protégées et
-                chiffrées.
+                Paiement sécurisé via la plateforme Emarzona. Vos informations de paiement sont
+                protégées et chiffrées.
               </AlertDescription>
             </Alert>
           </CardContent>

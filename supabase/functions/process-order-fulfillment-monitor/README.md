@@ -2,6 +2,14 @@
 
 Cron P0 — détecte les commandes payées dont le fulfillment dépasse le SLA (défaut **5 min**).
 
+## Flux
+
+1. `detect_stale_order_fulfillment` — scan SQL (7 verticaux)
+2. `record_order_fulfillment_alert` — alertes admin (déduplication 1 h)
+3. Retry `runPostOrderPaymentFulfillment` si `edge_fulfillment_pending`
+4. `auto_resolve_fulfilled_order_alerts` — clôture alertes réparées
+5. `record_platform_sla_check` — service `fulfillment` sur `/status`
+
 ## Secrets
 
 | Variable                    | Description                                         |
@@ -11,33 +19,29 @@ Cron P0 — détecte les commandes payées dont le fulfillment dépasse le SLA (
 | `EDGE_INTERNAL_SECRET`      | Retry certificats artiste (via fulfillment partagé) |
 | `FULFILLMENT_SLA_MINUTES`   | Optionnel (défaut `5`)                              |
 
-## Planification (pg_cron ou Supabase Dashboard)
+## Planification
 
-```sql
-SELECT cron.schedule(
-  'order-fulfillment-monitor',
-  '*/5 * * * *',
-  $$
-  SELECT net.http_post(
-    url := 'https://<project>.supabase.co/functions/v1/process-order-fulfillment-monitor',
-    headers := jsonb_build_object(
-      'Content-Type', 'application/json',
-      'x-cron-secret', '<CRON_SECRET>'
-    ),
-    body := '{}'::jsonb
-  );
-  $$
-);
+```powershell
+.\scripts\setup-fulfillment-monitor-cron.ps1
+# ou tous les crons :
+.\scripts\rotate-cron-secret.ps1 -GenerateNew -SyncGitHub
 ```
 
-## Manuel
+Secours : `.github/workflows/fulfillment-monitor-cron.yml`
+
+## Vérification
 
 ```bash
-curl -X POST "https://<project>.supabase.co/functions/v1/process-order-fulfillment-monitor" \
-  -H "x-cron-secret: <CRON_SECRET>" \
-  -H "Content-Type: application/json"
+npm run verify:fulfillment-monitor
 ```
 
-## SLA plateforme
+```powershell
+.\scripts\smoke-fulfillment-monitor.ps1
+```
 
-Enregistre un check `fulfillment` dans `platform_sla_checks` (visible sur `/status`).
+Runbook complet : [`docs/runbooks/order-fulfillment-monitor-prod.md`](../../../docs/runbooks/order-fulfillment-monitor-prod.md)
+
+## Admin UI
+
+- `/admin/fulfillment-alerts` — scan live + sweep SQL (`admin_run_fulfillment_monitor_sweep`)
+- `/status` — SLA service `fulfillment`

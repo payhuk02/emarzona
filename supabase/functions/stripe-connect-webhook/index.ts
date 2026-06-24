@@ -117,15 +117,20 @@ serve(async req => {
   const supabase = createSupabaseAdmin();
 
   try {
-    const isNew = await recordWebhookEvent(
-      supabase,
-      'stripe_connect',
-      event.id,
-      event.type,
-      event as unknown as Record<string, unknown>
-    );
-    if (!isNew) {
-      return new Response(JSON.stringify({ received: true, duplicate: true }), { status: 200 });
+    const isAtomicCheckoutCompletion = event.type === 'checkout.session.completed';
+
+    let isNew = true;
+    if (!isAtomicCheckoutCompletion) {
+      isNew = await recordWebhookEvent(
+        supabase,
+        'stripe_connect',
+        event.id,
+        event.type,
+        event as unknown as Record<string, unknown>
+      );
+      if (!isNew) {
+        return new Response(JSON.stringify({ received: true, duplicate: true }), { status: 200 });
+      }
     }
 
     if (event.type === 'checkout.session.completed') {
@@ -139,6 +144,13 @@ serve(async req => {
       };
 
       if (session.payment_status !== 'paid') {
+        await recordWebhookEvent(
+          supabase,
+          'stripe_connect',
+          event.id,
+          event.type,
+          event as unknown as Record<string, unknown>
+        );
         await markWebhookProcessed(supabase, 'stripe_connect', event.id);
         return new Response(JSON.stringify({ received: true }), { status: 200 });
       }
@@ -163,11 +175,14 @@ serve(async req => {
               transactionId,
               reason,
             });
-            await supabase
-              .from('payment_webhook_events')
-              .update({ processing_error: reason })
-              .eq('provider', 'stripe_connect')
-              .eq('external_event_id', event.id);
+            await supabase.from('payment_webhook_events').insert({
+              provider: 'stripe_connect',
+              external_event_id: event.id,
+              event_type: event.type,
+              payload: session as unknown as Record<string, unknown>,
+              processing_error: reason,
+              transaction_id: transactionId,
+            });
             return new Response(JSON.stringify({ error: 'Payment validation failed' }), {
               status: 400,
             });
@@ -183,11 +198,18 @@ serve(async req => {
               typeof session.payment_intent === 'string' ? session.payment_intent : undefined,
             webhookPayload: session as unknown as Record<string, unknown>,
             paymentProviderUsed: 'stripe_connect',
+            externalEventId: event.id,
+            eventType: event.type,
           }
         );
 
         if (orderId && !alreadyCompleted) {
           await runPostOrderPaymentFulfillment(supabase, orderId, transactionId);
+        } else if (alreadyCompleted) {
+          console.log('Stripe checkout.session.completed replay ignored (idempotent)', {
+            transactionId,
+            eventId: event.id,
+          });
         }
       }
     }
