@@ -25,7 +25,7 @@ import {
 } from './src/lib/middleware/csp-policy';
 
 export const config = {
-  matcher: '/((?!_next|api|assets|.*\\..*).*)',
+  matcher: '/((?!_next|assets|.*\\..*).*)',
 };
 
 const BOT_REGEX =
@@ -394,6 +394,16 @@ async function checkBotRateLimit(req: Request): Promise<boolean> {
   return count <= BOT_RATE_LIMIT_PER_MINUTE;
 }
 
+async function checkApiRateLimit(req: Request): Promise<boolean> {
+  const redis = getUpstashConfig();
+  if (!redis) return true;
+
+  const ip = getClientIp(req);
+  const key = `rate_limit:api:${ip}`;
+  const count = await upstashIncrWithTtl(redis.url, redis.token, key, 60);
+  return count <= 100;
+}
+
 async function readMetaFromCache(
   cacheKey: string
 ): Promise<{ meta: Meta; source: 'redis' | 'memory' } | null> {
@@ -521,6 +531,21 @@ function buildCspHtmlResponse(
 export default async function middleware(req: Request): Promise<Response | undefined> {
   // Requête issue du fetch interne ci-dessous → laisser atteindre index.html
   if (req.headers.get(PRERENDER_BYPASS_HEADER) === '1') {
+    return;
+  }
+
+  const url = new URL(req.url);
+
+  // Rate Limiting sur les routes API
+  if (url.pathname.startsWith('/api/')) {
+    const allowed = await checkApiRateLimit(req);
+    if (!allowed) {
+      return new Response(JSON.stringify({ error: 'Too Many Requests' }), {
+        status: 429,
+        headers: { 'content-type': 'application/json', 'retry-after': '60' },
+      });
+    }
+    // Laissez passer les requêtes API (elles ne sont pas du HTML)
     return;
   }
 

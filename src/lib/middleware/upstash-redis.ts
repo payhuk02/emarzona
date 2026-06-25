@@ -69,3 +69,21 @@ export async function upstashIncrWithTtl(
   const count = data?.[0]?.result;
   return typeof count === 'number' ? count : 0;
 }
+
+export async function upstashSetNx(
+  restUrl: string,
+  token: string,
+  key: string,
+  value: string,
+  ttlSeconds: number
+): Promise<boolean> {
+  const result = await upstashCommand<string | null>(restUrl, token, [
+    'SET',
+    key,
+    value,
+    'NX',
+    'EX',
+    ttlSeconds,
+  ]);
+  return result === 'OK';
+}

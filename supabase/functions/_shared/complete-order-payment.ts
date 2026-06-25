@@ -1,6 +1,7 @@
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
 import { resolvePaidOrderStatusForOrder } from './order-status.ts';
 import { sanitizePaymentWebhookPayload } from './payment-log-sanitize.ts';
+import { upstashSetNx } from './upstash-redis.ts';
 
 export async function recordWebhookEvent(
   supabase: SupabaseClient,
@@ -63,6 +64,17 @@ export async function completeTransactionAndOrder(
   const safePayload = extras?.webhookPayload
     ? sanitizePaymentWebhookPayload(paymentProviderUsed, extras.webhookPayload)
     : {};
+
+  // ATOMIC IDEMPOTENCY: Use Redis Mutex to completely block duplicate webhooks before hitting the DB.
+  if (extras?.externalEventId) {
+    const lockKey = `webhook_mutex:${paymentProviderUsed}:${extras.externalEventId}`;
+    const acquired = await upstashSetNx(lockKey, '1', 600); // 10 minutes TTL
+
+    if (!acquired) {
+      console.log(`[MUTEX] Duplicate webhook detected and blocked: ${lockKey}`);
+      return { orderId: null, alreadyCompleted: true };
+    }
+  }
 
   // ATOMIC IDEMPOTENCY: Use the RPC to lock the transaction, insert the webhook event,
   // and update the order/transaction all in one PostgreSQL transaction.
