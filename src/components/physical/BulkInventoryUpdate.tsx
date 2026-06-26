@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -55,6 +55,10 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { MovementType } from './StockMovementHistory';
+import { usePhysicalProducts } from '@/hooks/physical/usePhysicalProducts';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { Skeleton } from '@/components/ui/skeleton';
 
 // ============================================================================
 // TYPES
@@ -84,73 +88,13 @@ export interface BulkInventoryUpdateProps {
 }
 
 // ============================================================================
-// MOCK DATA
-// ============================================================================
-
-const  MOCK_PRODUCTS: Omit<BulkUpdateItem, 'is_selected' | 'new_quantity' | 'adjustment'>[] = [
-  {
-    id: '1',
-    product_id: 'prod_1',
-    product_name: 'T-Shirt Premium',
-    variant_label: 'Rouge / M',
-    sku: 'TSH-RED-M',
-    current_quantity: 50,
-    low_stock_threshold: 10,
-  },
-  {
-    id: '2',
-    product_id: 'prod_1',
-    product_name: 'T-Shirt Premium',
-    variant_label: 'Bleu / L',
-    sku: 'TSH-BLU-L',
-    current_quantity: 105,
-    low_stock_threshold: 10,
-  },
-  {
-    id: '3',
-    product_id: 'prod_1',
-    product_name: 'T-Shirt Premium',
-    variant_label: 'Vert / S',
-    sku: 'TSH-GRN-S',
-    current_quantity: 28,
-    low_stock_threshold: 10,
-  },
-  {
-    id: '4',
-    product_id: 'prod_2',
-    product_name: 'Jeans Classic',
-    sku: 'JNS-BLK-32',
-    current_quantity: 0,
-    low_stock_threshold: 5,
-  },
-  {
-    id: '5',
-    product_id: 'prod_3',
-    product_name: 'Sneakers Pro',
-    variant_label: 'Blanc / 42',
-    sku: 'SNK-WHT-42',
-    current_quantity: 8,
-    low_stock_threshold: 15,
-  },
-];
-
-// ============================================================================
 // MAIN COMPONENT
 // ============================================================================
 
-export function BulkInventoryUpdate({
-  storeId,
-  onComplete,
-  className,
-}: BulkInventoryUpdateProps) {
-  const [items, setItems] = useState<BulkUpdateItem[]>(
-    MOCK_PRODUCTS.map((p) => ({
-      ...p,
-      is_selected: false,
-      new_quantity: p.current_quantity,
-      adjustment: 0,
-    }))
-  );
+export function BulkInventoryUpdate({ storeId, onComplete, className }: BulkInventoryUpdateProps) {
+  const queryClient = useQueryClient();
+  const { data: products, isLoading } = usePhysicalProducts(storeId);
+  const [items, setItems] = useState<BulkUpdateItem[]>([]);
 
   const [mode, setMode] = useState<BulkUpdateMode>('set');
   const [movementType, setMovementType] = useState<MovementType>('adjustment');
@@ -165,28 +109,62 @@ export function BulkInventoryUpdate({
     errors: string[];
   } | null>(null);
 
+  useEffect(() => {
+    if (!products) return;
+    setItems(
+      products.map(p => ({
+        id: p.id,
+        product_id: p.product_id,
+        product_name: p.product?.name ?? p.name ?? 'Produit',
+        sku: p.sku ?? undefined,
+        current_quantity: p.total_quantity ?? 0,
+        new_quantity: p.total_quantity ?? 0,
+        low_stock_threshold: p.low_stock_threshold ?? undefined,
+        is_selected: false,
+        adjustment: 0,
+      }))
+    );
+  }, [products]);
+
+  const bulkUpdateMutation = useMutation({
+    mutationFn: async (updates: BulkUpdateItem[]) => {
+      for (const item of updates) {
+        const { error } = await supabase
+          .from('physical_products')
+          .update({ total_quantity: item.new_quantity })
+          .eq('id', item.id);
+        if (error) {
+          throw new Error(`${item.product_name}: ${error.message}`);
+        }
+      }
+      return updates.length;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['physical-products', storeId] });
+      queryClient.invalidateQueries({ queryKey: ['inventory-report', storeId] });
+    },
+  });
+
   // Selected items
-  const selectedItems = items.filter((i) => i.is_selected);
-  const allSelected = items.length > 0 && items.every((i) => i.is_selected);
+  const selectedItems = items.filter(i => i.is_selected);
+  const allSelected = items.length > 0 && items.every(i => i.is_selected);
 
   // Toggle selection
   const toggleSelection = (id: string) => {
-    setItems((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, is_selected: !item.is_selected } : item
-      )
+    setItems(prev =>
+      prev.map(item => (item.id === id ? { ...item, is_selected: !item.is_selected } : item))
     );
   };
 
   const toggleAll = () => {
     const newValue = !allSelected;
-    setItems((prev) => prev.map((item) => ({ ...item, is_selected: newValue })));
+    setItems(prev => prev.map(item => ({ ...item, is_selected: newValue })));
   };
 
   // Update quantity
   const updateQuantity = (id: string, value: number) => {
-    setItems((prev) =>
-      prev.map((item) => {
+    setItems(prev =>
+      prev.map(item => {
         if (item.id !== id) return item;
 
         if (mode === 'set') {
@@ -212,8 +190,8 @@ export function BulkInventoryUpdate({
 
   // Bulk update all selected
   const bulkUpdateAll = (value: number) => {
-    setItems((prev) =>
-      prev.map((item) => {
+    setItems(prev =>
+      prev.map(item => {
         if (!item.is_selected) return item;
 
         if (mode === 'set') {
@@ -242,21 +220,19 @@ export function BulkInventoryUpdate({
     setIsProcessing(true);
     setProgress(0);
 
-    const itemsToUpdate = items.filter((i) => i.is_selected && !i.error);
-    let  successCount= 0;
-    const  errors: string[] = [];
+    const itemsToUpdate = items.filter(i => i.is_selected && !i.error);
+    let successCount = 0;
+    const errors: string[] = [];
 
-    // Simulate processing
-    for (let  i= 0; i < itemsToUpdate.length; i++) {
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      setProgress(((i + 1) / itemsToUpdate.length) * 100);
-
-      // Simulate success/failure (90% success rate)
-      if (Math.random() > 0.1) {
+    for (let i = 0; i < itemsToUpdate.length; i++) {
+      const item = itemsToUpdate[i];
+      try {
+        await bulkUpdateMutation.mutateAsync([item]);
         successCount++;
-      } else {
-        errors.push(`Erreur: ${itemsToUpdate[i].product_name} (${itemsToUpdate[i].sku})`);
+      } catch (err) {
+        errors.push(err instanceof Error ? err.message : String(err));
       }
+      setProgress(((i + 1) / itemsToUpdate.length) * 100);
     }
 
     setUpdateResult({
@@ -273,13 +249,22 @@ export function BulkInventoryUpdate({
     }
   };
 
+  if (isLoading && items.length === 0) {
+    return (
+      <div className={cn('space-y-4', className)}>
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-64 w-full" />
+      </div>
+    );
+  }
+
   // CSV Import/Export
   const handleExportCSV = () => {
     const csvContent =
       'SKU,Produit,Variante,Stock Actuel,Nouveau Stock,Ajustement\n' +
       selectedItems
         .map(
-          (item) =>
+          item =>
             `${item.sku || ''},${item.product_name},"${item.variant_label || ''}",${
               item.current_quantity
             },${item.new_quantity},${item.adjustment || 0}`
@@ -353,7 +338,7 @@ export function BulkInventoryUpdate({
                       <Input
                         type="number"
                         placeholder={mode === 'set' ? 'Ex: 100' : 'Ex: +10 ou -5'}
-                        onChange={(e) => {
+                        onChange={e => {
                           const val = Number(e.target.value);
                           if (!isNaN(val)) bulkUpdateAll(val);
                         }}
@@ -380,15 +365,13 @@ export function BulkInventoryUpdate({
                   <TableHead>Produit</TableHead>
                   <TableHead>SKU</TableHead>
                   <TableHead>Stock Actuel</TableHead>
-                  <TableHead>
-                    {mode === 'set' ? 'Nouveau Stock' : 'Ajustement'}
-                  </TableHead>
+                  <TableHead>{mode === 'set' ? 'Nouveau Stock' : 'Ajustement'}</TableHead>
                   <TableHead>Après Maj</TableHead>
                   <TableHead>Différence</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {items.map((item) => (
+                {items.map(item => (
                   <TableRow key={item.id} className={item.error ? 'bg-destructive/5' : ''}>
                     {/* Checkbox */}
                     <TableCell>
@@ -420,9 +403,9 @@ export function BulkInventoryUpdate({
                           item.current_quantity === 0
                             ? 'destructive'
                             : item.low_stock_threshold &&
-                              item.current_quantity <= item.low_stock_threshold
-                            ? 'secondary'
-                            : 'default'
+                                item.current_quantity <= item.low_stock_threshold
+                              ? 'secondary'
+                              : 'default'
                         }
                       >
                         {item.current_quantity}
@@ -434,16 +417,11 @@ export function BulkInventoryUpdate({
                       <Input
                         type="number"
                         value={mode === 'set' ? item.new_quantity : item.adjustment}
-                        onChange={(e) => updateQuantity(item.id, Number(e.target.value))}
+                        onChange={e => updateQuantity(item.id, Number(e.target.value))}
                         disabled={!item.is_selected}
-                        className={cn(
-                          'w-[100px]',
-                          item.error && 'border-destructive'
-                        )}
+                        className={cn('w-[100px]', item.error && 'border-destructive')}
                       />
-                      {item.error && (
-                        <p className="text-xs text-destructive mt-1">{item.error}</p>
-                      )}
+                      {item.error && <p className="text-xs text-destructive mt-1">{item.error}</p>}
                     </TableCell>
 
                     {/* After */}
@@ -457,9 +435,7 @@ export function BulkInventoryUpdate({
                         <div
                           className={cn(
                             'flex items-center gap-1 font-medium',
-                            (item.adjustment || 0) > 0
-                              ? 'text-green-600'
-                              : 'text-red-600'
+                            (item.adjustment || 0) > 0 ? 'text-green-600' : 'text-red-600'
                           )}
                         >
                           {(item.adjustment || 0) > 0 ? (
@@ -481,10 +457,7 @@ export function BulkInventoryUpdate({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Type de mouvement</Label>
-              <Select
-                value={movementType}
-                onValueChange={(v: MovementType) => setMovementType(v)}
-              >
+              <Select value={movementType} onValueChange={(v: MovementType) => setMovementType(v)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -503,7 +476,7 @@ export function BulkInventoryUpdate({
               <Input
                 placeholder="Ex: Inventaire physique, réception fournisseur..."
                 value={reason}
-                onChange={(e) => setReason(e.target.value)}
+                onChange={e => setReason(e.target.value)}
               />
             </div>
           </div>
@@ -515,9 +488,7 @@ export function BulkInventoryUpdate({
                 <>
                   <span className="font-medium">{selectedItems.length}</span> produit(s)
                   sélectionné(s) •{' '}
-                  <span className="font-medium">
-                    {selectedItems.filter((i) => !i.error).length}
-                  </span>{' '}
+                  <span className="font-medium">{selectedItems.filter(i => !i.error).length}</span>{' '}
                   valide(s)
                 </>
               ) : (
@@ -528,12 +499,12 @@ export function BulkInventoryUpdate({
               onClick={() => setShowConfirm(true)}
               disabled={
                 selectedItems.length === 0 ||
-                selectedItems.every((i) => i.error || i.adjustment === 0)
+                selectedItems.every(i => i.error || i.adjustment === 0)
               }
               className="gap-2"
             >
               <CheckCircle2 className="h-4 w-4" />
-              Mettre à jour ({selectedItems.filter((i) => !i.error && i.adjustment !== 0).length})
+              Mettre à jour ({selectedItems.filter(i => !i.error && i.adjustment !== 0).length})
             </Button>
           </div>
         </CardContent>
@@ -550,7 +521,7 @@ export function BulkInventoryUpdate({
             <AlertDialogDescription className="space-y-4">
               <p>
                 Vous êtes sur le point de mettre à jour{' '}
-                <span className="font-bold">{selectedItems.filter((i) => !i.error).length}</span>{' '}
+                <span className="font-bold">{selectedItems.filter(i => !i.error).length}</span>{' '}
                 produit(s).
               </p>
               <div className="rounded-md bg-muted p-4 space-y-2">
@@ -559,13 +530,13 @@ export function BulkInventoryUpdate({
                   <li>
                     • Entrées :{' '}
                     <span className="text-green-600 font-medium">
-                      +{selectedItems.filter((i) => (i.adjustment || 0) > 0).length}
+                      +{selectedItems.filter(i => (i.adjustment || 0) > 0).length}
                     </span>
                   </li>
                   <li>
                     • Sorties :{' '}
                     <span className="text-red-600 font-medium">
-                      {selectedItems.filter((i) => (i.adjustment || 0) < 0).length}
+                      {selectedItems.filter(i => (i.adjustment || 0) < 0).length}
                     </span>
                   </li>
                   <li>
@@ -592,7 +563,7 @@ export function BulkInventoryUpdate({
 
       {/* Processing Dialog */}
       <Dialog open={isProcessing} onOpenChange={() => {}}>
-        <DialogContent className="sm:max-w-md" onPointerDownOutside={(e) => e.preventDefault()}>
+        <DialogContent className="sm:max-w-md" onPointerDownOutside={e => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Package className="h-5 w-5 animate-pulse" />
@@ -650,9 +621,7 @@ export function BulkInventoryUpdate({
 
               {updateResult.errors.length > 0 && (
                 <div className="rounded-md border border-destructive/20 bg-destructive/5 p-4">
-                  <p className="text-sm font-medium text-destructive mb-2">
-                    Erreurs détectées :
-                  </p>
+                  <p className="text-sm font-medium text-destructive mb-2">Erreurs détectées :</p>
                   <ul className="text-sm space-y-1">
                     {updateResult.errors.slice(0, 5).map((error, i) => (
                       <li key={i} className="text-muted-foreground">
@@ -677,10 +646,3 @@ export function BulkInventoryUpdate({
     </div>
   );
 }
-
-
-
-
-
-
-

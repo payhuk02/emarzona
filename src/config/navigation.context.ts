@@ -124,6 +124,7 @@ export const CONTEXT_SIDEBAR_CONFIGS = {
           '/dashboard/license-management',
           '/dashboard/digital-products/bundles',
           '/dashboard/digital-products/bundles/create',
+          '/dashboard/cross-type-bundles',
           '/dashboard/digital/updates',
         ],
       },

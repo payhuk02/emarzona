@@ -3,7 +3,7 @@
  * Page de réconciliation et vérification manuelle des transactions
  */
 
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
@@ -14,6 +14,13 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -31,33 +38,39 @@ import {
   Download,
   AlertTriangle,
   Loader2,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
 } from 'lucide-react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
+import {
+  ADMIN_TRANSACTION_PAGE_SIZES,
+  AdminTransactionRow,
+} from '@/lib/admin/admin-transactions-reconciliation-query';
+import {
+  DEFAULT_ADMIN_TRANSACTION_PAGE_SIZE,
+  useAdminTransactionStats,
+  useAdminTransactionsList,
+  type AdminTransactionTab,
+} from '@/hooks/useAdminTransactionReconciliation';
 
-interface Transaction {
-  id: string;
-  order_id: string | null;
-  amount: number | null;
-  currency: string;
-  status: string;
-  payment_provider: string;
-  moneroo_transaction_id: string | null;
-  created_at: string;
-  updated_at: string;
-  order?: { order_number: string | null; customer_email: string | null } | null;
-}
+type Transaction = AdminTransactionRow;
 
 // MobileTableCard attend un Record<string, unknown> (index signature).
 // On intersecte pour conserver le typage strict de Transaction.
 type TransactionRowData = Transaction & Record<string, unknown>;
 
 export default function AdminTransactionReconciliation() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('pending');
+  const [searchInput, setSearchInput] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [activeTab, setActiveTab] = useState<AdminTransactionTab>('pending');
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(DEFAULT_ADMIN_TRANSACTION_PAGE_SIZE);
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -81,79 +94,35 @@ export default function AdminTransactionReconciliation() {
     };
   }, []);
 
-  // Fetch transactions
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchInput), 300);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, activeTab, pageSize]);
+
   const {
-    data: transactions,
+    data: pageData,
     isLoading,
     refetch,
-  } = useQuery({
-    queryKey: ['admin-transactions-reconciliation', activeTab],
-    queryFn: async () => {
-      let query = supabase
-        .from('transactions')
-        .select(
-          `
-          *,
-          order:orders(
-            order_number,
-            customer_email
-          )
-        `
-        )
-        .order('created_at', { ascending: false })
-        .limit(500);
-
-      // Filtrer selon l'onglet actif
-      if (activeTab === 'pending') {
-        query = query.in('status', ['processing', 'pending']);
-      } else if (activeTab === 'failed') {
-        query = query.eq('status', 'failed');
-      } else if (activeTab === 'old') {
-        // Transactions en attente depuis plus de 24h
-        const thresholdDate = new Date();
-        thresholdDate.setHours(thresholdDate.getHours() - 24);
-        query = query
-          .in('status', ['processing', 'pending'])
-          .lt('created_at', thresholdDate.toISOString());
-      }
-
-      const { data, error } = await query;
-
-      if (error) throw error;
-      // `select` avec relation (alias `order:orders`) produit un type Supabase parfois trop strict.
-      // On normalise ici vers un DTO UI.
-      const rows = (data ?? []) as unknown as Array<Record<string, unknown>>;
-      return rows.map((row): Transaction => {
-        const order = row.order as Record<string, unknown> | null | undefined;
-        return {
-          id: String(row.id),
-          order_id: row.order_id ? String(row.order_id) : null,
-          amount:
-            typeof row.amount === 'number'
-              ? row.amount
-              : row.amount == null
-                ? null
-                : Number(row.amount),
-          currency: String(row.currency ?? 'XOF'),
-          status: String(row.status ?? 'pending'),
-          payment_provider: String(row.payment_provider ?? 'moneroo'),
-          moneroo_transaction_id: row.moneroo_transaction_id
-            ? String(row.moneroo_transaction_id)
-            : null,
-          created_at: String(row.created_at ?? ''),
-          updated_at: String(row.updated_at ?? ''),
-          order: order
-            ? {
-                order_number: order.order_number ? String(order.order_number) : null,
-                customer_email: order.customer_email ? String(order.customer_email) : null,
-              }
-            : null,
-        };
-      });
-    },
-    // Refetch auto uniquement quand la page est visible (perf/batterie mobile)
+    isFetching,
+  } = useAdminTransactionsList({
+    page,
+    pageSize,
+    tab: activeTab,
+    search: debouncedSearch,
     refetchInterval: isPageVisible ? 30000 : false,
   });
+
+  const { data: stats } = useAdminTransactionStats();
+
+  const transactions = pageData?.rows ?? [];
+  const totalCount = pageData?.totalCount ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+  const from = totalCount === 0 ? 0 : (page - 1) * pageSize + 1;
+  const to = Math.min(page * pageSize, totalCount);
 
   // Mutation pour vérifier une transaction
   const verifyTransactionMutation = useMutation({
@@ -200,6 +169,7 @@ export default function AdminTransactionReconciliation() {
         description: 'La transaction est en cours de vérification',
       });
       queryClient.invalidateQueries({ queryKey: ['admin-transactions-reconciliation'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-transactions-stats'] });
       setTimeout(() => refetch(), 2000);
     },
     onError: (error: Error) => {
@@ -211,52 +181,9 @@ export default function AdminTransactionReconciliation() {
     },
   });
 
-  // Stats
-  const stats = useMemo(() => {
-    if (!transactions) return null;
-
-    const total = transactions.length;
-    const totalAmount = transactions.reduce((sum, t) => sum + (t.amount ?? 0), 0);
-    const byStatus = transactions.reduce(
-      (acc, t) => {
-        acc[t.status] = (acc[t.status] || 0) + 1;
-        return acc;
-      },
-      {} as Record<string, number>
-    );
-
-    // Transactions anciennes (> 24h)
-    const thresholdDate = new Date();
-    thresholdDate.setHours(thresholdDate.getHours() - 24);
-    const oldCount = transactions.filter(t => new Date(t.created_at) < thresholdDate).length;
-
-    return {
-      total,
-      totalAmount,
-      byStatus,
-      oldCount,
-    };
-  }, [transactions]);
-
-  // Filtrer les transactions
-  const filteredTransactions = useMemo(() => {
-    if (!transactions) return [];
-
-    return transactions.filter(transaction => {
-      const searchLower = searchQuery.toLowerCase();
-      return (
-        transaction.id.toLowerCase().includes(searchLower) ||
-        transaction.order_id?.toLowerCase().includes(searchLower) ||
-        transaction.moneroo_transaction_id?.toLowerCase().includes(searchLower) ||
-        transaction.order?.order_number?.toLowerCase().includes(searchLower) ||
-        transaction.order?.customer_email?.toLowerCase().includes(searchLower)
-      );
-    });
-  }, [transactions, searchQuery]);
-
-  // Export CSV
+  // Export CSV (page courante)
   const handleExport = useCallback(() => {
-    if (!filteredTransactions || filteredTransactions.length === 0) {
+    if (transactions.length === 0) {
       toast({
         title: 'Aucune donnée',
         description: 'Aucune transaction à exporter',
@@ -278,7 +205,7 @@ export default function AdminTransactionReconciliation() {
       'Updated At',
     ];
 
-    const rows = filteredTransactions.map(t => [
+    const rows = transactions.map(t => [
       t.id,
       t.order_id || '',
       t.order?.order_number || '',
@@ -308,9 +235,9 @@ export default function AdminTransactionReconciliation() {
 
     toast({
       title: '✅ Export réussi',
-      description: `${filteredTransactions.length} transactions exportées`,
+      description: `${transactions.length} transactions exportées (page courante)`,
     });
-  }, [filteredTransactions, toast]);
+  }, [transactions, toast]);
 
   const getStatusBadge = useCallback((status: string) => {
     const variants: Record<string, { label: string; className: string }> = {
@@ -334,10 +261,10 @@ export default function AdminTransactionReconciliation() {
   }, []);
 
   useEffect(() => {
-    if (!isLoading && transactions) {
-      logger.info(`Admin Transaction Reconciliation: ${transactions.length} transactions chargées`);
+    if (!isLoading) {
+      logger.info(`Admin Transaction Reconciliation: ${totalCount} transactions (${activeTab})`);
     }
-  }, [isLoading, transactions]);
+  }, [isLoading, totalCount, activeTab]);
 
   return (
     <AdminLayout>
@@ -357,15 +284,11 @@ export default function AdminTransactionReconciliation() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => refetch()} disabled={isLoading}>
-              <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+            <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
+              <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? 'animate-spin' : ''}`} />
               Actualiser
             </Button>
-            <Button
-              variant="outline"
-              onClick={handleExport}
-              disabled={!filteredTransactions || filteredTransactions.length === 0}
-            >
+            <Button variant="outline" onClick={handleExport} disabled={transactions.length === 0}>
               <Download className="h-4 w-4 mr-2" />
               Exporter CSV
             </Button>
@@ -386,7 +309,7 @@ export default function AdminTransactionReconciliation() {
                 <DollarSign className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-lg sm:text-2xl font-bold">{stats.total}</div>
+                <div className="text-lg sm:text-2xl font-bold">{stats.totalCount}</div>
                 <p className="text-xs text-muted-foreground">transactions</p>
               </CardContent>
             </Card>
@@ -407,9 +330,7 @@ export default function AdminTransactionReconciliation() {
                 <Clock className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-lg sm:text-2xl font-bold">
-                  {stats.byStatus.processing || 0}
-                </div>
+                <div className="text-lg sm:text-2xl font-bold">{stats.processingCount}</div>
                 <p className="text-xs text-muted-foreground">processing</p>
               </CardContent>
             </Card>
@@ -419,7 +340,7 @@ export default function AdminTransactionReconciliation() {
                 <AlertTriangle className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-lg sm:text-2xl font-bold">{stats.oldCount}</div>
+                <div className="text-lg sm:text-2xl font-bold">{stats.oldPendingCount}</div>
                 <p className="text-xs text-muted-foreground">&gt; 24h</p>
               </CardContent>
             </Card>
@@ -427,7 +348,7 @@ export default function AdminTransactionReconciliation() {
         )}
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={value => setActiveTab(value as AdminTransactionTab)}>
           <TabsList className="w-full justify-start overflow-x-auto flex-nowrap [-webkit-overflow-scrolling:touch]">
             <TabsTrigger value="pending">En Attente</TabsTrigger>
             <TabsTrigger value="old">Anciennes (&gt; 24h)</TabsTrigger>
@@ -442,8 +363,8 @@ export default function AdminTransactionReconciliation() {
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Rechercher par ID, order number, email..."
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
+                  value={searchInput}
+                  onChange={e => setSearchInput(e.target.value)}
                   className="pl-8"
                 />
               </div>
@@ -454,7 +375,7 @@ export default function AdminTransactionReconciliation() {
               <CardHeader>
                 <CardTitle>Transactions</CardTitle>
                 <CardDescription>
-                  {filteredTransactions.length} transaction(s) trouvée(s)
+                  {totalCount} transaction(s) — page {page}/{totalPages}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -462,13 +383,13 @@ export default function AdminTransactionReconciliation() {
                   <div className="flex items-center justify-center py-8">
                     <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                   </div>
-                ) : filteredTransactions.length === 0 ? (
+                ) : transactions.length === 0 ? (
                   <Alert>
                     <AlertDescription>Aucune transaction trouvée</AlertDescription>
                   </Alert>
                 ) : isMobile ? (
                   <MobileTableCard
-                    data={filteredTransactions as unknown as TransactionRowData[]}
+                    data={transactions as unknown as TransactionRowData[]}
                     columns={[
                       {
                         key: 'id',
@@ -581,7 +502,7 @@ export default function AdminTransactionReconciliation() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {filteredTransactions.map(transaction => (
+                        {transactions.map(transaction => (
                           <TableRow key={transaction.id}>
                             <TableCell className="font-mono text-xs">
                               {transaction.id.substring(0, 8)}...
@@ -643,6 +564,69 @@ export default function AdminTransactionReconciliation() {
                         ))}
                       </TableBody>
                     </Table>
+                  </div>
+                )}
+
+                {totalCount > 0 && (
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t mt-4">
+                    <p className="text-sm text-muted-foreground">
+                      {from}–{to} sur {totalCount} transactions
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <Select
+                        value={pageSize.toString()}
+                        onValueChange={value => {
+                          setPageSize(Number(value));
+                          setPage(1);
+                        }}
+                      >
+                        <SelectTrigger className="w-[100px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {ADMIN_TRANSACTION_PAGE_SIZES.map(size => (
+                            <SelectItem key={size} value={size.toString()}>
+                              {size} / page
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        disabled={page <= 1}
+                        onClick={() => setPage(1)}
+                      >
+                        <ChevronsLeft className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        disabled={page <= 1}
+                        onClick={() => setPage(page - 1)}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <span className="text-sm px-2">
+                        {page} / {totalPages}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        disabled={page >= totalPages}
+                        onClick={() => setPage(page + 1)}
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        disabled={page >= totalPages}
+                        onClick={() => setPage(totalPages)}
+                      >
+                        <ChevronsRight className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 )}
               </CardContent>

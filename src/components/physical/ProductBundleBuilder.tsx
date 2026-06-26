@@ -47,6 +47,9 @@ import {
   CheckCircle2,
 } from '@/components/icons';
 import { cn } from '@/lib/utils';
+import { usePhysicalProducts } from '@/hooks/physical/usePhysicalProducts';
+import { useStore } from '@/hooks/useStore';
+import { Skeleton } from '@/components/ui/skeleton';
 
 // ============================================================================
 // TYPES
@@ -72,90 +75,70 @@ export interface ProductBundle {
   description?: string;
   type: BundleType;
   image_url?: string;
-  
+
   // Products
   products: BundleProduct[];
   min_products?: number; // For flexible bundles
   max_products?: number; // For flexible bundles
-  
+
   // Pricing
   original_price: number; // Sum of individual prices
   bundle_price: number;
   discount_percentage: number;
   discount_amount: number;
-  
+
   // Inventory
   track_inventory: boolean;
   total_quantity?: number;
-  
+
   // Display
   is_active: boolean;
   show_savings: boolean;
   show_individual_prices: boolean;
-  
+
   created_at: string;
   updated_at: string;
 }
 
 export interface ProductBundleBuilderProps {
+  storeId?: string;
   initialBundle?: ProductBundle;
   onSave?: (bundle: ProductBundle) => void;
   className?: string;
 }
 
-// ============================================================================
-// MOCK PRODUCTS FOR SELECTION
-// ============================================================================
-
-const MOCK_PRODUCTS = [
-  {
-    id: 'prod_1',
-    name: 'T-Shirt Premium',
-    variant_label: 'Rouge / M',
-    sku: 'TSH-RED-M',
-    price: 15000,
-    image_url: undefined,
-  },
-  {
-    id: 'prod_2',
-    name: 'Jeans Classic',
-    sku: 'JNS-BLU-32',
-    price: 35000,
-    image_url: undefined,
-  },
-  {
-    id: 'prod_3',
-    name: 'Sneakers Pro',
-    variant_label: 'Blanc / 42',
-    sku: 'SNK-WHT-42',
-    price: 45000,
-    image_url: undefined,
-  },
-  {
-    id: 'prod_4',
-    name: 'Casquette Sport',
-    sku: 'CAP-BLK',
-    price: 8000,
-    image_url: undefined,
-  },
-  {
-    id: 'prod_5',
-    name: 'Montre Classique',
-    sku: 'WTC-SLV',
-    price: 75000,
-    image_url: undefined,
-  },
-];
+type PickerProduct = {
+  id: string;
+  name: string;
+  variant_label?: string;
+  sku?: string;
+  price: number;
+  image_url?: string;
+};
 
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================
 
 export function ProductBundleBuilder({
+  storeId: storeIdProp,
   initialBundle,
   onSave,
   className,
 }: ProductBundleBuilderProps) {
+  const { store } = useStore();
+  const storeId = storeIdProp ?? store?.id ?? '';
+  const { data: physicalProducts, isLoading: productsLoading } = usePhysicalProducts(storeId);
+
+  const pickerProducts = useMemo<PickerProduct[]>(() => {
+    return (physicalProducts ?? []).map(p => ({
+      id: p.product_id,
+      name: p.product?.name ?? p.name ?? 'Produit',
+      sku: p.sku ?? undefined,
+      price: p.product?.price ?? p.price ?? 0,
+      image_url: p.product?.image_url ?? p.image_url ?? undefined,
+    }));
+  }, [physicalProducts]);
   const isMobile = useIsMobile();
   const { useBottomSheet } = useResponsiveModal();
   const [bundle, setBundle] = useState<Partial<ProductBundle>>(
@@ -194,8 +177,8 @@ export function ProductBundleBuilder({
   };
 
   // Add product to bundle
-  const handleAddProduct = (product: typeof MOCK_PRODUCTS[0]) => {
-    const  newBundleProduct: BundleProduct = {
+  const handleAddProduct = (product: PickerProduct) => {
+    const newBundleProduct: BundleProduct = {
       product_id: product.id,
       product_name: product.name,
       variant_label: product.variant_label,
@@ -218,7 +201,7 @@ export function ProductBundleBuilder({
 
   // Remove product
   const handleRemoveProduct = (productId: string) => {
-    const newProducts = (bundle.products || []).filter((p) => p.product_id !== productId);
+    const newProducts = (bundle.products || []).filter(p => p.product_id !== productId);
     const prices = calculatePrices(newProducts);
 
     setBundle({
@@ -230,7 +213,7 @@ export function ProductBundleBuilder({
 
   // Update quantity
   const handleUpdateQuantity = (productId: string, quantity: number) => {
-    const newProducts = (bundle.products || []).map((p) =>
+    const newProducts = (bundle.products || []).map(p =>
       p.product_id === productId ? { ...p, quantity: Math.max(1, quantity) } : p
     );
     const prices = calculatePrices(newProducts);
@@ -254,10 +237,7 @@ export function ProductBundleBuilder({
 
   // Apply discount percentage
   const handleApplyDiscountPercentage = (percentage: number) => {
-    const originalPrice = (bundle.products || []).reduce(
-      (sum, p) => sum + p.price * p.quantity,
-      0
-    );
+    const originalPrice = (bundle.products || []).reduce((sum, p) => sum + p.price * p.quantity, 0);
     const discountAmount = (originalPrice * percentage) / 100;
     const bundlePrice = originalPrice - discountAmount;
 
@@ -277,7 +257,7 @@ export function ProductBundleBuilder({
       return;
     }
 
-    const  finalBundle: ProductBundle = {
+    const finalBundle: ProductBundle = {
       id: bundle.id || `bundle_${Date.now()}`,
       name: bundle.name,
       description: bundle.description,
@@ -305,8 +285,8 @@ export function ProductBundleBuilder({
 
   // Filter products for picker with debounce and memoization
   const availableProducts = useMemo(() => {
-    return MOCK_PRODUCTS.filter((p) => {
-      if (bundle.products?.some((bp) => bp.product_id === p.id)) return false;
+    return pickerProducts.filter(p => {
+      if (bundle.products?.some(bp => bp.product_id === p.id)) return false;
       if (debouncedSearchQuery) {
         const query = debouncedSearchQuery.toLowerCase();
         return (
@@ -317,7 +297,61 @@ export function ProductBundleBuilder({
       }
       return true;
     });
-  }, [bundle.products, debouncedSearchQuery]);
+  }, [bundle.products, debouncedSearchQuery, pickerProducts]);
+
+  const productPickerContent = productsLoading ? (
+    <div className="space-y-2 py-4">
+      {[...Array(4)].map((_, i) => (
+        <Skeleton key={i} className="h-20 w-full" />
+      ))}
+    </div>
+  ) : availableProducts.length === 0 ? (
+    <div className="text-center py-8 text-muted-foreground">
+      <AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
+      <p>
+        {pickerProducts.length === 0
+          ? 'Aucun produit physique dans la boutique'
+          : 'Aucun produit disponible'}
+      </p>
+    </div>
+  ) : (
+    <div className="max-h-[400px] overflow-y-auto space-y-2">
+      {availableProducts.map(product => (
+        <Card
+          key={product.id}
+          className={cn(
+            'cursor-pointer hover:border-primary transition-transform',
+            useBottomSheet && 'active:scale-[0.98]'
+          )}
+          onClick={() => {
+            handleAddProduct(product);
+            setShowProductPicker(false);
+            setSearchQuery('');
+          }}
+        >
+          <CardContent className="p-4">
+            <div className="flex items-center gap-4">
+              <div className="h-16 w-16 rounded bg-muted flex items-center justify-center flex-shrink-0">
+                <Package className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium truncate">{product.name}</p>
+                {product.variant_label && (
+                  <p className="text-sm text-muted-foreground truncate">{product.variant_label}</p>
+                )}
+                {product.sku && (
+                  <p className="text-xs text-muted-foreground font-mono truncate">{product.sku}</p>
+                )}
+              </div>
+              <div className="text-right flex-shrink-0">
+                <p className="text-lg font-bold">{product.price.toLocaleString()} XOF</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
 
   return (
     <div className={cn('space-y-6', className)}>
@@ -345,10 +379,10 @@ export function ProductBundleBuilder({
               name="bundle-name"
               type="text"
               value={bundle.name || ''}
-              onChange={(value) => setBundle({ ...bundle, name: value })}
+              onChange={value => setBundle({ ...bundle, name: value })}
               required
               fieldProps={{
-                placeholder: "Ex: Pack Sportif Complet",
+                placeholder: 'Ex: Pack Sportif Complet',
               }}
             />
 
@@ -357,7 +391,7 @@ export function ProductBundleBuilder({
               name="bundle-type"
               type="select"
               value={bundle.type || 'fixed'}
-              onChange={(value) => setBundle({ ...bundle, type: value as BundleType })}
+              onChange={value => setBundle({ ...bundle, type: value as BundleType })}
               selectOptions={[
                 { value: 'fixed', label: 'Fixe (tous les produits inclus)' },
                 { value: 'flexible', label: 'Flexible (client choisit)' },
@@ -371,9 +405,9 @@ export function ProductBundleBuilder({
             name="description"
             type="textarea"
             value={bundle.description || ''}
-            onChange={(value) => setBundle({ ...bundle, description: value })}
+            onChange={value => setBundle({ ...bundle, description: value })}
             fieldProps={{
-              placeholder: "Décrivez le pack et ses avantages...",
+              placeholder: 'Décrivez le pack et ses avantages...',
               rows: 2,
             }}
           />
@@ -393,29 +427,30 @@ export function ProductBundleBuilder({
               </Button>
             </div>
 
-            {(!bundle.products || bundle.products.length === 0) ? (
+            {!bundle.products || bundle.products.length === 0 ? (
               <div className="text-center py-12 border-2 border-dashed rounded-lg">
                 <ShoppingBag className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-                <p className="text-lg font-medium text-muted-foreground mb-2">
-                  Aucun produit
-                </p>
+                <p className="text-lg font-medium text-muted-foreground mb-2">Aucun produit</p>
                 <p className="text-sm text-muted-foreground mb-4">
                   Ajoutez des produits pour créer votre pack
                 </p>
-                <Button onClick={() => setShowProductPicker(true)} className="gap-2 w-full sm:w-auto">
+                <Button
+                  onClick={() => setShowProductPicker(true)}
+                  className="gap-2 w-full sm:w-auto"
+                >
                   <Plus className="h-4 w-4" />
                   Ajouter des produits
                 </Button>
               </div>
             ) : isMobile ? (
               <MobileTableCard
-                data={bundle.products.map((p) => ({ id: p.product_id, ...p }))}
+                data={bundle.products.map(p => ({ id: p.product_id, ...p }))}
                 columns={[
                   {
                     key: 'product_name',
                     header: 'Produit',
                     priority: 'high',
-                    render: (row) => (
+                    render: row => (
                       <div className="flex items-center gap-3">
                         {row.image_url ? (
                           <img
@@ -444,7 +479,7 @@ export function ProductBundleBuilder({
                     key: 'price',
                     header: 'Prix Unitaire',
                     priority: 'high',
-                    render: (row) => (
+                    render: row => (
                       <span className="font-medium">{row.price.toLocaleString()} XOF</span>
                     ),
                   },
@@ -452,14 +487,12 @@ export function ProductBundleBuilder({
                     key: 'quantity',
                     header: 'Quantité',
                     priority: 'high',
-                    render: (row) => (
+                    render: row => (
                       <Input
                         type="number"
                         min="1"
                         value={row.quantity}
-                        onChange={(e) =>
-                          handleUpdateQuantity(row.product_id, Number(e.target.value))
-                        }
+                        onChange={e => handleUpdateQuantity(row.product_id, Number(e.target.value))}
                         className="w-20 min-h-[44px]"
                       />
                     ),
@@ -468,7 +501,7 @@ export function ProductBundleBuilder({
                     key: 'subtotal',
                     header: 'Sous-total',
                     priority: 'high',
-                    render: (row) => (
+                    render: row => (
                       <span className="font-bold">
                         {(row.price * row.quantity).toLocaleString()} XOF
                       </span>
@@ -476,7 +509,7 @@ export function ProductBundleBuilder({
                     className: 'font-bold',
                   },
                 ]}
-                actions={(row) => (
+                actions={row => (
                   <Button
                     variant="ghost"
                     size="sm"
@@ -500,7 +533,7 @@ export function ProductBundleBuilder({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {bundle.products.map((product) => (
+                    {bundle.products.map(product => (
                       <TableRow key={product.product_id}>
                         <TableCell>
                           <div className="flex items-center gap-3">
@@ -532,9 +565,7 @@ export function ProductBundleBuilder({
                         </TableCell>
 
                         <TableCell>
-                          <span className="font-medium">
-                            {product.price.toLocaleString()} XOF
-                          </span>
+                          <span className="font-medium">{product.price.toLocaleString()} XOF</span>
                         </TableCell>
 
                         <TableCell>
@@ -542,7 +573,7 @@ export function ProductBundleBuilder({
                             type="number"
                             min="1"
                             value={product.quantity}
-                            onChange={(e) =>
+                            onChange={e =>
                               handleUpdateQuantity(product.product_id, Number(e.target.value))
                             }
                             className="w-20"
@@ -593,11 +624,11 @@ export function ProductBundleBuilder({
                       name="bundle-price"
                       type="number"
                       value={bundle.bundle_price || 0}
-                      onChange={(value) => handleUpdateBundlePrice(Number(value))}
+                      onChange={value => handleUpdateBundlePrice(Number(value))}
                       required
                       fieldProps={{
                         min: 0,
-                        className: "text-lg sm:text-xl font-bold",
+                        className: 'text-lg sm:text-xl font-bold',
                       }}
                     />
                   </div>
@@ -612,12 +643,15 @@ export function ProductBundleBuilder({
                         max="100"
                         step="5"
                         value={bundle.discount_percentage?.toFixed(0) || 0}
-                        onChange={(e) => handleApplyDiscountPercentage(Number(e.target.value))}
+                        onChange={e => handleApplyDiscountPercentage(Number(e.target.value))}
                         className="min-h-[44px] flex-1"
                       />
-                      <Badge variant="destructive" className="text-base sm:text-lg px-3 sm:px-4 flex items-center gap-2 justify-center min-h-[44px]">
-                        <TrendingDown className="h-4 w-4" />
-                        -{bundle.discount_percentage?.toFixed(0)}%
+                      <Badge
+                        variant="destructive"
+                        className="text-base sm:text-lg px-3 sm:px-4 flex items-center gap-2 justify-center min-h-[44px]"
+                      >
+                        <TrendingDown className="h-4 w-4" />-
+                        {bundle.discount_percentage?.toFixed(0)}%
                       </Badge>
                     </div>
                   </div>
@@ -664,7 +698,7 @@ export function ProductBundleBuilder({
                 </div>
                 <Switch
                   checked={bundle.show_savings}
-                  onCheckedChange={(checked) => setBundle({ ...bundle, show_savings: checked })}
+                  onCheckedChange={checked => setBundle({ ...bundle, show_savings: checked })}
                 />
               </div>
 
@@ -680,7 +714,7 @@ export function ProductBundleBuilder({
                 </div>
                 <Switch
                   checked={bundle.show_individual_prices}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={checked =>
                     setBundle({ ...bundle, show_individual_prices: checked })
                   }
                 />
@@ -698,7 +732,7 @@ export function ProductBundleBuilder({
                 </div>
                 <Switch
                   checked={bundle.is_active}
-                  onCheckedChange={(checked) => setBundle({ ...bundle, is_active: checked })}
+                  onCheckedChange={checked => setBundle({ ...bundle, is_active: checked })}
                 />
               </div>
             </div>
@@ -720,52 +754,13 @@ export function ProductBundleBuilder({
                 <Input
                   placeholder="Rechercher un produit..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={e => setSearchQuery(e.target.value)}
                   className="pl-10 min-h-[44px] h-11"
                   aria-label="Rechercher un produit à ajouter au pack"
                 />
               </div>
 
-              {availableProducts.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Aucun produit disponible</p>
-                </div>
-              ) : (
-                <div className="max-h-[400px] overflow-y-auto space-y-2">
-                  {availableProducts.map((product) => (
-                    <Card
-                      key={product.id}
-                      className="cursor-pointer hover:border-primary active:scale-[0.98] transition-transform"
-                      onClick={() => {
-                        handleAddProduct(product);
-                        setShowProductPicker(false);
-                        setSearchQuery('');
-                      }}
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex items-center gap-4">
-                          <div className="h-16 w-16 rounded bg-muted flex items-center justify-center flex-shrink-0">
-                            <Package className="h-8 w-8 text-muted-foreground" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium truncate">{product.name}</p>
-                            {product.variant_label && (
-                              <p className="text-sm text-muted-foreground truncate">{product.variant_label}</p>
-                            )}
-                            {product.sku && (
-                              <p className="text-xs text-muted-foreground font-mono truncate">{product.sku}</p>
-                            )}
-                          </div>
-                          <div className="text-right flex-shrink-0">
-                            <p className="text-lg font-bold">{product.price.toLocaleString()} XOF</p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
+              {productPickerContent}
             </div>
           </BottomSheetContent>
         </BottomSheet>
@@ -785,69 +780,27 @@ export function ProductBundleBuilder({
                 <Input
                   placeholder="Rechercher un produit..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={e => setSearchQuery(e.target.value)}
                   className="pl-10 min-h-[44px] h-11"
                   aria-label="Rechercher un produit à ajouter au pack"
                 />
               </div>
 
-            {availableProducts.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>Aucun produit disponible</p>
-              </div>
-            ) : (
-              <div className="max-h-[400px] overflow-y-auto space-y-2">
-                {availableProducts.map((product) => (
-                  <Card
-                    key={product.id}
-                    className="cursor-pointer hover:border-primary"
-                    onClick={() => {
-                      handleAddProduct(product);
-                      setShowProductPicker(false);
-                      setSearchQuery('');
-                    }}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-4">
-                        <div className="h-16 w-16 rounded bg-muted flex items-center justify-center">
-                          <Package className="h-8 w-8 text-muted-foreground" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="font-medium">{product.name}</p>
-                          {product.variant_label && (
-                            <p className="text-sm text-muted-foreground">{product.variant_label}</p>
-                          )}
-                          {product.sku && (
-                            <p className="text-xs text-muted-foreground font-mono">{product.sku}</p>
-                          )}
-                        </div>
-                        <div className="text-right">
-                          <p className="text-lg font-bold">{product.price.toLocaleString()} XOF</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </div>
+              {productPickerContent}
+            </div>
 
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setShowProductPicker(false)} className="w-full sm:w-auto">
-                  Fermer
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setShowProductPicker(false)}
+                className="w-full sm:w-auto"
+              >
+                Fermer
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );
 }
-
-
-
-
-
-
-

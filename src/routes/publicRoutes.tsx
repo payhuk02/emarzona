@@ -50,6 +50,7 @@ const NotFound = lazyPage(() => import('@/pages/NotFound'));
 const StatusPage = lazyPage(() => import('@/pages/StatusPage'));
 const CourseDetail = lazyPage(() => import('@/pages/courses/CourseDetail'));
 const CoursesCatalog = lazyPage(() => import('@/pages/courses/CoursesCatalog'));
+const ArtistWorksCatalog = lazyPage(() => import('@/pages/artist/ArtistWorksCatalog'));
 const DigitalProductDetail = lazyPage(() => import('@/pages/digital/DigitalProductDetail'));
 const DigitalProductsSearch = lazyPage(() =>
   import('@/pages/digital/DigitalProductsSearch').then(
@@ -272,6 +273,7 @@ export const publicRoutes = (
     <Route path="/portfolio/:slug" element={<ArtistPortfolioPage />} />
     <Route path="/courses" element={<CoursesCatalog />} />
     <Route path="/courses/:slug" element={<CourseDetail />} />
+    <Route path="/art" element={<ArtistWorksCatalog />} />
     <Route path="/learn/:slug" element={<CourseDetail learnMode />} />
 
     {/* Collections & Enchères */}

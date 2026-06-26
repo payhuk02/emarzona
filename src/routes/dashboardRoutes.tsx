@@ -205,6 +205,9 @@ const MyDownloads = lazyPage(() => import('@/pages/digital/MyDownloads'));
 const DigitalBundlesManagement = lazyPage(
   () => import('@/pages/dashboard/DigitalBundlesManagement')
 );
+const CrossTypeBundlesPage = lazyPage(
+  () => import('@/pages/dashboard/bundles/CrossTypeBundlesPage')
+);
 const CreateBundle = lazyPage(() => import('@/pages/digital/CreateBundle'));
 const MyLicenses = lazyPage(() => import('@/pages/digital/MyLicenses'));
 const LicenseManagement = lazyPage(() => import('@/pages/digital/LicenseManagement'));
@@ -414,6 +417,7 @@ export const dashboardRoutes = (
     {pr('/dashboard/digital-products', DigitalProductsList)}
     {pr('/dashboard/my-downloads', MyDownloads)}
     {pr('/dashboard/digital-products/bundles', DigitalBundlesManagement)}
+    {pr('/dashboard/cross-type-bundles', CrossTypeBundlesPage)}
     {pr('/dashboard/digital-products/bundles/create', CreateBundle)}
     {pr('/dashboard/my-licenses', MyLicenses)}
     {pr('/dashboard/license-management', LicenseManagement)}

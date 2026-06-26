@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Select,
   SelectContent,
@@ -42,6 +43,7 @@ import {
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { useStoreStockMovementHistory } from '@/hooks/physical/useStoreStockMovementHistory';
 
 // ============================================================================
 // TYPES
@@ -93,7 +95,7 @@ export interface StockMovementHistoryProps {
 // HELPERS
 // ============================================================================
 
-const  MOVEMENT_CONFIG: Record<
+const MOVEMENT_CONFIG: Record<
   MovementType,
   {
     label: string;
@@ -147,97 +149,6 @@ const  MOVEMENT_CONFIG: Record<
 };
 
 // ============================================================================
-// MOCK DATA (Replace with actual hook/API call)
-// ============================================================================
-
-const  MOCK_MOVEMENTS: StockMovement[] = [
-  {
-    id: 'mov_1',
-    product_id: 'prod_1',
-    product_name: 'T-Shirt Premium',
-    variant_label: 'Rouge / M',
-    sku: 'TSH-RED-M',
-    type: 'sale',
-    direction: 'out',
-    quantity: 3,
-    quantity_before: 50,
-    quantity_after: 47,
-    reason: 'Vente commande #12345',
-    reference_id: 'order_12345',
-    reference_type: 'order',
-    user_name: 'Client: Marie Diallo',
-    created_at: new Date('2025-10-29T10:30:00').toISOString(),
-  },
-  {
-    id: 'mov_2',
-    product_id: 'prod_1',
-    product_name: 'T-Shirt Premium',
-    variant_label: 'Bleu / L',
-    sku: 'TSH-BLU-L',
-    type: 'purchase',
-    direction: 'in',
-    quantity: 100,
-    quantity_before: 5,
-    quantity_after: 105,
-    reason: 'Réapprovisionnement fournisseur XYZ',
-    reference_id: 'purchase_456',
-    reference_type: 'purchase',
-    user_name: 'Admin: Jean Kouadio',
-    location_to: 'Entrepôt Ouagadougou',
-    created_at: new Date('2025-10-28T14:15:00').toISOString(),
-  },
-  {
-    id: 'mov_3',
-    product_id: 'prod_1',
-    product_name: 'T-Shirt Premium',
-    variant_label: 'Vert / S',
-    sku: 'TSH-GRN-S',
-    type: 'adjustment',
-    direction: 'out',
-    quantity: 2,
-    quantity_before: 30,
-    quantity_after: 28,
-    reason: 'Inventaire physique - correction',
-    reference_type: 'manual',
-    user_name: 'Admin: Jean Kouadio',
-    created_at: new Date('2025-10-27T16:45:00').toISOString(),
-  },
-  {
-    id: 'mov_4',
-    product_id: 'prod_1',
-    product_name: 'T-Shirt Premium',
-    variant_label: 'Rouge / M',
-    sku: 'TSH-RED-M',
-    type: 'return',
-    direction: 'in',
-    quantity: 1,
-    quantity_before: 47,
-    quantity_after: 48,
-    reason: 'Retour client - taille incorrecte',
-    reference_id: 'order_12340',
-    reference_type: 'return',
-    user_name: 'Client: Amadou Traoré',
-    created_at: new Date('2025-10-26T11:20:00').toISOString(),
-  },
-  {
-    id: 'mov_5',
-    product_id: 'prod_1',
-    product_name: 'T-Shirt Premium',
-    variant_label: 'Noir / XL',
-    sku: 'TSH-BLK-XL',
-    type: 'damage',
-    direction: 'out',
-    quantity: 5,
-    quantity_before: 80,
-    quantity_after: 75,
-    reason: 'Produits endommagés lors du transport',
-    reference_type: 'manual',
-    user_name: 'Admin: Fatou Sow',
-    created_at: new Date('2025-10-25T09:00:00').toISOString(),
-  },
-];
-
-// ============================================================================
 // MAIN COMPONENT
 // ============================================================================
 
@@ -248,7 +159,14 @@ export function StockMovementHistory({
   maxHeight = '600px',
   className,
 }: StockMovementHistoryProps) {
-  const [movements] = useState<StockMovement[]>(MOCK_MOVEMENTS);
+  const {
+    data: movements = [],
+    isLoading,
+    isError,
+  } = useStoreStockMovementHistory(storeId, {
+    productId,
+    limit: 200,
+  });
   const [filterType, setFilterType] = useState<MovementType | 'all'>('all');
   const [filterDirection, setFilterDirection] = useState<MovementDirection | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -256,31 +174,31 @@ export function StockMovementHistory({
 
   // Filter movements
   const filteredMovements = React.useMemo(() => {
-    let  filtered= [...movements];
+    let filtered = [...movements];
 
     // Product/Variant filter
     if (productId) {
-      filtered = filtered.filter((m) => m.product_id === productId);
+      filtered = filtered.filter(m => m.product_id === productId);
     }
     if (variantId) {
-      filtered = filtered.filter((m) => m.variant_id === variantId);
+      filtered = filtered.filter(m => m.variant_id === variantId);
     }
 
     // Type filter
     if (filterType !== 'all') {
-      filtered = filtered.filter((m) => m.type === filterType);
+      filtered = filtered.filter(m => m.type === filterType);
     }
 
     // Direction filter
     if (filterDirection !== 'all') {
-      filtered = filtered.filter((m) => m.direction === filterDirection);
+      filtered = filtered.filter(m => m.direction === filterDirection);
     }
 
     // Search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
-        (m) =>
+        m =>
           m.product_name.toLowerCase().includes(query) ||
           m.variant_label?.toLowerCase().includes(query) ||
           m.sku?.toLowerCase().includes(query) ||
@@ -295,10 +213,10 @@ export function StockMovementHistory({
   // Stats
   const stats = React.useMemo(() => {
     const totalIn = filteredMovements
-      .filter((m) => m.direction === 'in')
+      .filter(m => m.direction === 'in')
       .reduce((sum, m) => sum + m.quantity, 0);
     const totalOut = filteredMovements
-      .filter((m) => m.direction === 'out')
+      .filter(m => m.direction === 'out')
       .reduce((sum, m) => sum + m.quantity, 0);
 
     return {
@@ -308,6 +226,32 @@ export function StockMovementHistory({
       netChange: totalIn - totalOut,
     };
   }, [filteredMovements]);
+
+  if (isLoading) {
+    return (
+      <div className={cn('space-y-4', className)}>
+        <div className="grid gap-4 md:grid-cols-4">
+          {[1, 2, 3, 4].map(i => (
+            <Skeleton key={i} className="h-24" />
+          ))}
+        </div>
+        <Skeleton className="h-64" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div
+        className={cn(
+          'rounded-lg border border-dashed p-8 text-center text-muted-foreground',
+          className
+        )}
+      >
+        Impossible de charger l&apos;historique des mouvements de stock.
+      </div>
+    );
+  }
 
   return (
     <div className={cn('space-y-4', className)}>
@@ -380,12 +324,15 @@ export function StockMovementHistory({
             <Input
               placeholder="Rechercher par produit, SKU, raison..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={e => setSearchQuery(e.target.value)}
               className="flex-1"
             />
 
             {/* Type Filter */}
-            <Select value={filterType} onValueChange={(value: MovementType | 'all') => setFilterType(value)}>
+            <Select
+              value={filterType}
+              onValueChange={(value: MovementType | 'all') => setFilterType(value)}
+            >
               <SelectTrigger className="w-full md:w-[180px]">
                 <Filter className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Type" />
@@ -403,7 +350,10 @@ export function StockMovementHistory({
             </Select>
 
             {/* Direction Filter */}
-            <Select value={filterDirection} onValueChange={(value: MovementDirection | 'all') => setFilterDirection(value)}>
+            <Select
+              value={filterDirection}
+              onValueChange={(value: MovementDirection | 'all') => setFilterDirection(value)}
+            >
               <SelectTrigger className="w-full md:w-[150px]">
                 <SelectValue placeholder="Direction" />
               </SelectTrigger>
@@ -449,7 +399,7 @@ export function StockMovementHistory({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredMovements.map((movement) => {
+                    {filteredMovements.map(movement => {
                       const config = MOVEMENT_CONFIG[movement.type];
                       const Icon = config.icon;
 
@@ -515,9 +465,7 @@ export function StockMovementHistory({
                             <div
                               className={cn(
                                 'font-bold',
-                                movement.direction === 'in'
-                                  ? 'text-green-600'
-                                  : 'text-red-600'
+                                movement.direction === 'in' ? 'text-green-600' : 'text-red-600'
                               )}
                             >
                               {movement.direction === 'in' ? '+' : '-'}
@@ -549,9 +497,7 @@ export function StockMovementHistory({
                             {movement.user_name && (
                               <div className="flex items-center gap-2 text-sm">
                                 <User className="h-3 w-3 text-muted-foreground" />
-                                <span className="truncate max-w-[150px]">
-                                  {movement.user_name}
-                                </span>
+                                <span className="truncate max-w-[150px]">{movement.user_name}</span>
                               </div>
                             )}
                           </TableCell>
@@ -719,10 +665,3 @@ export function StockMovementHistory({
 function Label({ className, children }: { className?: string; children: React.ReactNode }) {
   return <div className={cn('text-sm font-medium', className)}>{children}</div>;
 }
-
-
-
-
-
-
-

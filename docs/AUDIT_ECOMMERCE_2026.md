@@ -324,8 +324,12 @@ npm run typecheck:commerce-core
 
 ## Historique document
 
-| Date       | Action                                                                                     |
-| ---------- | ------------------------------------------------------------------------------------------ |
-| 2026-05-23 | Création audit + sprint 1 (doc, E2E, fix availabilities)                                   |
-| 2026-06-24 | Phase 0 : fulfillment monitor, idempotence webhooks, scripts `verify:phase0`               |
-| 2026-06-26 | Phase 1 : pagination `AdminProducts`, `ShippingDashboard` données réelles, `verify:phase1` |
+| Date       | Action                                                                                                      |
+| ---------- | ----------------------------------------------------------------------------------------------------------- |
+| 2026-05-23 | Création audit + sprint 1 (doc, E2E, fix availabilities)                                                    |
+| 2026-06-24 | Phase 0 : fulfillment monitor, idempotence webhooks, scripts `verify:phase0`                                |
+| 2026-06-26 | Phase 1 : pagination `AdminProducts`, `ShippingDashboard` données réelles, `verify:phase1`                  |
+| 2026-06-26 | Inventaire vendeur : mocks retirés (`InventoryDashboard`, `StockMovementHistory`, `BulkInventoryUpdate`)    |
+| 2026-06-26 | Admin paginé : `AdminPayments`, `AdminApiKeys`, `AdminDomains`, `AdminTransactionReconciliation`            |
+| 2026-06-26 | Phase 2 : `usePhysicalProductDetail`, landing `/art`, SEO ItemList, analytics trends réels, `verify:phase2` |
+| 2026-06-26 | Phase 3 : bundles cross-type checkout, DRM v2 policy, client API vendeur v1, `verify:phase3`                |

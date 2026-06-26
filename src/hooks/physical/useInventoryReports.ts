@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-const REPORT_PHYSICAL_PRODUCT_FIELDS = 'id, store_id, name, sku, price, cost_price, total_quantity, low_stock_threshold, track_inventory';
+const REPORT_PHYSICAL_PRODUCT_FIELDS =
+  'id, store_id, name, sku, price, cost_price, total_quantity, low_stock_threshold, track_inventory';
 
 // ============================================================================
 // TYPES
@@ -110,10 +111,13 @@ export interface LowStockForecast {
 // MAIN INVENTORY REPORT
 // ============================================================================
 
-export function useInventoryReport(storeId: string, dateRange?: {
-  start: string;
-  end: string;
-}) {
+export function useInventoryReport(
+  storeId: string,
+  dateRange?: {
+    start: string;
+    end: string;
+  }
+) {
   return useQuery({
     queryKey: ['inventory-report', storeId, dateRange],
     queryFn: async () => {
@@ -125,34 +129,37 @@ export function useInventoryReport(storeId: string, dateRange?: {
 
       if (productsError) throw productsError;
 
-      // Mock data for now (replace with actual calculations from database)
-      const  report: InventoryReportData = {
+      const productList = products ?? [];
+      const totalQuantity = productList.reduce((sum, p) => sum + (p.total_quantity || 0), 0);
+      const totalStockValue = productList.reduce(
+        (sum, p) => sum + (p.total_quantity || 0) * (p.price || 0),
+        0
+      );
+
+      const report: InventoryReportData = {
         // Overview
-        total_products: products?.length || 0,
+        total_products: productList.length,
         total_variants: 0, // TODO: Count from variants table
-        total_stock_value: 0,
-        total_quantity: (products || []).reduce(
-          (sum, p) => sum + (p.total_quantity || 0),
-          0
-        ),
-        avg_stock_per_product: 0,
+        total_stock_value: totalStockValue,
+        total_quantity: totalQuantity,
+        avg_stock_per_product: productList.length > 0 ? totalQuantity / productList.length : 0,
 
         // Stock Status
         in_stock_count: (products || []).filter(
-          (p) =>
+          p =>
             p.track_inventory &&
             p.total_quantity &&
             p.total_quantity > (p.low_stock_threshold || 10)
         ).length,
         low_stock_count: (products || []).filter(
-          (p) =>
+          p =>
             p.track_inventory &&
             p.total_quantity &&
             p.total_quantity > 0 &&
             p.total_quantity <= (p.low_stock_threshold || 10)
         ).length,
         out_of_stock_count: (products || []).filter(
-          (p) => p.track_inventory && (p.total_quantity === 0 || !p.total_quantity)
+          p => p.track_inventory && (p.total_quantity === 0 || !p.total_quantity)
         ).length,
         overstock_count: 0, // TODO: Define overstock threshold
 
@@ -161,7 +168,7 @@ export function useInventoryReport(storeId: string, dateRange?: {
           // TODO: Calculate from orders/sales
         ],
         top_stock_value_products: (products || [])
-          .map((p) => ({
+          .map(p => ({
             product_id: p.id,
             product_name: p.name,
             stock_quantity: p.total_quantity || 0,
@@ -173,13 +180,13 @@ export function useInventoryReport(storeId: string, dateRange?: {
         // Low Stock Products
         low_stock_products: (products || [])
           .filter(
-            (p) =>
+            p =>
               p.track_inventory &&
               p.total_quantity &&
               p.total_quantity > 0 &&
               p.total_quantity <= (p.low_stock_threshold || 10)
           )
-          .map((p) => ({
+          .map(p => ({
             product_id: p.id,
             product_name: p.name,
             sku: p.sku,
@@ -225,7 +232,7 @@ export function useStockValuationReport(storeId: string) {
 
       if (error) throw error;
 
-      const  items: StockValuationReport['items'] = (products || []).map((p) => {
+      const items: StockValuationReport['items'] = (products || []).map(p => {
         const quantity = p.total_quantity || 0;
         const unit_cost = p.cost_price || 0;
         const unit_price = p.price || 0;
@@ -246,7 +253,7 @@ export function useStockValuationReport(storeId: string) {
         };
       });
 
-      const  report: StockValuationReport = {
+      const report: StockValuationReport = {
         total_value: items.reduce((sum, i) => sum + i.total_value, 0),
         total_cost: items.reduce((sum, i) => sum + i.total_cost, 0),
         potential_profit: items.reduce((sum, i) => sum + i.potential_profit, 0),
@@ -281,7 +288,7 @@ export function useTurnoverReport(storeId: string, periodDays: number = 30) {
       // Fetch order items for these products in the period
       const periodStart = new Date();
       periodStart.setDate(periodStart.getDate() - periodDays);
-      
+
       const productIds = (products || []).map(p => p.id);
       const { data: orderItems } = await supabase
         .from('order_items')
@@ -296,13 +303,13 @@ export function useTurnoverReport(storeId: string, periodDays: number = 30) {
         salesMap.set(item.product_id, existing + (item.quantity || 0));
       });
 
-      const  reportProducts: TurnoverReport['products'] = (products || []).map((p) => {
+      const reportProducts: TurnoverReport['products'] = (products || []).map(p => {
         const avg_stock = p.total_quantity || 0;
         const total_sold = salesMap.get(p.id) || 0;
         const turnover_ratio = avg_stock > 0 ? total_sold / avg_stock : 0;
         const turnover_days = turnover_ratio > 0 ? periodDays / turnover_ratio : 0;
 
-        let  status: 'fast' | 'normal' | 'slow' | 'dead' = 'normal';
+        let status: 'fast' | 'normal' | 'slow' | 'dead' = 'normal';
         if (turnover_ratio === 0) status = 'dead';
         else if (turnover_days < 7) status = 'fast';
         else if (turnover_days > 90) status = 'slow';
@@ -319,7 +326,7 @@ export function useTurnoverReport(storeId: string, periodDays: number = 30) {
         };
       });
 
-      const  report: TurnoverReport = {
+      const report: TurnoverReport = {
         period_days: periodDays,
         products: reportProducts.sort((a, b) => b.turnover_ratio - a.turnover_ratio),
       };
@@ -350,7 +357,7 @@ export function useLowStockForecast(storeId: string, forecastDays: number = 30) 
       // Fetch order items for sales calculation
       const periodStart = new Date();
       periodStart.setDate(periodStart.getDate() - forecastDays);
-      
+
       const productIds = (products || []).map(p => p.id);
       const { data: orderItems } = await supabase
         .from('order_items')
@@ -365,9 +372,9 @@ export function useLowStockForecast(storeId: string, forecastDays: number = 30) 
         salesMap.set(item.product_id, existing + (item.quantity || 0));
       });
 
-      const  forecastProducts: LowStockForecast['products'] = (products || [])
-        .filter((p) => (p.total_quantity || 0) > 0)
-        .map((p) => {
+      const forecastProducts: LowStockForecast['products'] = (products || [])
+        .filter(p => (p.total_quantity || 0) > 0)
+        .map(p => {
           const current_quantity = p.total_quantity || 0;
           const total_sold = salesMap.get(p.id) || 0;
           const avg_daily_sales = forecastDays > 0 ? total_sold / forecastDays : 0;
@@ -392,10 +399,10 @@ export function useLowStockForecast(storeId: string, forecastDays: number = 30) 
             recommended_order_quantity,
           };
         })
-        .filter((p) => p.estimated_days_remaining < forecastDays)
+        .filter(p => p.estimated_days_remaining < forecastDays)
         .sort((a, b) => a.estimated_days_remaining - b.estimated_days_remaining);
 
-      const  report: LowStockForecast = {
+      const report: LowStockForecast = {
         products: forecastProducts,
       };
 
@@ -411,10 +418,10 @@ export function useLowStockForecast(storeId: string, forecastDays: number = 30) 
 // ============================================================================
 
 export function exportInventoryReportToCSV(report: InventoryReportData, filename?: string) {
-  const  rows: string[][] = [
-    ['Rapport d\'Inventaire'],
+  const rows: string[][] = [
+    ["Rapport d'Inventaire"],
     [],
-    ['Vue d\'Ensemble'],
+    ["Vue d'Ensemble"],
     ['Total Produits', report.total_products.toString()],
     ['Total Variantes', report.total_variants.toString()],
     ['Quantité Totale', report.total_quantity.toString()],
@@ -430,16 +437,11 @@ export function exportInventoryReportToCSV(report: InventoryReportData, filename
     ['Produit', 'SKU', 'Quantité Actuelle', 'Seuil'],
   ];
 
-  report.low_stock_products.forEach((p) => {
-    rows.push([
-      p.product_name,
-      p.sku || '',
-      p.current_quantity.toString(),
-      p.threshold.toString(),
-    ]);
+  report.low_stock_products.forEach(p => {
+    rows.push([p.product_name, p.sku || '', p.current_quantity.toString(), p.threshold.toString()]);
   });
 
-  const csvContent = rows.map((row) => row.join(',')).join('\n');
+  const csvContent = rows.map(row => row.join(',')).join('\n');
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = window.URL.createObjectURL(blob);
   const link = document.createElement('a');
@@ -448,10 +450,3 @@ export function exportInventoryReportToCSV(report: InventoryReportData, filename
   link.click();
   window.URL.revokeObjectURL(url);
 }
-
-
-
-
-
-
-

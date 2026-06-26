@@ -261,12 +261,62 @@ export function useCart() {
     },
   });
 
+  const addCrossTypeBundle = useMutation({
+    mutationFn: async (cartItem: CartItem) => {
+      assertCompatibleCartAddition(items, {
+        product_type: cartItem.product_type,
+        metadata: cartItem.metadata,
+        storeId: getCartItemStoreId(cartItem) ?? undefined,
+      });
+
+      const scope = getCartScope(user, sessionId);
+      const existingItem = await findExistingCartLine(scope, cartItem.product_id, null);
+
+      if (existingItem) {
+        return updateCartItemQuantity(existingItem.id, existingItem.quantity + cartItem.quantity);
+      }
+
+      const metadataRecord =
+        cartItem.metadata && typeof cartItem.metadata === 'object'
+          ? (cartItem.metadata as Record<string, unknown>)
+          : {};
+
+      return insertCartItem({
+        user_id: user?.id ?? null,
+        session_id: user ? null : sessionId,
+        product_id: cartItem.product_id,
+        product_type: cartItem.product_type,
+        product_name: cartItem.product_name,
+        product_image_url: cartItem.product_image_url ?? null,
+        variant_id: null,
+        variant_name: null,
+        quantity: cartItem.quantity,
+        unit_price: cartItem.unit_price,
+        currency: cartItem.currency,
+        metadata: (Object.keys(metadataRecord).length > 0 ? metadataRecord : null) as Json,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
+      toast({
+        title: '✅ Pack ajouté au panier',
+        description: 'Le pack cross-type est prêt pour le checkout.',
+      });
+    },
+    onError: (error: unknown) => {
+      const errorMessage =
+        error instanceof Error ? error.message : "Impossible d'ajouter le pack au panier";
+      toast({ title: '❌ Erreur', description: errorMessage, variant: 'destructive' });
+    },
+  });
+
   return {
     items,
     summary,
     isLoading,
     error: error?.message || null,
     addItem: addItem.mutateAsync,
+    addCrossTypeBundle: addCrossTypeBundle.mutateAsync,
     updateItem: updateItem.mutateAsync,
     removeItem: removeItem.mutateAsync,
     clearCart: clearCart.mutateAsync,

@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { CollectionsGallery } from '@/components/artist/CollectionsGallery';
 import { ArtistPublicPageShell } from '@/components/artist/ArtistPublicPageShell';
 import { usePublicArtistCollections } from '@/hooks/artist/useCollections';
-import { SEOMeta } from '@/components/seo/SEOMeta';
+import { SEOMeta, ItemListSchema } from '@/components/seo';
 import { Search } from 'lucide-react';
 
 const TYPE_FILTERS = [
@@ -40,6 +40,18 @@ const CollectionsPage = () => {
     });
   }, [collections, searchQuery, typeFilter]);
 
+  const schemaItems = useMemo(
+    () =>
+      filteredCollections.slice(0, 20).map(c => ({
+        id: c.id,
+        name: c.collection_name,
+        url: `/collections/${c.collection_slug ?? c.id}`,
+        description: c.collection_description ?? undefined,
+        image: c.cover_image_url ?? undefined,
+      })),
+    [filteredCollections]
+  );
+
   return (
     <ArtistPublicPageShell>
       <SEOMeta
@@ -48,6 +60,16 @@ const CollectionsPage = () => {
         url="https://www.emarzona.com/collections"
         canonical="https://www.emarzona.com/collections"
       />
+
+      {schemaItems.length > 0 && (
+        <ItemListSchema
+          name="Collections d'œuvres Emarzona"
+          description="Galeries thématiques et séries d'artistes sur Emarzona"
+          url="/collections"
+          numberOfItems={filteredCollections.length}
+          items={schemaItems}
+        />
+      )}
 
       <div className="space-y-8">
         <div className="space-y-2">

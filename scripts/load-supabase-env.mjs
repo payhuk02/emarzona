@@ -39,6 +39,15 @@ export function loadSupabaseEnv() {
   return env;
 }
 
+export function getEdgeInternalSecret(env = loadSupabaseEnv()) {
+  const secretFile = join(__dirname, '.edge-internal-secret.local');
+  if (existsSync(secretFile)) {
+    const raw = readFileSync(secretFile, 'utf8').trim();
+    if (raw) return raw;
+  }
+  return env.EDGE_INTERNAL_SECRET?.trim() || null;
+}
+
 export function getSupabaseUrl(env = loadSupabaseEnv()) {
   return env.SUPABASE_URL || env.VITE_SUPABASE_URL || 'https://hbdnzajbyjakdhuavrvb.supabase.co';
 }

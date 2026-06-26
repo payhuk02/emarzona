@@ -8,8 +8,6 @@
 
 import { useParams, useNavigate } from 'react-router-dom';
 import { AppPageShell } from '@/components/layout/AppPageShell';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { SafeHTML } from '@/components/security/SafeHTML';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -68,16 +66,7 @@ import {
   getPhysicalSellableQuantity,
   type PhysicalInventoryRow,
 } from '@/lib/physical/physical-product-display';
-
-const STORE_PUBLIC_FIELDS = 'id, name, slug, logo_url';
-const PRODUCT_PHYSICAL_FIELDS =
-  'id, store_id, slug, name, description, short_description, category, tags, product_type, is_active, price, promotional_price, currency, image_url, images, stock, created_at, updated_at, payment_options, pricing_model, licensing_type, license_terms';
-const PHYSICAL_PRODUCT_FIELDS =
-  'id, product_id, store_id, sku, manufacturer, country_of_origin, weight, weight_unit, height, length, width, dimensions_unit, whatsapp_number, whatsapp_enabled, created_at, updated_at';
-const PHYSICAL_VARIANT_FIELDS =
-  'id, physical_product_id, store_id, name, sku, price, compare_at_price, is_active, attributes, created_at, updated_at';
-const PHYSICAL_INVENTORY_FIELDS =
-  'id, physical_product_id, product_id, store_id, variant_id, quantity, quantity_available, available_quantity, reserved_quantity, quantity_reserved, low_stock_threshold, location, warehouse_id, created_at, updated_at';
+import { usePhysicalProductDetail } from '@/hooks/physical/usePhysicalProductDetail';
 
 // Types pour les APIs externes de tracking
 interface WindowWithGtag extends Window {
@@ -115,84 +104,7 @@ export default function PhysicalProductDetail() {
   // Track analytics event
   const { trackView } = useAnalyticsTracking();
 
-  // Fetch product data with store - OPTIMIZED: Single query with all relations
-  const { data: product, isLoading } = useQuery({
-    queryKey: ['physical-product', productId],
-    queryFn: async () => {
-      // Fetch product with store in one query
-      const { data: productData, error: productError } = await supabase
-        .from('products')
-        .select(
-          `
-          ${PRODUCT_PHYSICAL_FIELDS},
-          stores (
-            ${STORE_PUBLIC_FIELDS}
-          )
-        `
-        )
-        .eq('id', productId)
-        .single();
-
-      if (productError) throw productError;
-
-      // Fetch all related data in parallel (instead of sequential)
-      const [physicalResult, variantsResult, inventoryResult, sizeChartResult] = await Promise.all([
-        supabase
-          .from('physical_products')
-          .select(PHYSICAL_PRODUCT_FIELDS)
-          .eq('product_id', productId)
-          .single(),
-        supabase
-          .from('physical_product_variants')
-          .select(PHYSICAL_VARIANT_FIELDS)
-          .eq('physical_product_id', productData?.id), // Use productData.id if physical_products.id is not available
-        supabase
-          .from('physical_product_inventory')
-          .select(PHYSICAL_INVENTORY_FIELDS)
-          .eq('product_id', productId), // Use product_id directly if available
-        supabase
-          .from('product_size_charts')
-          .select('size_chart_id')
-          .eq('product_id', productId)
-          .limit(1)
-          .maybeSingle(), // Use maybeSingle to avoid error if no size chart
-      ]);
-
-      // Get physical product ID for variants and inventory if needed
-      const physicalData = physicalResult.data;
-      const physicalId = physicalData?.id;
-
-      // If variants/inventory need physical_product_id, refetch with correct ID
-      let variants = variantsResult.data || [];
-      let inventory = inventoryResult.data || [];
-
-      if (physicalId && (!variants.length || !inventory.length)) {
-        // Refetch with physical_product_id if initial query didn't work
-        const [variantsRefetch, inventoryRefetch] = await Promise.all([
-          supabase
-            .from('physical_product_variants')
-            .select(PHYSICAL_VARIANT_FIELDS)
-            .eq('physical_product_id', physicalId),
-          supabase
-            .from('physical_product_inventory')
-            .select(PHYSICAL_INVENTORY_FIELDS)
-            .eq('physical_product_id', physicalId),
-        ]);
-        variants = variantsRefetch.data || variants;
-        inventory = inventoryRefetch.data || inventory;
-      }
-
-      return {
-        ...productData,
-        physical: physicalData,
-        variants,
-        inventory,
-        size_chart_id: sizeChartResult.data?.size_chart_id || null,
-        store: productData.stores,
-      };
-    },
-    enabled: !!productId,
-  });
+  const { data: product, isLoading } = usePhysicalProductDetail(productId);
 
   // La vérification de wishlist est gérée par useWishlistToggle via useMarketplaceFavorites
 
@@ -397,11 +309,13 @@ export default function PhysicalProductDetail() {
   const physicalWeightLabel = formatPhysicalWeight(product?.physical);
   const physicalDimensionsLabel = formatPhysicalDimensions(product?.physical);
   const availability = stockQuantity > 0 ? 'instock' : 'outofstock';
-  const displayPrice = product?.promotional_price ?? product?.price;
+  const basePrice = product?.promotional_price ?? product?.price;
+  const displayPrice = selectedVariant?.price ?? basePrice;
   const compareAtPrice =
-    product?.promotional_price != null && product.promotional_price < product.price
+    selectedVariant?.compare_at_price ??
+    (product?.promotional_price != null && product.promotional_price < product.price
       ? product.price
-      : null;
+      : null);
   const productUrl = `${window.location.origin}/physical/${productId}`;
 
   return (

@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 import { normalizeFileStorageRef } from '@/lib/digital/storage-ref';
+import { assertBuyerDownloadMethod, buildDownloadRedeemPageUrl } from '@/lib/digital/drm-policy';
 
 const DIGITAL_DOWNLOAD_FIELDS =
   'id, digital_product_id, file_id, user_id, download_date, download_ip, download_country, user_agent, download_duration_seconds, download_success, license_key, file_version, created_at';
@@ -417,7 +418,9 @@ export const useGenerateDownloadLink = () => {
           throw new Error(message);
         }
 
-        const downloadPageUrl = `${window.location.origin}/download/${token}`;
+        assertBuyerDownloadMethod('token-redeem');
+
+        const downloadPageUrl = buildDownloadRedeemPageUrl(String(token));
 
         logger.info('Secure download token minted', {
           fileId: params.fileId,

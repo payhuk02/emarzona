@@ -8,7 +8,7 @@ import { GraduationCap, Search, BookOpen } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { SEOMeta } from '@/components/seo/SEOMeta';
+import { SEOMeta, ItemListSchema } from '@/components/seo';
 import { CourseProductCard } from '@/components/products/CourseProductCard';
 import { useMarketplaceProducts } from '@/hooks/useMarketplaceProducts';
 import type { FilterState, PaginationState } from '@/types/marketplace';
@@ -62,6 +62,21 @@ export default function CoursesCatalog() {
   const courseProducts = products as CourseProduct[];
   const totalPages = Math.max(1, Math.ceil(totalCount / pagination.itemsPerPage));
 
+  const schemaItems = useMemo(
+    () =>
+      courseProducts.slice(0, 20).map(product => ({
+        id: product.id,
+        name: product.name,
+        url: `/courses/${product.slug}`,
+        image: product.image_url ?? undefined,
+        description: product.short_description ?? product.description ?? undefined,
+        price: product.promotional_price ?? product.price,
+        currency: product.currency,
+        rating: product.rating ?? undefined,
+      })),
+    [courseProducts]
+  );
+
   return (
     <div className="min-h-screen bg-gray-50">
       <SEOMeta
@@ -71,6 +86,16 @@ export default function CoursesCatalog() {
         type="website"
         keywords="cours en ligne, formation, e-learning, apprentissage, Emarzona"
       />
+
+      {schemaItems.length > 0 && (
+        <ItemListSchema
+          name="Cours en ligne Emarzona"
+          description="Catalogue public des cours et formations disponibles sur Emarzona"
+          url="/courses"
+          numberOfItems={totalCount}
+          items={schemaItems}
+        />
+      )}
 
       <section className="bg-gradient-to-r from-orange-600 to-orange-800 text-white">
         <div className="container mx-auto px-4 py-12 md:py-16">

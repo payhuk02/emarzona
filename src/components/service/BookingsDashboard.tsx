@@ -21,6 +21,11 @@ import {
   Activity,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+  computeTrendFromDailyAmounts,
+  computeTrendFromDailyCounts,
+  mapBookingsByDayToTrendPoints,
+} from '@/lib/service/booking-trends';
 import type { ServiceBookingListItem } from '@/types/service-booking-dashboard';
 
 /**
@@ -38,6 +43,7 @@ export interface BookingsDashboardStats {
   upcomingBookings: number;
   bookingsByStatus: Record<string, number>;
   bookingsByDay: { date: string; count: number }[];
+  revenueByDay?: { date: string; amount: number }[];
   topServices: { id: string; name: string; bookings: number }[];
   topCustomers: { id: string; name: string; bookings: number; revenue: number }[];
 }
@@ -107,9 +113,16 @@ export const BookingsDashboard: React.FC<BookingsDashboardProps> = ({
     const completionRate =
       stats.totalBookings > 0 ? (stats.completedBookings / stats.totalBookings) * 100 : 0;
 
-    // Mock trend data (à calculer réellement à partir des données historiques)
-    const bookingsTrend = 12; // +12%
-    const revenueTrend = 18; // +18%
+    const bookingsTrend = computeTrendFromDailyCounts(
+      mapBookingsByDayToTrendPoints(stats.bookingsByDay ?? [])
+    );
+
+    const revenueTrend =
+      stats.revenueByDay && stats.revenueByDay.length >= 2
+        ? computeTrendFromDailyAmounts(
+            stats.revenueByDay.map(d => ({ date: d.date, amount: d.amount }))
+          )
+        : 0;
 
     return {
       conversionRate,
@@ -214,9 +227,22 @@ export const BookingsDashboard: React.FC<BookingsDashboardProps> = ({
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(stats.totalRevenue)}</div>
-            <div className="flex items-center text-xs text-green-600 mt-1">
-              <TrendingUp className="h-3 w-3 mr-1" />+{metrics.revenueTrend}% ce{' '}
-              {period === 'today' ? 'jour' : period === 'week' ? 'semaine' : 'mois'}
+            <div className="flex items-center text-xs mt-1">
+              {metrics.revenueTrend >= 0 ? (
+                <TrendingUp className="h-3 w-3 text-green-600 mr-1" />
+              ) : (
+                <TrendingDown className="h-3 w-3 text-red-600 mr-1" />
+              )}
+              <span className={metrics.revenueTrend >= 0 ? 'text-green-600' : 'text-red-600'}>
+                {metrics.revenueTrend >= 0 ? '+' : ''}
+                {metrics.revenueTrend}%
+              </span>
+              <span className="text-muted-foreground ml-1">
+                vs début de période
+                {stats.revenueByDay && stats.revenueByDay.length < 2
+                  ? ' (données insuffisantes)'
+                  : ''}
+              </span>
             </div>
           </CardContent>
         </Card>

@@ -298,6 +298,11 @@ export const userMenuSections = [
         icon: Layers,
       },
       {
+        title: 'Packs cross-type',
+        url: '/dashboard/cross-type-bundles',
+        icon: Sparkles,
+      },
+      {
         title: 'Mes Téléchargements (Vendeur)',
         url: '/dashboard/my-downloads',
         icon: Download,

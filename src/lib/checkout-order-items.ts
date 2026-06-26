@@ -6,6 +6,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { CartItem } from '@/types/cart';
 import { validateCheckoutCart } from '@/lib/checkout/cart-validation';
+import { resolveCheckoutCartItemsAsync } from '@/lib/checkout/resolve-checkout-cart';
 
 function cartMetadata(item: CartItem): Record<string, unknown> {
   if (item.metadata && typeof item.metadata === 'object' && !Array.isArray(item.metadata)) {
@@ -137,7 +138,7 @@ export async function buildOrderItemRows(
   orderId: string,
   items: CartItem[]
 ): Promise<OrderItemInsertRow[]> {
-  const validation = validateCheckoutCart(items);
+  const { validation } = await resolveCheckoutCartItemsAsync(items);
   if (!validation.canCheckout) {
     throw new Error(validation.message ?? 'Panier incompatible avec le checkout unifié');
   }

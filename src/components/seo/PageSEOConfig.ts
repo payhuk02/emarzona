@@ -56,6 +56,18 @@ export const PAGE_SEO_CONFIG: Record<string, PageSEOEntry> = {
       "Parcourez les collections d'œuvres d'artistes sur Emarzona. Art digital, illustrations, photographies et plus.",
     keywords: 'collections, art, artistes, œuvres',
   },
+  '/courses': {
+    title: 'Cours en ligne | Emarzona',
+    description:
+      'Formations et cours en ligne : développement, business, design, marketing. Apprenez à votre rythme avec certificats.',
+    keywords: 'cours en ligne, formation, e-learning, certificat',
+  },
+  '/art': {
+    title: "Œuvres d'artistes | Emarzona",
+    description:
+      "Achetez des œuvres originales d'artistes : éditions limitées, certificats d'authenticité, collections et enchères.",
+    keywords: 'art, artistes, œuvres, marketplace art, enchères',
+  },
   '/auctions': {
     title: 'Enchères en ligne | Emarzona',
     description:

@@ -1,17 +1,24 @@
 /**
- * Admin — domaines personnalisés toutes boutiques
+ * Admin — domaines personnalisés toutes boutiques (pagination serveur)
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { AdminLayout } from '@/components/admin/AdminLayout';
-import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -20,75 +27,67 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Globe, Search, Shield, RefreshCw, ExternalLink } from 'lucide-react';
+import {
+  Globe,
+  Search,
+  Shield,
+  RefreshCw,
+  ExternalLink,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-
-type DomainRow = {
-  id: string;
-  domain: string;
-  status: string;
-  ssl_status: string | null;
-  is_primary: boolean;
-  verified_at: string | null;
-  created_at: string;
-  store_id: string;
-  stores: { name: string; slug: string } | null;
-};
-
-const DOMAIN_FIELDS =
-  'id, domain, status, ssl_status, is_primary, verified_at, created_at, store_id, stores(name, slug)';
+import { ADMIN_DOMAIN_PAGE_SIZES } from '@/lib/admin/admin-domains-query';
+import {
+  DEFAULT_ADMIN_DOMAIN_PAGE_SIZE,
+  useAdminDomainStats,
+  useAdminDomainsList,
+} from '@/hooks/useAdminDomains';
 
 export default function AdminDomains() {
-  const [rows, setRows] = useState<DomainRow[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [search, setSearch] = useState('');
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const { data, error: queryError } = await supabase
-        .from('custom_domains')
-        .select(DOMAIN_FIELDS)
-        .order('created_at', { ascending: false })
-        .limit(200);
-
-      if (queryError) throw queryError;
-      setRows((data as DomainRow[]) ?? []);
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Erreur de chargement');
-      setRows([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const queryClient = useQueryClient();
+  const [searchInput, setSearchInput] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(DEFAULT_ADMIN_DOMAIN_PAGE_SIZE);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    const timer = setTimeout(() => setDebouncedSearch(searchInput), 300);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return rows;
-    return rows.filter(
-      r =>
-        r.domain.toLowerCase().includes(q) ||
-        r.stores?.name?.toLowerCase().includes(q) ||
-        r.stores?.slug?.toLowerCase().includes(q)
-    );
-  }, [rows, search]);
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, pageSize]);
 
-  const stats = useMemo(
-    () => ({
-      total: rows.length,
-      active: rows.filter(r => r.status === 'active' || r.status === 'verified').length,
-      sslOk: rows.filter(r => r.ssl_status === 'active').length,
-      pending: rows.filter(r => r.status === 'pending' || r.status === 'verifying').length,
-    }),
-    [rows]
-  );
+  const {
+    data: pageData,
+    isLoading,
+    error,
+    refetch,
+    isFetching,
+  } = useAdminDomainsList({
+    page,
+    pageSize,
+    search: debouncedSearch,
+  });
+
+  const { data: stats, isLoading: statsLoading } = useAdminDomainStats();
+
+  const rows = pageData?.rows ?? [];
+  const totalCount = pageData?.totalCount ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+  const from = totalCount === 0 ? 0 : (page - 1) * pageSize + 1;
+  const to = Math.min(page * pageSize, totalCount);
+
+  const refresh = () => {
+    void queryClient.invalidateQueries({ queryKey: ['admin-domains'] });
+    void queryClient.invalidateQueries({ queryKey: ['admin-domains-stats'] });
+    void refetch();
+  };
 
   return (
     <AdminLayout>
@@ -103,31 +102,31 @@ export default function AdminDomains() {
               Vue plateforme des domaines personnalisés connectés aux boutiques.
             </p>
           </div>
-          <Button variant="outline" size="sm" onClick={load} disabled={loading}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+          <Button variant="outline" size="sm" onClick={refresh} disabled={isFetching}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? 'animate-spin' : ''}`} />
             Actualiser
           </Button>
         </div>
 
         {error && (
           <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription>{error.message}</AlertDescription>
           </Alert>
         )}
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
-            { label: 'Total', value: stats.total },
-            { label: 'Actifs / vérifiés', value: stats.active },
-            { label: 'SSL actif', value: stats.sslOk },
-            { label: 'En attente', value: stats.pending },
+            { label: 'Total', value: stats?.totalCount ?? 0 },
+            { label: 'Actifs / vérifiés', value: stats?.active ?? 0 },
+            { label: 'SSL actif', value: stats?.sslOk ?? 0 },
+            { label: 'En attente', value: stats?.pending ?? 0 },
           ].map(s => (
             <Card key={s.label}>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm text-muted-foreground">{s.label}</CardTitle>
               </CardHeader>
               <CardContent>
-                {loading ? (
+                {statsLoading ? (
                   <Skeleton className="h-8 w-12" />
                 ) : (
                   <p className="text-2xl font-bold">{s.value}</p>
@@ -142,8 +141,8 @@ export default function AdminDomains() {
           <Input
             className="pl-9"
             placeholder="Domaine ou boutique…"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
+            value={searchInput}
+            onChange={e => setSearchInput(e.target.value)}
           />
         </div>
 
@@ -157,63 +156,128 @@ export default function AdminDomains() {
             </CardDescription>
           </CardHeader>
           <CardContent className="p-0 overflow-x-auto">
-            {loading ? (
+            {isLoading ? (
               <div className="p-6 space-y-2">
                 {[...Array(6)].map((_, i) => (
                   <Skeleton key={i} className="h-10 w-full" />
                 ))}
               </div>
-            ) : filtered.length === 0 ? (
+            ) : rows.length === 0 ? (
               <p className="p-6 text-sm text-muted-foreground">Aucun domaine trouvé.</p>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Domaine</TableHead>
-                    <TableHead>Boutique</TableHead>
-                    <TableHead>Statut</TableHead>
-                    <TableHead>SSL</TableHead>
-                    <TableHead>Principal</TableHead>
-                    <TableHead>Créé</TableHead>
-                    <TableHead />
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filtered.map(row => (
-                    <TableRow key={row.id}>
-                      <TableCell className="font-medium">{row.domain}</TableCell>
-                      <TableCell>
-                        {row.stores?.name ?? '—'}
-                        {row.stores?.slug && (
-                          <span className="block text-xs text-muted-foreground">
-                            {row.stores.slug}
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{row.status}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="secondary" className="gap-1">
-                          <Shield className="h-3 w-3" />
-                          {row.ssl_status ?? '—'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{row.is_primary ? 'Oui' : '—'}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
-                        {format(new Date(row.created_at), 'dd MMM yyyy', { locale: fr })}
-                      </TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="sm" asChild>
-                          <Link to={`/admin/stores`}>
-                            <ExternalLink className="h-4 w-4" />
-                          </Link>
-                        </Button>
-                      </TableCell>
+              <>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Domaine</TableHead>
+                      <TableHead>Boutique</TableHead>
+                      <TableHead>Statut</TableHead>
+                      <TableHead>SSL</TableHead>
+                      <TableHead>Principal</TableHead>
+                      <TableHead>Créé</TableHead>
+                      <TableHead />
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {rows.map(row => (
+                      <TableRow key={row.id}>
+                        <TableCell className="font-medium">{row.domain}</TableCell>
+                        <TableCell>
+                          {row.stores?.name ?? '—'}
+                          {row.stores?.slug && (
+                            <span className="block text-xs text-muted-foreground">
+                              {row.stores.slug}
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{row.status}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="secondary" className="gap-1">
+                            <Shield className="h-3 w-3" />
+                            {row.ssl_status ?? '—'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{row.is_primary ? 'Oui' : '—'}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
+                          {format(new Date(row.created_at), 'dd MMM yyyy', { locale: fr })}
+                        </TableCell>
+                        <TableCell>
+                          <Button variant="ghost" size="sm" asChild>
+                            <Link to="/admin/stores">
+                              <ExternalLink className="h-4 w-4" />
+                            </Link>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+
+                {totalCount > 0 && (
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t">
+                    <p className="text-sm text-muted-foreground">
+                      {from}–{to} sur {totalCount} domaines
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <Select
+                        value={pageSize.toString()}
+                        onValueChange={value => {
+                          setPageSize(Number(value));
+                          setPage(1);
+                        }}
+                      >
+                        <SelectTrigger className="w-[100px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {ADMIN_DOMAIN_PAGE_SIZES.map(size => (
+                            <SelectItem key={size} value={size.toString()}>
+                              {size} / page
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        disabled={page <= 1}
+                        onClick={() => setPage(1)}
+                      >
+                        <ChevronsLeft className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        disabled={page <= 1}
+                        onClick={() => setPage(page - 1)}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <span className="text-sm px-2">
+                        {page} / {totalPages}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        disabled={page >= totalPages}
+                        onClick={() => setPage(page + 1)}
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        disabled={page >= totalPages}
+                        onClick={() => setPage(totalPages)}
+                      >
+                        <ChevronsRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </CardContent>
         </Card>

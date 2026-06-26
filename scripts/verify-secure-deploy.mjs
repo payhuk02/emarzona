@@ -7,11 +7,12 @@ import {
   loadSupabaseEnv,
   getSupabaseUrl,
   getServiceRoleKey,
+  getEdgeInternalSecret,
 } from './load-supabase-env.mjs';
 
 const env = loadSupabaseEnv();
 const url = getSupabaseUrl(env).replace(/\/$/, '');
-const internalSecret = env.EDGE_INTERNAL_SECRET?.trim() || null;
+const internalSecret = getEdgeInternalSecret(env);
 const buyerEmail = env.E2E_BUYER_EMAIL?.trim() || null;
 const buyerPassword = env.E2E_BUYER_PASSWORD?.trim() || null;
 

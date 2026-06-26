@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Package,
   AlertTriangle,
@@ -21,8 +22,13 @@ import { logger } from '@/lib/logger';
 import { PhysicalProductsList } from './PhysicalProductsList';
 import { StockMovementHistory } from './StockMovementHistory';
 import { BulkInventoryUpdate } from './BulkInventoryUpdate';
-import { PreOrderManager } from './PreOrderManager';
-import { BackorderManager } from './BackorderManager';
+import { PreOrdersManager } from './preorders/PreOrdersManager';
+import { BackordersManager } from './backorders/BackordersManager';
+import { useInventoryReport } from '@/hooks/physical/useInventoryReports';
+import { usePreOrders } from '@/hooks/physical/usePreOrders';
+import { useBackorders } from '@/hooks/physical/useBackorders';
+import { useStoreStockMovementHistory } from '@/hooks/physical/useStoreStockMovementHistory';
+import { useQueryClient } from '@tanstack/react-query';
 
 // ============================================================================
 // TYPES
@@ -52,27 +58,71 @@ const EMPTY_STATS = {
   trending: 'up' as 'up' | 'down',
 };
 
-// ============================================================================
-// MAIN COMPONENT
-// ============================================================================
-
 export function InventoryDashboard({ storeId, className }: InventoryDashboardProps) {
   const [activeTab, setActiveTab] = useState('overview');
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const queryClient = useQueryClient();
 
-  const stats = EMPTY_STATS;
+  const { data: report, isLoading: reportLoading } = useInventoryReport(storeId);
+  const { data: preOrders } = usePreOrders(storeId);
+  const { data: backorders } = useBackorders(storeId);
+  const startOfToday = useMemo(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, []);
+  const { data: todayMovements } = useStoreStockMovementHistory(storeId, { limit: 500 });
+
+  const stats = useMemo(() => {
+    if (!report) return EMPTY_STATS;
+    const activePreOrders = (preOrders ?? []).filter(po => po.status === 'active').length;
+    const activeBackorders = (backorders ?? []).filter(bo => bo.status !== 'fulfilled').length;
+    const movementsToday = (todayMovements ?? []).filter(
+      m => new Date(m.created_at) >= startOfToday
+    ).length;
+
+    return {
+      total_products: report.total_products,
+      total_value: report.total_stock_value,
+      total_quantity: report.total_quantity,
+      low_stock_alerts: report.low_stock_count,
+      out_of_stock: report.out_of_stock_count,
+      pre_orders: activePreOrders,
+      backorders: activeBackorders,
+      movements_today: movementsToday,
+      avg_stock_value:
+        report.total_products > 0 ? report.total_stock_value / report.total_products : 0,
+      turnover_rate: 0,
+      top_category: '-',
+      trending: 'up' as const,
+    };
+  }, [report, preOrders, backorders, todayMovements, startOfToday]);
 
   const handleRefresh = async () => {
-    setIsRefreshing(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setIsRefreshing(false);
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['inventory-report', storeId] }),
+      queryClient.invalidateQueries({ queryKey: ['pre-orders', storeId] }),
+      queryClient.invalidateQueries({ queryKey: ['backorders', storeId] }),
+      queryClient.invalidateQueries({ queryKey: ['store-stock-movement-history', storeId] }),
+      queryClient.invalidateQueries({ queryKey: ['physical-products', storeId] }),
+    ]);
   };
 
   const handleExportReport = () => {
-    // Export functionality
-    logger.info('Exporting inventory report');
+    logger.info('Exporting inventory report', { storeId, stats });
   };
+
+  if (reportLoading && !report) {
+    return (
+      <div className={cn('space-y-6', className)}>
+        <Skeleton className="h-10 w-72" />
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {[1, 2, 3, 4].map(i => (
+            <Skeleton key={i} className="h-28" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={cn('space-y-6', className)}>
@@ -80,18 +130,16 @@ export function InventoryDashboard({ storeId, className }: InventoryDashboardPro
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Tableau de Bord Inventaire</h1>
-          <p className="text-muted-foreground mt-1">
-            Vue d'ensemble complète de votre stock
-          </p>
+          <p className="text-muted-foreground mt-1">Vue d'ensemble complète de votre stock</p>
         </div>
         <div className="flex gap-2">
           <Button
             variant="outline"
             onClick={handleRefresh}
-            disabled={isRefreshing}
+            disabled={reportLoading}
             className="gap-2"
           >
-            <RefreshCw className={cn('h-4 w-4', isRefreshing && 'animate-spin')} />
+            <RefreshCw className={cn('h-4 w-4', reportLoading && 'animate-spin')} />
             Actualiser
           </Button>
           <Button variant="outline" onClick={handleExportReport} className="gap-2">
@@ -226,8 +274,8 @@ export function InventoryDashboard({ storeId, className }: InventoryDashboardPro
                 <PhysicalProductsList
                   storeId={storeId}
                   onCreateProduct={() => logger.info('Create product action')}
-                  onEditProduct={(id) => logger.info('Edit product', { productId: id })}
-                  onViewProduct={(id) => logger.info('View product', { productId: id })}
+                  onEditProduct={id => logger.info('Edit product', { productId: id })}
+                  onViewProduct={id => logger.info('View product', { productId: id })}
                 />
               </div>
             </TabsContent>
@@ -239,10 +287,7 @@ export function InventoryDashboard({ storeId, className }: InventoryDashboardPro
                   <h3 className="text-lg font-semibold">Historique des Mouvements</h3>
                   <Badge variant="secondary">{stats.movements_today} aujourd'hui</Badge>
                 </div>
-                <StockMovementHistory
-                  storeId={storeId}
-                  maxHeight="600px"
-                />
+                <StockMovementHistory storeId={storeId} maxHeight="600px" />
               </div>
             </TabsContent>
 
@@ -255,7 +300,7 @@ export function InventoryDashboard({ storeId, className }: InventoryDashboardPro
                 </div>
                 <BulkInventoryUpdate
                   storeId={storeId}
-                  onComplete={(count) => logger.info('Bulk inventory update completed', { count })}
+                  onComplete={count => logger.info('Bulk inventory update completed', { count })}
                 />
               </div>
             </TabsContent>
@@ -269,7 +314,7 @@ export function InventoryDashboard({ storeId, className }: InventoryDashboardPro
                     {stats.pre_orders} actives
                   </Badge>
                 </div>
-                <PreOrderManager storeId={storeId} />
+                <PreOrdersManager storeId={storeId} />
               </div>
             </TabsContent>
 
@@ -282,7 +327,7 @@ export function InventoryDashboard({ storeId, className }: InventoryDashboardPro
                     {stats.backorders} actifs
                   </Badge>
                 </div>
-                <BackorderManager storeId={storeId} />
+                <BackordersManager storeId={storeId} />
               </div>
             </TabsContent>
           </CardContent>
@@ -318,10 +363,3 @@ export function InventoryDashboard({ storeId, className }: InventoryDashboardPro
     </div>
   );
 }
-
-
-
-
-
-
-

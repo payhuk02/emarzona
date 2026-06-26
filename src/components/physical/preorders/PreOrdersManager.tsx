@@ -67,9 +67,10 @@ import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useDebounce } from '@/hooks/useDebounce';
 import { cn } from '@/lib/utils';
 
-export function PreOrdersManager() {
+export function PreOrdersManager({ storeId: storeIdOverride }: { storeId?: string } = {}) {
   const { store } = useStore();
-  const { data: preOrders, isLoading } = usePreOrders(store?.id || null);
+  const storeId = storeIdOverride ?? store?.id ?? null;
+  const { data: preOrders, isLoading } = usePreOrders(storeId);
   const updatePreOrder = useUpdatePreOrder();
   const convertToOrders = useConvertPreOrderToOrders();
   const notifyCustomers = useNotifyPreOrderCustomers();
@@ -85,7 +86,9 @@ export function PreOrdersManager() {
   const statsRef = useScrollAnimation<HTMLDivElement>();
   const preOrdersRef = useScrollAnimation<HTMLDivElement>();
 
-  const { data: customers } = usePreOrderCustomers(showCustomers ? selectedPreOrder?.id || null : null);
+  const { data: customers } = usePreOrderCustomers(
+    showCustomers ? selectedPreOrder?.id || null : null
+  );
 
   // Stats calculées
   const stats = useMemo(() => {
@@ -102,14 +105,22 @@ export function PreOrdersManager() {
     if (!preOrders) return [];
     if (!debouncedSearch) return preOrders;
     const searchLower = debouncedSearch.toLowerCase();
-    return preOrders.filter(po => 
-      po.product?.name?.toLowerCase().includes(searchLower) ||
-      po.variant?.name?.toLowerCase().includes(searchLower)
+    return preOrders.filter(
+      po =>
+        po.product?.name?.toLowerCase().includes(searchLower) ||
+        po.variant?.name?.toLowerCase().includes(searchLower)
     );
   }, [preOrders, debouncedSearch]);
 
   const getStatusBadge = (status: PreOrder['status']) => {
-    const  variants: Record<PreOrder['status'], { variant: 'default' | 'secondary' | 'destructive' | 'outline'; label: string; className?: string }> = {
+    const variants: Record<
+      PreOrder['status'],
+      {
+        variant: 'default' | 'secondary' | 'destructive' | 'outline';
+        label: string;
+        className?: string;
+      }
+    > = {
       active: { variant: 'default', label: 'Active', className: 'bg-green-500' },
       pending_arrival: { variant: 'secondary', label: 'En attente' },
       arrived: { variant: 'outline', label: 'Arrivée', className: 'bg-blue-500' },
@@ -118,7 +129,11 @@ export function PreOrdersManager() {
     };
 
     const config = variants[status];
-    return <Badge variant={config.variant} className={config.className}>{config.label}</Badge>;
+    return (
+      <Badge variant={config.variant} className={config.className}>
+        {config.label}
+      </Badge>
+    );
   };
 
   const handleConvertToOrders = async () => {
@@ -151,15 +166,35 @@ export function PreOrdersManager() {
     <div className="space-y-4 sm:space-y-6">
       {/* Stats Cards - Responsive */}
       {preOrders && preOrders.length > 0 && (
-        <div 
+        <div
           ref={statsRef}
           className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
         >
           {[
-            { label: 'Total Précommandes', value: stats.total, icon: Package, color: 'from-purple-600 to-pink-600' },
-            { label: 'Actives', value: stats.active, icon: CheckCircle2, color: 'from-green-600 to-emerald-600' },
-            { label: 'Arrivées', value: stats.arrived, icon: TrendingUp, color: 'from-blue-600 to-cyan-600' },
-            { label: 'Total Clients', value: stats.totalCustomers, icon: Users, color: 'from-orange-600 to-yellow-600' },
+            {
+              label: 'Total Précommandes',
+              value: stats.total,
+              icon: Package,
+              color: 'from-purple-600 to-pink-600',
+            },
+            {
+              label: 'Actives',
+              value: stats.active,
+              icon: CheckCircle2,
+              color: 'from-green-600 to-emerald-600',
+            },
+            {
+              label: 'Arrivées',
+              value: stats.arrived,
+              icon: TrendingUp,
+              color: 'from-blue-600 to-cyan-600',
+            },
+            {
+              label: 'Total Clients',
+              value: stats.totalCustomers,
+              icon: Users,
+              color: 'from-orange-600 to-yellow-600',
+            },
           ].map((stat, index) => {
             const Icon = stat.icon;
             return (
@@ -175,7 +210,9 @@ export function PreOrdersManager() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-3 sm:p-4 pt-0">
-                  <div className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                  <div
+                    className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}
+                  >
                     {stat.value}
                   </div>
                 </CardContent>
@@ -194,7 +231,7 @@ export function PreOrdersManager() {
               <Input
                 placeholder="Rechercher par produit ou variante..."
                 value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
+                onChange={e => setSearchInput(e.target.value)}
                 className="pl-8 sm:pl-10 h-9 sm:h-10 text-xs sm:text-sm"
                 aria-label="Rechercher"
               />
@@ -236,12 +273,16 @@ export function PreOrdersManager() {
           {!preOrders || preOrders.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-64 text-center py-8 sm:py-12">
               <Package className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground mb-4 animate-in zoom-in-95 duration-500" />
-              <p className="text-sm sm:text-base text-muted-foreground">Aucune précommande pour le moment</p>
+              <p className="text-sm sm:text-base text-muted-foreground">
+                Aucune précommande pour le moment
+              </p>
             </div>
           ) : filteredPreOrders.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-64 text-center py-8 sm:py-12">
               <Search className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground mb-4 animate-in zoom-in-95 duration-500" />
-              <p className="text-sm sm:text-base text-muted-foreground">Aucune précommande trouvée</p>
+              <p className="text-sm sm:text-base text-muted-foreground">
+                Aucune précommande trouvée
+              </p>
             </div>
           ) : (
             <>
@@ -283,7 +324,7 @@ export function PreOrdersManager() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredPreOrders.map((preOrder) => (
+                    {filteredPreOrders.map(preOrder => (
                       <TableRow key={preOrder.id}>
                         <TableCell>
                           <div className="space-y-1">
@@ -303,7 +344,11 @@ export function PreOrdersManager() {
                             <div className="flex items-center gap-1 text-sm">
                               <Calendar className="h-3 w-3 flex-shrink-0" />
                               <span className="truncate">
-                                {format(new Date(preOrder.expected_availability_date), 'dd/MM/yyyy', { locale: fr })}
+                                {format(
+                                  new Date(preOrder.expected_availability_date),
+                                  'dd/MM/yyyy',
+                                  { locale: fr }
+                                )}
                               </span>
                             </div>
                           ) : (
@@ -379,12 +424,8 @@ export function PreOrdersManager() {
       <Dialog open={showCustomers} onOpenChange={setShowCustomers}>
         <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>
-              Clients - {selectedPreOrder?.product?.name}
-            </DialogTitle>
-            <DialogDescription>
-              Liste des clients ayant effectué une précommande
-            </DialogDescription>
+            <DialogTitle>Clients - {selectedPreOrder?.product?.name}</DialogTitle>
+            <DialogDescription>Liste des clients ayant effectué une précommande</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             {customers && customers.length > 0 ? (
@@ -400,7 +441,7 @@ export function PreOrdersManager() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {customers.map((customer) => (
+                    {customers.map(customer => (
                       <TableRow key={customer.id}>
                         <TableCell>
                           <div>
@@ -415,7 +456,9 @@ export function PreOrdersManager() {
                         <TableCell className="text-sm">{customer.quantity}</TableCell>
                         <TableCell>
                           {customer.deposit_paid ? (
-                            <Badge variant="default" className="bg-green-500">Payé</Badge>
+                            <Badge variant="default" className="bg-green-500">
+                              Payé
+                            </Badge>
                           ) : (
                             <Badge variant="outline">Non payé</Badge>
                           )}
@@ -453,8 +496,8 @@ export function PreOrdersManager() {
           <AlertDialogHeader>
             <AlertDialogTitle>Convertir en commandes</AlertDialogTitle>
             <AlertDialogDescription>
-              Voulez-vous convertir cette précommande en commandes réelles ?
-              Les clients seront automatiquement notifiés et les commandes seront créées.
+              Voulez-vous convertir cette précommande en commandes réelles ? Les clients seront
+              automatiquement notifiés et les commandes seront créées.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -483,7 +526,8 @@ export function PreOrdersManager() {
           <AlertDialogHeader>
             <AlertDialogTitle>Notifier les clients</AlertDialogTitle>
             <AlertDialogDescription>
-              Envoyer une notification à tous les clients de cette précommande pour les informer de l'arrivée du produit.
+              Envoyer une notification à tous les clients de cette précommande pour les informer de
+              l'arrivée du produit.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -522,7 +566,14 @@ interface PreOrderCardProps {
   animationDelay?: number;
 }
 
-function PreOrderCard({ preOrder, getStatusBadge, onViewCustomers, onNotify, onConvert, animationDelay = 0 }: PreOrderCardProps) {
+function PreOrderCard({
+  preOrder,
+  getStatusBadge,
+  onViewCustomers,
+  onNotify,
+  onConvert,
+  animationDelay = 0,
+}: PreOrderCardProps) {
   return (
     <Card
       className="hover:shadow-lg transition-all duration-300 group overflow-hidden animate-in fade-in slide-in-from-bottom-4 touch-manipulation"
@@ -553,7 +604,12 @@ function PreOrderCard({ preOrder, getStatusBadge, onViewCustomers, onNotify, onC
           {preOrder.expected_availability_date && (
             <div className="flex items-center gap-2 text-muted-foreground">
               <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
-              <span>Date prévue: {format(new Date(preOrder.expected_availability_date), 'dd/MM/yyyy', { locale: fr })}</span>
+              <span>
+                Date prévue:{' '}
+                {format(new Date(preOrder.expected_availability_date), 'dd/MM/yyyy', {
+                  locale: fr,
+                })}
+              </span>
             </div>
           )}
           <div className="flex items-center gap-2 text-muted-foreground">
@@ -575,12 +631,7 @@ function PreOrderCard({ preOrder, getStatusBadge, onViewCustomers, onNotify, onC
             <span className="text-xs sm:text-sm">Clients</span>
           </Button>
           {preOrder.status === 'arrived' && !preOrder.notification_sent && (
-            <Button
-              onClick={onNotify}
-              size="sm"
-              variant="outline"
-              className="flex-1 min-w-[100px]"
-            >
+            <Button onClick={onNotify} size="sm" variant="outline" className="flex-1 min-w-[100px]">
               <Bell className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
               <span className="text-xs sm:text-sm">Notifier</span>
             </Button>
@@ -600,9 +651,3 @@ function PreOrderCard({ preOrder, getStatusBadge, onViewCustomers, onNotify, onC
     </Card>
   );
 }
-
-
-
-
-
-

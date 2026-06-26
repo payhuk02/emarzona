@@ -35,10 +35,11 @@ npm run verify:phase0
 
 Variables optionnelles pour tests positifs complets :
 
-| Variable                                 | Usage                                           |
-| ---------------------------------------- | ----------------------------------------------- |
-| `EDGE_INTERNAL_SECRET`                   | Smoke `webhook-delivery` + `send-email` interne |
-| `E2E_BUYER_EMAIL` / `E2E_BUYER_PASSWORD` | Smoke restrictions utilisateur `send-email`     |
+| Variable                                 | Usage                                               |
+| ---------------------------------------- | --------------------------------------------------- |
+| `EDGE_INTERNAL_SECRET`                   | Smoke `webhook-delivery` + `send-email` interne     |
+| `scripts/.edge-internal-secret.local`    | Alternative gitignored (comme `.cron-secret.local`) |
+| `E2E_BUYER_EMAIL` / `E2E_BUYER_PASSWORD` | Smoke restrictions utilisateur `send-email`         |
 
 Checks manuels si secrets absents :
 

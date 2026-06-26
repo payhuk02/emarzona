@@ -62,6 +62,7 @@ import {
   Factory,
   Filter,
   ArrowUpDown,
+  type LucideIcon,
 } from 'lucide-react';
 import {
   useBackorders,
@@ -81,8 +82,9 @@ import { useToast } from '@/hooks/use-toast';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { cn } from '@/lib/utils';
 
-export function BackordersManager() {
+export function BackordersManager({ storeId: storeIdOverride }: { storeId?: string } = {}) {
   const { store } = useStore();
+  const storeId = storeIdOverride ?? store?.id ?? null;
   const { toast } = useToast();
   const [statusFilter, setStatusFilter] = useState<BackorderStatus | 'all'>('all');
   const [priorityFilter, setPriorityFilter] = useState<BackorderPriority | 'all'>('all');
@@ -102,14 +104,16 @@ export function BackordersManager() {
   const backordersRef = useScrollAnimation<HTMLDivElement>();
 
   const filters = useMemo(() => {
-    const  f: any = {};
+    const f: { status?: BackorderStatus; priority?: BackorderPriority } = {};
     if (statusFilter !== 'all') f.status = statusFilter;
     if (priorityFilter !== 'all') f.priority = priorityFilter;
     return f;
   }, [statusFilter, priorityFilter]);
 
-  const { data: backorders, isLoading } = useBackorders(store?.id || null, filters);
-  const { data: customers } = useBackorderCustomers(showCustomers ? selectedBackorder?.id || null : null);
+  const { data: backorders, isLoading } = useBackorders(storeId, filters);
+  const { data: customers } = useBackorderCustomers(
+    showCustomers ? selectedBackorder?.id || null : null
+  );
   const updateBackorder = useUpdateBackorder();
   const receiveStock = useReceiveBackorderStock();
   const notifyCustomers = useNotifyBackorderCustomers();
@@ -120,7 +124,7 @@ export function BackordersManager() {
     if (!backorders) return { total: 0, urgent: 0, totalCustomers: 0, pendingUnits: 0 };
     return {
       total: backorders.length,
-      urgent: backorders.filter((b) => b.priority === 'urgent' && b.status !== 'fulfilled').length,
+      urgent: backorders.filter(b => b.priority === 'urgent' && b.status !== 'fulfilled').length,
       totalCustomers: backorders.reduce((sum, b) => sum + b.total_customers, 0),
       pendingUnits: backorders.reduce((sum, b) => sum + b.pending_quantity, 0),
     };
@@ -132,7 +136,7 @@ export function BackordersManager() {
     const sorted = [...backorders];
     switch (sortBy) {
       case 'priority': {
-        const  priorityOrder: Record<BackorderPriority, number> = {
+        const priorityOrder: Record<BackorderPriority, number> = {
           urgent: 0,
           high: 1,
           medium: 2,
@@ -142,7 +146,10 @@ export function BackordersManager() {
         break;
       }
       case 'date':
-        sorted.sort((a, b) => new Date(b.first_request_date).getTime() - new Date(a.first_request_date).getTime());
+        sorted.sort(
+          (a, b) =>
+            new Date(b.first_request_date).getTime() - new Date(a.first_request_date).getTime()
+        );
         break;
       case 'quantity':
         sorted.sort((a, b) => b.pending_quantity - a.pending_quantity);
@@ -152,17 +159,45 @@ export function BackordersManager() {
   }, [backorders, sortBy]);
 
   const getStatusBadge = (status: BackorderStatus) => {
-    const  config: Record<BackorderStatus, { variant: 'default' | 'secondary' | 'destructive' | 'outline'; label: string; icon: any; className?: string }> = {
+    const config: Record<
+      BackorderStatus,
+      {
+        variant: 'default' | 'secondary' | 'destructive' | 'outline';
+        label: string;
+        icon: LucideIcon;
+        className?: string;
+      }
+    > = {
       pending: { variant: 'secondary', label: 'En attente', icon: Clock },
       ordered: { variant: 'outline', label: 'Commandé', icon: Package, className: 'bg-blue-500' },
-      in_transit: { variant: 'outline', label: 'En transit', icon: Truck, className: 'bg-purple-500' },
-      partially_received: { variant: 'default', label: 'Partiellement reçu', icon: TrendingUp, className: 'bg-yellow-500' },
-      received: { variant: 'default', label: 'Reçu', icon: CheckCircle2, className: 'bg-green-500' },
-      fulfilled: { variant: 'default', label: 'Rempli', icon: CheckCircle2, className: 'bg-green-500' },
+      in_transit: {
+        variant: 'outline',
+        label: 'En transit',
+        icon: Truck,
+        className: 'bg-purple-500',
+      },
+      partially_received: {
+        variant: 'default',
+        label: 'Partiellement reçu',
+        icon: TrendingUp,
+        className: 'bg-yellow-500',
+      },
+      received: {
+        variant: 'default',
+        label: 'Reçu',
+        icon: CheckCircle2,
+        className: 'bg-green-500',
+      },
+      fulfilled: {
+        variant: 'default',
+        label: 'Rempli',
+        icon: CheckCircle2,
+        className: 'bg-green-500',
+      },
     };
     const { variant, label, icon: Icon, className } = config[status];
     return (
-      <Badge variant={variant} className={cn("flex items-center gap-1", className)}>
+      <Badge variant={variant} className={cn('flex items-center gap-1', className)}>
         <Icon className="h-3 w-3" />
         {label}
       </Badge>
@@ -170,14 +205,25 @@ export function BackordersManager() {
   };
 
   const getPriorityBadge = (priority: BackorderPriority) => {
-    const  config: Record<BackorderPriority, { variant: 'default' | 'secondary' | 'destructive' | 'outline'; label: string; className?: string }> = {
+    const config: Record<
+      BackorderPriority,
+      {
+        variant: 'default' | 'secondary' | 'destructive' | 'outline';
+        label: string;
+        className?: string;
+      }
+    > = {
       low: { variant: 'outline', label: 'Basse' },
       medium: { variant: 'default', label: 'Moyenne', className: 'bg-yellow-500' },
       high: { variant: 'default', label: 'Haute', className: 'bg-orange-500' },
       urgent: { variant: 'destructive', label: 'Urgente' },
     };
     const { variant, label, className } = config[priority];
-    return <Badge variant={variant} className={className}>{label}</Badge>;
+    return (
+      <Badge variant={variant} className={className}>
+        {label}
+      </Badge>
+    );
   };
 
   const handleReceiveStock = async () => {
@@ -226,15 +272,35 @@ export function BackordersManager() {
     <div className="space-y-4 sm:space-y-6">
       {/* Stats Cards - Responsive */}
       {backorders && backorders.length > 0 && (
-        <div 
+        <div
           ref={statsRef}
           className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
         >
           {[
-            { label: 'Total Backorders', value: stats.total, icon: Package, color: 'from-purple-600 to-pink-600' },
-            { label: 'Urgents', value: stats.urgent, icon: AlertCircle, color: 'from-red-600 to-orange-600' },
-            { label: 'Total Clients', value: stats.totalCustomers, icon: Users, color: 'from-blue-600 to-cyan-600' },
-            { label: 'Unités en attente', value: stats.pendingUnits, icon: Clock, color: 'from-yellow-600 to-orange-600' },
+            {
+              label: 'Total Backorders',
+              value: stats.total,
+              icon: Package,
+              color: 'from-purple-600 to-pink-600',
+            },
+            {
+              label: 'Urgents',
+              value: stats.urgent,
+              icon: AlertCircle,
+              color: 'from-red-600 to-orange-600',
+            },
+            {
+              label: 'Total Clients',
+              value: stats.totalCustomers,
+              icon: Users,
+              color: 'from-blue-600 to-cyan-600',
+            },
+            {
+              label: 'Unités en attente',
+              value: stats.pendingUnits,
+              icon: Clock,
+              color: 'from-yellow-600 to-orange-600',
+            },
           ].map((stat, index) => {
             const Icon = stat.icon;
             return (
@@ -250,7 +316,9 @@ export function BackordersManager() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-3 sm:p-4 pt-0">
-                  <div className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                  <div
+                    className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}
+                  >
                     {stat.value}
                   </div>
                 </CardContent>
@@ -277,7 +345,10 @@ export function BackordersManager() {
             <div className="flex items-center gap-2 flex-1 min-w-[150px]">
               <Filter className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
               <Label className="text-xs sm:text-sm whitespace-nowrap">Statut:</Label>
-              <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
+              <Select
+                value={statusFilter}
+                onValueChange={v => setStatusFilter(v as BackorderStatus | 'all')}
+              >
                 <SelectTrigger className="w-full sm:w-[150px] h-9 sm:h-10 text-xs sm:text-sm">
                   <SelectValue />
                 </SelectTrigger>
@@ -295,7 +366,10 @@ export function BackordersManager() {
 
             <div className="flex items-center gap-2 flex-1 min-w-[150px]">
               <Label className="text-xs sm:text-sm whitespace-nowrap">Priorité:</Label>
-              <Select value={priorityFilter} onValueChange={(v) => setPriorityFilter(v as any)}>
+              <Select
+                value={priorityFilter}
+                onValueChange={v => setPriorityFilter(v as BackorderPriority | 'all')}
+              >
                 <SelectTrigger className="w-full sm:w-[150px] h-9 sm:h-10 text-xs sm:text-sm">
                   <SelectValue />
                 </SelectTrigger>
@@ -312,7 +386,10 @@ export function BackordersManager() {
             <div className="flex items-center gap-2 flex-1 min-w-[150px]">
               <ArrowUpDown className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
               <Label className="text-xs sm:text-sm whitespace-nowrap">Trier par:</Label>
-              <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
+              <Select
+                value={sortBy}
+                onValueChange={v => setSortBy(v as 'priority' | 'date' | 'quantity')}
+              >
                 <SelectTrigger className="w-full sm:w-[150px] h-9 sm:h-10 text-xs sm:text-sm">
                   <SelectValue />
                 </SelectTrigger>
@@ -329,7 +406,9 @@ export function BackordersManager() {
           {!sortedBackorders || sortedBackorders.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-64 text-center py-8 sm:py-12">
               <AlertCircle className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground mb-4 animate-in zoom-in-95 duration-500" />
-              <p className="text-sm sm:text-base text-muted-foreground">Aucun backorder trouvé avec ces filtres</p>
+              <p className="text-sm sm:text-base text-muted-foreground">
+                Aucun backorder trouvé avec ces filtres
+              </p>
             </div>
           ) : (
             <>
@@ -382,7 +461,7 @@ export function BackordersManager() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {sortedBackorders.map((backorder) => (
+                    {sortedBackorders.map(backorder => (
                       <TableRow key={backorder.id}>
                         <TableCell>
                           <div className="space-y-1">
@@ -407,7 +486,12 @@ export function BackordersManager() {
                         <TableCell className="text-sm">{backorder.ordered_quantity}</TableCell>
                         <TableCell className="text-sm">{backorder.received_quantity}</TableCell>
                         <TableCell>
-                          <span className={cn("text-sm", backorder.pending_quantity > 0 && 'font-semibold text-orange-500')}>
+                          <span
+                            className={cn(
+                              'text-sm',
+                              backorder.pending_quantity > 0 && 'font-semibold text-orange-500'
+                            )}
+                          >
                             {backorder.pending_quantity}
                           </span>
                         </TableCell>
@@ -426,7 +510,9 @@ export function BackordersManager() {
                             <div className="flex items-center gap-1 text-sm">
                               <Calendar className="h-3 w-3 flex-shrink-0" />
                               <span className="truncate">
-                                {format(new Date(backorder.expected_restock_date), 'dd/MM/yyyy', { locale: fr })}
+                                {format(new Date(backorder.expected_restock_date), 'dd/MM/yyyy', {
+                                  locale: fr,
+                                })}
                               </span>
                             </div>
                           ) : (
@@ -460,7 +546,9 @@ export function BackordersManager() {
                                 Marquer commandé
                               </Button>
                             )}
-                            {(backorder.status === 'ordered' || backorder.status === 'in_transit' || backorder.status === 'partially_received') && (
+                            {(backorder.status === 'ordered' ||
+                              backorder.status === 'in_transit' ||
+                              backorder.status === 'partially_received') && (
                               <Button
                                 variant="default"
                                 size="sm"
@@ -474,20 +562,21 @@ export function BackordersManager() {
                                 Recevoir stock
                               </Button>
                             )}
-                            {backorder.status === 'received' && !backorder.auto_fulfill_on_arrival && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  setSelectedBackorder(backorder);
-                                  setShowNotifyDialog(true);
-                                }}
-                                className="h-8 text-xs"
-                              >
-                                <Bell className="h-3.5 w-3.5 mr-1.5" />
-                                Notifier
-                              </Button>
-                            )}
+                            {backorder.status === 'received' &&
+                              !backorder.auto_fulfill_on_arrival && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedBackorder(backorder);
+                                    setShowNotifyDialog(true);
+                                  }}
+                                  className="h-8 text-xs"
+                                >
+                                  <Bell className="h-3.5 w-3.5 mr-1.5" />
+                                  Notifier
+                                </Button>
+                              )}
                           </div>
                         </TableCell>
                       </TableRow>
@@ -505,9 +594,7 @@ export function BackordersManager() {
         <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Clients - {selectedBackorder?.product?.name}</DialogTitle>
-            <DialogDescription>
-              Liste des clients en attente pour ce backorder
-            </DialogDescription>
+            <DialogDescription>Liste des clients en attente pour ce backorder</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             {customers && customers.length > 0 ? (
@@ -525,7 +612,7 @@ export function BackordersManager() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {customers.map((customer) => (
+                    {customers.map(customer => (
                       <TableRow key={customer.id}>
                         <TableCell>
                           <div>
@@ -591,7 +678,7 @@ export function BackordersManager() {
               <Input
                 type="number"
                 value={receiveQuantity}
-                onChange={(e) => setReceiveQuantity(Number(e.target.value))}
+                onChange={e => setReceiveQuantity(Number(e.target.value))}
                 min="1"
                 max={selectedBackorder?.pending_quantity || 0}
               />
@@ -637,7 +724,7 @@ export function BackordersManager() {
               <Input
                 type="number"
                 value={orderQuantity}
-                onChange={(e) => setOrderQuantity(Number(e.target.value))}
+                onChange={e => setOrderQuantity(Number(e.target.value))}
                 min="1"
               />
             </div>
@@ -645,7 +732,7 @@ export function BackordersManager() {
               <Label>Nom du fournisseur (optionnel)</Label>
               <Input
                 value={supplierName}
-                onChange={(e) => setSupplierName(e.target.value)}
+                onChange={e => setSupplierName(e.target.value)}
                 placeholder="Nom du fournisseur"
               />
             </div>
@@ -653,7 +740,7 @@ export function BackordersManager() {
               <Label>Numéro de commande (optionnel)</Label>
               <Input
                 value={purchaseOrderId}
-                onChange={(e) => setPurchaseOrderId(e.target.value)}
+                onChange={e => setPurchaseOrderId(e.target.value)}
                 placeholder="PO-12345"
               />
             </div>
@@ -686,7 +773,8 @@ export function BackordersManager() {
           <AlertDialogHeader>
             <AlertDialogTitle>Notifier les clients</AlertDialogTitle>
             <AlertDialogDescription>
-              Envoyer une notification à tous les clients de ce backorder pour les informer de la disponibilité du produit.
+              Envoyer une notification à tous les clients de ce backorder pour les informer de la
+              disponibilité du produit.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -727,15 +815,15 @@ interface BackorderCardProps {
   animationDelay?: number;
 }
 
-function BackorderCard({ 
-  backorder, 
-  getStatusBadge, 
-  getPriorityBadge, 
-  onViewCustomers, 
-  onMarkOrdered, 
-  onReceiveStock, 
+function BackorderCard({
+  backorder,
+  getStatusBadge,
+  getPriorityBadge,
+  onViewCustomers,
+  onMarkOrdered,
+  onReceiveStock,
   onNotify,
-  animationDelay = 0 
+  animationDelay = 0,
 }: BackorderCardProps) {
   return (
     <Card
@@ -772,10 +860,14 @@ function BackorderCard({
             <span>Demande: {backorder.customer_demand}</span>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
-            <span>Commandé: {backorder.ordered_quantity} | Reçu: {backorder.received_quantity}</span>
+            <span>
+              Commandé: {backorder.ordered_quantity} | Reçu: {backorder.received_quantity}
+            </span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-orange-500">En attente: {backorder.pending_quantity}</span>
+            <span className="font-semibold text-orange-500">
+              En attente: {backorder.pending_quantity}
+            </span>
           </div>
           {backorder.supplier_name && (
             <div className="flex items-center gap-2 text-muted-foreground">
@@ -786,7 +878,10 @@ function BackorderCard({
           {backorder.expected_restock_date && (
             <div className="flex items-center gap-2 text-muted-foreground">
               <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
-              <span>Date prévue: {format(new Date(backorder.expected_restock_date), 'dd/MM/yyyy', { locale: fr })}</span>
+              <span>
+                Date prévue:{' '}
+                {format(new Date(backorder.expected_restock_date), 'dd/MM/yyyy', { locale: fr })}
+              </span>
             </div>
           )}
         </div>
@@ -810,7 +905,9 @@ function BackorderCard({
               <span className="text-xs sm:text-sm">Marquer commandé</span>
             </Button>
           )}
-          {(backorder.status === 'ordered' || backorder.status === 'in_transit' || backorder.status === 'partially_received') && (
+          {(backorder.status === 'ordered' ||
+            backorder.status === 'in_transit' ||
+            backorder.status === 'partially_received') && (
             <Button
               onClick={onReceiveStock}
               size="sm"
@@ -821,12 +918,7 @@ function BackorderCard({
             </Button>
           )}
           {backorder.status === 'received' && !backorder.auto_fulfill_on_arrival && (
-            <Button
-              onClick={onNotify}
-              size="sm"
-              variant="outline"
-              className="flex-1 min-w-[100px]"
-            >
+            <Button onClick={onNotify} size="sm" variant="outline" className="flex-1 min-w-[100px]">
               <Bell className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
               <span className="text-xs sm:text-sm">Notifier</span>
             </Button>
@@ -836,8 +928,3 @@ function BackorderCard({
     </Card>
   );
 }
-
-
-
-
-
