@@ -25,14 +25,44 @@
 
 ## 4) Post-deploy smoke tests
 
-- Call `webhook-delivery` without secret -> expect `401`.
-- Call `webhook-delivery` with valid secret -> expect `200`.
-- Call `send-email` as user with `html` payload -> expect `403`.
-- Call `send-email` as user to another email -> expect `403`.
-- Call `send-email` with internal secret and valid payload -> expect `200`.
+Automated (Phase 0.5):
+
+```powershell
+npm run verify:secure-deploy
+# ou validation complète Phase 0 :
+npm run verify:phase0
+```
+
+Variables optionnelles pour tests positifs complets :
+
+| Variable                                 | Usage                                           |
+| ---------------------------------------- | ----------------------------------------------- |
+| `EDGE_INTERNAL_SECRET`                   | Smoke `webhook-delivery` + `send-email` interne |
+| `E2E_BUYER_EMAIL` / `E2E_BUYER_PASSWORD` | Smoke restrictions utilisateur `send-email`     |
+
+Checks manuels si secrets absents :
+
+- Call `webhook-delivery` without secret → expect `401`.
+- Call `webhook-delivery` with valid secret → expect `200`.
+- Call `send-email` as user with `html` payload → expect `403`.
+- Call `send-email` as user to another email → expect `403`.
+- Call `send-email` with internal secret and valid payload → expect `200`.
 
 ## 5) Observability validation
 
 - Confirm logs include `requestId` and `durationMs` for `send-email` and `webhook-delivery`.
 - Confirm failed requests include structured error payloads.
 - Track error rates after deploy (first 24h, then 7 days).
+
+## 6) Sign-off (Phase 0)
+
+| Check                | Commande                             | Statut |
+| -------------------- | ------------------------------------ | ------ |
+| Idempotence webhooks | `npm run verify:webhook-idempotency` |        |
+| Fulfillment monitor  | `npm run verify:fulfillment-monitor` |        |
+| Payment V2           | `npm run verify:payment-v2`          |        |
+| FedEx prod           | `npm run verify:fedex-prod`          |        |
+| Secure deploy        | `npm run verify:secure-deploy`       |        |
+| RLS + storage        | `npm run audit:security-gates`       |        |
+
+**Signé par :** ******\_\_\_****** **Date :** ******\_\_\_******

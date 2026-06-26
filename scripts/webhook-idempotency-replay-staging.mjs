@@ -11,35 +11,11 @@
  * 3. Rejeu transaction déjà completed → already_completed (pas de double fulfillment)
  */
 import { createClient } from '@supabase/supabase-js';
-import { readFileSync, existsSync } from 'fs';
+import { loadSupabaseEnv, getSupabaseUrl, getServiceRoleKey } from './load-supabase-env.mjs';
 
-function loadEnv() {
-  const env = {};
-  for (const file of ['.env.local', '.env']) {
-    if (!existsSync(file)) continue;
-    const raw = readFileSync(file, 'utf8');
-    for (const line of raw.split(/\r?\n/)) {
-      if (!line || line.startsWith('#')) continue;
-      const i = line.indexOf('=');
-      if (i === -1) continue;
-      const key = line.slice(0, i);
-      let val = line.slice(i + 1).trim();
-      if (
-        (val.startsWith('"') && val.endsWith('"')) ||
-        (val.startsWith("'") && val.endsWith("'"))
-      ) {
-        val = val.slice(1, -1);
-      }
-      if (!(key in env)) env[key] = val;
-    }
-  }
-  return env;
-}
-
-const env = loadEnv();
-const url = process.env.SUPABASE_URL || env.VITE_SUPABASE_URL || 'https://hbdnzajbyjakdhuavrvb.supabase.co';
-const serviceKey =
-  process.env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_SERVICE_ROLE_KEY;
+const env = loadSupabaseEnv();
+const url = getSupabaseUrl(env);
+const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || getServiceRoleKey(env);
 
 const report = {
   ok: false,

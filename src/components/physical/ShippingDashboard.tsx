@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
   TableBody,
@@ -25,8 +26,9 @@ import {
   Users,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { CompactShippingInfo } from './ShippingInfoDisplay';
-import type { ShippingStatus } from '@/hooks/physical/useShippingTracking';
+import type { ShippingInfo, ShippingStatus } from '@/hooks/physical/useShippingTracking';
+import { useShipments, useShippingStats } from '@/hooks/physical/useShippingTracking';
+import { useQueryClient } from '@tanstack/react-query';
 
 // ============================================================================
 // TYPES
@@ -38,80 +40,46 @@ export interface ShippingDashboardProps {
 }
 
 // ============================================================================
-// MOCK DATA
+// HELPERS
 // ============================================================================
 
-const MOCK_STATS = {
-  total_shipments: 342,
-  pending: 15,
-  in_transit: 48,
-  delivered: 279,
-  failed: 0,
-  on_time_rate: 94.2,
-  avg_delivery_days: 3.5,
-  carriers: {
-    dhl: 145,
-    fedex: 98,
-    ups: 65,
-    la_poste: 34,
-  },
-  today_shipments: 12,
-  this_week: 67,
-  trending: 'up' as 'up' | 'down',
-};
+function countShipmentsSince(shipments: ShippingInfo[], since: Date) {
+  return shipments.filter(s => new Date(s.created_at) >= since).length;
+}
 
-const MOCK_RECENT_SHIPMENTS = [
-  {
-    id: 'ship_1',
-    order_number: '#12345',
-    customer_name: 'Marie Diallo',
-    status: 'in_transit' as ShippingStatus,
-    carrier: 'DHL',
-    tracking_number: 'DHL123456789',
-    shipped_date: '2025-10-27',
-    estimated_delivery: '2025-10-30',
-  },
-  {
-    id: 'ship_2',
-    order_number: '#12346',
-    customer_name: 'Amadou Traoré',
-    status: 'delivered' as ShippingStatus,
-    carrier: 'FedEx',
-    tracking_number: 'FDX987654321',
-    shipped_date: '2025-10-25',
-    estimated_delivery: '2025-10-28',
-  },
-  {
-    id: 'ship_3',
-    order_number: '#12347',
-    customer_name: 'Fatou Sow',
-    status: 'pending' as ShippingStatus,
-    carrier: 'UPS',
-    tracking_number: '',
-    shipped_date: '',
-    estimated_delivery: '2025-11-01',
-  },
-];
+function buildCarrierCounts(shipments: ShippingInfo[]) {
+  return shipments.reduce<Record<string, number>>((acc, shipment) => {
+    const key = (shipment.carrier || shipment.carrier_name || 'other').toLowerCase();
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
+}
+
+function buildCountryCounts(shipments: ShippingInfo[]) {
+  return shipments.reduce<Record<string, number>>((acc, shipment) => {
+    const country = shipment.shipping_address?.country?.trim() || 'unknown';
+    acc[country] = (acc[country] || 0) + 1;
+    return acc;
+  }, {});
+}
 
 // ============================================================================
 // HELPER COMPONENTS
 // ============================================================================
 
 function ShippingStatusBadge({ status }: { status: ShippingStatus }) {
-  const  config: Record<
-    ShippingStatus,
-    { label: string; className: string; icon: typeof Package }
-  > = {
-    pending: { label: 'En attente', className: 'bg-gray-600', icon: Clock },
-    processing: { label: 'Traitement', className: 'bg-blue-600', icon: Package },
-    packed: { label: 'Emballé', className: 'bg-indigo-600', icon: Package },
-    shipped: { label: 'Expédié', className: 'bg-purple-600', icon: Truck },
-    in_transit: { label: 'En transit', className: 'bg-orange-600', icon: Truck },
-    out_for_delivery: { label: 'En livraison', className: 'bg-yellow-600', icon: Truck },
-    delivered: { label: 'Livré', className: 'bg-green-600', icon: CheckCircle2 },
-    failed: { label: 'Échec', className: 'bg-red-600', icon: XCircle },
-    returned: { label: 'Retourné', className: 'bg-gray-600', icon: Package },
-  };
+  const config: Record<ShippingStatus, { label: string; className: string; icon: typeof Package }> =
+    {
+      pending: { label: 'En attente', className: 'bg-gray-600', icon: Clock },
+      processing: { label: 'Traitement', className: 'bg-blue-600', icon: Package },
+      packed: { label: 'Emballé', className: 'bg-indigo-600', icon: Package },
+      shipped: { label: 'Expédié', className: 'bg-purple-600', icon: Truck },
+      in_transit: { label: 'En transit', className: 'bg-orange-600', icon: Truck },
+      out_for_delivery: { label: 'En livraison', className: 'bg-yellow-600', icon: Truck },
+      delivered: { label: 'Livré', className: 'bg-green-600', icon: CheckCircle2 },
+      failed: { label: 'Échec', className: 'bg-red-600', icon: XCircle },
+      returned: { label: 'Retourné', className: 'bg-gray-600', icon: Package },
+    };
 
   const { label, className, icon: Icon } = config[status];
 
@@ -129,15 +97,66 @@ function ShippingStatusBadge({ status }: { status: ShippingStatus }) {
 
 export function ShippingDashboard({ storeId, className }: ShippingDashboardProps) {
   const [activeTab, setActiveTab] = useState('overview');
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const queryClient = useQueryClient();
+  const {
+    data: statsData,
+    isLoading: statsLoading,
+    isFetching: statsFetching,
+  } = useShippingStats(storeId);
+  const { data: shipments = [], isLoading: shipmentsLoading } = useShipments(storeId);
 
-  const stats = MOCK_STATS;
+  const isRefreshing = statsFetching || shipmentsLoading;
+
+  const dashboard = useMemo(() => {
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfWeek = new Date(startOfToday);
+    startOfWeek.setDate(startOfWeek.getDate() - 7);
+
+    const carriers = buildCarrierCounts(shipments);
+    const countries = buildCountryCounts(shipments);
+    const total = statsData?.total ?? shipments.length;
+
+    return {
+      total_shipments: total,
+      pending: statsData?.pending ?? 0,
+      in_transit: statsData?.in_transit ?? 0,
+      delivered: statsData?.delivered ?? 0,
+      failed: statsData?.failed ?? 0,
+      on_time_rate: statsData?.on_time_delivery_rate ?? 0,
+      avg_delivery_days: statsData?.avg_delivery_time_days ?? 0,
+      carriers,
+      countries,
+      today_shipments: countShipmentsSince(shipments, startOfToday),
+      this_week: countShipmentsSince(shipments, startOfWeek),
+      recent: [...shipments]
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .slice(0, 10),
+    };
+  }, [shipments, statsData]);
 
   const handleRefresh = async () => {
-    setIsRefreshing(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setIsRefreshing(false);
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['shipping-stats', storeId] }),
+      queryClient.invalidateQueries({ queryKey: ['shipments', storeId] }),
+    ]);
   };
+
+  if (statsLoading && shipmentsLoading) {
+    return (
+      <div className={cn('space-y-6', className)}>
+        <Skeleton className="h-10 w-72" />
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {[1, 2, 3, 4].map(i => (
+            <Skeleton key={i} className="h-28" />
+          ))}
+        </div>
+        <Skeleton className="h-96" />
+      </div>
+    );
+  }
+
+  const stats = dashboard;
 
   return (
     <div className={cn('space-y-6', className)}>
@@ -145,9 +164,7 @@ export function ShippingDashboard({ storeId, className }: ShippingDashboardProps
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Tableau de Bord Expéditions</h1>
-          <p className="text-muted-foreground mt-1">
-            Suivi complet de vos livraisons
-          </p>
+          <p className="text-muted-foreground mt-1">Suivi complet de vos livraisons</p>
         </div>
         <div className="flex gap-2">
           <Button
@@ -176,9 +193,7 @@ export function ShippingDashboard({ storeId, className }: ShippingDashboardProps
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.total_shipments}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              +{stats.this_week} cette semaine
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">+{stats.this_week} cette semaine</p>
           </CardContent>
         </Card>
 
@@ -190,9 +205,7 @@ export function ShippingDashboard({ storeId, className }: ShippingDashboardProps
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-600">{stats.in_transit}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {stats.pending} en attente
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">{stats.pending} en attente</p>
           </CardContent>
         </Card>
 
@@ -204,9 +217,7 @@ export function ShippingDashboard({ storeId, className }: ShippingDashboardProps
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{stats.delivered}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {stats.failed} échecs
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">{stats.failed} échecs</p>
           </CardContent>
         </Card>
 
@@ -217,9 +228,13 @@ export function ShippingDashboard({ storeId, className }: ShippingDashboardProps
             <TrendingUp className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.on_time_rate}%</div>
+            <div className="text-2xl font-bold text-green-600">
+              {stats.on_time_rate > 0 ? `${stats.on_time_rate.toFixed(1)}%` : '—'}
+            </div>
             <p className="text-xs text-muted-foreground mt-1">
-              Moy. {stats.avg_delivery_days}j de livraison
+              {stats.avg_delivery_days > 0
+                ? `Moy. ${stats.avg_delivery_days.toFixed(1)}j de livraison`
+                : 'Pas encore de livraisons mesurées'}
             </p>
           </CardContent>
         </Card>
@@ -236,9 +251,11 @@ export function ShippingDashboard({ storeId, className }: ShippingDashboardProps
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span>Livrés à temps</span>
-                <span className="font-medium">{stats.on_time_rate}%</span>
+                <span className="font-medium">
+                  {stats.on_time_rate > 0 ? `${stats.on_time_rate.toFixed(1)}%` : '—'}
+                </span>
               </div>
-              <Progress value={stats.on_time_rate} className="h-2" />
+              <Progress value={stats.on_time_rate || 0} className="h-2" />
             </div>
 
             <div className="grid grid-cols-2 gap-4 pt-4 border-t">
@@ -260,20 +277,25 @@ export function ShippingDashboard({ storeId, className }: ShippingDashboardProps
             <CardTitle className="text-base">Répartition par Transporteur</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {Object.entries(stats.carriers).map(([carrier, count]) => {
-              const percentage = (count / stats.total_shipments) * 100;
-              return (
-                <div key={carrier} className="space-y-1">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium uppercase">{carrier}</span>
-                    <span className="text-muted-foreground">
-                      {count} ({percentage.toFixed(0)}%)
-                    </span>
+            {Object.keys(stats.carriers).length === 0 ? (
+              <p className="text-sm text-muted-foreground">Aucune expédition enregistrée.</p>
+            ) : (
+              Object.entries(stats.carriers).map(([carrier, count]) => {
+                const percentage =
+                  stats.total_shipments > 0 ? (count / stats.total_shipments) * 100 : 0;
+                return (
+                  <div key={carrier} className="space-y-1">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="font-medium uppercase">{carrier}</span>
+                      <span className="text-muted-foreground">
+                        {count} ({percentage.toFixed(0)}%)
+                      </span>
+                    </div>
+                    <Progress value={percentage} className="h-2" />
                   </div>
-                  <Progress value={percentage} className="h-2" />
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </CardContent>
         </Card>
       </div>
@@ -347,33 +369,49 @@ export function ShippingDashboard({ storeId, className }: ShippingDashboardProps
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {MOCK_RECENT_SHIPMENTS.map((shipment) => (
-                      <TableRow key={shipment.id}>
-                        <TableCell className="font-medium">{shipment.order_number}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Users className="h-4 w-4 text-muted-foreground" />
-                            {shipment.customer_name}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{shipment.carrier}</Badge>
-                        </TableCell>
-                        <TableCell>
-                          <span className="font-mono text-xs">
-                            {shipment.tracking_number || '-'}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <ShippingStatusBadge status={shipment.status} />
-                        </TableCell>
-                        <TableCell>
-                          <span className="text-sm">
-                            {shipment.estimated_delivery || '-'}
-                          </span>
+                    {stats.recent.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                          Aucune expédition récente
                         </TableCell>
                       </TableRow>
-                    ))}
+                    ) : (
+                      stats.recent.map(shipment => (
+                        <TableRow key={shipment.id}>
+                          <TableCell className="font-medium">
+                            {shipment.order_number || shipment.order_id}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Users className="h-4 w-4 text-muted-foreground" />
+                              {shipment.customer_name || '—'}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">
+                              {shipment.carrier_name || shipment.carrier || '—'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <span className="font-mono text-xs">
+                              {shipment.tracking_number || '-'}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            <ShippingStatusBadge status={shipment.status} />
+                          </TableCell>
+                          <TableCell>
+                            <span className="text-sm">
+                              {shipment.estimated_delivery_date
+                                ? new Date(shipment.estimated_delivery_date).toLocaleDateString(
+                                    'fr-FR'
+                                  )
+                                : '-'}
+                            </span>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
                   </TableBody>
                 </Table>
               </div>
@@ -402,21 +440,31 @@ export function ShippingDashboard({ storeId, className }: ShippingDashboardProps
                     <CardTitle className="text-base">Destinations Populaires</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-3">
-                      {['Dakar (45%)', 'Abidjan (28%)', 'Lomé (15%)', 'Bamako (12%)'].map(
-                        (city, index) => (
-                          <div key={city} className="flex items-center gap-3">
-                            <div className="flex-1">
-                              <p className="text-sm font-medium">{city}</p>
-                              <Progress
-                                value={[45, 28, 15, 12][index]}
-                                className="h-2 mt-1"
-                              />
-                            </div>
-                          </div>
-                        )
-                      )}
-                    </div>
+                    {Object.keys(stats.countries).length === 0 ? (
+                      <p className="text-sm text-muted-foreground">
+                        Les destinations apparaîtront après vos premières expéditions.
+                      </p>
+                    ) : (
+                      <div className="space-y-3">
+                        {Object.entries(stats.countries)
+                          .sort(([, a], [, b]) => b - a)
+                          .slice(0, 5)
+                          .map(([country, count]) => {
+                            const pct =
+                              stats.total_shipments > 0 ? (count / stats.total_shipments) * 100 : 0;
+                            return (
+                              <div key={country} className="flex items-center gap-3">
+                                <div className="flex-1">
+                                  <p className="text-sm font-medium">
+                                    {country} ({pct.toFixed(0)}%)
+                                  </p>
+                                  <Progress value={pct} className="h-2 mt-1" />
+                                </div>
+                              </div>
+                            );
+                          })}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>
@@ -424,26 +472,31 @@ export function ShippingDashboard({ storeId, className }: ShippingDashboardProps
 
             {/* Carriers Tab */}
             <TabsContent value="carriers" className="mt-0">
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                {Object.entries(stats.carriers).map(([carrier, count]) => (
-                  <Card key={carrier}>
-                    <CardHeader>
-                      <CardTitle className="text-sm uppercase">{carrier}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        <div className="text-3xl font-bold">{count}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {((count / stats.total_shipments) * 100).toFixed(1)}% du total
+              {Object.keys(stats.carriers).length === 0 ? (
+                <p className="text-sm text-muted-foreground py-8 text-center">
+                  Aucun transporteur utilisé pour le moment.
+                </p>
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                  {Object.entries(stats.carriers).map(([carrier, count]) => (
+                    <Card key={carrier}>
+                      <CardHeader>
+                        <CardTitle className="text-sm uppercase">{carrier}</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          <div className="text-3xl font-bold">{count}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {stats.total_shipments > 0
+                              ? `${((count / stats.total_shipments) * 100).toFixed(1)}% du total`
+                              : '0% du total'}
+                          </div>
                         </div>
-                        <Button variant="outline" size="sm" className="w-full mt-4">
-                          Voir Détails
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </TabsContent>
           </CardContent>
         </Tabs>
@@ -478,10 +531,3 @@ export function ShippingDashboard({ storeId, className }: ShippingDashboardProps
     </div>
   );
 }
-
-
-
-
-
-
-

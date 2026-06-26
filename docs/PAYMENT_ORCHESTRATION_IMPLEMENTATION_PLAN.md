@@ -38,17 +38,17 @@ L'acheteur paie via le PSP **optimal** selon boutique, devise, pays et disponibi
 
 ### Ce qui existe
 
-| Élément              | Emplacement                                                          | État                                                    |
-| -------------------- | -------------------------------------------------------------------- | ------------------------------------------------------- |
-| Rail production      | `src/lib/payment-service.ts`                                         | **Moneroo uniquement**                                  |
-| Classes PSP          | `src/integrations/payments/stripe.ts`, `paypal.ts`, `flutterwave.ts` | Code présent, **non branché** au checkout               |
-| Préférences boutique | `stores.enabled_payment_providers` (TEXT[])                          | Défaut `['moneroo']`                                    |
-| Sélecteur checkout   | `src/components/checkout/PaymentProviderSelector.tsx`                | Type union = `'moneroo'` seul                           |
-| Webhook production   | `supabase/functions/moneroo-webhook`                                 | Fulfillment riche (bookings, certificats artiste, etc.) |
-| Transactions         | Table `transactions`                                                 | `payment_provider` + colonnes Moneroo/Paydunya legacy   |
-| Commandes            | 5 hooks `useCreate*Order`                                            | Tous appellent `initiateMonerooPayment`                 |
-| Checkout panier      | `src/pages/Checkout.tsx`                                             | `selectedPaymentProvider: 'moneroo'`                    |
-| Fulfillment SQL      | Triggers digital / course enrollment                                 | Déclenchés sur `orders.payment_status`                  |
+| Élément              | Emplacement                                                          | État                                                       |
+| -------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------- |
+| Rail production      | `src/lib/payment-service.ts`                                         | **Moneroo uniquement**                                     |
+| Classes PSP          | `src/integrations/payments/stripe.ts`, `paypal.ts`, `flutterwave.ts` | Code présent, **non branché** au checkout                  |
+| Préférences boutique | `stores.enabled_payment_providers` (TEXT[])                          | Défaut `['moneroo']`                                       |
+| Sélecteur checkout   | `src/components/checkout/PaymentProviderSelector.tsx`                | Type union = `'moneroo'` seul                              |
+| Webhook production   | `supabase/functions/moneroo-webhook`                                 | Fulfillment riche (bookings, certificats artiste, etc.)    |
+| Transactions         | Table `transactions`                                                 | `payment_provider` + colonnes Moneroo/Paydunya legacy      |
+| Commandes            | 5 hooks `useCreate*Order`                                            | Via `initiatePayment` → orchestrateur V2 ou Moneroo legacy |
+| Checkout panier      | `src/pages/Checkout.tsx`                                             | `selectedPaymentProvider: 'moneroo'`                       |
+| Fulfillment SQL      | Triggers digital / course enrollment                                 | Déclenchés sur `orders.payment_status`                     |
 
 ### Lacunes critiques
 
@@ -552,7 +552,7 @@ _R = Responsible, A = Accountable, C = Consulted, I = Informed_
 - [ ] Moneroo reste défaut Afrique sans régression E2E
 - [ ] Documentation vendeur publiée
 - [ ] Runbook incident paiement
-- [ ] SECURE_DEPLOY_CHECKLIST mis à jour
+- [x] SECURE_DEPLOY_CHECKLIST mis à jour (`verify:secure-deploy`, `verify:phase0`)
 
 ---
 

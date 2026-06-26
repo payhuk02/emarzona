@@ -1,86 +1,135 @@
 /**
- * Vérifie migration Payment V2 sur Supabase remote (lecture seule)
+ * Vérifie Payment V2 sur Supabase remote (lecture seule).
  * Usage: node scripts/verify-payment-v2-remote.mjs
  */
 import { createClient } from '@supabase/supabase-js';
-import { readFileSync } from 'fs';
+import { execSync } from 'child_process';
+import {
+  loadSupabaseEnv,
+  getSupabaseUrl,
+  getServiceRoleKey,
+} from './load-supabase-env.mjs';
 
-function loadEnv() {
-  const raw = readFileSync('.env', 'utf8');
-  const env = {};
-  for (const line of raw.split(/\r?\n/)) {
-    if (!line || line.startsWith('#')) continue;
-    const i = line.indexOf('=');
-    if (i === -1) continue;
-    const key = line.slice(0, i);
-    let val = line.slice(i + 1).trim();
-    if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
-      val = val.slice(1, -1);
-    }
-    env[key] = val;
-  }
-  return env;
+const env = loadSupabaseEnv();
+const url = getSupabaseUrl(env);
+const serviceKey = getServiceRoleKey(env);
+
+const report = {
+  ok: false,
+  timestamp: new Date().toISOString(),
+  store_payment_connections_count: null,
+  moneroo_connections: null,
+  rpc_sample_eur: null,
+  payment_orchestration_v2_flag: null,
+  vite_orchestration_v2: env.VITE_PAYMENT_ORCHESTRATION_V2 ?? null,
+  via: null,
+  blockers: [],
+};
+
+function fail(msg) {
+  report.blockers.push(msg);
 }
 
-const env = loadEnv();
-const url = env.VITE_SUPABASE_URL || 'https://hbdnzajbyjakdhuavrvb.supabase.co';
-const key =
-  env.SUPABASE_SERVICE_ROLE_KEY ||
-  env.VITE_SUPABASE_ANON_KEY ||
-  env.VITE_SUPABASE_PUBLISHABLE_KEY;
-
-if (!key) {
-  console.error('Missing Supabase key in .env (SERVICE_ROLE or ANON)');
-  process.exit(1);
-}
-
-const sb = createClient(url, key);
-
-const { count, error: countErr } = await sb
-  .from('store_payment_connections')
-  .select('*', { count: 'exact', head: true });
-
-const { data: stores, error: storeErr } = await sb.from('stores').select('id').limit(1);
-
-let rpcSample = null;
-let rpcErr = null;
-if (stores?.[0]?.id) {
-  const r = await sb.rpc('get_store_payment_options', {
-    p_store_id: stores[0].id,
-    p_currency: 'EUR',
-    p_buyer_country: null,
+function runLinkedSql(sql) {
+  return execSync('npx supabase db query --linked', {
+    input: sql,
+    encoding: 'utf8',
+    stdio: ['pipe', 'pipe', 'pipe'],
   });
-  rpcSample = r.data;
-  rpcErr = r.error;
 }
 
-const { data: flag } = await sb
-  .from('platform_settings')
-  .select('settings')
-  .eq('key', 'payment_orchestration_v2')
-  .maybeSingle();
+async function verifyViaServiceRole() {
+  const sb = createClient(url, serviceKey);
 
-const { data: monerooCount } = await sb
-  .from('store_payment_connections')
-  .select('id', { count: 'exact', head: true })
-  .eq('provider', 'moneroo_platform');
+  const { count, error: countErr } = await sb
+    .from('store_payment_connections')
+    .select('*', { count: 'exact', head: true });
+  if (countErr) throw new Error(countErr.message);
+  report.store_payment_connections_count = count;
 
-console.log(
-  JSON.stringify(
-    {
-      ok: !countErr && !rpcErr,
-      store_payment_connections_count: count,
-      table_error: countErr?.message ?? null,
-      moneroo_connections: monerooCount,
-      rpc_sample_eur: rpcSample,
-      rpc_error: rpcErr?.message ?? null,
-      store_fetch_error: storeErr?.message ?? null,
-      payment_orchestration_v2_flag: flag?.settings ?? null,
-      vite_orchestration_v2: env.VITE_PAYMENT_ORCHESTRATION_V2 ?? null,
-    },
-    null,
-    2
-  )
-);
+  const { count: monerooCount, error: monerooErr } = await sb
+    .from('store_payment_connections')
+    .select('id', { count: 'exact', head: true })
+    .eq('provider', 'moneroo_platform');
+  if (monerooErr) throw new Error(monerooErr.message);
+  report.moneroo_connections = monerooCount;
 
-process.exit(countErr || rpcErr ? 1 : 0);
+  const { data: stores, error: storeErr } = await sb.from('stores').select('id').limit(1);
+  if (storeErr) throw new Error(storeErr.message);
+
+  if (stores?.[0]?.id) {
+    const { data, error } = await sb.rpc('get_store_payment_options', {
+      p_store_id: stores[0].id,
+      p_currency: 'EUR',
+      p_buyer_country: null,
+    });
+    if (error) throw new Error(error.message);
+    report.rpc_sample_eur = data;
+  }
+
+  const { data: flag, error: flagErr } = await sb
+    .from('platform_settings')
+    .select('settings')
+    .eq('key', 'payment_orchestration_v2')
+    .maybeSingle();
+  if (flagErr) throw new Error(flagErr.message);
+  report.payment_orchestration_v2_flag = flag?.settings ?? null;
+
+  report.via = 'service_role';
+}
+
+function verifyViaLinkedSql() {
+  const countOut = runLinkedSql(
+    'SELECT count(*)::int AS c FROM public.store_payment_connections;'
+  );
+  const countMatch = countOut.match(/"c":\s*(\d+)/);
+  report.store_payment_connections_count = countMatch ? Number(countMatch[1]) : null;
+
+  const monerooOut = runLinkedSql(
+    "SELECT count(*)::int AS c FROM public.store_payment_connections WHERE provider = 'moneroo_platform';"
+  );
+  const monerooMatch = monerooOut.match(/"c":\s*(\d+)/);
+  report.moneroo_connections = monerooMatch ? Number(monerooMatch[1]) : null;
+
+  const flagOut = runLinkedSql(
+    "SELECT settings FROM public.platform_settings WHERE key = 'payment_orchestration_v2' LIMIT 1;"
+  );
+  if (flagOut.includes('enabled') || flagOut.includes('rollout')) {
+    report.payment_orchestration_v2_flag = 'present_in_db';
+  }
+
+  const rpcOut = runLinkedSql(`
+    SELECT public.get_store_payment_options(
+      (SELECT id FROM public.stores LIMIT 1),
+      'EUR',
+      NULL
+    ) AS opts;
+  `);
+  report.rpc_sample_eur = rpcOut.includes('moneroo') || rpcOut.includes('providers') ? 'ok' : null;
+  report.via = 'supabase_db_query';
+}
+
+try {
+  if (serviceKey) {
+    await verifyViaServiceRole();
+  } else {
+    verifyViaLinkedSql();
+  }
+
+  if (report.store_payment_connections_count === null) {
+    fail('store_payment_connections inaccessible');
+  }
+  if (!report.rpc_sample_eur) {
+    fail('get_store_payment_options indisponible ou vide');
+  }
+  if (!report.payment_orchestration_v2_flag) {
+    fail('platform_settings.payment_orchestration_v2 absent');
+  }
+
+  report.ok = report.blockers.length === 0;
+} catch (err) {
+  fail(err instanceof Error ? err.message : String(err));
+}
+
+console.log(JSON.stringify(report, null, 2));
+process.exit(report.ok ? 0 : 1);

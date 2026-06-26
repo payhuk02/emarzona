@@ -270,13 +270,15 @@ npm run typecheck:commerce-core
 
 ### J+30 — Production truth
 
-| Livrable                               | Owner    | Statut                                          |
-| -------------------------------------- | -------- | ----------------------------------------------- |
-| FedEx 100 % réel staging/prod          | Infra    | Code prêt ; secrets `FEDEX_*` à poser           |
-| E2E artiste + cours renforcés          | QA       | **Fait** — `test-vertical-paid` (5 specs)       |
-| Fix `service_availability` query/types | Platform | **Fait** — app sur `service_availability_slots` |
-| Régression panier multi-type (4 types) | QA       | Contrat Vitest + `mixed-cart-service-product`   |
-| Monitoring fulfillment post-paid       | Platform | À faire                                         |
+| Livrable                               | Owner    | Statut                                                                    |
+| -------------------------------------- | -------- | ------------------------------------------------------------------------- |
+| FedEx 100 % réel staging/prod          | Infra    | Code prêt ; secrets `FEDEX_*` à poser                                     |
+| E2E artiste + cours renforcés          | QA       | **Fait** — `test-vertical-paid` (5 specs)                                 |
+| Fix `service_availability` query/types | Platform | **Fait** — app sur `service_availability_slots`                           |
+| Régression panier multi-type (4 types) | QA       | Contrat Vitest + `mixed-cart-service-product`                             |
+| Monitoring fulfillment post-paid       | Platform | **Fait** — cron `order-fulfillment-monitor`, `verify:fulfillment-monitor` |
+| Billing → orchestrateur                | Platform | **Fait** — `initiate-billing-payment.ts`                                  |
+| Idempotence webhooks multi-PSP         | Platform | **Fait** — `process_payment_webhook_atomic`, `verify:webhook-idempotency` |
 
 **KPIs** : fulfillment < 5 min ≥ 99 % ; 5/5 E2E verts chemin critique ; 0 % shipping mock en prod.
 
@@ -311,17 +313,19 @@ npm run typecheck:commerce-core
 ## Definition of Done (release majeure)
 
 - [x] E2E chemin payant vert sur CI (`test-vertical-paid` dans `playwright.yml`)
-- [ ] Trigger fulfillment vérifié staging
-- [ ] Webhook idempotent (pas double fulfillment)
+- [x] Trigger fulfillment vérifié staging (`verify:fulfillment-monitor`)
+- [x] Webhook idempotent (pas double fulfillment) — contrat `verify_webhook_idempotency_contract`
 - [ ] RLS portails client validé
-- [ ] `typecheck:commerce-core` + `lint:ci:critical` verts
+- [ ] `typecheck:commerce-core` + `lint:ci:critical` verts — `npm run verify:phase1`
 - [ ] Pas de mock FedEx/analytics sur métriques vendeur affichées
-- [ ] `SECURE_DEPLOY_CHECKLIST.md` signé
+- [ ] `SECURE_DEPLOY_CHECKLIST.md` signé — `npm run verify:phase0` + sign-off section 6
 
 ---
 
 ## Historique document
 
-| Date       | Action                                                   |
-| ---------- | -------------------------------------------------------- |
-| 2026-05-23 | Création audit + sprint 1 (doc, E2E, fix availabilities) |
+| Date       | Action                                                                                     |
+| ---------- | ------------------------------------------------------------------------------------------ |
+| 2026-05-23 | Création audit + sprint 1 (doc, E2E, fix availabilities)                                   |
+| 2026-06-24 | Phase 0 : fulfillment monitor, idempotence webhooks, scripts `verify:phase0`               |
+| 2026-06-26 | Phase 1 : pagination `AdminProducts`, `ShippingDashboard` données réelles, `verify:phase1` |

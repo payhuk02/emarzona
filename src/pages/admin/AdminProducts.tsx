@@ -14,6 +14,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useIsMobile } from '@/hooks/use-mobile';
 import {
   AlertDialog,
@@ -25,89 +32,77 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Package, Search, Trash2, AlertTriangle, Eye, Power, PowerOff } from 'lucide-react';
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import {
+  Package,
+  Search,
+  Trash2,
+  AlertTriangle,
+  Eye,
+  Power,
+  PowerOff,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { formatCurrency } from '@/lib/utils';
-import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { ProtectedAction } from '@/components/admin/ProtectedAction';
 import { Admin2FABanner } from '@/components/admin/Admin2FABanner';
 import { useAdminMFA } from '@/hooks/useAdminMFA';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { RequireAAL2 } from '@/components/admin/RequireAAL2';
-
-interface ProductData {
-  id: string;
-  name: string;
-  price: number;
-  currency: string;
-  is_active: boolean;
-  store_id: string;
-  created_at: string;
-  store_name?: string;
-}
+import { useQueryClient } from '@tanstack/react-query';
+import {
+  ADMIN_PRODUCT_PAGE_SIZES,
+  DEFAULT_ADMIN_PRODUCT_PAGE_SIZE,
+} from '@/lib/admin/admin-products-query';
+import { useAdminProductsList } from '@/hooks/useAdminProducts';
 
 const AdminProducts = () => {
-  const [products, setProducts] = useState<ProductData[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(DEFAULT_ADMIN_PRODUCT_PAGE_SIZE);
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const { deleteProduct, toggleProductStatus } = useAdminActions();
   const navigate = useNavigate();
   const { isAAL2 } = useAdminMFA();
   const isMobile = useIsMobile();
+  const queryClient = useQueryClient();
 
-  // Animations au scroll
   const headerRef = useScrollAnimation<HTMLDivElement>();
   const tableRef = useScrollAnimation<HTMLDivElement>();
 
-  const fetchProducts = useCallback(async () => {
-    logger.info('Chargement des produits admin');
-    try {
-      const { data, error } = await supabase
-        .from('products')
-        .select(
-          `
-          *,
-          stores!inner(name)
-        `
-        )
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      const productsWithStore = (data || []).map(product => ({
-        ...product,
-        store_name: product.stores?.[0]?.name || 'Inconnu',
-      }));
-
-      setProducts(productsWithStore);
-      logger.info(`${productsWithStore.length} produits chargés`);
-    } catch (err: unknown) {
-      logger.error('Erreur lors du chargement des produits:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchTerm), 300);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+    setPage(1);
+  }, [debouncedSearch, pageSize]);
 
-  const filteredProducts = useMemo(
-    () =>
-      products.filter(
-        product =>
-          product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          product.store_name?.toLowerCase().includes(searchTerm.toLowerCase())
-      ),
-    [products, searchTerm]
-  );
+  const { data: pageData, isLoading } = useAdminProductsList({
+    page,
+    pageSize,
+    search: debouncedSearch,
+  });
 
-  if (loading) {
+  const products = pageData?.rows ?? [];
+  const totalCount = pageData?.totalCount ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+  const from = totalCount === 0 ? 0 : (page - 1) * pageSize + 1;
+  const to = Math.min(page * pageSize, totalCount);
+
+  const refreshProducts = async () => {
+    await queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+  };
+
+  if (isLoading && !pageData) {
     return (
       <AdminLayout>
         <div className="container mx-auto p-6 space-y-6">
@@ -123,7 +118,6 @@ const AdminProducts = () => {
       <RequireAAL2>
         <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
           <Admin2FABanner />
-          {/* Header avec animation - Style Inventory */}
           <div
             ref={headerRef}
             className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700"
@@ -145,7 +139,7 @@ const AdminProducts = () => {
                 </span>
               </h1>
               <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
-                {products.length} produit{products.length > 1 ? 's' : ''} sur la plateforme
+                {totalCount} produit{totalCount > 1 ? 's' : ''} sur la plateforme
               </p>
             </div>
           </div>
@@ -156,12 +150,12 @@ const AdminProducts = () => {
                 Liste des produits
               </CardTitle>
               <CardDescription className="text-[10px] sm:text-xs md:text-sm">
-                Gérer tous les produits de la plateforme
+                Gérer tous les produits de la plateforme (pagination serveur)
               </CardDescription>
               <div className="relative mt-3 sm:mt-4">
                 <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Rechercher par nom ou boutique..."
+                  placeholder="Rechercher par nom ou boutique (min. 2 caractères)..."
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
                   className="pl-8 sm:pl-10 min-h-[44px] text-xs sm:text-sm"
@@ -170,10 +164,12 @@ const AdminProducts = () => {
             </CardHeader>
             <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
               <div ref={tableRef} role="region" aria-label="Tableau des produits">
-                {/* Version mobile : Cartes */}
                 {isMobile ? (
                   <MobileTableCard
-                    data={filteredProducts}
+                    data={products.map(product => ({
+                      ...product,
+                      store_name: product.stores?.name ?? 'Inconnu',
+                    }))}
                     columns={[
                       { key: 'name', label: 'Nom', priority: 'high' },
                       { key: 'store_name', label: 'Boutique', priority: 'high' },
@@ -203,45 +199,32 @@ const AdminProducts = () => {
                     actions={product => (
                       <div className="flex flex-wrap gap-2">
                         <ProtectedAction permission="products.manage">
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <span>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    disabled={!isAAL2}
-                                    onClick={async () => {
-                                      if (!isAAL2) return;
-                                      const success = await toggleProductStatus(
-                                        product.id,
-                                        product.is_active
-                                      );
-                                      if (success) {
-                                        await fetchProducts();
-                                      }
-                                    }}
-                                    className="w-full sm:w-auto"
-                                  >
-                                    {product.is_active ? (
-                                      <>
-                                        <PowerOff className="h-4 w-4 mr-1" />
-                                        Désactiver
-                                      </>
-                                    ) : (
-                                      <>
-                                        <Power className="h-4 w-4 mr-1" />
-                                        Activer
-                                      </>
-                                    )}
-                                  </Button>
-                                </span>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                {product.is_active ? 'Désactiver le produit' : 'Activer le produit'}
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={!isAAL2}
+                            onClick={async () => {
+                              if (!isAAL2) return;
+                              const success = await toggleProductStatus(
+                                product.id,
+                                product.is_active
+                              );
+                              if (success) await refreshProducts();
+                            }}
+                            className="w-full sm:w-auto"
+                          >
+                            {product.is_active ? (
+                              <>
+                                <PowerOff className="h-4 w-4 mr-1" />
+                                Désactiver
+                              </>
+                            ) : (
+                              <>
+                                <Power className="h-4 w-4 mr-1" />
+                                Activer
+                              </>
+                            )}
+                          </Button>
                         </ProtectedAction>
                         <Button
                           variant="outline"
@@ -272,7 +255,6 @@ const AdminProducts = () => {
                     )}
                   />
                 ) : (
-                  /* Version desktop : Tableau */
                   <div className="overflow-x-auto">
                     <Table className="min-w-[720px]">
                       <TableHeader>
@@ -286,11 +268,11 @@ const AdminProducts = () => {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {filteredProducts.map(product => (
+                        {products.map(product => (
                           <TableRow key={product.id}>
                             <TableCell className="font-medium">{product.name}</TableCell>
-                            <TableCell>{product.store_name}</TableCell>
-                            <TableCell>{formatCurrency(product.price)}</TableCell>
+                            <TableCell>{product.stores?.name ?? 'Inconnu'}</TableCell>
+                            <TableCell>{formatCurrency(product.price, product.currency)}</TableCell>
                             <TableCell>
                               <Badge variant={product.is_active ? 'default' : 'secondary'}>
                                 {product.is_active ? 'Actif' : 'Inactif'}
@@ -316,9 +298,7 @@ const AdminProducts = () => {
                                                 product.id,
                                                 product.is_active
                                               );
-                                              if (success) {
-                                                await fetchProducts();
-                                              }
+                                              if (success) await refreshProducts();
                                             }}
                                           >
                                             {product.is_active ? (
@@ -378,13 +358,77 @@ const AdminProducts = () => {
                     </Table>
                   </div>
                 )}
-                {filteredProducts.length === 0 && (
+
+                {products.length === 0 && !isLoading && (
                   <div
                     className="text-center py-12 text-muted-foreground"
                     role="status"
                     aria-live="polite"
                   >
                     Aucun produit trouvé
+                  </div>
+                )}
+
+                {totalCount > 0 && (
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-4 border-t">
+                    <p className="text-sm text-muted-foreground">
+                      {from}–{to} sur {totalCount} produits
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <Select
+                        value={pageSize.toString()}
+                        onValueChange={value => {
+                          setPageSize(Number(value));
+                          setPage(1);
+                        }}
+                      >
+                        <SelectTrigger className="w-[100px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {ADMIN_PRODUCT_PAGE_SIZES.map(size => (
+                            <SelectItem key={size} value={size.toString()}>
+                              {size} / page
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        disabled={page <= 1}
+                        onClick={() => setPage(1)}
+                      >
+                        <ChevronsLeft className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        disabled={page <= 1}
+                        onClick={() => setPage(page - 1)}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <span className="text-sm px-2">
+                        {page} / {totalPages}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        disabled={page >= totalPages}
+                        onClick={() => setPage(page + 1)}
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        disabled={page >= totalPages}
+                        onClick={() => setPage(totalPages)}
+                      >
+                        <ChevronsRight className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -411,7 +455,7 @@ const AdminProducts = () => {
                       if (success) {
                         setDeleteDialogOpen(false);
                         setSelectedProduct(null);
-                        await fetchProducts();
+                        await refreshProducts();
                       }
                     }
                   }}
