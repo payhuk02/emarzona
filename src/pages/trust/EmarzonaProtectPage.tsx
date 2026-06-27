@@ -1,5 +1,5 @@
 /**
- * Page publique Emarzona Protect v1
+ * Page publique Emarzona Protect v2
  */
 
 import { Link } from 'react-router-dom';
@@ -7,7 +7,10 @@ import { AppPageShell } from '@/components/layout/AppPageShell';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ShieldCheck, Clock, Package, Scale } from 'lucide-react';
-import { EMARZONA_PROTECT_CLAIM_WINDOW_DAYS } from '@/lib/trust/emarzona-protect-policy';
+import {
+  EMARZONA_PROTECT_CLAIM_WINDOW_DAYS,
+  EMARZONA_PROTECT_MAX_AMOUNT_XOF,
+} from '@/lib/trust/emarzona-protect-policy';
 import { SEOMeta } from '@/components/seo';
 
 export default function EmarzonaProtectPage() {
@@ -15,7 +18,7 @@ export default function EmarzonaProtectPage() {
     <AppPageShell>
       <SEOMeta
         title="Emarzona Protect — Protection acheteur"
-        description="Couverture acheteur v1 : aide en cas de non-réception, produit non conforme ou endommagé."
+        description="Couverture acheteur v2 : digital, physique, services, cours et enchères — escrow et remboursement assisté."
       />
       <div className="container mx-auto max-w-3xl px-4 py-10 space-y-8">
         <div className="space-y-3 text-center">
@@ -24,8 +27,7 @@ export default function EmarzonaProtectPage() {
           </div>
           <h1 className="text-3xl font-bold tracking-tight">Emarzona Protect</h1>
           <p className="text-muted-foreground">
-            Protection acheteur incluse sur les commandes éligibles, sans frais supplémentaires en
-            v1.
+            Protection acheteur incluse sur les commandes éligibles, sans frais supplémentaires.
           </p>
         </div>
 
@@ -38,7 +40,7 @@ export default function EmarzonaProtectPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-muted-foreground">
-              Fenêtre de réclamation après paiement confirmé.
+              Fenêtre de réclamation après paiement confirmé (v2).
             </CardContent>
           </Card>
           <Card>
@@ -47,16 +49,17 @@ export default function EmarzonaProtectPage() {
               <CardTitle className="text-base">Produits couverts</CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-muted-foreground">
-              Digital, physique, cours et œuvres artiste (1 000 – 5 M XOF).
+              Digital, physique, services, cours et enchères artiste (1 000 –{' '}
+              {(EMARZONA_PROTECT_MAX_AMOUNT_XOF / 1_000_000).toFixed(0)} M XOF).
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="pb-2">
               <Scale className="h-5 w-5 text-primary mb-2" />
-              <CardTitle className="text-base">Médiation plateforme</CardTitle>
+              <CardTitle className="text-base">Escrow & médiation</CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-muted-foreground">
-              Réclamation prioritaire traitée par l'équipe trust via le module litiges.
+              Litiges Protect avec retenue escrow logique et remboursement automatisé côté admin.
             </CardContent>
           </Card>
         </div>

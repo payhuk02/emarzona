@@ -1,17 +1,19 @@
 /**
- * Emarzona Protect v1 — politique d'éligibilité et réclamations acheteur.
+ * Emarzona Protect v2 — éligibilité élargie, escrow, remboursement admin.
  */
 
 import type { CartItem, ProductType } from '@/types/cart';
 
-export const EMARZONA_PROTECT_VERSION = 'v1' as const;
-export const EMARZONA_PROTECT_CLAIM_WINDOW_DAYS = 30;
+export const EMARZONA_PROTECT_VERSION = 'v2' as const;
+export const EMARZONA_PROTECT_CLAIM_WINDOW_DAYS = 45;
 export const EMARZONA_PROTECT_MIN_AMOUNT_XOF = 1000;
-export const EMARZONA_PROTECT_MAX_AMOUNT_XOF = 5_000_000;
+export const EMARZONA_PROTECT_MAX_AMOUNT_XOF = 10_000_000;
 
+/** Tous les verticaux marketplace, y compris services et enchères (artist). */
 export const EMARZONA_PROTECT_COVERED_TYPES: ProductType[] = [
   'digital',
   'physical',
+  'service',
   'course',
   'artist',
 ];
@@ -22,6 +24,8 @@ export type ProtectReasonCode =
   | 'damaged'
   | 'unauthorized_charge'
   | 'other';
+
+export type ProtectResolution = 'refund_full' | 'refund_partial' | 'release_seller';
 
 export type ProtectEnrollmentStatus =
   | 'none'
@@ -53,15 +57,30 @@ export const PROTECT_REASON_OPTIONS: Array<{ code: ProtectReasonCode; label: str
   { code: 'other', label: 'Autre problème' },
 ];
 
+export const PROTECT_RESOLUTION_OPTIONS: Array<{
+  code: ProtectResolution;
+  label: string;
+  description: string;
+}> = [
+  {
+    code: 'refund_full',
+    label: 'Remboursement intégral',
+    description: 'Rembourse l’acheteur via apply_transaction_refund (escrow Protect).',
+  },
+  {
+    code: 'refund_partial',
+    label: 'Remboursement partiel',
+    description: 'Montant saisi par l’admin, plafonné au solde remboursable.',
+  },
+  {
+    code: 'release_seller',
+    label: 'Libérer au vendeur',
+    description: 'Clôture la réclamation sans remboursement.',
+  },
+];
+
 export function cartHasProtectCoveredItems(items: CartItem[]): boolean {
   return items.some(item => EMARZONA_PROTECT_COVERED_TYPES.includes(item.product_type));
-}
-
-export function isServiceOnlyCart(items: CartItem[]): boolean {
-  if (!items.length) return false;
-  const hasService = items.some(i => i.product_type === 'service');
-  const hasNonService = items.some(i => i.product_type !== 'service');
-  return hasService && !hasNonService;
 }
 
 export function assessCartProtectEligibility(
@@ -72,13 +91,7 @@ export function assessCartProtectEligibility(
     return { eligible: false, reason: 'Montant minimum non atteint (1 000 XOF).' };
   }
   if (totalAmountXof > EMARZONA_PROTECT_MAX_AMOUNT_XOF) {
-    return { eligible: false, reason: 'Montant au-delà de la couverture Protect v1.' };
-  }
-  if (isServiceOnlyCart(items)) {
-    return {
-      eligible: false,
-      reason: 'Les réservations service seules ne sont pas couvertes en v1.',
-    };
+    return { eligible: false, reason: 'Montant au-delà de la couverture Protect (10 M XOF).' };
   }
   if (!cartHasProtectCoveredItems(items)) {
     return { eligible: false, reason: 'Aucun produit éligible dans le panier.' };

@@ -95,7 +95,7 @@ export const useDisputes = (options?: UseDisputesOptions) => {
       let query = supabase
         .from('disputes')
         .select(
-          'id,order_id,status,priority,initiator_type,assigned_admin_id,subject,description,created_at,updated_at',
+          'id,order_id,status,priority,initiator_type,assigned_admin_id,subject,description,created_at,updated_at,is_emarzona_protect,protect_reason_code',
           { count: 'exact' }
         )
         .order(sortBy, { ascending: sortDirection === 'asc' });

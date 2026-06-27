@@ -68,9 +68,12 @@ import { ProtectedAction } from '@/components/admin/ProtectedAction';
 import { Admin2FABanner } from '@/components/admin/Admin2FABanner';
 import { useAdminMFA } from '@/hooks/useAdminMFA';
 import { RequireAAL2 } from '@/components/admin/RequireAAL2';
+import { EmarzonaProtectDisputeBadge } from '@/components/trust/EmarzonaProtectDisputeBadge';
+import { ProtectDisputeResolvePanel } from '@/components/trust/ProtectDisputeResolvePanel';
+import { useBackfillEmarzonaProtect } from '@/hooks/trust/useEmarzonaProtect';
 
 const DISPUTE_EXPORT_FIELDS =
-  'id, order_id, initiator_type, initiator_id, subject, description, status, priority, assigned_admin_id, admin_notes, resolution, resolved_at, created_at, updated_at';
+  'id, order_id, initiator_type, initiator_id, subject, description, status, priority, assigned_admin_id, admin_notes, resolution, resolved_at, created_at, updated_at, is_emarzona_protect, protect_reason_code';
 
 const AdminDisputes = () => {
   const { toast } = useToast();
@@ -111,7 +114,10 @@ const AdminDisputes = () => {
     closeDispute,
     updateDisputeStatus,
     updateDisputePriority,
+    fetchDisputes,
   } = useDisputes({ filters, page, pageSize, sortBy: sortByColumn, sortDirection: sortDir });
+
+  const backfillProtect = useBackfillEmarzonaProtect();
 
   // Animations au scroll
   const headerRef = useScrollAnimation<HTMLDivElement>();
@@ -454,26 +460,68 @@ const AdminDisputes = () => {
               </p>
             </div>
             <ProtectedAction permission="disputes.manage">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span>
-                      <Button
-                        onClick={handleExportCSV}
-                        variant="outline"
-                        className="w-full sm:w-auto"
-                        disabled={disputes.length === 0 || !isAAL2}
-                      >
-                        <Download className="h-4 w-4 mr-2" />
-                        Exporter CSV
-                      </Button>
-                    </span>
-                  </TooltipTrigger>
-                  {!isAAL2 && (
-                    <TooltipContent>Activez la 2FA pour utiliser cette action</TooltipContent>
-                  )}
-                </Tooltip>
-              </TooltipProvider>
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full sm:w-auto border-emerald-500/40"
+                          disabled={!isAAL2 || backfillProtect.isPending}
+                          onClick={async () => {
+                            try {
+                              const result = await backfillProtect.mutateAsync({
+                                daysBack: 365,
+                                limit: 500,
+                                reconcileIneligible: true,
+                              });
+                              toast({
+                                title: 'Rétro-enrollment Protect',
+                                description: `${result.activated} activations, ${result.reconciled} réconciliations.`,
+                              });
+                              await fetchDisputes();
+                            } catch (err) {
+                              toast({
+                                title: 'Échec backfill Protect',
+                                description: err instanceof Error ? err.message : 'Erreur inconnue',
+                                variant: 'destructive',
+                              });
+                            }
+                          }}
+                        >
+                          <Shield className="h-4 w-4 mr-2" />
+                          Backfill Protect
+                        </Button>
+                      </span>
+                    </TooltipTrigger>
+                    {!isAAL2 && (
+                      <TooltipContent>Activez la 2FA pour utiliser cette action</TooltipContent>
+                    )}
+                  </Tooltip>
+                </TooltipProvider>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span>
+                        <Button
+                          onClick={handleExportCSV}
+                          variant="outline"
+                          className="w-full sm:w-auto"
+                          disabled={disputes.length === 0 || !isAAL2}
+                        >
+                          <Download className="h-4 w-4 mr-2" />
+                          Exporter CSV
+                        </Button>
+                      </span>
+                    </TooltipTrigger>
+                    {!isAAL2 && (
+                      <TooltipContent>Activez la 2FA pour utiliser cette action</TooltipContent>
+                    )}
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
             </ProtectedAction>
           </div>
 
@@ -727,6 +775,12 @@ const AdminDisputes = () => {
                       priority: 'high',
                       render: (row: Dispute) => (
                         <div>
+                          <div className="flex flex-wrap items-center gap-2 mb-1">
+                            <EmarzonaProtectDisputeBadge
+                              isProtect={row.is_emarzona_protect}
+                              reasonCode={row.protect_reason_code}
+                            />
+                          </div>
                           <p className="font-medium text-sm">{row.subject}</p>
                           <p className="text-xs text-muted-foreground line-clamp-2">
                             {row.description}
@@ -888,6 +942,11 @@ const AdminDisputes = () => {
                           </TableCell>
                           <TableCell>
                             <div className="max-w-xs">
+                              <EmarzonaProtectDisputeBadge
+                                isProtect={dispute.is_emarzona_protect}
+                                reasonCode={dispute.protect_reason_code}
+                                className="mb-1"
+                              />
                               <p className="font-medium text-sm">{dispute.subject}</p>
                               <TooltipProvider>
                                 <Tooltip>
@@ -1165,6 +1224,10 @@ const AdminDisputes = () => {
                 <div className="flex flex-wrap items-center gap-3">
                   {getStatusBadge(selectedDispute.status)}
                   {getInitiatorBadge(selectedDispute.initiator_type)}
+                  <EmarzonaProtectDisputeBadge
+                    isProtect={selectedDispute.is_emarzona_protect}
+                    reasonCode={selectedDispute.protect_reason_code}
+                  />
                   {selectedDispute.assigned_admin_id && (
                     <Badge variant="outline" className="flex items-center gap-1">
                       <Shield className="h-3 w-3" />
@@ -1265,6 +1328,18 @@ const AdminDisputes = () => {
                   </div>
                 )}
 
+                {selectedDispute.is_emarzona_protect &&
+                  selectedDispute.status !== 'resolved' &&
+                  selectedDispute.status !== 'closed' && (
+                    <ProtectDisputeResolvePanel
+                      disputeId={selectedDispute.id}
+                      onResolved={async () => {
+                        await fetchDisputes();
+                        setDetailsDialogOpen(false);
+                      }}
+                    />
+                  )}
+
                 {/* Actions rapides */}
                 <div className="flex flex-wrap items-center gap-2 pt-4 border-t">
                   {!selectedDispute.assigned_admin_id && (
@@ -1296,18 +1371,20 @@ const AdminDisputes = () => {
                     <FileText className="h-4 w-4 mr-2" />
                     Modifier notes
                   </Button>
-                  {selectedDispute.status !== 'resolved' && selectedDispute.status !== 'closed' && (
-                    <Button
-                      size="sm"
-                      onClick={() => {
-                        setDetailsDialogOpen(false);
-                        handleOpenDialog(selectedDispute, 'resolve');
-                      }}
-                    >
-                      <CheckCircle className="h-4 w-4 mr-2" />
-                      Résoudre
-                    </Button>
-                  )}
+                  {selectedDispute.status !== 'resolved' &&
+                    selectedDispute.status !== 'closed' &&
+                    !selectedDispute.is_emarzona_protect && (
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          setDetailsDialogOpen(false);
+                          handleOpenDialog(selectedDispute, 'resolve');
+                        }}
+                      >
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Résoudre
+                      </Button>
+                    )}
                   {selectedDispute.status === 'resolved' && (
                     <Button
                       size="sm"

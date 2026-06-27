@@ -212,6 +212,8 @@ export interface Dispute {
   created_at: string;
   updated_at: string;
   resolved_at?: string;
+  is_emarzona_protect?: boolean;
+  protect_reason_code?: string | null;
 }
 
 // ==============================================
@@ -474,9 +476,3 @@ export interface SecurityConfig {
   max_message_length: number;
   rate_limit_messages_per_minute: number;
 }
-
-
-
-
-
-

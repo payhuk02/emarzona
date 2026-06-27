@@ -2,6 +2,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   createEmarzonaProtectClaim,
   fetchEmarzonaProtectStatus,
+  resolveEmarzonaProtectDispute,
+  backfillEmarzonaProtectEnrollments,
 } from '@/lib/trust/emarzona-protect-store';
 import type { ProtectReasonCode } from '@/lib/trust/emarzona-protect-policy';
 
@@ -28,5 +30,22 @@ export function useCreateEmarzonaProtectClaim(orderId: string) {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: protectKeys.status(orderId) });
     },
+  });
+}
+
+export function useResolveEmarzonaProtectDispute() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: resolveEmarzonaProtectDispute,
+    onSuccess: (_data, variables) => {
+      void queryClient.invalidateQueries({ queryKey: ['disputes'] });
+      void queryClient.invalidateQueries({ queryKey: ['emarzona-protect'] });
+    },
+  });
+}
+
+export function useBackfillEmarzonaProtect() {
+  return useMutation({
+    mutationFn: backfillEmarzonaProtectEnrollments,
   });
 }

@@ -293,6 +293,7 @@ npm run typecheck:commerce-core
 | Landings `/courses` et art SEO  | Growth            |
 | Analytics services réelles      | Commerce Service  |
 | Emarzona Protect v1             | Trust             |
+| Emarzona Protect v2             | Trust             |
 
 **KPIs** : conversion checkout +15 % ; abandon panier −10 %.
 
@@ -336,3 +337,4 @@ npm run typecheck:commerce-core
 | 2026-06-26 | Phase 4 : addons service + produit, dashboard `/dashboard/services/addons`, `verify:phase4`                 |
 | 2026-06-26 | AdminAnalytics : RPC `get_platform_admin_analytics`, fin des mocks hardcodés                                |
 | 2026-06-26 | Emarzona Protect v1 : enrollments, réclamations litiges, `/protect`, badge checkout                         |
+| 2026-06-26 | Emarzona Protect v2 : services + enchères, escrow, remboursement admin, badge litiges, rétro-enrollment     |

@@ -163,6 +163,32 @@ guard(
   'Public /protect landing route'
 );
 
+const protectV2Migration = join(root, 'supabase/migrations/20260626180000__emarzona_protect_v2.sql');
+const adminDisputes = readFileSync(join(root, 'src/pages/admin/AdminDisputes.tsx'), 'utf8');
+
+guard(
+  'emarzona-protect-v2-migration',
+  existsSync(protectV2Migration) &&
+    readFileSync(protectV2Migration, 'utf8').includes('resolve_emarzona_protect_dispute') &&
+    readFileSync(protectV2Migration, 'utf8').includes('backfill_emarzona_protect_enrollments'),
+  'Emarzona Protect v2 migration (escrow, resolve, backfill)'
+);
+
+guard(
+  'emarzona-protect-v2-policy',
+  protectPolicy.includes("EMARZONA_PROTECT_VERSION = 'v2'") &&
+    protectPolicy.includes("'service'") &&
+    protectPolicy.includes('PROTECT_RESOLUTION_OPTIONS'),
+  'Emarzona Protect v2 policy (services, resolutions)'
+);
+
+guard(
+  'emarzona-protect-admin-badge',
+  adminDisputes.includes('EmarzonaProtectDisputeBadge') &&
+    adminDisputes.includes('ProtectDisputeResolvePanel'),
+  'Admin disputes UI shows Protect badge and resolve panel'
+);
+
 console.log('\n=== Phase 4 guards ===');
 for (const [name, result] of Object.entries(report.guards)) {
   console.log(`${result.ok ? 'OK' : 'FAIL'} — ${name}: ${result.detail}`);
