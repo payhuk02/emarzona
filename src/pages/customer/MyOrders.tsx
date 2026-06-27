@@ -49,6 +49,7 @@ import { generateInvoicePDF } from '@/lib/invoice-generator';
 import { useToast } from '@/hooks/use-toast';
 import { buildOrderTimeline } from '@/lib/customer/order-timeline';
 import { OrderTimeline } from '@/components/customer/OrderTimeline';
+import { OrderProtectClaimButton } from '@/components/trust/OrderProtectClaimButton';
 import { useEffect } from 'react';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
@@ -763,33 +764,39 @@ export default function MyOrders() {
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-2 pt-4">
-                  {(selectedOrder.payment_status === 'completed' ||
-                    selectedOrder.payment_status === 'paid') && (
+                <div className="flex flex-col gap-2 pt-4">
+                  <OrderProtectClaimButton
+                    orderId={selectedOrder.id}
+                    paymentStatus={selectedOrder.payment_status}
+                  />
+                  <div className="flex gap-2">
+                    {(selectedOrder.payment_status === 'completed' ||
+                      selectedOrder.payment_status === 'paid') && (
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          handleDownloadInvoice(selectedOrder);
+                          setIsDetailDialogOpen(false);
+                        }}
+                        disabled={generatingInvoice === selectedOrder.id}
+                        className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:from-green-700 hover:to-emerald-700 border-0"
+                      >
+                        {generatingInvoice === selectedOrder.id ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <Download className="h-4 w-4 mr-2" />
+                        )}
+                        Télécharger facture
+                      </Button>
+                    )}
                     <Button
                       variant="outline"
-                      onClick={() => {
-                        handleDownloadInvoice(selectedOrder);
-                        setIsDetailDialogOpen(false);
-                      }}
-                      disabled={generatingInvoice === selectedOrder.id}
-                      className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:from-green-700 hover:to-emerald-700 border-0"
+                      onClick={() => setIsDetailDialogOpen(false)}
+                      className="flex-1"
                     >
-                      {generatingInvoice === selectedOrder.id ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      ) : (
-                        <Download className="h-4 w-4 mr-2" />
-                      )}
-                      Télécharger facture
+                      Fermer
                     </Button>
-                  )}
-                  <Button
-                    variant="outline"
-                    onClick={() => setIsDetailDialogOpen(false)}
-                    className="flex-1"
-                  >
-                    Fermer
-                  </Button>
+                  </div>
                 </div>
               </div>
             )}

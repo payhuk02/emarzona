@@ -26,6 +26,13 @@ const steps = [
     args: ['run', 'test:unit', '--', 'src/lib/admin/__tests__/admin-platform-analytics.test.ts'],
     required: true,
   },
+  {
+    id: '4.3',
+    label: 'emarzona protect policy tests',
+    cmd: 'npm',
+    args: ['run', 'test:unit', '--', 'src/lib/trust/__tests__/emarzona-protect-policy.test.ts'],
+    required: true,
+  },
 ];
 
 const report = {
@@ -118,6 +125,42 @@ guard(
       'utf8'
     ).includes('get_platform_admin_analytics'),
   'Platform admin analytics RPC migration present'
+);
+
+const protectPolicy = readFileSync(join(root, 'src/lib/trust/emarzona-protect-policy.ts'), 'utf8');
+const checkoutSummary = readFileSync(
+  join(root, 'src/components/checkout/cart/CheckoutOrderSummary.tsx'),
+  'utf8'
+);
+
+guard(
+  'emarzona-protect-policy',
+  protectPolicy.includes('assessCartProtectEligibility') &&
+    protectPolicy.includes('EMARZONA_PROTECT_CLAIM_WINDOW_DAYS'),
+  'Emarzona Protect v1 policy module present'
+);
+
+guard(
+  'emarzona-protect-checkout-badge',
+  checkoutSummary.includes('EmarzonaProtectBadge') &&
+    checkoutSummary.includes('assessCartProtectEligibility'),
+  'Checkout summary shows Protect eligibility badge'
+);
+
+guard(
+  'emarzona-protect-migration',
+  existsSync(join(root, 'supabase/migrations/20260626160000__emarzona_protect_v1.sql')) &&
+    readFileSync(
+      join(root, 'supabase/migrations/20260626160000__emarzona_protect_v1.sql'),
+      'utf8'
+    ).includes('create_emarzona_protect_claim'),
+  'Emarzona Protect v1 migration with claim RPC'
+);
+
+guard(
+  'emarzona-protect-public-page',
+  readFileSync(join(root, 'src/routes/publicRoutes.tsx'), 'utf8').includes('path="/protect"'),
+  'Public /protect landing route'
 );
 
 console.log('\n=== Phase 4 guards ===');

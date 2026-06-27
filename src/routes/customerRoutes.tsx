@@ -22,6 +22,7 @@ const CustomerArtistPortal = lazyPage(() => import('@/pages/customer/CustomerArt
 const MultiStoreCheckoutTracking = lazyPage(
   () => import('@/pages/checkout/MultiStoreCheckoutTracking')
 );
+const CreateProtectClaimPage = lazyPage(() => import('@/pages/disputes/CreateProtectClaimPage'));
 
 const protectedRoute = (
   path: string,
@@ -55,6 +56,7 @@ export const customerRoutes = (
     {protectedRoute('/account/returns', CustomerMyReturns)}
     {protectedRoute('/account/loyalty', CustomerLoyaltyPage)}
     {protectedRoute('/account/gift-cards', CustomerMyGiftCardsPage)}
+    {protectedRoute('/disputes/create', CreateProtectClaimPage)}
     {protectedRoute('/checkout/multi-store-tracking', MultiStoreCheckoutTracking)}
   </>
 );

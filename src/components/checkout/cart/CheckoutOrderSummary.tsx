@@ -12,6 +12,9 @@ import type {
   TaxBreakdownItem,
 } from '@/pages/checkout/cart/checkout-types';
 import { CreditCard, ArrowRight, AlertCircle, Loader2, Tag } from 'lucide-react';
+import { useMemo } from 'react';
+import { EmarzonaProtectBadge } from '@/components/trust/EmarzonaProtectBadge';
+import { assessCartProtectEligibility } from '@/lib/trust/emarzona-protect-policy';
 
 export interface CheckoutOrderSummaryProps {
   items: CartItem[];
@@ -64,6 +67,11 @@ export default function CheckoutOrderSummary({
   onCouponApply,
   onCouponRemove,
 }: CheckoutOrderSummaryProps) {
+  const protectEligibility = useMemo(
+    () => assessCartProtectEligibility(items, finalTotal),
+    [items, finalTotal]
+  );
+
   return (
     <Card className="sticky top-4" role="region" aria-labelledby="summary-title">
       <CardHeader>
@@ -398,6 +406,10 @@ export default function CheckoutOrderSummary({
                 </>
               )}
             </Button>
+
+            {protectEligibility.eligible && (
+              <EmarzonaProtectBadge eligible compact className="text-left" />
+            )}
 
             <p className="text-xs text-center text-muted-foreground">
               {summary.item_count} {summary.item_count > 1 ? 'articles' : 'article'}
