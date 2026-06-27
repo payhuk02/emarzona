@@ -42,6 +42,29 @@ export function buildServiceCartMetadata(params: {
   };
 }
 
+/** Metadata pour un produit addon ajouté avec une réservation service. */
+export function buildServiceAddonCartMetadata(params: {
+  storeId: string;
+  linkedBookingId: string;
+  linkedServiceProductId: string;
+  addonProductId: string;
+  quantity?: number;
+}): Record<string, unknown> {
+  return {
+    store_id: params.storeId,
+    linked_booking_id: params.linkedBookingId,
+    linked_service_product_id: params.linkedServiceProductId,
+    service_addon_product_id: params.addonProductId,
+    is_service_addon: true,
+    ...(params.quantity != null && params.quantity > 1 ? { addon_quantity: params.quantity } : {}),
+  };
+}
+
+export function isServiceAddonCartItem(metadata?: Record<string, unknown> | null): boolean {
+  if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) return false;
+  return metadata.is_service_addon === true && typeof metadata.linked_booking_id === 'string';
+}
+
 export function formatServiceCartSlotLabel(
   metadata?: Record<string, unknown> | null
 ): string | null {

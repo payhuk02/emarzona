@@ -333,3 +333,5 @@ npm run typecheck:commerce-core
 | 2026-06-26 | Admin paginé : `AdminPayments`, `AdminApiKeys`, `AdminDomains`, `AdminTransactionReconciliation`            |
 | 2026-06-26 | Phase 2 : `usePhysicalProductDetail`, landing `/art`, SEO ItemList, analytics trends réels, `verify:phase2` |
 | 2026-06-26 | Phase 3 : bundles cross-type checkout, DRM v2 policy, client API vendeur v1, `verify:phase3`                |
+| 2026-06-26 | Phase 4 : addons service + produit, dashboard `/dashboard/services/addons`, `verify:phase4`                 |
+| 2026-06-26 | AdminAnalytics : RPC `get_platform_admin_analytics`, fin des mocks hardcodés                                |

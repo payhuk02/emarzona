@@ -53,7 +53,13 @@ import { ProductImages } from '@/components/shared';
 import type { StaffMember } from '@/hooks/service/useAvailability';
 import { useCreateServiceOrder } from '@/hooks/orders/useCreateServiceOrder';
 import { useCart } from '@/hooks/cart/useCart';
-import { buildServiceCartMetadata } from '@/lib/cart/service-cart-policy';
+import {
+  buildServiceCartMetadata,
+  buildServiceAddonCartMetadata,
+} from '@/lib/cart/service-cart-policy';
+import { validateServiceAddonSelection } from '@/lib/service/service-product-addons';
+import { useServiceProductAddons } from '@/hooks/service/useServiceProductAddons';
+import { ServiceProductAddonsPicker } from '@/components/service/ServiceProductAddonsPicker';
 import {
   useValidateServiceBooking,
   useQuickAvailabilityCheck,
@@ -113,6 +119,7 @@ export default function ServiceDetail() {
   const [isBooking, setIsBooking] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [isValidating, setIsValidating] = useState(false);
+  const [selectedAddonProductIds, setSelectedAddonProductIds] = useState<string[]>([]);
 
   // Hooks de validation
   const validateBooking = useValidateServiceBooking();
@@ -193,6 +200,17 @@ export default function ServiceDetail() {
     },
     enabled: !!serviceId,
   });
+
+  const serviceProductId = service?.service?.id ?? null;
+  const { data: serviceAddons = [], isLoading: addonsLoading } =
+    useServiceProductAddons(serviceProductId);
+
+  useEffect(() => {
+    const required = serviceAddons.filter(a => a.is_required).map(a => a.addon_product_id);
+    if (required.length) {
+      setSelectedAddonProductIds(prev => [...new Set([...prev, ...required])]);
+    }
+  }, [serviceAddons]);
 
   // Check if product is in wishlist
   // La vérification de wishlist est gérée par useWishlistToggle via useMarketplaceFavorites
@@ -376,6 +394,17 @@ export default function ServiceDetail() {
     setIsBooking(true);
     setValidationError(null);
 
+    const addonValidation = validateServiceAddonSelection(serviceAddons, selectedAddonProductIds);
+    if (!addonValidation.ok) {
+      toast({
+        title: '❌ Compléments manquants',
+        description: addonValidation.message,
+        variant: 'destructive',
+      });
+      setIsBooking(false);
+      return;
+    }
+
     try {
       // Construire le bookingDateTime
       const bookingDate = new Date(selectedDate);
@@ -457,9 +486,29 @@ export default function ServiceDetail() {
             numberOfParticipants: participants,
           }),
         });
+
+        for (const row of serviceAddons) {
+          if (!selectedAddonProductIds.includes(row.addon_product_id)) continue;
+          await addItem.mutateAsync({
+            product_id: row.addon_product_id,
+            product_type: row.addon.product_type,
+            quantity: row.quantity,
+            metadata: buildServiceAddonCartMetadata({
+              storeId,
+              linkedBookingId: result.bookingId,
+              linkedServiceProductId: service.service.id,
+              addonProductId: row.addon_product_id,
+              quantity: row.quantity,
+            }),
+          });
+        }
+
         toast({
           title: '✅ Service ajouté au panier',
-          description: 'Vous pouvez ajouter d’autres produits de la même boutique avant de payer.',
+          description:
+            selectedAddonProductIds.length > 0
+              ? 'Service et produits complémentaires ajoutés. Passez au panier pour payer.'
+              : 'Vous pouvez ajouter d’autres produits de la même boutique avant de payer.',
         });
         navigate('/cart');
         return;
@@ -1059,6 +1108,15 @@ export default function ServiceDetail() {
                     </span>
                   </div>
                 </div>
+              )}
+
+              {selectedDate && selectedSlot && serviceProductId && (
+                <ServiceProductAddonsPicker
+                  addons={serviceAddons}
+                  isLoading={addonsLoading}
+                  selectedAddonProductIds={selectedAddonProductIds}
+                  onChange={setSelectedAddonProductIds}
+                />
               )}
 
               {/* Book Button */}

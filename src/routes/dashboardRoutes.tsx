@@ -208,6 +208,7 @@ const DigitalBundlesManagement = lazyPage(
 const CrossTypeBundlesPage = lazyPage(
   () => import('@/pages/dashboard/bundles/CrossTypeBundlesPage')
 );
+const ServiceAddonsPage = lazyPage(() => import('@/pages/service/ServiceAddonsPage'));
 const CreateBundle = lazyPage(() => import('@/pages/digital/CreateBundle'));
 const MyLicenses = lazyPage(() => import('@/pages/digital/MyLicenses'));
 const LicenseManagement = lazyPage(() => import('@/pages/digital/LicenseManagement'));
@@ -438,6 +439,7 @@ export const dashboardRoutes = (
     {pr('/dashboard/services/calendar-integrations', CalendarIntegrationsPage)}
     {pr('/dashboard/services/waitlist', ServiceWaitlistManagementPage)}
     {pr('/dashboard/services/reminders', BookingRemindersManagementPage)}
+    {pr('/dashboard/services/addons', ServiceAddonsPage)}
 
     {/* Advanced Systems */}
     {pr('/orders/:orderId/messaging', OrderMessaging)}

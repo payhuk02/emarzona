@@ -383,6 +383,11 @@ export const userMenuSections = [
         icon: Calendar,
       },
       {
+        title: 'Compléments service',
+        url: '/dashboard/services/addons',
+        icon: Package,
+      },
+      {
         title: 'Calendrier Services',
         url: '/dashboard/services/calendar',
         icon: Calendar,

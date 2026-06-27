@@ -1,14 +1,16 @@
 /**
  * Admin Analytics Dashboard
- * Analytics globales de la plateforme
+ * Analytics globales de la plateforme (données réelles via RPC admin)
  */
 
 import { useMemo, useEffect, useState } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   BarChart3,
   TrendingUp,
+  TrendingDown,
   Users,
   ShoppingCart,
   DollarSign,
@@ -17,10 +19,15 @@ import {
   Activity,
   MousePointerClick,
   Target,
+  Rocket,
+  AlertCircle,
 } from 'lucide-react';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { supabase } from '@/integrations/supabase/client';
+import { useAdminPlatformAnalytics } from '@/hooks/useAdminPlatformAnalytics';
+import { formatGrowthLabel, productTypeLabel } from '@/lib/admin/admin-platform-analytics';
+import { cn } from '@/lib/utils';
 
 type PhysicalConversionSnapshot = {
   loading: boolean;
@@ -36,28 +43,34 @@ const INITIAL_SNAPSHOT: PhysicalConversionSnapshot = {
   billingClicks: 0,
 };
 
+const PRODUCT_TYPE_COLORS: Record<string, string> = {
+  physical: 'bg-blue-500',
+  digital: 'bg-green-500',
+  service: 'bg-purple-500',
+  course: 'bg-orange-500',
+  artist: 'bg-pink-500',
+  unknown: 'bg-muted-foreground',
+};
+
+function GrowthHint({ value }: { value: number }) {
+  const positive = value >= 0;
+  const Icon = positive ? TrendingUp : TrendingDown;
+  return (
+    <p className={cn('text-[10px] sm:text-xs text-muted-foreground flex items-center gap-1')}>
+      <Icon className={cn('h-3 w-3', positive ? 'text-green-600' : 'text-red-600')} />
+      {formatGrowthLabel(value)}
+    </p>
+  );
+}
+
 export default function AdminAnalytics() {
-  // Animations au scroll
   const headerRef = useScrollAnimation<HTMLDivElement>();
   const statsRef = useScrollAnimation<HTMLDivElement>();
   const chartsRef = useScrollAnimation<HTMLDivElement>();
   const [physicalSnapshot, setPhysicalSnapshot] =
     useState<PhysicalConversionSnapshot>(INITIAL_SNAPSHOT);
 
-  // Mock stats - À remplacer par vraies données
-  const stats = useMemo(
-    () => ({
-      totalRevenue: 15680000,
-      totalOrders: 1245,
-      totalUsers: 856,
-      totalStores: 143,
-      totalProducts: 2890,
-      conversionRate: 3.2,
-      averageOrderValue: 12590,
-      activeUsers: 234,
-    }),
-    []
-  );
+  const { data: analytics, isLoading, error } = useAdminPlatformAnalytics(30);
 
   useEffect(() => {
     logger.info('Admin Analytics page chargée');
@@ -77,13 +90,13 @@ export default function AdminAnalytics() {
 
         const results = await Promise.all(
           eventTypes.map(async eventType => {
-            const { count, error } = await supabase
+            const { count, error: countError } = await supabase
               .from('store_analytics_events')
               .select('id', { count: 'exact', head: true })
               .eq('event_type', eventType)
               .gte('created_at', since);
 
-            if (error) throw error;
+            if (countError) throw countError;
             return { eventType, count: count ?? 0 };
           })
         );
@@ -101,9 +114,9 @@ export default function AdminAnalytics() {
           trialClicks: byType.trial_continue_clicked,
           billingClicks: byType.billing_cta_clicked,
         });
-      } catch (error) {
+      } catch (loadError) {
         if (!active) return;
-        logger.error('Erreur chargement conversion snapshot', { error });
+        logger.error('Erreur chargement conversion snapshot', { error: loadError });
         setPhysicalSnapshot(prev => ({ ...prev, loading: false }));
       }
     };
@@ -124,10 +137,19 @@ export default function AdminAnalytics() {
     return (physicalSnapshot.billingClicks / physicalSnapshot.onboardingViews) * 100;
   }, [physicalSnapshot.onboardingViews, physicalSnapshot.billingClicks]);
 
+  const maxProductTypeRevenue = useMemo(() => {
+    if (!analytics?.revenueByProductType.length) return 1;
+    return Math.max(...analytics.revenueByProductType.map(r => r.revenue), 1);
+  }, [analytics?.revenueByProductType]);
+
+  const maxMonthlyRevenue = useMemo(() => {
+    if (!analytics?.monthlyRevenue.length) return 1;
+    return Math.max(...analytics.monthlyRevenue.map(m => m.revenue), 1);
+  }, [analytics?.monthlyRevenue]);
+
   return (
     <AdminLayout>
       <div className="container mx-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
-        {/* Header */}
         <div
           ref={headerRef}
           role="banner"
@@ -141,135 +163,163 @@ export default function AdminAnalytics() {
               Analytics Plateforme
             </h1>
             <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
-              Vue d'ensemble des statistiques globales
+              Données agrégées sur les {analytics?.periodDays ?? 30} derniers jours
             </p>
           </div>
         </div>
 
-        {/* Main Stats Grid */}
+        {error && (
+          <Card className="border-destructive/50">
+            <CardContent className="pt-6 flex items-center gap-2 text-destructive text-sm">
+              <AlertCircle className="h-4 w-4 shrink-0" />
+              Impossible de charger les analytics plateforme : {error.message}
+            </CardContent>
+          </Card>
+        )}
+
         <div
           ref={statsRef}
           className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4"
           role="region"
           aria-label="Statistiques principales"
         >
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">
-                Revenu Total
-              </CardTitle>
-              <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-base sm:text-xl md:text-2xl font-bold">
-                {stats.totalRevenue.toLocaleString()} FCFA
-              </div>
-              <p className="text-[10px] sm:text-xs text-muted-foreground">
-                <TrendingUp className="inline h-3 w-3 text-green-600" /> +12.5% ce mois
-              </p>
-            </CardContent>
-          </Card>
+          {isLoading ? (
+            Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-28 w-full" />)
+          ) : (
+            <>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">
+                    Revenu (période)
+                  </CardTitle>
+                  <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-base sm:text-xl md:text-2xl font-bold">
+                    {Math.round(analytics?.totalRevenue ?? 0).toLocaleString('fr-FR')} FCFA
+                  </div>
+                  <GrowthHint value={analytics?.revenueGrowthPct ?? 0} />
+                </CardContent>
+              </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">
-                Commandes
-              </CardTitle>
-              <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-base sm:text-xl md:text-2xl font-bold">{stats.totalOrders}</div>
-              <p className="text-[10px] sm:text-xs text-muted-foreground">
-                <TrendingUp className="inline h-3 w-3 text-green-600" /> +8.3% ce mois
-              </p>
-            </CardContent>
-          </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">
+                    Commandes
+                  </CardTitle>
+                  <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-base sm:text-xl md:text-2xl font-bold">
+                    {analytics?.totalOrders ?? 0}
+                  </div>
+                  <GrowthHint value={analytics?.ordersGrowthPct ?? 0} />
+                </CardContent>
+              </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">
-                Utilisateurs
-              </CardTitle>
-              <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-base sm:text-xl md:text-2xl font-bold">{stats.totalUsers}</div>
-              <p className="text-[10px] sm:text-xs text-muted-foreground">
-                {stats.activeUsers} actifs maintenant
-              </p>
-            </CardContent>
-          </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">
+                    Utilisateurs
+                  </CardTitle>
+                  <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-base sm:text-xl md:text-2xl font-bold">
+                    {analytics?.totalUsers ?? 0}
+                  </div>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">
+                    +{analytics?.newUsersPeriod ?? 0} sur la période
+                  </p>
+                </CardContent>
+              </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">
-                Boutiques
-              </CardTitle>
-              <Store className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-base sm:text-xl md:text-2xl font-bold">{stats.totalStores}</div>
-              <p className="text-[10px] sm:text-xs text-muted-foreground">+15 ce mois</p>
-            </CardContent>
-          </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">
+                    Boutiques
+                  </CardTitle>
+                  <Store className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-base sm:text-xl md:text-2xl font-bold">
+                    {analytics?.totalStores ?? 0}
+                  </div>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">
+                    +{analytics?.newStoresPeriod ?? 0} sur la période
+                  </p>
+                </CardContent>
+              </Card>
+            </>
+          )}
         </div>
 
-        {/* Secondary Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">
-                Produits
-              </CardTitle>
-              <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-base sm:text-xl md:text-2xl font-bold">
-                {stats.totalProducts}
-              </div>
-            </CardContent>
-          </Card>
+          {isLoading ? (
+            Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24 w-full" />)
+          ) : (
+            <>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">
+                    Produits actifs
+                  </CardTitle>
+                  <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-base sm:text-xl md:text-2xl font-bold">
+                    {analytics?.activeProducts ?? 0}
+                  </div>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">
+                    {analytics?.totalProducts ?? 0} au total
+                  </p>
+                </CardContent>
+              </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">
-                Taux Conversion
-              </CardTitle>
-              <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-base sm:text-xl md:text-2xl font-bold">
-                {stats.conversionRate}%
-              </div>
-            </CardContent>
-          </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">
+                    Taux paiement
+                  </CardTitle>
+                  <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-base sm:text-xl md:text-2xl font-bold">
+                    {(analytics?.paymentConversionRate ?? 0).toFixed(1)}%
+                  </div>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">
+                    {analytics?.paidOrders ?? 0} commandes payées
+                  </p>
+                </CardContent>
+              </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">
-                Panier Moyen
-              </CardTitle>
-              <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-base sm:text-xl md:text-2xl font-bold">
-                {stats.averageOrderValue.toLocaleString()} FCFA
-              </div>
-            </CardContent>
-          </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">
+                    Panier moyen
+                  </CardTitle>
+                  <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-base sm:text-xl md:text-2xl font-bold">
+                    {Math.round(analytics?.averageOrderValue ?? 0).toLocaleString('fr-FR')} FCFA
+                  </div>
+                </CardContent>
+              </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Utilisateurs Actifs</CardTitle>
-              <Activity className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.activeUsers}</div>
-            </CardContent>
-          </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Acheteurs actifs (7j)</CardTitle>
+                  <Activity className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{analytics?.activeUsers7d ?? 0}</div>
+                </CardContent>
+              </Card>
+            </>
+          )}
         </div>
 
-        {/* Charts Placeholder */}
         <div
           ref={chartsRef}
           className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4"
@@ -278,38 +328,80 @@ export default function AdminAnalytics() {
         >
           <Card>
             <CardHeader>
-              <CardTitle>Revenus Mensuels</CardTitle>
-              <CardDescription>Évolution des revenus sur 12 mois</CardDescription>
+              <CardTitle>Revenus mensuels</CardTitle>
+              <CardDescription>12 derniers mois (commandes payées)</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[300px] flex items-center justify-center border-2 border-dashed rounded-lg">
-                <div className="text-center text-muted-foreground">
-                  <BarChart3 className="h-12 w-12 mx-auto mb-2" />
-                  <p>Graphique des revenus</p>
-                  <p className="text-sm">(À intégrer avec Recharts)</p>
+              {isLoading ? (
+                <Skeleton className="h-[300px] w-full" />
+              ) : analytics?.monthlyRevenue.length ? (
+                <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                  {analytics.monthlyRevenue.map(item => (
+                    <div key={item.month} className="space-y-1">
+                      <div className="flex justify-between text-xs">
+                        <span>{item.month}</span>
+                        <span className="text-muted-foreground">
+                          {Math.round(item.revenue).toLocaleString('fr-FR')} FCFA • {item.orders}{' '}
+                          cmd
+                        </span>
+                      </div>
+                      <div className="w-full bg-secondary rounded-full h-2">
+                        <div
+                          className="bg-primary h-2 rounded-full"
+                          style={{ width: `${(item.revenue / maxMonthlyRevenue) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </div>
+              ) : (
+                <p className="text-sm text-muted-foreground py-8 text-center">
+                  Aucun revenu enregistré sur 12 mois.
+                </p>
+              )}
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>Commandes par Catégorie</CardTitle>
-              <CardDescription>Répartition des ventes par type</CardDescription>
+              <CardTitle>Commandes par verticale</CardTitle>
+              <CardDescription>Répartition des ventes payées (période)</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[300px] flex items-center justify-center border-2 border-dashed rounded-lg">
-                <div className="text-center text-muted-foreground">
-                  <ShoppingCart className="h-12 w-12 mx-auto mb-2" />
-                  <p>Graphique des catégories</p>
-                  <p className="text-sm">(À intégrer avec Recharts)</p>
+              {isLoading ? (
+                <Skeleton className="h-[300px] w-full" />
+              ) : analytics?.revenueByProductType.length ? (
+                <div className="space-y-4 max-h-[300px] overflow-y-auto pr-1">
+                  {analytics.revenueByProductType.map(item => (
+                    <div key={item.product_type} className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="font-medium">{productTypeLabel(item.product_type)}</span>
+                        <span className="text-muted-foreground">
+                          {Math.round(item.revenue).toLocaleString('fr-FR')} FCFA • {item.orders}{' '}
+                          cmd
+                        </span>
+                      </div>
+                      <div className="w-full bg-secondary rounded-full h-2">
+                        <div
+                          className={cn(
+                            'h-2 rounded-full',
+                            PRODUCT_TYPE_COLORS[item.product_type] ?? PRODUCT_TYPE_COLORS.unknown
+                          )}
+                          style={{ width: `${(item.revenue / maxProductTypeRevenue) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </div>
+              ) : (
+                <p className="text-sm text-muted-foreground py-8 text-center">
+                  Aucune vente par verticale sur la période.
+                </p>
+              )}
             </CardContent>
           </Card>
         </div>
 
-        {/* Physical Conversion Snapshot */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -322,9 +414,7 @@ export default function AdminAnalytics() {
           </CardHeader>
           <CardContent>
             {physicalSnapshot.loading ? (
-              <p className="text-sm text-muted-foreground">
-                Chargement des donnees de conversion...
-              </p>
+              <p className="text-sm text-muted-foreground">Chargement des données de conversion…</p>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
                 <div className="rounded-lg border p-4">
@@ -356,54 +446,6 @@ export default function AdminAnalytics() {
                 </div>
               </div>
             )}
-          </CardContent>
-        </Card>
-
-        {/* Performance by Store Type */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Performance par Type de Produit</CardTitle>
-            <CardDescription>Comparaison des ventes par catégorie</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {[
-                {
-                  type: 'Produits Physiques',
-                  revenue: 6800000,
-                  orders: 456,
-                  color: 'bg-blue-500',
-                },
-                {
-                  type: 'Produits Digitaux',
-                  revenue: 4200000,
-                  orders: 589,
-                  color: 'bg-green-500',
-                },
-                { type: 'Services', revenue: 2680000, orders: 134, color: 'bg-purple-500' },
-                {
-                  type: 'Cours en Ligne',
-                  revenue: 2000000,
-                  orders: 66,
-                  color: 'bg-orange-500',
-                },
-              ].map(item => (
-                <div key={item.type} className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium">{item.type}</span>
-                    <span className="text-muted-foreground">
-                      {item.revenue.toLocaleString()} FCFA • {item.orders} commandes
-                    </span>
-                  </div>
-                  <div className="w-full bg-secondary rounded-full h-2">
-                    <div
-                      className={`${item.color} h-2 rounded-full`}
-                      style={{ width: `${(item.revenue / stats.totalRevenue) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
           </CardContent>
         </Card>
       </div>

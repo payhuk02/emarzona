@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   assertCanAddServiceToCart,
   buildServiceCartMetadata,
+  buildServiceAddonCartMetadata,
   formatServiceCartSlotLabel,
   hasServiceBookingMetadata,
 } from '@/lib/cart/service-cart-policy';
@@ -38,5 +39,16 @@ describe('service-cart-policy', () => {
   it('formats scheduled slot for cart display', () => {
     const label = formatServiceCartSlotLabel({ scheduled_at: '2026-06-15T14:00:00Z' });
     expect(label).toBeTruthy();
+  });
+
+  it('builds service addon metadata', () => {
+    expect(
+      buildServiceAddonCartMetadata({
+        storeId: 'store-1',
+        linkedBookingId: 'bk-1',
+        linkedServiceProductId: 'svc-1',
+        addonProductId: 'prod-1',
+      }).is_service_addon
+    ).toBe(true);
   });
 });
