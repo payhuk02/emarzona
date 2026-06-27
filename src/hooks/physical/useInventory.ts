@@ -1,15 +1,24 @@
 /**
  * Inventory Management Hooks
  * Date: 28 octobre 2025
- * 
+ *
  * Hooks pour gestion inventaire et stock
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import {
+  getInventoryRowProductName,
+  getInventoryRowStoreId,
+  getInventoryRowVariantLabel,
+  mapPhysicalProductInventoryRow,
+  PHYSICAL_PRODUCT_INVENTORY_SELECT,
+} from '@/lib/physical/inventory-adapter';
 
-const INVENTORY_ITEM_FIELDS = 'id, physical_product_id, variant_id, sku, quantity_available, quantity_reserved, quantity_committed, warehouse_location, bin_location, reorder_point, reorder_quantity, unit_cost, total_value, last_counted_at, created_at, updated_at';
-const INVENTORY_STOCK_MOVEMENT_FIELDS = 'id, inventory_item_id, movement_type, quantity, order_id, user_id, reason, notes, unit_cost, total_cost, movement_date, created_at';
+const INVENTORY_ITEM_FIELDS =
+  'id, physical_product_id, variant_id, quantity_available, quantity, quantity_reserved, reserved_quantity, location_name, reorder_point, reorder_quantity, unit_cost, last_counted_at, created_at, updated_at';
+const INVENTORY_STOCK_MOVEMENT_FIELDS =
+  'id, inventory_item_id, movement_type, quantity, order_id, user_id, reason, notes, unit_cost, total_cost, movement_date, created_at';
 
 // =====================================================
 // TYPES
@@ -68,47 +77,16 @@ export const useInventoryItems = (storeId?: string) => {
   return useQuery({
     queryKey: ['inventory-items', storeId],
     queryFn: async () => {
-      // Complex query to get inventory with product/variant info
       const { data, error } = await supabase
-        .from('inventory_items')
-        .select(`
-          *,
-          physical_product:physical_products (
-            id,
-            product:products (
-              id,
-              name,
-              store_id
-            )
-          ),
-          variant:product_variants (
-            id,
-            option1_value,
-            option2_value,
-            option3_value,
-            physical_product:physical_products (
-              product:products (
-                id,
-                name,
-                store_id
-              )
-            )
-          )
-        `);
+        .from('physical_product_inventory')
+        .select(PHYSICAL_PRODUCT_INVENTORY_SELECT);
 
       if (error) throw error;
 
-      // Filter by store
-      if (storeId) {
-        return data.filter((item: any) => {
-          const productStoreId =
-            item.physical_product?.product?.store_id ||
-            item.variant?.physical_product?.product?.store_id;
-          return productStoreId === storeId;
-        });
-      }
+      const rows = (data ?? []) as never[];
+      const filtered = storeId ? rows.filter(row => getInventoryRowStoreId(row) === storeId) : rows;
 
-      return data as InventoryItem[];
+      return filtered.map(row => mapPhysicalProductInventoryRow(row));
     },
     enabled: !!storeId,
   });
@@ -122,13 +100,13 @@ export const useInventoryItem = (itemId: string) => {
     queryKey: ['inventory-item', itemId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('inventory_items')
+        .from('physical_product_inventory')
         .select(INVENTORY_ITEM_FIELDS)
         .eq('id', itemId)
         .single();
 
       if (error) throw error;
-      return data as InventoryItem;
+      return mapPhysicalProductInventoryRow(data as never);
     },
     enabled: !!itemId,
   });
@@ -141,14 +119,24 @@ export const useInventoryItemBySKU = (sku: string) => {
   return useQuery({
     queryKey: ['inventory-item-sku', sku],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('inventory_items')
-        .select(INVENTORY_ITEM_FIELDS)
+      const { data: variant, error: variantError } = await supabase
+        .from('physical_product_variants')
+        .select('id')
         .eq('sku', sku)
-        .single();
+        .maybeSingle();
+
+      if (variantError) throw variantError;
+      if (!variant) throw new Error('SKU introuvable');
+
+      const { data, error } = await supabase
+        .from('physical_product_inventory')
+        .select(PHYSICAL_PRODUCT_INVENTORY_SELECT)
+        .eq('variant_id', variant.id)
+        .maybeSingle();
 
       if (error) throw error;
-      return data as InventoryItem;
+      if (!data) throw new Error('Inventaire introuvable pour ce SKU');
+      return mapPhysicalProductInventoryRow(data as never);
     },
     enabled: !!sku,
   });
@@ -181,63 +169,36 @@ export const useLowStockAlerts = (storeId: string) => {
   return useQuery({
     queryKey: ['low-stock-alerts', storeId],
     queryFn: async () => {
-      const { data: items } = await supabase
-        .from('inventory_items')
-        .select(`
-          *,
-          physical_product:physical_products (
-            product:products (
-              name,
-              store_id
-            )
-          ),
-          variant:product_variants (
-            option1_value,
-            option2_value,
-            physical_product:physical_products (
-              product:products (
-                name,
-                store_id
-              )
-            )
-          )
-        `);
+      const { data: items, error } = await supabase
+        .from('physical_product_inventory')
+        .select(PHYSICAL_PRODUCT_INVENTORY_SELECT);
 
+      if (error) throw error;
       if (!items) return [];
 
-      // Filter for low stock
-      const  alerts: StockAlert[] = [];
+      const alerts: StockAlert[] = [];
 
-      items.forEach((item: any) => {
-        const storeMatches =
-          item.physical_product?.product?.store_id === storeId ||
-          item.variant?.physical_product?.product?.store_id === storeId;
+      items.forEach((rawRow: never) => {
+        const row = rawRow as Parameters<typeof getInventoryRowStoreId>[0];
+        if (getInventoryRowStoreId(row) !== storeId) return;
 
-        if (!storeMatches) return;
+        const mapped = mapPhysicalProductInventoryRow(row);
+        const productName = getInventoryRowProductName(row) + getInventoryRowVariantLabel(row);
 
-        const productName =
-          item.physical_product?.product?.name ||
-          item.variant?.physical_product?.product?.name ||
-          'Unknown';
-
-        const variantInfo = item.variant
-          ? ` (${item.variant.option1_value}${item.variant.option2_value ? ' / ' + item.variant.option2_value : ''})`
-          : '';
-
-        if (item.quantity_available === 0) {
+        if (mapped.quantity_available === 0) {
           alerts.push({
-            product_name: productName + variantInfo,
-            sku: item.sku,
-            quantity_available: item.quantity_available,
-            reorder_point: item.reorder_point,
+            product_name: productName,
+            sku: mapped.sku,
+            quantity_available: mapped.quantity_available,
+            reorder_point: mapped.reorder_point,
             alert_type: 'out_of_stock',
           });
-        } else if (item.quantity_available <= item.reorder_point) {
+        } else if (mapped.quantity_available <= mapped.reorder_point) {
           alerts.push({
-            product_name: productName + variantInfo,
-            sku: item.sku,
-            quantity_available: item.quantity_available,
-            reorder_point: item.reorder_point,
+            product_name: productName,
+            sku: mapped.sku,
+            quantity_available: mapped.quantity_available,
+            reorder_point: mapped.reorder_point,
             alert_type: 'low_stock',
           });
         }
@@ -256,41 +217,23 @@ export const useInventoryValue = (storeId: string) => {
   return useQuery({
     queryKey: ['inventory-value', storeId],
     queryFn: async () => {
-      const { data: items } = await supabase
-        .from('inventory_items')
-        .select(`
-          *,
-          physical_product:physical_products (
-            product:products (store_id)
-          ),
-          variant:product_variants (
-            physical_product:physical_products (
-              product:products (store_id)
-            )
-          )
-        `);
+      const { data: items, error } = await supabase
+        .from('physical_product_inventory')
+        .select(PHYSICAL_PRODUCT_INVENTORY_SELECT);
 
-      if (!items) return { total_value: 0, total_items: 0 };
+      if (error) throw error;
+      if (!items) return { total_value: 0, total_items: 0, total_quantity: 0 };
 
-      const storeItems = items.filter((item: any) => {
-        return (
-          item.physical_product?.product?.store_id === storeId ||
-          item.variant?.physical_product?.product?.store_id === storeId
-        );
-      });
+      const storeItems = items
+        .filter((row: never) => getInventoryRowStoreId(row as never) === storeId)
+        .map(row => mapPhysicalProductInventoryRow(row as never));
 
-      const total_value = storeItems.reduce(
-        (sum: number, item: any) => sum + (item.total_value || 0),
-        0
-      );
+      const total_value = storeItems.reduce((sum, item) => sum + (item.total_value || 0), 0);
 
       return {
         total_value,
         total_items: storeItems.length,
-        total_quantity: storeItems.reduce(
-          (sum: number, item: any) => sum + item.quantity_available,
-          0
-        ),
+        total_quantity: storeItems.reduce((sum, item) => sum + item.quantity_available, 0),
       };
     },
     enabled: !!storeId,
@@ -316,8 +259,11 @@ export const useUpdateInventoryQuantity = () => {
       quantity: number;
     }) => {
       const { data, error } = await supabase
-        .from('inventory_items')
-        .update({ quantity_available: quantity })
+        .from('physical_product_inventory')
+        .update({
+          quantity_available: quantity,
+          quantity,
+        })
         .eq('id', inventoryItemId)
         .select()
         .single();
@@ -377,23 +323,31 @@ export const useAdjustStock = () => {
       reason?: string;
       notes?: string;
     }) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: current, error: readError } = await supabase
+        .from('physical_product_inventory')
+        .select('quantity_available, quantity')
+        .eq('id', inventoryItemId)
+        .single();
 
-      // Create stock movement (trigger will update inventory_items)
+      if (readError || !current) throw readError ?? new Error('Inventaire introuvable');
+
+      const currentQty = current.quantity_available ?? current.quantity ?? 0;
+      const nextQty = Math.max(0, currentQty + quantity);
+
       const { data, error } = await supabase
-        .from('stock_movements')
-        .insert({
-          inventory_item_id: inventoryItemId,
-          movement_type: 'adjustment',
-          quantity,
-          user_id: user?.id,
-          reason,
-          notes,
+        .from('physical_product_inventory')
+        .update({
+          quantity_available: nextQty,
+          quantity: nextQty,
         })
+        .eq('id', inventoryItemId)
         .select()
         .single();
 
       if (error) throw error;
+
+      void reason;
+      void notes;
       return data;
     },
     onSuccess: () => {
@@ -418,15 +372,33 @@ export const useReserveInventory = () => {
       inventoryItemId: string;
       quantity: number;
     }) => {
-      // Call the SQL function
-      const { data, error } = await supabase.rpc('reserve_inventory', {
-        p_inventory_item_id: inventoryItemId,
-        p_quantity: quantity,
-      });
+      const { data: row, error: readError } = await supabase
+        .from('physical_product_inventory')
+        .select('quantity_available, quantity, quantity_reserved, reserved_quantity')
+        .eq('id', inventoryItemId)
+        .single();
+
+      if (readError || !row) throw readError ?? new Error('Inventaire introuvable');
+
+      const available = row.quantity_available ?? row.quantity ?? 0;
+      const reserved = row.quantity_reserved ?? row.reserved_quantity ?? 0;
+      const sellable = available - reserved;
+
+      if (sellable < quantity) {
+        throw new Error('Insufficient inventory');
+      }
+
+      const nextReserved = reserved + quantity;
+      const { error } = await supabase
+        .from('physical_product_inventory')
+        .update({
+          quantity_reserved: nextReserved,
+          reserved_quantity: nextReserved,
+        })
+        .eq('id', inventoryItemId);
 
       if (error) throw error;
-      if (!data) throw new Error('Insufficient inventory');
-      return data;
+      return true;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventory-items'] });
@@ -443,10 +415,7 @@ export const useBulkUpdateReorderPoints = () => {
   return useMutation({
     mutationFn: async (updates: { id: string; reorder_point: number }[]) => {
       const promises = updates.map(({ id, reorder_point }) =>
-        supabase
-          .from('inventory_items')
-          .update({ reorder_point })
-          .eq('id', id)
+        supabase.from('inventory_items').update({ reorder_point }).eq('id', id)
       );
 
       await Promise.all(promises);
@@ -476,7 +445,9 @@ export const useTransferStock = () => {
       quantity: number;
       notes?: string;
     }) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       // Create two movements: one out, one in
       const movements = [
@@ -506,10 +477,3 @@ export const useTransferStock = () => {
     },
   });
 };
-
-
-
-
-
-
-

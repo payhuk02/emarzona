@@ -18,6 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 import { assertCanAddServiceToCart } from '@/lib/cart/service-cart-policy';
 import { assertCompatibleCartAddition } from '@/lib/cart/mixed-cart-policy';
+import { assertPhysicalStockAvailable } from '@/lib/cart/physical-stock-validation';
 import { getCartItemStoreId } from '@/lib/checkout/cart-validation';
 import {
   fetchCartItems,
@@ -149,7 +150,18 @@ export function useCart() {
 
       if (existingItem) {
         const newQuantity = existingItem.quantity + (options.quantity || 1);
+        if (options.product_type === 'physical') {
+          await assertPhysicalStockAvailable(options.product_id, newQuantity, options.variant_id);
+        }
         return updateCartItemQuantity(existingItem.id, newQuantity);
+      }
+
+      if (options.product_type === 'physical') {
+        await assertPhysicalStockAvailable(
+          options.product_id,
+          options.quantity || 1,
+          options.variant_id
+        );
       }
 
       const newItem: CartItemInsert = {
@@ -197,6 +209,16 @@ export function useCart() {
         if (options.quantity <= 0) {
           return removeItem.mutateAsync(options.item_id);
         }
+
+        const cartItem = items.find(item => item.id === options.item_id);
+        if (cartItem?.product_type === 'physical') {
+          await assertPhysicalStockAvailable(
+            cartItem.product_id,
+            options.quantity,
+            cartItem.variant_id
+          );
+        }
+
         updates.quantity = options.quantity;
       }
 
@@ -273,7 +295,19 @@ export function useCart() {
       const existingItem = await findExistingCartLine(scope, cartItem.product_id, null);
 
       if (existingItem) {
-        return updateCartItemQuantity(existingItem.id, existingItem.quantity + cartItem.quantity);
+        const newQuantity = existingItem.quantity + cartItem.quantity;
+        if (cartItem.product_type === 'physical') {
+          await assertPhysicalStockAvailable(cartItem.product_id, newQuantity, cartItem.variant_id);
+        }
+        return updateCartItemQuantity(existingItem.id, newQuantity);
+      }
+
+      if (cartItem.product_type === 'physical') {
+        await assertPhysicalStockAvailable(
+          cartItem.product_id,
+          cartItem.quantity,
+          cartItem.variant_id
+        );
       }
 
       const metadataRecord =

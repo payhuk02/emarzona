@@ -1,22 +1,22 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import type { InventoryItem } from '@/hooks/physical/useInventory';
+import {
+  mapPhysicalProductInventoryRow,
+  PHYSICAL_PRODUCT_INVENTORY_SELECT,
+} from '@/lib/physical/inventory-adapter';
 
-const INVENTORY_ITEM_FIELDS =
-  'id, physical_product_id, variant_id, sku, quantity_available, quantity_reserved, quantity_committed, warehouse_location, bin_location, reorder_point, reorder_quantity, unit_cost, total_value, last_counted_at, created_at, updated_at';
-
-/** Inventory rows for a physical product (all variants/locations). */
+/** Inventory rows for a physical product (canonical: physical_product_inventory). */
 export function useInventory(physicalProductId: string) {
   return useQuery({
     queryKey: ['inventory-by-physical-product', physicalProductId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('inventory_items')
-        .select(INVENTORY_ITEM_FIELDS)
+        .from('physical_product_inventory')
+        .select(PHYSICAL_PRODUCT_INVENTORY_SELECT)
         .eq('physical_product_id', physicalProductId);
 
       if (error) throw error;
-      return (data ?? []) as InventoryItem[];
+      return (data ?? []).map(row => mapPhysicalProductInventoryRow(row as never));
     },
     enabled: !!physicalProductId,
   });

@@ -50,6 +50,11 @@ import { isPaymentOrchestrationV2Enabled } from '@/lib/payments/feature-flags';
 import { validateMultiStorePaymentProvider } from '@/lib/payments/multi-store-checkout';
 import { reserveArtistLimitedEditionsForCart } from '@/lib/artist-edition-reservation';
 import {
+  cartHasArtistDedications,
+  getCartDedicationPreview,
+  persistArtistDedicationsFromCartItems,
+} from '@/lib/checkout/artist-dedications';
+import {
   cartHasPhysicalItems,
   releasePhysicalInventoryForOrder,
   reservePhysicalInventoryForOrder,
@@ -674,6 +679,8 @@ export default function Checkout() {
           continue;
         }
 
+        await persistArtistDedicationsFromCartItems(order.id, group.items);
+
         if (cartHasPhysicalItems(group.items)) {
           try {
             await reservePhysicalInventoryForOrder(order.id);
@@ -1130,6 +1137,8 @@ export default function Checkout() {
 
       if (itemsError) throw itemsError;
 
+      await persistArtistDedicationsFromCartItems(order.id, items);
+
       if (cartHasPhysicalItems(items)) {
         await reservePhysicalInventoryForOrder(order.id);
       }
@@ -1405,6 +1414,34 @@ export default function Checkout() {
                 onGiftCardRemove={handleGiftCardRemove}
               />
             </Suspense>
+
+            {cartHasArtistDedications(items) && (
+              <Card>
+                <CardContent className="pt-6 space-y-3">
+                  <h2 className="font-semibold">Dédicaces personnalisées</h2>
+                  {items
+                    .filter(item => item.product_type === 'artist')
+                    .map(item => {
+                      const dedication = getCartDedicationPreview(item);
+                      if (!dedication) return null;
+                      return (
+                        <div
+                          key={item.id ?? item.product_id}
+                          className="rounded-lg border p-3 text-sm"
+                        >
+                          <p className="font-medium">{item.product_name}</p>
+                          <p className="text-muted-foreground mt-1">{dedication.dedication_text}</p>
+                          {dedication.recipient_name && (
+                            <p className="text-muted-foreground">
+                              Pour : {dedication.recipient_name}
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })}
+                </CardContent>
+              </Card>
+            )}
 
             {/* Méthode de paiement */}
             <PaymentProviderSelector

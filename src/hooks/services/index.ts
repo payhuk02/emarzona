@@ -13,17 +13,15 @@ export {
   useBulkUpdateServices,
 } from './useServices';
 
-// Bookings CRUD & Availability
+// Bookings — schéma service_bookings (canonical: src/hooks/service/useBookings.ts)
 export {
   useServiceBookings,
-  useCustomerBookings,
-  useBooking,
+  useMyBookings as useCustomerBookings,
   useCreateBooking,
   useUpdateBooking,
   useCancelBooking,
-  useCheckAvailability,
-} from './useBookings';
-export type { Booking, AvailabilitySlot } from './useBookings';
+} from '@/hooks/service/useBookings';
+export type { ServiceBooking as Booking } from '@/hooks/service/useBookings';
 
 // Alerts & Notifications
 export {
@@ -39,12 +37,7 @@ export {
   useCheckLowCapacity,
   useCheckUpcomingBookings,
 } from './useServiceAlerts';
-export type {
-  AlertType,
-  AlertPriority,
-  ServiceAlert,
-  AlertSettings,
-} from './useServiceAlerts';
+export type { AlertType, AlertPriority, ServiceAlert, AlertSettings } from './useServiceAlerts';
 
 // Reports & Analytics
 export {
@@ -61,10 +54,3 @@ export type {
   StaffReport,
   CapacityReport,
 } from './useServiceReports';
-
-
-
-
-
-
-

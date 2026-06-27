@@ -79,6 +79,8 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { FileText } from 'lucide-react';
 import { EditionLimitedBadge } from '@/components/artist/EditionLimitedBadge';
+import { DedicationForm } from '@/components/artist/DedicationForm';
+import type { CartDedicationPayload } from '@/lib/checkout/artist-dedications';
 
 const ArtistProductDetail = () => {
   const { productId } = useParams<{ productId: string }>();
@@ -88,6 +90,8 @@ const ArtistProductDetail = () => {
   const { addItem } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [showDedicationForm, setShowDedicationForm] = useState(false);
+  const [pendingDedication, setPendingDedication] = useState<CartDedicationPayload | null>(null);
 
   // Utiliser le hook unifié pour la wishlist
   const {
@@ -266,6 +270,7 @@ const ArtistProductDetail = () => {
           store_id: product.store_id,
           artist_product_id: product.artist?.id,
           selected_at: new Date().toISOString(),
+          ...(pendingDedication ? { dedication: pendingDedication } : {}),
         },
       });
 
@@ -580,6 +585,46 @@ const ArtistProductDetail = () => {
               </Button>
             </div>
           </div>
+
+          {/* Dédicace optionnelle */}
+          {product.artist?.id && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Dédicace personnalisée</CardTitle>
+                <CardDescription>
+                  Ajoutez un message personnalisé (livres, musique, impressions signées).
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button
+                  type="button"
+                  variant={showDedicationForm ? 'secondary' : 'outline'}
+                  onClick={() => setShowDedicationForm(prev => !prev)}
+                >
+                  {showDedicationForm ? 'Masquer le formulaire' : 'Ajouter une dédicace'}
+                </Button>
+                {showDedicationForm && (
+                  <DedicationForm
+                    artistProductId={product.artist.id}
+                    productId={productId!}
+                    onSubmit={async data => {
+                      setPendingDedication(data);
+                      toast({
+                        title: 'Dédicace enregistrée',
+                        description: 'Elle sera associée à votre commande au checkout.',
+                      });
+                    }}
+                  />
+                )}
+                {pendingDedication && !showDedicationForm && (
+                  <p className="text-sm text-muted-foreground">
+                    Dédicace prête : « {pendingDedication.dedication_text.slice(0, 80)}
+                    {pendingDedication.dedication_text.length > 80 ? '…' : ''} »
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Actions */}
           <div className="space-y-3">

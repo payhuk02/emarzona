@@ -4,7 +4,7 @@
  * Date : 27 octobre 2025
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -52,6 +52,9 @@ import { CohortsList } from '@/components/courses/cohorts';
 import { AssignmentsList } from '@/components/courses/assignments';
 import { PrerequisitesList } from '@/components/courses/prerequisites';
 import { LiveSessionsList } from '@/components/courses/live';
+import { QuizContainer } from '@/components/courses/quiz/QuizContainer';
+import { CertificateGenerator } from '@/components/courses/certificates/CertificateGenerator';
+import { useCourseQuizzes } from '@/hooks/courses/useQuiz';
 import { CourseSchema, minutesToISO8601 } from '@/components/seo/CourseSchema';
 import {
   Accordion,
@@ -117,6 +120,17 @@ const CourseDetail = ({ learnMode = false }: CourseDetailProps) => {
 
   // Récupérer la configuration des pixels
   const { data: pixelsConfig } = useProductPixels(data?.product?.id || '');
+  const { data: courseQuizzes = [] } = useCourseQuizzes(data?.course?.id);
+  const certificateRef = useRef<HTMLDivElement>(null);
+  const quizByLessonId = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const quiz of courseQuizzes) {
+      if (quiz.lesson_id) {
+        map.set(quiz.lesson_id, quiz.id);
+      }
+    }
+    return map;
+  }, [courseQuizzes]);
 
   // Tracker automatiquement la vue de la page
   useEffect(() => {
@@ -303,6 +317,7 @@ const CourseDetail = ({ learnMode = false }: CourseDetailProps) => {
   };
 
   const displayLesson = getInitialLesson();
+  const displayLessonQuizId = displayLesson ? quizByLessonId.get(displayLesson.id) : undefined;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -505,6 +520,18 @@ const CourseDetail = ({ learnMode = false }: CourseDetailProps) => {
                     <LessonCompletionButton
                       enrollmentId={enrollment.id}
                       lessonId={displayLesson.id}
+                    />
+                  </div>
+                )}
+
+                {isEnrolled && enrollment && displayLessonQuizId && (
+                  <div className="mt-6">
+                    <QuizContainer
+                      quizId={displayLessonQuizId}
+                      enrollmentId={enrollment.id}
+                      onCertificateReady={() =>
+                        certificateRef.current?.scrollIntoView({ behavior: 'smooth' })
+                      }
                     />
                   </div>
                 )}
@@ -713,6 +740,16 @@ const CourseDetail = ({ learnMode = false }: CourseDetailProps) => {
                   courseId={course.id}
                   showLocked={false}
                 />
+                {course.certificate_enabled && (
+                  <div ref={certificateRef}>
+                    <CertificateGenerator
+                      enrollmentId={enrollment.id}
+                      courseId={course.id}
+                      courseName={product.name}
+                      instructorName={store?.name}
+                    />
+                  </div>
+                )}
               </>
             )}
 

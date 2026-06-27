@@ -93,23 +93,13 @@ export interface CreateDigitalOrderResult {
   transactionId: string;
 }
 
-/**
- * Génère une clé de licence unique
- */
-function generateLicenseKey(): string {
-  const segments = 4;
-  const segmentLength = 4;
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-
-  return Array(segments)
-    .fill(0)
-    .map(() =>
-      Array(segmentLength)
-        .fill(0)
-        .map(() => chars[Math.floor(Math.random() * chars.length)])
-        .join('')
-    )
-    .join('-');
+async function generateLicenseKeyViaRpc(): Promise<string> {
+  const { data, error } = await supabase.rpc('generate_license_key');
+  if (error || !data) {
+    logger.error('generate_license_key RPC failed', { error });
+    throw new Error('Erreur lors de la génération de la clé de licence');
+  }
+  return data as string;
 }
 
 /**
@@ -196,7 +186,7 @@ export const useCreateDigitalOrder = () => {
           .insert({
             digital_product_id: digitalProductId,
             user_id: user.id,
-            license_key: generateLicenseKey(),
+            license_key: await generateLicenseKeyViaRpc(),
             license_type: licenseType,
             max_activations: licenseType === 'unlimited' ? -1 : maxActivations, // ✅ -1 for unlimited
             current_activations: 0, // ✅ Correct column name

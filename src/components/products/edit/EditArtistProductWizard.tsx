@@ -34,6 +34,7 @@ import { ArtistBasicInfoForm } from '../create/artist/ArtistBasicInfoForm';
 import { ArtistSpecificForms } from '../create/artist/ArtistSpecificForms';
 import { ArtistShippingConfig } from '../create/artist/ArtistShippingConfig';
 import { ArtistAuthenticationConfig } from '../create/artist/ArtistAuthenticationConfig';
+import { ArtworkProvenanceManager } from '@/components/artist/ArtworkProvenanceManager';
 import { ArtistPreview } from '../create/artist/ArtistPreview';
 import { ProductSEOForm } from '../create/shared/ProductSEOForm';
 import { ProductFAQForm } from '../create/shared/ProductFAQForm';
@@ -351,16 +352,18 @@ export const EditArtistProductWizard = ({
       if (user) {
         const { data: ownershipCheck, error: ownershipError } = await supabase
           .from('products')
-          .select(`
+          .select(
+            `
             id,
             stores!inner(user_id)
-          `)
+          `
+          )
           .eq('id', artistProductData.product_id)
           .eq('stores.user_id', user.id)
           .single();
 
         if (ownershipError || !ownershipCheck) {
-          throw new Error('Vous n\'avez pas les permissions pour modifier ce produit artiste');
+          throw new Error("Vous n'avez pas les permissions pour modifier ce produit artiste");
         }
       }
       // Update base product
@@ -556,7 +559,12 @@ export const EditArtistProductWizard = ({
             )}
 
             {currentStep === 5 && (
-              <ArtistAuthenticationConfig data={formData} onUpdate={handleUpdateFormData} />
+              <div className="space-y-8">
+                <ArtistAuthenticationConfig data={formData} onUpdate={handleUpdateFormData} />
+                {productId && (storeId || store?.id) && (
+                  <ArtworkProvenanceManager productId={productId} storeId={storeId || store!.id} />
+                )}
+              </div>
             )}
 
             {currentStep === 6 && (

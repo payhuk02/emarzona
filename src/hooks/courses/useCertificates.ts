@@ -19,12 +19,15 @@ export const useCertificate = (enrollmentId: string | undefined) => {
     queryFn: async () => {
       if (!enrollmentId) return null;
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return null;
 
       const { data, error } = await supabase
         .from('course_certificates')
-        .select(`
+        .select(
+          `
           *,
           enrollment:course_enrollments(
             *,
@@ -33,7 +36,8 @@ export const useCertificate = (enrollmentId: string | undefined) => {
               product:products(*)
             )
           )
-        `)
+        `
+        )
         .eq('enrollment_id', enrollmentId)
         .eq('user_id', user.id)
         .maybeSingle();
@@ -53,42 +57,32 @@ export const useCreateCertificate = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({
-      enrollmentId,
-      courseId,
-    }: {
-      enrollmentId: string;
-      courseId: string;
-    }) => {
-      const { data: { user } } = await supabase.auth.getUser();
+    mutationFn: async ({ enrollmentId, courseId }: { enrollmentId: string; courseId: string }) => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
-      // Vérifier que le cours est complété à 100%
-      const { data: enrollment } = await supabase
-        .from('course_enrollments')
-        .select('completed_lessons, total_lessons')
-        .eq('id', enrollmentId)
-        .single();
-
-      if (!enrollment || enrollment.completed_lessons !== enrollment.total_lessons) {
-        throw new Error('Vous devez compléter tout le cours pour obtenir le certificat');
-      }
-
-      // Récupérer les infos complètes
       const { data: enrollment, error: enrollmentError } = await supabase
         .from('course_enrollments')
-        .select(`
+        .select(
+          `
           *,
           course:courses(
             *,
             product:products(name, store_id)
           )
-        `)
+        `
+        )
         .eq('id', enrollmentId)
         .single();
 
       if (enrollmentError || !enrollment) {
-        throw new Error('Enrollment not found');
+        throw new Error('Inscription introuvable');
+      }
+
+      if (enrollment.completed_lessons !== enrollment.total_lessons) {
+        throw new Error('Vous devez compléter tout le cours pour obtenir le certificat');
       }
 
       // Récupérer le profil utilisateur
@@ -101,12 +95,14 @@ export const useCreateCertificate = () => {
       // Récupérer l'instructeur
       const { data: instructor } = await supabase
         .from('course_sections')
-        .select(`
+        .select(
+          `
           lessons:course_lessons(
             instructor_id,
             profiles:instructor_id(full_name)
           )
-        `)
+        `
+        )
         .eq('course_id', courseId)
         .limit(1)
         .maybeSingle();
@@ -124,9 +120,19 @@ export const useCreateCertificate = () => {
           certificate_number: certificateNumber,
           certificate_url: 'pending', // Temporaire, sera remplacé par l'URL du PDF
           student_name: profile?.full_name || user.email || 'Étudiant',
-          course_title: ((enrollment.course as Record<string, unknown>)?.product as Record<string, unknown>)?.name as string || 'Cours',
-          instructor_name: ((instructor?.lessons as Array<Record<string, unknown>>)?.[0]?.profiles as Record<string, unknown>)?.full_name as string || 'Emarzona Academy',
-          completion_date: enrollment.completion_date ? enrollment.completion_date.split('T')[0] : new Date().toISOString().split('T')[0],
+          course_title:
+            (((enrollment.course as Record<string, unknown>)?.product as Record<string, unknown>)
+              ?.name as string) || 'Cours',
+          instructor_name:
+            ((
+              (instructor?.lessons as Array<Record<string, unknown>>)?.[0]?.profiles as Record<
+                string,
+                unknown
+              >
+            )?.full_name as string) || 'Emarzona Academy',
+          completion_date: enrollment.completion_date
+            ? enrollment.completion_date.split('T')[0]
+            : new Date().toISOString().split('T')[0],
           verification_code: await generateVerificationCode(),
         })
         .select()
@@ -136,21 +142,18 @@ export const useCreateCertificate = () => {
 
       // 🆕 Générer et uploader le PDF
       try {
-        const storeId = ((enrollment.course as Record<string, unknown>)?.product as Record<string, unknown>)?.store_id as string | undefined;
+        const storeId = (
+          (enrollment.course as Record<string, unknown>)?.product as Record<string, unknown>
+        )?.store_id as string | undefined;
         if (storeId && certificate) {
-          await generateAndUploadCertificate(
-            certificate.id,
-            courseId,
-            storeId,
-            {
-              student_name: certificate.student_name,
-              course_name: certificate.course_title,
-              completion_date: certificate.completion_date,
-              certificate_number: certificate.certificate_number,
-              instructor_name: certificate.instructor_name,
-              verification_code: certificate.verification_code,
-            }
-          );
+          await generateAndUploadCertificate(certificate.id, courseId, storeId, {
+            student_name: certificate.student_name,
+            course_name: certificate.course_title,
+            completion_date: certificate.completion_date,
+            certificate_number: certificate.certificate_number,
+            instructor_name: certificate.instructor_name,
+            verification_code: certificate.verification_code,
+          });
         }
       } catch (pdfError) {
         // Ne pas faire échouer la création si le PDF échoue
@@ -169,10 +172,10 @@ export const useCreateCertificate = () => {
         description: 'Votre certificat est prêt à être téléchargé.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: 'Erreur',
-        description: error.message,
+        description: error instanceof Error ? error.message : 'Erreur inconnue',
         variant: 'destructive',
       });
     },
@@ -188,7 +191,9 @@ export const useCanGetCertificate = (enrollmentId: string | undefined) => {
     queryFn: async () => {
       if (!enrollmentId) return false;
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return false;
 
       // Vérifier progression
@@ -202,7 +207,9 @@ export const useCanGetCertificate = (enrollmentId: string | undefined) => {
       if (!enrollment) return false;
 
       // Le certificat est disponible si toutes les leçons sont complétées
-      return enrollment.completed_lessons === enrollment.total_lessons && enrollment.total_lessons > 0;
+      return (
+        enrollment.completed_lessons === enrollment.total_lessons && enrollment.total_lessons > 0
+      );
     },
     enabled: !!enrollmentId,
   });
@@ -227,12 +234,15 @@ export const useMyCertificates = () => {
   return useQuery({
     queryKey: ['my-certificates'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return [];
 
       const { data, error } = await supabase
         .from('course_certificates')
-        .select(`
+        .select(
+          `
           *,
           enrollment:course_enrollments(
             *,
@@ -241,7 +251,8 @@ export const useMyCertificates = () => {
               product:products(*)
             )
           )
-        `)
+        `
+        )
         .eq('user_id', user.id)
         .order('issued_at', { ascending: false });
 
@@ -250,10 +261,3 @@ export const useMyCertificates = () => {
     },
   });
 };
-
-
-
-
-
-
-
