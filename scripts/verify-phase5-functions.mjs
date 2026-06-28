@@ -71,7 +71,7 @@ async function run() {
         body: (await res.text()).slice(0, 200),
       };
     },
-    (d) => d.status === 200 && d.storeId === STORE_ID,
+    (d) => d.status === 200 && d.storeId === STORE_ID && d.authMode === 'gateway-scoped',
   );
 
   await check(

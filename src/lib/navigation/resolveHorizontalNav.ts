@@ -283,6 +283,7 @@ export function resolveHorizontalNavDomains(input: {
   isPlatformAdmin: boolean;
   physicalPlanSlug?: string | null;
   commerceType?: StoreCommerceType | null;
+  isExpertMode?: boolean;
   pathname: string;
   search: string;
   t: TFunction;
@@ -299,6 +300,7 @@ export function resolveHorizontalNavDomains(input: {
   sections = filterSellerNavSectionsByAccess(sections, {
     isPlatformAdmin: input.isPlatformAdmin,
     commerceType: input.commerceType,
+    isExpertMode: input.isExpertMode,
   });
   sections = translateNavSections(sections, input.t);
 

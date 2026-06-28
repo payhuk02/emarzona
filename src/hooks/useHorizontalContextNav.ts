@@ -7,6 +7,7 @@ import { useAdmin } from '@/hooks/useAdmin';
 import { useStoreContext } from '@/contexts/StoreContext';
 import { useStorePhysicalAccess } from '@/hooks/billing/useStorePhysicalAccess';
 import { useSidebarPersona } from '@/hooks/useSidebarPersona';
+import { useProgressiveUX } from '@/hooks/useProgressiveUX';
 
 export function useHorizontalContextNav() {
   const { t } = useTranslation();
@@ -17,6 +18,7 @@ export function useHorizontalContextNav() {
   const { planSlug } = useStorePhysicalAccess(selectedStoreId);
   const commerceType = selectedStore?.commerce_type;
   const persona = resolveHorizontalNavPersona(location.pathname, sidebarPersona);
+  const { isExpertMode } = useProgressiveUX();
 
   return useMemo(
     () =>
@@ -25,10 +27,11 @@ export function useHorizontalContextNav() {
         isPlatformAdmin: isAdmin,
         physicalPlanSlug: planSlug,
         commerceType,
+        isExpertMode,
         pathname: location.pathname,
         search: location.search,
         t,
       }),
-    [persona, isAdmin, planSlug, commerceType, location.pathname, location.search, t]
+    [persona, isAdmin, planSlug, commerceType, isExpertMode, location.pathname, location.search, t]
   );
 }

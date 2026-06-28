@@ -43,6 +43,43 @@ serve(async () => {
         }
       }
 
+      // ⏳ LOGIQUE EXPONENTIAL BACKOFF POUR LES EVENTS 'failed'
+      if (event.status === 'failed') {
+        const timeSinceLastUpdateMs = Date.now() - new Date(event.updated_at).getTime();
+
+        // Seuils de Backoff selon le retry_count actuel :
+        // 0 -> échec initial -> retry 1 attend 2 min
+        // 1 -> échec retry 1 -> retry 2 attend 15 min
+        // 2 -> échec retry 2 -> retry 3 attend 1 heure
+        // 3 -> échec retry 3 -> retry 4 attend 6 heures
+        let backoffMs = 0;
+        switch (event.retry_count) {
+          case 0:
+            backoffMs = 2 * 60 * 1000;
+            break; // 2 min
+          case 1:
+            backoffMs = 15 * 60 * 1000;
+            break; // 15 min
+          case 2:
+            backoffMs = 60 * 60 * 1000;
+            break; // 1 heure
+          case 3:
+            backoffMs = 6 * 60 * 60 * 1000;
+            break; // 6 heures
+          case 4:
+            backoffMs = 24 * 60 * 60 * 1000;
+            break; // 24 heures (avant mise en Dead Letter)
+          default:
+            backoffMs = 2 * 60 * 1000;
+            break;
+        }
+
+        if (timeSinceLastUpdateMs < backoffMs) {
+          // Le délai de backoff n'est pas encore écoulé, on skip silencieusement
+          continue;
+        }
+      }
+
       // Marquer comme processing (pour empêcher une double exécution par un autre worker)
       await supabase
         .from('webhook_events')

@@ -1,14 +1,14 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createSupabaseAdmin } from '../_shared/supabase-admin.ts';
 import { crypto } from 'https://deno.land/std@0.168.0/crypto/mod.ts';
-import { encode as base64url } from 'https://deno.land/std@0.168.0/encoding/base64url.ts';
+import {
+  scopeGraphqlQuery,
+  sanitizeGraphqlResponse,
+  TenantGuardError,
+} from '../_shared/graphql-tenant-guard.ts';
 
 // ============================================================================
-// 🚀 Headless GraphQL Gateway - Composable Commerce API
-// ============================================================================
-// Ce Gateway sécurise l'accès à l'API GraphQL (pg_graphql) via des clés API
-// marchandes (sk_*). L'isolation tenant est garantie par un JWT forgé signé
-// avec le JWT_SECRET de Supabase, contenant le store_id dans les claims.
+// Headless GraphQL Gateway — isolation tenant par filtrage store_id (sans JWT legacy)
 // ============================================================================
 
 const CORS_HEADERS = {
@@ -17,189 +17,64 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
-// --- Utilitaires Crypto ---
+const API_VERSION = '2026-06-28-gateway-scoped';
+
 function toHexString(bytes: Uint8Array): string {
   return Array.from(bytes)
     .map(b => b.toString(16).padStart(2, '0'))
     .join('');
 }
 
-function resolveJwtSecret(): string | undefined {
-  return (
-    Deno.env.get('SUPABASE_JWT_SECRET')?.trim() || Deno.env.get('JWT_SECRET')?.trim() || undefined
-  );
-}
+/** Clé secrète service_role pour appeler pg_graphql (côté serveur uniquement). */
+function resolveServiceRoleKey(): string {
+  const direct = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')?.trim();
+  if (direct) return direct;
 
-function resolvePublishableKey(): string | undefined {
-  const direct = Deno.env.get('SUPABASE_ANON_KEY');
-  if (direct?.startsWith('sb_')) return direct;
-
-  const raw = Deno.env.get('SUPABASE_PUBLISHABLE_KEYS');
-  if (!raw) return undefined;
-  try {
-    const parsed = JSON.parse(raw) as Record<string, string>;
-    return parsed.default || Object.values(parsed).find(v => v.startsWith('sb_'));
-  } catch {
-    return undefined;
-  }
-}
-
-function resolveLegacyJwtKey(): string | undefined {
-  const candidates: string[] = [
-    Deno.env.get('LEGACY_ANON_JWT') ?? '',
-    Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-  ];
-
-  for (const jsonEnv of ['SUPABASE_PUBLISHABLE_KEYS', 'SUPABASE_SECRET_KEYS']) {
-    const raw = Deno.env.get(jsonEnv);
-    if (!raw) continue;
+  const raw = Deno.env.get('SUPABASE_SECRET_KEYS');
+  if (raw) {
     try {
-      candidates.push(
-        ...Object.values(JSON.parse(raw)).filter((v): v is string => typeof v === 'string')
-      );
+      const parsed = JSON.parse(raw) as Record<string, string>;
+      const key =
+        parsed.default || Object.values(parsed).find(v => typeof v === 'string' && v.length > 0);
+      if (key) return key;
     } catch {
-      // ignore malformed JSON
+      // ignore
     }
   }
 
-  return candidates.find(key => key.split('.').length === 3);
+  throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY for upstream GraphQL');
 }
 
-function resolveProjectRef(): string {
-  const url = Deno.env.get('SUPABASE_URL') ?? '';
-  return url.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1] ?? '';
-}
-
-/**
- * Forge un JWT Supabase-compatible signé HMAC-SHA256.
- * `sub` = user_id du propriétaire pour que auth.uid() fonctionne dans les RLS.
- */
-async function forgeStoreJwt(
-  storeOwnerUserId: string,
-  storeId: string,
-  scopes: string[],
-  jwtSecret: string
-): Promise<string> {
-  const now = Math.floor(Date.now() / 1000);
-  const header = { alg: 'HS256', typ: 'JWT' };
-  const payload = {
-    iss: 'supabase',
-    ref: resolveProjectRef(),
-    sub: storeOwnerUserId,
-    aud: 'authenticated',
-    role: 'authenticated',
-    iat: now,
-    exp: now + 60,
-    app_metadata: {
-      store_id: storeId,
-      scopes,
-      source: 'headless_api',
-    },
-    user_metadata: {},
-  };
-
-  const encoder = new TextEncoder();
-  const headerB64 = base64url(encoder.encode(JSON.stringify(header)));
-  const payloadB64 = base64url(encoder.encode(JSON.stringify(payload)));
-  const signingInput = `${headerB64}.${payloadB64}`;
-
-  const key = await crypto.subtle.importKey(
-    'raw',
-    encoder.encode(jwtSecret),
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign']
-  );
-  const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(signingInput));
-  const signatureB64 = base64url(new Uint8Array(signature));
-
-  return `${signingInput}.${signatureB64}`;
-}
-
-async function resolveGraphqlAuthToken(
-  supabaseAdmin: ReturnType<typeof createSupabaseAdmin>,
-  storeId: string,
-  scopes: string[]
-): Promise<{
-  token: string;
-  apikey: string;
-  mode: 'tenant-jwt' | 'publishable-key' | 'legacy-jwt';
-}> {
-  const jwtSecret = resolveJwtSecret();
-  if (jwtSecret) {
-    const { data: store, error } = await supabaseAdmin
-      .from('stores')
-      .select('user_id')
-      .eq('id', storeId)
-      .single();
-
-    if (error || !store?.user_id) {
-      throw new Error('Store owner not found for tenant JWT');
-    }
-
-    const token = await forgeStoreJwt(store.user_id, storeId, scopes, jwtSecret);
-    const apikey = resolvePublishableKey() ?? token;
-    return { token, apikey, mode: 'tenant-jwt' };
-  }
-
-  const publishableKey = resolvePublishableKey();
-  if (publishableKey) {
-    return { token: publishableKey, apikey: publishableKey, mode: 'publishable-key' };
-  }
-
-  const legacyJwt = resolveLegacyJwtKey();
-  if (legacyJwt) {
-    return { token: legacyJwt, apikey: legacyJwt, mode: 'legacy-jwt' };
-  }
-
-  throw new Error(
-    'Missing SUPABASE_JWT_SECRET for tenant JWT. Configure it in Edge Function secrets (Dashboard > Settings > API > JWT Secret).'
-  );
+function jsonError(status: number, body: Record<string, unknown>): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+  });
 }
 
 serve(async req => {
-  // CORS Preflight
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: CORS_HEADERS });
   }
 
-  // Seul POST est autorisé pour GraphQL
   if (req.method !== 'POST') {
-    return new Response(
-      JSON.stringify({ error: 'Method not allowed. Use POST for GraphQL queries.' }),
-      {
-        status: 405,
-        headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
-      }
-    );
+    return jsonError(405, { error: 'Method not allowed. Use POST for GraphQL queries.' });
   }
 
   try {
-    // 1. Validation du format de la clé API
     const authHeader = req.headers.get('Authorization');
     if (!authHeader || !authHeader.startsWith('Bearer sk_')) {
-      return new Response(
-        JSON.stringify({
-          error: 'Unauthorized',
-          message:
-            'Missing or invalid API Key. Expected format: "Authorization: Bearer sk_live_..."',
-        }),
-        {
-          status: 401,
-          headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
-        }
-      );
+      return jsonError(401, {
+        error: 'Unauthorized',
+        message: 'Missing or invalid API Key. Expected format: "Authorization: Bearer sk_live_..."',
+      });
     }
 
     const storeApiKey = authHeader.replace('Bearer ', '');
-
-    // 2. Hachage SHA-256 de la clé pour comparaison sécurisée avec la DB
     const msgUint8 = new TextEncoder().encode(storeApiKey);
     const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
     const hashHex = toHexString(new Uint8Array(hashBuffer));
 
-    // 3. Vérification de la clé via RPC (admin)
     const supabaseAdmin = createSupabaseAdmin();
     const { data: keyData, error: rpcError } = await supabaseAdmin.rpc('verify_store_api_key', {
       p_api_key_hash: hashHex,
@@ -207,83 +82,51 @@ serve(async req => {
 
     if (rpcError) {
       console.error('RPC Error:', rpcError.message);
-      return new Response(JSON.stringify({ error: 'Internal authentication error' }), {
-        status: 500,
-        headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
-      });
+      return jsonError(500, { error: 'Internal authentication error' });
     }
 
-    if (!keyData || !keyData.is_valid) {
-      return new Response(
-        JSON.stringify({
-          error: 'Unauthorized',
-          message: keyData?.error || 'Invalid or expired API key',
-        }),
-        {
-          status: 401,
-          headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
-        }
-      );
+    if (!keyData?.is_valid) {
+      return jsonError(401, {
+        error: 'Unauthorized',
+        message: keyData?.error || 'Invalid or expired API key',
+      });
     }
 
     const storeId: string = keyData.store_id;
     const scopes: string[] = keyData.scopes || ['read_catalog'];
 
-    // 4. Validation des scopes — vérifier que la requête GraphQL est autorisée
-    const body = await req.text();
-    let parsedBody: { query?: string; variables?: Record<string, unknown> };
+    const rawBody = await req.text();
+    let parsedBody: { query?: string; variables?: Record<string, unknown>; operationName?: string };
     try {
-      parsedBody = JSON.parse(body);
+      parsedBody = JSON.parse(rawBody);
     } catch {
-      return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
-        status: 400,
-        headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
-      });
+      return jsonError(400, { error: 'Invalid JSON body' });
     }
 
     if (!parsedBody.query) {
-      return new Response(JSON.stringify({ error: 'Missing "query" field in GraphQL request' }), {
-        status: 400,
-        headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
-      });
+      return jsonError(400, { error: 'Missing "query" field in GraphQL request' });
     }
 
-    // Vérification basique des mutations (si le scope write_orders n'est pas accordé)
-    const isMutation = parsedBody.query.trim().toLowerCase().startsWith('mutation');
-    if (isMutation && !scopes.includes('write_orders')) {
-      return new Response(
-        JSON.stringify({
-          error: 'Forbidden',
-          message: 'Your API key does not have write permissions. Required scope: write_orders',
-        }),
-        {
-          status: 403,
-          headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
-        }
-      );
-    }
+    // Isolation tenant : injection filtres store_id + validation scopes
+    const scopedQuery = scopeGraphqlQuery(parsedBody.query, storeId, scopes);
 
-    // 5. 🔒 ISOLATION TENANT : JWT forgé (RLS) ou service_role (fallback)
-    const {
-      token: graphqlAuthToken,
-      apikey: graphqlApiKey,
-      mode: authMode,
-    } = await resolveGraphqlAuthToken(supabaseAdmin, storeId, scopes);
-
-    // 6. Relayer la requête vers pg_graphql
+    const serviceKey = resolveServiceRoleKey();
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
 
     const graphqlResponse = await fetch(`${supabaseUrl}/graphql/v1`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        apikey: graphqlApiKey,
-        Authorization: `Bearer ${graphqlAuthToken}`,
+        apikey: serviceKey,
+        Authorization: `Bearer ${serviceKey}`,
       },
-      body: JSON.stringify(parsedBody),
+      body: JSON.stringify({
+        ...parsedBody,
+        query: scopedQuery,
+      }),
     });
 
-    const responseBody = await graphqlResponse.text();
+    const responseBody = sanitizeGraphqlResponse(await graphqlResponse.text(), storeId);
 
     return new Response(responseBody, {
       status: graphqlResponse.status,
@@ -291,16 +134,16 @@ serve(async req => {
         ...CORS_HEADERS,
         'Content-Type': 'application/json',
         'X-Emarzona-Store-Id': storeId,
-        'X-Emarzona-Api-Version': '2026-06-28',
-        'X-Emarzona-Auth-Mode': authMode,
+        'X-Emarzona-Api-Version': API_VERSION,
+        'X-Emarzona-Auth-Mode': 'gateway-scoped',
       },
     });
   } catch (error) {
+    if (error instanceof TenantGuardError) {
+      return jsonError(error.status, { error: 'Forbidden', message: error.message });
+    }
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('Headless Gateway Error:', message);
-    return new Response(JSON.stringify({ error: 'Internal Gateway Error', detail: message }), {
-      status: 500,
-      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
-    });
+    return jsonError(500, { error: 'Internal Gateway Error', detail: message });
   }
 });

@@ -10,6 +10,7 @@ import {
   canAccessCommercePath,
   canAccessProductCreateNavPath,
 } from '@/lib/commerce/store-capability-map';
+import { requiresExpertMode } from '@/config/navigation.progressive';
 
 const getNavPath = (url: string) => url.split('?')[0];
 
@@ -39,10 +40,15 @@ export function filterAdminNavSectionsByRbac(
 /** Seller nav: hide items that require platform admin (future-proof). */
 export function filterSellerNavSectionsByAccess(
   sections: NavSection[],
-  options: { isPlatformAdmin: boolean; commerceType?: StoreCommerceType | null }
+  options: {
+    isPlatformAdmin: boolean;
+    commerceType?: StoreCommerceType | null;
+    isExpertMode?: boolean;
+  }
 ): NavSection[] {
   const hidePhysicalOnly =
     options.commerceType != null && !shouldApplyPhysicalPlanGating(options.commerceType);
+  const isExpert = options.isExpertMode ?? true; // Par défaut on affiche tout si non fourni
 
   return sections
     .map(section => ({
@@ -50,6 +56,9 @@ export function filterSellerNavSectionsByAccess(
       items: section.items.filter(item => {
         if (!options.isPlatformAdmin && item.adminOnly) return false;
         if (hidePhysicalOnly && isPhysicalOnlyNavUrl(item.url)) return false;
+
+        // 🔒 Filtrage UX Progressive : Masquer les routes complexes si mode "Essentiel"
+        if (!isExpert && requiresExpertMode(item.url)) return false;
         const path = getNavItemPath(item.url);
         if (item.createGroup && !canAccessProductCreateNavPath(path, options.commerceType)) {
           return false;

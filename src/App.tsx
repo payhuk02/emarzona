@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, useLocation } from 'react-router-dom';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { StoreProvider } from '@/contexts/StoreContext';
 import { PlatformCustomizationProvider } from '@/contexts/PlatformCustomizationContext';
+import { ProgressiveUXProvider } from '@/contexts/ProgressiveUXContext';
 import { SubdomainMiddleware } from '@/components/multi-tenant/SubdomainMiddleware';
 import { ScrollToTop } from '@/components/navigation/ScrollToTop';
 import { LoadingBar } from '@/components/navigation/LoadingBar';
@@ -340,10 +341,12 @@ const App = () => (
           <AuthProvider>
             <StoreProvider>
               <PlatformCustomizationProvider>
-                <SubdomainMiddleware>
-                  <AppInitializer queryClient={queryClient} />
-                  <AppContent />
-                </SubdomainMiddleware>
+                <ProgressiveUXProvider>
+                  <SubdomainMiddleware>
+                    <AppInitializer queryClient={queryClient} />
+                    <AppContent />
+                  </SubdomainMiddleware>
+                </ProgressiveUXProvider>
               </PlatformCustomizationProvider>
             </StoreProvider>
           </AuthProvider>

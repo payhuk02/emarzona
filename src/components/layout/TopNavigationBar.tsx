@@ -23,6 +23,9 @@ import { useResolvedNavItems } from '@/hooks/useResolvedNavItems';
 import { isNavItemActive } from '@/config/navigation.helpers';
 import { usePlanLockNavAction } from '@/hooks/usePlanLockNavAction';
 import type { ResolvedNavItem } from '@/lib/navigation/resolveNavItems';
+import { useProgressiveUX } from '@/hooks/useProgressiveUX';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 function TopNavMainLink({
   item,
@@ -84,6 +87,7 @@ export const TopNavigationBar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const mainNavItems = useResolvedNavItems({ surface: 'topnav' });
   const handlePlanLockedNav = usePlanLockNavAction();
+  const { isExpertMode, toggleExpertMode } = useProgressiveUX();
 
   const isActive = (url: string) =>
     isNavItemActive(url, location.pathname, location.search, 'prefix');
@@ -206,6 +210,22 @@ export const TopNavigationBar = () => {
           </nav>
 
           <div className="flex items-center gap-0.5 sm:gap-1 shrink-0 ml-auto">
+            {/* 🔒 UX Progressive Toggle */}
+            <div className="hidden md:flex items-center gap-2 mr-2 px-2 border-r">
+              <Label
+                htmlFor="expert-mode"
+                className="text-xs font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:text-foreground"
+              >
+                Mode Expert
+              </Label>
+              <Switch
+                id="expert-mode"
+                checked={isExpertMode}
+                onCheckedChange={toggleExpertMode}
+                className="scale-75 data-[state=checked]:bg-primary"
+              />
+            </div>
+
             <NotificationBell />
             <ThemeSelectorCompact variant="nav" className="hidden sm:inline-flex" />
             <UserUtilityActions variant="topnav" />
