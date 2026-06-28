@@ -32,9 +32,7 @@ const BOT_REGEX =
   /(googlebot|bingbot|yandex|duckduckbot|baiduspider|facebookexternalhit|facebot|twitterbot|linkedinbot|whatsapp|slackbot|telegrambot|discordbot|pinterest|redditbot|applebot|gptbot|claudebot|perplexitybot|google-extended|chatgpt-user|oai-searchbot)/i;
 
 const SUPABASE_URL =
-  globalThis.process?.env?.VITE_SUPABASE_URL ||
-  globalThis.process?.env?.SUPABASE_URL ||
-  '';
+  globalThis.process?.env?.VITE_SUPABASE_URL || globalThis.process?.env?.SUPABASE_URL || '';
 const SITE = 'https://www.emarzona.com';
 const STORE_DOMAIN = 'myemarzona.shop';
 
@@ -573,7 +571,12 @@ export default async function middleware(req: Request): Promise<Response | undef
     const ct = res.headers.get('content-type') || '';
     if (!ct.includes('text/html')) return res;
     const html = await res.text();
-    return buildCspHtmlResponse(html, res);
+
+    // Ajout du SWR Caching Mondial (Edge Computing)
+    return buildCspHtmlResponse(html, res, {
+      'cache-control': 'public, max-age=0, s-maxage=3600, stale-while-revalidate=86400',
+      'x-edge-caching': 'swr-enabled',
+    });
   }
 
   const allowed = await checkBotRateLimit(req);

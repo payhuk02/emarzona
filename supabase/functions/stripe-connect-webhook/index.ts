@@ -13,6 +13,48 @@ import { applyPaymentRefund } from '../_shared/apply-payment-refund.ts';
 import { runPostOrderPaymentFulfillment } from '../_shared/post-order-payment-fulfillment.ts';
 import { fromStripeAmount, stripeGet } from '../_shared/stripe-api.ts';
 
+async function insertWebhookEventDLQ(
+  supabase: any,
+  provider: string,
+  eventId: string,
+  eventType: string,
+  payload: any
+): Promise<{ success: boolean; id?: string }> {
+  const { data, error } = await supabase
+    .from('webhook_events')
+    .insert({
+      provider,
+      provider_event_id: eventId,
+      event_type: eventType,
+      payload,
+      status: 'pending',
+    })
+    .select('id')
+    .single();
+
+  if (error) {
+    if (error.code === '23505') {
+      // Unique violation (already ingested)
+      return { success: false };
+    }
+    console.error('Failed to insert DLQ event', error);
+    throw error;
+  }
+  return { success: true, id: data.id };
+}
+
+async function updateWebhookEventDLQStatus(
+  supabase: any,
+  id: string,
+  status: 'completed' | 'failed',
+  errorMessage?: string
+) {
+  await supabase
+    .from('webhook_events')
+    .update({ status, error_message: errorMessage, updated_at: new Date().toISOString() })
+    .eq('id', id);
+}
+
 function constantTimeEquals(a: string, b: string): boolean {
   if (a.length !== b.length) return false;
   let result = 0;
@@ -119,18 +161,28 @@ serve(async req => {
   try {
     const isAtomicCheckoutCompletion = event.type === 'checkout.session.completed';
 
-    let isNew = true;
+    // 1. Insertion Idempotente dans la DLQ (webhook_events)
+    const { success: inserted, id: dlqEventId } = await insertWebhookEventDLQ(
+      supabase,
+      'stripe_connect',
+      event.id,
+      event.type,
+      event
+    );
+
+    if (!inserted) {
+      return new Response(JSON.stringify({ received: true, duplicate: true }), { status: 200 });
+    }
+
+    // On stocke aussi dans l'ancien système d'audit par sécurité transitoire
     if (!isAtomicCheckoutCompletion) {
-      isNew = await recordWebhookEvent(
+      await recordWebhookEvent(
         supabase,
         'stripe_connect',
         event.id,
         event.type,
         event as unknown as Record<string, unknown>
       );
-      if (!isNew) {
-        return new Response(JSON.stringify({ received: true, duplicate: true }), { status: 200 });
-      }
     }
 
     if (event.type === 'checkout.session.completed') {
@@ -189,28 +241,41 @@ serve(async req => {
           }
         }
 
-        const { orderId, alreadyCompleted } = await completeTransactionAndOrder(
-          supabase,
-          transactionId,
-          {
-            provider_session_id: session.id,
-            provider_payment_intent_id:
-              typeof session.payment_intent === 'string' ? session.payment_intent : undefined,
-            webhookPayload: session as unknown as Record<string, unknown>,
-            paymentProviderUsed: 'stripe_connect',
-            externalEventId: event.id,
-            eventType: event.type,
-          }
-        );
-
-        if (orderId && !alreadyCompleted) {
-          await runPostOrderPaymentFulfillment(supabase, orderId, transactionId);
-        } else if (alreadyCompleted) {
-          console.log('Stripe checkout.session.completed replay ignored (idempotent)', {
+        try {
+          const { orderId, alreadyCompleted } = await completeTransactionAndOrder(
+            supabase,
             transactionId,
-            eventId: event.id,
-          });
+            {
+              provider_session_id: session.id,
+              provider_payment_intent_id:
+                typeof session.payment_intent === 'string' ? session.payment_intent : undefined,
+              webhookPayload: session as unknown as Record<string, unknown>,
+              paymentProviderUsed: 'stripe_connect',
+              externalEventId: event.id,
+              eventType: event.type,
+            }
+          );
+
+          if (orderId && !alreadyCompleted) {
+            await runPostOrderPaymentFulfillment(supabase, orderId, transactionId);
+          } else if (alreadyCompleted) {
+            console.log('Stripe checkout.session.completed replay ignored (idempotent)', {
+              transactionId,
+              eventId: event.id,
+            });
+          }
+
+          if (dlqEventId) await updateWebhookEventDLQStatus(supabase, dlqEventId, 'completed');
+        } catch (syncError) {
+          console.error('Hybrid sync processing failed, falling back to DLQ worker', syncError);
+          const errorMsg = syncError instanceof Error ? syncError.message : String(syncError);
+          if (dlqEventId)
+            await updateWebhookEventDLQStatus(supabase, dlqEventId, 'failed', errorMsg);
+          // On renvoie quand même 200 à Stripe car l'événement est sauvegardé pour retry
         }
+      } else {
+        if (dlqEventId)
+          await updateWebhookEventDLQStatus(supabase, dlqEventId, 'completed', 'No transaction ID');
       }
     }
 
@@ -263,6 +328,9 @@ serve(async req => {
             provider: 'stripe_connect',
           });
         }
+        if (dlqEventId) await updateWebhookEventDLQStatus(supabase, dlqEventId, 'completed');
+      } else {
+        if (dlqEventId) await updateWebhookEventDLQStatus(supabase, dlqEventId, 'completed');
       }
     }
 
@@ -289,6 +357,8 @@ serve(async req => {
         })
         .eq('external_account_id', account.id)
         .eq('provider', 'stripe_connect');
+
+      if (dlqEventId) await updateWebhookEventDLQStatus(supabase, dlqEventId, 'completed');
     }
 
     await markWebhookProcessed(supabase, 'stripe_connect', event.id);
@@ -301,6 +371,8 @@ serve(async req => {
       .update({ processing_error: message })
       .eq('provider', 'stripe_connect')
       .eq('external_event_id', event.id);
+
+    // Le 500 informera Stripe de re-tenter si l'insertion DB n'a même pas pu se faire.
     return new Response(JSON.stringify({ error: message }), { status: 500 });
   }
 });

@@ -164,3 +164,7 @@ jobs:
           deno check --config supabase/functions/deno.json supabase/functions/trigger-email-workflows/index.ts
           deno check --config supabase/functions/deno.json supabase/functions/execute-email-workflow/index.ts
 
+      - name: Run Edge Functions Contract Tests
+        run: |
+          deno test --allow-env --allow-net --config supabase/functions/deno.json supabase/functions/gdpr-export/index.test.ts
+
