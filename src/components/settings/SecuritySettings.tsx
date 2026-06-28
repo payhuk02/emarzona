@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { logger } from '@/lib/logger';
 import { AccountDeletionPanel } from '@/components/account/AccountDeletionPanel';
+import { GDPRExportPanel } from '@/components/account/GDPRExportPanel';
 
 const USER_SESSION_FIELDS = 'id, user_id, device, location, last_active, current';
 const USER_LOGIN_HISTORY_FIELDS = 'id, user_id, timestamp, device, location, success';
@@ -527,6 +528,7 @@ export const SecuritySettings = () => {
         </CardContent>
       </Card>
 
+      <GDPRExportPanel />
       <AccountDeletionPanel />
     </div>
   );
