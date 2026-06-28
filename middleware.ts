@@ -34,9 +34,22 @@ const BOT_REGEX =
 const SUPABASE_URL =
   globalThis.process?.env?.VITE_SUPABASE_URL ||
   globalThis.process?.env?.SUPABASE_URL ||
-  'https://hbdnzajbyjakdhuavrvb.supabase.co';
+  '';
 const SITE = 'https://www.emarzona.com';
 const STORE_DOMAIN = 'myemarzona.shop';
+
+/**
+ * 🔒 SECURITY: Validate and sanitize slugs before PostgREST filter interpolation.
+ * Prevents filter injection via URL path segments.
+ */
+function sanitizeSlug(raw: string): string | null {
+  // Allow only lowercase alphanumeric + hyphens, max 100 chars
+  const slug = decodeURIComponent(raw).toLowerCase().trim();
+  if (!slug || slug.length > 100 || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+    return null;
+  }
+  return slug;
+}
 
 interface Meta {
   title: string;
@@ -89,7 +102,9 @@ async function fetchStoreRowByCustomDomain(host: string): Promise<Record<string,
 
 async function fetchProductMeta(slug: string, storeId?: string): Promise<Meta | null> {
   try {
-    const filter = storeId ? `slug=eq.${slug}&store_id=eq.${storeId}` : `slug=eq.${slug}`;
+    const safeSlug = sanitizeSlug(slug);
+    if (!safeSlug) return null;
+    const filter = storeId ? `slug=eq.${safeSlug}&store_id=eq.${storeId}` : `slug=eq.${safeSlug}`;
     const r = await fetch(
       `${SUPABASE_URL}/rest/v1/products?${filter}&select=name,description,image_url,price,currency,meta_title,meta_description,slug&is_active=eq.true&limit=1`,
       {
@@ -116,7 +131,7 @@ async function fetchProductMeta(slug: string, storeId?: string): Promise<Meta | 
 async function fetchStoreMeta(slugOrSubdomain: string): Promise<Meta | null> {
   try {
     const r = await fetch(
-      `${SUPABASE_URL}/rest/v1/stores?or=(subdomain.eq.${slugOrSubdomain},slug.eq.${slugOrSubdomain})&select=name,description,about,logo_url,meta_title,meta_description,slug,subdomain&is_active=eq.true&limit=1`,
+      `${SUPABASE_URL}/rest/v1/stores?or=(subdomain.eq.${sanitizeSlug(slugOrSubdomain) ?? ''},slug.eq.${sanitizeSlug(slugOrSubdomain) ?? ''})&select=name,description,about,logo_url,meta_title,meta_description,slug,subdomain&is_active=eq.true&limit=1`,
       {
         headers: getAuthHeaders(),
       }
@@ -139,7 +154,7 @@ async function fetchStoreMeta(slugOrSubdomain: string): Promise<Meta | null> {
 async function fetchCollectionMeta(slug: string): Promise<Meta | null> {
   try {
     const r = await fetch(
-      `${SUPABASE_URL}/rest/v1/artist_collections?collection_slug=eq.${slug}&select=collection_name,collection_description,cover_image_url&is_public=eq.true&limit=1`,
+      `${SUPABASE_URL}/rest/v1/artist_collections?collection_slug=eq.${sanitizeSlug(slug) ?? ''}&select=collection_name,collection_description,cover_image_url&is_public=eq.true&limit=1`,
       {
         headers: getAuthHeaders(),
       }
@@ -162,7 +177,7 @@ async function fetchCollectionMeta(slug: string): Promise<Meta | null> {
 async function fetchAuctionMeta(slug: string): Promise<Meta | null> {
   try {
     const r = await fetch(
-      `${SUPABASE_URL}/rest/v1/artist_product_auctions?auction_slug=eq.${slug}&select=auction_title,auction_description,current_bid,artist_products(products(image_url))&limit=1`,
+      `${SUPABASE_URL}/rest/v1/artist_product_auctions?auction_slug=eq.${sanitizeSlug(slug) ?? ''}&select=auction_title,auction_description,current_bid,artist_products(products(image_url))&limit=1`,
       {
         headers: getAuthHeaders(),
       }

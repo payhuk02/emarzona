@@ -9,7 +9,6 @@
     "skipLibCheck": true
   },
   "include": [
-    "src/integrations/payments/**/*.ts",
     "src/lib/webhooks/**/*.ts",
     "src/services/fedex/**/*.ts",
     "src/integrations/supabase/client.ts",

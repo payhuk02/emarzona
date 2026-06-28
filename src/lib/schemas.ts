@@ -699,7 +699,10 @@ export const authSchema = z.object({
   password: z.string()
     .min(8, 'Le mot de passe doit contenir au moins 8 caractères')
     .max(100, 'Le mot de passe ne peut pas dépasser 100 caractères')
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Le mot de passe doit contenir au moins une minuscule, une majuscule et un chiffre'),
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9])/,
+      'Le mot de passe doit contenir au moins une minuscule, une majuscule, un chiffre et un caractère spécial'
+    ),
 });
 
 // Types TypeScript dérivés des schémas

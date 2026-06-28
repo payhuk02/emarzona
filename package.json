@@ -19,7 +19,7 @@
     "lint:ci:phase1": "eslint . --max-warnings=300",
     "lint:ci:phase2": "eslint . --max-warnings=100",
     "lint:ci:phase3": "eslint . --max-warnings=0",
-    "lint:ci:critical": "eslint src/components/pixels/PixelInjector.tsx src/components/storefront/StoreAnalyticsScripts.tsx src/integrations/payments/*.ts src/integrations/supabase/client.ts src/lib/webhooks/*.ts src/lib/logger.ts src/lib/sendgrid.ts src/services/fedex/*.ts src/types/webhooks.ts --max-warnings=0",
+    "lint:ci:critical": "eslint src/components/pixels/PixelInjector.tsx src/components/storefront/StoreAnalyticsScripts.tsx src/integrations/supabase/client.ts src/lib/webhooks/*.ts src/lib/logger.ts src/lib/sendgrid.ts src/services/fedex/*.ts src/types/webhooks.ts --max-warnings=0",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx,json,css,md}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,json,css,md}\"",

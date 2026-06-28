@@ -252,23 +252,31 @@ export function generateSecureRandomString(length: number = 32): string {
 // =====================================================
 
 /**
- * Security headers configuration
+ * Security headers configuration.
+ *
+ * ⚠️  NOTE: CSP is intentionally omitted here.
+ * The production CSP uses per-request nonces and is applied by the Edge Middleware
+ * (see src/lib/middleware/csp-policy.ts). Using a static CSP here would conflict.
+ *
+ * X-Frame-Options uses SAMEORIGIN to match vercel.json and CSP frame-ancestors.
  */
 export const securityHeaders = {
   'X-Content-Type-Options': 'nosniff',
-  'X-Frame-Options': 'DENY',
+  'X-Frame-Options': 'SAMEORIGIN',
   'X-XSS-Protection': '1; mode=block',
   'Referrer-Policy': 'strict-origin-when-cross-origin',
   'Permissions-Policy': 'geolocation=(), microphone=(self), camera=(self)',
-  'Content-Security-Policy':
-    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:;",
-};
+} as const;
 
 /**
- * Apply security headers to response
+ * Apply security headers to a response.
+ *
+ * @deprecated Prefer Edge Middleware CSP headers (applyCspResponseHeaders).
+ * This function applies a subset of headers; CSP is handled by the middleware.
  */
 export function applySecurityHeaders(headers: Headers): void {
   Object.entries(securityHeaders).forEach(([key, value]) => {
     headers.set(key, value);
   });
 }
+

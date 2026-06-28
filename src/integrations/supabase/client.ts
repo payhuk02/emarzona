@@ -2,8 +2,13 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL =
-  import.meta.env.VITE_SUPABASE_URL || 'https://hbdnzajbyjakdhuavrvb.supabase.co';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+if (!SUPABASE_URL) {
+  throw new Error(
+    '❌ VITE_SUPABASE_URL is required. Add it to your .env file. ' +
+    'See .env.example for details.'
+  );
+}
 
 /**
  * Clé publique Supabase.
