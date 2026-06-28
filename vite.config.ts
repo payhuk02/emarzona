@@ -221,9 +221,9 @@ export default defineConfig(({ mode }) => {
       treeshake: {
         moduleSideEffects: 'no-external',
         propertyReadSideEffects: false,
-        tryCatchDeoptimization: false,
+        tryCatchDeoptimization: true,
         preserveComments: false,
-        unknownGlobalSideEffects: false,
+        unknownGlobalSideEffects: true,
       },
       commonjsOptions: { transformMixedEsModules: true, strictRequires: false },
     },

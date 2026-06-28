@@ -3,7 +3,7 @@
  * Affiche des notifications toast lorsque le rate limit est atteint
  */
 
-import { toast } from 'sonner';
+import { toast } from '@/hooks/use-toast';
 import { checkRateLimit, type RateLimitEndpoint } from './rate-limiter';
 import { logger } from './logger';
 
@@ -19,16 +19,8 @@ interface RateLimitUXOptions {
  * Vérifie le rate limit avec feedback UX
  * Affiche un toast si le rate limit est atteint
  */
-export async function checkRateLimitWithUX(
-  options: RateLimitUXOptions
-): Promise<boolean> {
-  const {
-    endpoint,
-    userId,
-    showToast = true,
-    toastMessage,
-    onRateLimitExceeded,
-  } = options;
+export async function checkRateLimitWithUX(options: RateLimitUXOptions): Promise<boolean> {
+  const { endpoint, userId, showToast = true, toastMessage, onRateLimitExceeded } = options;
 
   try {
     const result = await checkRateLimit(endpoint, userId);
@@ -36,10 +28,12 @@ export async function checkRateLimitWithUX(
     if (!result.allowed) {
       // Rate limit atteint
       if (showToast) {
-        const message = toastMessage || 
-          `Trop de requêtes. Réessayez dans ${getTimeUntilReset(result.resetAt)}`;
-        
-        toast.error('Limite atteinte', {
+        const message =
+          toastMessage || `Trop de requêtes. Réessayez dans ${getTimeUntilReset(result.resetAt)}`;
+
+        toast({
+          variant: 'destructive',
+          title: 'Limite atteinte',
           description: message,
           duration: 5000,
         });
@@ -61,7 +55,8 @@ export async function checkRateLimitWithUX(
     // Afficher un avertissement si proche de la limite
     if (result.remaining <= 5 && result.remaining > 0) {
       if (showToast) {
-        toast.warning('Attention', {
+        toast({
+          title: 'Attention',
           description: `Il vous reste ${result.remaining} requête${result.remaining > 1 ? 's' : ''} avant la limite`,
           duration: 3000,
         });
@@ -122,10 +117,3 @@ export function useRateLimitUX(endpoint: RateLimitEndpoint) {
 
   return { checkWithUX };
 }
-
-
-
-
-
-
-

@@ -45,10 +45,10 @@ export const GDPRExportPanel = () => {
         title: 'Export réussi',
         description: 'Vos données ont été téléchargées.',
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast({
         title: 'Erreur',
-        description: err.message || "Impossible d'exporter vos données",
+        description: err instanceof Error ? err.message : "Impossible d'exporter vos données",
         variant: 'destructive',
       });
     } finally {
@@ -64,24 +64,17 @@ export const GDPRExportPanel = () => {
           Télécharger mes données (GDPR)
         </CardTitle>
         <CardDescription>
-          Conformément à l'article 20 du RGPD, vous pouvez télécharger une copie de vos données personnelles (profil, boutiques, commandes) au format structuré.
+          Conformément à l'article 20 du RGPD, vous pouvez télécharger une copie de vos données
+          personnelles (profil, boutiques, commandes) au format structuré.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex gap-4">
-          <Button
-            variant="outline"
-            onClick={() => handleExport('json')}
-            disabled={loading}
-          >
+          <Button variant="outline" onClick={() => handleExport('json')} disabled={loading}>
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Télécharger en JSON
           </Button>
-          <Button
-            variant="outline"
-            onClick={() => handleExport('csv')}
-            disabled={loading}
-          >
+          <Button variant="outline" onClick={() => handleExport('csv')} disabled={loading}>
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Télécharger en CSV
           </Button>

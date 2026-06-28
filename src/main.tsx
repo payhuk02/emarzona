@@ -46,14 +46,6 @@ installChunkLoadRecovery();
 // Les initialisations non-critiques seront effectuées après le render
 createRoot(document.getElementById('root')!).render(<App />);
 
-// Retire le contenu SEO statique injecté dans index.html après hydratation React
-// (il reste visible pour les crawlers/LLM qui n'exécutent pas le JS).
-if (typeof document !== 'undefined') {
-  const seoFallback = document.getElementById('seo-fallback');
-  if (seoFallback) seoFallback.remove();
-  document.querySelectorAll('script[data-seo-static]').forEach(el => el.remove());
-}
-
 // ✅ PERFORMANCE: Initialisations non-critiques après le premier render
 // Ces initialisations ne bloquent pas le FCP (First Contentful Paint)
 if (typeof window !== 'undefined') {
