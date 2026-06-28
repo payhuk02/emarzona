@@ -1,625 +1,408 @@
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
-import { useDarkMode } from "@/hooks/useDarkMode";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
-import { logger } from "@/lib/logger";
-import { 
-  Loader2, 
-  Moon, 
-  Sun, 
-  Bell, 
-  Mail, 
-  Smartphone, 
-  Settings, 
-  CheckCircle2, 
-  AlertCircle,
-  Save,
-  RotateCcw,
-  Volume2,
-  VolumeX,
-  Clock,
-  Calendar,
-  MessageSquare,
-  ShoppingCart,
-  CreditCard,
-  Users,
-  TrendingUp,
-  Shield,
-  Globe
-} from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Bell, Mail, Smartphone, Save } from 'lucide-react';
+import {
+  useNotificationPreferences,
+  useUpdateNotificationPreferences,
+  useRequestNotificationPermission,
+} from '@/hooks/useNotifications';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
+import { useToast } from '@/hooks/use-toast';
+import { useState, useEffect } from 'react';
+import type { NotificationPreferences } from '@/types/notifications';
+import { EmailPreferencesSettings } from '@/components/settings/EmailPreferencesSettings';
 
-const USER_NOTIFICATION_SETTINGS_FIELDS = 'id, user_id, settings, updated_at';
-
-interface NotificationSettings {
-  // Email notifications
-  emailOrders: boolean;
-  emailProducts: boolean;
-  emailPromotions: boolean;
-  emailNewsletter: boolean;
-  emailSecurity: boolean;
-  emailMarketing: boolean;
-  
-  // Push notifications
-  pushOrders: boolean;
-  pushProducts: boolean;
-  pushPromotions: boolean;
-  pushSecurity: boolean;
-  
-  // SMS notifications
-  smsOrders: boolean;
-  smsSecurity: boolean;
-  
-  // Frequency settings
-  emailFrequency: 'immediate' | 'daily' | 'weekly';
-  pushFrequency: 'immediate' | 'batched';
-  
-  // Quiet hours
-  quietHoursEnabled: boolean;
-  quietHoursStart: string;
-  quietHoursEnd: string;
-  
-  // Theme
-  darkMode: boolean;
-}
+const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
+  id: 'local-default',
+  user_id: '',
+  email_course_enrollment: true,
+  email_lesson_complete: true,
+  email_course_complete: true,
+  email_certificate_ready: true,
+  email_new_course: false,
+  email_course_update: true,
+  email_quiz_result: true,
+  email_affiliate_sale: true,
+  email_comment_reply: true,
+  email_instructor_message: true,
+  app_course_enrollment: true,
+  app_lesson_complete: true,
+  app_course_complete: true,
+  app_certificate_ready: true,
+  app_new_course: true,
+  app_course_update: true,
+  app_quiz_result: true,
+  app_affiliate_sale: true,
+  app_comment_reply: true,
+  app_instructor_message: true,
+  email_notifications: true,
+  push_notifications: true,
+  sms_notifications: false,
+  email_digest_frequency: 'weekly',
+  pause_until: null,
+  sound_notifications: true,
+  vibration_notifications: true,
+  sound_volume: 80,
+  vibration_intensity: 'medium',
+  notification_sound_type: 'default',
+  accessibility_mode: false,
+  high_contrast_sounds: false,
+  screen_reader_friendly: false,
+  created_at: new Date(0).toISOString(),
+  updated_at: new Date(0).toISOString(),
+};
 
 export const NotificationSettings = () => {
   const { toast } = useToast();
-  const { user } = useAuth();
-  const { isDark, toggle } = useDarkMode();
-  const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [settings, setSettings] = useState<NotificationSettings>({
-    emailOrders: true,
-    emailProducts: true,
-    emailPromotions: false,
-    emailNewsletter: false,
-    emailSecurity: true,
-    emailMarketing: false,
-    pushOrders: true,
-    pushProducts: false,
-    pushPromotions: false,
-    pushSecurity: true,
-    smsOrders: false,
-    smsSecurity: true,
-    emailFrequency: 'immediate',
-    pushFrequency: 'immediate',
-    quietHoursEnabled: false,
-    quietHoursStart: '22:00',
-    quietHoursEnd: '08:00',
-    darkMode: isDark,
-  });
+  const { data: preferences, isLoading } = useNotificationPreferences();
+  const updatePreferences = useUpdateNotificationPreferences();
+  const { permission, requestPermission } = useRequestNotificationPermission();
+  const {
+    permission: pushPermission,
+    isSupported: isPushSupported,
+    isVapidReady,
+    isSubscribed: isPushSubscribed,
+    isLoading: isPushLoading,
+    subscribe: subscribePush,
+    unsubscribe: unsubscribePush,
+  } = usePushNotifications();
+
+  const [localPrefs, setLocalPrefs] = useState<NotificationPreferences>(
+    preferences ?? DEFAULT_NOTIFICATION_PREFERENCES
+  );
 
   useEffect(() => {
-    loadSettings();
-  }, []);
-
-  const loadSettings = async () => {
-    if (!user) return;
-    
-    setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('user_notification_settings')
-        .select(USER_NOTIFICATION_SETTINGS_FIELDS)
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
-        throw error;
-      }
-
-      if (data) {
-        setSettings(prev => ({ ...prev, ...data.settings }));
-      }
-    } catch ( _error: any) {
-      logger.error('Error loading notification settings', { error, userId: user?.id });
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger les paramètres de notifications",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
+    if (preferences) {
+      setLocalPrefs(prev => ({
+        ...prev,
+        ...preferences,
+      }));
     }
-  };
+  }, [preferences]);
 
-  const saveSettings = async () => {
-    if (!user) return;
-    
-    setSaving(true);
-    try {
-      const { error } = await supabase
-        .from('user_notification_settings')
-        .upsert({
-          user_id: user.id,
-          settings: settings,
-          updated_at: new Date().toISOString(),
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: "Succès",
-        description: "Paramètres de notifications sauvegardés",
-      });
-    } catch ( _error: any) {
-      logger.error('Error saving notification settings', { error, userId: user?.id });
-      toast({
-        title: "Erreur",
-        description: "Impossible de sauvegarder les paramètres",
-        variant: "destructive",
-      });
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const resetToDefaults = () => {
-    setSettings({
-      emailOrders: true,
-      emailProducts: true,
-      emailPromotions: false,
-      emailNewsletter: false,
-      emailSecurity: true,
-      emailMarketing: false,
-      pushOrders: true,
-      pushProducts: false,
-      pushPromotions: false,
-      pushSecurity: true,
-      smsOrders: false,
-      smsSecurity: true,
-      emailFrequency: 'immediate',
-      pushFrequency: 'immediate',
-      quietHoursEnabled: false,
-      quietHoursStart: '22:00',
-      quietHoursEnd: '08:00',
-      darkMode: isDark,
-    });
-  };
-
-  const updateSetting = (key: keyof NotificationSettings, value: any) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
-  };
-
-  const getNotificationCount = () => {
-    const enabledSettings = Object.values(settings).filter(value => value === true).length;
-    return enabledSettings;
-  };
-
-  if (loading) {
+  if (isLoading && !preferences) {
     return (
-      <div className="flex items-center justify-center py-8">
-        <Loader2 className="h-8 w-8 animate-spin" />
-        <span className="ml-2">Chargement des paramètres...</span>
+      <div className="py-4">
+        <Skeleton className="h-12 w-64 mb-6" />
+        <div className="space-y-4">
+          {[...Array(3)].map((_, i) => (
+            <Skeleton key={i} className="h-48 w-full" />
+          ))}
+        </div>
       </div>
     );
   }
 
+  const handleToggle = (field: string, value: boolean | string) => {
+    setLocalPrefs((prev: NotificationPreferences | null) => {
+      if (!prev) return prev;
+      return { ...prev, [field]: value } as NotificationPreferences;
+    });
+  };
+
+  const handleSave = async () => {
+    await updatePreferences.mutateAsync(localPrefs);
+    toast({
+      title: 'Préférences sauvegardées',
+      description: 'Vos préférences de notifications ont été mises à jour',
+    });
+  };
+
+  const handleRequestBrowserNotifications = async () => {
+    const result = await requestPermission();
+    if (result === 'granted') {
+      toast({
+        title: 'Notifications activées',
+        description: 'Vous recevrez désormais des notifications dans votre navigateur',
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-semibold flex items-center gap-2">
-            <Bell className="h-5 w-5" />
-            Préférences de notifications
-          </h3>
-          <p className="text-sm text-muted-foreground">
-            Configurez comment vous souhaitez être notifié
-          </p>
-        </div>
-        <Badge variant="secondary" className="flex items-center gap-1">
-          <Bell className="h-3 w-3" />
-          {getNotificationCount()} activées
-        </Badge>
+      <div className="mb-4">
+        <h3 className="text-xl font-bold mb-2">Préférences de Notifications</h3>
+        <p className="text-muted-foreground text-sm">
+          Choisissez comment et quand vous souhaitez être notifié
+        </p>
       </div>
 
-      {/* Theme Settings */}
+      {/* Notifications Push */}
+      {isPushSupported && (
+        <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950/20">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Smartphone className="w-5 h-5 text-blue-600" />
+              Notifications Push
+            </CardTitle>
+            <CardDescription>
+              Recevez des notifications push même quand l'application est fermée
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label>Notifications Push</Label>
+                <p className="text-sm text-muted-foreground">
+                  {pushPermission.permission === 'granted'
+                    ? isPushSubscribed
+                      ? 'Vous êtes abonné aux notifications push'
+                      : 'Permission accordée mais non abonné'
+                    : pushPermission.permission === 'denied'
+                      ? 'Notifications push désactivées'
+                      : 'Demander la permission pour les notifications push'}
+                </p>
+              </div>
+              {isPushSubscribed ? (
+                <Button onClick={unsubscribePush} disabled={isPushLoading} variant="destructive">
+                  Désactiver
+                </Button>
+              ) : (
+                <Button
+                  onClick={subscribePush}
+                  disabled={
+                    isPushLoading || pushPermission.permission === 'denied' || !isVapidReady
+                  }
+                  className="bg-blue-600"
+                >
+                  {isPushLoading ? 'Chargement...' : 'Activer'}
+                </Button>
+              )}
+            </div>
+            {!isVapidReady && (
+              <p className="text-sm text-amber-700 dark:text-amber-400">
+                Configuration serveur en cours — les notifications push seront disponibles dès que
+                la clé VAPID est activée en production.
+              </p>
+            )}
+            {pushPermission.permission === 'denied' && (
+              <p className="text-sm text-red-600 dark:text-red-400">
+                Les notifications push ont été désactivées. Activez-les dans les paramètres de votre
+                navigateur.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Notifications navigateur (legacy) */}
+      {permission !== 'granted' && !isPushSupported && (
+        <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950/20">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Bell className="w-5 h-5 text-blue-600" />
+              Notifications navigateur
+            </CardTitle>
+            <CardDescription>
+              Activez les notifications navigateur pour être alerté en temps réel
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button onClick={handleRequestBrowserNotifications} className="bg-blue-600">
+              <Bell className="w-4 h-4 mr-2" />
+              Activer les notifications
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      <EmailPreferencesSettings />
+
+      {/* Notifications Email */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Settings className="h-5 w-5" />
-            Apparence
+            <Mail className="w-5 h-5" />
+            Notifications par Email
           </CardTitle>
-          <CardDescription>
-            Personnalisez l'apparence de votre interface
-          </CardDescription>
+          <CardDescription>Recevez des emails pour les événements suivants</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-        <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50 border">
-          <div className="space-y-0.5">
-            <Label htmlFor="darkMode" className="flex items-center gap-2">
-              {isDark ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-              Mode {isDark ? "sombre" : "clair"}
-            </Label>
-            <p className="text-sm text-muted-foreground">
-              Basculer entre le thème clair et sombre
-            </p>
-          </div>
-          <Switch
-            id="darkMode"
-            checked={isDark}
-            onCheckedChange={toggle}
-          />
-        </div>
-        </CardContent>
-      </Card>
-
-      {/* Email Notifications */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Mail className="h-5 w-5" />
-            Notifications par email
-          </CardTitle>
-          <CardDescription>
-            Recevez des emails pour les événements importants
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-                <Label htmlFor="emailOrders" className="flex items-center gap-2">
-                  <ShoppingCart className="h-4 w-4" />
-                  Commandes
-                </Label>
-            <p className="text-sm text-muted-foreground">
-              Recevoir un email lors de nouvelles commandes
-            </p>
-          </div>
-          <Switch
-            id="emailOrders"
-            checked={settings.emailOrders}
-                onCheckedChange={(checked) => updateSetting('emailOrders', checked)}
-          />
-        </div>
-
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-                <Label htmlFor="emailProducts" className="flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4" />
-                  Produits
-                </Label>
-            <p className="text-sm text-muted-foreground">
-              Recevoir un email lors de nouveaux produits
-            </p>
-          </div>
-          <Switch
-            id="emailProducts"
-            checked={settings.emailProducts}
-                onCheckedChange={(checked) => updateSetting('emailProducts', checked)}
-          />
-        </div>
-
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-                <Label htmlFor="emailPromotions" className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  Promotions
-                </Label>
-            <p className="text-sm text-muted-foreground">
-              Recevoir un email lors de nouvelles promotions
-            </p>
-          </div>
-          <Switch
-            id="emailPromotions"
-            checked={settings.emailPromotions}
-                onCheckedChange={(checked) => updateSetting('emailPromotions', checked)}
-              />
+          <div className="flex items-center justify-between">
+            <div>
+              <Label htmlFor="email_course_enrollment">Inscription à un cours</Label>
+              <p className="text-sm text-muted-foreground">
+                Quand vous vous inscrivez à un nouveau cours
+              </p>
             </div>
-
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="emailSecurity" className="flex items-center gap-2">
-                  <Shield className="h-4 w-4" />
-                  Sécurité
-                </Label>
-                <p className="text-sm text-muted-foreground">
-                  Recevoir un email pour les événements de sécurité
-                </p>
-              </div>
-              <Switch
-                id="emailSecurity"
-                checked={settings.emailSecurity}
-                onCheckedChange={(checked) => updateSetting('emailSecurity', checked)}
-          />
-        </div>
-
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-                <Label htmlFor="emailNewsletter" className="flex items-center gap-2">
-                  <MessageSquare className="h-4 w-4" />
-                  Newsletter
-                </Label>
-            <p className="text-sm text-muted-foreground">
-              Recevoir notre newsletter hebdomadaire
-            </p>
-          </div>
-          <Switch
-            id="emailNewsletter"
-            checked={settings.emailNewsletter}
-                onCheckedChange={(checked) => updateSetting('emailNewsletter', checked)}
-              />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="emailMarketing" className="flex items-center gap-2">
-                  <Globe className="h-4 w-4" />
-                  Marketing
-                </Label>
-                <p className="text-sm text-muted-foreground">
-                  Recevoir des emails marketing et publicitaires
-                </p>
-              </div>
-              <Switch
-                id="emailMarketing"
-                checked={settings.emailMarketing}
-                onCheckedChange={(checked) => updateSetting('emailMarketing', checked)}
-              />
-            </div>
+            <Switch
+              id="email_course_enrollment"
+              checked={localPrefs.email_course_enrollment}
+              onCheckedChange={checked => handleToggle('email_course_enrollment', checked)}
+            />
           </div>
 
-          <Separator />
-
-          <div className="space-y-2">
-            <Label htmlFor="emailFrequency">Fréquence des emails</Label>
-            <Select
-              value={settings.emailFrequency}
-              onValueChange={(value: 'immediate' | 'daily' | 'weekly') => 
-                updateSetting('emailFrequency', value)
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Sélectionner la fréquence" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="immediate">Immédiat</SelectItem>
-                <SelectItem value="daily">Quotidien</SelectItem>
-                <SelectItem value="weekly">Hebdomadaire</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="flex items-center justify-between">
+            <div>
+              <Label htmlFor="email_course_complete">Cours terminé</Label>
+              <p className="text-sm text-muted-foreground">Quand vous terminez un cours</p>
+            </div>
+            <Switch
+              id="email_course_complete"
+              checked={localPrefs.email_course_complete}
+              onCheckedChange={checked => handleToggle('email_course_complete', checked)}
+            />
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Push Notifications */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Smartphone className="h-5 w-5" />
-            Notifications push
-          </CardTitle>
-          <CardDescription>
-            Recevez des notifications sur votre appareil
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="pushOrders" className="flex items-center gap-2">
-                  <ShoppingCart className="h-4 w-4" />
-                  Commandes
-                </Label>
-                <p className="text-sm text-muted-foreground">
-                  Notifications push pour les commandes
-                </p>
-              </div>
-              <Switch
-                id="pushOrders"
-                checked={settings.pushOrders}
-                onCheckedChange={(checked) => updateSetting('pushOrders', checked)}
-              />
+          <div className="flex items-center justify-between">
+            <div>
+              <Label htmlFor="email_certificate_ready">Certificat disponible</Label>
+              <p className="text-sm text-muted-foreground">
+                Quand votre certificat est prêt à télécharger
+              </p>
             </div>
+            <Switch
+              id="email_certificate_ready"
+              checked={localPrefs.email_certificate_ready}
+              onCheckedChange={checked => handleToggle('email_certificate_ready', checked)}
+            />
+          </div>
 
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="pushProducts" className="flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4" />
-                  Produits
-                </Label>
-                <p className="text-sm text-muted-foreground">
-                  Notifications push pour les produits
-                </p>
-              </div>
-              <Switch
-                id="pushProducts"
-                checked={settings.pushProducts}
-                onCheckedChange={(checked) => updateSetting('pushProducts', checked)}
-              />
+          <div className="flex items-center justify-between">
+            <div>
+              <Label htmlFor="email_new_course">Nouveaux cours</Label>
+              <p className="text-sm text-muted-foreground">
+                Quand de nouveaux cours sont disponibles
+              </p>
             </div>
+            <Switch
+              id="email_new_course"
+              checked={localPrefs.email_new_course}
+              onCheckedChange={checked => handleToggle('email_new_course', checked)}
+            />
+          </div>
 
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="pushPromotions" className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  Promotions
-                </Label>
-                <p className="text-sm text-muted-foreground">
-                  Notifications push pour les promotions
-                </p>
-              </div>
-              <Switch
-                id="pushPromotions"
-                checked={settings.pushPromotions}
-                onCheckedChange={(checked) => updateSetting('pushPromotions', checked)}
-              />
+          <div className="flex items-center justify-between">
+            <div>
+              <Label htmlFor="email_affiliate_sale">Ventes affilié</Label>
+              <p className="text-sm text-muted-foreground">
+                Quand vous générez une vente via affiliation
+              </p>
             </div>
+            <Switch
+              id="email_affiliate_sale"
+              checked={localPrefs.email_affiliate_sale}
+              onCheckedChange={checked => handleToggle('email_affiliate_sale', checked)}
+            />
+          </div>
 
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="pushSecurity" className="flex items-center gap-2">
-                  <Shield className="h-4 w-4" />
-                  Sécurité
-                </Label>
-                <p className="text-sm text-muted-foreground">
-                  Notifications push pour la sécurité
-                </p>
-              </div>
-              <Switch
-                id="pushSecurity"
-                checked={settings.pushSecurity}
-                onCheckedChange={(checked) => updateSetting('pushSecurity', checked)}
-          />
-        </div>
-      </div>
-
-          <Separator />
-
-          <div className="space-y-2">
-            <Label htmlFor="pushFrequency">Fréquence des notifications push</Label>
-            <Select
-              value={settings.pushFrequency}
-              onValueChange={(value: 'immediate' | 'batched') => 
-                updateSetting('pushFrequency', value)
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Sélectionner la fréquence" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="immediate">Immédiat</SelectItem>
-                <SelectItem value="batched">Regroupées</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="flex items-center justify-between">
+            <div>
+              <Label htmlFor="email_quiz_result">Résultats quiz</Label>
+              <p className="text-sm text-muted-foreground">Quand vous passez un quiz</p>
+            </div>
+            <Switch
+              id="email_quiz_result"
+              checked={localPrefs.email_quiz_result}
+              onCheckedChange={checked => handleToggle('email_quiz_result', checked)}
+            />
           </div>
         </CardContent>
       </Card>
 
-      {/* SMS Notifications */}
+      {/* Notifications In-App */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <MessageSquare className="h-5 w-5" />
-            Notifications SMS
+            <Smartphone className="w-5 h-5" />
+            Notifications dans l'Application
           </CardTitle>
           <CardDescription>
-            Recevez des SMS pour les événements critiques
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="smsOrders" className="flex items-center gap-2">
-                  <ShoppingCart className="h-4 w-4" />
-                  Commandes importantes
-                </Label>
-                <p className="text-sm text-muted-foreground">
-                  SMS pour les commandes importantes uniquement
-                </p>
-              </div>
-              <Switch
-                id="smsOrders"
-                checked={settings.smsOrders}
-                onCheckedChange={(checked) => updateSetting('smsOrders', checked)}
-              />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="smsSecurity" className="flex items-center gap-2">
-                  <Shield className="h-4 w-4" />
-                  Sécurité
-                </Label>
-                <p className="text-sm text-muted-foreground">
-                  SMS pour les événements de sécurité critiques
-                </p>
-              </div>
-              <Switch
-                id="smsSecurity"
-                checked={settings.smsSecurity}
-                onCheckedChange={(checked) => updateSetting('smsSecurity', checked)}
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Quiet Hours */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5" />
-            Heures silencieuses
-          </CardTitle>
-          <CardDescription>
-            Désactivez les notifications pendant certaines heures
+            Recevez des notifications dans votre centre de notifications
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label htmlFor="quietHoursEnabled">
-                Activer les heures silencieuses
-              </Label>
-              <p className="text-sm text-muted-foreground">
-                Désactiver les notifications pendant les heures de repos
-              </p>
+            <div>
+              <Label htmlFor="app_course_enrollment">Inscription à un cours</Label>
             </div>
             <Switch
-              id="quietHoursEnabled"
-              checked={settings.quietHoursEnabled}
-              onCheckedChange={(checked) => updateSetting('quietHoursEnabled', checked)}
+              id="app_course_enrollment"
+              checked={localPrefs.app_course_enrollment}
+              onCheckedChange={checked => handleToggle('app_course_enrollment', checked)}
             />
           </div>
 
-          {settings.quietHoursEnabled && (
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="quietHoursStart">Début</Label>
-                <input
-                  id="quietHoursStart"
-                  type="time"
-                  value={settings.quietHoursStart}
-                  onChange={(e) => updateSetting('quietHoursStart', e.target.value)}
-                  className="w-full p-2 border rounded-md"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="quietHoursEnd">Fin</Label>
-                <input
-                  id="quietHoursEnd"
-                  type="time"
-                  value={settings.quietHoursEnd}
-                  onChange={(e) => updateSetting('quietHoursEnd', e.target.value)}
-                  className="w-full p-2 border rounded-md"
-                />
-              </div>
+          <div className="flex items-center justify-between">
+            <div>
+              <Label htmlFor="app_lesson_complete">Leçon terminée</Label>
             </div>
-          )}
+            <Switch
+              id="app_lesson_complete"
+              checked={localPrefs.app_lesson_complete}
+              onCheckedChange={checked => handleToggle('app_lesson_complete', checked)}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <Label htmlFor="app_course_complete">Cours terminé</Label>
+            </div>
+            <Switch
+              id="app_course_complete"
+              checked={localPrefs.app_course_complete}
+              onCheckedChange={checked => handleToggle('app_course_complete', checked)}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <Label htmlFor="app_affiliate_sale">Ventes affilié</Label>
+            </div>
+            <Switch
+              id="app_affiliate_sale"
+              checked={localPrefs.app_affiliate_sale}
+              onCheckedChange={checked => handleToggle('app_affiliate_sale', checked)}
+            />
+          </div>
         </CardContent>
       </Card>
 
-      {/* Action Buttons */}
-      <div className="flex gap-3 pt-4">
-        <Button onClick={saveSettings} disabled={saving}>
-          {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          <Save className="mr-2 h-4 w-4" />
-        Enregistrer les préférences
-      </Button>
-        <Button variant="outline" onClick={resetToDefaults}>
-          <RotateCcw className="mr-2 h-4 w-4" />
-          Réinitialiser
+      {/* Résumé Email */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Résumé par Email</CardTitle>
+          <CardDescription>Recevez un récapitulatif de vos notifications par email</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-4">
+            <Label htmlFor="digest">Fréquence</Label>
+            <Select
+              value={localPrefs.email_digest_frequency}
+              onValueChange={(value: string) => handleToggle('email_digest_frequency', value)}
+            >
+              <SelectTrigger className="w-48">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="never">Jamais</SelectItem>
+                <SelectItem value="daily">Quotidien</SelectItem>
+                <SelectItem value="weekly">Hebdomadaire</SelectItem>
+                <SelectItem value="monthly">Mensuel</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Bouton Sauvegarder */}
+      <div className="flex justify-end">
+        <Button onClick={handleSave} disabled={updatePreferences.isPending} className="gap-2">
+          <Save className="w-4 h-4" />
+          {updatePreferences.isPending ? 'Sauvegarde...' : 'Sauvegarder les préférences'}
         </Button>
       </div>
     </div>
   );
 };
-
-
-
-
-
-

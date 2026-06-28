@@ -188,15 +188,16 @@ export const useCreateNotification = () => {
 
   return useMutation({
     mutationFn: async (data: CreateNotificationData) => {
-      const { error } = await supabase.from('notifications').insert({
-        user_id: data.user_id,
-        type: data.type,
-        title: data.title,
-        message: data.message,
-        metadata: (data.metadata || {}) as Json,
-        action_url: data.action_url,
-        action_label: data.action_label,
-        priority: data.priority || 'normal',
+      // Contournement du RLS pour les administrateurs
+      const { error } = await supabase.rpc('admin_create_notification', {
+        p_user_id: data.user_id,
+        p_type: data.type,
+        p_title: data.title,
+        p_message: data.message,
+        p_metadata: (data.metadata || {}) as Json,
+        p_action_url: data.action_url,
+        p_action_label: data.action_label,
+        p_priority: data.priority || 'normal',
       });
 
       if (error) {
