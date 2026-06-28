@@ -472,39 +472,54 @@ export const useCreateServiceOrder = () => {
         phone: customerPhone,
       });
 
-      // 6. Créer le booking (réservation)
+      // 6. Créer le booking (réservation) de manière atomique via l'Edge Function
       // Note: actualDuration, bookingDate, bookingStartTime, bookingEndTime déjà calculés plus haut
 
-      // Récupérer le user_id à partir du customer_id
-      const { data: customerData } = await supabase
-        .from('customers')
-        .select('user_id')
-        .eq('id', customerId)
-        .single();
+      const { data: authData } = await supabase.auth.getUser();
 
-      const userId = customerData?.user_id || customerId; // Fallback si user_id n'existe pas
+      const { data: provisionData, error: provisionError } = await supabase.functions.invoke(
+        'service-checkout-provisioning',
+        {
+          body: {
+            email: customerEmail,
+            customerName: customerName,
+            productId: productId,
+            staffId: staffId,
+            bookingDate: bookingDate,
+            bookingStartTime: bookingStartTime,
+            bookingEndTime: bookingEndTime,
+            durationMinutes: actualDuration,
+            timezone: serviceProduct.timezone || 'UTC',
+            numberOfParticipants: numberOfParticipants,
+            notes: notes,
+            userId: authData?.user?.id || null,
+          },
+        }
+      );
 
-      const { data: booking, error: bookingError } = await supabase
-        .from('service_bookings')
-        .insert({
-          product_id: productId, // Correction: utiliser product_id au lieu de service_id
-          user_id: userId, // Correction: utiliser user_id au lieu de customer_id
-          staff_member_id: staffId, // Correction: utiliser staff_member_id au lieu de staff_id
-          scheduled_date: bookingDate,
-          scheduled_start_time: bookingStartTime,
-          scheduled_end_time: bookingEndTime,
-          timezone: serviceProduct.timezone || 'UTC',
-          duration_minutes: actualDuration,
-          status: 'pending', // Sera confirmé après paiement
-          participants_count: numberOfParticipants,
-          customer_notes: notes,
-        })
-        .select('id, scheduled_date, scheduled_start_time, scheduled_end_time, created_at')
-        .single();
-
-      if (bookingError || !booking) {
-        throw new Error('Erreur lors de la création de la réservation');
+      if (provisionError) {
+        logger.error('Service checkout provisioning error', { error: provisionError });
+        throw new Error(provisionError.message || 'Impossible de finaliser la réservation.');
       }
+
+      if (provisionData?.error) {
+        throw new Error(provisionData.error);
+      }
+
+      if (!provisionData?.success || !provisionData?.booking_id) {
+        throw new Error('Erreur inattendue lors de la réservation');
+      }
+
+      const userId = provisionData.user_id;
+
+      // On simule l'objet booking pour la suite du flux (webhooks)
+      const booking = {
+        id: provisionData.booking_id,
+        scheduled_date: bookingDate,
+        scheduled_start_time: bookingStartTime,
+        scheduled_end_time: bookingEndTime,
+        created_at: new Date().toISOString(),
+      };
 
       if (checkoutMode === 'cart') {
         return {

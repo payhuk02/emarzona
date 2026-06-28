@@ -167,6 +167,34 @@ export const useCreateCourseOrder = () => {
         }
       }
 
+      // 3.5 Auto-provisioning invité avant la création de commande
+      // Pour s'assurer que le trigger auto_enroll trouve bien un utilisateur auth.users
+      let finalUserId = user?.id;
+
+      if (!user) {
+        const { data: provisionData, error: provisionError } = await supabase.functions.invoke(
+          'course-checkout-provisioning',
+          {
+            body: {
+              email: customerEmail,
+              customerName: customerName,
+              userId: null,
+            },
+          }
+        );
+
+        if (provisionError) {
+          logger.error('Course checkout provisioning error', { error: provisionError });
+          throw new Error(provisionError.message || "Impossible de finaliser l'achat invité.");
+        }
+
+        if (provisionData?.error) {
+          throw new Error(provisionData.error);
+        }
+
+        finalUserId = provisionData?.user_id;
+      }
+
       const customerId = await findOrCreateStoreCustomer({
         storeId,
         email: customerEmail,

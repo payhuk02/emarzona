@@ -173,37 +173,68 @@ export const useCreateDigitalOrder = () => {
         const {
           data: { user },
         } = await supabase.auth.getUser();
-        if (!user?.id) {
-          throw new Error('Connexion requise pour acheter un produit digital avec licence');
+
+        if (user?.id) {
+          const expiresAt = licenseExpiryDays
+            ? new Date(Date.now() + licenseExpiryDays * 24 * 60 * 60 * 1000).toISOString()
+            : null;
+
+          const { data: license, error: licenseError } = await supabase
+            .from('digital_licenses')
+            .insert({
+              digital_product_id: digitalProductId,
+              user_id: user.id,
+              license_key: await generateLicenseKeyViaRpc(),
+              license_type: licenseType,
+              max_activations: licenseType === 'unlimited' ? -1 : maxActivations,
+              current_activations: 0,
+              expires_at: expiresAt,
+              status: 'pending',
+              customer_email: customerEmail,
+              customer_name: customerName || customerEmail.split('@')[0],
+            })
+            .select('id')
+            .single();
+
+          if (licenseError || !license) {
+            logger.error('License creation error', { error: licenseError, digitalProductId });
+            throw new Error('Erreur lors de la génération de la licence');
+          }
+
+          licenseId = license.id;
+        } else {
+          // Guest Checkout Flow: Call auto-provisioning edge function
+          const { data, error: functionError } = await supabase.functions.invoke(
+            'guest-checkout-provisioning',
+            {
+              body: {
+                email: customerEmail,
+                customerName: customerName,
+                digitalProductId: digitalProductId,
+                licenseType: licenseType,
+                maxActivations: maxActivations,
+                licenseExpiryDays: licenseExpiryDays,
+              },
+            }
+          );
+
+          if (functionError) {
+            logger.error('Guest checkout provisioning error', { error: functionError });
+            throw new Error(
+              functionError.message || "Impossible de générer la licence pour l'invité"
+            );
+          }
+
+          if (data?.error) {
+            throw new Error(data.error);
+          }
+
+          if (!data?.success || !data?.license_id) {
+            throw new Error("Erreur inattendue lors de l'auto-provisioning");
+          }
+
+          licenseId = data.license_id;
         }
-
-        const expiresAt = licenseExpiryDays
-          ? new Date(Date.now() + licenseExpiryDays * 24 * 60 * 60 * 1000).toISOString()
-          : null;
-
-        const { data: license, error: licenseError } = await supabase
-          .from('digital_licenses')
-          .insert({
-            digital_product_id: digitalProductId,
-            user_id: user.id,
-            license_key: await generateLicenseKeyViaRpc(),
-            license_type: licenseType,
-            max_activations: licenseType === 'unlimited' ? -1 : maxActivations, // ✅ -1 for unlimited
-            current_activations: 0, // ✅ Correct column name
-            expires_at: expiresAt,
-            status: 'pending', // ✅ Will become 'active' after payment confirmation
-            customer_email: customerEmail, // ✅ Store customer email
-            customer_name: customerName || customerEmail.split('@')[0], // ✅ Store customer name
-          })
-          .select('id')
-          .single();
-
-        if (licenseError || !license) {
-          logger.error('License creation error', { error: licenseError, digitalProductId });
-          throw new Error('Erreur lors de la génération de la licence');
-        }
-
-        licenseId = license.id;
       }
 
       // 4. Calculer le montant final (promo + carte cadeau)

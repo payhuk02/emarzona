@@ -195,6 +195,35 @@ export const useCreateArtistOrder = () => {
         throw new Error('Adresse de livraison requise pour cette œuvre');
       }
 
+      // 5. Auto-provisioning invité avant la création de commande
+      // Pour s'assurer que le webhook post-paiement puisse générer le Certificat et la Provenance
+      const { data: authData } = await supabase.auth.getUser();
+      let finalUserId = authData?.user?.id;
+
+      if (!finalUserId) {
+        const { data: provisionData, error: provisionError } = await supabase.functions.invoke(
+          'artist-checkout-provisioning',
+          {
+            body: {
+              email: customerEmail,
+              customerName: customerName,
+              userId: null,
+            },
+          }
+        );
+
+        if (provisionError) {
+          logger.error('Artist checkout provisioning error', { error: provisionError });
+          throw new Error(provisionError.message || "Impossible de finaliser l'achat invité.");
+        }
+
+        if (provisionData?.error) {
+          throw new Error(provisionData.error);
+        }
+
+        finalUserId = provisionData?.user_id;
+      }
+
       const customerId = await findOrCreateStoreCustomer({
         storeId,
         email: customerEmail,
