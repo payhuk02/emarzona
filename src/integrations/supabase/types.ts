@@ -44460,6 +44460,19 @@ export type Database = {
         };
         Returns: string;
       };
+      admin_create_notification: {
+        Args: {
+          p_action_label?: string | null;
+          p_action_url?: string | null;
+          p_message: string;
+          p_metadata?: Json;
+          p_priority?: string;
+          p_title: string;
+          p_type: string;
+          p_user_id: string;
+        };
+        Returns: string;
+      };
       admin_list_disputes: {
         Args: {
           p_assigned_admin_id?: string;
@@ -45002,6 +45015,14 @@ export type Database = {
           max_allowed: number;
           message: string;
         }[];
+      };
+      check_physical_stock_availability: {
+        Args: {
+          p_product_id: string;
+          p_quantity?: number;
+          p_variant_id?: string | null;
+        };
+        Returns: Json;
       };
       check_password: {
         Args: { hash: string; plain: string };
