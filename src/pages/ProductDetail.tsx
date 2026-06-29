@@ -63,6 +63,7 @@ import type { Product } from '@/types/marketplace';
 import type { Store } from '@/hooks/useStore';
 import { generateStoreUrl, generateProductUrl } from '@/lib/store-utils';
 import { toUserErrorMessage } from '@/lib/user-error-message';
+import { sanitizeProductDescription } from '@/lib/html-sanitizer';
 
 const STORES_PUBLIC_FIELDS =
   'id, name, slug, subdomain, description, default_currency, custom_domain, domain_status, logo_url, banner_url, facebook_url, instagram_url, twitter_url, linkedin_url, created_at, updated_at';
@@ -884,7 +885,7 @@ const ProductDetails = () => {
                           </p>
                         )}
                         <Link
-                          to={`/${slug}/${product.paid_product.slug}`}
+                          to={`/products/${product.paid_product.slug}`}
                           className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-colors font-medium text-xs sm:text-sm touch-manipulation min-h-[44px] w-full sm:w-auto justify-center sm:justify-start"
                         >
                           <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
@@ -919,7 +920,7 @@ const ProductDetails = () => {
                           version complète.
                         </p>
                         <Link
-                          to={`/${slug}/${product.free_product.slug}`}
+                          to={`/products/${product.free_product.slug}`}
                           className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 transition-colors font-medium text-xs sm:text-sm touch-manipulation min-h-[44px] w-full sm:w-auto justify-center sm:justify-start"
                         >
                           <Gift className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
@@ -1295,7 +1296,7 @@ const ProductDetails = () => {
                   Description
                 </h2>
                 <SafeHTML
-                  html={product.description || ''}
+                  html={safeDescription}
                   className="product-description-content bg-card border border-border rounded-lg sm:rounded-xl p-4 sm:p-6 md:p-8 shadow-sm"
                 />
               </div>
