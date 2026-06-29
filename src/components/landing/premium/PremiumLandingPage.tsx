@@ -26,9 +26,7 @@ const PricingSection = lazy(() =>
 const FinalCtaSection = lazy(() =>
   import('./FinalCtaSection').then(m => ({ default: m.FinalCtaSection }))
 );
-const PremiumFooter = lazy(() =>
-  import('./PremiumFooter').then(m => ({ default: m.PremiumFooter }))
-);
+import { PremiumFooter } from './PremiumFooter';
 
 export function PremiumLandingPage() {
   return (
@@ -86,9 +84,7 @@ export function PremiumLandingPage() {
         </LandingDeferredSection>
       </main>
 
-      <Suspense fallback={null}>
-        <PremiumFooter />
-      </Suspense>
+      <PremiumFooter />
     </div>
   );
 }

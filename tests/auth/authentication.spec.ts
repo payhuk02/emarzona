@@ -13,9 +13,16 @@ test.describe('Authentication', () => {
   });
 
   test('should display landing page', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'load' });
+
     await expect(page).toHaveTitle(/Emarzona/);
-    const footer = page.locator('footer');
-    await expect(footer).toBeVisible();
+
+    // Title is set on the loading shell before premium content mounts.
+    await expect(page.locator('.lp-hero h1')).toBeVisible({ timeout: 15_000 });
+
+    const footer = page.locator('footer#apropos');
+    await footer.scrollIntoViewIfNeeded();
+    await expect(footer).toBeVisible({ timeout: 15_000 });
     await expect(footer).toContainText(/Emarzona/i);
   });
 

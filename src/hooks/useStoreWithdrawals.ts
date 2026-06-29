@@ -95,87 +95,19 @@ export const useStoreWithdrawals = (filters?: StoreWithdrawalFilters) => {
     formData: StoreWithdrawalRequestForm
   ): Promise<StoreWithdrawal | null> => {
     try {
-      // Vérifier le solde disponible
-      const { data: earnings, error: earningsError } = await supabase
-        .from('store_earnings')
-        .select('available_balance')
-        .eq('store_id', storeId)
-        .single();
+      // Appeler la nouvelle fonction RPC sécurisée
+      const { data, error } = await supabase.rpc('request_store_withdrawal', {
+        p_store_id: storeId,
+        p_amount: formData.amount,
+        p_payment_method: formData.payment_method,
+        p_payment_details: formData.payment_details,
+        p_notes: formData.notes,
+      });
 
-      if (earningsError) {
-        // Si les revenus n'existent pas, les créer
-        await supabase.rpc('update_store_earnings', { p_store_id: storeId });
-
-        const { data: newEarnings, error: newError } = await supabase
-          .from('store_earnings')
-          .select('available_balance')
-          .eq('store_id', storeId)
-          .single();
-
-        if (newError) throw newError;
-
-        // Calculer le solde disponible moins les retraits en attente
-        const { data: pendingWithdrawals } = await supabase
-          .from('store_withdrawals')
-          .select('amount')
-          .eq('store_id', storeId)
-          .in('status', ['pending', 'processing']);
-
-        const pendingAmount =
-          pendingWithdrawals?.reduce((sum, w) => sum + parseFloat(w.amount.toString()), 0) || 0;
-        const availableAfterPending = (newEarnings.available_balance || 0) - pendingAmount;
-
-        if (formData.amount > availableAfterPending) {
-          throw new Error(
-            `Solde insuffisant. Disponible après retraits en attente : ${availableAfterPending} XOF`
-          );
-        }
-      } else {
-        // Calculer le solde disponible moins les retraits en attente
-        const { data: pendingWithdrawals } = await supabase
-          .from('store_withdrawals')
-          .select('amount')
-          .eq('store_id', storeId)
-          .in('status', ['pending', 'processing']);
-
-        const pendingAmount =
-          pendingWithdrawals?.reduce((sum, w) => sum + parseFloat(w.amount.toString()), 0) || 0;
-        const availableAfterPending = (earnings.available_balance || 0) - pendingAmount;
-
-        if (formData.amount > availableAfterPending) {
-          throw new Error(
-            `Solde insuffisant. Disponible après retraits en attente : ${availableAfterPending} XOF`
-          );
-        }
+      if (error) {
+        // Gérer le retour d'erreur de la base de données (message métier)
+        throw new Error(error.message);
       }
-
-      // Vérifier le montant minimum (ex: 10000 XOF)
-      const MIN_WITHDRAWAL = 10000;
-      if (formData.amount < MIN_WITHDRAWAL) {
-        throw new Error(`Le montant minimum de retrait est de ${MIN_WITHDRAWAL} XOF`);
-      }
-
-      // Créer la demande de retrait
-      const { data, error } = await supabase
-        .from('store_withdrawals')
-        .insert({
-          store_id: storeId,
-          amount: formData.amount,
-          currency: 'XOF',
-          payment_method: formData.payment_method,
-          payment_details: formData.payment_details,
-          notes: formData.notes,
-          status: 'pending',
-        })
-        .select(
-          `
-          *,
-          store:stores(id, name, slug, user_id)
-        `
-        )
-        .single();
-
-      if (error) throw error;
 
       toast({
         title: 'Demande envoyée ! 📤',
