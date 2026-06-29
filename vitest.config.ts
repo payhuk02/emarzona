@@ -1,4 +1,5 @@
 import { defineConfig } from 'vitest/config';
+import { loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
@@ -7,8 +8,23 @@ const isCiExecution =
   process.env.CI === '1' ||
   process.argv.some(arg => arg.includes('vitest.ci.config.ts'));
 
+const env = loadEnv('test', process.cwd(), '');
+const publicBackendUrl =
+  env.VITE_SUPABASE_URL || process.env.VITE_SUPABASE_URL || 'https://mock.supabase.co';
+const publicBackendKey =
+  env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+  env.VITE_SUPABASE_ANON_KEY ||
+  process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+  process.env.VITE_SUPABASE_ANON_KEY ||
+  'mock-key';
+
 export default defineConfig({
   plugins: [react()],
+  define: {
+    'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(publicBackendUrl),
+    'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(publicBackendKey),
+    'import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY': JSON.stringify(publicBackendKey),
+  },
   test: {
     globals: true,
     environment: 'jsdom',
