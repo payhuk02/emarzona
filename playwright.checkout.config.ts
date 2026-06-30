@@ -32,5 +32,10 @@ export default defineConfig({
     url: 'http://localhost:8080',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
+    env: {
+      VITE_PAYMENT_ORCHESTRATION_V2: process.env.VITE_PAYMENT_ORCHESTRATION_V2 ?? 'true',
+      VITE_PAYMENT_ORCHESTRATION_V2_ROLLOUT:
+        process.env.VITE_PAYMENT_ORCHESTRATION_V2_ROLLOUT ?? '100',
+    },
   },
 });

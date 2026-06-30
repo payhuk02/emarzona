@@ -98,7 +98,7 @@ VITE_SUPABASE_ANON_KEY=sb_publishable_...
 3. Redéployer production.
 4. **Staging / Preview** : laisser non défini pour auto-V2, ou `true` explicitement.
 
-### Rollout canary (50 % → 100 %)
+### Rollout canary (10 % → 50 % → 100 %)
 
 Phase recommandée après smoke QA §7 :
 
@@ -108,7 +108,16 @@ Phase recommandée après smoke QA §7 :
 | 2     | `true`                          | `50`                                    | `get_payment_webhook_health(24)` OK, E2E financial CI verte |
 | 3     | `true`                          | `100`                                   | Stripe + PayPal + Moneroo smoke prod                        |
 
-**Statut 2026-06-14** : phase **3 active** — `VITE_PAYMENT_ORCHESTRATION_V2=true`, `VITE_PAYMENT_ORCHESTRATION_V2_ROLLOUT=100` en production Vercel (via `enable-payment-v2-rollout-100.ps1 -Force -SkipRedeploy`).
+**Gate Phase 1 (codebase)** :
+
+```bash
+npm run verify:phase1-payments
+npm run verify:phase1:signoff
+npm run rollout:payment-v2:canary          # contrat offline
+npm run rollout:payment-v2:10                # dispatch GitHub ou Vercel CLI
+```
+
+**Guide vendeur** : [USER_GUIDE_PAYMENT_CONNECTIONS.md](./USER_GUIDE_PAYMENT_CONNECTIONS.md)
 
 > **Redeploy requis** : les `VITE_*` ne sont lues qu’au build. Redéployer depuis **Vercel Dashboard → Deployments → Redeploy** (branche `main`, environnement Production) pour activer le 100 % côté build. Rollback : `enable-payment-v2-rollout-vercel.ps1 -RolloutPercent 50 -SkipRedeploy`.
 

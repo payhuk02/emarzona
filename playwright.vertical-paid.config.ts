@@ -5,6 +5,7 @@ import { defineConfig, devices } from '@playwright/test';
  * Le dev server est lancé via scripts/start-e2e-dev.mjs (.env.e2e.local).
  */
 export default defineConfig({
+  globalSetup: './tests/e2e/global-setup-e2e-guard.ts',
   testDir: './tests/e2e',
   testMatch: ['**/course-paid-enrollment.spec.ts', '**/artist-paid-purchase.spec.ts'],
   fullyParallel: false,

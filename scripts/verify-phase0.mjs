@@ -11,7 +11,9 @@ const steps = [
   { id: '0.1', label: 'Payment V2 remote', cmd: 'npm', args: ['run', 'verify:payment-v2'], required: true },
   { id: '0.2', label: 'FedEx prod probe', cmd: 'npm', args: ['run', 'verify:fedex-prod'], required: false, warnOnFail: true },
   { id: '0.5', label: 'Secure deploy smoke', cmd: 'npm', args: ['run', 'verify:secure-deploy'], required: true },
-  { id: 'sec', label: 'Security gates (RLS + storage)', cmd: 'npm', args: ['run', 'audit:security-gates'], required: true },
+  { id: 'sec', label: 'Security gates (RLS + storage + client portal)', cmd: 'npm', args: ['run', 'audit:security-gates'], required: true },
+  { id: '0.4b', label: 'Client portal RLS contract (offline)', cmd: 'npm', args: ['run', 'test:client-portal-rls'], required: true },
+  { id: '0.5b', label: 'E2E prod guard (offline)', cmd: 'npm', args: ['run', 'test:e2e-guard'], required: true },
 ];
 
 const report = {

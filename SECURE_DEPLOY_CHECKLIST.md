@@ -57,13 +57,22 @@ Checks manuels si secrets absents :
 
 ## 6) Sign-off (Phase 0)
 
-| Check                | Commande                             | Statut |
-| -------------------- | ------------------------------------ | ------ |
-| Idempotence webhooks | `npm run verify:webhook-idempotency` |        |
-| Fulfillment monitor  | `npm run verify:fulfillment-monitor` |        |
-| Payment V2           | `npm run verify:payment-v2`          |        |
-| FedEx prod           | `npm run verify:fedex-prod`          |        |
-| Secure deploy        | `npm run verify:secure-deploy`       |        |
-| RLS + storage        | `npm run audit:security-gates`       |        |
+Génération automatique du statut :
 
-**Signé par :** ******\_\_\_****** **Date :** ******\_\_\_******
+```powershell
+npm run verify:phase0:signoff
+```
+
+| Check                         | Commande                             | Statut |
+| ----------------------------- | ------------------------------------ | ------ |
+| Idempotence webhooks          | `npm run verify:webhook-idempotency` |        |
+| Fulfillment monitor           | `npm run verify:fulfillment-monitor` |        |
+| Payment V2                    | `npm run verify:payment-v2`          |        |
+| FedEx prod                    | `npm run verify:fedex-prod`          |        |
+| Secure deploy                 | `npm run verify:secure-deploy`       |        |
+| RLS + storage + client portal | `npm run audit:security-gates`       |        |
+| Client portal RLS (offline)   | `npm run test:client-portal-rls`     |        |
+| E2E prod guard (offline)      | `npm run test:e2e-guard`             |        |
+| Phase 0 complet               | `npm run verify:phase0`              |        |
+
+**Signé par :** ********\_\_******** **Date :** ********\_\_********

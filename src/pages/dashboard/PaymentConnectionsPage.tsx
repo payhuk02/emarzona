@@ -1,5 +1,5 @@
 /**
- * Connexions paiement vendeur — Stripe Connect, PayPal (à venir), Moneroo plateforme
+ * Connexions paiement vendeur — Stripe Connect, PayPal Commerce, Moneroo plateforme
  */
 import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -12,7 +12,8 @@ import { useStore } from '@/hooks/useStore';
 import { useStorePaymentConnections } from '@/hooks/payments/useStorePaymentConnections';
 import { StripeConnectCard } from '@/components/payments/StripeConnectCard';
 import { PayPalConnectCard } from '@/components/payments/PayPalConnectCard';
-import { Wallet, Loader2 } from 'lucide-react';
+import { PaymentConnectionsOnboardingChecklist } from '@/components/payments/PaymentConnectionsOnboardingChecklist';
+import { Wallet, Loader2, BookOpen } from 'lucide-react';
 import { isPaymentOrchestrationV2Enabled } from '@/lib/payments/feature-flags';
 
 export default function PaymentConnectionsPage() {
@@ -152,6 +153,15 @@ export default function PaymentConnectionsPage() {
           <Skeleton className="h-48 w-full" />
         ) : (
           <div className="space-y-6">
+            <PaymentConnectionsOnboardingChecklist
+              storeId={store.id}
+              stripeConnection={stripeConnection}
+              paypalConnection={paypalConnection}
+              monerooActive={
+                !monerooConnection || monerooConnection.external_account_status === 'active'
+              }
+            />
+
             <StripeConnectCard
               connection={stripeConnection}
               isConnecting={connectStripe.isPending}
@@ -187,6 +197,36 @@ export default function PaymentConnectionsPage() {
                   {monerooConnection?.external_account_status === 'active'
                     ? 'Actif'
                     : 'Configuration plateforme'}
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card id="guide-paiements">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <BookOpen className="h-5 w-5 text-primary" aria-hidden />
+                  <CardTitle className="text-lg">Guide rapide</CardTitle>
+                </div>
+                <CardDescription>
+                  Documentation vendeur :{' '}
+                  <code className="text-xs">docs/USER_GUIDE_PAYMENT_CONNECTIONS.md</code>
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="text-sm text-muted-foreground space-y-2">
+                <p>
+                  1. Connectez <strong>Stripe</strong> pour les cartes internationales (EUR, USD,
+                  GBP).
+                </p>
+                <p>
+                  2. Connectez <strong>PayPal</strong> pour les acheteurs US/EU préférant PayPal.
+                </p>
+                <p>
+                  3. <strong>Moneroo</strong> reste actif pour l&apos;Afrique francophone (XOF) sans
+                  configuration supplémentaire.
+                </p>
+                <p className="text-xs pt-2">
+                  Test recommandé après activation : commande 1 € / 1 $ sur staging ou preview
+                  Vercel.
                 </p>
               </CardContent>
             </Card>

@@ -22,6 +22,13 @@ const steps = [
     args: ['run', 'test:production-truth'],
     required: true,
   },
+  {
+    id: '1.8',
+    label: 'Phase 1 payments gate',
+    cmd: 'npm',
+    args: ['run', 'verify:phase1-payments'],
+    required: true,
+  },
 ];
 
 const report = {

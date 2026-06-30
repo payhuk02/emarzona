@@ -33,6 +33,10 @@
     "test:commerce-gating": "vitest run src/lib/commerce/__tests__/store-capability-map.test.ts src/components/billing/__tests__/SellerRoutePermissionGuard.test.tsx src/lib/navigation/__tests__/resolveNavItems.test.ts src/lib/navigation/__tests__/commerce-sidebar.integration.test.ts src/lib/navigation/__tests__/horizontal-nav-commerce-gating.test.ts",
     "test:production-truth": "vitest run src/lib/shipping/__tests__/fedex-policy.test.ts src/lib/__tests__/fedex-rates-client.test.ts src/lib/payments/__tests__/feature-flags.test.ts src/lib/cart/__tests__/service-cart-policy.test.ts src/lib/checkout/__tests__/cart-validation.test.ts src/lib/orders/__tests__/resolve-order-number.test.ts src/lib/__tests__/checkout-order-items.test.ts",
     "verify:payment-v2": "node scripts/verify-payment-v2-remote.mjs",
+    "verify:payment-v2-migrations": "node scripts/verify-payment-v2-migrations.mjs",
+    "verify:payment-v2-edge-functions": "node scripts/verify-payment-v2-edge-functions.mjs",
+    "verify:phase1-payments": "node scripts/verify-phase1-payments.mjs",
+    "verify:phase1:signoff": "node scripts/verify-phase1-signoff.mjs",
     "verify:fulfillment-monitor": "node scripts/verify-fulfillment-monitor.mjs",
     "verify:webhook-idempotency": "node scripts/verify-webhook-idempotency-remote.mjs",
     "verify:webhook-idempotency:replay": "node scripts/webhook-idempotency-replay-staging.mjs",
@@ -50,7 +54,11 @@
     "test:components": "vitest run src/components --maxWorkers=2",
     "test:security": "npm run test:guards && npm run test:unit:payments",
     "audit:rls": "node scripts/audit-rls-check.mjs",
-    "audit:security-gates": "npm run audit:rls && npm run audit:storage-public",
+    "audit:security-gates": "npm run audit:rls && npm run audit:storage-public && npm run audit:client-portal-rls",
+    "audit:client-portal-rls": "node scripts/audit-client-portal-rls.mjs",
+    "test:client-portal-rls": "vitest run src/lib/security/__tests__/client-portal-rls-contract.test.ts",
+    "test:e2e-guard": "vitest run src/lib/security/__tests__/e2e-supabase-guard.test.ts",
+    "verify:phase0:signoff": "node scripts/verify-phase0-signoff.mjs",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
     "test:ci": "vitest run --coverage --config vitest.ci.config.ts",
@@ -284,5 +292,14 @@
     "vitest": "^4.0.1",
     "wait-on": "^9.0.1",
     "ws": "^8.21.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,css,md}": [
+      "prettier --write"
+    ]
   }
 }

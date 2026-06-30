@@ -30,12 +30,30 @@ function fail(msg) {
   report.blockers.push(msg);
 }
 
-function runLinkedSql(sql) {
-  return execSync('npx supabase db query --linked', {
-    input: sql,
-    encoding: 'utf8',
-    stdio: ['pipe', 'pipe', 'pipe'],
-  });
+function isTransientSupabaseError(err) {
+  const msg = err instanceof Error ? err.message : String(err);
+  return /503|timeout|connection timeout|upstream connect error/i.test(msg);
+}
+
+function runLinkedSql(sql, { retries = 3 } = {}) {
+  let lastError;
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      return execSync('npx supabase db query --linked', {
+        input: sql,
+        encoding: 'utf8',
+        stdio: ['pipe', 'pipe', 'pipe'],
+      });
+    } catch (err) {
+      lastError = err;
+      if (attempt >= retries || !isTransientSupabaseError(err)) {
+        throw err;
+      }
+      // Backoff before retry on transient Supabase CLI errors
+      execSync('node -e "setTimeout(()=>{}, 2000)"', { stdio: 'ignore' });
+    }
+  }
+  throw lastError;
 }
 
 async function verifyViaServiceRole() {

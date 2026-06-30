@@ -53,7 +53,10 @@ export function getSupabaseUrl(env = loadSupabaseEnv()) {
 }
 
 export function getServiceRoleKey(env = loadSupabaseEnv()) {
-  const key = env.SUPABASE_SERVICE_ROLE_KEY || env.SB_SERVICE_ROLE_KEY;
+  const key =
+    env.SUPABASE_SERVICE_ROLE_KEY ||
+    env.SUPABASE_TEST_SERVICE_ROLE_KEY ||
+    env.SB_SERVICE_ROLE_KEY;
   if (!key || key.includes('REMOVED') || key.length < 40) return null;
   return key;
 }

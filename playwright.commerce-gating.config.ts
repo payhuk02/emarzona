@@ -12,6 +12,7 @@ const supabaseAnonKey =
  * E2E commerce_type gating — requires SUPABASE_SERVICE_ROLE_KEY in CI.
  */
 export default defineConfig({
+  globalSetup: './tests/e2e/global-setup-e2e-guard.ts',
   testDir: './tests/e2e',
   testMatch: ['**/commerce-type-gating.spec.ts'],
   fullyParallel: false,

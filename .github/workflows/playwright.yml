@@ -166,6 +166,45 @@ jobs:
         path: playwright-report/
         retention-days: 14
 
+  test-checkout-multi-psp:
+    name: Checkout multi-PSP E2E
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps chromium
+
+    - name: Run checkout multi-PSP E2E
+      run: npm run test:e2e:checkout
+      env:
+        CI: true
+        VITE_PAYMENT_ORCHESTRATION_V2: 'true'
+        VITE_PAYMENT_ORCHESTRATION_V2_ROLLOUT: '100'
+        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_TEST_URL || secrets.VITE_SUPABASE_URL || 'https://mock.supabase.co' }}
+        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_ci_mock' }}
+        VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_ci_mock' }}
+
+    - name: Upload checkout E2E report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: playwright-checkout-report
+        path: playwright-report/
+        retention-days: 14
+
   test-products:
     timeout-minutes: 25
     runs-on: ubuntu-latest
