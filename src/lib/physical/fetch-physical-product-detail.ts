@@ -8,7 +8,7 @@ export const PRODUCT_PHYSICAL_FIELDS =
 export const PHYSICAL_PRODUCT_FIELDS =
   'id, product_id, store_id, sku, manufacturer, country_of_origin, weight, weight_unit, height, length, width, dimensions_unit, whatsapp_number, whatsapp_enabled, created_at, updated_at';
 export const PHYSICAL_VARIANT_FIELDS =
-  'id, physical_product_id, store_id, name, sku, price, compare_at_price, is_active, attributes, created_at, updated_at';
+  'id, physical_product_id, option1_value, option2_value, option3_value, sku, price, compare_at_price, cost_per_item, quantity, barcode, weight, image_url, position, is_available, created_at, updated_at';
 export const PHYSICAL_INVENTORY_FIELDS =
   'id, physical_product_id, product_id, store_id, variant_id, quantity, quantity_available, available_quantity, reserved_quantity, quantity_reserved, low_stock_threshold, location, warehouse_id, created_at, updated_at';
 

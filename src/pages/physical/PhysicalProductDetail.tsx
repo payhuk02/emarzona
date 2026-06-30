@@ -423,7 +423,7 @@ export default function PhysicalProductDetail() {
               <h3 className="font-semibold mb-3">Variantes</h3>
               <VariantSelector
                 variants={product.variants}
-                onSelect={(variant: PhysicalProductVariant) => setSelectedVariant(variant)}
+                onVariantChange={variant => setSelectedVariant(variant)}
               />
             </div>
           )}
