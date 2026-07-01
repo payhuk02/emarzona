@@ -52,6 +52,13 @@ const steps = [
     required: true,
   },
   {
+    id: '2.4',
+    label: 'i18n ES/DE/PT checkout parity',
+    cmd: 'npm',
+    args: ['run', 'audit:i18n-checkout-locales'],
+    required: true,
+  },
+  {
     id: '2.5',
     label: 'i18n fallback EN contract',
     cmd: 'npm',

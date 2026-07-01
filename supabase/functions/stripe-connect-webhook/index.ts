@@ -51,7 +51,11 @@ async function updateWebhookEventDLQStatus(
 ) {
   await supabase
     .from('webhook_events')
-    .update({ status, error_message: errorMessage, updated_at: new Date().toISOString() })
+    .update({
+      status,
+      error_message: errorMessage,
+      updated_at: new Date().toISOString(),
+    })
     .eq('id', id);
 }
 
@@ -171,7 +175,9 @@ serve(async req => {
     );
 
     if (!inserted) {
-      return new Response(JSON.stringify({ received: true, duplicate: true }), { status: 200 });
+      return new Response(JSON.stringify({ received: true, duplicate: true }), {
+        status: 200,
+      });
     }
 
     // On stocke aussi dans l'ancien système d'audit par sécurité transitoire
@@ -204,7 +210,9 @@ serve(async req => {
           event as unknown as Record<string, unknown>
         );
         await markWebhookProcessed(supabase, 'stripe_connect', event.id);
-        return new Response(JSON.stringify({ received: true }), { status: 200 });
+        return new Response(JSON.stringify({ received: true }), {
+          status: 200,
+        });
       }
 
       const transactionId = session.metadata?.transaction_id;
@@ -265,17 +273,21 @@ serve(async req => {
             });
           }
 
-          if (dlqEventId) await updateWebhookEventDLQStatus(supabase, dlqEventId, 'completed');
+          if (dlqEventId) {
+            await updateWebhookEventDLQStatus(supabase, dlqEventId, 'completed');
+          }
         } catch (syncError) {
           console.error('Hybrid sync processing failed, falling back to DLQ worker', syncError);
           const errorMsg = syncError instanceof Error ? syncError.message : String(syncError);
-          if (dlqEventId)
+          if (dlqEventId) {
             await updateWebhookEventDLQStatus(supabase, dlqEventId, 'failed', errorMsg);
+          }
           // On renvoie quand même 200 à Stripe car l'événement est sauvegardé pour retry
         }
       } else {
-        if (dlqEventId)
+        if (dlqEventId) {
           await updateWebhookEventDLQStatus(supabase, dlqEventId, 'completed', 'No transaction ID');
+        }
       }
     }
 
@@ -328,9 +340,13 @@ serve(async req => {
             provider: 'stripe_connect',
           });
         }
-        if (dlqEventId) await updateWebhookEventDLQStatus(supabase, dlqEventId, 'completed');
+        if (dlqEventId) {
+          await updateWebhookEventDLQStatus(supabase, dlqEventId, 'completed');
+        }
       } else {
-        if (dlqEventId) await updateWebhookEventDLQStatus(supabase, dlqEventId, 'completed');
+        if (dlqEventId) {
+          await updateWebhookEventDLQStatus(supabase, dlqEventId, 'completed');
+        }
       }
     }
 
@@ -358,7 +374,9 @@ serve(async req => {
         .eq('external_account_id', account.id)
         .eq('provider', 'stripe_connect');
 
-      if (dlqEventId) await updateWebhookEventDLQStatus(supabase, dlqEventId, 'completed');
+      if (dlqEventId) {
+        await updateWebhookEventDLQStatus(supabase, dlqEventId, 'completed');
+      }
     }
 
     await markWebhookProcessed(supabase, 'stripe_connect', event.id);

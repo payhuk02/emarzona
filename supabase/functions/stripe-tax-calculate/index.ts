@@ -91,7 +91,9 @@ serve(async req => {
       customer_details: { address },
     };
     if (shippingMajor > 0) {
-      requestBody.shipping_cost = { amount: toStripeAmount(shippingMajor, currency) };
+      requestBody.shipping_cost = {
+        amount: toStripeAmount(shippingMajor, currency),
+      };
     }
 
     const calc = await stripeRequest<StripeTaxCalculation>('/tax/calculations', requestBody);

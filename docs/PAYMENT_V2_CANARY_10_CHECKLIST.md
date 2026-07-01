@@ -1,7 +1,15 @@
 # Payment V2 — Checklist canary 10 %
 
-Date cible : ****\_\_****  
+Date cible : \***\*\_\_\*\***  
 Owner : Lead Platform / Lead Infra
+
+## Rollout canary 10 % — déployé (2026-07-01)
+
+- [x] `VITE_PAYMENT_ORCHESTRATION_V2=true` + `ROLLOUT=10` sur Vercel production
+- [x] Redéploiement production déclenché
+- [x] Edge Function `stripe-tax-calculate` live
+- [x] Migration SQL Stripe Tax (sans fallback 18 % global)
+- [ ] Monitoring 48h (Sentry, fulfillment, webhooks) — en cours
 
 ## Pré-requis
 

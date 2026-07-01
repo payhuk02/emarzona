@@ -59,6 +59,7 @@
     "audit:security-gates": "npm run audit:rls && npm run audit:storage-public && npm run audit:client-portal-rls",
     "audit:client-portal-rls": "node scripts/audit-client-portal-rls.mjs",
     "audit:i18n-parity": "node scripts/audit-i18n-parity.mjs",
+    "audit:i18n-checkout-locales": "node scripts/audit-i18n-checkout-locales.mjs",
     "sync:i18n-en-parity": "node scripts/sync-i18n-en-parity.mjs",
     "verify:phase2:signoff": "node scripts/verify-phase2-signoff.mjs",
     "verify:phase2:fast": "node scripts/verify-phase2-fast.mjs",

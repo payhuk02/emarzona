@@ -161,6 +161,16 @@ jobs:
         with:
           deno-version: v2.x
 
+      - name: Format check (Stripe / Payment V2 Edge Functions)
+        run: |
+          deno fmt --check \
+            supabase/functions/_shared/stripe-api.ts \
+            supabase/functions/stripe-tax-calculate/index.ts \
+            supabase/functions/stripe-create-checkout/index.ts \
+            supabase/functions/stripe-connect-onboard/index.ts \
+            supabase/functions/stripe-connect-webhook/index.ts \
+            supabase/functions/stripe-refund/index.ts
+
       - name: Type check email workflow Edge Functions
         run: |
           deno check --config supabase/functions/deno.json supabase/functions/_shared/workflow-executor.ts
@@ -168,7 +178,14 @@ jobs:
           deno check --config supabase/functions/deno.json supabase/functions/trigger-email-workflows/index.ts
           deno check --config supabase/functions/deno.json supabase/functions/execute-email-workflow/index.ts
 
+      - name: Type check Payment V2 / Stripe Tax Edge Functions
+        run: |
+          deno check --config supabase/functions/deno.json supabase/functions/_shared/stripe-api.ts
+          deno check --config supabase/functions/deno.json supabase/functions/stripe-tax-calculate/index.ts
+          deno check --config supabase/functions/deno.json supabase/functions/stripe-create-checkout/index.ts
+
       - name: Run Edge Functions Contract Tests
         run: |
           deno test --allow-env --allow-net --config supabase/functions/deno.json supabase/functions/gdpr-export/index.test.ts
+          deno test --allow-env --config supabase/functions/deno.json supabase/functions/stripe-tax-calculate/index.test.ts
 
