@@ -52,7 +52,13 @@ i18n
   // Initialise i18next
   .init({
     resources,
-    fallbackLng: 'fr', // Langue par défaut
+    fallbackLng: (code: string | readonly string[]) => {
+      const lng = Array.isArray(code) ? code[0] : code;
+      if (lng === 'fr') return ['fr'];
+      if (lng === 'en') return ['en', 'fr'];
+      // ES, DE, PT and unknown locales → English first (Phase 2.5)
+      return ['en', 'fr'];
+    },
     debug: import.meta.env.VITE_I18N_DEBUG === 'true',
 
     // Options de détection

@@ -63,16 +63,16 @@ Génération automatique du statut :
 npm run verify:phase0:signoff
 ```
 
-| Check                         | Commande                             | Statut |
-| ----------------------------- | ------------------------------------ | ------ |
-| Idempotence webhooks          | `npm run verify:webhook-idempotency` |        |
-| Fulfillment monitor           | `npm run verify:fulfillment-monitor` |        |
-| Payment V2                    | `npm run verify:payment-v2`          |        |
-| FedEx prod                    | `npm run verify:fedex-prod`          |        |
-| Secure deploy                 | `npm run verify:secure-deploy`       |        |
-| RLS + storage + client portal | `npm run audit:security-gates`       |        |
-| Client portal RLS (offline)   | `npm run test:client-portal-rls`     |        |
-| E2E prod guard (offline)      | `npm run test:e2e-guard`             |        |
-| Phase 0 complet               | `npm run verify:phase0`              |        |
+| Check                         | Commande                             | Statut                                            |
+| ----------------------------- | ------------------------------------ | ------------------------------------------------- |
+| Idempotence webhooks          | `npm run verify:webhook-idempotency` | ✅                                                |
+| Fulfillment monitor           | `npm run verify:fulfillment-monitor` | ✅                                                |
+| Payment V2                    | `npm run verify:payment-v2`          | ⚠️ — `SUPABASE_SERVICE_ROLE_KEY` requis en local  |
+| FedEx prod                    | `npm run verify:fedex-prod`          | ⚠️ — credentials `FEDEX_*` requis en prod         |
+| Secure deploy                 | `npm run verify:secure-deploy`       | ✅                                                |
+| RLS + storage + client portal | `npm run audit:security-gates`       | ✅                                                |
+| Client portal RLS (offline)   | `npm run test:client-portal-rls`     | ✅                                                |
+| E2E prod guard (offline)      | `npm run test:e2e-guard`             | ✅                                                |
+| Phase 0 complet               | `npm run verify:phase0`              | ⚠️ — bloqué si Payment V2 remote sans clé service |
 
 **Signé par :** ********\_\_******** **Date :** ********\_\_********

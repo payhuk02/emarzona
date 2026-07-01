@@ -24,7 +24,8 @@ import { StockMovementHistory } from './StockMovementHistory';
 import { BulkInventoryUpdate } from './BulkInventoryUpdate';
 import { PreOrdersManager } from './preorders/PreOrdersManager';
 import { BackordersManager } from './backorders/BackordersManager';
-import { useInventoryReport } from '@/hooks/physical/useInventoryReports';
+import { useInventoryReport, useTurnoverReport } from '@/hooks/physical/useInventoryReports';
+import { computeTrendFromDailyCounts } from '@/lib/service/booking-trends';
 import { usePreOrders } from '@/hooks/physical/usePreOrders';
 import { useBackorders } from '@/hooks/physical/useBackorders';
 import { useStoreStockMovementHistory } from '@/hooks/physical/useStoreStockMovementHistory';
@@ -40,7 +41,7 @@ export interface InventoryDashboardProps {
 }
 
 // ============================================================================
-// MOCK STATS
+// DEFAULT STATS (loading / empty state)
 // ============================================================================
 
 const EMPTY_STATS = {
@@ -63,6 +64,7 @@ export function InventoryDashboard({ storeId, className }: InventoryDashboardPro
   const queryClient = useQueryClient();
 
   const { data: report, isLoading: reportLoading } = useInventoryReport(storeId);
+  const { data: turnoverReport } = useTurnoverReport(storeId, 30);
   const { data: preOrders } = usePreOrders(storeId);
   const { data: backorders } = useBackorders(storeId);
   const startOfToday = useMemo(() => {
@@ -80,6 +82,23 @@ export function InventoryDashboard({ storeId, className }: InventoryDashboardPro
       m => new Date(m.created_at) >= startOfToday
     ).length;
 
+    const soldProducts = (turnoverReport?.products ?? []).filter(p => p.total_sold > 0);
+    const avgTurnover =
+      soldProducts.length > 0
+        ? soldProducts.reduce((sum, p) => sum + p.turnover_ratio, 0) / soldProducts.length
+        : 0;
+
+    const movementsByDay = new Map<string, number>();
+    for (const m of todayMovements ?? []) {
+      const day = m.created_at.slice(0, 10);
+      movementsByDay.set(day, (movementsByDay.get(day) ?? 0) + 1);
+    }
+    const movementTrend = computeTrendFromDailyCounts(
+      Array.from(movementsByDay.entries()).map(([date, count]) => ({ date, count }))
+    );
+
+    const topCategoryEntry = report.top_stock_value_products[0];
+
     return {
       total_products: report.total_products,
       total_value: report.total_stock_value,
@@ -91,11 +110,11 @@ export function InventoryDashboard({ storeId, className }: InventoryDashboardPro
       movements_today: movementsToday,
       avg_stock_value:
         report.total_products > 0 ? report.total_stock_value / report.total_products : 0,
-      turnover_rate: 0,
-      top_category: '-',
-      trending: 'up' as const,
+      turnover_rate: Math.round(avgTurnover * 10) / 10,
+      top_category: topCategoryEntry?.product_name ?? '-',
+      trending: movementTrend >= 0 ? ('up' as const) : ('down' as const),
     };
-  }, [report, preOrders, backorders, todayMovements, startOfToday]);
+  }, [report, turnoverReport, preOrders, backorders, todayMovements, startOfToday]);
 
   const handleRefresh = async () => {
     await Promise.all([

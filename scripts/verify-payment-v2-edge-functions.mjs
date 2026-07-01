@@ -15,6 +15,7 @@ const REQUIRED = [
   'stripe-create-checkout',
   'stripe-connect-webhook',
   'stripe-refund',
+  'stripe-tax-calculate',
   'paypal-partner-onboard',
   'paypal-create-order',
   'paypal-webhook',

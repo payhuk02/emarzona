@@ -6,14 +6,43 @@ export function getStripeSecretKey(): string {
   return key;
 }
 
-export async function stripeRequest<T>(path: string, params: Record<string, string>): Promise<T> {
+/** Encode nested objects for Stripe form bodies (line_items[0][amount], etc.). */
+export function flattenStripeParams(value: unknown, prefix = ''): Record<string, string> {
+  const out: Record<string, string> = {};
+  if (value === null || value === undefined) return out;
+
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => {
+      const key = prefix ? `${prefix}[${index}]` : String(index);
+      Object.assign(out, flattenStripeParams(item, key));
+    });
+    return out;
+  }
+
+  if (typeof value === 'object') {
+    for (const [key, nested] of Object.entries(value as Record<string, unknown>)) {
+      const fullKey = prefix ? `${prefix}[${key}]` : key;
+      Object.assign(out, flattenStripeParams(nested, fullKey));
+    }
+    return out;
+  }
+
+  if (prefix) out[prefix] = String(value);
+  return out;
+}
+
+export async function stripeRequest<T>(
+  path: string,
+  params: Record<string, string> | Record<string, unknown>
+): Promise<T> {
+  const flat = flattenStripeParams(params);
   const response = await fetch(`${STRIPE_API}${path}`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${getStripeSecretKey()}`,
       'Content-Type': 'application/x-www-form-urlencoded',
     },
-    body: new URLSearchParams(params).toString(),
+    body: new URLSearchParams(flat).toString(),
   });
   const data = await response.json();
   if (!response.ok) {

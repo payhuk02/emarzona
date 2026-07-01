@@ -16,6 +16,7 @@ const { values } = parseArgs({
     rollout: { type: 'string', default: '10' },
     'verify-only': { type: 'boolean', default: false },
     dispatch: { type: 'boolean', default: false },
+    fast: { type: 'boolean', default: false },
   },
 });
 
@@ -39,8 +40,10 @@ function run(label, command, args, { optional = false } = {}) {
   return true;
 }
 
+const fast = process.env.VERIFY_FAST === '1' || values.fast;
+
 console.log('=== Payment V2 canary — preflight ===');
-console.log(`Target rollout: ${rollout}%`);
+console.log(`Target rollout: ${rollout}%${fast ? ' (fast — Vitest only)' : ''}`);
 
 run('Feature flags unit tests', 'npx', [
   'vitest',
@@ -48,12 +51,14 @@ run('Feature flags unit tests', 'npx', [
   'src/lib/payments/__tests__/feature-flags.test.ts',
 ]);
 
-run('Rollout invariants (Playwright contract)', 'npx', [
-  'playwright',
-  'test',
-  'tests/e2e/payment-v2-rollout.spec.ts',
-  '--project=chromium',
-]);
+if (!fast) {
+  run('Rollout invariants (Playwright contract)', 'npx', [
+    'playwright',
+    'test',
+    'tests/e2e/payment-v2-rollout.spec.ts',
+    '--project=chromium',
+  ]);
+}
 
 if (existsSync('.env')) {
   run('Remote Supabase Payment V2 check', 'node', ['scripts/verify-payment-v2-remote.mjs'], {
@@ -68,23 +73,32 @@ if (values['verify-only']) {
   process.exit(0);
 }
 
-if (values.dispatch) {
-  const ghOk = run('GitHub workflow dispatch', 'gh', [
-    'workflow',
-    'run',
-    'payment-v2-vercel-rollout.yml',
-    '-f',
-    `rollout_percent=${rollout}`,
-    '-f',
-    'redeploy=true',
-  ], { optional: true });
+  if (values.dispatch) {
+    const ghOk = run(
+      'GitHub workflow dispatch',
+      'gh',
+      [
+        'workflow',
+        'run',
+        'payment-v2-vercel-rollout.yml',
+        '-f',
+        `rollout_percent=${rollout}`,
+        '-f',
+        'redeploy=true',
+      ],
+      { optional: true }
+    );
 
-  if (ghOk) {
-    console.log('\n✓ Workflow payment-v2-vercel-rollout.yml dispatched.');
-    console.log('  Suivre : gh run list --workflow=payment-v2-vercel-rollout.yml');
-    process.exit(0);
+    if (ghOk) {
+      console.log('\n✓ Workflow payment-v2-vercel-rollout.yml dispatched.');
+      console.log('  Suivre : gh run list --workflow=payment-v2-vercel-rollout.yml');
+      process.exit(0);
+    }
+
+    console.error('\n❌ Dispatch GitHub échoué (secrets VERCEL_TOKEN / VERCEL_PROJECT_ID manquants ?)');
+    console.error('  npm run setup:payment-v2-github-secrets');
+    console.error('  ou : .\\scripts\\enable-payment-v2-rollout-vercel.ps1 -RolloutPercent 10 -Redeploy');
   }
-}
 
 console.log('\n=== Prochaines étapes (rollout manuel) ===');
 console.log('');

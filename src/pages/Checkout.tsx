@@ -433,6 +433,12 @@ export default function Checkout() {
         shippingAmount,
         countryCode: formData.country,
         stateProvince: formData.state || null,
+        postalCode: formData.postal_code || null,
+        city: formData.city || null,
+        currency:
+          items[0]?.currency && items[0].currency.length === 3
+            ? items[0].currency.toUpperCase()
+            : 'XOF',
         storeId: storeId || null,
         items,
       });

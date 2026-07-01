@@ -10,7 +10,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 export function loadSupabaseEnv() {
   const env = { ...process.env };
 
-  for (const file of ['.env.local', '.env']) {
+  for (const file of ['.env.local', '.env', '.env.e2e.local']) {
     if (!existsSync(file)) continue;
     const raw = readFileSync(file, 'utf8');
     for (const line of raw.split(/\r?\n/)) {
@@ -25,7 +25,7 @@ export function loadSupabaseEnv() {
       ) {
         val = val.slice(1, -1);
       }
-      if (!env[key]) env[key] = val;
+      if (env[key] === undefined || env[key] === '') env[key] = val;
     }
   }
 
@@ -59,6 +59,13 @@ export function getServiceRoleKey(env = loadSupabaseEnv()) {
     env.SB_SERVICE_ROLE_KEY;
   if (!key || key.includes('REMOVED') || key.length < 40) return null;
   return key;
+}
+
+export function getVercelCredentials(env = loadSupabaseEnv()) {
+  const token = (env.VERCEL_TOKEN || env.VERCEL_API_TOKEN)?.trim() || null;
+  const projectId = env.VERCEL_PROJECT_ID?.trim() || null;
+  const orgId = env.VERCEL_ORG_ID?.trim() || null;
+  return { token, projectId, orgId };
 }
 
 export function getCronSecret(env = loadSupabaseEnv()) {

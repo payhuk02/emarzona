@@ -131,7 +131,18 @@ try {
   if (serviceKey) {
     await verifyViaServiceRole();
   } else {
-    verifyViaLinkedSql();
+    try {
+      verifyViaLinkedSql();
+    } catch (linkedErr) {
+      if (process.env.SUPABASE_DB_PASSWORD?.trim()) {
+        verifyViaLinkedSql();
+      } else {
+        fail(
+          'Configure SUPABASE_SERVICE_ROLE_KEY in .env (recommandé) ou connectez supabase login + db query --linked'
+        );
+        if (linkedErr instanceof Error) fail(linkedErr.message);
+      }
+    }
   }
 
   if (report.store_payment_connections_count === null) {

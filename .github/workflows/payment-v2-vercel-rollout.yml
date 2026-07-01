@@ -32,6 +32,7 @@ jobs:
         run: |
           if [ -z "$VERCEL_TOKEN" ] || [ -z "$VERCEL_PROJECT_ID" ]; then
             echo "Configure VERCEL_TOKEN and VERCEL_PROJECT_ID in repository secrets."
+            echo "Run locally: VERCEL_TOKEN=... VERCEL_PROJECT_ID=... npm run setup:payment-v2-github-secrets"
             exit 1
           fi
 
@@ -59,7 +60,7 @@ jobs:
               curl -sfS -X PATCH -H "Authorization: Bearer ${VERCEL_TOKEN}" \
                 -H "Content-Type: application/json" \
                 "https://api.vercel.com/v9/projects/${VERCEL_PROJECT_ID}/env/${existing}${TEAM_QS}" \
-                -d "$(jq -n --arg v "$value" '{value: $v, target: ["production"], type: "plain"}')"
+                -d "$(jq -n --arg v "$value" '{value: $v, target: ["production"]}')"
             else
               curl -sfS -X POST -H "Authorization: Bearer ${VERCEL_TOKEN}" \
                 -H "Content-Type: application/json" \
@@ -88,3 +89,15 @@ jobs:
             "https://api.vercel.com/v13/deployments${TEAM_QS}" \
             -H "Content-Type: application/json" \
             -d "$(jq -n --arg pid "$VERCEL_PROJECT_ID" '{name: "emarzona", project: $pid, target: "production"}')"
+
+      - name: Post-rollout summary
+        run: |
+          echo "## Payment V2 canary ${{ inputs.rollout_percent }} % — déployé" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Variable | Valeur |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| -------- | ------ |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| VITE_PAYMENT_ORCHESTRATION_V2 | true |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| VITE_PAYMENT_ORCHESTRATION_V2_ROLLOUT | ${{ inputs.rollout_percent }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Post-déploiement (48h)** : verify:payment-v2, verify:fulfillment-monitor, Sentry checkout." >> "$GITHUB_STEP_SUMMARY"
+          echo "Checklist : docs/PAYMENT_V2_CANARY_10_CHECKLIST.md" >> "$GITHUB_STEP_SUMMARY"
