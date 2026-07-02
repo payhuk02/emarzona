@@ -105,28 +105,10 @@ export function PremiumHeroCarousel() {
         )}
       </div>
 
-      <div className="lp-hero-carousel__footer mt-5 flex flex-col items-center gap-4 lg:items-start">
-        <p className="lp-hero-caption lp-hero-carousel__caption text-center lg:text-left">
+      <div className="lp-hero-carousel__footer mt-5 flex flex-col items-center lg:items-start">
+        <p className="lp-hero-carousel__caption lp-hero-caption text-center lg:text-left">
           {t(`hero.carousel.slides.${activeSlide.key}.caption`)}
         </p>
-
-        <div
-          className="lp-hero-carousel__dots flex items-center gap-2"
-          role="tablist"
-          aria-label={t('hero.carousel.navLabel')}
-        >
-          {slides.map((item, index) => (
-            <button
-              key={item.key}
-              type="button"
-              role="tab"
-              aria-selected={index === active}
-              aria-label={t(`hero.carousel.slides.${item.key}.label`)}
-              className={`lp-hero-carousel__dot ${index === active ? 'is-active' : ''}`}
-              onClick={() => goTo(index)}
-            />
-          ))}
-        </div>
       </div>
     </div>
   );
