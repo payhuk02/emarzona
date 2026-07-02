@@ -27,11 +27,11 @@ npm run build:check             # build + budgets
 
 ## Upstash Redis (middleware SEO cache)
 
-Runbook : [docs/runbooks/upstash-middleware-cache.md](./runbooks/upstash-middleware-cache.md)
+Déjà configuré sur Vercel (production + preview) et Supabase Edge.
 
-```powershell
-# Depuis .env avec UPSTASH_REDIS_REST_URL + TOKEN
-.\scripts\set-upstash-vercel-env.ps1
+```bash
+npm run verify:upstash-prod
+# Si absent : .\scripts\set-upstash-vercel-env.ps1 (credentials dans .env)
 ```
 
 Secrets Supabase Edge (invalidation cache) :

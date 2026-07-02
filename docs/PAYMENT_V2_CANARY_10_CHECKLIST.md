@@ -3,15 +3,12 @@
 Date cible : \***\*\_\_\*\***  
 Owner : Lead Platform / Lead Infra
 
-## Rollout canary 10 % — déployé (2026-07-01)
+## Rollout canary — **100 % déployé (2026-07-02)**
 
-- [x] `VITE_PAYMENT_ORCHESTRATION_V2=true` + `ROLLOUT=10` sur Vercel production
-- [x] Redéploiement production déclenché
-- [x] Edge Function `stripe-tax-calculate` live
-- [x] Migration SQL Stripe Tax (sans fallback 18 % global)
-- [x] Secrets GitHub `VERCEL_*` configurés (`npm run setup:payment-v2-github-secrets`) — 2026-07-02
-- [x] Migration repair `20260701120000` — applied (linked)
-- [ ] Monitoring 48h — gates auto OK 2026-07-02 (`npm run monitor:payment-v2-canary`)
+- [x] `VITE_PAYMENT_ORCHESTRATION_V2=true` + `ROLLOUT=100` sur Vercel production
+- [x] Redéploiement production (local + GitHub Actions run #28603298400 ✅)
+- [x] Upstash Redis — Vercel + Supabase Edge (`npm run verify:upstash-prod`)
+- [x] VAPID push — Vercel + Supabase Edge
 
 ## Pré-requis
 
