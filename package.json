@@ -67,6 +67,8 @@
     "verify:phase2:signoff": "node scripts/verify-phase2-signoff.mjs",
     "verify:phase2:fast": "node scripts/verify-phase2-fast.mjs",
     "setup:payment-v2-github-secrets": "node scripts/setup-payment-v2-github-secrets.mjs",
+    "setup:vapid-secrets": "node scripts/setup-vapid-secrets.mjs",
+    "monitor:payment-v2-canary": "node scripts/monitor-payment-v2-canary.mjs",
     "test:client-portal-rls": "vitest run src/lib/security/__tests__/client-portal-rls-contract.test.ts",
     "test:e2e-guard": "vitest run src/lib/security/__tests__/e2e-supabase-guard.test.ts",
     "verify:phase0:signoff": "node scripts/verify-phase0-signoff.mjs",

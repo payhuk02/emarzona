@@ -85,10 +85,24 @@ jobs:
           if [ -n "${VERCEL_ORG_ID:-}" ]; then
             TEAM_QS="?teamId=${VERCEL_ORG_ID}"
           fi
+          LIST_QS="${TEAM_QS}"
+          if [ -z "$LIST_QS" ]; then
+            LIST_QS="?projectId=${VERCEL_PROJECT_ID}&target=production&limit=1"
+          else
+            LIST_QS="${TEAM_QS}&projectId=${VERCEL_PROJECT_ID}&target=production&limit=1"
+          fi
+          DEPLOYMENT_ID=$(curl -sfS -H "Authorization: Bearer ${VERCEL_TOKEN}" \
+            "https://api.vercel.com/v6/deployments${LIST_QS}" \
+            | jq -r '.deployments[0].uid // .deployments[0].id // empty')
+          if [ -z "$DEPLOYMENT_ID" ]; then
+            echo "No production deployment found — set env vars manually and redeploy from Vercel Dashboard."
+            exit 0
+          fi
           curl -sfS -X POST -H "Authorization: Bearer ${VERCEL_TOKEN}" \
             "https://api.vercel.com/v13/deployments${TEAM_QS}" \
             -H "Content-Type: application/json" \
-            -d "$(jq -n --arg pid "$VERCEL_PROJECT_ID" '{name: "emarzona", project: $pid, target: "production"}')"
+            -d "$(jq -n --arg id "$DEPLOYMENT_ID" '{deploymentId: $id, target: "production", name: "emarzona"}')"
+          echo "Redeploy triggered for deployment ${DEPLOYMENT_ID}"
 
       - name: Post-rollout summary
         run: |

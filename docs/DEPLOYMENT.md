@@ -79,6 +79,8 @@ Signez [SECURE_DEPLOY_CHECKLIST.md](../SECURE_DEPLOY_CHECKLIST.md) §6 lorsque t
 
 ```bash
 npm run setup:payment-v2-github-secrets   # une fois
+npm run setup:vapid-secrets               # VAPID push (Vercel + Supabase)
+npm run monitor:payment-v2-canary         # gates 48h canary 10 %
 npm run rollout:payment-v2:10             # 10 %
 # monitoring 48h → 50 % → 100 %
 ```

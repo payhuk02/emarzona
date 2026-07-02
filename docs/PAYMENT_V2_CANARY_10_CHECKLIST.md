@@ -9,15 +9,17 @@ Owner : Lead Platform / Lead Infra
 - [x] Redéploiement production déclenché
 - [x] Edge Function `stripe-tax-calculate` live
 - [x] Migration SQL Stripe Tax (sans fallback 18 % global)
-- [ ] Monitoring 48h (Sentry, fulfillment, webhooks) — en cours
+- [x] Secrets GitHub `VERCEL_*` configurés (`npm run setup:payment-v2-github-secrets`) — 2026-07-02
+- [x] Migration repair `20260701120000` — applied (linked)
+- [ ] Monitoring 48h — gates auto OK 2026-07-02 (`npm run monitor:payment-v2-canary`)
 
 ## Pré-requis
 
-- [ ] Migrations Payment V2 appliquées (`npm run verify:payment-v2-migrations`)
-- [ ] Edge Functions PSP déployées (`npm run verify:payment-v2-edge-functions`)
+- [x] Migrations Payment V2 appliquées (`npm run verify:payment-v2-migrations`)
+- [x] Edge Functions PSP déployées (`npm run verify:payment-v2-edge-functions`)
 - [ ] Secrets Supabase : `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `PAYPAL_*`, `MONEROO_*`
 - [ ] `STRIPE_SECRET_KEY` actif (requis aussi pour Stripe Tax Phase 2.6)
-- [ ] Tests unitaires paiements verts (`npm run test:unit:payments`)
+- [x] Tests unitaires paiements verts (`npm run test:unit:payments`)
 
 ## Préparation rollout
 
@@ -49,20 +51,24 @@ Secrets GitHub requis :
 
 ## Monitoring 48h (canary 10 %)
 
-- [ ] `npm run verify:payment-v2` — exit 0
-- [ ] `npm run verify:webhook-idempotency` — exit 0
-- [ ] `npm run verify:fulfillment-monitor` — exit 0
+Automatisé : `npm run monitor:payment-v2-canary`
+
+- [x] `npm run verify:payment-v2` — exit 0 (2026-07-02)
+- [x] `npm run verify:webhook-idempotency` — exit 0 (2026-07-02)
+- [x] `npm run verify:fulfillment-monitor` — exit 0 (2026-07-02)
 - [ ] Sentry : 0 double-fulfillment, error rate checkout < 0,1 %
 - [ ] Test manuel : boutique dans les 10 % → Stripe Connect checkout EUR/USD
 - [ ] Test manuel : boutique hors canary → Moneroo inchangé
 
+**Escalade 50 %** : earliest **2026-07-03** (48h après déploiement 10 %), si monitor OK + Sentry/manuels OK.
+
 ## Escalade canary
 
-| Étape | Commande                                                               | Délai min. |
-| ----- | ---------------------------------------------------------------------- | ---------- |
-| 10 %  | `npm run rollout:payment-v2:10`                                        | —          |
-| 50 %  | `gh workflow run payment-v2-vercel-rollout.yml -f rollout_percent=50`  | 48h stable |
-| 100 % | `gh workflow run payment-v2-vercel-rollout.yml -f rollout_percent=100` | 48h stable |
+| Étape | Commande                                                                               | Délai min.                |
+| ----- | -------------------------------------------------------------------------------------- | ------------------------- |
+| 10 %  | `npm run rollout:payment-v2:10`                                                        | —                         |
+| 50 %  | `gh workflow run payment-v2-vercel-rollout.yml -f rollout_percent=50 -f redeploy=true` | 48h stable (≥ 2026-07-03) |
+| 100 % | `gh workflow run payment-v2-vercel-rollout.yml -f rollout_percent=100`                 | 48h stable                |
 
 ## Rollback
 
