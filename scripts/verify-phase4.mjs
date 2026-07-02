@@ -33,6 +33,13 @@ const steps = [
     args: ['run', 'test:unit', '--', 'src/lib/trust/__tests__/emarzona-protect-policy.test.ts'],
     required: true,
   },
+  {
+    id: '4.4',
+    label: 'multi-store isolation contract',
+    cmd: 'npm',
+    args: ['run', 'test:multi-store-isolation'],
+    required: true,
+  },
 ];
 
 const report = {
@@ -187,6 +194,23 @@ guard(
   adminDisputes.includes('EmarzonaProtectDisputeBadge') &&
     adminDisputes.includes('ProtectDisputeResolvePanel'),
   'Admin disputes UI shows Protect badge and resolve panel'
+);
+
+guard(
+  'multi-store-isolation-contract',
+  existsSync(join(root, 'src/lib/security/multi-store-isolation-contract.ts')) &&
+    readFileSync(join(root, 'src/lib/security/multi-store-isolation-contract.ts'), 'utf8').includes(
+      'STORE_SCOPED_HOOK_REQUIREMENTS'
+    ),
+  'Multi-store isolation contract module present'
+);
+
+guard(
+  'push-vapid-graceful-degrade',
+  readFileSync(join(root, 'src/components/settings/NotificationSettings.tsx'), 'utf8').includes(
+    'isVapidReady'
+  ),
+  'Push notifications degrade gracefully when VAPID absent'
 );
 
 console.log('\n=== Phase 4 guards ===');

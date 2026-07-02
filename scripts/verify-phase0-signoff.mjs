@@ -13,8 +13,8 @@ const CHECKS = [
   { label: 'Secure deploy', cmd: ['run', 'verify:secure-deploy'] },
   { label: 'RLS + storage + client portal', cmd: ['run', 'audit:security-gates'] },
   { label: 'Client portal RLS contract (offline)', cmd: ['run', 'test:client-portal-rls'] },
-  { label: 'E2E prod guard (offline)', cmd: ['run', 'test:e2e-guard'] },
-];
+  { label: 'Edge Functions CI (offline)', cmd: ['run', 'verify:edge-functions-ci'] },
+  { label: 'Multi-store isolation contract', cmd: ['run', 'test:multi-store-isolation'] },
 
 const results = [];
 let allRequiredOk = true;

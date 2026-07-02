@@ -73,6 +73,8 @@ npm run verify:phase0:signoff
 | RLS + storage + client portal | `npm run audit:security-gates`       | ✅                                        |
 | Client portal RLS (offline)   | `npm run test:client-portal-rls`     | ✅                                        |
 | E2E prod guard (offline)      | `npm run test:e2e-guard`             | ✅                                        |
+| Edge Functions CI (offline)   | `npm run verify:edge-functions-ci`   | ✅                                        |
+| Multi-store isolation         | `npm run test:multi-store-isolation` | ✅                                        |
 | Phase 0 complet               | `npm run verify:phase0`              | ✅ (FedEx optionnel dégradé hors prod)    |
 
 **Signé par :** **\*\*\*\***\_\_**\*\*\*\*** **Date :** **\*\*\*\***\_\_**\*\*\*\***

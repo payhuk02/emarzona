@@ -14,6 +14,8 @@ const steps = [
   { id: 'sec', label: 'Security gates (RLS + storage + client portal)', cmd: 'npm', args: ['run', 'audit:security-gates'], required: true },
   { id: '0.4b', label: 'Client portal RLS contract (offline)', cmd: 'npm', args: ['run', 'test:client-portal-rls'], required: true },
   { id: '0.5b', label: 'E2E prod guard (offline)', cmd: 'npm', args: ['run', 'test:e2e-guard'], required: true },
+  { id: '0.6', label: 'Edge Functions CI (offline)', cmd: 'npm', args: ['run', 'verify:edge-functions-ci'], required: true },
+  { id: '0.7', label: 'Multi-store isolation contract', cmd: 'npm', args: ['run', 'test:multi-store-isolation'], required: true },
 ];
 
 const report = {

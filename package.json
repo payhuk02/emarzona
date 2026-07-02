@@ -36,6 +36,7 @@
     "verify:payment-v2-migrations": "node scripts/verify-payment-v2-migrations.mjs",
     "verify:payment-v2-edge-functions": "node scripts/verify-payment-v2-edge-functions.mjs",
     "verify:edge-functions-ci": "node scripts/verify-edge-functions-ci.mjs",
+    "test:multi-store-isolation": "vitest run src/lib/security/__tests__/multi-store-isolation-contract.test.ts",
     "verify:phase1-payments": "node scripts/verify-phase1-payments.mjs",
     "verify:phase1:signoff": "node scripts/verify-phase1-signoff.mjs",
     "verify:fulfillment-monitor": "node scripts/verify-fulfillment-monitor.mjs",

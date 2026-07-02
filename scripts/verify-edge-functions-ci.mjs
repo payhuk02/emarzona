@@ -2,6 +2,16 @@
 /** Reproduit .github/workflows/tests.yml job edge-functions */
 import { spawnSync } from 'node:child_process';
 
+const DENO = process.platform === 'win32' ? 'npx' : 'deno';
+const DENO_ARGS_PREFIX = process.platform === 'win32' ? ['deno'] : [];
+
+function runDeno(args) {
+  return spawnSync(DENO, [...DENO_ARGS_PREFIX, ...args], {
+    stdio: 'inherit',
+    shell: process.platform === 'win32',
+  });
+}
+
 const FMT_FILES = [
   'supabase/functions/_shared/stripe-api.ts',
   'supabase/functions/stripe-tax-calculate/index.ts',
@@ -12,10 +22,9 @@ const FMT_FILES = [
 ];
 
 const steps = [
-  { label: 'deno fmt --check (Stripe)', cmd: 'deno', args: ['fmt', '--check', ...FMT_FILES] },
+  { label: 'deno fmt --check (Stripe)', args: ['fmt', '--check', ...FMT_FILES] },
   {
     label: 'deno check email workflow',
-    cmd: 'deno',
     args: [
       'check',
       '--config',
@@ -28,7 +37,6 @@ const steps = [
   },
   {
     label: 'deno check Payment V2 / Stripe Tax',
-    cmd: 'deno',
     args: [
       'check',
       '--config',
@@ -40,7 +48,6 @@ const steps = [
   },
   {
     label: 'deno test contract',
-    cmd: 'deno',
     args: [
       'test',
       '--allow-env',
@@ -56,7 +63,7 @@ const steps = [
 let ok = true;
 for (const step of steps) {
   console.log(`\n▶ ${step.label}`);
-  const r = spawnSync(step.cmd, step.args, { stdio: 'inherit', shell: process.platform === 'win32' });
+  const r = runDeno(step.args);
   if (r.status !== 0) {
     ok = false;
     break;
