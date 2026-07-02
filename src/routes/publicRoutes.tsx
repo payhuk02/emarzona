@@ -209,6 +209,7 @@ export const publicRoutes = (
     <Route path="/auth/signup" element={<Navigate to="/register" replace />} />
     <Route path="/auth/sso/:storeSlug" element={<StoreSsoLoginPage />} />
     <Route path="/marketplace" element={<Marketplace />} />
+    <Route path="/marketplace/category/:categorySlug" element={<Marketplace />} />
     <Route path="/recommendations" element={<Recommendations />} />
     <Route path="/recommendations/history-based" element={<HistoryBasedRecommendations />} />
     <Route path="/discover" element={<Discover />} />

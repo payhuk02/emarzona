@@ -45,6 +45,7 @@ import {
   useMarketplacePagination,
   needsTypeSpecificRpc,
   useMarketplaceUrlSync,
+  useMarketplaceComparison,
 } from '@/hooks/marketplace';
 import { MarketplaceHeroSection } from '@/components/marketplace/MarketplaceHeroSection';
 import { MarketplaceControlsSection } from '@/components/marketplace/MarketplaceControlsSection';
@@ -242,17 +243,8 @@ const Marketplace = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
   const [, setShowComparison] = useState(false);
-  const [comparisonProducts, setComparisonProducts] = useState<Product[]>(() => {
-    // Charger la comparaison depuis localStorage
-    try {
-      const saved = localStorage.getItem('marketplace-comparison');
-      const parsed = saved ? (JSON.parse(saved) as unknown) : [];
-      return Array.isArray(parsed) ? (parsed as Product[]) : [];
-    } catch (error) {
-      logger.warn('[Marketplace] Comparison storage is corrupted. Resetting.', { error });
-      return [];
-    }
-  });
+  const { comparisonProducts, removeFromComparison, clearComparison, addToComparison } =
+    useMarketplaceComparison();
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 100000]);
 
   // ✅ REFACTORING: PRICE_RANGES, SORT_OPTIONS, PRODUCT_TAGS sont maintenant fournis par useMarketplaceFilters
@@ -388,39 +380,6 @@ const Marketplace = () => {
     filters.featuredOnly,
     resetPagination,
   ]);
-
-  // Persister la comparaison dans localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem('marketplace-comparison', JSON.stringify(comparisonProducts));
-    } catch (error) {
-      // Storage peut être plein / bloqué (mode privé, quotas, etc.) -> ne pas casser la page
-      logger.warn('[Marketplace] Failed to persist comparison to localStorage', { error });
-    }
-  }, [comparisonProducts]);
-
-  // Gestion de la comparaison
-  // Note: addToComparison peut être utilisé par ProductCardModern si nécessaire
-
-  const removeFromComparison = useCallback(
-    (productId: string) => {
-      setComparisonProducts(prev => prev.filter(p => p.id !== productId));
-      toast({
-        title: 'Produit retiré',
-        description: 'Le produit a été retiré de la comparaison',
-      });
-    },
-    [toast]
-  );
-
-  const clearComparison = useCallback(() => {
-    setComparisonProducts([]);
-    localStorage.removeItem('marketplace-comparison');
-    toast({
-      title: 'Comparaison effacée',
-      description: 'Tous les produits ont été retirés de la comparaison',
-    });
-  }, [toast]);
 
   // Obtenir les produits favoris
   const favoriteProducts = useMemo(() => {

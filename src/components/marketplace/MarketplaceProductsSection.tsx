@@ -224,10 +224,11 @@ export const MarketplaceProductsSection = React.memo<MarketplaceProductsSectionP
                 <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
             </div>
-          ) : loading && !hasLoadedOnce ? (
-            // ✅ OPTIMISATION: Afficher skeleton au premier chargement
+          ) : isLoadingProducts || (loading && !hasLoadedOnce) ? (
+            // ✅ OPTIMISATION: Afficher skeleton au premier chargement ET pendant les filtrages
+            // Cela maintient la structure de la grille et évite tout Cumulative Layout Shift (CLS)
             <div
-              className="w-full"
+              className="w-full animate-in fade-in duration-300"
               role="status"
               aria-live="polite"
               aria-label={t('marketplace.loading', 'Chargement des produits...')}
@@ -238,38 +239,18 @@ export const MarketplaceProductsSection = React.memo<MarketplaceProductsSectionP
               <ProductListSkeleton count={pagination.itemsPerPage} />
             </div>
           ) : products.length > 0 ? (
-            <>
-              {/* Indicateur de chargement discret en haut si rechargement */}
-              {isLoadingProducts && hasLoadedOnce && (
-                <div className="flex justify-center mb-4">
-                  <div className="h-1 w-32 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-full animate-pulse" />
-                </div>
-              )}
-
+            <div className="w-full animate-in fade-in duration-300">
               {/* ✅ OPTIMISATION: Utiliser VirtualizedProductGrid dès 12 produits (1 page) */}
               {products.length >= 12 ? (
                 <VirtualizedProductGrid
                   count={products.length}
                   renderItem={renderProductItem}
-                  loading={isLoadingProducts && hasLoadedOnce}
+                  loading={false}
                   loadingCount={pagination.itemsPerPage}
-                  className={
-                    isLoadingProducts && hasLoadedOnce
-                      ? 'opacity-75 transition-opacity duration-300'
-                      : ''
-                  }
                   emptyMessage={t('marketplace.noProducts')}
                 />
               ) : (
-                <ProductGrid
-                  className={
-                    isLoadingProducts && hasLoadedOnce
-                      ? 'opacity-75 transition-opacity duration-300'
-                      : ''
-                  }
-                >
-                  {renderedProducts}
-                </ProductGrid>
+                <ProductGrid>{renderedProducts}</ProductGrid>
               )}
 
               {/* Pagination */}
@@ -329,7 +310,7 @@ export const MarketplaceProductsSection = React.memo<MarketplaceProductsSectionP
                   </Button>
                 </nav>
               )}
-            </>
+            </div>
           ) : (
             <div className="mp-empty-state text-center py-12 sm:py-16 lg:py-20 px-2">
               <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-full bg-[var(--lp-surface-muted)] mx-auto mb-4 sm:mb-6 flex items-center justify-center">

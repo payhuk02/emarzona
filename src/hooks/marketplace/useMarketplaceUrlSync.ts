@@ -1,5 +1,5 @@
 import { useEffect, useRef, type Dispatch, type SetStateAction } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate, useParams, useLocation } from 'react-router-dom';
 import { FilterState, PaginationState } from '@/types/marketplace';
 import { filtersToSearchParams, parseMarketplaceSearchParams } from '@/lib/marketplace-url-filters';
 
@@ -26,11 +26,23 @@ export function useMarketplaceUrlSync({
   debouncedSearch,
 }: UseMarketplaceUrlSyncOptions) {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { categorySlug } = useParams<{ categorySlug?: string }>();
+  const navigate = useNavigate();
+  const location = useLocation();
   const mountedRef = useRef(false);
   const lastWrittenRef = useRef('');
+  const lastPathRef = useRef(location.pathname);
 
-  const applyFromUrl = (params: URLSearchParams) => {
+  const applyFromUrl = (params: URLSearchParams, currentCategorySlug?: string) => {
     const { filters: urlFilters, search, page } = parseMarketplaceSearchParams(params);
+
+    // Si on est sur une route /marketplace/category/:slug, on surcharge le filtre
+    if (currentCategorySlug) {
+      urlFilters.category = currentCategorySlug;
+    } else if (!urlFilters.category) {
+      urlFilters.category = 'all';
+    }
+
     if (Object.keys(urlFilters).length > 0) {
       setFilters(prev => ({ ...prev, ...urlFilters }));
     }
@@ -41,8 +53,9 @@ export function useMarketplaceUrlSync({
   };
 
   useEffect(() => {
-    applyFromUrl(searchParams);
+    applyFromUrl(searchParams, categorySlug);
     lastWrittenRef.current = searchParams.toString();
+    lastPathRef.current = location.pathname;
     mountedRef.current = true;
     // Hydratation initiale uniquement
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -50,25 +63,51 @@ export function useMarketplaceUrlSync({
 
   useEffect(() => {
     if (!mountedRef.current) return;
-    const current = searchParams.toString();
-    if (current === lastWrittenRef.current) return;
-    applyFromUrl(searchParams);
-    lastWrittenRef.current = current;
+    const currentSearch = searchParams.toString();
+    const currentPath = location.pathname;
+
+    // Si ni la recherche ni le path n'ont changé, on ignore
+    if (currentSearch === lastWrittenRef.current && currentPath === lastPathRef.current) return;
+
+    applyFromUrl(searchParams, categorySlug);
+    lastWrittenRef.current = currentSearch;
+    lastPathRef.current = currentPath;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
+  }, [searchParams, location.pathname, categorySlug]);
 
   useEffect(() => {
     if (!mountedRef.current) return;
 
+    // Retirer la catégorie des filtres passés à filtersToSearchParams pour ne pas l'avoir dans ?category=...
+    // si on l'intègre dans l'URL.
+    const filtersForQuery = { ...filters };
+    let targetPath = '/marketplace';
+
+    if (filters.category && filters.category !== 'all' && filters.category !== 'featured') {
+      targetPath = `/marketplace/category/${filters.category}`;
+      delete filtersForQuery.category;
+    }
+
     const nextParams = filtersToSearchParams(
-      { ...filters, search: debouncedSearch },
+      { ...filtersForQuery, search: debouncedSearch },
       pagination.currentPage,
       debouncedSearch || searchInput
     );
+
     const nextStr = nextParams.toString();
-    if (nextStr === lastWrittenRef.current) return;
+
+    if (nextStr === lastWrittenRef.current && targetPath === lastPathRef.current) return;
 
     lastWrittenRef.current = nextStr;
-    setSearchParams(nextParams, { replace: true });
-  }, [filters, debouncedSearch, pagination.currentPage, searchInput, setSearchParams]);
+    lastPathRef.current = targetPath;
+
+    // Au lieu d'utiliser juste setSearchParams, on utilise navigate pour potentiellement changer de route
+    navigate(
+      {
+        pathname: targetPath,
+        search: nextStr ? `?${nextStr}` : '',
+      },
+      { replace: true }
+    );
+  }, [filters, debouncedSearch, pagination.currentPage, searchInput, navigate]);
 }
