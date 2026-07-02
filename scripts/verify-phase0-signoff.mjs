@@ -15,6 +15,7 @@ const CHECKS = [
   { label: 'Client portal RLS contract (offline)', cmd: ['run', 'test:client-portal-rls'] },
   { label: 'Edge Functions CI (offline)', cmd: ['run', 'verify:edge-functions-ci'] },
   { label: 'Multi-store isolation contract', cmd: ['run', 'test:multi-store-isolation'] },
+];
 
 const results = [];
 let allRequiredOk = true;
