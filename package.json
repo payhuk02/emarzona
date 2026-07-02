@@ -36,7 +36,7 @@
     "verify:payment-v2-migrations": "node scripts/verify-payment-v2-migrations.mjs",
     "verify:payment-v2-edge-functions": "node scripts/verify-payment-v2-edge-functions.mjs",
     "verify:edge-functions-ci": "node scripts/verify-edge-functions-ci.mjs",
-    "fmt:edge-stripe": "deno fmt supabase/functions/_shared/stripe-api.ts supabase/functions/stripe-tax-calculate/index.ts supabase/functions/stripe-create-checkout/index.ts supabase/functions/stripe-connect-onboard/index.ts supabase/functions/stripe-connect-webhook/index.ts supabase/functions/stripe-refund/index.ts supabase/functions/stripe-tax-calculate/index.test.ts",
+    "fmt:edge-stripe": "npx deno fmt supabase/functions/_shared/stripe-api.ts supabase/functions/stripe-tax-calculate/index.ts supabase/functions/stripe-create-checkout/index.ts supabase/functions/stripe-connect-onboard/index.ts supabase/functions/stripe-connect-webhook/index.ts supabase/functions/stripe-refund/index.ts supabase/functions/stripe-tax-calculate/index.test.ts",
     "test:multi-store-isolation": "vitest run src/lib/security/__tests__/multi-store-isolation-contract.test.ts",
     "verify:phase1-payments": "node scripts/verify-phase1-payments.mjs",
     "verify:phase1:signoff": "node scripts/verify-phase1-signoff.mjs",
@@ -303,14 +303,5 @@
     "vitest": "^4.0.1",
     "wait-on": "^9.0.1",
     "ws": "^8.21.0"
-  },
-  "lint-staged": {
-    "*.{ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{json,css,md}": [
-      "prettier --write"
-    ]
   }
 }

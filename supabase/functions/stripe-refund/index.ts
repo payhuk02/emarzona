@@ -1,15 +1,15 @@
 /**
  * Stripe Connect — remboursement PaymentIntent (vendeur authentifié)
  */
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { buildCorsHeaders, jsonResponse } from '../_shared/cors.ts';
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { buildCorsHeaders, jsonResponse } from "../_shared/cors.ts";
 import {
   assertStoreOwner,
   createSupabaseAdmin,
   createSupabaseUserClient,
-} from '../_shared/supabase-admin.ts';
-import { stripeRequest, toStripeAmount } from '../_shared/stripe-api.ts';
-import { applyPaymentRefund } from '../_shared/apply-payment-refund.ts';
+} from "../_shared/supabase-admin.ts";
+import { stripeRequest, toStripeAmount } from "../_shared/stripe-api.ts";
+import { applyPaymentRefund } from "../_shared/apply-payment-refund.ts";
 
 interface RefundBody {
   transactionId: string;
@@ -17,49 +17,57 @@ interface RefundBody {
   reason?: string;
 }
 
-serve(async req => {
-  const origin = req.headers.get('Origin');
-  if (req.method === 'OPTIONS') {
+serve(async (req) => {
+  const origin = req.headers.get("Origin");
+  if (req.method === "OPTIONS") {
     return new Response(null, { headers: buildCorsHeaders(origin) });
   }
-  if (req.method !== 'POST') {
-    return jsonResponse({ error: 'Method not allowed' }, 405, origin);
+  if (req.method !== "POST") {
+    return jsonResponse({ error: "Method not allowed" }, 405, origin);
   }
 
   try {
-    const authHeader = req.headers.get('Authorization');
+    const authHeader = req.headers.get("Authorization");
     const supabaseUser = createSupabaseUserClient(authHeader);
     const supabaseAdmin = createSupabaseAdmin();
     const body = (await req.json()) as RefundBody;
 
     if (!body.transactionId) {
-      return jsonResponse({ error: 'transactionId is required' }, 400, origin);
+      return jsonResponse({ error: "transactionId is required" }, 400, origin);
     }
 
     const { data: transaction, error: txError } = await supabaseAdmin
-      .from('transactions')
+      .from("transactions")
       .select(
-        'id, store_id, status, amount, currency, payment_provider, provider_payment_intent_id'
+        "id, store_id, status, amount, currency, payment_provider, provider_payment_intent_id",
       )
-      .eq('id', body.transactionId)
+      .eq("id", body.transactionId)
       .single();
 
     if (txError || !transaction) {
-      return jsonResponse({ error: 'Transaction not found' }, 404, origin);
+      return jsonResponse({ error: "Transaction not found" }, 404, origin);
     }
 
-    if (transaction.payment_provider !== 'stripe_connect') {
-      return jsonResponse({ error: 'Not a Stripe Connect transaction' }, 400, origin);
+    if (transaction.payment_provider !== "stripe_connect") {
+      return jsonResponse(
+        { error: "Not a Stripe Connect transaction" },
+        400,
+        origin,
+      );
     }
 
     await assertStoreOwner(supabaseUser, transaction.store_id);
 
     const paymentIntentId = transaction.provider_payment_intent_id;
     if (!paymentIntentId) {
-      return jsonResponse({ error: 'Stripe PaymentIntent ID missing' }, 400, origin);
+      return jsonResponse(
+        { error: "Stripe PaymentIntent ID missing" },
+        400,
+        origin,
+      );
     }
 
-    const currency = (transaction.currency || 'EUR').toUpperCase();
+    const currency = (transaction.currency || "EUR").toUpperCase();
     const txAmount = Number(transaction.amount ?? 0);
     const refundAmount = body.amount ?? txAmount;
 
@@ -70,8 +78,8 @@ serve(async req => {
       params.amount = String(toStripeAmount(refundAmount, currency));
     }
     if (body.reason) {
-      params.reason = 'requested_by_customer';
-      params['metadata[reason]'] = body.reason.slice(0, 500);
+      params.reason = "requested_by_customer";
+      params["metadata[reason]"] = body.reason.slice(0, 500);
     }
 
     const stripeRefund = await stripeRequest<{
@@ -79,10 +87,10 @@ serve(async req => {
       status: string;
       amount: number;
       currency: string;
-    }>('/refunds', params);
+    }>("/refunds", params);
 
     const refundedMajor =
-      currency.toLowerCase() === 'xof' || currency.toLowerCase() === 'xaf'
+      currency.toLowerCase() === "xof" || currency.toLowerCase() === "xaf"
         ? stripeRefund.amount
         : stripeRefund.amount / 100;
 
@@ -91,7 +99,7 @@ serve(async req => {
       amount: refundedMajor,
       currency: stripeRefund.currency.toUpperCase(),
       reason: body.reason,
-      provider: 'stripe_connect',
+      provider: "stripe_connect",
     });
 
     return jsonResponse(
@@ -103,11 +111,11 @@ serve(async req => {
         status: stripeRefund.status,
       },
       200,
-      origin
+      origin,
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    console.error('stripe-refund error:', message);
+    console.error("stripe-refund error:", message);
     return jsonResponse({ error: message, success: false }, 500, origin);
   }
 });
