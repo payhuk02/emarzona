@@ -32,8 +32,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { StableDropdownMenu, DropdownMenuSeparator } from '@/components/ui/stable-dropdown-menu';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Pagination,
@@ -66,8 +64,6 @@ import {
   ArrowUp,
   CreditCard,
   Gift,
-  Volume2,
-  Accessibility,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
@@ -86,6 +82,9 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { isSafeInternalNavUrl } from '@/lib/navigation/keyboard-shortcuts';
 import { cn } from '@/lib/utils';
+import { NotificationExperienceSettings } from '@/components/settings/NotificationExperienceSettings';
+import { mergeNotificationPreferences } from '@/lib/notifications/notification-preferences-defaults';
+import type { NotificationPreferences } from '@/types/notifications';
 
 export default function NotificationsManagement() {
   const navigate = useNavigate();
@@ -902,182 +901,21 @@ export default function NotificationsManagement() {
 
         {/* Preferences Dialog */}
         <Dialog open={isPreferencesOpen} onOpenChange={setIsPreferencesOpen}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Préférences de Notifications</DialogTitle>
-              <DialogDescription>Configurez vos préférences de notifications</DialogDescription>
+              <DialogDescription>
+                Canaux, sons, vibrations et accessibilité — identiques aux paramètres compte
+              </DialogDescription>
             </DialogHeader>
             {preferences && (
-              <div className="space-y-6 py-4">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="email_notifications">Notifications Email</Label>
-                    <Switch
-                      id="email_notifications"
-                      checked={preferences.email_notifications ?? true}
-                      onCheckedChange={checked => {
-                        updatePreferences.mutate({ email_notifications: checked });
-                      }}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="push_notifications">Notifications Push</Label>
-                    <Switch
-                      id="push_notifications"
-                      checked={preferences.push_notifications ?? true}
-                      onCheckedChange={checked => {
-                        updatePreferences.mutate({ push_notifications: checked });
-                      }}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="sms_notifications">Notifications SMS</Label>
-                    <Switch
-                      id="sms_notifications"
-                      checked={preferences.sms_notifications ?? false}
-                      onCheckedChange={checked => {
-                        updatePreferences.mutate({ sms_notifications: checked });
-                      }}
-                    />
-                  </div>
-                </div>
-
-                {/* Section Sons et Vibrations */}
-                <div className="border-t pt-4">
-                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                    <Volume2 className="h-5 w-5" />
-                    Sons et Vibrations
-                  </h3>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="sound_notifications" className="flex items-center gap-2">
-                        Sons de notifications
-                        <span className="text-sm text-muted-foreground">
-                          (recommandé pour l'accessibilité)
-                        </span>
-                      </Label>
-                      <Switch
-                        id="sound_notifications"
-                        checked={preferences.sound_notifications ?? true}
-                        onCheckedChange={checked => {
-                          updatePreferences.mutate({ sound_notifications: checked });
-                        }}
-                      />
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="vibration_notifications" className="flex items-center gap-2">
-                        Vibrations
-                        <span className="text-sm text-muted-foreground">(mobile uniquement)</span>
-                      </Label>
-                      <Switch
-                        id="vibration_notifications"
-                        checked={preferences.vibration_notifications ?? true}
-                        onCheckedChange={checked => {
-                          updatePreferences.mutate({ vibration_notifications: checked });
-                        }}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="vibration_intensity">Intensité des vibrations</Label>
-                      <Select
-                        value={preferences.vibration_intensity || 'medium'}
-                        onValueChange={value => {
-                          updatePreferences.mutate({
-                            vibration_intensity: value as 'light' | 'medium' | 'heavy',
-                          });
-                        }}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="light">Légère</SelectItem>
-                          <SelectItem value="medium">Normale</SelectItem>
-                          <SelectItem value="heavy">Intense</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="notification_sound_type">Type de son</Label>
-                      <Select
-                        value={preferences.notification_sound_type || 'default'}
-                        onValueChange={value => {
-                          updatePreferences.mutate({
-                            notification_sound_type: value as 'default' | 'gentle' | 'urgent',
-                          });
-                        }}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="default">Par défaut</SelectItem>
-                          <SelectItem value="gentle">Doux</SelectItem>
-                          <SelectItem value="urgent">Urgent</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Section Accessibilité */}
-                <div className="border-t pt-4">
-                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                    <Accessibility className="h-5 w-5" />
-                    Accessibilité
-                  </h3>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="accessibility_mode" className="flex items-center gap-2">
-                        Mode accessibilité
-                        <span className="text-sm text-muted-foreground">
-                          (optimisations pour les utilisateurs handicapés)
-                        </span>
-                      </Label>
-                      <Switch
-                        id="accessibility_mode"
-                        checked={preferences.accessibility_mode ?? false}
-                        onCheckedChange={checked => {
-                          updatePreferences.mutate({ accessibility_mode: checked });
-                        }}
-                      />
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="high_contrast_sounds" className="flex items-center gap-2">
-                        Sons haute contraste
-                        <span className="text-sm text-muted-foreground">
-                          (différenciation améliorée)
-                        </span>
-                      </Label>
-                      <Switch
-                        id="high_contrast_sounds"
-                        checked={preferences.high_contrast_sounds ?? false}
-                        onCheckedChange={checked => {
-                          updatePreferences.mutate({ high_contrast_sounds: checked });
-                        }}
-                      />
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="screen_reader_friendly" className="flex items-center gap-2">
-                        Compatible lecteur d'écran
-                        <span className="text-sm text-muted-foreground">(optimisations ARIA)</span>
-                      </Label>
-                      <Switch
-                        id="screen_reader_friendly"
-                        checked={preferences.screen_reader_friendly ?? true}
-                        onCheckedChange={checked => {
-                          updatePreferences.mutate({ screen_reader_friendly: checked });
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <NotificationExperienceSettings
+                compact
+                prefs={mergeNotificationPreferences(preferences)}
+                onChange={(field, value) => {
+                  updatePreferences.mutate({ [field]: value } as Partial<NotificationPreferences>);
+                }}
+              />
             )}
           </DialogContent>
         </Dialog>

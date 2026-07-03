@@ -293,6 +293,8 @@ self.addEventListener('push', event => {
         tag: data.tag || data.type || notificationData.tag,
         data: data.data || data.metadata || {},
         requireInteraction: data.requireInteraction || false,
+        silent: data.silent !== undefined ? data.silent : !notificationData.soundEnabled,
+        vibrate: Array.isArray(data.vibrate) ? data.vibrate : undefined,
         url: data.url || data.action_url || '/',
         soundEnabled:
           data.soundEnabled !== undefined ? data.soundEnabled : notificationData.soundEnabled,
@@ -326,8 +328,11 @@ self.addEventListener('push', event => {
     tag: notificationData.tag,
     data: { ...notificationData.data, url: notificationData.url },
     requireInteraction: notificationData.requireInteraction,
-    silent: !notificationData.soundEnabled,
-    vibrate: getVibrationPattern(),
+    silent:
+      notificationData.silent !== undefined
+        ? notificationData.silent
+        : !notificationData.soundEnabled,
+    vibrate: notificationData.vibrate ?? getVibrationPattern(),
     timestamp: Date.now(),
     actions: notificationData.data.actions || [],
   };

@@ -22,6 +22,7 @@ import { useState, useEffect } from 'react';
 import type { NotificationPreferences } from '@/types/notifications';
 import { EmailPreferencesSettings } from '@/components/settings/EmailPreferencesSettings';
 import { mergeNotificationPreferences } from '@/lib/notifications/notification-preferences-defaults';
+import { NotificationExperienceSettings } from '@/components/settings/NotificationExperienceSettings';
 
 export const NotificationSettings = () => {
   const { toast } = useToast();
@@ -61,7 +62,10 @@ export const NotificationSettings = () => {
     );
   }
 
-  const handleToggle = (field: keyof NotificationPreferences, value: boolean | string) => {
+  const handleToggle = (
+    field: keyof NotificationPreferences,
+    value: boolean | string | number | null
+  ) => {
     setLocalPrefs(prev => ({ ...prev, [field]: value }));
   };
 
@@ -254,6 +258,18 @@ export const NotificationSettings = () => {
 
           <div className="flex items-center justify-between">
             <div>
+              <Label htmlFor="email_lesson_complete">Leçon terminée</Label>
+              <p className="text-sm text-muted-foreground">Quand vous terminez une leçon</p>
+            </div>
+            <Switch
+              id="email_lesson_complete"
+              checked={localPrefs.email_lesson_complete ?? false}
+              onCheckedChange={checked => handleToggle('email_lesson_complete', checked)}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div>
               <Label htmlFor="email_quiz_result">Résultats quiz</Label>
               <p className="text-sm text-muted-foreground">Quand vous passez un quiz</p>
             </div>
@@ -261,6 +277,40 @@ export const NotificationSettings = () => {
               id="email_quiz_result"
               checked={localPrefs.email_quiz_result ?? false}
               onCheckedChange={checked => handleToggle('email_quiz_result', checked)}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <Label htmlFor="email_course_update">Mises à jour de cours</Label>
+              <p className="text-sm text-muted-foreground">Nouveau contenu sur vos cours</p>
+            </div>
+            <Switch
+              id="email_course_update"
+              checked={localPrefs.email_course_update ?? false}
+              onCheckedChange={checked => handleToggle('email_course_update', checked)}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <Label htmlFor="email_comment_reply">Réponses à vos commentaires</Label>
+            </div>
+            <Switch
+              id="email_comment_reply"
+              checked={localPrefs.email_comment_reply ?? false}
+              onCheckedChange={checked => handleToggle('email_comment_reply', checked)}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <Label htmlFor="email_instructor_message">Messages instructeur</Label>
+            </div>
+            <Switch
+              id="email_instructor_message"
+              checked={localPrefs.email_instructor_message ?? false}
+              onCheckedChange={checked => handleToggle('email_instructor_message', checked)}
             />
           </div>
         </CardContent>
@@ -313,6 +363,50 @@ export const NotificationSettings = () => {
 
           <div className="flex items-center justify-between">
             <div>
+              <Label htmlFor="app_certificate_ready">Certificat disponible</Label>
+            </div>
+            <Switch
+              id="app_certificate_ready"
+              checked={localPrefs.app_certificate_ready ?? false}
+              onCheckedChange={checked => handleToggle('app_certificate_ready', checked)}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <Label htmlFor="app_new_course">Nouveaux cours</Label>
+            </div>
+            <Switch
+              id="app_new_course"
+              checked={localPrefs.app_new_course ?? false}
+              onCheckedChange={checked => handleToggle('app_new_course', checked)}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <Label htmlFor="app_course_update">Mises à jour de cours</Label>
+            </div>
+            <Switch
+              id="app_course_update"
+              checked={localPrefs.app_course_update ?? false}
+              onCheckedChange={checked => handleToggle('app_course_update', checked)}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <Label htmlFor="app_quiz_result">Résultats quiz</Label>
+            </div>
+            <Switch
+              id="app_quiz_result"
+              checked={localPrefs.app_quiz_result ?? false}
+              onCheckedChange={checked => handleToggle('app_quiz_result', checked)}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div>
               <Label htmlFor="app_affiliate_sale">Ventes affilié</Label>
             </div>
             <Switch
@@ -321,8 +415,32 @@ export const NotificationSettings = () => {
               onCheckedChange={checked => handleToggle('app_affiliate_sale', checked)}
             />
           </div>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <Label htmlFor="app_comment_reply">Réponses à vos commentaires</Label>
+            </div>
+            <Switch
+              id="app_comment_reply"
+              checked={localPrefs.app_comment_reply ?? false}
+              onCheckedChange={checked => handleToggle('app_comment_reply', checked)}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <Label htmlFor="app_instructor_message">Messages instructeur</Label>
+            </div>
+            <Switch
+              id="app_instructor_message"
+              checked={localPrefs.app_instructor_message ?? false}
+              onCheckedChange={checked => handleToggle('app_instructor_message', checked)}
+            />
+          </div>
         </CardContent>
       </Card>
+
+      <NotificationExperienceSettings prefs={localPrefs} onChange={handleToggle} />
 
       {/* Résumé Email */}
       <Card>

@@ -9,8 +9,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useEffect, useState } from 'react';
 import { logger } from '@/lib/logger';
 import { isSafeInternalNavUrl } from '@/lib/navigation/keyboard-shortcuts';
-import { playNotificationSound } from '@/lib/notifications/play-notification-sound';
-import type { NotificationSoundType } from '@/lib/notifications/play-notification-sound';
+import { playInAppNotificationAlert } from '@/lib/notifications/in-app-notification-alert';
+import { isNotificationPaused } from '@/lib/notifications/notification-pause';
+import { getVibrationPattern } from '@/lib/notifications/vibration-patterns';
 import type { Json } from '@/integrations/supabase/types';
 import type {
   Notification,
@@ -344,36 +345,17 @@ export const useRealtimeNotifications = (options?: { enabled?: boolean }) => {
             // Invalider le cache pour rafraîchir
             queryClient.invalidateQueries({ queryKey: ['notifications'] });
 
-            // Afficher une notification browser avec son et vibration
-            if ('Notification' in window && Notification.permission === 'granted') {
-              const notif = payload.new as Notification;
+            const notif = payload.new as Notification;
+            const paused = isNotificationPaused(preferences?.pause_until);
 
-              // Respecter les préférences utilisateur pour les sons et vibrations
-              const shouldPlaySound = preferences?.sound_notifications !== false; // true par défaut
-              const shouldVibrate = preferences?.vibration_notifications !== false; // true par défaut
+            if (paused) return;
 
-              if (shouldPlaySound) {
-                playNotificationSound(
-                  (preferences?.notification_sound_type as NotificationSoundType) || 'default'
-                );
-              }
+            const osNotificationGranted =
+              'Notification' in window && Notification.permission === 'granted';
+            const shouldPlaySound = preferences?.sound_notifications !== false;
+            const shouldVibrate = preferences?.vibration_notifications !== false;
 
-              // Déterminer l'intensité de vibration selon les préférences
-              const getVibrationPattern = (): number[] => {
-                if (!shouldVibrate) return [];
-
-                const intensity = preferences?.vibration_intensity || 'medium';
-                switch (intensity) {
-                  case 'light':
-                    return [100, 50, 100];
-                  case 'heavy':
-                    return [300, 150, 300];
-                  case 'medium':
-                  default:
-                    return [200, 100, 200];
-                }
-              };
-
+            if (osNotificationGranted) {
               const notification = new Notification(notif.title, {
                 body: notif.message,
                 icon: '/icon-192x192.png',
@@ -385,12 +367,11 @@ export const useRealtimeNotifications = (options?: { enabled?: boolean }) => {
                   action_url: notif.action_url,
                 },
                 requireInteraction: false,
-                silent: !shouldPlaySound, // 🔄 Respecte les préférences utilisateur
-                vibrate: getVibrationPattern(), // 🔄 Vibration conditionnelle selon préférences
+                silent: !shouldPlaySound,
+                vibrate: getVibrationPattern(preferences?.vibration_intensity, shouldVibrate),
                 timestamp: Date.now(),
               } as NotificationOptions);
 
-              // Ouvrir l'application quand on clique sur la notification
               notification.onclick = event => {
                 event.preventDefault();
                 const rawUrl = notif.action_url?.trim();
@@ -399,6 +380,8 @@ export const useRealtimeNotifications = (options?: { enabled?: boolean }) => {
                 window.location.href = target;
                 notification.close();
               };
+            } else {
+              playInAppNotificationAlert(preferences, { forceInTabSound: true });
             }
           }
         )
@@ -424,6 +407,10 @@ export const useRealtimeNotifications = (options?: { enabled?: boolean }) => {
     subscriptionEnabled,
     preferences?.sound_notifications,
     preferences?.vibration_notifications,
+    preferences?.pause_until,
+    preferences?.sound_volume,
+    preferences?.notification_sound_type,
+    preferences?.high_contrast_sounds,
   ]);
 
   return { isSubscribed };

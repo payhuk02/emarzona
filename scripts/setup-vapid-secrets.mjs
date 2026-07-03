@@ -96,6 +96,8 @@ async function upsertVercelEnv(key, value, targets = ['production', 'preview']) 
 }
 
 function setSupabaseSecrets() {
+  const vapidSubject =
+    env.VAPID_SUBJECT?.trim() || 'mailto:contact@emarzona.com';
   const result = spawnSync(
     'npx',
     [
@@ -104,6 +106,7 @@ function setSupabaseSecrets() {
       'set',
       `VAPID_PUBLIC_KEY=${publicKey}`,
       `VAPID_PRIVATE_KEY=${privateKey}`,
+      `VAPID_SUBJECT=${vapidSubject}`,
       '--project-ref',
       projectRef,
     ],

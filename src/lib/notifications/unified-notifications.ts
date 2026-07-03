@@ -12,24 +12,8 @@ import { logger } from '@/lib/logger';
 import { notificationRateLimiter } from './rate-limiter';
 import { notificationRetryService } from './retry-service';
 import { logNotification } from './notification-logger';
-/** Table `user_push_tokens` absent from generated Database types */
-type UserPushTokensClient = {
-  from: (table: 'user_push_tokens') => {
-    select: (columns: string) => {
-      eq: (
-        column: string,
-        value: string
-      ) => {
-        eq: (
-          column: string,
-          value: boolean
-        ) => Promise<{
-          data: Array<{ token: string; platform: string }> | null;
-        }>;
-      };
-    };
-  };
-};
+import { isNotificationPaused } from './notification-pause';
+import { getVibrationPattern } from './vibration-patterns';
 
 export type NotificationType =
   // Produits digitaux
@@ -106,6 +90,10 @@ export interface UnifiedNotification {
 
 export interface NotificationPreferences {
   user_id: string;
+  email_notifications?: boolean | null;
+  push_notifications?: boolean | null;
+  sms_notifications?: boolean | null;
+  pause_until?: string | null;
   // Par type de notification
   preferences: Record<
     NotificationType,
@@ -305,6 +293,16 @@ function shouldSendNotification(
   preferences: NotificationPreferences | null,
   channel: 'in_app' | 'email' | 'sms' | 'push'
 ): boolean {
+  if (isNotificationPaused(preferences?.pause_until) && channel !== 'in_app') {
+    return false;
+  }
+
+  if (preferences) {
+    if (channel === 'email' && preferences.email_notifications === false) return false;
+    if (channel === 'push' && preferences.push_notifications === false) return false;
+    if (channel === 'sms' && preferences.sms_notifications === false) return false;
+  }
+
   if (!preferences) {
     // Par défaut, activer in_app et email
     return channel === 'in_app' || channel === 'email';
@@ -328,7 +326,7 @@ async function getUserNotificationPreferences(
     const { data, error } = await supabase
       .from('notification_preferences')
       .select(
-        'user_id,email_course_enrollment,email_course_complete,email_certificate_ready,email_new_course,email_affiliate_sale,app_course_enrollment,app_course_complete,app_certificate_ready,app_new_course,app_affiliate_sale'
+        'user_id,email_notifications,push_notifications,sms_notifications,pause_until,email_course_enrollment,email_lesson_complete,email_course_complete,email_certificate_ready,email_new_course,email_course_update,email_quiz_result,email_affiliate_sale,email_comment_reply,email_instructor_message,app_course_enrollment,app_lesson_complete,app_course_complete,app_certificate_ready,app_new_course,app_course_update,app_quiz_result,app_affiliate_sale,app_comment_reply,app_instructor_message'
       )
       .eq('user_id', userId)
       .single();
@@ -361,6 +359,10 @@ async function getUserNotificationPreferences(
 
     return {
       user_id: userId,
+      email_notifications: dataRecord.email_notifications as boolean | null | undefined,
+      push_notifications: dataRecord.push_notifications as boolean | null | undefined,
+      sms_notifications: dataRecord.sms_notifications as boolean | null | undefined,
+      pause_until: dataRecord.pause_until as string | null | undefined,
       preferences: preferences as Record<NotificationType, ChannelPrefs>,
     };
   } catch (error) {
@@ -374,12 +376,16 @@ async function getUserNotificationPreferences(
  */
 function mapPreferenceKeyToNotificationType(key: string): NotificationType | null {
   const mapping: Record<string, NotificationType> = {
-    email_course_enrollment: 'course_enrollment',
-    email_course_complete: 'course_complete',
-    email_certificate_ready: 'course_certificate_ready',
-    email_new_course: 'course_new_content',
-    email_affiliate_sale: 'affiliate_commission_earned',
-    // Ajouter plus de mappings selon les besoins
+    course_enrollment: 'course_enrollment',
+    lesson_complete: 'course_lesson_complete',
+    course_complete: 'course_complete',
+    certificate_ready: 'course_certificate_ready',
+    new_course: 'course_new_content',
+    course_update: 'course_new_content',
+    quiz_result: 'course_quiz_passed',
+    affiliate_sale: 'affiliate_commission_earned',
+    comment_reply: 'product_review_received',
+    instructor_message: 'vendor_message_received',
   };
 
   const baseKey = key.replace(/^(email_|app_)/, '');
@@ -477,69 +483,54 @@ async function sendSMSNotification(notification: UnifiedNotification): Promise<v
  */
 async function sendPushNotification(notification: UnifiedNotification): Promise<void> {
   try {
-    // Récupérer les tokens push de l'utilisateur
-    const { data: pushTokens } = await (supabase as unknown as UserPushTokensClient)
-      .from('user_push_tokens')
-      .select('token, platform')
+    const { data: preferences } = await supabase
+      .from('notification_preferences')
+      .select(
+        'sound_notifications, vibration_notifications, vibration_intensity, pause_until, push_notifications'
+      )
       .eq('user_id', notification.user_id)
-      .eq('is_active', true);
+      .maybeSingle();
 
-    if (!pushTokens || pushTokens.length === 0) {
-      logger.warn('No push tokens found for user', { userId: notification.user_id });
+    if (isNotificationPaused(preferences?.pause_until)) {
+      logger.info('Push skipped — user in do-not-disturb', { userId: notification.user_id });
       return;
     }
 
-    // 🔄 Récupérer les préférences utilisateur pour les sons et vibrations
-    const { data: preferences } = await supabase
-      .from('notification_preferences')
-      .select('sound_notifications, vibration_notifications, vibration_intensity')
-      .eq('user_id', notification.user_id)
-      .maybeSingle();
+    if (preferences?.push_notifications === false) {
+      logger.info('Push skipped — global push disabled', { userId: notification.user_id });
+      return;
+    }
 
     // Respecter les préférences utilisateur (true par défaut)
     const soundEnabled = preferences?.sound_notifications !== false;
     const vibrationEnabled = preferences?.vibration_notifications !== false;
     const vibrationIntensity = preferences?.vibration_intensity || 'medium';
 
-    // Déterminer le pattern de vibration selon l'intensité
-    const getVibrationPattern = (): number[] => {
-      if (!vibrationEnabled) return [];
+    const vibratePattern = getVibrationPattern(vibrationIntensity, vibrationEnabled);
 
-      switch (vibrationIntensity) {
-        case 'light':
-          return [100, 50, 100];
-        case 'heavy':
-          return [300, 150, 300];
-        case 'medium':
-        default:
-          return [200, 100, 200];
-      }
-    };
-
-    // Envoyer à chaque token avec son et affichage selon préférences
-    for (const tokenData of pushTokens) {
-      await supabase.functions.invoke('send-push', {
-        body: {
-          token: tokenData.token,
-          platform: tokenData.platform,
-          title: notification.title,
-          body: notification.message,
-          data: {
-            ...notification.metadata,
-            url: notification.action_url || '/',
-            type: notification.type,
-            // 🔄 Passer les préférences utilisateur au push
-            soundEnabled,
-            vibrationEnabled,
-            vibrationIntensity,
-          },
-          // Options pour son et affichage selon préférences
-          silent: !soundEnabled, // 🔄 Respecte les préférences utilisateur
-          requireInteraction:
-            notification.priority === 'urgent' || notification.priority === 'high',
-          vibrate: getVibrationPattern(), // 🔄 Vibration conditionnelle selon préférences
+    const { error: invokeError } = await supabase.functions.invoke('send-push-notification', {
+      body: {
+        user_id: notification.user_id,
+        title: notification.title,
+        body: notification.message,
+        url: notification.action_url || '/',
+        tag: notification.type,
+        priority: notification.priority,
+        silent: !soundEnabled,
+        requireInteraction: notification.priority === 'urgent' || notification.priority === 'high',
+        vibrate: vibratePattern,
+        data: {
+          ...notification.metadata,
+          type: notification.type,
+          soundEnabled,
+          vibrationEnabled,
+          vibrationIntensity,
         },
-      });
+      },
+    });
+
+    if (invokeError) {
+      throw invokeError;
     }
 
     logger.info('Push notification sent with user preferences', {

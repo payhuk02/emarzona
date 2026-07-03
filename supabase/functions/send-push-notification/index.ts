@@ -1,143 +1,179 @@
-import 'https://deno.land/x/xhr@0.1.0/mod.ts';
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
+import { buildPushHTTPRequest } from 'npm:@pushforge/builder@2.0.5';
+import { resolveVapidPrivateJWK } from '../_shared/vapid-utils.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': Deno.env.get('SITE_URL') || 'https://www.emarzona.com',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Max-Age': '86400',
 };
 
-// VAPID keys (doivent être configurées dans Supabase Edge Functions secrets)
 const VAPID_PUBLIC_KEY = Deno.env.get('VAPID_PUBLIC_KEY');
 const VAPID_PRIVATE_KEY = Deno.env.get('VAPID_PRIVATE_KEY');
+const VAPID_ADMIN_CONTACT =
+  Deno.env.get('VAPID_SUBJECT') || Deno.env.get('VAPID_ADMIN_CONTACT') || 'mailto:contact@emarzona.com';
 
-/**
- * Encoder une clé VAPID pour l'URL base64
- */
-function urlBase64ToUint8Array(base64String: string): Uint8Array {
-  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-  const rawData = atob(base64);
-  const outputArray = new Uint8Array(rawData.length);
-  for (let i = 0; i < rawData.length; ++i) {
-    outputArray[i] = rawData.charCodeAt(i);
-  }
-  return outputArray;
+type PushPayload = {
+  title: string;
+  body: string;
+  icon?: string;
+  badge?: string;
+  tag?: string;
+  url?: string;
+  data?: Record<string, unknown>;
+  silent?: boolean;
+  requireInteraction?: boolean;
+  vibrate?: number[];
+  soundEnabled?: boolean;
+  vibrationEnabled?: boolean;
+  vibrationIntensity?: string;
+  urgency?: 'very-low' | 'low' | 'normal' | 'high';
+  ttl?: number;
+};
+
+type PushSubscriptionRow = {
+  id: string;
+  endpoint: string;
+  keys: { p256dh: string; auth: string };
+};
+
+function mapUrgency(priority?: string): PushPayload['urgency'] {
+  if (priority === 'urgent') return 'high';
+  if (priority === 'high') return 'high';
+  if (priority === 'low') return 'low';
+  return 'normal';
 }
 
-/**
- * Générer la signature JWT pour VAPID
- */
-async function generateVAPIDJWT(endpoint: string): Promise<string> {
-  // Note: Cette implémentation simplifiée nécessite une bibliothèque JWT
-  // Pour une production réelle, utilisez une bibliothèque JWT appropriée
-  // Pour l'instant, on retourne un placeholder
-  // TODO: Implémenter la génération JWT VAPID complète
-  return 'vapid-jwt-token';
-}
-
-/**
- * Envoyer une notification push via Web Push Protocol
- */
-async function sendPushNotification(
-  subscription: {
-    endpoint: string;
-    keys: { p256dh: string; auth: string };
-  },
-  payload: {
-    title: string;
-    body: string;
-    icon?: string;
-    badge?: string;
-    tag?: string;
-    data?: Record<string, unknown>;
-    url?: string;
-  }
-): Promise<{ success: boolean; error?: string }> {
+async function deliverWebPush(
+  privateJWK: JsonWebKey,
+  subscription: PushSubscriptionRow,
+  payload: PushPayload
+): Promise<{ success: boolean; status?: number; error?: string; expired?: boolean }> {
   try {
-    if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
-      return { success: false, error: 'VAPID keys not configured' };
-    }
-
-    // Préparer le payload de la notification avec son et affichage
-    const notificationPayload = JSON.stringify({
+    const pushPayload = {
       title: payload.title,
       body: payload.body,
       icon: payload.icon || '/icon-192x192.png',
       badge: payload.badge || '/badge-72x72.png',
       tag: payload.tag || 'default',
+      silent: payload.silent ?? false,
+      requireInteraction: payload.requireInteraction ?? false,
+      vibrate: payload.vibrate ?? [200, 100, 200],
+      timestamp: Date.now(),
+      soundEnabled: payload.soundEnabled ?? !payload.silent,
+      vibrationEnabled: payload.vibrationEnabled ?? true,
+      vibrationIntensity: payload.vibrationIntensity ?? 'medium',
       data: {
-        ...payload.data,
+        ...(payload.data || {}),
         url: payload.url || '/',
       },
-      // Options pour son et affichage
-      silent: false,
-      requireInteraction: false,
-      vibrate: [200, 100, 200],
+    };
+
+    const { endpoint, headers, body } = await buildPushHTTPRequest({
+      privateJWK,
+      subscription: {
+        endpoint: subscription.endpoint,
+        keys: subscription.keys,
+      },
+      message: {
+        payload: pushPayload,
+        adminContact: VAPID_ADMIN_CONTACT,
+        options: {
+          ttl: payload.ttl ?? 86400,
+          urgency: payload.urgency ?? 'normal',
+          topic: payload.tag,
+        },
+      },
     });
 
-    // Décoder les clés
-    const p256dh = urlBase64ToUint8Array(subscription.keys.p256dh);
-    const auth = urlBase64ToUint8Array(subscription.keys.auth);
+    const response = await fetch(endpoint, { method: 'POST', headers, body });
 
-    // Générer le JWT VAPID
-    const jwt = await generateVAPIDJWT(subscription.endpoint);
+    if (response.status === 201 || response.status === 200) {
+      return { success: true, status: response.status };
+    }
 
-    // Note: L'implémentation complète du chiffrement Web Push nécessite
-    // l'utilisation d'une bibliothèque de chiffrement (web-push library)
-    // Pour l'instant, on retourne un succès simulé
-    // TODO: Implémenter le chiffrement Web Push complet avec web-push
-
-    console.log('Push notification prepared:', {
-      endpoint: subscription.endpoint,
-      payload: notificationPayload,
-    });
-
-    // Pour une implémentation complète, utiliser web-push library:
-    // const webpush = require('web-push');
-    // webpush.setVapidDetails(
-    //   'mailto:your-email@example.com',
-    //   VAPID_PUBLIC_KEY,
-    //   VAPID_PRIVATE_KEY
-    // );
-    // await webpush.sendNotification(subscription, notificationPayload);
-
-    return { success: true };
-  } catch (error) {
-    console.error('Error sending push notification:', error);
+    const expired = response.status === 410 || response.status === 404;
+    const errorText = await response.text().catch(() => response.statusText);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      status: response.status,
+      error: errorText || `Push service returned ${response.status}`,
+      expired,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown push error',
     };
   }
 }
 
 serve(async req => {
-  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
+      return new Response(JSON.stringify({ error: 'VAPID keys not configured' }), {
+        status: 503,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    let privateJWK: JsonWebKey;
+    try {
+      privateJWK = resolveVapidPrivateJWK(VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
+    } catch (keyError) {
+      const message = keyError instanceof Error ? keyError.message : 'Invalid VAPID keys';
+      console.error('VAPID key resolution failed:', message);
+      return new Response(JSON.stringify({ error: message }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { user_id, title, body, data, url } = await req.json();
+    const body = await req.json();
+    const userId = body.user_id as string | undefined;
+    const title = (body.title as string | undefined)?.trim();
+    const messageBody = (body.body ?? body.message) as string | undefined;
+    const url = (body.url ?? body.data?.url) as string | undefined;
+    const priority = body.priority as string | undefined;
 
-    if (!user_id || !title || !body) {
+    if (!userId || !title || !messageBody) {
       return new Response(
-        JSON.stringify({ error: 'Missing required fields: user_id, title, body' }),
+        JSON.stringify({ error: 'Missing required fields: user_id, title, body (or message)' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Obtenir les abonnements push de l'utilisateur
+    const payload: PushPayload = {
+      title,
+      body: messageBody,
+      icon: body.icon,
+      badge: body.badge,
+      tag: body.tag ?? body.data?.type,
+      url,
+      data: body.data,
+      silent: body.silent,
+      requireInteraction: body.requireInteraction,
+      vibrate: body.vibrate,
+      soundEnabled: body.data?.soundEnabled ?? body.soundEnabled,
+      vibrationEnabled: body.data?.vibrationEnabled ?? body.vibrationEnabled,
+      vibrationIntensity: body.data?.vibrationIntensity ?? body.vibrationIntensity,
+      urgency: body.urgency ?? mapUrgency(priority),
+      ttl: body.ttl,
+    };
+
     const { data: subscriptions, error: subscriptionsError } = await supabase.rpc(
       'get_push_subscriptions_for_user',
-      { p_user_id: user_id }
+      { p_user_id: userId }
     );
 
     if (subscriptionsError) {
@@ -149,44 +185,49 @@ serve(async req => {
     }
 
     if (!subscriptions || subscriptions.length === 0) {
-      return new Response(JSON.stringify({ message: 'No push subscriptions found for user' }), {
+      return new Response(JSON.stringify({ message: 'No push subscriptions found for user', sent: 0 }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Envoyer la notification à tous les abonnements
     const results = [];
-    for (const subscription of subscriptions) {
-      const result = await sendPushNotification(
-        {
-          endpoint: subscription.endpoint,
-          keys: subscription.keys,
-        },
-        {
-          title,
-          body,
-          data,
-          url,
-        }
-      );
+    for (const row of subscriptions as PushSubscriptionRow[]) {
+      const keys = row.keys;
+      if (!keys?.p256dh || !keys?.auth) {
+        results.push({
+          subscription_id: row.id,
+          success: false,
+          error: 'Invalid subscription keys',
+        });
+        continue;
+      }
 
-      // Logger la notification
+      const result = await deliverWebPush(privateJWK, row, payload);
+
+      if (result.expired) {
+        await supabase
+          .from('push_subscriptions')
+          .update({ is_active: false, updated_at: new Date().toISOString() })
+          .eq('id', row.id);
+      }
+
       await supabase.rpc('log_notification', {
-        p_user_id: user_id,
+        p_user_id: userId,
         p_type: 'push',
         p_title: title,
-        p_body: body,
-        p_data: data || {},
+        p_body: messageBody,
+        p_data: payload.data || {},
         p_channel: 'web-push',
         p_provider: 'vapid',
-        p_push_subscription_id: subscription.id,
+        p_push_subscription_id: row.id,
         p_status: result.success ? 'sent' : 'failed',
       });
 
       results.push({
-        subscription_id: subscription.id,
+        subscription_id: row.id,
         success: result.success,
+        status: result.status,
         error: result.error,
       });
     }
@@ -196,7 +237,7 @@ serve(async req => {
 
     return new Response(
       JSON.stringify({
-        success: true,
+        success: successCount > 0,
         sent: successCount,
         failed: failureCount,
         total: subscriptions.length,
