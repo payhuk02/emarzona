@@ -1,5 +1,10 @@
 export type VibrationIntensity = 'light' | 'medium' | 'heavy';
 
+export function parseVibrationIntensity(value: string | null | undefined): VibrationIntensity {
+  if (value === 'light' || value === 'heavy') return value;
+  return 'medium';
+}
+
 export function getVibrationPattern(
   intensity: VibrationIntensity | null | undefined,
   enabled = true

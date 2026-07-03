@@ -13,7 +13,7 @@ import { notificationRateLimiter } from './rate-limiter';
 import { notificationRetryService } from './retry-service';
 import { logNotification } from './notification-logger';
 import { isNotificationPaused } from './notification-pause';
-import { getVibrationPattern } from './vibration-patterns';
+import { getVibrationPattern, parseVibrationIntensity } from './vibration-patterns';
 
 export type NotificationType =
   // Produits digitaux
@@ -504,7 +504,7 @@ async function sendPushNotification(notification: UnifiedNotification): Promise<
     // Respecter les préférences utilisateur (true par défaut)
     const soundEnabled = preferences?.sound_notifications !== false;
     const vibrationEnabled = preferences?.vibration_notifications !== false;
-    const vibrationIntensity = preferences?.vibration_intensity || 'medium';
+    const vibrationIntensity = parseVibrationIntensity(preferences?.vibration_intensity);
 
     const vibratePattern = getVibrationPattern(vibrationIntensity, vibrationEnabled);
 
