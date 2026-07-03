@@ -19,7 +19,8 @@ interface SessionHealth {
   gracePeriodEnds: Date | null;
 }
 
-export const useSessionHealth = () => {
+export const useSessionHealth = (options?: { enabled?: boolean }) => {
+  const enabled = options?.enabled ?? true;
   const { user, signOut } = useAuth();
   const [health, setHealth] = useState<SessionHealth>({
     isHealthy: false,
@@ -135,7 +136,7 @@ export const useSessionHealth = () => {
 
   // ✅ SILENCIEUX: Vérification périodique de santé complètement automatique
   useEffect(() => {
-    if (!user) return;
+    if (!enabled || !user) return;
 
     // Vérifier la santé toutes les 45 secondes (moins fréquent pour éviter la surcharge)
     const healthCheckInterval = setInterval(async () => {
@@ -143,7 +144,8 @@ export const useSessionHealth = () => {
       const timeSinceLastCheck = now.getTime() - health.lastCheck.getTime();
 
       // Ne pas vérifier trop fréquemment
-      if (timeSinceLastCheck > 45000) { // 45 secondes
+      if (timeSinceLastCheck > 45000) {
+        // 45 secondes
         await checkSessionHealth();
       }
     }, 45000);
@@ -152,11 +154,11 @@ export const useSessionHealth = () => {
     checkSessionHealth();
 
     return () => clearInterval(healthCheckInterval);
-  }, [user, health.lastCheck, checkSessionHealth]);
+  }, [user, health.lastCheck, checkSessionHealth, enabled]);
 
   // Vérification au focus de la fenêtre
   useEffect(() => {
-    if (!user) return;
+    if (!enabled || !user) return;
 
     const handleFocus = () => {
       const now = new Date();
@@ -171,7 +173,7 @@ export const useSessionHealth = () => {
 
     window.addEventListener('focus', handleFocus);
     return () => window.removeEventListener('focus', handleFocus);
-  }, [user, health.lastCheck, refreshSessionIfNeeded]);
+  }, [user, health.lastCheck, refreshSessionIfNeeded, enabled]);
 
   return {
     ...health,

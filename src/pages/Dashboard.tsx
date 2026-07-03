@@ -1,7 +1,7 @@
 import { AppPageShell } from '@/components/layout/AppPageShell';
 import { Activity, Package, ShoppingCart } from 'lucide-react';
 import { useDashboardStatsOptimized as useDashboardStats } from '@/hooks/useDashboardStats';
-import { useStore } from '@/hooks/useStore';
+import { useStore, type Store } from '@/hooks/useStore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigate } from 'react-router-dom';
 import { useState, useMemo, useCallback, lazy, Suspense, useEffect, useRef } from 'react';
@@ -23,6 +23,14 @@ const ProductTypePerformanceMetrics = lazy(() =>
     default: m.ProductTypePerformanceMetrics,
   }))
 );
+const DashboardCharts = lazy(() =>
+  import('@/components/dashboard/DashboardCharts').then(m => ({ default: m.DashboardCharts }))
+);
+const CoreWebVitalsMonitor = lazy(() =>
+  import('@/components/dashboard/CoreWebVitalsMonitor').then(m => ({
+    default: m.CoreWebVitalsMonitor,
+  }))
+);
 // Composants non-lourds (pas de lazy loading nécessaire)
 import { RecentOrdersCard } from '@/components/dashboard/RecentOrdersCard';
 import { TopProductsCard } from '@/components/dashboard/TopProductsCard';
@@ -34,8 +42,8 @@ import {
 import { PeriodType } from '@/components/dashboard/PeriodFilter';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { DashboardStats } from '@/components/dashboard/DashboardStats';
-import { DashboardCharts } from '@/components/dashboard/DashboardCharts';
 import { DashboardNotifications } from '@/components/dashboard/DashboardNotifications';
+import { DashboardWidgetErrorBoundary } from '@/components/dashboard/DashboardWidgetErrorBoundary';
 import {
   useNotifications,
   useUnreadCount,
@@ -43,7 +51,6 @@ import {
 } from '@/hooks/useNotifications';
 import { DashboardFullSkeleton } from '@/components/dashboard/DashboardSkeleton';
 import { DashboardOnboarding } from '@/components/dashboard/DashboardOnboarding';
-import { CoreWebVitalsMonitor } from '@/components/dashboard/CoreWebVitalsMonitor';
 // import { SessionExpiryWarning } from '@/components/auth/SessionExpiryWarning'; // ✅ Supprimé pour gestion silencieuse
 import { DashboardErrorHandler } from '@/components/dashboard/DashboardErrorHandler';
 import { DashboardCategorySales } from '@/components/dashboard/DashboardCategorySales';
@@ -90,11 +97,15 @@ const Dashboard = () => {
     return <DashboardOnboarding />;
   }
 
-  return <DashboardWithStore storeHydrating={storeLoading && !store} />;
+  return <DashboardWithStore store={store} storeLoading={storeLoading} />;
 };
 
-const DashboardWithStore = ({ storeHydrating }: { storeHydrating: boolean }) => {
-  const { store } = useStore();
+type DashboardWithStoreProps = {
+  store: Store | null;
+  storeLoading: boolean;
+};
+
+const DashboardWithStore = ({ store, storeLoading }: DashboardWithStoreProps) => {
   const platformLogo = usePlatformLogo();
 
   useEffect(() => {
@@ -116,12 +127,22 @@ const DashboardWithStore = ({ storeHydrating }: { storeHydrating: boolean }) => 
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
 
-  // ✅ SESSION HEALTH: Surveillance proactive de la santé des sessions
+  // ✅ SESSION HEALTH: différé après le premier paint (non bloquant pour LCP)
+  const [sessionHealthEnabled, setSessionHealthEnabled] = useState(false);
+  useEffect(() => {
+    const enable = () => setSessionHealthEnabled(true);
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      requestIdleCallback(enable, { timeout: 3000 });
+    } else {
+      setTimeout(enable, 500);
+    }
+  }, []);
+
   const {
     isHealthy: sessionHealthy,
     connectionStatus,
     refreshSessionIfNeeded,
-  } = useSessionHealth();
+  } = useSessionHealth({ enabled: sessionHealthEnabled });
   const [period, setPeriod] = useState<PeriodType>('30d');
   const [customStartDate, setCustomStartDate] = useState<Date | undefined>();
   const [customEndDate, setCustomEndDate] = useState<Date | undefined>();
@@ -140,11 +161,13 @@ const DashboardWithStore = ({ storeHydrating }: { storeHydrating: boolean }) => 
     period,
     customStartDate,
     customEndDate,
+    storeId: store?.id,
   });
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedProductType, setSelectedProductType] = useState<ProductTypeFilter>('all');
 
-  const showStatsSkeleton = storeHydrating || (statsInitialLoading && !hasStatsData);
+  const showStatsSkeleton =
+    storeLoading || !store?.id || (statsInitialLoading && !hasStatsData && !hookError);
 
   // ✅ PHASE 2: Déferrer les notifications (non-critique pour le premier render)
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
@@ -181,7 +204,7 @@ const DashboardWithStore = ({ storeHydrating }: { storeHydrating: boolean }) => 
     includeArchived: false,
     enabled: notificationsEnabled,
   });
-  const { data: unreadCount = 0 } = useUnreadCount();
+  const { data: unreadCount = 0 } = useUnreadCount({ enabled: notificationsEnabled });
 
   // S'abonner aux notifications en temps réel — seulement après defer (évite canal inutile au 1er paint)
   useRealtimeNotifications({ enabled: notificationsEnabled });
@@ -268,6 +291,7 @@ const DashboardWithStore = ({ storeHydrating }: { storeHydrating: boolean }) => 
    * - Gère les erreurs silencieusement avec logging
    */
   const handleExport = useCallback(() => {
+    if (!stats) return;
     try {
       const data = {
         stats,
@@ -398,178 +422,184 @@ const DashboardWithStore = ({ storeHydrating }: { storeHydrating: boolean }) => 
 
         {showStatsSkeleton ? (
           <DashboardFullSkeleton />
-        ) : (
-          stats && (
-            <div
-              className={cn(
-                'space-y-6 sm:space-y-8 transition-opacity duration-200',
-                isUpdating && 'opacity-70 pointer-events-none'
-              )}
-            >
-              <DashboardActionCenter
-                operational={stats.operational}
-                periodLabel={stats.periodLabel}
-                storeName={store?.name}
-                storeSlug={store?.slug}
-                storeSubdomain={store?.subdomain}
-                customDomain={store?.custom_domain}
-                unreadNotifications={unreadCount}
+        ) : stats ? (
+          <div
+            className={cn(
+              'space-y-6 sm:space-y-8 transition-opacity duration-200',
+              isUpdating && 'opacity-70 pointer-events-none'
+            )}
+          >
+            <DashboardActionCenter
+              operational={stats.operational}
+              periodLabel={stats.periodLabel}
+              storeName={store?.name}
+              storeSlug={store?.slug}
+              storeSubdomain={store?.subdomain}
+              customDomain={store?.custom_domain}
+              unreadNotifications={unreadCount}
+            />
+
+            {notificationsEnabled && (
+              <DashboardNotificationsStrip
+                notifications={notifications}
+                unreadCount={unreadCount}
+                enabled={notificationsEnabled}
               />
+            )}
 
-              {notificationsEnabled && (
-                <DashboardNotificationsStrip
-                  notifications={notifications}
-                  unreadCount={unreadCount}
-                  enabled={notificationsEnabled}
+            <DashboardStats stats={stats} />
+
+            {stats.revenueByMonth.length > 0 && (
+              <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 sm:gap-6">
+                <div className="xl:col-span-2">
+                  <DashboardSalesEvolution data={stats.revenueByMonth} />
+                </div>
+                <DashboardCategorySales
+                  revenueByType={stats.revenueByType}
+                  onViewAll={handleViewAnalytics}
                 />
-              )}
+              </div>
+            )}
 
-              <DashboardStats stats={stats} />
-
-              {stats.revenueByMonth.length > 0 && (
-                <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 sm:gap-6">
-                  <div className="xl:col-span-2">
-                    <DashboardSalesEvolution data={stats.revenueByMonth} />
-                  </div>
-                  <DashboardCategorySales
-                    revenueByType={stats.revenueByType}
-                    onViewAll={handleViewAnalytics}
-                  />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
+              {stats.recentOrders.length > 0 ? (
+                <RecentOrdersCard orders={stats.recentOrders} variant="premium" />
+              ) : (
+                <div className="dashboard-premium-panel flex items-center justify-center min-h-[200px] text-muted-foreground text-sm">
+                  {t('dashboard.orders.empty', 'Aucune commande récente')}
                 </div>
               )}
+              {stats.topProducts.length > 0 ? (
+                <TopProductsCard products={stats.topProducts} variant="premium" />
+              ) : (
+                <div className="dashboard-premium-panel flex items-center justify-center min-h-[200px] text-muted-foreground text-sm">
+                  {t('dashboard.products.empty', 'Aucun produit vendu')}
+                </div>
+              )}
+              <DashboardRecentActivity activities={stats.recentActivity} />
+            </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
-                {stats.recentOrders.length > 0 ? (
-                  <RecentOrdersCard orders={stats.recentOrders} variant="premium" />
-                ) : (
-                  <div className="dashboard-premium-panel flex items-center justify-center min-h-[200px] text-muted-foreground text-sm">
-                    {t('dashboard.orders.empty', 'Aucune commande récente')}
-                  </div>
-                )}
-                {stats.topProducts.length > 0 ? (
-                  <TopProductsCard products={stats.topProducts} variant="premium" />
-                ) : (
-                  <div className="dashboard-premium-panel flex items-center justify-center min-h-[200px] text-muted-foreground text-sm">
-                    {t('dashboard.products.empty', 'Aucun produit vendu')}
-                  </div>
-                )}
-                <DashboardRecentActivity activities={stats.recentActivity} />
-              </div>
+            <DashboardFooterMetrics stats={stats} />
 
-              <DashboardFooterMetrics stats={stats} />
+            <div
+              ref={actionsRef}
+              className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3"
+              role="list"
+              aria-label={t('dashboard.quickActions.ariaLabel', 'Actions rapides')}
+            >
+              {[
+                {
+                  title: t('dashboard.quickActions.newProduct'),
+                  icon: Package,
+                  onClick: handleCreateProduct,
+                  theme: 'border-emerald-200/80 hover:bg-emerald-50/50',
+                },
+                {
+                  title: t('dashboard.quickActions.newOrder'),
+                  icon: ShoppingCart,
+                  onClick: handleCreateOrder,
+                  theme: 'border-blue-200/80 hover:bg-blue-50/50',
+                },
+                {
+                  title: t('dashboard.quickActions.analytics'),
+                  icon: Activity,
+                  onClick: handleViewAnalytics,
+                  theme: 'border-violet-200/80 hover:bg-violet-50/50',
+                },
+              ].map(action => {
+                const Icon = action.icon;
+                return (
+                  <button
+                    key={action.title}
+                    type="button"
+                    onClick={action.onClick}
+                    className={`dashboard-premium-panel flex items-center justify-center gap-2 text-sm sm:text-base font-semibold transition-colors ${action.theme}`}
+                  >
+                    <Icon className="h-5 w-5 shrink-0" aria-hidden />
+                    {action.title}
+                  </button>
+                );
+              })}
+            </div>
 
-              <div
-                ref={actionsRef}
-                className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3"
-                role="list"
-                aria-label={t('dashboard.quickActions.ariaLabel', 'Actions rapides')}
-              >
-                {[
-                  {
-                    title: t('dashboard.quickActions.newProduct'),
-                    icon: Package,
-                    onClick: handleCreateProduct,
-                    theme: 'border-emerald-200/80 hover:bg-emerald-50/50',
-                  },
-                  {
-                    title: t('dashboard.quickActions.newOrder'),
-                    icon: ShoppingCart,
-                    onClick: handleCreateOrder,
-                    theme: 'border-blue-200/80 hover:bg-blue-50/50',
-                  },
-                  {
-                    title: t('dashboard.quickActions.analytics'),
-                    icon: Activity,
-                    onClick: handleViewAnalytics,
-                    theme: 'border-violet-200/80 hover:bg-violet-50/50',
-                  },
-                ].map(action => {
-                  const Icon = action.icon;
-                  return (
-                    <button
-                      key={action.title}
-                      type="button"
-                      onClick={action.onClick}
-                      className={`dashboard-premium-panel flex items-center justify-center gap-2 text-sm sm:text-base font-semibold transition-colors ${action.theme}`}
-                    >
-                      <Icon className="h-5 w-5 shrink-0" aria-hidden />
-                      {action.title}
-                    </button>
-                  );
-                })}
-              </div>
-
-              <details className="dashboard-premium-panel group">
-                <summary className="cursor-pointer list-none dashboard-premium-panel-title flex items-center justify-between gap-2">
-                  {t('dashboard.sections.advanced', 'Analyses avancées')}
-                  <span className="text-sm font-normal text-muted-foreground group-open:hidden">
-                    {t('common.expand', 'Afficher')}
-                  </span>
-                </summary>
-                <div className="mt-6 space-y-6 border-t border-border/50 pt-6">
-                  <CoreWebVitalsMonitor />
-                  <DashboardCharts stats={stats} />
-                  <div className="rounded-xl border border-border/40 p-4 sm:p-5 bg-muted/20">
-                    <ProductTypeQuickFilters
-                      selectedType={selectedProductType}
-                      onTypeChange={setSelectedProductType}
-                      stats={stats}
-                    />
-                  </div>
-                  <ProductTypeBreakdown
-                    productsByType={stats.productsByType}
-                    revenueByType={stats.revenueByType}
-                    ordersByType={stats.ordersByType}
+            <details className="dashboard-premium-panel group">
+              <summary className="cursor-pointer list-none dashboard-premium-panel-title flex items-center justify-between gap-2">
+                {t('dashboard.sections.advanced', 'Analyses avancées')}
+                <span className="text-sm font-normal text-muted-foreground group-open:hidden">
+                  {t('common.expand', 'Afficher')}
+                </span>
+              </summary>
+              <div className="mt-6 space-y-6 border-t border-border/50 pt-6">
+                <DashboardWidgetErrorBoundary title="Analyses Web Vitals indisponibles">
+                  <Suspense fallback={<Skeleton className="h-[200px] w-full rounded-xl" />}>
+                    <CoreWebVitalsMonitor />
+                  </Suspense>
+                </DashboardWidgetErrorBoundary>
+                <DashboardWidgetErrorBoundary title="Graphiques indisponibles">
+                  <Suspense fallback={<Skeleton className="h-[320px] w-full rounded-xl" />}>
+                    <DashboardCharts stats={stats} />
+                  </Suspense>
+                </DashboardWidgetErrorBoundary>
+                <div className="rounded-xl border border-border/40 p-4 sm:p-5 bg-muted/20">
+                  <ProductTypeQuickFilters
+                    selectedType={selectedProductType}
+                    onTypeChange={setSelectedProductType}
+                    stats={stats}
                   />
-                  {stats.revenueByTypeAndMonth.length > 0 && (
-                    <Suspense fallback={<Skeleton className="h-[400px] w-full rounded-xl" />}>
-                      <ProductTypeCharts
-                        revenueByTypeAndMonth={stats.revenueByTypeAndMonth}
-                        ordersByType={stats.ordersByType}
-                        selectedType={selectedProductType}
-                      />
-                    </Suspense>
-                  )}
-                  <Suspense fallback={<Skeleton className="h-[300px] w-full rounded-xl" />}>
-                    <ProductTypePerformanceMetrics
-                      performanceMetricsByType={
-                        stats.performanceMetricsByType as {
-                          digital: {
-                            conversionRate: number;
-                            averageOrderValue: number;
-                            customerRetention: number;
-                          };
-                          physical: {
-                            conversionRate: number;
-                            averageOrderValue: number;
-                            customerRetention: number;
-                          };
-                          service: {
-                            conversionRate: number;
-                            averageOrderValue: number;
-                            customerRetention: number;
-                          };
-                          course: {
-                            conversionRate: number;
-                            averageOrderValue: number;
-                            customerRetention: number;
-                          };
-                          artist: {
-                            conversionRate: number;
-                            averageOrderValue: number;
-                            customerRetention: number;
-                          };
-                        }
-                      }
+                </div>
+                <ProductTypeBreakdown
+                  productsByType={stats.productsByType}
+                  revenueByType={stats.revenueByType}
+                  ordersByType={stats.ordersByType}
+                />
+                {stats.revenueByTypeAndMonth.length > 0 && (
+                  <Suspense fallback={<Skeleton className="h-[400px] w-full rounded-xl" />}>
+                    <ProductTypeCharts
+                      revenueByTypeAndMonth={stats.revenueByTypeAndMonth}
+                      ordersByType={stats.ordersByType}
                       selectedType={selectedProductType}
                     />
                   </Suspense>
-                  <DashboardNotifications {...dashboardNotificationsProps} />
-                </div>
-              </details>
-            </div>
-          )
-        )}
+                )}
+                <Suspense fallback={<Skeleton className="h-[300px] w-full rounded-xl" />}>
+                  <ProductTypePerformanceMetrics
+                    performanceMetricsByType={
+                      stats.performanceMetricsByType as {
+                        digital: {
+                          conversionRate: number;
+                          averageOrderValue: number;
+                          customerRetention: number;
+                        };
+                        physical: {
+                          conversionRate: number;
+                          averageOrderValue: number;
+                          customerRetention: number;
+                        };
+                        service: {
+                          conversionRate: number;
+                          averageOrderValue: number;
+                          customerRetention: number;
+                        };
+                        course: {
+                          conversionRate: number;
+                          averageOrderValue: number;
+                          customerRetention: number;
+                        };
+                        artist: {
+                          conversionRate: number;
+                          averageOrderValue: number;
+                          customerRetention: number;
+                        };
+                      }
+                    }
+                    selectedType={selectedProductType}
+                  />
+                </Suspense>
+                <DashboardNotifications {...dashboardNotificationsProps} />
+              </div>
+            </details>
+          </div>
+        ) : null}
       </div>
     </AppPageShell>
   );

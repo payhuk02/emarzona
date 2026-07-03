@@ -79,9 +79,11 @@ export const useNotifications = (options?: {
 /**
  * Hook pour compter les notifications non lues
  */
-export const useUnreadCount = () => {
+export const useUnreadCount = (options?: { enabled?: boolean }) => {
+  const enabled = options?.enabled ?? true;
   return useQuery({
     queryKey: ['notifications', 'unread-count'],
+    enabled,
     queryFn: async (): Promise<number> => {
       const { data, error } = await supabase.rpc('get_unread_count');
 

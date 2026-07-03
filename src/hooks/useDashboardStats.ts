@@ -9,7 +9,6 @@ import { useStore } from './useStore';
 import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
 import { transformOptimizedData } from '@/services/dashboardStatsTransform';
-import { getFallbackStats } from '@/types/dashboard-stats';
 
 export type { DashboardStats, UseDashboardStatsOptions } from '@/types/dashboard-stats';
 import type {
@@ -309,8 +308,9 @@ async function fetchDashboardStatsFromTables(
       .eq('store_id', storeId)
       .gte('created_at', compareStart.toISOString())
       .lte('created_at', range.end.toISOString())
-      .order('created_at', { ascending: false }),
-    supabase.from('customers').select('created_at').eq('store_id', storeId),
+      .order('created_at', { ascending: false })
+      .limit(500),
+    supabase.from('customers').select('created_at').eq('store_id', storeId).limit(3000),
     fetchOperationalCounts(storeId),
   ]);
 
@@ -435,11 +435,12 @@ async function fetchDashboardStatsFromTables(
 export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) => {
   const { store } = useStore();
   const { user } = useAuth();
+  const storeId = options?.storeId ?? store?.id ?? null;
   const range = resolvePeriodRange(options);
 
   const queryKey = [
     'dashboard-stats',
-    store?.id,
+    storeId,
     range.days,
     range.start.toISOString(),
     range.end.toISOString(),
@@ -448,10 +449,10 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
   const { data, isLoading, isFetching, error, refetch } = useQuery<DashboardStats>({
     queryKey,
     queryFn: () => {
-      if (!store?.id) throw new Error('No store');
-      return fetchDashboardStatsFromTables(store.id, range);
+      if (!storeId) throw new Error('No store');
+      return fetchDashboardStatsFromTables(storeId, range);
     },
-    enabled: !!user && !!store?.id,
+    enabled: !!user && !!storeId,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
@@ -465,7 +466,8 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
   });
 
   const hasData = data != null;
-  const stats = data ?? getFallbackStats();
+  /** Ne pas afficher de faux KPIs à zéro — skeleton ou erreur tant qu’il n’y a pas de données réelles */
+  const stats = hasData ? data : null;
   const errorMessage = error
     ? error.message?.includes('fetch') || error.message?.includes('Network')
       ? 'Problème de connexion temporaire.'

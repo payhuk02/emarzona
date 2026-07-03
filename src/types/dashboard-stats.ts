@@ -187,6 +187,8 @@ export interface UseDashboardStatsOptions {
   period?: '7d' | '30d' | '90d' | 'custom';
   customStartDate?: Date;
   customEndDate?: Date;
+  /** Évite un second appel useStore() quand le parent fournit déjà l’ID boutique */
+  storeId?: string | null;
 }
 
 // Zero-value fallback stats
