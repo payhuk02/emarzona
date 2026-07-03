@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { generateProductUrl } from '@/lib/store-utils';
 import { Product } from '@/types/marketplace';
-import { ArtistProductCard } from '@/components/products/ArtistProductCard';
+import { UnifiedProductCard } from '@/components/products/UnifiedProductCard';
 import { transformToUnifiedProduct } from '@/lib/product-transform';
 import { CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -142,7 +142,7 @@ export function ArtGallerySection() {
               if (unifiedProduct.type !== 'artist') return null;
 
               return (
-                <ArtistProductCard
+                <UnifiedProductCard
                   key={artwork.id}
                   product={unifiedProduct}
                   variant="marketplace"

@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SEOMeta, ItemListSchema } from '@/components/seo';
-import { CourseProductCard } from '@/components/products/CourseProductCard';
+import { UnifiedProductCard } from '@/components/products/UnifiedProductCard';
 import { useMarketplaceProducts } from '@/hooks/useMarketplaceProducts';
 import type { FilterState, PaginationState } from '@/types/marketplace';
 import type { CourseProduct } from '@/types/unified-product';
@@ -168,7 +168,7 @@ export default function CoursesCatalog() {
           <>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {courseProducts.map(product => (
-                <CourseProductCard key={product.id} product={product} variant="marketplace" />
+                <UnifiedProductCard key={product.id} product={product} variant="marketplace" />
               ))}
             </div>
 

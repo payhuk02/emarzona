@@ -2,48 +2,30 @@
  * Hook universel pour créer une commande
  * Date: 28 octobre 2025
  *
- * Router intelligent qui détecte le type de produit et appelle le bon hook
+ * Router intelligent qui utilise le pattern Strategy pour créer une commande
  */
 
 import { useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useCreateDigitalOrder, type CreateDigitalOrderOptions } from './useCreateDigitalOrder';
-import { useCreatePhysicalOrder, type CreatePhysicalOrderOptions } from './useCreatePhysicalOrder';
-import { useCreateServiceOrder, type CreateServiceOrderOptions } from './useCreateServiceOrder';
-import { useCreateCourseOrder, type CreateCourseOrderOptions } from './useCreateCourseOrder';
-import { useCreateArtistOrder, type CreateArtistOrderOptions } from './useCreateArtistOrder';
-import { initiatePayment } from '@/lib/payment-service';
-import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
+import { type CreateDigitalOrderOptions } from './useCreateDigitalOrder';
+import { type CreatePhysicalOrderOptions } from './useCreatePhysicalOrder';
+import { type CreateServiceOrderOptions } from './useCreateServiceOrder';
+import { type CreateCourseOrderOptions } from './useCreateCourseOrder';
+import { type CreateArtistOrderOptions } from './useCreateArtistOrder';
+import { orderStrategyRegistry } from './strategies/registry';
 import { logger } from '@/lib/logger';
-import { findOrCreateStoreCustomer } from '@/lib/orders/customers-data';
-import { generateOrderNumber } from '@/lib/orders/orders-data';
 
 const GENERIC_PRODUCT_FIELDS = 'id, name, price, promotional_price, currency, product_type';
 
-/**
- * Options génériques pour créer une commande
- */
 export interface CreateOrderOptions {
-  /** ID du produit */
   productId: string;
-
-  /** ID du store */
   storeId: string;
-
-  /** Email du client */
   customerEmail: string;
-
-  /** Nom du client (optionnel) */
   customerName?: string;
-
-  /** Téléphone du client (optionnel) */
   customerPhone?: string;
-
-  /** Quantité (pour produits physiques) */
   quantity?: number;
 
-  /** Options spécifiques selon le type */
   digitalOptions?: Partial<CreateDigitalOrderOptions>;
   physicalOptions?: Partial<CreatePhysicalOrderOptions>;
   serviceOptions?: Partial<CreateServiceOrderOptions>;
@@ -51,33 +33,8 @@ export interface CreateOrderOptions {
   artistOptions?: Partial<CreateArtistOrderOptions>;
 }
 
-/**
- * Hook universel pour créer une commande
- * Détecte automatiquement le type de produit et appelle le bon hook
- *
- * @example
- * ```typescript
- * const { mutateAsync: createOrder, isPending } = useCreateOrder();
- *
- * const handleBuy = async () => {
- *   const result = await createOrder({
- *     productId: 'xxx',
- *     storeId: 'yyy',
- *     customerEmail: 'user@example.com',
- *     // Options spécifiques seront automatiquement passées selon le type
- *   });
- *
- *   window.location.href = result.checkoutUrl;
- * };
- * ```
- */
 export const useCreateOrder = () => {
   const { toast } = useToast();
-  const { mutateAsync: createDigitalOrder } = useCreateDigitalOrder();
-  const { mutateAsync: createPhysicalOrder } = useCreatePhysicalOrder();
-  const { mutateAsync: createServiceOrder } = useCreateServiceOrder();
-  const { mutateAsync: createCourseOrder } = useCreateCourseOrder();
-  const { mutateAsync: createArtistOrder } = useCreateArtistOrder();
 
   return useMutation({
     mutationFn: async (options: CreateOrderOptions) => {
@@ -95,7 +52,6 @@ export const useCreateOrder = () => {
         artistOptions,
       } = options;
 
-      // 1. Récupérer le produit pour déterminer son type
       const { data: product, error: productError } = await supabase
         .from('products')
         .select(GENERIC_PRODUCT_FIELDS)
@@ -108,266 +64,35 @@ export const useCreateOrder = () => {
 
       const productType = product.product_type;
 
-      // 2. Router vers le bon hook selon le type
+      let typeOptions: Record<string, unknown> | undefined;
       switch (productType) {
-        case 'digital': {
-          // Récupérer le digital_product_id
-          const { data: digitalProduct } = await supabase
-            .from('digital_products')
-            .select('id')
-            .eq('product_id', productId)
-            .single();
-
-          if (!digitalProduct) {
-            throw new Error('Produit digital non trouvé');
-          }
-
-          return await createDigitalOrder({
-            digitalProductId: digitalProduct.id,
-            productId,
-            storeId,
-            customerEmail,
-            customerName,
-            customerPhone,
-            generateLicense: digitalOptions?.generateLicense ?? true,
-            licenseType: digitalOptions?.licenseType || 'single',
-            maxActivations: digitalOptions?.maxActivations,
-            licenseExpiryDays: digitalOptions?.licenseExpiryDays,
-          });
-        }
-
-        case 'physical': {
-          // Récupérer le physical_product_id
-          const { data: physicalProduct } = await supabase
-            .from('physical_products')
-            .select('id')
-            .eq('product_id', productId)
-            .single();
-
-          if (!physicalProduct) {
-            throw new Error('Produit physique non trouvé');
-          }
-
-          if (!physicalOptions?.shippingAddress) {
-            throw new Error('Adresse de livraison requise pour un produit physique');
-          }
-
-          return await createPhysicalOrder({
-            physicalProductId: physicalProduct.id,
-            productId,
-            storeId,
-            customerEmail,
-            customerName,
-            customerPhone,
-            shippingAddress: physicalOptions.shippingAddress,
-            variantId: physicalOptions.variantId,
-            quantity,
-            inventoryLocationId: physicalOptions.inventoryLocationId,
-          });
-        }
-
-        case 'service': {
-          // Récupérer le service_product_id
-          const { data: serviceProduct } = await supabase
-            .from('service_products')
-            .select('id')
-            .eq('product_id', productId)
-            .single();
-
-          if (!serviceProduct) {
-            throw new Error('Service non trouvé');
-          }
-
-          if (!serviceOptions?.bookingDateTime) {
-            throw new Error('Date et heure de réservation requises pour un service');
-          }
-
-          return await createServiceOrder({
-            serviceProductId: serviceProduct.id,
-            productId,
-            storeId,
-            customerEmail,
-            customerName,
-            customerPhone,
-            bookingDateTime: serviceOptions.bookingDateTime,
-            durationMinutes: serviceOptions.durationMinutes,
-            staffId: serviceOptions.staffId,
-            numberOfParticipants: serviceOptions.numberOfParticipants || 1,
-            notes: serviceOptions.notes,
-          });
-        }
-
-        case 'course': {
-          // Récupérer le course_id
-          const { data: course } = await supabase
-            .from('courses')
-            .select('id')
-            .eq('product_id', productId)
-            .single();
-
-          if (!course) {
-            throw new Error('Cours non trouvé');
-          }
-
-          return await createCourseOrder({
-            courseId: course.id,
-            productId,
-            storeId,
-            customerEmail,
-            customerName,
-            customerPhone,
-            quantity,
-            giftCardId: courseOptions?.giftCardId,
-            giftCardAmount: courseOptions?.giftCardAmount,
-          });
-        }
-
-        case 'artist': {
-          // Récupérer le artist_product_id
-          const { data: artistProduct } = await supabase
-            .from('artist_products')
-            .select('id')
-            .eq('product_id', productId)
-            .single();
-
-          if (!artistProduct) {
-            throw new Error("Œuvre d'artiste non trouvée");
-          }
-
-          return await createArtistOrder({
-            artistProductId: artistProduct.id,
-            productId,
-            storeId,
-            customerEmail,
-            customerName,
-            customerPhone,
-            shippingAddress: artistOptions?.shippingAddress,
-            quantity,
-            giftCardId: artistOptions?.giftCardId,
-            giftCardAmount: artistOptions?.giftCardAmount,
-          });
-        }
-
-        case 'generic':
-        default: {
-          // Pour les produits génériques, utiliser l'ancien système
-          toast({
-            title: 'ℹ️ Type de produit',
-            description: `Utilisation du flux générique pour ${productType}`,
-          });
-
-          const customerId = await findOrCreateStoreCustomer({
-            storeId,
-            email: customerEmail,
-            name: customerName || customerEmail.split('@')[0],
-            phone: customerPhone,
-          });
-
-          // Créer order générique
-          const orderNumber = await generateOrderNumber();
-
-          const totalPrice = (product.promotional_price || product.price) * quantity;
-
-          // Récupérer le cookie d'affiliation s'il existe
-          const affiliateTrackingCookie = getAffiliateTrackingCookie();
-
-          const { data: order, error: orderError } = await supabase
-            .from('orders')
-            .insert({
-              store_id: storeId,
-              customer_id: customerId,
-              order_number: orderNumber,
-              total_amount: totalPrice,
-              currency: product.currency,
-              payment_status: 'pending',
-              status: 'pending',
-              affiliate_tracking_cookie: affiliateTrackingCookie, // Inclure le cookie d'affiliation
-              metadata: {
-                product_id: productId,
-                product_type: productType,
-                flow: 'generic_product_checkout',
-              },
-            })
-            .select(
-              'id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at'
-            )
-            .single();
-
-          if (orderError || !order) {
-            throw new Error('Erreur lors de la création de la commande');
-          }
-
-          // Déclencher webhook order.created (asynchrone, ne bloque pas)
-          if (order) {
-            import('@/lib/webhooks/webhook-system').then(({ triggerWebhook }) => {
-              triggerWebhook(order.store_id, 'order.created', {
-                order_id: order.id,
-                order_number: order.order_number,
-                customer_id: order.customer_id,
-                total_amount: order.total_amount,
-                currency: order.currency,
-                status: order.status,
-                payment_status: order.payment_status,
-                created_at: order.created_at,
-              }).catch(err => {
-                logger.error('Error triggering webhook', { error: err, orderId: order.id });
-              });
-            });
-          }
-
-          // Créer order_item générique
-          const { data: orderItem, error: orderItemError } = await supabase
-            .from('order_items')
-            .insert({
-              order_id: order.id,
-              product_id: productId,
-              product_type: productType === 'generic' ? 'generic' : productType,
-              product_name: product.name,
-              quantity,
-              unit_price: product.promotional_price || product.price,
-              total_price: totalPrice,
-              item_metadata: {
-                product_type: productType,
-                source: 'useCreateOrder_generic',
-              },
-            })
-            .select('id')
-            .single();
-
-          if (orderItemError || !orderItem) {
-            throw new Error("Erreur lors de la création de l'élément de commande");
-          }
-
-          // Initier paiement
-          const paymentResult = await initiatePayment({
-            storeId,
-            productId,
-            orderId: order.id,
-            customerId,
-            amount: totalPrice,
-            currency: product.currency,
-            description: `Achat: ${product.name}`,
-            customerEmail,
-            customerName: customerName || customerEmail.split('@')[0],
-            customerPhone,
-            metadata: {
-              product_type: productType,
-              order_item_id: orderItem.id,
-            },
-          });
-
-          if (!paymentResult.success || !paymentResult.checkout_url) {
-            throw new Error("Erreur lors de l'initialisation du paiement");
-          }
-
-          return {
-            orderId: order.id,
-            orderItemId: orderItem.id,
-            checkoutUrl: paymentResult.checkout_url,
-            transactionId: paymentResult.transaction_id,
-          };
-        }
+        case 'digital': typeOptions = digitalOptions; break;
+        case 'physical': typeOptions = physicalOptions; break;
+        case 'service': typeOptions = serviceOptions; break;
+        case 'course': typeOptions = courseOptions; break;
+        case 'artist': typeOptions = artistOptions; break;
       }
+
+      if (productType === 'generic') {
+        toast({
+          title: 'ℹ️ Type de produit',
+          description: `Utilisation du flux générique pour ${productType}`,
+        });
+      }
+
+      const strategy = orderStrategyRegistry.getStrategy(productType);
+
+      return await strategy.createOrder({
+        productId,
+        storeId,
+        customerEmail,
+        customerName,
+        customerPhone,
+        quantity,
+        productType,
+        productRecord: product,
+        options: typeOptions,
+      });
     },
 
     onError: (error: Error) => {

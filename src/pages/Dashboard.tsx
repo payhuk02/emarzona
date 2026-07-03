@@ -423,23 +423,23 @@ const DashboardWithStore = ({ store, storeLoading }: DashboardWithStoreProps) =>
           <DashboardFullSkeleton />
         ) : stats ? (
           <div className="space-y-6 sm:space-y-8">
-            <DashboardActionCenter
-              operational={stats.operational}
-              periodLabel={stats.periodLabel}
-              storeName={store?.name}
-              storeSlug={store?.slug}
-              storeSubdomain={store?.subdomain}
-              customDomain={store?.custom_domain}
-              unreadNotifications={unreadCount}
-            />
-
-            {notificationsEnabled && (
-              <DashboardNotificationsStrip
-                notifications={notifications}
-                unreadCount={unreadCount}
-                enabled={notificationsEnabled}
+              <DashboardActionCenter
+                operational={stats.operational}
+                periodLabel={stats.periodLabel}
+                storeName={store?.name}
+                storeSlug={store?.slug}
+                storeSubdomain={store?.subdomain}
+                customDomain={store?.custom_domain}
+                unreadNotifications={unreadCount}
               />
-            )}
+
+              {notificationsEnabled && (
+                <DashboardNotificationsStrip
+                  notifications={notifications}
+                  unreadCount={unreadCount}
+                  enabled={notificationsEnabled}
+                />
+              )}
 
             <div
               className={cn(
@@ -451,156 +451,156 @@ const DashboardWithStore = ({ store, storeLoading }: DashboardWithStoreProps) =>
               <DashboardStats stats={stats} />
             </div>
 
-            {stats.revenueByMonth.length > 0 && (
-              <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 sm:gap-6">
-                <div className="xl:col-span-2">
-                  <DashboardSalesEvolution data={stats.revenueByMonth} />
+              {stats.revenueByMonth.length > 0 && (
+                <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 sm:gap-6">
+                  <div className="xl:col-span-2">
+                    <DashboardSalesEvolution data={stats.revenueByMonth} />
+                  </div>
+                  <DashboardCategorySales
+                    revenueByType={stats.revenueByType}
+                    onViewAll={handleViewAnalytics}
+                  />
                 </div>
-                <DashboardCategorySales
-                  revenueByType={stats.revenueByType}
-                  onViewAll={handleViewAnalytics}
-                />
+              )}
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
+                {stats.recentOrders.length > 0 ? (
+                  <RecentOrdersCard orders={stats.recentOrders} variant="premium" />
+                ) : (
+                  <div className="dashboard-premium-panel flex items-center justify-center min-h-[200px] text-muted-foreground text-sm">
+                    {t('dashboard.orders.empty', 'Aucune commande récente')}
+                  </div>
+                )}
+                {stats.topProducts.length > 0 ? (
+                  <TopProductsCard products={stats.topProducts} variant="premium" />
+                ) : (
+                  <div className="dashboard-premium-panel flex items-center justify-center min-h-[200px] text-muted-foreground text-sm">
+                    {t('dashboard.products.empty', 'Aucun produit vendu')}
+                  </div>
+                )}
+                <DashboardRecentActivity activities={stats.recentActivity} />
               </div>
-            )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
-              {stats.recentOrders.length > 0 ? (
-                <RecentOrdersCard orders={stats.recentOrders} variant="premium" />
-              ) : (
-                <div className="dashboard-premium-panel flex items-center justify-center min-h-[200px] text-muted-foreground text-sm">
-                  {t('dashboard.orders.empty', 'Aucune commande récente')}
-                </div>
-              )}
-              {stats.topProducts.length > 0 ? (
-                <TopProductsCard products={stats.topProducts} variant="premium" />
-              ) : (
-                <div className="dashboard-premium-panel flex items-center justify-center min-h-[200px] text-muted-foreground text-sm">
-                  {t('dashboard.products.empty', 'Aucun produit vendu')}
-                </div>
-              )}
-              <DashboardRecentActivity activities={stats.recentActivity} />
-            </div>
+              <DashboardFooterMetrics stats={stats} />
 
-            <DashboardFooterMetrics stats={stats} />
+              <div
+                ref={actionsRef}
+                className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3"
+                role="list"
+                aria-label={t('dashboard.quickActions.ariaLabel', 'Actions rapides')}
+              >
+                {[
+                  {
+                    title: t('dashboard.quickActions.newProduct'),
+                    icon: Package,
+                    onClick: handleCreateProduct,
+                    theme: 'border-emerald-200/80 hover:bg-emerald-50/50',
+                  },
+                  {
+                    title: t('dashboard.quickActions.newOrder'),
+                    icon: ShoppingCart,
+                    onClick: handleCreateOrder,
+                    theme: 'border-blue-200/80 hover:bg-blue-50/50',
+                  },
+                  {
+                    title: t('dashboard.quickActions.analytics'),
+                    icon: Activity,
+                    onClick: handleViewAnalytics,
+                    theme: 'border-violet-200/80 hover:bg-violet-50/50',
+                  },
+                ].map(action => {
+                  const Icon = action.icon;
+                  return (
+                    <button
+                      key={action.title}
+                      type="button"
+                      onClick={action.onClick}
+                      className={`dashboard-premium-panel flex items-center justify-center gap-2 text-sm sm:text-base font-semibold transition-colors ${action.theme}`}
+                    >
+                      <Icon className="h-5 w-5 shrink-0" aria-hidden />
+                      {action.title}
+                    </button>
+                  );
+                })}
+              </div>
 
-            <div
-              ref={actionsRef}
-              className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3"
-              role="list"
-              aria-label={t('dashboard.quickActions.ariaLabel', 'Actions rapides')}
-            >
-              {[
-                {
-                  title: t('dashboard.quickActions.newProduct'),
-                  icon: Package,
-                  onClick: handleCreateProduct,
-                  theme: 'border-emerald-200/80 hover:bg-emerald-50/50',
-                },
-                {
-                  title: t('dashboard.quickActions.newOrder'),
-                  icon: ShoppingCart,
-                  onClick: handleCreateOrder,
-                  theme: 'border-blue-200/80 hover:bg-blue-50/50',
-                },
-                {
-                  title: t('dashboard.quickActions.analytics'),
-                  icon: Activity,
-                  onClick: handleViewAnalytics,
-                  theme: 'border-violet-200/80 hover:bg-violet-50/50',
-                },
-              ].map(action => {
-                const Icon = action.icon;
-                return (
-                  <button
-                    key={action.title}
-                    type="button"
-                    onClick={action.onClick}
-                    className={`dashboard-premium-panel flex items-center justify-center gap-2 text-sm sm:text-base font-semibold transition-colors ${action.theme}`}
-                  >
-                    <Icon className="h-5 w-5 shrink-0" aria-hidden />
-                    {action.title}
-                  </button>
-                );
-              })}
-            </div>
-
-            <details className="dashboard-premium-panel group">
-              <summary className="cursor-pointer list-none dashboard-premium-panel-title flex items-center justify-between gap-2">
-                {t('dashboard.sections.advanced', 'Analyses avancées')}
-                <span className="text-sm font-normal text-muted-foreground group-open:hidden">
-                  {t('common.expand', 'Afficher')}
-                </span>
-              </summary>
-              <div className="mt-6 space-y-6 border-t border-border/50 pt-6">
+              <details className="dashboard-premium-panel group">
+                <summary className="cursor-pointer list-none dashboard-premium-panel-title flex items-center justify-between gap-2">
+                  {t('dashboard.sections.advanced', 'Analyses avancées')}
+                  <span className="text-sm font-normal text-muted-foreground group-open:hidden">
+                    {t('common.expand', 'Afficher')}
+                  </span>
+                </summary>
+                <div className="mt-6 space-y-6 border-t border-border/50 pt-6">
                 <DashboardWidgetErrorBoundary title="Analyses Web Vitals indisponibles">
                   <Suspense fallback={<Skeleton className="h-[200px] w-full rounded-xl" />}>
-                    <CoreWebVitalsMonitor />
+                  <CoreWebVitalsMonitor />
                   </Suspense>
                 </DashboardWidgetErrorBoundary>
                 <DashboardWidgetErrorBoundary title="Graphiques indisponibles">
                   <Suspense fallback={<Skeleton className="h-[320px] w-full rounded-xl" />}>
-                    <DashboardCharts stats={stats} />
+                  <DashboardCharts stats={stats} />
                   </Suspense>
                 </DashboardWidgetErrorBoundary>
-                <div className="rounded-xl border border-border/40 p-4 sm:p-5 bg-muted/20">
-                  <ProductTypeQuickFilters
-                    selectedType={selectedProductType}
-                    onTypeChange={setSelectedProductType}
-                    stats={stats}
+                  <div className="rounded-xl border border-border/40 p-4 sm:p-5 bg-muted/20">
+                    <ProductTypeQuickFilters
+                      selectedType={selectedProductType}
+                      onTypeChange={setSelectedProductType}
+                      stats={stats}
+                    />
+                  </div>
+                  <ProductTypeBreakdown
+                    productsByType={stats.productsByType}
+                    revenueByType={stats.revenueByType}
+                    ordersByType={stats.ordersByType}
                   />
-                </div>
-                <ProductTypeBreakdown
-                  productsByType={stats.productsByType}
-                  revenueByType={stats.revenueByType}
-                  ordersByType={stats.ordersByType}
-                />
-                {stats.revenueByTypeAndMonth.length > 0 && (
-                  <Suspense fallback={<Skeleton className="h-[400px] w-full rounded-xl" />}>
-                    <ProductTypeCharts
-                      revenueByTypeAndMonth={stats.revenueByTypeAndMonth}
-                      ordersByType={stats.ordersByType}
+                  {stats.revenueByTypeAndMonth.length > 0 && (
+                    <Suspense fallback={<Skeleton className="h-[400px] w-full rounded-xl" />}>
+                      <ProductTypeCharts
+                        revenueByTypeAndMonth={stats.revenueByTypeAndMonth}
+                        ordersByType={stats.ordersByType}
+                        selectedType={selectedProductType}
+                      />
+                    </Suspense>
+                  )}
+                  <Suspense fallback={<Skeleton className="h-[300px] w-full rounded-xl" />}>
+                    <ProductTypePerformanceMetrics
+                      performanceMetricsByType={
+                        stats.performanceMetricsByType as {
+                          digital: {
+                            conversionRate: number;
+                            averageOrderValue: number;
+                            customerRetention: number;
+                          };
+                          physical: {
+                            conversionRate: number;
+                            averageOrderValue: number;
+                            customerRetention: number;
+                          };
+                          service: {
+                            conversionRate: number;
+                            averageOrderValue: number;
+                            customerRetention: number;
+                          };
+                          course: {
+                            conversionRate: number;
+                            averageOrderValue: number;
+                            customerRetention: number;
+                          };
+                          artist: {
+                            conversionRate: number;
+                            averageOrderValue: number;
+                            customerRetention: number;
+                          };
+                        }
+                      }
                       selectedType={selectedProductType}
                     />
                   </Suspense>
-                )}
-                <Suspense fallback={<Skeleton className="h-[300px] w-full rounded-xl" />}>
-                  <ProductTypePerformanceMetrics
-                    performanceMetricsByType={
-                      stats.performanceMetricsByType as {
-                        digital: {
-                          conversionRate: number;
-                          averageOrderValue: number;
-                          customerRetention: number;
-                        };
-                        physical: {
-                          conversionRate: number;
-                          averageOrderValue: number;
-                          customerRetention: number;
-                        };
-                        service: {
-                          conversionRate: number;
-                          averageOrderValue: number;
-                          customerRetention: number;
-                        };
-                        course: {
-                          conversionRate: number;
-                          averageOrderValue: number;
-                          customerRetention: number;
-                        };
-                        artist: {
-                          conversionRate: number;
-                          averageOrderValue: number;
-                          customerRetention: number;
-                        };
-                      }
-                    }
-                    selectedType={selectedProductType}
-                  />
-                </Suspense>
-                <DashboardNotifications {...dashboardNotificationsProps} />
-              </div>
-            </details>
-          </div>
+                  <DashboardNotifications {...dashboardNotificationsProps} />
+                </div>
+              </details>
+            </div>
         ) : null}
       </div>
     </AppPageShell>

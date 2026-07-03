@@ -610,33 +610,33 @@ const ProductCardModernComponent = ({
             />
           }
         >
-          {hasPromo && (
+            {hasPromo && (
+              <span
+                className="text-xs sm:text-sm text-gray-600 line-through flex-shrink-0 whitespace-nowrap"
+                aria-label={`Prix original: ${formatPrice(product.price)} ${product.currency || 'XOF'}`}
+              >
+                {formatPrice(product.price)} {product.currency || 'XOF'}
+              </span>
+            )}
             <span
-              className="text-xs sm:text-sm text-gray-600 line-through flex-shrink-0 whitespace-nowrap"
-              aria-label={`Prix original: ${formatPrice(product.price)} ${product.currency || 'XOF'}`}
+              className="text-sm sm:text-base md:text-lg font-bold text-blue-600 whitespace-nowrap"
+              aria-label={`Prix actuel: ${formatPrice(price)} ${product.currency || 'XOF'}`}
             >
-              {formatPrice(product.price)} {product.currency || 'XOF'}
+              {formatPrice(price)} {product.currency || 'XOF'}
             </span>
-          )}
-          <span
-            className="text-sm sm:text-base md:text-lg font-bold text-blue-600 whitespace-nowrap"
-            aria-label={`Prix actuel: ${formatPrice(price)} ${product.currency || 'XOF'}`}
-          >
-            {formatPrice(price)} {product.currency || 'XOF'}
-          </span>
         </MarketplaceProductCardPriceRow>
 
         <MarketplaceProductCardActions
-          productId={product.id}
-          productName={product.name}
+            productId={product.id}
+            productName={product.name}
           productUrl={generateProductUrl(currentStoreSlug, product.slug)}
           storeId={product.store_id}
           buyLabel={cta.buyLabel}
           buyAriaLabel={
-            marketplaceBuy.loading
-              ? `Traitement en cours pour ${product.name}`
-              : `${cta.buyAriaVerb} ${product.name} pour ${formatPrice(price)} ${product.currency || 'XOF'}`
-          }
+                marketplaceBuy.loading
+                  ? `Traitement en cours pour ${product.name}`
+                  : `${cta.buyAriaVerb} ${product.name} pour ${formatPrice(price)} ${product.currency || 'XOF'}`
+              }
           buyLoading={marketplaceBuy.loading}
           buyIcon={cta.action === 'service' ? 'calendar' : 'cart'}
           onBuy={handleBuyNow}

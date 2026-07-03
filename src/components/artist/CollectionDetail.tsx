@@ -12,7 +12,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowLeft, Package, ImageIcon, Store } from 'lucide-react';
 import { OptimizedImage } from '@/components/ui/OptimizedImage';
-import { ArtistProductCard } from '@/components/products/ArtistProductCard';
+import { UnifiedProductCard } from '@/components/products/UnifiedProductCard';
 import { ArtistPublicPageShell } from '@/components/artist/ArtistPublicPageShell';
 import { SEOMeta } from '@/components/seo/SEOMeta';
 import { fetchPublicArtistCollection, isArtistCollectionId } from '@/lib/artist-collection-resolve';
@@ -242,7 +242,7 @@ export const CollectionDetail = () => {
         ) : products && products.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {products.map(product => (
-              <ArtistProductCard key={product.id} product={product} variant="marketplace" />
+              <UnifiedProductCard key={product.id} product={product} variant="marketplace" />
             ))}
           </div>
         ) : (

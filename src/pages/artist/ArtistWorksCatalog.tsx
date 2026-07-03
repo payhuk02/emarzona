@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SEOMeta, ItemListSchema } from '@/components/seo';
-import { ArtistProductCard } from '@/components/products/ArtistProductCard';
+import { UnifiedProductCard } from '@/components/products/UnifiedProductCard';
 import { useMarketplaceProducts } from '@/hooks/useMarketplaceProducts';
 import type { FilterState, PaginationState } from '@/types/marketplace';
 import type { ArtistProduct } from '@/types/unified-product';
@@ -181,7 +181,7 @@ export default function ArtistWorksCatalog() {
           <>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {artistProducts.map(product => (
-                <ArtistProductCard key={product.id} product={product} variant="marketplace" />
+                <UnifiedProductCard key={product.id} product={product} variant="marketplace" />
               ))}
             </div>
 
