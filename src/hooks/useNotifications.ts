@@ -17,9 +17,10 @@ import type {
   CreateNotificationData,
   NotificationPreferences,
 } from '@/types/notifications';
+import { mergeNotificationPreferences } from '@/lib/notifications/notification-preferences-defaults';
 
 const NOTIFICATION_PREFERENCES_FIELDS =
-  'id, user_id, email_notifications, push_notifications, sound_notifications, vibration_notifications, vibration_intensity, notification_sound_type, created_at, updated_at';
+  'id, user_id, email_course_enrollment, email_lesson_complete, email_course_complete, email_certificate_ready, email_new_course, email_course_update, email_quiz_result, email_affiliate_sale, email_comment_reply, email_instructor_message, app_course_enrollment, app_lesson_complete, app_course_complete, app_certificate_ready, app_new_course, app_course_update, app_quiz_result, app_affiliate_sale, app_comment_reply, app_instructor_message, email_notifications, push_notifications, sms_notifications, email_digest_frequency, pause_until, sound_notifications, vibration_notifications, sound_volume, vibration_intensity, notification_sound_type, accessibility_mode, high_contrast_sounds, screen_reader_friendly, created_at, updated_at';
 
 /**
  * Hook pour récupérer les notifications de l'utilisateur avec pagination
@@ -222,7 +223,7 @@ export const useNotificationPreferences = () => {
       } = await supabase.auth.getUser();
 
       if (!user) {
-        return null;
+        return mergeNotificationPreferences(null);
       }
 
       const { data, error } = await supabase
@@ -235,7 +236,7 @@ export const useNotificationPreferences = () => {
         logger.warn('Error fetching notification preferences (table may not exist)', {
           error: error.message,
         });
-        return null;
+        return mergeNotificationPreferences(null);
       }
 
       // Si pas de préférences, créer par défaut
@@ -248,13 +249,13 @@ export const useNotificationPreferences = () => {
 
         if (insertError) {
           logger.error('Error creating notification preferences', { error: insertError });
-          return null;
+          return mergeNotificationPreferences(null);
         }
 
-        return newPrefs as NotificationPreferences;
+        return mergeNotificationPreferences(newPrefs as NotificationPreferences);
       }
 
-      return data as NotificationPreferences;
+      return mergeNotificationPreferences(data as NotificationPreferences);
     },
   });
 };
@@ -275,9 +276,17 @@ export const useUpdateNotificationPreferences = () => {
         throw new Error('User not authenticated');
       }
 
+      const {
+        id: _id,
+        user_id: _userId,
+        created_at: _createdAt,
+        updated_at: _updatedAt,
+        ...patch
+      } = preferences;
+
       const { error } = await supabase
         .from('notification_preferences')
-        .update(preferences)
+        .update(patch)
         .eq('user_id', user.id);
 
       if (error) {

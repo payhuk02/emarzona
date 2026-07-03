@@ -16,10 +16,19 @@ import {
   isGenericProductCreateChooser,
   resolveStoreCommerceTypeFromStore,
 } from '@/lib/commerce/store-capability-map';
+import { isAccountSettingsPath } from '@/lib/billing/account-settings-paths';
 
 type SellerRoutePermissionGuardProps = {
   children: ReactNode;
 };
+
+function GuardLoadingFallback() {
+  return (
+    <div className="flex min-h-[40vh] items-center justify-center">
+      <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent" />
+    </div>
+  );
+}
 
 /**
  * Guard seller routes that require higher physical plan tiers.
@@ -29,6 +38,7 @@ export function SellerRoutePermissionGuard({ children }: SellerRoutePermissionGu
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const accountSettingsRoute = isAccountSettingsPath(location.pathname);
   const { store, loading: storeLoading } = useStore();
   const { planSlug, loading: accessLoading } = useStorePhysicalAccess(store?.id ?? null);
   const commerceType = store ? resolveStoreCommerceTypeFromStore(store) : 'physical';
@@ -43,6 +53,7 @@ export function SellerRoutePermissionGuard({ children }: SellerRoutePermissionGu
   const commerceTypeBlocked = !canAccessCommercePath(location.pathname, commerceType);
 
   useEffect(() => {
+    if (accountSettingsRoute) return;
     if (storeLoading || accessLoading) return;
 
     if (physicalOnlyBlocked) {
@@ -101,9 +112,14 @@ export function SellerRoutePermissionGuard({ children }: SellerRoutePermissionGu
     toast,
     navigate,
     location.pathname,
+    accountSettingsRoute,
   ]);
 
-  if (storeLoading || accessLoading) return null;
+  if (accountSettingsRoute) {
+    return <>{children}</>;
+  }
+
+  if (storeLoading || accessLoading) return <GuardLoadingFallback />;
   if (physicalOnlyBlocked) return null;
   if (commerceTypeBlocked) return null;
   if (requiredFeature && !allowed) return null;

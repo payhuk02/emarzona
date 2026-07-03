@@ -21,46 +21,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useState, useEffect } from 'react';
 import type { NotificationPreferences } from '@/types/notifications';
 import { EmailPreferencesSettings } from '@/components/settings/EmailPreferencesSettings';
-
-const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
-  id: 'local-default',
-  user_id: '',
-  email_course_enrollment: true,
-  email_lesson_complete: true,
-  email_course_complete: true,
-  email_certificate_ready: true,
-  email_new_course: false,
-  email_course_update: true,
-  email_quiz_result: true,
-  email_affiliate_sale: true,
-  email_comment_reply: true,
-  email_instructor_message: true,
-  app_course_enrollment: true,
-  app_lesson_complete: true,
-  app_course_complete: true,
-  app_certificate_ready: true,
-  app_new_course: true,
-  app_course_update: true,
-  app_quiz_result: true,
-  app_affiliate_sale: true,
-  app_comment_reply: true,
-  app_instructor_message: true,
-  email_notifications: true,
-  push_notifications: true,
-  sms_notifications: false,
-  email_digest_frequency: 'weekly',
-  pause_until: null,
-  sound_notifications: true,
-  vibration_notifications: true,
-  sound_volume: 80,
-  vibration_intensity: 'medium',
-  notification_sound_type: 'default',
-  accessibility_mode: false,
-  high_contrast_sounds: false,
-  screen_reader_friendly: false,
-  created_at: new Date(0).toISOString(),
-  updated_at: new Date(0).toISOString(),
-};
+import { mergeNotificationPreferences } from '@/lib/notifications/notification-preferences-defaults';
 
 export const NotificationSettings = () => {
   const { toast } = useToast();
@@ -78,15 +39,12 @@ export const NotificationSettings = () => {
   } = usePushNotifications();
 
   const [localPrefs, setLocalPrefs] = useState<NotificationPreferences>(
-    preferences ?? DEFAULT_NOTIFICATION_PREFERENCES
+    mergeNotificationPreferences(preferences)
   );
 
   useEffect(() => {
     if (preferences) {
-      setLocalPrefs(prev => ({
-        ...prev,
-        ...preferences,
-      }));
+      setLocalPrefs(mergeNotificationPreferences(preferences));
     }
   }, [preferences]);
 
@@ -103,11 +61,8 @@ export const NotificationSettings = () => {
     );
   }
 
-  const handleToggle = (field: string, value: boolean | string) => {
-    setLocalPrefs((prev: NotificationPreferences | null) => {
-      if (!prev) return prev;
-      return { ...prev, [field]: value } as NotificationPreferences;
-    });
+  const handleToggle = (field: keyof NotificationPreferences, value: boolean | string) => {
+    setLocalPrefs(prev => ({ ...prev, [field]: value }));
   };
 
   const handleSave = async () => {
@@ -238,7 +193,7 @@ export const NotificationSettings = () => {
             </div>
             <Switch
               id="email_course_enrollment"
-              checked={localPrefs.email_course_enrollment}
+              checked={localPrefs.email_course_enrollment ?? false}
               onCheckedChange={checked => handleToggle('email_course_enrollment', checked)}
             />
           </div>
@@ -250,7 +205,7 @@ export const NotificationSettings = () => {
             </div>
             <Switch
               id="email_course_complete"
-              checked={localPrefs.email_course_complete}
+              checked={localPrefs.email_course_complete ?? false}
               onCheckedChange={checked => handleToggle('email_course_complete', checked)}
             />
           </div>
@@ -264,7 +219,7 @@ export const NotificationSettings = () => {
             </div>
             <Switch
               id="email_certificate_ready"
-              checked={localPrefs.email_certificate_ready}
+              checked={localPrefs.email_certificate_ready ?? false}
               onCheckedChange={checked => handleToggle('email_certificate_ready', checked)}
             />
           </div>
@@ -278,7 +233,7 @@ export const NotificationSettings = () => {
             </div>
             <Switch
               id="email_new_course"
-              checked={localPrefs.email_new_course}
+              checked={localPrefs.email_new_course ?? false}
               onCheckedChange={checked => handleToggle('email_new_course', checked)}
             />
           </div>
@@ -292,7 +247,7 @@ export const NotificationSettings = () => {
             </div>
             <Switch
               id="email_affiliate_sale"
-              checked={localPrefs.email_affiliate_sale}
+              checked={localPrefs.email_affiliate_sale ?? false}
               onCheckedChange={checked => handleToggle('email_affiliate_sale', checked)}
             />
           </div>
@@ -304,7 +259,7 @@ export const NotificationSettings = () => {
             </div>
             <Switch
               id="email_quiz_result"
-              checked={localPrefs.email_quiz_result}
+              checked={localPrefs.email_quiz_result ?? false}
               onCheckedChange={checked => handleToggle('email_quiz_result', checked)}
             />
           </div>
@@ -329,7 +284,7 @@ export const NotificationSettings = () => {
             </div>
             <Switch
               id="app_course_enrollment"
-              checked={localPrefs.app_course_enrollment}
+              checked={localPrefs.app_course_enrollment ?? false}
               onCheckedChange={checked => handleToggle('app_course_enrollment', checked)}
             />
           </div>
@@ -340,7 +295,7 @@ export const NotificationSettings = () => {
             </div>
             <Switch
               id="app_lesson_complete"
-              checked={localPrefs.app_lesson_complete}
+              checked={localPrefs.app_lesson_complete ?? false}
               onCheckedChange={checked => handleToggle('app_lesson_complete', checked)}
             />
           </div>
@@ -351,7 +306,7 @@ export const NotificationSettings = () => {
             </div>
             <Switch
               id="app_course_complete"
-              checked={localPrefs.app_course_complete}
+              checked={localPrefs.app_course_complete ?? false}
               onCheckedChange={checked => handleToggle('app_course_complete', checked)}
             />
           </div>
@@ -362,7 +317,7 @@ export const NotificationSettings = () => {
             </div>
             <Switch
               id="app_affiliate_sale"
-              checked={localPrefs.app_affiliate_sale}
+              checked={localPrefs.app_affiliate_sale ?? false}
               onCheckedChange={checked => handleToggle('app_affiliate_sale', checked)}
             />
           </div>
@@ -379,7 +334,7 @@ export const NotificationSettings = () => {
           <div className="flex items-center gap-4">
             <Label htmlFor="digest">Fréquence</Label>
             <Select
-              value={localPrefs.email_digest_frequency}
+              value={localPrefs.email_digest_frequency ?? 'weekly'}
               onValueChange={(value: string) => handleToggle('email_digest_frequency', value)}
             >
               <SelectTrigger className="w-48">

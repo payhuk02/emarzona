@@ -183,4 +183,21 @@ describe('SellerRoutePermissionGuard', () => {
       expect(screen.getByTestId('location')).toHaveTextContent('/dashboard/courses/new');
     });
   });
+
+  it('bypasses seller guard for account notification settings while store is loading', async () => {
+    mockStoreLoading = true;
+    mockAccessLoading = true;
+    renderGuard('/settings/notifications');
+
+    expect(screen.getByText('PROTECTED_CONTENT')).toBeInTheDocument();
+    expect(screen.getByTestId('location')).toHaveTextContent('/settings/notifications');
+    expect(mockToast).not.toHaveBeenCalled();
+  });
+
+  it('bypasses seller guard for notifications center', async () => {
+    mockStoreLoading = true;
+    renderGuard('/notifications');
+
+    expect(screen.getByText('PROTECTED_CONTENT')).toBeInTheDocument();
+  });
 });
