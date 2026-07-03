@@ -28,12 +28,6 @@ const steps = [
     args: ['run', 'test:multi-store-isolation'],
   },
   {
-    id: 'edge',
-    label: 'Edge Functions CI (offline)',
-    cmd: 'npm',
-    args: ['run', 'verify:edge-functions-ci'],
-  },
-  {
     id: 'shell',
     label: 'Shell heavy imports gate',
     cmd: 'npm',

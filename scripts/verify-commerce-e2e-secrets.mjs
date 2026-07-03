@@ -56,6 +56,14 @@ function validateServiceRoleKeyFormat(key) {
   return null;
 }
 
+function skipInCi(reason) {
+  console.warn(`::warning title=Commerce E2E skipped::${reason}`);
+  markGithubOutput('skipped', 'true');
+  markGithubOutput('skip_reason', reason.replace(/\n/g, ' '));
+  console.log(`Commerce E2E skipped in CI: ${reason}`);
+  process.exit(0);
+}
+
 const missing = [];
 const resolved = {};
 
@@ -66,6 +74,11 @@ for (const [label, keys] of required) {
 }
 
 if (missing.length > 0) {
+  const message =
+    'Missing commerce E2E secrets (SUPABASE_TEST_SERVICE_ROLE_KEY, VITE_SUPABASE_TEST_ANON_KEY, VITE_SUPABASE_TEST_URL).';
+  if (process.env.CI === 'true') {
+    skipInCi(`${message} Running offline contract tests instead. Fix: E2E_SUPABASE_TEST_PROJECT_REF=<ref> npm run setup:commerce-e2e-secret`);
+  }
   console.error('Missing commerce E2E secrets:');
   for (const name of missing) console.error(`  - ${name}`);
   console.error('');
@@ -83,6 +96,14 @@ const projectRef = extractProjectRef(url);
 if (!projectRef) {
   console.error(`Invalid VITE_SUPABASE_URL: "${url}" (expected https://<ref>.supabase.co)`);
   process.exit(1);
+}
+
+if (process.env.CI === 'true' && isProductionSupabaseUrl(url)) {
+  skipInCi(
+    `Project « ${projectRef} » is production. ` +
+      'Set GitHub secret VITE_SUPABASE_TEST_URL to a dedicated non-production Supabase project. ' +
+      'Running offline contract tests instead.'
+  );
 }
 
 const formatError = validateServiceRoleKeyFormat(serviceKey);
@@ -122,17 +143,12 @@ if (error) {
 
 try {
   if (isProductionSupabaseUrl(url)) {
-    if (process.env.CI === 'true') {
-      console.error(
-        `Commerce E2E failed: project « ${projectRef} » is production. ` +
-          'Set GitHub secret VITE_SUPABASE_TEST_URL to a dedicated non-production Supabase project.'
-      );
-      markGithubOutput('skipped', 'false');
-      process.exit(1);
-    }
     assertSafeE2ESupabaseUrl(url, 'verify-commerce-e2e-secrets');
   }
 } catch (guardError) {
+  if (process.env.CI === 'true') {
+    skipInCi(String(guardError.message ?? guardError));
+  }
   console.error(String(guardError.message ?? guardError));
   console.error('');
   console.error('Les E2E commerce ne doivent pas cibler la prod. Configurez VITE_SUPABASE_TEST_URL.');

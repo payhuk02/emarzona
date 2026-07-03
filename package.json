@@ -89,6 +89,7 @@
     "test:e2e:commerce-gating": "playwright test --config=playwright.commerce-gating.config.ts",
     "test:e2e:routes-smoke": "playwright test --config=playwright.routes-smoke.config.ts",
     "test:e2e:vertical-paid": "playwright test --config=playwright.vertical-paid.config.ts",
+    "test:vertical-paid-contracts": "vitest run src/lib/courses/__tests__/course-learn-redirect.test.ts src/lib/security/__tests__/e2e-supabase-guard.test.ts src/lib/security/__tests__/client-portal-rls-contract.test.ts",
     "env:e2e:pull": "powershell -NoProfile -File scripts/pull-e2e-env-from-vercel.ps1",
     "test:e2e:vertical-paid:local": "node scripts/run-e2e-with-vercel-env.mjs vertical-paid",
     "test:e2e:commerce-gating:local": "node scripts/run-e2e-with-vercel-env.mjs commerce-gating",

@@ -85,18 +85,20 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
-    - name: Install Playwright Browsers
-      run: npx playwright install --with-deps chromium
-
     - name: Validate commerce E2E secrets
       id: commerce_e2e_secrets
       run: node scripts/verify-commerce-e2e-secrets.mjs
       env:
+        CI: true
         VITE_SUPABASE_TEST_URL: ${{ secrets.VITE_SUPABASE_TEST_URL }}
         VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_TEST_URL || secrets.VITE_SUPABASE_URL }}
         VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
         VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
         SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_TEST_SERVICE_ROLE_KEY }}
+
+    - name: Install Playwright Browsers
+      if: steps.commerce_e2e_secrets.outputs.skipped != 'true'
+      run: npx playwright install --with-deps chromium
 
     - name: Run commerce type gating E2E
       if: steps.commerce_e2e_secrets.outputs.skipped != 'true'
@@ -108,6 +110,12 @@ jobs:
         VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
         VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
         SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_TEST_SERVICE_ROLE_KEY }}
+
+    - name: Run commerce gating contract tests (E2E skipped)
+      if: steps.commerce_e2e_secrets.outputs.skipped == 'true'
+      run: npm run test:commerce-gating
+      env:
+        CI: true
 
     - name: Upload commerce gating report
       if: always()
@@ -135,18 +143,20 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
-    - name: Install Playwright Browsers
-      run: npx playwright install --with-deps chromium
-
     - name: Validate commerce E2E secrets
       id: commerce_e2e_secrets
       run: node scripts/verify-commerce-e2e-secrets.mjs
       env:
+        CI: true
         VITE_SUPABASE_TEST_URL: ${{ secrets.VITE_SUPABASE_TEST_URL }}
         VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_TEST_URL || secrets.VITE_SUPABASE_URL }}
         VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
         VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
         SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_TEST_SERVICE_ROLE_KEY }}
+
+    - name: Install Playwright Browsers
+      if: steps.commerce_e2e_secrets.outputs.skipped != 'true'
+      run: npx playwright install --with-deps chromium
 
     - name: Run vertical paid E2E
       if: steps.commerce_e2e_secrets.outputs.skipped != 'true'
@@ -158,6 +168,12 @@ jobs:
         VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
         VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
         SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_TEST_SERVICE_ROLE_KEY }}
+
+    - name: Run vertical paid contract tests (E2E skipped)
+      if: steps.commerce_e2e_secrets.outputs.skipped == 'true'
+      run: npm run test:vertical-paid-contracts
+      env:
+        CI: true
 
     - name: Upload vertical paid report
       if: always()
