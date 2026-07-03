@@ -9,12 +9,17 @@ serve(async req => {
   }
 
   try {
-    // 1. Validation Service Role
+    // 1. Validation Service Role / Internal Secret
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) throw new Error('Missing Authorization header');
 
-    // (En prod, on vérifierait le token avec jwt.verify ou avec auth.getUser
-    // Pour un trigger interne, la clé service_role est utilisée).
+    const token = authHeader.replace('Bearer ', '').trim();
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    const internalSecret = Deno.env.get('EDGE_INTERNAL_SECRET');
+
+    if (token !== serviceRoleKey && token !== internalSecret) {
+      throw new Error('Unauthorized: Invalid token');
+    }
 
     const { tag, table } = await req.json();
     if (!tag) throw new Error('Missing cache tag');

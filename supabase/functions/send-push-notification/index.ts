@@ -116,6 +116,17 @@ serve(async req => {
   }
 
   try {
+    const authHeader = req.headers.get('authorization');
+    const internalSecret = Deno.env.get('EDGE_INTERNAL_SECRET');
+    const token = authHeader?.replace('Bearer ', '').trim();
+
+    if (!token || token !== internalSecret) {
+      return new Response(JSON.stringify({ error: 'Unauthorized: Invalid token' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
       return new Response(JSON.stringify({ error: 'VAPID keys not configured' }), {
         status: 503,

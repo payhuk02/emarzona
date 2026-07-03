@@ -30,6 +30,25 @@ serve(async (req: Request) => {
   }
 
   try {
+    const authHeader = req.headers.get('authorization');
+    const checkoutToken = req.headers.get('x-checkout-token');
+    const internalSecret = Deno.env.get('EDGE_INTERNAL_SECRET');
+    const token = authHeader?.replace('Bearer ', '').trim();
+
+    if (!token && !checkoutToken) {
+      return new Response(JSON.stringify({ error: 'Unauthorized: Missing valid token or secret' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (token !== internalSecret && !checkoutToken) {
+      return new Response(JSON.stringify({ error: 'Unauthorized: Invalid token' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const {
       email,
       customerName,

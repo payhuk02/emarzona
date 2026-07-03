@@ -123,12 +123,12 @@ if (error) {
 try {
   if (isProductionSupabaseUrl(url)) {
     if (process.env.CI === 'true') {
-      console.log(
-        `Commerce E2E skipped: project « ${projectRef} » is production. ` +
+      console.error(
+        `Commerce E2E failed: project « ${projectRef} » is production. ` +
           'Set GitHub secret VITE_SUPABASE_TEST_URL to a dedicated non-production Supabase project.'
       );
-      markGithubOutput('skipped', 'true');
-      process.exit(0);
+      markGithubOutput('skipped', 'false');
+      process.exit(1);
     }
     assertSafeE2ESupabaseUrl(url, 'verify-commerce-e2e-secrets');
   }

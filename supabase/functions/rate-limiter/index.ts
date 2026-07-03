@@ -47,6 +47,16 @@ serve(async req => {
   let endpoint = 'default';
 
   try {
+    const authHeader = req.headers.get('authorization');
+    const internalSecret = Deno.env.get('EDGE_INTERNAL_SECRET');
+    const token = authHeader?.replace('Bearer ', '').trim();
+
+    if (!token || token !== internalSecret) {
+      return new Response(JSON.stringify({ error: 'Unauthorized: Internal only' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''

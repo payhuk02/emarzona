@@ -18,7 +18,7 @@ jobs:
         run: |
           if [ -z "$SUPABASE_URL" ] || [ -z "$CRON_SECRET" ]; then
             echo "SUPABASE_URL and CRON_SECRET secrets are required."
-            exit 0
+            exit 1
           fi
           curl -sfS -X POST "${SUPABASE_URL%/}/functions/v1/platform-health" \
             -H "Content-Type: application/json" \

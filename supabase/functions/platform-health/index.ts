@@ -203,7 +203,10 @@ serve(async req => {
     req.headers.get('x-cron-secret') === cronSecret ||
     req.headers.get('Authorization')?.replace('Bearer ', '') === cronSecret;
 
-  if (isCron || req.method === 'POST') {
+  if (req.method === 'POST') {
+    if (!isCron) {
+      return jsonResponse({ error: 'Unauthorized' }, 401, origin);
+    }
     const probes = await Promise.all([
       probeSupabase(),
       probeSite(),

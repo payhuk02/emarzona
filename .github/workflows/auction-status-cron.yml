@@ -19,7 +19,7 @@ jobs:
         run: |
           if [ -z "$SUPABASE_URL" ] || [ -z "$CRON_SECRET" ]; then
             echo "SUPABASE_URL and CRON_SECRET secrets are required."
-            exit 0
+            exit 1
           fi
           if [ -z "$SUPABASE_ANON_KEY" ]; then
             echo "VITE_SUPABASE_PUBLISHABLE_KEY secret is required for Edge gateway auth."

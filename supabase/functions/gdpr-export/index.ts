@@ -39,7 +39,7 @@ serve(async req => {
     // Fetch user data
     const [profileRes, storesRes, ordersRes] = await Promise.all([
       supabaseAdmin.from('profiles').select('*').eq('id', userId).single(),
-      supabaseAdmin.from('stores').select('*').eq('owner_id', userId),
+      supabaseAdmin.from('stores').select('*').eq('user_id', userId),
       supabaseAdmin.from('orders').select('*').eq('customer_id', userId),
     ]);
 

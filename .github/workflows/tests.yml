@@ -98,6 +98,30 @@ jobs:
   #   runs-on: ubuntu-latest
   #   if: false  # Disabled - use playwright.yml instead
 
+  security-gates:
+    name: Security & Architecture Gates
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify Phase 0
+        run: npm run verify:phase0
+
+      - name: Audit Security Gates
+        run: npm run audit:security-gates
+
   lint:
     name: Lint
     timeout-minutes: 10
