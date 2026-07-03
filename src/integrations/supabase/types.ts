@@ -46151,6 +46151,15 @@ export type Database = {
           version_number: string;
         }[];
       };
+      get_store_dashboard_stats_aggregated: {
+        Args: {
+          p_period_end: string;
+          p_period_label?: string;
+          p_period_start: string;
+          p_store_id: string;
+        };
+        Returns: Json;
+      };
       get_dashboard_stats: {
         Args: { period_days?: number; store_id_param: string };
         Returns: Json;

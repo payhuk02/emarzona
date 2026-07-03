@@ -8,6 +8,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { useStore } from './useStore';
 import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
+import {
+  fetchDashboardStatsFromRpc,
+  isDashboardRpcUnavailableError,
+} from '@/lib/dashboard/fetch-dashboard-stats-rpc';
 import { transformOptimizedData } from '@/services/dashboardStatsTransform';
 
 export type { DashboardStats, UseDashboardStatsOptions } from '@/types/dashboard-stats';
@@ -116,8 +120,8 @@ async function fetchOperationalCounts(storeId: string): Promise<DashboardOperati
       .eq('store_id', storeId)
       .eq('product_type', 'physical')
       .eq('is_active', true)
-      .not('stock', 'is', null)
-      .lte('stock', 5),
+      .not('stock_quantity', 'is', null)
+      .lte('stock_quantity', 5),
     supabase
       .from('reviews')
       .select('id, products!inner(store_id)', { count: 'exact', head: true })
@@ -432,6 +436,31 @@ async function fetchDashboardStatsFromTables(
   return transformOptimizedData(optimizedData);
 }
 
+async function fetchDashboardStats(storeId: string, range: PeriodRange): Promise<DashboardStats> {
+  try {
+    const optimizedData = await fetchDashboardStatsFromRpc(storeId, range);
+    return transformOptimizedData(optimizedData);
+  } catch (err) {
+    const cause =
+      err instanceof Error && 'cause' in err
+        ? (err.cause as { code?: string; message?: string })
+        : null;
+    const rpcErr = cause ?? (err as { code?: string; message?: string });
+
+    if (
+      (err instanceof Error && err.message === 'DASHBOARD_RPC_UNAVAILABLE') ||
+      isDashboardRpcUnavailableError(rpcErr)
+    ) {
+      logger.info('[Dashboard] RPC agrégée indisponible — fallback requêtes client', {
+        storeId,
+      });
+      return fetchDashboardStatsFromTables(storeId, range);
+    }
+
+    throw err;
+  }
+}
+
 export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) => {
   const { store } = useStore();
   const { user } = useAuth();
@@ -450,7 +479,7 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
     queryKey,
     queryFn: () => {
       if (!storeId) throw new Error('No store');
-      return fetchDashboardStatsFromTables(storeId, range);
+      return fetchDashboardStats(storeId, range);
     },
     enabled: !!user && !!storeId,
     staleTime: 5 * 60 * 1000,
