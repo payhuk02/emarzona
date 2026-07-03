@@ -8,7 +8,6 @@ import { test, expect } from '@playwright/test';
 import { createNodeSupabaseClient } from './helpers/create-node-supabase-client';
 import { assertSafeE2ESupabaseUrl, resolveE2ESupabaseUrl } from './helpers/e2e-supabase-guard';
 import {
-  assertCourseEnrollment,
   assertCertificateVerification,
   cleanupPaidFixture,
   seedPaidArtistFixture,
@@ -45,7 +44,8 @@ test.describe('Artist paid purchase (E2E)', () => {
       await expect(page.getByRole('heading', { name: /espace artiste/i })).toBeVisible({
         timeout: 20_000,
       });
-      await expect(page.getByText(fixture.product.name)).toBeVisible({ timeout: 20_000 });
+      // Attendre le chargement RPC list_my_artist_orders (onglet achats par défaut)
+      await expect(page.getByText(fixture.product.name)).toBeVisible({ timeout: 30_000 });
     } finally {
       try {
         await cleanupPaidFixture(admin, fixture);

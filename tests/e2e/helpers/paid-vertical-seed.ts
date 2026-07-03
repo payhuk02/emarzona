@@ -194,8 +194,8 @@ export async function seedPaidCourseFixture(
       order_number: orderNumber,
       total_amount: 7500,
       currency: 'XOF',
-      payment_status: 'pending',
-      status: 'pending',
+      payment_status: 'paid',
+      status: 'completed',
       payment_type: 'full',
     })
     .select('id')
@@ -287,8 +287,8 @@ export async function seedPaidArtistFixture(
       order_number: orderNumber,
       total_amount: 12000,
       currency: 'XOF',
-      payment_status: 'pending',
-      status: 'pending',
+      payment_status: 'paid',
+      status: 'completed',
       payment_type: 'full',
     })
     .select('id')

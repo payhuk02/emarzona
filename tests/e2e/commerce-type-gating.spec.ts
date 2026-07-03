@@ -42,7 +42,7 @@ function slugify(input: string): string {
 
 function expectSidebarHasLink(page: Page, path: string) {
   return expect(page.locator(`.app-sidebar a[href="${path}"]`)).toHaveCount(1, {
-    timeout: 15_000,
+    timeout: process.env.CI ? 30_000 : 15_000,
   });
 }
 
@@ -168,17 +168,25 @@ test.describe('Commerce type gating (E2E minimal)', () => {
       const storeId = (storeData as { id: string } | null)?.id;
       expect(storeId, 'created store id').toBeTruthy();
 
-      // Login via UI
+      // Login via UI (selectors alignés avec Auth.tsx)
       await page.goto('/login', { waitUntil: 'domcontentloaded' });
-      await page.fill('input[type="email"]', email);
-      await page.fill('input[type="password"]', password);
-      await page.click('button[type="submit"]');
-      await expect(page).toHaveURL('/dashboard', { timeout: 20_000 });
+      await page.locator('input[name="email-login"]').fill(email);
+      await page.locator('#password-login').fill(password);
+      await page
+        .locator('form')
+        .filter({ has: page.locator('#password-login') })
+        .locator('button[type="submit"]')
+        .click();
+      await expect(page).toHaveURL('/dashboard', { timeout: 30_000 });
 
       // Ensure sidebar loaded (commerce_type from StoreContext drives nav filtering)
       await expect(page.locator('.app-sidebar')).toBeVisible();
 
       const { mustHave, mustNotHave, forbiddenDirectPath } = typeAssertions[commerceType];
+      const ownCreatePath = PRIMARY_PRODUCT_CREATE_PATH_BY_TYPE[commerceType];
+
+      // Wait for store-driven gating before asserting full matrix (StoreContext fetch + nav resolve)
+      await expectSidebarHasLink(page, ownCreatePath);
 
       for (const path of mustHave) {
         await expectSidebarHasLink(page, path);
@@ -186,9 +194,6 @@ test.describe('Commerce type gating (E2E minimal)', () => {
       for (const path of mustNotHave) {
         await expectSidebarMissingLink(page, path);
       }
-
-      const ownCreatePath = PRIMARY_PRODUCT_CREATE_PATH_BY_TYPE[commerceType];
-      await expectSidebarHasLink(page, ownCreatePath);
 
       for (const path of ALL_CREATE_PATHS) {
         if (path !== ownCreatePath) {

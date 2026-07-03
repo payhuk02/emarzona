@@ -64,6 +64,7 @@
     "test:security": "npm run test:guards && npm run test:unit:payments",
     "audit:rls": "node scripts/audit-rls-check.mjs",
     "audit:security-gates": "npm run audit:rls && npm run audit:storage-public && npm run audit:client-portal-rls",
+    "verify:security-gates:ci": "node scripts/verify-security-gates-ci.mjs",
     "audit:client-portal-rls": "node scripts/audit-client-portal-rls.mjs",
     "audit:i18n-parity": "node scripts/audit-i18n-parity.mjs",
     "audit:i18n-checkout-locales": "node scripts/audit-i18n-checkout-locales.mjs",

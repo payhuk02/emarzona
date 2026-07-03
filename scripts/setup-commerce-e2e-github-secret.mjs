@@ -17,8 +17,32 @@
 import { execSync, spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { DEFAULT_PRODUCTION_SUPABASE_PROJECT_REF } from './e2e-supabase-guard.mjs';
 
-const PROJECT_REF = 'hbdnzajbyjakdhuavrvb';
+const PRODUCTION_PROJECT_REF = DEFAULT_PRODUCTION_SUPABASE_PROJECT_REF;
+const PROJECT_REF =
+  process.env.E2E_SUPABASE_TEST_PROJECT_REF?.trim() ||
+  process.env.SUPABASE_TEST_PROJECT_REF?.trim() ||
+  '';
+
+if (!PROJECT_REF) {
+  console.error('Missing E2E_SUPABASE_TEST_PROJECT_REF (dedicated non-production Supabase project).');
+  console.error('');
+  console.error('Example:');
+  console.error('  E2E_SUPABASE_TEST_PROJECT_REF=your-test-ref npm run setup:commerce-e2e-secret');
+  console.error('');
+  console.error(`Production ref "${PRODUCTION_PROJECT_REF}" must NOT be used for commerce E2E secrets.`);
+  process.exit(1);
+}
+
+if (PROJECT_REF === PRODUCTION_PROJECT_REF) {
+  console.error(
+    `Refusing to set ${'VITE_SUPABASE_TEST_URL'} to production project "${PRODUCTION_PROJECT_REF}".`
+  );
+  console.error('Create a separate Supabase project for E2E and set E2E_SUPABASE_TEST_PROJECT_REF.');
+  process.exit(1);
+}
+
 const PROJECT_URL = `https://${PROJECT_REF}.supabase.co`;
 const SERVICE_ROLE_SECRET = 'SUPABASE_TEST_SERVICE_ROLE_KEY';
 const PUBLISHABLE_SECRET = 'VITE_SUPABASE_TEST_ANON_KEY';
