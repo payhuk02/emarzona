@@ -15,7 +15,7 @@ const baseFilters: FilterState = {
   tags: [],
   verifiedOnly: false,
   featuredOnly: false,
-  inStock: true,
+  inStock: false,
 };
 
 describe('marketplace-url-filters', () => {
@@ -46,5 +46,16 @@ describe('marketplace-url-filters', () => {
   it('omits default values from URL', () => {
     const params = filtersToSearchParams(baseFilters, 1, '');
     expect(params.toString()).toBe('');
+  });
+
+  it('serializes inStock only when filtering en stock', () => {
+    const params = filtersToSearchParams({ ...baseFilters, inStock: true }, 1, '');
+    expect(params.get('inStock')).toBe('1');
+    expect(params.toString()).toBe('inStock=1');
+  });
+
+  it('parses legacy inStock=0 without forcing URL rewrite', () => {
+    const parsed = parseMarketplaceSearchParams(new URLSearchParams('inStock=0'));
+    expect(parsed.filters.inStock).toBe(false);
   });
 });

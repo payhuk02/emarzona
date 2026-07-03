@@ -13,6 +13,22 @@ interface UseMarketplaceUrlSyncOptions {
   debouncedSearch: string;
 }
 
+function filtersEqual(a: FilterState, b: Partial<FilterState>): boolean {
+  for (const [key, value] of Object.entries(b)) {
+    const k = key as keyof FilterState;
+    const left = a[k];
+    const right = value;
+    if (Array.isArray(left) && Array.isArray(right)) {
+      if (left.length !== right.length || left.some((item, index) => item !== right[index])) {
+        return false;
+      }
+      continue;
+    }
+    if (left !== right) return false;
+  }
+  return true;
+}
+
 /**
  * Synchronise filtres marketplace ↔ URL (partage, retour navigateur, SEO long-tail).
  */
@@ -44,9 +60,14 @@ export function useMarketplaceUrlSync({
     }
 
     if (Object.keys(urlFilters).length > 0) {
-      setFilters(prev => ({ ...prev, ...urlFilters }));
+      setFilters(prev => {
+        if (filtersEqual(prev, urlFilters)) return prev;
+        return { ...prev, ...urlFilters };
+      });
     }
-    setSearchInput(search);
+    if (search !== searchInput) {
+      setSearchInput(search);
+    }
     if (page !== pagination.currentPage) {
       goToPage(page);
     }

@@ -85,7 +85,7 @@ export function filtersToSearchParams(
   }
   if (filters.featuredOnly) params.set('featured', '1');
   if (filters.verifiedOnly) params.set('verified', '1');
-  if (!filters.inStock) params.set('inStock', '0');
+  if (filters.inStock) params.set('inStock', '1');
   if (filters.tags.length > 0) params.set('tags', filters.tags.join(','));
   if (page > 1) params.set('page', String(page));
 
