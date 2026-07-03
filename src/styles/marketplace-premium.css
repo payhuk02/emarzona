@@ -352,6 +352,22 @@
   color: var(--lp-text-dim);
 }
 
+/* Actions carte produit — CTA pleine largeur + secondaires en grille */
+.marketplace-premium .mp-product-card__actions,
+.mp-product-cards-band.landing-premium .mp-product-card__actions {
+  min-width: 0;
+}
+
+.marketplace-premium .mp-product-card__actions [data-action='primary'],
+.mp-product-cards-band.landing-premium .mp-product-card__actions [data-action='primary'] {
+  letter-spacing: 0.01em;
+}
+
+.marketplace-premium .mp-product-card__price,
+.mp-product-cards-band.landing-premium .mp-product-card__price {
+  min-width: 0;
+}
+
 /* Panneau filtres avancés */
 .marketplace-premium .mp-filters-panel {
   background: var(--lp-surface-muted);

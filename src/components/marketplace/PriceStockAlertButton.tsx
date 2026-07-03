@@ -23,6 +23,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from '@/components/icons';
 import { useCurrentUserId } from '@/hooks/useCurrentUserId';
+import { cn } from '@/lib/utils';
 
 interface PriceStockAlertButtonProps {
   productId: string;
@@ -208,7 +209,7 @@ export function PriceStockAlertButton({
   };
 
   return (
-    <div className={`flex-shrink-0 ${className}`}>
+    <div className={cn('flex flex-wrap items-center gap-1.5', className)}>
       {/* Bouton Alerte Prix */}
       {hasPriceAlert ? (
         <Button
@@ -361,9 +362,3 @@ export function PriceStockAlertButton({
     </div>
   );
 }
-
-
-
-
-
-

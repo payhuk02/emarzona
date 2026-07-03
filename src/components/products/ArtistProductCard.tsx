@@ -52,6 +52,10 @@ import {
 import { generateProductUrl } from '@/lib/store-utils';
 import { useMarketplaceGuestBuy } from '@/hooks/marketplace/useMarketplaceGuestBuy';
 import { MarketplaceGuestBuyDialogs } from '@/components/marketplace/MarketplaceGuestBuyDialogs';
+import {
+  MarketplaceProductCardActions,
+  MarketplaceProductCardPriceRow,
+} from '@/components/marketplace/MarketplaceProductCardActions';
 import { Loader2 } from 'lucide-react';
 
 interface ArtistProductCardProps {
@@ -600,91 +604,46 @@ export function ArtistProductCard({
 
         {/* Prix et Actions - Style identique à la carte digitale */}
         <div className="mt-auto pt-3 sm:pt-4 border-t border-gray-200 dark:border-gray-700">
-          {/* Prix - Style exact de l'image */}
-          <div className="flex items-center justify-between gap-2 mb-3 sm:mb-4">
-            <div className="flex items-baseline gap-1.5 sm:gap-2 min-w-0 flex-1">
-              {priceInfo.originalPrice && (
-                <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 line-through">
-                  {formatPrice(priceInfo.originalPrice, product.currency)}
-                </span>
-              )}
-              <span
-                id={`artwork-price-${product.id}`}
-                className="text-base sm:text-lg md:text-xl font-bold text-blue-600 dark:text-blue-400 whitespace-nowrap"
-              >
-                {priceInfo.price === 0 ? 'Gratuit' : formatPrice(priceInfo.price, product.currency)}
+          <MarketplaceProductCardPriceRow
+            priceId={`artwork-price-${product.id}`}
+            alertSlot={
+              <PriceStockAlertButton
+                productId={product.id}
+                productName={product.artwork_title || product.name}
+                currentPrice={priceInfo.price}
+                currency={product.currency || 'XOF'}
+                productType="artist"
+                variant="outline"
+                size="sm"
+              />
+            }
+          >
+            {priceInfo.originalPrice && (
+              <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 line-through">
+                {formatPrice(priceInfo.originalPrice, product.currency)}
               </span>
-            </div>
-            <PriceStockAlertButton
-              productId={product.id}
-              productName={product.artwork_title || product.name}
-              currentPrice={priceInfo.price}
-              currency={product.currency || 'XOF'}
-              productType="artist"
-              variant="outline"
-              size="sm"
-              className="flex-shrink-0"
-            />
-          </div>
+            )}
+            <span className="text-base sm:text-lg md:text-xl font-bold text-blue-600 dark:text-blue-400 whitespace-nowrap">
+              {priceInfo.price === 0 ? 'Gratuit' : formatPrice(priceInfo.price, product.currency)}
+            </span>
+          </MarketplaceProductCardPriceRow>
 
-          {/* Boutons d'action - 3 boutons horizontaux comme dans l'image */}
-          <div className="flex gap-2">
-            {/* Bouton JAUNE "Voir" */}
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1 h-10 sm:h-11 text-xs sm:text-sm bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 border-amber-500 text-white font-medium"
-              asChild
-            >
-              <Link
-                to={productUrl}
-                aria-label={`Voir les détails de ${product.artwork_title || product.name}`}
-                onClick={() => onAction?.('view', product)}
-              >
-                <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
-                Voir
-              </Link>
-            </Button>
-
-            {/* Bouton VIOLET "Contacter" */}
-            <Button
-              size="sm"
-              className="flex-1 h-10 sm:h-11 text-xs sm:text-sm bg-purple-600 hover:bg-purple-700 text-white font-medium"
-              asChild
-            >
-              <Link
-                to={
-                  product.store_id
-                    ? `/vendor/messaging/${product.store_id}?productId=${product.id}`
-                    : productUrl
-                }
-                aria-label={`Contacter le vendeur pour ${product.artwork_title || product.name}`}
-              >
-                <MessageSquare className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
-                Contacter
-              </Link>
-            </Button>
-
-            <Button
-              size="sm"
-              className="flex-1 h-10 sm:h-11 text-xs sm:text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium"
-              disabled={marketplaceBuy.loading}
-              onClick={e => {
-                e.preventDefault();
-                e.stopPropagation();
-                onAction?.('buy', product);
-                void marketplaceBuy.handleBuyClick();
-              }}
-              aria-label={`${marketplaceBuy.cta.buyAriaVerb} ${product.artwork_title || product.name}`}
-            >
-              {marketplaceBuy.loading ? (
-                <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 animate-spin" />
-              ) : (
-                <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
-              )}
-              {marketplaceBuy.cta.buyLabel}
-            </Button>
-          </div>
+          <MarketplaceProductCardActions
+            productId={product.id}
+            productName={product.artwork_title || product.name}
+            productUrl={productUrl}
+            storeId={product.store_id}
+            buyLabel={marketplaceBuy.cta.buyLabel}
+            buyAriaLabel={`${marketplaceBuy.cta.buyAriaVerb} ${product.artwork_title || product.name}`}
+            buyLoading={marketplaceBuy.loading}
+            onView={() => onAction?.('view', product)}
+            onBuy={e => {
+              e.preventDefault();
+              e.stopPropagation();
+              onAction?.('buy', product);
+              void marketplaceBuy.handleBuyClick();
+            }}
+          />
         </div>
       </div>
 

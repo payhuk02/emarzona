@@ -47,6 +47,10 @@ import { PhysicalQuickOrderDialog } from '@/components/physical/PhysicalQuickOrd
 import { parsePhysicalCheckoutOptions } from '@/lib/physical/physical-checkout-display';
 import { PricingModelBadge } from '@/components/products/PricingModelBadge';
 import { PhysicalSizeChartBadge } from '@/components/products/PhysicalInfoBadges';
+import {
+  MarketplaceProductCardActions,
+  MarketplaceProductCardPriceRow,
+} from '@/components/marketplace/MarketplaceProductCardActions';
 
 interface PhysicalProductCardProps {
   product: PhysicalProduct;
@@ -525,94 +529,52 @@ export function PhysicalProductCard({
 
         {/* Prix et Actions - Style identique à la carte digitale */}
         <div className="mt-auto pt-3 sm:pt-4 border-t border-gray-200 dark:border-gray-700">
-          {/* Prix - Style exact de l'image */}
-          <div className="flex items-center justify-between gap-2 mb-3 sm:mb-4">
-            <div className="flex items-baseline gap-1.5 sm:gap-2 min-w-0 flex-1">
-              {priceInfo.originalPrice && (
-                <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 line-through">
-                  {formatPrice(priceInfo.originalPrice, product.currency)}
-                </span>
-              )}
-              <span
-                id={`product-price-${product.id}`}
-                className="text-base sm:text-lg md:text-xl font-bold text-blue-600 dark:text-blue-400 whitespace-nowrap"
-              >
-                {priceInfo.price === 0 ? 'Gratuit' : formatPrice(priceInfo.price, product.currency)}
+          <MarketplaceProductCardPriceRow
+            priceId={`product-price-${product.id}`}
+            alertSlot={
+              <PriceStockAlertButton
+                productId={product.id}
+                productName={product.name}
+                currentPrice={priceInfo.price}
+                currency={product.currency || 'XOF'}
+                productType="physical"
+                stockQuantity={product.stock}
+                variant="outline"
+                size="sm"
+              />
+            }
+          >
+            {priceInfo.originalPrice && (
+              <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 line-through">
+                {formatPrice(priceInfo.originalPrice, product.currency)}
               </span>
-            </div>
-            <PriceStockAlertButton
-              productId={product.id}
-              productName={product.name}
-              currentPrice={priceInfo.price}
-              currency={product.currency || 'XOF'}
-              productType="physical"
-              variant="outline"
-              size="sm"
-              className="flex-shrink-0"
-            />
-          </div>
+            )}
+            <span className="text-base sm:text-lg md:text-xl font-bold text-blue-600 dark:text-blue-400 whitespace-nowrap">
+              {priceInfo.price === 0 ? 'Gratuit' : formatPrice(priceInfo.price, product.currency)}
+            </span>
+          </MarketplaceProductCardPriceRow>
 
-          {/* Boutons d'action - 3 boutons horizontaux comme dans l'image */}
-          <div className="flex gap-2">
-            {/* Bouton JAUNE "Voir" */}
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1 h-10 sm:h-11 text-xs sm:text-sm bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 border-amber-500 text-white font-medium"
-              asChild
-              disabled={product.stock === 0}
-            >
-              <Link
-                to={productUrl}
-                aria-label={`Voir les détails de ${product.name}`}
-                onClick={() => onAction?.('view', product)}
-              >
-                <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
-                Voir
-              </Link>
-            </Button>
-
-            {/* Bouton VIOLET "Contacter" */}
-            <Button
-              size="sm"
-              className="flex-1 h-10 sm:h-11 text-xs sm:text-sm bg-purple-600 hover:bg-purple-700 text-white font-medium"
-              asChild
-            >
-              <Link
-                to={
-                  product.store_id
-                    ? `/vendor/messaging/${product.store_id}?productId=${product.id}`
-                    : productUrl
-                }
-                aria-label={`Contacter le vendeur pour ${product.name}`}
-              >
-                <MessageSquare className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
-                Contacter
-              </Link>
-            </Button>
-
-            {/* Bouton d'action principal (libellé vendeur) */}
-            <Button
-              size="sm"
-              className="flex-1 h-10 sm:h-11 text-xs sm:text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={product.stock === 0}
-              onClick={e => {
-                e.preventDefault();
-                e.stopPropagation();
-                if (product.stock === 0) return;
-                onAction?.('buy', product);
-                setQuickOrderOpen(true);
-              }}
-              aria-label={
-                product.stock === 0
-                  ? `${product.name} est épuisé`
-                  : `${checkoutDisplay.cta_button_label} ${product.name}`
-              }
-            >
-              <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
-              {product.stock === 0 ? 'Épuisé' : checkoutDisplay.cta_button_label}
-            </Button>
-          </div>
+          <MarketplaceProductCardActions
+            productId={product.id}
+            productName={product.name}
+            productUrl={productUrl}
+            storeId={product.store_id}
+            buyLabel={product.stock === 0 ? 'Épuisé' : checkoutDisplay.cta_button_label}
+            buyAriaLabel={
+              product.stock === 0
+                ? `${product.name} est épuisé`
+                : `${checkoutDisplay.cta_button_label} ${product.name}`
+            }
+            buyDisabled={product.stock === 0}
+            onView={() => onAction?.('view', product)}
+            onBuy={e => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (product.stock === 0) return;
+              onAction?.('buy', product);
+              setQuickOrderOpen(true);
+            }}
+          />
         </div>
       </div>
 

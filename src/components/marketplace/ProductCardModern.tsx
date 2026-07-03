@@ -22,6 +22,10 @@ import {
 } from 'lucide-react';
 import { useMarketplaceGuestBuy } from '@/hooks/marketplace/useMarketplaceGuestBuy';
 import { MarketplaceGuestBuyDialogs } from '@/components/marketplace/MarketplaceGuestBuyDialogs';
+import {
+  MarketplaceProductCardActions,
+  MarketplaceProductCardPriceRow,
+} from '@/components/marketplace/MarketplaceProductCardActions';
 import { PhysicalCheckoutMethodBadge } from '@/components/products/PhysicalCheckoutMethodBadge';
 import type { PhysicalProductPaymentOptions } from '@/types/physical-product';
 import { Button } from '@/components/ui/button';
@@ -591,122 +595,52 @@ const ProductCardModernComponent = ({
           )}
         </div>
 
-        {/* Prix */}
-        <div
-          className="flex items-center justify-between gap-2 mb-2 sm:mb-3"
-          id={`product-price-${product.id}`}
-        >
-          <div className="flex items-baseline gap-1.5 sm:gap-2 min-w-0 flex-1">
-            {hasPromo && (
-              <span
-                className="text-xs sm:text-sm text-gray-600 line-through flex-shrink-0 whitespace-nowrap"
-                aria-label={`Prix original: ${formatPrice(product.price)} ${product.currency || 'XOF'}`}
-              >
-                {formatPrice(product.price)} {product.currency || 'XOF'}
-              </span>
-            )}
-            <span
-              className="text-sm sm:text-base md:text-lg font-bold text-blue-600 whitespace-nowrap"
-              aria-label={`Prix actuel: ${formatPrice(price)} ${product.currency || 'XOF'}`}
-            >
-              {formatPrice(price)} {product.currency || 'XOF'}
-            </span>
-          </div>
-          <PriceStockAlertButton
-            productId={product.id}
-            productName={product.name}
-            currentPrice={price}
-            currency={product.currency || 'XOF'}
-            productType={product.product_type || 'digital'}
-            stockQuantity={product.stock_quantity}
-            variant="outline"
-            size="sm"
-            className="flex-shrink-0"
-          />
-        </div>
-
-        {/* Boutons d'action - Touch targets optimisés mobile (44px minimum) */}
-        <div className="flex flex-col gap-2 sm:gap-2 mt-auto">
-          <div className="flex gap-2 sm:gap-2">
-            <Button
+        <MarketplaceProductCardPriceRow
+          priceId={`product-price-${product.id}`}
+          alertSlot={
+            <PriceStockAlertButton
+              productId={product.id}
+              productName={product.name}
+              currentPrice={price}
+              currency={product.currency || 'XOF'}
+              productType={product.product_type || 'digital'}
+              stockQuantity={product.stock_quantity}
               variant="outline"
               size="sm"
-              className="flex-1 min-h-[44px] h-11 text-xs sm:text-xs text-white bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 border-amber-500 px-3 sm:px-3 touch-manipulation active:scale-95 transition-transform"
-              asChild
+            />
+          }
+        >
+          {hasPromo && (
+            <span
+              className="text-xs sm:text-sm text-gray-600 line-through flex-shrink-0 whitespace-nowrap"
+              aria-label={`Prix original: ${formatPrice(product.price)} ${product.currency || 'XOF'}`}
             >
-              <Link
-                to={generateProductUrl(currentStoreSlug, product.slug)}
-                aria-label={`Voir les détails de ${product.name}`}
-                className="flex items-center justify-center gap-1 sm:gap-1.5"
-              >
-                <Eye
-                  className="h-3 w-3 sm:h-3.5 sm:w-3.5 flex-shrink-0 text-white"
-                  aria-hidden="true"
-                />
-                <span className="whitespace-nowrap text-white">Voir</span>
-              </Link>
-            </Button>
+              {formatPrice(product.price)} {product.currency || 'XOF'}
+            </span>
+          )}
+          <span
+            className="text-sm sm:text-base md:text-lg font-bold text-blue-600 whitespace-nowrap"
+            aria-label={`Prix actuel: ${formatPrice(price)} ${product.currency || 'XOF'}`}
+          >
+            {formatPrice(price)} {product.currency || 'XOF'}
+          </span>
+        </MarketplaceProductCardPriceRow>
 
-            {product.store_id && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1 min-h-[44px] h-11 text-xs sm:text-xs text-white bg-gradient-to-r from-purple-700 to-purple-900 hover:from-purple-800 hover:to-purple-950 border-purple-700 px-3 sm:px-3 touch-manipulation active:scale-95 transition-transform"
-                asChild
-              >
-                <Link
-                  to={`/vendor/messaging/${product.store_id}?productId=${product.id}`}
-                  aria-label={`Contacter le vendeur pour ${product.name}`}
-                  className="flex items-center justify-center gap-1 sm:gap-1.5"
-                >
-                  <MessageSquare
-                    className="h-3 w-3 sm:h-3.5 sm:w-3.5 flex-shrink-0 text-white"
-                    aria-hidden="true"
-                  />
-                  <span className="hidden sm:inline whitespace-nowrap text-white">Contacter</span>
-                  <span className="sm:hidden text-white">Msg</span>
-                </Link>
-              </Button>
-            )}
-
-            <Button
-              onClick={handleBuyNow}
-              disabled={marketplaceBuy.loading}
-              size="sm"
-              className="flex-1 min-h-[44px] h-11 text-xs sm:text-xs bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium disabled:opacity-50 px-3 sm:px-3 touch-manipulation active:scale-95 transition-transform"
-              aria-label={
-                marketplaceBuy.loading
-                  ? `Traitement en cours pour ${product.name}`
-                  : `${cta.buyAriaVerb} ${product.name} pour ${formatPrice(price)} ${product.currency || 'XOF'}`
-              }
-            >
-              {marketplaceBuy.loading ? (
-                <>
-                  <Loader2
-                    className="h-3 w-3 sm:h-3.5 sm:w-3.5 animate-spin flex-shrink-0"
-                    aria-hidden="true"
-                  />
-                  <span className="whitespace-nowrap">Chargement...</span>
-                </>
-              ) : (
-                <>
-                  {cta.action === 'service' ? (
-                    <Calendar
-                      className="h-3 w-3 sm:h-3.5 sm:w-3.5 flex-shrink-0"
-                      aria-hidden="true"
-                    />
-                  ) : (
-                    <ShoppingCart
-                      className="h-3 w-3 sm:h-3.5 sm:w-3.5 flex-shrink-0"
-                      aria-hidden="true"
-                    />
-                  )}
-                  <span className="whitespace-nowrap">{cta.buyLabel}</span>
-                </>
-              )}
-            </Button>
-          </div>
-        </div>
+        <MarketplaceProductCardActions
+          productId={product.id}
+          productName={product.name}
+          productUrl={generateProductUrl(currentStoreSlug, product.slug)}
+          storeId={product.store_id}
+          buyLabel={cta.buyLabel}
+          buyAriaLabel={
+            marketplaceBuy.loading
+              ? `Traitement en cours pour ${product.name}`
+              : `${cta.buyAriaVerb} ${product.name} pour ${formatPrice(price)} ${product.currency || 'XOF'}`
+          }
+          buyLoading={marketplaceBuy.loading}
+          buyIcon={cta.action === 'service' ? 'calendar' : 'cart'}
+          onBuy={handleBuyNow}
+        />
       </div>
 
       <MarketplaceGuestBuyDialogs
