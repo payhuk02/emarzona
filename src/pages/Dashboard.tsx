@@ -152,7 +152,6 @@ const DashboardWithStore = ({ store, storeLoading }: DashboardWithStoreProps) =>
   navigateRef.current = navigate;
   const {
     stats,
-    loading: statsInitialLoading,
     hasData: hasStatsData,
     error: hookError,
     isUpdating,
@@ -166,8 +165,8 @@ const DashboardWithStore = ({ store, storeLoading }: DashboardWithStoreProps) =>
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedProductType, setSelectedProductType] = useState<ProductTypeFilter>('all');
 
-  const showStatsSkeleton =
-    storeLoading || !store?.id || (statsInitialLoading && !hasStatsData && !hookError);
+  /** Skeleton jusqu’à la 1re réponse réelle — jamais en parallèle d’une erreur affichée */
+  const showStatsSkeleton = storeLoading || !store?.id || (!hasStatsData && !hookError);
 
   // ✅ PHASE 2: Déferrer les notifications (non-critique pour le premier render)
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
@@ -423,12 +422,7 @@ const DashboardWithStore = ({ store, storeLoading }: DashboardWithStoreProps) =>
         {showStatsSkeleton ? (
           <DashboardFullSkeleton />
         ) : stats ? (
-          <div
-            className={cn(
-              'space-y-6 sm:space-y-8 transition-opacity duration-200',
-              isUpdating && 'opacity-70 pointer-events-none'
-            )}
-          >
+          <div className="space-y-6 sm:space-y-8">
             <DashboardActionCenter
               operational={stats.operational}
               periodLabel={stats.periodLabel}
@@ -447,7 +441,15 @@ const DashboardWithStore = ({ store, storeLoading }: DashboardWithStoreProps) =>
               />
             )}
 
-            <DashboardStats stats={stats} />
+            <div
+              className={cn(
+                'transition-opacity duration-200',
+                isUpdating && 'opacity-60 pointer-events-none'
+              )}
+              aria-busy={isUpdating}
+            >
+              <DashboardStats stats={stats} />
+            </div>
 
             {stats.revenueByMonth.length > 0 && (
               <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 sm:gap-6">

@@ -137,6 +137,7 @@ SELECT public.setup_order_fulfillment_monitor_cron_job(
   '$ProjectRef',
   '$EscSecret'
 );
+SELECT public.setup_dashboard_materialized_views_cron_job('15 * * * *');
 COMMIT;
 "@
 

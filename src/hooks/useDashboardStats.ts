@@ -3,7 +3,8 @@
  * Utilise React Query pour le cache, le refetch automatique et la déduplication
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useMemo } from 'react';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useStore } from './useStore';
 import { useAuth } from '@/contexts/AuthContext';
@@ -465,7 +466,10 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
   const { store } = useStore();
   const { user } = useAuth();
   const storeId = options?.storeId ?? store?.id ?? null;
-  const range = resolvePeriodRange(options);
+  const range = useMemo(
+    () => resolvePeriodRange(options),
+    [options?.period, options?.customStartDate, options?.customEndDate]
+  );
 
   const queryKey = [
     'dashboard-stats',
@@ -475,24 +479,34 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
     range.end.toISOString(),
   ] as const;
 
-  const { data, isLoading, isFetching, error, refetch } = useQuery<DashboardStats>({
-    queryKey,
-    queryFn: () => {
-      if (!storeId) throw new Error('No store');
-      return fetchDashboardStats(storeId, range);
-    },
-    enabled: !!user && !!storeId,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
-    refetchOnWindowFocus: false,
-    /** Évite le flash skeleton → contenu lors d’un changement de période */
-    placeholderData: previousData => previousData,
-    retry: 2,
-    retryDelay: attempt => Math.min(1000 * 2 ** attempt, 10000),
-    meta: {
-      errorMessage: 'Erreur de chargement des statistiques',
-    },
-  });
+  const { data, isLoading, isFetching, isPlaceholderData, error, refetch } =
+    useQuery<DashboardStats>({
+      queryKey,
+      queryFn: () => {
+        if (!storeId) throw new Error('No store');
+        return fetchDashboardStats(storeId, range);
+      },
+      enabled: !!user && !!storeId,
+      staleTime: 5 * 60 * 1000,
+      gcTime: 10 * 60 * 1000,
+      refetchOnWindowFocus: false,
+      /** Garde le contenu visible entre périodes — pas de flash skeleton complet */
+      placeholderData: keepPreviousData,
+      retry: (failureCount, err) => {
+        const code =
+          err && typeof err === 'object' && 'code' in err
+            ? String((err as { code?: string }).code)
+            : '';
+        if (code === '42501') return false;
+        const msg = err instanceof Error ? err.message : '';
+        if (msg === 'DASHBOARD_RPC_UNAVAILABLE') return failureCount < 1;
+        return failureCount < 2;
+      },
+      retryDelay: attempt => Math.min(1000 * 2 ** attempt, 10000),
+      meta: {
+        errorMessage: 'Erreur de chargement des statistiques',
+      },
+    });
 
   const hasData = data != null;
   /** Ne pas afficher de faux KPIs à zéro — skeleton ou erreur tant qu’il n’y a pas de données réelles */
@@ -509,7 +523,9 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
     /** Premier chargement uniquement — pas lors des refetch / changement de période */
     loading: isLoading && !hasData,
     error: errorMessage,
-    isUpdating: isFetching && hasData,
+    /** Refetch ou changement de période — contenu précédent conservé via keepPreviousData */
+    isUpdating: isFetching && hasData && !isLoading,
+    isPlaceholderData,
     refetch: () => {
       refetch();
     },

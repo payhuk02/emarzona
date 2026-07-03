@@ -47983,8 +47983,13 @@ export type Database = {
         Returns: string;
       };
       refresh_all_dashboard_views: { Args: never; Returns: undefined };
+      refresh_all_dashboard_materialized_views: { Args: never; Returns: Json };
       refresh_dashboard_materialized_views: { Args: never; Returns: undefined };
       refresh_dashboard_stats: { Args: never; Returns: undefined };
+      setup_dashboard_materialized_views_cron_job: {
+        Args: { p_schedule?: string };
+        Returns: Json;
+      };
       refresh_dashboard_views_sequential: { Args: never; Returns: undefined };
       refresh_dashboard_views_smart: { Args: never; Returns: undefined };
       refresh_marketplace_products: { Args: never; Returns: undefined };

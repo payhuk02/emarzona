@@ -178,7 +178,12 @@ export function parseDashboardStatsRpcPayload(
     topProducts: parseTopProducts(root.topProducts),
     recentOrders: parseRecentOrders(root.recentOrders),
     operational: parseOperational(root.operational),
-    generatedAt: typeof root.generatedAt === 'string' ? root.generatedAt : new Date().toISOString(),
+    generatedAt: (() => {
+      const raw = root.generatedAt;
+      if (typeof raw === 'string') return raw;
+      if (typeof raw === 'number') return new Date(raw).toISOString();
+      return new Date().toISOString();
+    })(),
     periodDays: num(root.periodDays, range.days),
     periodLabel: str(root.periodLabel, range.label),
   };

@@ -51,6 +51,8 @@
     "verify:phase1": "node scripts/verify-phase1.mjs",
     "verify:phase2": "node scripts/verify-phase2.mjs",
     "verify:dashboard-stats-rpc": "node scripts/verify-dashboard-stats-rpc.mjs",
+    "benchmark:dashboard-stats": "node scripts/benchmark-dashboard-stats.mjs",
+    "cron:refresh-dashboard-views": "node scripts/cron-refresh-dashboard-views.mjs",
     "verify:phase3": "node scripts/verify-phase3.mjs",
     "verify:phase4": "node scripts/verify-phase4.mjs",
     "verify:vendor-api": "node scripts/verify-vendor-api-remote.mjs",
