@@ -152,6 +152,7 @@ export function useMarketplaceGuestBuy({
   }, [cta.action, proceedWithCustomer, product.store_id, toast]);
 
   return {
+    product,
     cta,
     loading,
     guestOpen,
