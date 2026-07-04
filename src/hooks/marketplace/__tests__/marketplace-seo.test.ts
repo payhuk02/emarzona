@@ -15,7 +15,7 @@ const baseFilters: FilterState = {
   tags: [],
   verifiedOnly: false,
   featuredOnly: false,
-  inStock: true,
+  inStock: false,
 };
 
 describe('marketplace-seo', () => {

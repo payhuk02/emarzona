@@ -52,7 +52,12 @@ export function supabaseReadRpc<Fn extends keyof Database['public']['Functions']
   fn: Fn,
   args?: Database['public']['Functions'][Fn]['Args']
 ) {
-  return supabaseRead.rpc(fn, (args ?? undefined) as Record<string, unknown> | undefined, {
+  // Clean args to omit null and undefined values, preventing Postgrest GET from serializing them as "null" strings
+  const cleanedArgs = args
+    ? Object.fromEntries(Object.entries(args).filter(([_, v]) => v !== null && v !== undefined))
+    : undefined;
+
+  return supabaseRead.rpc(fn, cleanedArgs as Record<string, unknown> | undefined, {
     get: true,
   });
 }
