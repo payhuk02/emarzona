@@ -73,7 +73,7 @@ interface ProcessSequencesRequest {
 interface SequenceEmail {
   enrollment_id: string;
   sequence_id: string;
-  user_id: string;
+  user_id: string | null;
   step_id: string;
   template_id: string | null;
   recipient_email: string;
@@ -247,7 +247,7 @@ serve(async req => {
           supabase,
           emailData.recipient_email,
           'marketing',
-          emailData.user_id
+          emailData.user_id ?? undefined
         );
 
         if (!eligibility.allowed) {
@@ -269,7 +269,7 @@ serve(async req => {
             sequence_name: template.name,
             ...(emailData.context || {}),
           },
-          userId: emailData.user_id,
+          userId: emailData.user_id ?? undefined,
           storeId: sequenceInfo?.store_id,
           sequenceId: emailData.sequence_id,
           templateSlug: template.name,

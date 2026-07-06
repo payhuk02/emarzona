@@ -23,12 +23,13 @@ import {
 } from '@/components/ui/select';
 import { useCreateEmailSequence, useUpdateEmailSequence } from '@/hooks/email/useEmailSequences';
 import { useResponsiveModal } from '@/hooks/use-responsive-modal';
-import type { 
-  EmailSequence, 
-  CreateSequencePayload, 
+import type {
+  EmailSequence,
+  CreateSequencePayload,
   SequenceTriggerType,
   SequenceStatus,
 } from '@/lib/email/email-sequence-service';
+import { WorkflowTriggerEditor } from '@/components/email/WorkflowTriggerEditor';
 import { Loader2 } from 'lucide-react';
 
 interface EmailSequenceBuilderProps {
@@ -51,7 +52,7 @@ export const EmailSequenceBuilder = ({
   const [description, setDescription] = useState('');
   const [triggerType, setTriggerType] = useState<SequenceTriggerType>('event');
   const [status, setStatus] = useState<SequenceStatus>('active');
-  const [triggerConfig, setTriggerConfig] = useState<Record<string, any>>({});
+  const [triggerConfig, setTriggerConfig] = useState<Record<string, unknown>>({});
 
   const createSequence = useCreateEmailSequence();
   const updateSequence = useUpdateEmailSequence();
@@ -78,7 +79,7 @@ export const EmailSequenceBuilder = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const  payload: CreateSequencePayload = {
+    const payload: CreateSequencePayload = {
       store_id: storeId,
       name,
       description,
@@ -115,7 +116,7 @@ export const EmailSequenceBuilder = ({
         onChange={setName}
         required
         fieldProps={{
-          placeholder: "Séquence de bienvenue",
+          placeholder: 'Séquence de bienvenue',
         }}
       />
 
@@ -126,7 +127,7 @@ export const EmailSequenceBuilder = ({
         value={description}
         onChange={setDescription}
         fieldProps={{
-          placeholder: "Description de la séquence...",
+          placeholder: 'Description de la séquence...',
           rows: 3,
         }}
       />
@@ -136,7 +137,7 @@ export const EmailSequenceBuilder = ({
         name="triggerType"
         type="select"
         value={triggerType}
-        onChange={(value) => setTriggerType(value as SequenceTriggerType)}
+        onChange={value => setTriggerType(value as SequenceTriggerType)}
         required
         description="Le déclencheur détermine quand la séquence démarre pour un utilisateur"
         selectOptions={[
@@ -151,7 +152,7 @@ export const EmailSequenceBuilder = ({
         name="status"
         type="select"
         value={status}
-        onChange={(value) => setStatus(value as SequenceStatus)}
+        onChange={value => setStatus(value as SequenceStatus)}
         required
         selectOptions={[
           { value: 'active', label: 'Active' },
@@ -160,38 +161,40 @@ export const EmailSequenceBuilder = ({
         ]}
       />
 
-          {triggerType === 'event' && (
-            <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
-              <p className="text-sm text-blue-900 dark:text-blue-100 mb-2">
-                Configuration de l'événement
-              </p>
-              <p className="text-xs text-blue-700 dark:text-blue-300">
-                Les événements seront configurés lors de l'ajout des étapes de la séquence.
-              </p>
-            </div>
-          )}
+      {triggerType === 'event' && (
+        <div className="space-y-2 rounded-lg border p-4">
+          <p className="text-sm font-medium">Événement déclencheur</p>
+          <p className="text-xs text-muted-foreground mb-2">
+            La séquence démarre automatiquement à l&apos;événement choisi (ex. commande payée pour
+            les invités).
+          </p>
+          <WorkflowTriggerEditor
+            triggerType="event"
+            config={triggerConfig}
+            onChange={setTriggerConfig}
+          />
+        </div>
+      )}
 
-          {triggerType === 'time' && (
-            <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
-              <p className="text-sm text-blue-900 dark:text-blue-100 mb-2">
-                Déclenchement temporel
-              </p>
-              <p className="text-xs text-blue-700 dark:text-blue-300">
-                La séquence démarrera après un délai défini lors de l'ajout des étapes.
-              </p>
-            </div>
-          )}
+      {triggerType === 'time' && (
+        <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+          <p className="text-sm text-blue-900 dark:text-blue-100 mb-2">Déclenchement temporel</p>
+          <p className="text-xs text-blue-700 dark:text-blue-300">
+            La séquence démarrera après un délai défini lors de l'ajout des étapes.
+          </p>
+        </div>
+      )}
 
-          {triggerType === 'behavior' && (
-            <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
-              <p className="text-sm text-blue-900 dark:text-blue-100 mb-2">
-                Déclenchement comportemental
-              </p>
-              <p className="text-xs text-blue-700 dark:text-blue-300">
-                La séquence démarrera selon le comportement de l'utilisateur (panier abandonné, etc.).
-              </p>
-            </div>
-          )}
+      {triggerType === 'behavior' && (
+        <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+          <p className="text-sm text-blue-900 dark:text-blue-100 mb-2">
+            Déclenchement comportemental
+          </p>
+          <p className="text-xs text-blue-700 dark:text-blue-300">
+            La séquence démarrera selon le comportement de l'utilisateur (panier abandonné, etc.).
+          </p>
+        </div>
+      )}
 
       <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4">
         <Button
@@ -220,7 +223,7 @@ export const EmailSequenceBuilder = ({
             description={
               isEditing
                 ? 'Modifiez les informations de votre séquence email'
-                : 'Créez une nouvelle séquence d\'emails automatiques pour votre boutique'
+                : "Créez une nouvelle séquence d'emails automatiques pour votre boutique"
             }
             className="max-h-[90vh] overflow-y-auto"
           >
@@ -231,13 +234,11 @@ export const EmailSequenceBuilder = ({
         <Dialog open={open} onOpenChange={onOpenChange}>
           <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>
-                {isEditing ? 'Modifier la séquence' : 'Nouvelle séquence'}
-              </DialogTitle>
+              <DialogTitle>{isEditing ? 'Modifier la séquence' : 'Nouvelle séquence'}</DialogTitle>
               <DialogDescription>
                 {isEditing
                   ? 'Modifiez les informations de votre séquence email'
-                  : 'Créez une nouvelle séquence d\'emails automatiques pour votre boutique'}
+                  : "Créez une nouvelle séquence d'emails automatiques pour votre boutique"}
               </DialogDescription>
             </DialogHeader>
             {formContent}
@@ -247,10 +248,3 @@ export const EmailSequenceBuilder = ({
     </>
   );
 };
-
-
-
-
-
-
-

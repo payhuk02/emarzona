@@ -394,13 +394,11 @@ export const usePauseSequenceEnrollment = () => {
 
   return useMutation({
     mutationFn: async ({
-      sequenceId,
-      userId,
+      enrollmentId,
     }: {
-      sequenceId: string;
-      userId: string;
+      enrollmentId: string;
     }): Promise<EmailSequenceEnrollment> => {
-      return EmailSequenceService.pauseEnrollment(sequenceId, userId);
+      return EmailSequenceService.pauseEnrollmentById(enrollmentId);
     },
     onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['email-sequence-enrollments', data.sequence_id] });
@@ -431,13 +429,11 @@ export const useCancelSequenceEnrollment = () => {
 
   return useMutation({
     mutationFn: async ({
-      sequenceId,
-      userId,
+      enrollmentId,
     }: {
-      sequenceId: string;
-      userId: string;
+      enrollmentId: string;
     }): Promise<EmailSequenceEnrollment> => {
-      return EmailSequenceService.cancelEnrollment(sequenceId, userId);
+      return EmailSequenceService.cancelEnrollmentById(enrollmentId);
     },
     onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['email-sequence-enrollments', data.sequence_id] });

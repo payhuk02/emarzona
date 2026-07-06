@@ -14811,10 +14811,11 @@ export type Database = {
           enrolled_at: string | null;
           id: string;
           next_email_at: string | null;
+          recipient_email: string | null;
           sequence_id: string;
           status: string;
           updated_at: string | null;
-          user_id: string;
+          user_id: string | null;
         };
         Insert: {
           completed_at?: string | null;
@@ -14824,10 +14825,11 @@ export type Database = {
           enrolled_at?: string | null;
           id?: string;
           next_email_at?: string | null;
+          recipient_email?: string | null;
           sequence_id: string;
           status?: string;
           updated_at?: string | null;
-          user_id: string;
+          user_id?: string | null;
         };
         Update: {
           completed_at?: string | null;
@@ -14837,10 +14839,11 @@ export type Database = {
           enrolled_at?: string | null;
           id?: string;
           next_email_at?: string | null;
+          recipient_email?: string | null;
           sequence_id?: string;
           status?: string;
           updated_at?: string | null;
-          user_id?: string;
+          user_id?: string | null;
         };
         Relationships: [
           {
@@ -45630,6 +45633,19 @@ export type Database = {
       };
       enqueue_google_indexing: {
         Args: { p_store_id?: string; p_url: string; p_url_type?: string };
+        Returns: string;
+      };
+      enroll_email_in_sequence: {
+        Args: { p_context?: Json; p_email: string; p_sequence_id: string };
+        Returns: string;
+      };
+      enroll_store_email_in_sequence: {
+        Args: {
+          p_context?: Json;
+          p_email: string;
+          p_sequence_id: string;
+          p_store_id: string;
+        };
         Returns: string;
       };
       enroll_user_in_course: {

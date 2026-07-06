@@ -45,7 +45,8 @@ export interface EmailSequenceStep {
 export interface EmailSequenceEnrollment {
   id: string;
   sequence_id: string;
-  user_id: string;
+  user_id: string | null;
+  recipient_email?: string | null;
   status: EnrollmentStatus;
   current_step: number;
   completed_steps: number[];
@@ -84,7 +85,7 @@ const EMAIL_SEQUENCE_FIELDS =
 const EMAIL_SEQUENCE_STEP_FIELDS =
   'id,sequence_id,step_order,template_id,delay_type,delay_value,conditions,created_at';
 const EMAIL_SEQUENCE_ENROLLMENT_FIELDS =
-  'id,sequence_id,user_id,status,current_step,completed_steps,enrolled_at,next_email_at,completed_at,context';
+  'id,sequence_id,user_id,recipient_email,status,current_step,completed_steps,enrolled_at,next_email_at,completed_at,context';
 
 // ============================================================
 // SERVICE
@@ -349,23 +350,25 @@ export class EmailSequenceService {
     context?: Record<string, unknown>
   ): Promise<EmailSequenceEnrollment> {
     const normalized = email.trim().toLowerCase();
-    // @ts-expect-error - RPC not in generated types yet
-    const { data: resolvedUserId, error: resolveError } = await supabase.rpc(
-      'resolve_user_id_for_store_email',
-      { p_store_id: storeId, p_email: normalized }
-    );
 
-    if (resolveError || !resolvedUserId) {
-      throw new Error(
-        'Aucun compte utilisateur associé à cet email. Le contact doit avoir un compte ou être lié à un client.'
-      );
+    const { data: enrollmentId, error } = await supabase.rpc('enroll_store_email_in_sequence', {
+      p_store_id: storeId,
+      p_sequence_id: sequenceId,
+      p_email: normalized,
+      p_context: { ...context, email: normalized, store_id: storeId },
+    });
+
+    if (error || !enrollmentId) {
+      logger.error('Error enrolling by email', { error, sequenceId, storeId, email: normalized });
+      throw error ?? new Error("Impossible d'inscrire ce contact à la séquence.");
     }
 
-    return this.enrollUser({
-      sequence_id: sequenceId,
-      user_id: resolvedUserId as string,
-      context: { ...context, email: normalized, store_id: storeId },
-    });
+    const enrollment = await this.getEnrollmentById(enrollmentId as string);
+    if (!enrollment) {
+      throw new Error('Failed to create enrollment');
+    }
+
+    return enrollment;
   }
 
   /**
@@ -393,6 +396,29 @@ export class EmailSequenceService {
       return enrollment;
     } catch (err: unknown) {
       logger.error('EmailSequenceService.enrollUser error', { error: err, payload });
+      throw err instanceof Error ? err : new Error('Erreur inconnue');
+    }
+  }
+
+  /**
+   * Récupérer un enrollment par id
+   */
+  static async getEnrollmentById(enrollmentId: string): Promise<EmailSequenceEnrollment | null> {
+    try {
+      const { data, error } = await supabase
+        .from('email_sequence_enrollments')
+        .select(EMAIL_SEQUENCE_ENROLLMENT_FIELDS)
+        .eq('id', enrollmentId)
+        .maybeSingle();
+
+      if (error) {
+        logger.error('Error fetching enrollment by id', { error, enrollmentId });
+        throw error;
+      }
+
+      return (data as EmailSequenceEnrollment) ?? null;
+    } catch (err: unknown) {
+      logger.error('EmailSequenceService.getEnrollmentById error', { error: err, enrollmentId });
       throw err instanceof Error ? err : new Error('Erreur inconnue');
     }
   }
@@ -473,6 +499,27 @@ export class EmailSequenceService {
     }
   }
 
+  static async pauseEnrollmentById(enrollmentId: string): Promise<EmailSequenceEnrollment> {
+    try {
+      const { data, error } = await supabase
+        .from('email_sequence_enrollments')
+        .update({ status: 'paused' })
+        .eq('id', enrollmentId)
+        .select(EMAIL_SEQUENCE_ENROLLMENT_FIELDS)
+        .single();
+
+      if (error) {
+        logger.error('Error pausing enrollment', { error, enrollmentId });
+        throw error;
+      }
+
+      return data as EmailSequenceEnrollment;
+    } catch (err: unknown) {
+      logger.error('EmailSequenceService.pauseEnrollmentById error', { error: err, enrollmentId });
+      throw err instanceof Error ? err : new Error('Erreur inconnue');
+    }
+  }
+
   /**
    * Mettre en pause un enrollment
    */
@@ -499,6 +546,27 @@ export class EmailSequenceService {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailSequenceService.pauseEnrollment error', { error, sequenceId, userId });
       throw error;
+    }
+  }
+
+  static async cancelEnrollmentById(enrollmentId: string): Promise<EmailSequenceEnrollment> {
+    try {
+      const { data, error } = await supabase
+        .from('email_sequence_enrollments')
+        .update({ status: 'cancelled' })
+        .eq('id', enrollmentId)
+        .select(EMAIL_SEQUENCE_ENROLLMENT_FIELDS)
+        .single();
+
+      if (error) {
+        logger.error('Error cancelling enrollment', { error, enrollmentId });
+        throw error;
+      }
+
+      return data as EmailSequenceEnrollment;
+    } catch (err: unknown) {
+      logger.error('EmailSequenceService.cancelEnrollmentById error', { error: err, enrollmentId });
+      throw err instanceof Error ? err : new Error('Erreur inconnue');
     }
   }
 

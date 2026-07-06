@@ -120,60 +120,71 @@ export const SequenceEnrollmentsPanel = ({ sequence, storeId }: SequenceEnrollme
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {enrollments.map(enrollment => (
-                    <TableRow key={enrollment.id}>
-                      <TableCell className="font-mono text-xs">
-                        {enrollment.user_id.slice(0, 8)}…
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{STATUS_LABELS[enrollment.status]}</Badge>
-                      </TableCell>
-                      <TableCell>{enrollment.current_step}</TableCell>
-                      <TableCell>
-                        {format(new Date(enrollment.enrolled_at), 'dd MMM yyyy', { locale: fr })}
-                      </TableCell>
-                      <TableCell>
-                        {enrollment.next_email_at
-                          ? format(new Date(enrollment.next_email_at), 'dd MMM yyyy HH:mm', {
-                              locale: fr,
-                            })
-                          : '—'}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {enrollment.status === 'active' && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() =>
-                              pauseEnrollment.mutateAsync({
-                                sequenceId: sequence.id,
-                                userId: enrollment.user_id,
+                  {enrollments.map(enrollment => {
+                    const displayContact =
+                      enrollment.recipient_email ||
+                      (enrollment.context?.email as string | undefined) ||
+                      (enrollment.user_id ? `${enrollment.user_id.slice(0, 8)}…` : '—');
+                    const isGuest = !enrollment.user_id;
+
+                    return (
+                      <TableRow key={enrollment.id}>
+                        <TableCell className="text-xs">
+                          <span className="font-mono">{displayContact}</span>
+                          {isGuest && (
+                            <Badge variant="secondary" className="ml-2 text-[10px]">
+                              Invité
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{STATUS_LABELS[enrollment.status]}</Badge>
+                        </TableCell>
+                        <TableCell>{enrollment.current_step}</TableCell>
+                        <TableCell>
+                          {format(new Date(enrollment.enrolled_at), 'dd MMM yyyy', { locale: fr })}
+                        </TableCell>
+                        <TableCell>
+                          {enrollment.next_email_at
+                            ? format(new Date(enrollment.next_email_at), 'dd MMM yyyy HH:mm', {
+                                locale: fr,
                               })
-                            }
-                          >
-                            <Pause className="h-4 w-4 mr-1" />
-                            Pause
-                          </Button>
-                        )}
-                        {enrollment.status !== 'cancelled' && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-destructive"
-                            onClick={() =>
-                              cancelEnrollment.mutateAsync({
-                                sequenceId: sequence.id,
-                                userId: enrollment.user_id,
-                              })
-                            }
-                          >
-                            <XCircle className="h-4 w-4 mr-1" />
-                            Annuler
-                          </Button>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                            : '—'}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {enrollment.status === 'active' && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() =>
+                                pauseEnrollment.mutateAsync({
+                                  enrollmentId: enrollment.id,
+                                })
+                              }
+                            >
+                              <Pause className="h-4 w-4 mr-1" />
+                              Pause
+                            </Button>
+                          )}
+                          {enrollment.status !== 'cancelled' && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-destructive"
+                              onClick={() =>
+                                cancelEnrollment.mutateAsync({
+                                  enrollmentId: enrollment.id,
+                                })
+                              }
+                            >
+                              <XCircle className="h-4 w-4 mr-1" />
+                              Annuler
+                            </Button>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>

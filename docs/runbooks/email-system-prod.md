@@ -130,6 +130,47 @@ LIMIT 20;
 
 Voir aussi : `docs/runbooks/webhook-idempotency-replay-staging.md` (paiements).
 
+## Enrollments invités (séquences post-checkout)
+
+### Prérequis migration
+
+```bash
+npx supabase db query --linked -f supabase/migrations/20260706230000__guest_sequence_enrollment.sql
+```
+
+### Configuration vendeur
+
+1. Créer une séquence **Active** avec déclencheur **Événement** → `order.paid` (ou `order.completed`)
+2. Ajouter au moins une étape avec template + délai
+3. Option filtre JSON : `{ "guest_only": true }` pour cibler uniquement les invités
+
+### Flux automatique
+
+```
+Paiement confirmé → runPostOrderPaymentFulfillment
+  → triggerSequenceEnrollmentsForEvent(order.paid)
+  → enroll_store_email_in_sequence (user_id OU recipient_email)
+  → process-email-sequences (cron) envoie les étapes
+```
+
+### Vérification SQL
+
+```sql
+SELECT e.id, e.recipient_email, e.user_id, e.status, e.context, s.name
+FROM email_sequence_enrollments e
+JOIN email_sequences s ON s.id = e.sequence_id
+WHERE e.context->>'order_id' = '<order_uuid>';
+```
+
+### Tests CI
+
+```bash
+npx deno test --allow-env --config supabase/functions/deno.json \
+  supabase/functions/_shared/__tests__/sequence-enrollment-utils.test.ts
+```
+
+---
+
 ## Conformité & désabonnement
 
 - Page publique : `https://www.emarzona.com/unsubscribe?email=...&type=marketing`

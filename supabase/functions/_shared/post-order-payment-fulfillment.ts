@@ -6,6 +6,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { logArtistFulfillmentEvent } from './artist-fulfillment-observability.ts';
 import { triggerEmailWorkflowsForEvent } from './workflow-executor.ts';
+import { triggerSequenceEnrollmentsForEvent } from './sequence-enrollment-utils.ts';
 
 const ORDER_SELECT =
   'id, store_id, order_number, customer_id, total_amount, currency, status, payment_status, created_at, metadata, customer_email, shipping_address, expected_delivery_date, tracking_number, tracking_link';
@@ -369,6 +370,7 @@ async function triggerMarketingWorkflowsAfterOrder(
   let email = order.customer_email as string | undefined;
   let customerName = (order.customer_name as string) || 'Client';
   const customerId = order.customer_id as string | undefined;
+  let guestCheckout = false;
 
   if (!email && customerId) {
     const { data: customer } = await supabase
@@ -379,7 +381,16 @@ async function triggerMarketingWorkflowsAfterOrder(
     if (customer) {
       email = customer.email ?? undefined;
       customerName = customer.full_name || customer.name || customerName;
+      guestCheckout = !customer.user_id;
     }
+  }
+
+  const orderMeta = parseOrderMetadata(order.metadata);
+  if (!email && typeof orderMeta.customer_email === 'string') {
+    email = orderMeta.customer_email;
+  }
+  if (orderMeta.guest_checkout === true) {
+    guestCheckout = true;
   }
 
   const context = {
@@ -388,8 +399,9 @@ async function triggerMarketingWorkflowsAfterOrder(
     customer_id: customerId,
     email,
     customer_name: customerName,
-    order_total: order.total_amount ?? transaction?.amount,
+    order_total: (order.total_amount ?? transaction?.amount) as number | undefined,
     currency: order.currency as string | undefined,
+    guest_checkout: guestCheckout,
   };
 
   const events = ['order.paid', 'order.completed'];
@@ -403,6 +415,22 @@ async function triggerMarketingWorkflowsAfterOrder(
       }
     } catch (err) {
       console.error(`triggerEmailWorkflowsForEvent ${event}:`, err);
+    }
+
+    try {
+      const seqResult = await triggerSequenceEnrollmentsForEvent(
+        supabase,
+        storeId,
+        event,
+        context
+      );
+      if (seqResult.triggered > 0) {
+        console.log(
+          `Email sequences [${event}]: ${seqResult.enrolled}/${seqResult.triggered} enrolled for order ${order.id}`
+        );
+      }
+    } catch (err) {
+      console.error(`triggerSequenceEnrollmentsForEvent ${event}:`, err);
     }
   }
 }
