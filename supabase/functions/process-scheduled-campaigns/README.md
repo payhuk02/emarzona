@@ -8,7 +8,7 @@ Edge Function pour vérifier et envoie automatiquement les campagnes email progr
 
 - `SUPABASE_URL` : URL de votre instance Supabase
 - `SUPABASE_SERVICE_ROLE_KEY` : Clé de service Supabase
-- `SENDGRID_API_KEY` : Clé API SendGrid (optionnel, mais recommandé)
+- `RESEND_API_KEY` : Clé API Resend (optionnel, mais recommandé)
 
 ### Configuration Cron Job
 

@@ -9,6 +9,7 @@ import { getCampaignRecipients } from '../_shared/campaign-recipients.ts';
 import { canSendEmailToRecipient } from '../_shared/email-compliance-utils.ts';
 import { sendMarketingEmailViaResend } from '../_shared/resend-send-utils.ts';
 import { getProjectRefFromSupabaseUrl, isServiceRoleJwt } from '../_shared/edge-auth-utils.ts';
+import { isRateLimited } from '../_shared/upstash-redis.ts';
 import {
   applySubjectOverride,
   getActiveABTestForCampaign,
@@ -224,6 +225,20 @@ serve(async req => {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
+    }
+
+    // --- Rate limiting server-side (Upstash Redis) ---
+    // Les campagnes sont limitées à 10 appels/minute (chaque appel envoie un batch de 100 emails)
+    const rateLimitId = token ? token.slice(0, 16) : (req.headers.get('x-forwarded-for') ?? 'anon');
+    const rl = await isRateLimited(rateLimitId, 'send-email-campaign', 10, 60);
+    if (!rl.allowed) {
+      return new Response(
+        JSON.stringify({ error: 'Too many campaign sends. Please try again later.', retryAfterSeconds: 60 }),
+        {
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
     }
 
     if (!RESEND_API_KEY) {

@@ -35,3 +35,72 @@ export async function upstashSetNx(
     return false;
   }
 }
+
+/**
+ * Incrémente un compteur Redis et définit son TTL en une seule opération atomique (pipeline)
+ */
+export async function upstashIncrWithTtl(
+  key: string,
+  ttlSeconds: number
+): Promise<number> {
+  const restUrl = Deno.env.get('UPSTASH_REDIS_REST_URL') || Deno.env.get('KV_REST_API_URL');
+  const token = Deno.env.get('UPSTASH_REDIS_REST_TOKEN') || Deno.env.get('KV_REST_API_TOKEN');
+
+  if (!restUrl || !token) {
+    return 0; // En dev, si Redis n'est pas configuré, on ne bloque pas
+  }
+
+  try {
+    const res = await fetch(`${restUrl}/pipeline`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify([
+        ['INCR', key],
+        ['EXPIRE', key, ttlSeconds],
+      ]),
+    });
+
+    if (!res.ok) return 0;
+
+    const data = await res.json() as Array<{ result?: number }>;
+    const count = data?.[0]?.result;
+    return typeof count === 'number' ? count : 0;
+  } catch (err) {
+    console.error('Redis INCR pipeline error:', err);
+    return 0;
+  }
+}
+
+/**
+ * Vérifie et applique le rate limit via Upstash Redis
+ */
+export async function isRateLimited(
+  identifier: string,
+  endpoint: string,
+  maxRequests = 30,
+  windowSeconds = 60
+): Promise<{ allowed: boolean; count: number }> {
+  const restUrl = Deno.env.get('UPSTASH_REDIS_REST_URL') || Deno.env.get('KV_REST_API_URL');
+  const token = Deno.env.get('UPSTASH_REDIS_REST_TOKEN') || Deno.env.get('KV_REST_API_TOKEN');
+
+  if (!restUrl || !token) {
+    // Si Upstash n'est pas configuré, on bypass le rate limiting (comportement dev/fallback)
+    return { allowed: true, count: 0 };
+  }
+
+  const key = `rate_limit:${endpoint}:${identifier}`;
+  const count = await upstashIncrWithTtl(key, windowSeconds);
+
+  if (count === 0) {
+    // Si l'incrémentation échoue ou renvoie 0, on autorise l'action par précaution
+    return { allowed: true, count: 1 };
+  }
+
+  return {
+    allowed: count <= maxRequests,
+    count,
+  };
+}

@@ -14598,6 +14598,7 @@ export type Database = {
           id: string;
           metadata: Json | null;
           opened_at: string | null;
+          provider_message_id: string | null;
           sendgrid_message_id: string | null;
           sequence_id: string | null;
           status: string | null;
@@ -14615,6 +14616,7 @@ export type Database = {
           id?: string;
           metadata?: Json | null;
           opened_at?: string | null;
+          provider_message_id?: string | null;
           sendgrid_message_id?: string | null;
           sequence_id?: string | null;
           status?: string | null;
@@ -14632,6 +14634,7 @@ export type Database = {
           id?: string;
           metadata?: Json | null;
           opened_at?: string | null;
+          provider_message_id?: string | null;
           sendgrid_message_id?: string | null;
           sequence_id?: string | null;
           status?: string | null;
@@ -15041,6 +15044,7 @@ export type Database = {
           name: string;
           open_rate: number | null;
           product_type: string | null;
+          provider_template_id: string | null;
           reply_to: string | null;
           sendgrid_template_id: string | null;
           sent_count: number | null;
@@ -15065,6 +15069,7 @@ export type Database = {
           name: string;
           open_rate?: number | null;
           product_type?: string | null;
+          provider_template_id?: string | null;
           reply_to?: string | null;
           sendgrid_template_id?: string | null;
           sent_count?: number | null;
@@ -15089,6 +15094,7 @@ export type Database = {
           name?: string;
           open_rate?: number | null;
           product_type?: string | null;
+          provider_template_id?: string | null;
           reply_to?: string | null;
           sendgrid_template_id?: string | null;
           sent_count?: number | null;

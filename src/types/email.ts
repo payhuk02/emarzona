@@ -29,8 +29,8 @@ export interface EmailTemplate {
   // Variables
   variables: string[]; // ["{{user_name}}", "{{order_id}}"]
 
-  // SendGrid
-  sendgrid_template_id?: string;
+  // Provider
+  provider_template_id?: string;
   from_email: string;
   from_name: string;
   reply_to?: string;
@@ -77,9 +77,9 @@ export interface EmailLog {
   // Variables utilisées
   variables: Record<string, unknown>;
 
-  // SendGrid
-  sendgrid_message_id?: string;
-  sendgrid_status: SendGridStatus;
+  // Provider
+  provider_message_id?: string;
+  status: SendGridStatus;
 
   // Tracking
   sent_at: string;

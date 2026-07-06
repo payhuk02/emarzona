@@ -124,7 +124,7 @@ ORDER BY created_at DESC;
 
 Pour l'instant, les alertes sont uniquement loggées. Pour une intégration complète :
 
-1. **Email**: Intégrer avec SendGrid pour envoyer des emails aux admins
+1. **Email**: Intégrer avec Resend pour envoyer des emails aux admins
 2. **SMS**: Intégrer avec un service SMS pour alertes critiques
 3. **Slack/Discord**: Webhooks pour notifications en temps réel
 4. **Dashboard**: Afficher les alertes dans le dashboard admin

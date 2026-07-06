@@ -49,13 +49,39 @@ export async function sendMarketingEmailViaResend(
     options.template.name;
   const htmlRaw = pickLocalized(options.template.html_content, language) || '';
 
+  // Construire l'URL de désabonnement marketing
+  const cleanEmail = encodeURIComponent(options.to.trim().toLowerCase());
+  const unsubscribeUrl = `https://emarzona.com/unsubscribe?email=${cleanEmail}&type=marketing${options.campaignId ? `&campaign_id=${options.campaignId}` : ''}${options.storeId ? `&store_id=${options.storeId}` : ''}`;
+
   const variables = {
     user_name: options.toName || 'Client',
+    unsubscribe_url: unsubscribeUrl,
     ...(options.variables || {}),
   };
 
   const subject = replaceVariables(subjectRaw, variables);
-  const html = replaceVariables(htmlRaw, variables);
+  let html = replaceVariables(htmlRaw, variables);
+
+  // Injection automatique du pied de page de désabonnement s'il n'est pas présent dans l'HTML final
+  const hasUnsubscribeLink = html.includes('/unsubscribe') || html.includes('unsubscribe') || html.includes('désabonner') || html.includes('desabonner');
+  if (!hasUnsubscribeLink) {
+    const isFrench = language.toLowerCase().startsWith('fr');
+    const footerText = isFrench 
+      ? `Cet email vous a été envoyé par Emarzona.<br>Pour ne plus recevoir ces emails, vous pouvez vous <a href="${unsubscribeUrl}" style="color: #667eea; text-decoration: underline;">désabonner ici</a>.`
+      : `This email was sent by Emarzona.<br>To unsubscribe from these emails, you can <a href="${unsubscribeUrl}" style="color: #667eea; text-decoration: underline;">unsubscribe here</a>.`;
+      
+    const footerHtml = `
+      <div style="margin-top: 40px; border-top: 1px solid #eaeaea; padding-top: 20px; text-align: center; font-size: 12px; color: #888888; font-family: sans-serif;">
+        ${footerText}
+      </div>
+    `;
+
+    if (html.includes('</body>')) {
+      html = html.replace('</body>', `${footerHtml}</body>`);
+    } else {
+      html = html + footerHtml;
+    }
+  }
 
   const fromEmail = options.template.from_email || RESEND_FROM_EMAIL;
   const fromName = options.template.from_name || RESEND_FROM_NAME;
@@ -94,7 +120,7 @@ export async function sendMarketingEmailViaResend(
         subject,
         html_content: html,
         variables,
-        sendgrid_status: 'failed',
+        status: 'failed',
         error_message: errorText,
         error_code: String(response.status),
       });
@@ -118,8 +144,8 @@ export async function sendMarketingEmailViaResend(
         ...(options.campaignId ? { campaign_id: options.campaignId } : {}),
         ...(options.sequenceId ? { sequence_id: options.sequenceId } : {}),
       },
-      sendgrid_message_id: messageId,
-      sendgrid_status: 'sent',
+      provider_message_id: messageId,
+      status: 'sent',
     });
 
     return { success: true, messageId };

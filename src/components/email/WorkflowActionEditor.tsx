@@ -14,14 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { X, GripVertical } from 'lucide-react';
+import { X, GripVertical, AlertTriangle } from 'lucide-react';
 import type { WorkflowAction, WorkflowActionType } from '@/lib/email/email-workflow-service';
 import { useEmailTemplates } from '@/hooks/useEmail';
 
@@ -161,19 +154,35 @@ export const WorkflowActionEditor = ({
         )}
 
         {action.type === 'wait' && (
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor={`waitDuration-${index}`} className="text-right">
-              Durée (minutes)
-            </Label>
-            <Input
-              id={`waitDuration-${index}`}
-              type="number"
-              value={action.config.duration || ''}
-              onChange={e => updateConfig('duration', (parseInt(e.target.value, 10) || 0) * 60)}
-              className="col-span-3"
-              placeholder="60"
-            />
-          </div>
+          <>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor={`waitDuration-${index}`} className="text-right">
+                Durée (minutes)
+              </Label>
+              <Input
+                id={`waitDuration-${index}`}
+                type="number"
+                value={action.config.duration || ''}
+                onChange={e => updateConfig('duration', (parseInt(e.target.value, 10) || 0) * 60)}
+                className="col-span-3"
+                placeholder="60"
+              />
+            </div>
+            {typeof action.config.duration === 'number' && action.config.duration > 10 && (
+              <div className="flex items-start gap-3 p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg">
+                <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-amber-800 dark:text-amber-300">
+                  <p className="font-medium mb-1">Délai important détecté</p>
+                  <p className="text-xs leading-relaxed">
+                    Les workflows avec des délais supérieurs à 10 secondes sont limités par
+                    l'exécution des Edge Functions. Pour des délais plus longs (minutes, heures,
+                    jours), utilisez plutôt les <strong>Séquences email</strong> qui disposent d'un
+                    système de scheduling via cron jobs.
+                  </p>
+                </div>
+              </div>
+            )}
+          </>
         )}
 
         {(action.type === 'add_tag' || action.type === 'remove_tag') && (

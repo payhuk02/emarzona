@@ -10,8 +10,9 @@ import {
   verifyStoreAccess,
   type EmailCategory,
 } from '../_shared/email-compliance-utils.ts';
-import { logEmailSend, renderDbTemplate } from '../_shared/email-template-utils.ts';
+import { logEmailSend, renderDbTemplate, htmlToText } from '../_shared/email-template-utils.ts';
 import { getProjectRefFromSupabaseUrl, isServiceRoleJwt } from '../_shared/edge-auth-utils.ts';
+import { isRateLimited } from '../_shared/upstash-redis.ts';
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 const RESEND_FROM_EMAIL = Deno.env.get('RESEND_FROM_EMAIL') || 'noreply@mail.emarzona.com';
@@ -278,6 +279,23 @@ serve(async req => {
       return jsonResponse(req, 401, { error: 'Unauthorized' }, requestId, requestStart);
     }
 
+    // --- Rate limiting server-side (Upstash Redis) ---
+    // Les appels internes (service_role, cron, edge-internal) contournent le rate limit
+    if (!isInternalCall) {
+      const rateLimitId = callerUserId || callerEmail || (req.headers.get('x-forwarded-for') ?? 'anonymous');
+      const rl = await isRateLimited(rateLimitId, 'send-email', 30, 60);
+      if (!rl.allowed) {
+        logEvent('warn', 'Rate limited', { requestId, identifier: rateLimitId, count: rl.count });
+        return jsonResponse(
+          req,
+          429,
+          { error: 'Too many requests. Please try again later.', retryAfterSeconds: 60 },
+          requestId,
+          requestStart
+        );
+      }
+    }
+
     if (!RESEND_API_KEY) {
       return jsonResponse(
         req,
@@ -457,7 +475,7 @@ serve(async req => {
         order_id: orderId,
         store_id: storeId,
         variables,
-        sendgrid_status: 'failed',
+        status: 'failed',
         error_message: eligibility.reason,
         error_code: 'COMPLIANCE_SKIPPED',
       });
@@ -489,6 +507,9 @@ serve(async req => {
       return jsonResponse(req, 400, { error: 'Missing HTML content' }, requestId, requestStart);
     }
 
+    // Générer le fallback text/plain pour améliorer la délivrabilité
+    const textContent = htmlToText(htmlContent);
+
     const resendResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -500,6 +521,7 @@ serve(async req => {
         to: [normalizedTo],
         subject: finalSubject,
         html: htmlContent,
+        text: textContent,
       }),
     });
 
@@ -519,7 +541,7 @@ serve(async req => {
         order_id: orderId,
         store_id: storeId,
         variables,
-        sendgrid_status: 'failed',
+        status: 'failed',
         error_message: errorData,
         error_code: String(resendResponse.status),
       });
@@ -548,8 +570,8 @@ serve(async req => {
       order_id: orderId,
       store_id: storeId,
       variables,
-      sendgrid_message_id: result.id,
-      sendgrid_status: 'sent',
+      provider_message_id: result.id,
+      status: 'sent',
     });
 
     logEvent('info', 'Email sent', {

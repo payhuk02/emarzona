@@ -170,8 +170,8 @@ export async function logEmailSend(
     order_id?: string;
     store_id?: string;
     variables?: Record<string, unknown>;
-    sendgrid_message_id?: string;
-    sendgrid_status: string;
+    provider_message_id?: string;
+    status: string;
     error_message?: string;
     error_code?: string;
   }
@@ -194,8 +194,8 @@ export async function logEmailSend(
     user_id: log.user_id,
     to_email: log.recipient_email,
     subject: log.subject,
-    status: log.sendgrid_status,
-    sendgrid_message_id: log.sendgrid_message_id,
+    status: log.status,
+    provider_message_id: log.provider_message_id,
     campaign_id: (variables.campaign_id as string) || null,
     sequence_id: (variables.sequence_id as string) || null,
     error_message: log.error_message,
@@ -207,4 +207,42 @@ export async function logEmailSend(
       JSON.stringify({ level: 'error', message: 'Failed to log email', error: error.message })
     );
   }
+}
+
+/**
+ * Convertit du HTML brut en texte brut simple pour améliorer la délivrabilité
+ */
+export function htmlToText(html: string): string {
+  let text = html;
+  
+  // Supprimer les balises style et script
+  text = text.replace(/<style[^>]*>([\s\S]*?)<\/style>/gi, '');
+  text = text.replace(/<script[^>]*>([\s\S]*?)<\/script>/gi, '');
+  
+  // Remplacer les retours à la ligne HTML par des sauts de ligne
+  text = text.replace(/<br\s*\/?>/gi, '\n');
+  
+  // Insérer des sauts de ligne pour les balises de structure
+  text = text.replace(/<\/p>/gi, '\n\n');
+  text = text.replace(/<\/div>/gi, '\n');
+  text = text.replace(/<\/h[1-6]>/gi, '\n\n');
+  text = text.replace(/<\/tr>/gi, '\n');
+  text = text.replace(/<\/li>/gi, '\n');
+  
+  // Supprimer toutes les autres balises HTML
+  text = text.replace(/<[^>]+>/g, '');
+  
+  // Décoder les entités HTML courantes
+  text = text.replace(/&nbsp;/g, ' ')
+             .replace(/&amp;/g, '&')
+             .replace(/&lt;/g, '<')
+             .replace(/&gt;/g, '>')
+             .replace(/&quot;/g, '"')
+             .replace(/&#39;/g, "'");
+  
+  // Nettoyer les espaces multiples et les sauts de ligne consécutifs
+  text = text.replace(/[ \t]+/g, ' ');
+  text = text.replace(/\n\s*\n\s*\n+/g, '\n\n');
+  
+  return text.trim();
 }

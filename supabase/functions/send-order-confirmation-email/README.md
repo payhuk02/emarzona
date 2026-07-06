@@ -33,7 +33,7 @@ L'envoi est déclenché automatiquement par un trigger SQL sur la table `orders`
 
 - `SUPABASE_URL` : URL de votre projet Supabase
 - `SUPABASE_SERVICE_ROLE_KEY` : Clé de service pour accès administrateur
-- `SENDGRID_API_KEY` : Clé API SendGrid (ou autre service d'email configuré)
+- `RESEND_API_KEY` : Clé API Resend (ou autre service d'email configuré)
 
 ## Déploiement
 

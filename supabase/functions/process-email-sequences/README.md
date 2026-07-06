@@ -57,7 +57,7 @@ Utilisez un service comme cron-job.org, EasyCron, ou votre propre serveur pour a
 
 - ✅ Récupère automatiquement les prochains emails à envoyer
 - ✅ Vérifie les désabonnements avant envoi
-- ✅ Envoie les emails via SendGrid
+- ✅ Envoie les emails via Resend
 - ✅ Fait avancer automatiquement les enrollments
 - ✅ Gère les erreurs et les logs
 - ✅ Rate limiting intégré
@@ -70,7 +70,7 @@ Utilisez un service comme cron-job.org, EasyCron, ou votre propre serveur pour a
 2. Pour chaque email :
    - Vérifier désabonnement
    - Récupérer le template
-   - Envoyer l'email via SendGrid
+   - Envoyer l'email via Resend
    - Logger l'envoi
    - Faire avancer l'enrollment (advance_sequence_enrollment)
    ↓

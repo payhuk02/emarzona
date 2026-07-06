@@ -147,8 +147,8 @@ interface EmailLogData {
   order_id?: string;
   store_id?: string;
   variables?: Record<string, string | number | boolean | null | undefined>;
-  sendgrid_message_id?: string;
-  sendgrid_status?: string;
+  provider_message_id?: string;
+  status?: string;
   error_message?: string;
   error_code?: string;
   processing_time_ms?: number;

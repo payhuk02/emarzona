@@ -24,7 +24,7 @@ import { EmailPreferencesService } from '@/lib/email/email-preferences-service';
 const EMAIL_TEMPLATE_FIELDS =
   'id, name, slug, category, product_type, subject, html_content, text_content, variables, is_active, is_default, created_at, updated_at';
 const EMAIL_LOG_FIELDS =
-  'id, user_id, template_id, campaign_id, sequence_id, to_email, subject, status, sendgrid_message_id, error_message, opened_at, clicked_at, metadata, created_at, updated_at';
+  'id, user_id, template_id, campaign_id, sequence_id, to_email, subject, status, provider_message_id, error_message, opened_at, clicked_at, metadata, created_at, updated_at';
 
 type EmailLogRow = {
   id: string;
@@ -35,7 +35,7 @@ type EmailLogRow = {
   to_email: string;
   subject: string;
   status: string | null;
-  sendgrid_message_id: string | null;
+  provider_message_id: string | null;
   error_message: string | null;
   opened_at: string | null;
   clicked_at: string | null;
@@ -60,8 +60,8 @@ function mapEmailLogRow(row: EmailLogRow): EmailLog {
     order_id: typeof meta.order_id === 'string' ? meta.order_id : undefined,
     store_id: typeof meta.store_id === 'string' ? meta.store_id : undefined,
     variables: meta,
-    sendgrid_message_id: row.sendgrid_message_id ?? undefined,
-    sendgrid_status: (row.status ?? 'sent') as SendGridStatus,
+    provider_message_id: row.provider_message_id ?? undefined,
+    status: (row.status ?? 'sent') as SendGridStatus,
     sent_at: row.created_at ?? '',
     opened_at: row.opened_at ?? undefined,
     clicked_at: row.clicked_at ?? undefined,
@@ -368,12 +368,10 @@ export const useEmailAnalytics = (options?: {
       // Calculer les statistiques
       const stats = {
         total_sent: logs.length,
-        total_delivered: logs.filter(l => l.sendgrid_status === 'delivered').length,
+        total_delivered: logs.filter(l => l.status === 'delivered').length,
         total_opened: logs.filter(l => l.opened_at).length,
         total_clicked: logs.filter(l => l.clicked_at).length,
-        total_bounced: logs.filter(
-          l => l.sendgrid_status === 'bounced' || l.sendgrid_status === 'failed'
-        ).length,
+        total_bounced: logs.filter(l => l.status === 'bounced' || l.status === 'failed').length,
         open_rate: 0,
         click_rate: 0,
         bounce_rate: 0,
