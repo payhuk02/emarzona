@@ -716,10 +716,13 @@ export const CreatePhysicalProductWizard = ({
         description: formData.description,
         short_description: formData.short_description || null,
         price: formData.price || 0,
+        compare_at_price: formData.compare_at_price ?? null,
+        cost_per_item: formData.cost_per_item ?? null,
         currency: 'XOF',
         category_id: formData.category_id,
         image_url: formData.images?.[0] || null,
         images: formData.images || [],
+        tags: formData.tags || [],
         meta_title: formData.seo?.meta_title,
         meta_description: formData.seo?.meta_description,
         og_image: formData.seo?.og_image,
@@ -730,6 +733,12 @@ export const CreatePhysicalProductWizard = ({
           payment_type: 'full',
           percentage_rate: 30,
         },
+        hide_purchase_count: formData.hide_purchase_count ?? false,
+        hide_likes_count: formData.hide_likes_count ?? false,
+        hide_recommendations_count: formData.hide_recommendations_count ?? false,
+        hide_downloads_count: formData.hide_downloads_count ?? false,
+        hide_reviews_count: formData.hide_reviews_count ?? false,
+        hide_rating: formData.hide_rating ?? false,
         is_draft: isDraft,
         is_active: !isDraft,
       };
@@ -750,6 +759,13 @@ export const CreatePhysicalProductWizard = ({
         inventory_policy: formData.inventory_policy || 'deny',
         continue_selling_when_out_of_stock: formData.continue_selling_when_out_of_stock ?? false,
         country_of_origin: formData.country_of_origin || 'CI',
+        shipping_class: formData.shipping_class,
+        whatsapp_number: formData.whatsapp_number?.trim() || null,
+        whatsapp_enabled: Boolean(formData.whatsapp_enabled && formData.whatsapp_number?.trim()),
+        has_variants: Boolean(formData.variants && formData.variants.length > 0),
+        option1_name: formData.options?.[0]?.name || null,
+        option2_name: formData.options?.[1]?.name || null,
+        option3_name: formData.options?.[2]?.name || null,
       };
 
       const rpcResult = await createPhysicalProductTx(store.id, productPayload, physicalPayload);
@@ -761,20 +777,6 @@ export const CreatePhysicalProductWizard = ({
         currency: 'XOF',
       };
       const physicalRow = { id: rpcResult.physical_product_id! };
-
-      // Champs physique hors transaction RPC (WhatsApp, shipping class, options)
-      await supabase
-        .from('physical_products')
-        .update({
-          shipping_class: formData.shipping_class,
-          whatsapp_number: formData.whatsapp_number?.trim() || null,
-          whatsapp_enabled: Boolean(formData.whatsapp_enabled && formData.whatsapp_number?.trim()),
-          has_variants: Boolean(formData.variants && formData.variants.length > 0),
-          option1_name: formData.options?.[0]?.name || null,
-          option2_name: formData.options?.[1]?.name || null,
-          option3_name: formData.options?.[2]?.name || null,
-        })
-        .eq('id', physicalRow.id);
 
       const hasVariants = Boolean(formData.variants && formData.variants.length > 0);
       const lowStockThreshold = formData.low_stock_threshold || 5;

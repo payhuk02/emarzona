@@ -43,6 +43,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/hooks/useStore';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { validateRequiredSteps } from '@/lib/wizard-validation/edit-save-validation';
+import { updateFullCourseTx } from '@/lib/products/product-update-rpc';
 import { logger } from '@/lib/logger';
 import { useQuery } from '@tanstack/react-query';
 import type { CourseSection, CourseLesson, CourseFormData } from '@/types/course-form';
@@ -439,12 +441,23 @@ export const EditCourseProductWizard = ({
           return { valid: Object.keys(newErrors).length === 0, errors };
         }
 
+        case 2: {
+          if (sections.length === 0) {
+            errors.push('Au moins une section est requise');
+          } else if (!sections.some(section => section.lessons.length > 0)) {
+            errors.push('Chaque section doit contenir au moins une leçon');
+          }
+
+          setErrors(newErrors);
+          return { valid: errors.length === 0, errors };
+        }
+
         default:
           setErrors({});
           return { valid: true, errors: [] };
       }
     },
-    [formData]
+    [formData, sections]
   );
 
   /**
@@ -515,10 +528,27 @@ export const EditCourseProductWizard = ({
         throw new Error('Impossible de générer un slug unique');
       }
 
-      // Update product
-      const { error: productError } = await supabase
-        .from('products')
-        .update({
+      const sectionsPayload = sections.map(section => ({
+        title: section.title,
+        description: section.description || null,
+        order_index: section.order_index,
+        lessons: section.lessons.map((lesson, index) => ({
+          title: lesson.title,
+          description: lesson.description || null,
+          order_index: lesson.order_index ?? index,
+          video_type: (lesson as { video_type?: string }).video_type || 'upload',
+          video_url: lesson.video_url || '',
+          video_duration_seconds: lesson.video_duration || 0,
+          content: lesson.content || null,
+          is_preview: lesson.is_preview || false,
+          is_required: true,
+        })),
+      }));
+
+      await updateFullCourseTx({
+        storeId: store.id,
+        productId,
+        product: {
           name: formData.title,
           slug,
           description: formData.description,
@@ -526,132 +556,29 @@ export const EditCourseProductWizard = ({
           price: formData.price || 0,
           promotional_price: formData.promotional_price,
           currency: formData.currency || 'XOF',
+          category_id: formData.category || null,
           image_url: formData.image_url || '',
           images: formData.images || [],
-          category_id: formData.category || null,
           meta_title: seoData.meta_title,
           meta_description: seoData.meta_description,
+          meta_keywords: seoData.meta_keywords,
           og_image: seoData.og_image,
           faqs: faqs || [],
           pricing_model: formData.pricing_model || 'one-time',
           licensing_type: formData.licensing_type || 'standard',
           license_terms: formData.license_terms || null,
-        })
-        .eq('id', productId);
-
-      if (productError) throw productError;
-
-      // Get course ID
-      const { data: existingCourse } = await supabase
-        .from('courses')
-        .select('id')
-        .eq('product_id', productId)
-        .limit(1)
-        .maybeSingle();
-
-      const courseData = {
-        product_id: productId,
-        level: formData.level || '',
-        language: formData.language || 'fr',
-        certificate_enabled: formData.certificate_enabled ?? true,
-        certificate_passing_score: formData.certificate_passing_score || 80,
-        learning_objectives: formData.learning_objectives || [],
-        prerequisites: formData.prerequisites || [],
-        target_audience: formData.target_audience || [],
-      };
-
-      let courseId: string;
-      if (existingCourse) {
-        const { error: courseError } = await supabase
-          .from('courses')
-          .update(courseData)
-          .eq('id', existingCourse.id)
-          .select('id')
-          .single();
-
-        if (courseError) throw courseError;
-        courseId = existingCourse.id;
-      } else {
-        const { data: newCourse, error: courseError } = await supabase
-          .from('courses')
-          .insert(courseData)
-          .select('id')
-          .single();
-
-        if (courseError) throw courseError;
-        courseId = newCourse.id;
-      }
-
-      // Update sections and lessons
-      // Get existing section IDs first
-      const { data: existingSections } = await supabase
-        .from('course_sections')
-        .select('id')
-        .eq('course_id', courseId);
-
-      const existingSectionIds = existingSections?.map((s: { id: string }) => s.id) || [];
-
-      // Delete existing lessons
-      if (existingSectionIds.length > 0) {
-        await supabase.from('course_lessons').delete().in('section_id', existingSectionIds);
-      }
-
-      // Delete existing sections
-      await supabase.from('course_sections').delete().eq('course_id', courseId);
-
-      // Insert new sections
-      if (sections.length > 0) {
-        for (const section of sections) {
-          const { data: newSection, error: sectionError } = await supabase
-            .from('course_sections')
-            .insert({
-              course_id: courseId,
-              title: section.title,
-              description: section.description || null,
-              order_index: section.order_index,
-            })
-            .select('id')
-            .single();
-
-          if (sectionError) throw sectionError;
-
-          // Insert lessons for this section
-          if (section.lessons && section.lessons.length > 0) {
-            const lessonsData = section.lessons.map((lesson, index) => ({
-              course_id: courseId,
-              section_id: newSection.id,
-              title: lesson.title,
-              description: lesson.description || null,
-              content: lesson.content || null,
-              video_url: lesson.video_url || null,
-              video_duration_seconds: lesson.video_duration || null,
-              order_index: lesson.order_index || index,
-              is_preview: lesson.is_preview || false,
-              video_type: 'upload', // Default, can be updated later
-              is_required: true,
-            }));
-
-            const { error: lessonsError } = await supabase
-              .from('course_lessons')
-              .insert(lessonsData);
-
-            if (lessonsError) throw lessonsError;
-          }
-        }
-      }
-
-      // Update affiliate settings
-      if (affiliateData.affiliate_enabled) {
-        const { data: existingAffiliate } = await supabase
-          .from('product_affiliate_settings')
-          .select('id')
-          .eq('product_id', productId)
-          .limit(1)
-          .maybeSingle();
-
-        const affiliateSettingsData = {
-          product_id: productId,
-          store_id: store.id,
+        },
+        course: {
+          level: formData.level || '',
+          language: formData.language || 'fr',
+          certificate_enabled: formData.certificate_enabled ?? true,
+          certificate_passing_score: formData.certificate_passing_score || 80,
+          learning_objectives: formData.learning_objectives || [],
+          prerequisites: formData.prerequisites || [],
+          target_audience: formData.target_audience || [],
+        },
+        sections: sectionsPayload,
+        affiliate: {
           affiliate_enabled: affiliateData.affiliate_enabled,
           commission_rate: affiliateData.commission_rate,
           commission_type: affiliateData.commission_type,
@@ -662,47 +589,19 @@ export const EditCourseProductWizard = ({
           allow_self_referral: affiliateData.allow_self_referral,
           require_approval: affiliateData.require_approval,
           terms_and_conditions: affiliateData.terms_and_conditions,
-        };
-
-        if (existingAffiliate) {
-          await supabase
-            .from('product_affiliate_settings')
-            .update(affiliateSettingsData)
-            .eq('id', existingAffiliate.id);
-        } else {
-          await supabase.from('product_affiliate_settings').insert(affiliateSettingsData);
-        }
-      }
-
-      // Update pixels/tracking settings
-      const { data: existingPixels } = await supabase
-        .from('course_tracking_settings')
-        .select('id')
-        .eq('course_id', courseId)
-        .limit(1)
-        .maybeSingle();
-
-      const pixelsSettingsData = {
-        course_id: courseId,
-        tracking_enabled: pixelsData.tracking_enabled,
-        google_analytics_id: pixelsData.google_analytics_id || null,
-        facebook_pixel_id: pixelsData.facebook_pixel_id || null,
-        google_tag_manager_id: pixelsData.google_tag_manager_id || null,
-        tiktok_pixel_id: pixelsData.tiktok_pixel_id || null,
-        track_video_events: pixelsData.track_video_events,
-        track_lesson_completion: pixelsData.track_lesson_completion,
-        track_quiz_attempts: pixelsData.track_quiz_attempts,
-        track_certificate_downloads: pixelsData.track_certificate_downloads,
-      };
-
-      if (existingPixels) {
-        await supabase
-          .from('course_tracking_settings')
-          .update(pixelsSettingsData)
-          .eq('id', existingPixels.id);
-      } else {
-        await supabase.from('course_tracking_settings').insert(pixelsSettingsData);
-      }
+        },
+        tracking: {
+          tracking_enabled: pixelsData.tracking_enabled,
+          google_analytics_id: pixelsData.google_analytics_id || null,
+          facebook_pixel_id: pixelsData.facebook_pixel_id || null,
+          google_tag_manager_id: pixelsData.google_tag_manager_id || null,
+          tiktok_pixel_id: pixelsData.tiktok_pixel_id || null,
+          track_video_events: pixelsData.track_video_events,
+          track_lesson_completion: pixelsData.track_lesson_completion,
+          track_quiz_attempts: pixelsData.track_quiz_attempts,
+          track_certificate_downloads: pixelsData.track_certificate_downloads,
+        },
+      });
 
       toast({
         title: '✅ Cours mis à jour',
@@ -759,7 +658,7 @@ export const EditCourseProductWizard = ({
   }, []);
 
   const handleSave = useCallback(async () => {
-    const result = await validateStep(currentStep);
+    const result = await validateRequiredSteps([1, 2], validateStep);
     if (result.valid) {
       await saveCourse();
     } else {
@@ -773,7 +672,7 @@ export const EditCourseProductWizard = ({
         variant: 'destructive',
       });
     }
-  }, [currentStep, validateStep, saveCourse, toast]);
+  }, [validateStep, saveCourse, toast]);
 
   const renderStepContent = useCallback(() => {
     switch (currentStep) {

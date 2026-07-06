@@ -850,6 +850,12 @@ export const CreateDigitalProductWizard = ({
           meta_description: formData.seo?.meta_description || formData.short_description,
           og_image: formData.seo?.og_image,
           faqs: formData.faqs || [],
+          hide_purchase_count: formData.hide_purchase_count ?? false,
+          hide_likes_count: formData.hide_likes_count ?? false,
+          hide_recommendations_count: formData.hide_recommendations_count ?? false,
+          hide_downloads_count: formData.hide_downloads_count ?? false,
+          hide_reviews_count: formData.hide_reviews_count ?? false,
+          hide_rating: formData.hide_rating ?? false,
         };
 
         const digitalPayload: Record<string, unknown> = {

@@ -44,6 +44,8 @@ import { useStore } from '@/hooks/useStore';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
+import { updateArtistProductTx } from '@/lib/products/product-update-rpc';
+import { validateRequiredSteps } from '@/lib/wizard-validation/edit-save-validation';
 import { cn } from '@/lib/utils';
 import type { ArtistProductFormData, ArtistType } from '@/types/artist-product';
 import { generateSlug } from '@/lib/validation-utils';
@@ -345,6 +347,17 @@ export const EditArtistProductWizard = ({
       throw new Error('Aucune boutique ou produit trouvé');
     }
 
+    const validation = await validateRequiredSteps([1, 2], async step => validateStep(step));
+    if (!validation.valid) {
+      toast({
+        title: 'Erreurs de validation',
+        description:
+          validation.errors.join(', ') || 'Veuillez corriger les erreurs avant de sauvegarder',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsSaving(true);
 
     try {
@@ -366,73 +379,65 @@ export const EditArtistProductWizard = ({
           throw new Error("Vous n'avez pas les permissions pour modifier ce produit artiste");
         }
       }
-      // Update base product
-      const { error: productError } = await supabase
-        .from('products')
-        .update({
-          name: formData.artwork_title || formData.name,
-          description: formData.description,
-          short_description: formData.short_description || null,
-          price: formData.price || 0,
-          compare_at_price: formData.compare_at_price || null,
-          cost_per_item: formData.cost_per_item || null,
-          category_id: formData.category_id || null,
-          image_url: formData.images?.[0] || null,
-          images: formData.images || [],
-          tags: formData.tags || [],
-          meta_title: formData.seo?.meta_title,
-          meta_description: formData.seo?.meta_description,
-          og_image: formData.seo?.og_image,
-          faqs: formData.faqs || [],
-          payment_options: formData.payment || { payment_type: 'full', percentage_rate: 30 },
-          is_draft: isDraft,
-          is_active: !isDraft,
-        })
-        .eq('id', productId);
 
-      if (productError) {
-        if (productError.code === '23505' || productError.message?.includes('duplicate key')) {
-          throw new Error('Ce slug est déjà utilisé par un autre produit de votre boutique.');
-        }
-        throw productError;
+      const productPayload: Record<string, unknown> = {
+        name: formData.artwork_title || formData.name,
+        description: formData.description,
+        short_description: formData.short_description || null,
+        price: formData.price || 0,
+        category_id: formData.category_id || null,
+        image_url: formData.images?.[0] || null,
+        images: formData.images || [],
+        tags: formData.tags || [],
+        meta_title: formData.seo?.meta_title,
+        meta_description: formData.seo?.meta_description,
+        og_image: formData.seo?.og_image,
+        faqs: formData.faqs || [],
+        payment_options: formData.payment || { payment_type: 'full', percentage_rate: 30 },
+        is_draft: isDraft,
+        is_active: !isDraft,
+      };
+
+      if (formData.compare_at_price != null && formData.compare_at_price > 0) {
+        productPayload.compare_at_price = formData.compare_at_price;
+      }
+      if (formData.cost_per_item != null && formData.cost_per_item > 0) {
+        productPayload.cost_per_item = formData.cost_per_item;
       }
 
-      // Update artist_product
-      const { error: artistError } = await supabase
-        .from('artist_products')
-        .update({
-          artist_type: formData.artist_type,
-          artist_name: formData.artist_name,
-          artist_bio: formData.artist_bio,
-          artist_website: formData.artist_website,
-          artist_photo_url: formData.artist_photo_url || null,
-          artist_social_links: formData.artist_social_links || {},
-          artwork_title: formData.artwork_title,
-          artwork_year: formData.artwork_year,
-          artwork_medium: formData.artwork_medium,
-          artwork_dimensions: formData.artwork_dimensions,
-          artwork_link_url: formData.artwork_link_url || null,
-          artwork_edition_type: formData.edition_type,
-          edition_number: formData.edition_number,
-          total_editions: formData.total_editions,
-          writer_specific: formData.writer_specific || null,
-          musician_specific: formData.musician_specific || null,
-          visual_artist_specific: formData.visual_artist_specific || null,
-          designer_specific: formData.designer_specific || null,
-          multimedia_specific: formData.multimedia_specific || null,
-          requires_shipping: formData.requires_shipping,
-          shipping_handling_time: formData.shipping_handling_time,
-          shipping_fragile: formData.shipping_fragile,
-          shipping_insurance_required: formData.shipping_insurance_required,
-          shipping_insurance_amount: formData.shipping_insurance_amount,
-          certificate_of_authenticity: formData.certificate_of_authenticity,
-          certificate_file_url: formData.certificate_file_url,
-          signature_authenticated: formData.signature_authenticated,
-          signature_location: formData.signature_location,
-        })
-        .eq('product_id', productId);
+      const artistPayload: Record<string, unknown> = {
+        artist_type: formData.artist_type,
+        artist_name: formData.artist_name,
+        artist_bio: formData.artist_bio,
+        artist_website: formData.artist_website,
+        artist_photo_url: formData.artist_photo_url || null,
+        artist_social_links: formData.artist_social_links || {},
+        artwork_title: formData.artwork_title,
+        artwork_year: formData.artwork_year,
+        artwork_medium: formData.artwork_medium,
+        artwork_dimensions: formData.artwork_dimensions,
+        artwork_link_url: formData.artwork_link_url || null,
+        artwork_edition_type: formData.edition_type,
+        edition_type: formData.edition_type,
+        edition_number: formData.edition_number,
+        total_editions: formData.total_editions,
+        writer_specific: formData.writer_specific || null,
+        musician_specific: formData.musician_specific || null,
+        visual_artist_specific: formData.visual_artist_specific || null,
+        designer_specific: formData.designer_specific || null,
+        multimedia_specific: formData.multimedia_specific || null,
+        requires_shipping: formData.requires_shipping,
+        shipping_handling_time: formData.shipping_handling_time,
+        shipping_fragile: formData.shipping_fragile,
+        shipping_insurance_required: formData.shipping_insurance_required,
+        shipping_insurance_amount: formData.shipping_insurance_amount,
+        certificate_of_authenticity: formData.certificate_of_authenticity,
+        certificate_file_url: formData.certificate_file_url,
+        signature_authenticated: formData.signature_authenticated,
+        signature_location: formData.signature_location,
+      };
 
-      if (artistError) throw artistError;
+      await updateArtistProductTx(store.id, productId, productPayload, artistPayload);
 
       localStorage.removeItem('artist-product-draft');
 

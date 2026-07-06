@@ -669,11 +669,18 @@ export const CreateServiceWizard = ({
         category_id: formData.category_id,
         image_url: formData.images?.[0] || null,
         images: formData.images || [],
+        tags: formData.tags || [],
         meta_title: formData.seo?.meta_title,
         meta_description: formData.seo?.meta_description,
         og_image: formData.seo?.og_image,
         faqs: formData.faqs || [],
         payment_options: formData.payment || { payment_type: 'full', percentage_rate: 30 },
+        hide_purchase_count: formData.hide_purchase_count ?? false,
+        hide_likes_count: formData.hide_likes_count ?? false,
+        hide_recommendations_count: formData.hide_recommendations_count ?? false,
+        hide_downloads_count: formData.hide_downloads_count ?? false,
+        hide_reviews_count: formData.hide_reviews_count ?? false,
+        hide_rating: formData.hide_rating ?? false,
         is_draft: isDraft,
         is_active: !isDraft,
       };
@@ -858,7 +865,7 @@ export const CreateServiceWizard = ({
           } else {
             logger.info('Free preview service created', { previewServiceId });
           }
-        } catch (_error: unknown) {
+        } catch (error: unknown) {
           const errorMessage = error instanceof Error ? error.message : String(error);
           logger.error('Exception creating preview service', { error: errorMessage });
           // Ne pas faire échouer la création du service principal

@@ -10,6 +10,7 @@ export interface ProductCreateRpcResult {
   digital_product_id?: string;
   service_product_id?: string;
   physical_product_id?: string;
+  course_id?: string;
 }
 
 async function parseRpcResult(

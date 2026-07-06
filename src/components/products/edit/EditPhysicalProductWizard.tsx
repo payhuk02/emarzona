@@ -52,6 +52,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/hooks/useStore';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
+import { updatePhysicalProductTx } from '@/lib/products/product-update-rpc';
+import { validateRequiredSteps } from '@/lib/wizard-validation/edit-save-validation';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
@@ -647,13 +649,42 @@ export const EditPhysicalProductWizard = ({
           return { valid: true, errors: [] };
         }
 
+        case 2: {
+          if (formData.has_variants) {
+            if (!formData.options || formData.options.length === 0) {
+              errors.push('Au moins une option de variante est requise');
+            }
+            if (!formData.variants || formData.variants.length === 0) {
+              errors.push('Au moins une variante est requise');
+            }
+          }
+
+          if (errors.length > 0) {
+            setValidationErrors(prev => ({ ...prev, [step]: errors }));
+            return { valid: false, errors };
+          }
+
+          setValidationErrors(prev => {
+            const newErrors = { ...prev };
+            delete newErrors[step];
+            return newErrors;
+          });
+          return { valid: true, errors: [] };
+        }
+
         case 3: {
           if (formData.track_inventory) {
             if (!formData.sku?.trim()) {
               errors.push('Le SKU est requis');
             }
-            if (formData.quantity === undefined || formData.quantity < 0) {
+            if (
+              !formData.has_variants &&
+              (formData.quantity === undefined || formData.quantity < 0)
+            ) {
               errors.push('La quantité en stock est requise');
+            }
+            if (formData.has_variants && formData.variants?.some(v => v.quantity < 0)) {
+              errors.push('La quantité de chaque variante doit être valide');
             }
           }
 
@@ -770,47 +801,33 @@ export const EditPhysicalProductWizard = ({
         throw new Error('Impossible de générer un slug unique');
       }
 
-      // Update product
-      const { error: productError } = await supabase
-        .from('products')
-        .update({
-          name: formData.name,
-          slug,
-          description: formData.description,
-          short_description: formData.short_description,
-          price: formData.price || 0,
-          compare_at_price: formData.compare_at_price,
-          cost_per_item: formData.cost_per_item,
-          images: formData.images || [],
-          category_id: formData.category_id,
-          tags: formData.tags || [],
-          meta_title: formData.seo?.meta_title,
-          meta_description: formData.seo?.meta_description,
-          og_image: formData.seo?.og_image,
-          faqs: formData.faqs || [],
-          payment_options: formData.payment,
-          hide_purchase_count: formData.hide_purchase_count,
-          hide_likes_count: formData.hide_likes_count,
-          hide_recommendations_count: formData.hide_recommendations_count,
-          hide_downloads_count: formData.hide_downloads_count,
-          hide_reviews_count: formData.hide_reviews_count,
-          hide_rating: formData.hide_rating,
-          is_active: formData.is_active,
-        })
-        .eq('id', productId);
+      // Mise à jour transactionnelle produit + physical_products
+      const productPayload: Record<string, unknown> = {
+        name: formData.name,
+        slug,
+        description: formData.description,
+        short_description: formData.short_description,
+        price: formData.price || 0,
+        compare_at_price: formData.compare_at_price,
+        cost_per_item: formData.cost_per_item,
+        images: formData.images || [],
+        category_id: formData.category_id,
+        tags: formData.tags || [],
+        meta_title: formData.seo?.meta_title,
+        meta_description: formData.seo?.meta_description,
+        og_image: formData.seo?.og_image,
+        faqs: formData.faqs || [],
+        payment_options: formData.payment,
+        hide_purchase_count: formData.hide_purchase_count,
+        hide_likes_count: formData.hide_likes_count,
+        hide_recommendations_count: formData.hide_recommendations_count,
+        hide_downloads_count: formData.hide_downloads_count,
+        hide_reviews_count: formData.hide_reviews_count,
+        hide_rating: formData.hide_rating,
+        is_active: formData.is_active,
+      };
 
-      if (productError) throw productError;
-
-      // Update or create physical product
-      const { data: existingPhysical } = await supabase
-        .from('physical_products')
-        .select('id')
-        .eq('product_id', productId)
-        .limit(1)
-        .maybeSingle();
-
-      const physicalProductData = {
-        product_id: productId,
+      const physicalPayload: Record<string, unknown> = {
         track_inventory: formData.track_inventory ?? true,
         continue_selling_when_out_of_stock: formData.continue_selling_when_out_of_stock ?? false,
         inventory_policy: formData.inventory_policy || 'deny',
@@ -835,26 +852,14 @@ export const EditPhysicalProductWizard = ({
           (formData as { low_stock_threshold?: number }).low_stock_threshold || 5,
       };
 
-      let physicalProductId = existingPhysical?.id;
+      const rpcResult = await updatePhysicalProductTx(
+        store.id,
+        productId,
+        productPayload,
+        physicalPayload
+      );
 
-      if (existingPhysical) {
-        const { error: physicalError } = await supabase
-          .from('physical_products')
-          .update(physicalProductData)
-          .eq('id', existingPhysical.id);
-
-        if (physicalError) throw physicalError;
-      } else {
-        const { data: newPhysical, error: physicalError } = await supabase
-          .from('physical_products')
-          .insert(physicalProductData)
-          .select('id')
-          .single();
-
-        if (physicalError) throw physicalError;
-        physicalProductId = newPhysical.id;
-      }
-
+      const physicalProductId = rpcResult.physical_product_id;
       if (!physicalProductId) {
         throw new Error('Enregistrement produit physique introuvable');
       }
@@ -979,7 +984,12 @@ export const EditPhysicalProductWizard = ({
   }, []);
 
   const handleSave = useCallback(async () => {
-    const result = await validateStep(currentStep);
+    const requiredSteps = [1, 2, 3];
+    if (formData.requires_shipping) {
+      requiredSteps.push(4);
+    }
+
+    const result = await validateRequiredSteps(requiredSteps, validateStep);
     if (result.valid) {
       await saveProduct();
     } else {
@@ -993,7 +1003,7 @@ export const EditPhysicalProductWizard = ({
         variant: 'destructive',
       });
     }
-  }, [currentStep, validateStep, saveProduct, toast]);
+  }, [formData.requires_shipping, validateStep, saveProduct, toast]);
 
   const getStepProps = useCallback(() => {
     const baseProps = {

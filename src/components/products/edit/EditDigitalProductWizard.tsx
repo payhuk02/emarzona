@@ -42,7 +42,8 @@ import { useStore } from '@/hooks/useStore';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
 import { supabase } from '@/integrations/supabase/client';
-import type { Json } from '@/integrations/supabase/types';
+import { updateDigitalProductTx } from '@/lib/products/product-update-rpc';
+import { validateRequiredSteps } from '@/lib/wizard-validation/edit-save-validation';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import type {
@@ -606,47 +607,6 @@ export const EditDigitalProductWizard = ({
         throw new Error('Impossible de générer un slug unique');
       }
 
-      // Update product
-      const { error: productError } = await supabase
-        .from('products')
-        .update({
-          name: formData.name,
-          slug,
-          description: formData.description,
-          short_description: formData.short_description,
-          category: formData.category,
-          price: formData.pricing_model === 'free' ? 0 : formData.price || 0,
-          promotional_price: formData.promotional_price,
-          currency: formData.currency,
-          pricing_model: formData.pricing_model || 'one-time',
-          image_url: formData.image_url || '',
-          images: formData.images || [],
-          meta_title: formData.seo?.meta_title,
-          meta_description: formData.seo?.meta_description,
-          og_image: formData.seo?.og_image,
-          faqs: (formData.faqs || []) as unknown as Json,
-          licensing_type: formData.licensing_type || 'standard',
-          license_terms: formData.license_terms || null,
-          hide_purchase_count: formData.hide_purchase_count,
-          hide_likes_count: formData.hide_likes_count,
-          hide_recommendations_count: formData.hide_recommendations_count,
-          hide_downloads_count: formData.hide_downloads_count,
-          hide_reviews_count: formData.hide_reviews_count,
-          hide_rating: formData.hide_rating,
-          is_active: formData.is_active,
-        })
-        .eq('id', productId);
-
-      if (productError) throw productError;
-
-      // Get digital product ID
-      const { data: existingDigital } = await supabase
-        .from('digital_products')
-        .select('id')
-        .eq('product_id', productId)
-        .limit(1)
-        .maybeSingle();
-
       const mainFile = formData.downloadable_files?.[0];
       const mainFileFormat = mainFile?.format || mainFile?.name?.split('.').pop() || 'unknown';
       const totalSizeMB = (formData.downloadable_files || []).reduce(
@@ -654,8 +614,34 @@ export const EditDigitalProductWizard = ({
         0
       );
 
-      const digitalProductData = {
-        product_id: productId,
+      const productPayload: Record<string, unknown> = {
+        name: formData.name,
+        slug,
+        description: formData.description,
+        short_description: formData.short_description,
+        category: formData.category,
+        price: formData.pricing_model === 'free' ? 0 : formData.price || 0,
+        promotional_price: formData.promotional_price,
+        currency: formData.currency,
+        pricing_model: formData.pricing_model || 'one-time',
+        image_url: formData.image_url || '',
+        images: formData.images || [],
+        meta_title: formData.seo?.meta_title,
+        meta_description: formData.seo?.meta_description,
+        og_image: formData.seo?.og_image,
+        faqs: formData.faqs || [],
+        licensing_type: formData.licensing_type || 'standard',
+        license_terms: formData.license_terms || null,
+        hide_purchase_count: formData.hide_purchase_count,
+        hide_likes_count: formData.hide_likes_count,
+        hide_recommendations_count: formData.hide_recommendations_count,
+        hide_downloads_count: formData.hide_downloads_count,
+        hide_reviews_count: formData.hide_reviews_count,
+        hide_rating: formData.hide_rating,
+        is_active: formData.is_active,
+      };
+
+      const digitalPayload: Record<string, unknown> = {
         digital_type: formData.digital_type || 'ebook',
         license_type: formData.license_type || 'single',
         license_duration_days: formData.license_duration_days || null,
@@ -676,24 +662,16 @@ export const EditDigitalProductWizard = ({
         version: formData.version || '1.0',
       };
 
-      let digitalProductId = existingDigital?.id;
+      const rpcResult = await updateDigitalProductTx(
+        store.id,
+        productId,
+        productPayload,
+        digitalPayload
+      );
 
-      if (existingDigital) {
-        const { error: digitalError } = await supabase
-          .from('digital_products')
-          .update(digitalProductData)
-          .eq('id', existingDigital.id);
-
-        if (digitalError) throw digitalError;
-      } else {
-        const { data: newDigital, error: digitalError } = await supabase
-          .from('digital_products')
-          .insert(digitalProductData)
-          .select('id')
-          .single();
-
-        if (digitalError) throw digitalError;
-        digitalProductId = newDigital.id;
+      const digitalProductId = rpcResult.digital_product_id;
+      if (!digitalProductId) {
+        throw new Error('Enregistrement produit digital introuvable');
       }
 
       // Update files
@@ -805,9 +783,8 @@ export const EditDigitalProductWizard = ({
   }, []);
 
   const handleSave = useCallback(async () => {
-    const result = await validateStep(currentStep);
+    const result = await validateRequiredSteps([1, 2], validateStep);
     logger.info('[EditDigitalProductWizard] handleSave - Résultat validation', {
-      currentStep,
       isValid: result.valid,
       errors: result.errors,
       errorsCount: result.errors.length,
@@ -832,7 +809,7 @@ export const EditDigitalProductWizard = ({
         variant: 'destructive',
       });
     }
-  }, [currentStep, validateStep, saveProduct, toast]);
+  }, [validateStep, saveProduct, toast]);
 
   const renderStepContent = useCallback(() => {
     switch (currentStep) {

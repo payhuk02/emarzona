@@ -47,6 +47,8 @@ import { useStore } from '@/hooks/useStore';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
 import { supabase } from '@/integrations/supabase/client';
+import { updateServiceProductTx } from '@/lib/products/product-update-rpc';
+import { validateRequiredSteps } from '@/lib/wizard-validation/edit-save-validation';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import type {
@@ -56,12 +58,16 @@ import type {
 } from '@/types/service-product';
 import { useQuery } from '@tanstack/react-query';
 
-const PRODUCT_FIELDS = 'id, store_id, name, slug, description, short_description, price, promotional_price, currency, category_id, tags, images, image_url, meta_title, meta_description, og_image, faqs, payment_options, hide_purchase_count, hide_likes_count, hide_recommendations_count, hide_downloads_count, hide_reviews_count, hide_rating, is_active';
-const SERVICE_PRODUCT_FIELDS = 'id, product_id, service_type, duration_minutes, location_type, location_address, meeting_url, timezone, requires_staff, max_participants, pricing_type, deposit_required, deposit_amount, deposit_type, allow_booking_cancellation, cancellation_deadline_hours, require_approval, buffer_time_before, buffer_time_after, advance_booking_days';
-const SERVICE_AVAILABILITY_SLOT_FIELDS = 'id, service_product_id, day_of_week, start_time, end_time';
+const PRODUCT_FIELDS =
+  'id, store_id, name, slug, description, short_description, price, promotional_price, currency, category_id, tags, images, image_url, meta_title, meta_description, og_image, faqs, payment_options, hide_purchase_count, hide_likes_count, hide_recommendations_count, hide_downloads_count, hide_reviews_count, hide_rating, is_active';
+const SERVICE_PRODUCT_FIELDS =
+  'id, product_id, service_type, duration_minutes, location_type, location_address, meeting_url, timezone, requires_staff, max_participants, pricing_type, deposit_required, deposit_amount, deposit_type, allow_booking_cancellation, cancellation_deadline_hours, require_approval, buffer_time_before, buffer_time_after, advance_booking_days';
+const SERVICE_AVAILABILITY_SLOT_FIELDS =
+  'id, service_product_id, day_of_week, start_time, end_time';
 const SERVICE_STAFF_FIELDS = 'id, service_product_id, name, email, role, avatar_url, availability';
 const SERVICE_RESOURCE_FIELDS = 'id, service_product_id, name, resource_name';
-const PRODUCT_AFFILIATE_FIELDS = 'id, product_id, affiliate_enabled, commission_rate, commission_type, fixed_commission_amount, cookie_duration_days, min_order_amount, allow_self_referral, require_approval, terms_and_conditions';
+const PRODUCT_AFFILIATE_FIELDS =
+  'id, product_id, affiliate_enabled, commission_rate, commission_type, fixed_commission_amount, cookie_duration_days, min_order_amount, allow_self_referral, require_approval, terms_and_conditions';
 
 const STEPS = [
   {
@@ -134,15 +140,20 @@ interface EditServiceProductWizardProps {
  * Convert service product from DB to form data
  * ✅ SÉCURITÉ: Inclut validation de propriété
  */
-const convertToFormData = async (productId: string, userId?: string): Promise<Partial<ServiceProductFormData>> => {
+const convertToFormData = async (
+  productId: string,
+  userId?: string
+): Promise<Partial<ServiceProductFormData>> => {
   // ✅ SÉCURITÉ: Vérifier propriété du produit avant chargement
   if (userId) {
     const { data: ownershipCheck, error: ownershipError } = await supabase
       .from('products')
-      .select(`
+      .select(
+        `
         id,
         stores!inner(user_id)
-      `)
+      `
+      )
       .eq('id', productId)
       .eq('stores.user_id', userId)
       .single();
@@ -496,6 +507,31 @@ export const EditServiceProductWizard = ({
           return { valid: true, errors: [] };
         }
 
+        case 2: {
+          const duration = formData.duration_minutes ?? formData.duration;
+          if (!duration || duration <= 0) {
+            errors.push('La durée du service est requise');
+          }
+          if (formData.location_type === 'on_site' && !formData.location_address?.trim()) {
+            errors.push("L'adresse est requise pour les services sur site");
+          }
+          if (formData.location_type === 'online' && !formData.meeting_url?.trim()) {
+            errors.push("L'URL de réunion est requise pour les services en ligne");
+          }
+
+          if (errors.length > 0) {
+            setValidationErrors(prev => ({ ...prev, [step]: errors }));
+            return { valid: false, errors };
+          }
+
+          setValidationErrors(prev => {
+            const newErrors = { ...prev };
+            delete newErrors[step];
+            return newErrors;
+          });
+          return { valid: true, errors: [] };
+        }
+
         default:
           setValidationErrors(prev => {
             const newErrors = { ...prev };
@@ -522,16 +558,18 @@ export const EditServiceProductWizard = ({
       if (user) {
         const { data: ownershipCheck, error: ownershipError } = await supabase
           .from('products')
-          .select(`
+          .select(
+            `
             id,
             stores!inner(user_id)
-          `)
+          `
+          )
           .eq('id', productId)
           .eq('stores.user_id', user.id)
           .single();
 
         if (ownershipError || !ownershipCheck) {
-          throw new Error('Vous n\'avez pas les permissions pour modifier ce produit');
+          throw new Error("Vous n'avez pas les permissions pour modifier ce produit");
         }
       }
       // Generate slug if not provided
@@ -574,48 +612,33 @@ export const EditServiceProductWizard = ({
         throw new Error('Impossible de générer un slug unique');
       }
 
-      // Update product
-      const { error: productError } = await supabase
-        .from('products')
-        .update({
-          name: formData.name,
-          slug,
-          description: formData.description,
-          short_description: formData.short_description,
-          price: formData.price || 0,
-          promotional_price: formData.promotional_price,
-          currency: formData.currency || 'XOF',
-          image_url: formData.image_url || '',
-          images: formData.images || [],
-          category_id: formData.category_id,
-          tags: formData.tags || [],
-          meta_title: formData.seo?.meta_title,
-          meta_description: formData.seo?.meta_description,
-          og_image: formData.seo?.og_image,
-          faqs: formData.faqs || [],
-          payment_options: formData.payment,
-          hide_purchase_count: formData.hide_purchase_count,
-          hide_likes_count: formData.hide_likes_count,
-          hide_recommendations_count: formData.hide_recommendations_count,
-          hide_downloads_count: formData.hide_downloads_count,
-          hide_reviews_count: formData.hide_reviews_count,
-          hide_rating: formData.hide_rating,
-          is_active: formData.is_active,
-        })
-        .eq('id', productId);
+      const productPayload: Record<string, unknown> = {
+        name: formData.name,
+        slug,
+        description: formData.description,
+        short_description: formData.short_description,
+        price: formData.price || 0,
+        promotional_price: formData.promotional_price,
+        currency: formData.currency || 'XOF',
+        image_url: formData.image_url || '',
+        images: formData.images || [],
+        category_id: formData.category_id,
+        tags: formData.tags || [],
+        meta_title: formData.seo?.meta_title,
+        meta_description: formData.seo?.meta_description,
+        og_image: formData.seo?.og_image,
+        faqs: formData.faqs || [],
+        payment_options: formData.payment,
+        hide_purchase_count: formData.hide_purchase_count,
+        hide_likes_count: formData.hide_likes_count,
+        hide_recommendations_count: formData.hide_recommendations_count,
+        hide_downloads_count: formData.hide_downloads_count,
+        hide_reviews_count: formData.hide_reviews_count,
+        hide_rating: formData.hide_rating,
+        is_active: formData.is_active,
+      };
 
-      if (productError) throw productError;
-
-      // Get service product ID
-      const { data: existingService } = await supabase
-        .from('service_products')
-        .select('id')
-        .eq('product_id', productId)
-        .limit(1)
-        .maybeSingle();
-
-      const serviceProductData = {
-        product_id: productId,
+      const servicePayload: Record<string, unknown> = {
         service_type: formData.service_type || 'appointment',
         duration_minutes: formData.duration_minutes || 60,
         location_type: formData.location_type || 'on_site',
@@ -633,36 +656,31 @@ export const EditServiceProductWizard = ({
         require_approval: formData.booking_options?.require_approval || false,
         buffer_time_before: formData.booking_options?.buffer_time_before || 0,
         buffer_time_after: formData.booking_options?.buffer_time_after || 0,
+        max_bookings_per_day: formData.booking_options?.max_bookings_per_day,
         advance_booking_days: formData.booking_options?.advance_booking_days || 30,
       };
 
-      if (existingService) {
-        const { error: serviceError } = await supabase
-          .from('service_products')
-          .update(serviceProductData)
-          .eq('id', existingService.id);
+      const rpcResult = await updateServiceProductTx(
+        store.id,
+        productId,
+        productPayload,
+        servicePayload
+      );
 
-        if (serviceError) throw serviceError;
-      } else {
-        const { error: serviceError } = await supabase
-          .from('service_products')
-          .insert(serviceProductData);
-
-        if (serviceError) throw serviceError;
-      }
+      const serviceProductId = rpcResult.service_product_id;
 
       // Update availability slots
-      if (existingService && formData.availability_slots) {
+      if (serviceProductId && formData.availability_slots) {
         // Delete existing slots
         await supabase
           .from('service_availability_slots')
           .delete()
-          .eq('service_product_id', existingService.id);
+          .eq('service_product_id', serviceProductId);
 
         // Insert new slots
         if (formData.availability_slots.length > 0) {
           const slotsData = formData.availability_slots.map(slot => ({
-            service_product_id: existingService.id,
+            service_product_id: serviceProductId,
             day_of_week: slot.day,
             start_time: slot.start_time,
             end_time: slot.end_time,
@@ -677,17 +695,17 @@ export const EditServiceProductWizard = ({
       }
 
       // Update staff members
-      if (existingService && formData.staff_members) {
+      if (serviceProductId && formData.staff_members) {
         // Delete existing staff
         await supabase
           .from('service_staff_members')
           .delete()
-          .eq('service_product_id', existingService.id);
+          .eq('service_product_id', serviceProductId);
 
         // Insert new staff
         if (formData.staff_members.length > 0) {
           const staffData = formData.staff_members.map(staff => ({
-            service_product_id: existingService.id,
+            service_product_id: serviceProductId,
             name: staff.name,
             email: staff.email,
             role: staff.role || null,
@@ -704,18 +722,18 @@ export const EditServiceProductWizard = ({
       }
 
       // Update resources
-      if (existingService && (formData.resources || formData.resources_needed)) {
+      if (serviceProductId && (formData.resources || formData.resources_needed)) {
         // Delete existing resources
         await supabase
           .from('service_resources')
           .delete()
-          .eq('service_product_id', existingService.id);
+          .eq('service_product_id', serviceProductId);
 
         // Insert new resources
         const resourcesList = formData.resources || formData.resources_needed || [];
         if (resourcesList.length > 0) {
           const resourcesData = resourcesList.map((resource: string) => ({
-            service_product_id: existingService.id,
+            service_product_id: serviceProductId,
             resource_name: resource,
           }));
 
@@ -804,7 +822,7 @@ export const EditServiceProductWizard = ({
   }, []);
 
   const handleSave = useCallback(async () => {
-    const result = await validateStep(currentStep);
+    const result = await validateRequiredSteps([1, 2], validateStep);
     if (result.valid) {
       await saveProduct();
     } else {
@@ -818,7 +836,7 @@ export const EditServiceProductWizard = ({
         variant: 'destructive',
       });
     }
-  }, [currentStep, validateStep, saveProduct, toast]);
+  }, [validateStep, saveProduct, toast]);
 
   const getStepProps = useCallback(() => {
     const baseProps = {
