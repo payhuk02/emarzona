@@ -14,15 +14,11 @@
 import { useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { initiatePayment } from '@/lib/payment-service';
-import {
-  releasePhysicalInventoryForOrder,
-  reservePhysicalInventoryForOrder,
-} from '@/lib/physical-inventory';
+import { releasePhysicalInventoryForOrder } from '@/lib/physical-inventory';
 import { useToast } from '@/hooks/use-toast';
 import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
 import { logger } from '@/lib/logger';
-import { findOrCreateStoreCustomer } from '@/lib/orders/customers-data';
-import { generateOrderNumber } from '@/lib/orders/orders-data';
+import { createPublicPhysicalOrder } from '@/lib/orders/create-public-physical-order';
 import { parsePhysicalCheckoutOptions } from '@/lib/physical/physical-checkout-display';
 import type { PhysicalCheckoutMethod } from '@/constants/physical-checkout-options';
 
@@ -251,85 +247,57 @@ export const useCreatePhysicalOrder = () => {
         variantPrice = variantRecord.price_adjustment || 0;
       }
 
-      const customerId = await findOrCreateStoreCustomer({
+      // 4. Créer commande via RPC sécurisée (contourne RLS invité + colonnes invalides)
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      const isGuestCheckout = guestCheckout ?? !user;
+      const affiliateTrackingCookie = getAffiliateTrackingCookie();
+
+      const rpcResult = await createPublicPhysicalOrder({
+        productId,
         storeId,
-        email: customerEmail,
-        name: customerName || customerEmail.split('@')[0],
-        phone: customerPhone,
-        address: `${shippingAddress.street}, ${shippingAddress.city}, ${shippingAddress.postal_code}`,
-        city: shippingAddress.city,
-        country: shippingAddress.country,
+        customerEmail,
+        customerName: customerName || customerEmail.split('@')[0],
+        customerPhone,
+        quantity,
+        variantId,
+        checkoutMethod,
+        shippingAddress,
+        affiliateTrackingCookie,
+        guestCheckout: isGuestCheckout,
       });
 
-      // 6. Calculer le prix total
-      const unitPrice = (product.promotional_price || product.price) + variantPrice;
-      const totalPrice = unitPrice * quantity;
+      const customerId = rpcResult.customer_id;
+      const totalPrice = rpcResult.total_amount;
+      const typedOrder: OrderRow = {
+        id: rpcResult.order_id,
+        store_id: storeId,
+        customer_id: customerId,
+        order_number: rpcResult.order_number,
+        total_amount: totalPrice - (giftCardAmount || 0),
+        currency: rpcResult.currency || product.currency,
+        status: isCashOnDelivery ? 'confirmed' : 'pending',
+        payment_status: isCashOnDelivery ? 'cod_pending' : 'pending',
+        created_at: new Date().toISOString(),
+      };
+      const orderItem = { id: rpcResult.order_item_id };
+      const inventoryId = rpcResult.inventory_id ?? '';
 
-      // Calculer le montant à payer selon le type de paiement
+      // Recalcul montant à payer selon type (RPC retourne le total catalogue)
       let amountToPay = totalPrice;
       let percentagePaid = 0;
       let remainingAmount = 0;
 
       if (paymentType === 'percentage') {
-        // Paiement partiel : calculer l'acompte
         amountToPay = Math.round((totalPrice * percentageRate) / 100);
         percentagePaid = amountToPay;
         remainingAmount = totalPrice - amountToPay;
       } else if (paymentType === 'delivery_secured') {
-        // Paiement sécurisé : montant total mais retenu en escrow
         amountToPay = totalPrice;
       }
-      // Si 'full', amountToPay = totalPrice (déjà défini)
 
-      // Appliquer la carte cadeau si applicable
       const finalAmountToPay = Math.max(0, amountToPay - (giftCardAmount || 0));
-
-      // 7. Générer un numéro de commande
-      const orderNumber = await generateOrderNumber();
-
-      // 8. Créer la commande (avec payment_type)
-      // Récupérer le cookie d'affiliation s'il existe
-      const affiliateTrackingCookie = getAffiliateTrackingCookie();
-
-      const unsafeOrdersClient = supabase as unknown as {
-        from: (table: 'orders') => {
-          insert: (values: Record<string, unknown>) => {
-            select: (columns: string) => {
-              single: () => Promise<{ data: Record<string, unknown> | null; error: unknown }>;
-            };
-          };
-        };
-      };
-      const { data: order, error: orderError } = await unsafeOrdersClient
-        .from('orders')
-        .insert({
-          store_id: storeId,
-          customer_id: customerId,
-          customer_email: customerEmail,
-          order_number: orderNumber,
-          total_amount: totalPrice - (giftCardAmount || 0),
-          currency: product.currency,
-          payment_status: isCashOnDelivery ? 'cod_pending' : 'pending',
-          status: isCashOnDelivery ? 'confirmed' : 'pending',
-          delivery_status: 'pending',
-          payment_type: paymentType,
-          percentage_paid: percentagePaid,
-          remaining_amount: remainingAmount,
-          affiliate_tracking_cookie: affiliateTrackingCookie,
-          metadata: {
-            checkout_method: checkoutMethod,
-            guest_checkout: guestCheckout ?? false,
-          },
-        })
-        .select(
-          'id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at'
-        )
-        .single();
-
-      if (orderError || !order) {
-        throw new Error('Erreur lors de la création de la commande');
-      }
-      const typedOrder = order as unknown as OrderRow;
 
       // 8a. Rédimer la carte cadeau si applicable (APRÈS création commande)
       if (giftCardId && giftCardAmount && giftCardAmount > 0) {
@@ -392,70 +360,6 @@ export const useCreatePhysicalOrder = () => {
         });
       });
 
-      // 11. Créer l'order_item avec les références spécialisées
-      const unsafeOrderItemsClient = supabase as unknown as {
-        from: (table: 'order_items') => {
-          insert: (values: Record<string, unknown>) => {
-            select: (columns: string) => {
-              single: () => Promise<{ data: { id: string } | null; error: unknown }>;
-            };
-          };
-          select: (columns: string) => {
-            eq: (
-              column: string,
-              value: string
-            ) => {
-              single: () => Promise<{ data: Record<string, unknown> | null; error: unknown }>;
-            };
-          };
-        };
-      };
-      const { data: orderItem, error: orderItemError } = await unsafeOrderItemsClient
-        .from('order_items')
-        .insert({
-          order_id: typedOrder.id,
-          product_id: productId,
-          product_type: 'physical',
-          physical_product_id: resolvedPhysicalProductId,
-          variant_id: variantId,
-          product_name: product.name,
-          quantity,
-          unit_price: unitPrice,
-          total_price: totalPrice,
-          item_metadata: {
-            variant_price_adjustment: variantPrice,
-            shipping_address: shippingAddress,
-            ...(inventoryLocationId ? { preferred_inventory_id: inventoryLocationId } : {}),
-          },
-        })
-        .select('id')
-        .single();
-
-      if (orderItemError || !orderItem) {
-        throw new Error("Erreur lors de la création de l'élément de commande");
-      }
-
-      try {
-        await reservePhysicalInventoryForOrder(typedOrder.id);
-      } catch (stockErr) {
-        throw stockErr instanceof Error ? stockErr : new Error('Stock insuffisant');
-      }
-
-      const { data: reservedItem } = await unsafeOrderItemsClient
-        .from('order_items')
-        .select('item_metadata')
-        .eq('id', orderItem.id)
-        .single();
-
-      const reservedMeta = ((reservedItem as { item_metadata?: unknown } | null)?.item_metadata ??
-        {}) as Record<string, unknown>;
-      const inventoryId =
-        typeof reservedMeta.inventory_id === 'string' ? reservedMeta.inventory_id : '';
-      const inventoryLocation =
-        typeof reservedMeta.inventory_location === 'string'
-          ? reservedMeta.inventory_location
-          : undefined;
-
       // 10. Créer un secured_payment si paiement escrow
       if (paymentType === 'delivery_secured') {
         await supabase.from('secured_payments').insert({
@@ -472,7 +376,7 @@ export const useCreatePhysicalOrder = () => {
       }
 
       // 11. Paiement en ligne ou confirmation COD
-      if (isCashOnDelivery) {
+      if (isCashOnDelivery || rpcResult.cash_on_delivery) {
         return {
           orderId: typedOrder.id,
           orderItemId: orderItem.id,
@@ -507,7 +411,6 @@ export const useCreatePhysicalOrder = () => {
           physical_product_id: resolvedPhysicalProductId,
           variant_id: variantId,
           inventory_id: inventoryId || undefined,
-          inventory_location: inventoryLocation,
           quantity,
           order_item_id: orderItem.id,
           shipping_address: shippingAddress,
@@ -516,7 +419,7 @@ export const useCreatePhysicalOrder = () => {
           total_price: totalPrice,
           amount_paid: amountToPay,
           remaining_amount: remainingAmount,
-          ...(guestCheckout ? { guest_checkout: true } : {}),
+          ...(isGuestCheckout ? { guest_checkout: true } : {}),
         },
       });
 

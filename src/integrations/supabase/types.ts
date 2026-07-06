@@ -45248,6 +45248,22 @@ export type Database = {
           name: string;
         }[];
       };
+      create_public_physical_order: {
+        Args: {
+          p_affiliate_tracking_cookie?: string | null;
+          p_checkout_method?: string | null;
+          p_customer_email: string;
+          p_customer_name: string;
+          p_customer_phone?: string | null;
+          p_guest_checkout?: boolean;
+          p_product_id: string;
+          p_quantity?: number;
+          p_shipping_address?: Json;
+          p_store_id: string;
+          p_variant_id?: string | null;
+        };
+        Returns: Json;
+      };
       create_auction_winner_order: {
         Args: { p_auction_id: string };
         Returns: string;

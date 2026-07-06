@@ -83,6 +83,7 @@ export function PhysicalQuickOrderDialog({
         quantity: product.quantity ?? 1,
         variantId: product.variantId,
         checkoutMethod: checkout.checkout_method as PhysicalCheckoutMethod,
+        guestCheckout: !user,
         shippingAddress: {
           street: street.trim(),
           city: city.trim(),
