@@ -149,6 +149,45 @@ async function probeFedex(): Promise<ProbeResult> {
   };
 }
 
+async function probeResend(): Promise<ProbeResult> {
+  const apiKey = Deno.env.get('RESEND_API_KEY');
+  const start = Date.now();
+
+  if (!apiKey) {
+    return {
+      service_key: 'resend',
+      service_label: 'Email (Resend)',
+      status: 'degraded',
+      latency_ms: Date.now() - start,
+      message: 'RESEND_API_KEY non configurée',
+    };
+  }
+
+  try {
+    const res = await fetch('https://api.resend.com/domains', {
+      headers: { Authorization: `Bearer ${apiKey}` },
+    });
+    const latency = Date.now() - start;
+    const status: ServiceStatus =
+      res.ok && latency < 3000 ? 'operational' : res.ok ? 'degraded' : 'outage';
+    return {
+      service_key: 'resend',
+      service_label: 'Email (Resend)',
+      status,
+      latency_ms: latency,
+      message: res.ok ? null : `HTTP ${res.status}`,
+    };
+  } catch (err) {
+    return {
+      service_key: 'resend',
+      service_label: 'Email (Resend)',
+      status: 'outage',
+      latency_ms: Date.now() - start,
+      message: String(err),
+    };
+  }
+}
+
 async function probeFulfillment(
   supabase: ReturnType<typeof createSupabaseAdmin>
 ): Promise<ProbeResult> {
@@ -212,6 +251,7 @@ serve(async req => {
       probeSite(),
       probeEdgeFunctions(),
       probeFedex(),
+      probeResend(),
       probeFulfillment(supabase),
     ]);
     for (const probe of probes) {

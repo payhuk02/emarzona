@@ -1730,7 +1730,33 @@
     },
     "template": "Template de email",
     "selectTemplate": "Selecionar um template",
-    "noTemplate": "Sem template"
+    "noTemplate": "Sem template",
+    "unsubscribe": {
+      "title": "Gerenciar suas preferências de email",
+      "description": "Cancelar inscrição em emails de marketing ou ajustar suas preferências de notificação.",
+      "emailLabel": "Seu endereço de email *",
+      "emailPlaceholder": "seu@email.com",
+      "typeLabel": "Tipo de cancelamento *",
+      "types": {
+        "marketing": "Apenas emails de marketing",
+        "newsletter": "Apenas newsletters",
+        "transactional": "Emails transacionais opcionais",
+        "all": "Todos os emails opcionais"
+      },
+      "reasonLabel": "Motivo (opcional)",
+      "reasonPlaceholder": "Conte-nos por que está cancelando…",
+      "confirm": "Confirmar cancelamento",
+      "processing": "Processando…",
+      "settingsLink": "Preferências completas da conta",
+      "manageAccount": "Gerenciar todas as minhas preferências",
+      "error": "Falha ao cancelar inscrição",
+      "success": {
+        "title": "Cancelamento confirmado",
+        "description": "Suas preferências foram atualizadas",
+        "all": "Você não receberá mais emails de marketing opcionais.",
+        "type": "Você cancelou a inscrição em emails do tipo {{type}}."
+      }
+    }
   },
   "digitalUpdates": {
     "title": "Gestão de Atualizações",

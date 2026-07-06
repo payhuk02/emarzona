@@ -1,6 +1,6 @@
 /**
  * Edge Function: maintenance nocturne groupee (reduit cold starts vs N fonctions separees).
- * Jobs: orphaned-orders, notification-cleanup
+ * Jobs: orphaned-orders, notification-cleanup, email-maintenance
  */
 
 import 'https://deno.land/x/xhr@0.1.0/mod.ts';
@@ -8,7 +8,7 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
 import { requireCronOrInternalAuth } from '../_shared/edge-auth-utils.ts';
 
-const DEFAULT_JOBS = ['orphaned-orders', 'notification-cleanup'] as const;
+const DEFAULT_JOBS = ['orphaned-orders', 'notification-cleanup', 'email-maintenance'] as const;
 type MaintenanceJob = (typeof DEFAULT_JOBS)[number];
 
 const defaultAllowedOrigin = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
@@ -74,6 +74,12 @@ async function runOrphanedOrders(
   };
 }
 
+async function runEmailMaintenance(supabase: ReturnType<typeof createClient>) {
+  const { data, error } = await supabase.rpc('run_email_maintenance_batch');
+  if (error) throw error;
+  return data ?? { email_maintenance: true };
+}
+
 async function runNotificationCleanup(supabase: ReturnType<typeof createClient>) {
   const { error } = await supabase.rpc('cleanup_notifications_enhanced');
   if (error) throw error;
@@ -115,6 +121,8 @@ serve(async req => {
           results[job] = await runOrphanedOrders(supabase, hoursThreshold);
         } else if (job === 'notification-cleanup') {
           results[job] = await runNotificationCleanup(supabase);
+        } else if (job === 'email-maintenance') {
+          results[job] = await runEmailMaintenance(supabase);
         }
       } catch (error) {
         results[job] = {

@@ -1619,6 +1619,35 @@
         "blockInserted": "Block eingefügt",
         "blockInsertedDescription": "Der Block wurde in Ihre Vorlage eingefügt."
       }
+    },
+    "template": "E-Mail-Vorlage",
+    "selectTemplate": "Vorlage auswählen",
+    "noTemplate": "Keine Vorlage",
+    "unsubscribe": {
+      "title": "E-Mail-Einstellungen verwalten",
+      "description": "Abmelden von Marketing-E-Mails oder Anpassen Ihrer Benachrichtigungseinstellungen.",
+      "emailLabel": "Ihre E-Mail-Adresse *",
+      "emailPlaceholder": "ihre@email.de",
+      "typeLabel": "Abmeldetyp *",
+      "types": {
+        "marketing": "Nur Marketing-E-Mails",
+        "newsletter": "Nur Newsletter",
+        "transactional": "Optionale Transaktions-E-Mails",
+        "all": "Alle optionalen E-Mails"
+      },
+      "reasonLabel": "Grund (optional)",
+      "reasonPlaceholder": "Teilen Sie uns mit, warum Sie sich abmelden…",
+      "confirm": "Abmeldung bestätigen",
+      "processing": "Wird verarbeitet…",
+      "settingsLink": "Vollständige Kontoeinstellungen",
+      "manageAccount": "Alle meine Einstellungen verwalten",
+      "error": "Abmeldung fehlgeschlagen",
+      "success": {
+        "title": "Abmeldung bestätigt",
+        "description": "Ihre Einstellungen wurden aktualisiert",
+        "all": "Sie erhalten keine optionalen Marketing-E-Mails mehr.",
+        "type": "Sie wurden von {{type}}-E-Mails abgemeldet."
+      }
     }
   },
   "digitalUpdates": {

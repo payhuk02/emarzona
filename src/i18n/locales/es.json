@@ -1620,7 +1620,33 @@
     },
     "template": "Plantilla de email",
     "selectTemplate": "Seleccionar una plantilla",
-    "noTemplate": "Sin plantilla"
+    "noTemplate": "Sin plantilla",
+    "unsubscribe": {
+      "title": "Gestionar tus preferencias de email",
+      "description": "Darse de baja de los emails de marketing o ajustar tus preferencias de notificación.",
+      "emailLabel": "Tu dirección de email *",
+      "emailPlaceholder": "tu@email.com",
+      "typeLabel": "Tipo de baja *",
+      "types": {
+        "marketing": "Solo emails de marketing",
+        "newsletter": "Solo newsletters",
+        "transactional": "Emails transaccionales opcionales",
+        "all": "Todos los emails opcionales"
+      },
+      "reasonLabel": "Motivo (opcional)",
+      "reasonPlaceholder": "Cuéntanos por qué te das de baja…",
+      "confirm": "Confirmar baja",
+      "processing": "Procesando…",
+      "settingsLink": "Preferencias completas de la cuenta",
+      "manageAccount": "Gestionar todas mis preferencias",
+      "error": "Error al darse de baja",
+      "success": {
+        "title": "Baja confirmada",
+        "description": "Tus preferencias han sido actualizadas",
+        "all": "Ya no recibirás emails de marketing opcionales.",
+        "type": "Te has dado de baja de los emails de tipo {{type}}."
+      }
+    }
   },
   "digitalUpdates": {
     "title": "Gestión de Actualizaciones",

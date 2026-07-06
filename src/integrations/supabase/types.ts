@@ -15106,6 +15106,66 @@ export type Database = {
         };
         Relationships: [];
       };
+      email_logs_archive: {
+        Row: {
+          archived_at: string;
+          campaign_id: string | null;
+          clicked_at: string | null;
+          created_at: string | null;
+          error_message: string | null;
+          id: string;
+          metadata: Json | null;
+          opened_at: string | null;
+          provider_message_id: string | null;
+          sendgrid_message_id: string | null;
+          sequence_id: string | null;
+          status: string | null;
+          subject: string;
+          template_id: string | null;
+          to_email: string;
+          updated_at: string | null;
+          user_id: string | null;
+        };
+        Insert: {
+          archived_at?: string;
+          campaign_id?: string | null;
+          clicked_at?: string | null;
+          created_at?: string | null;
+          error_message?: string | null;
+          id: string;
+          metadata?: Json | null;
+          opened_at?: string | null;
+          provider_message_id?: string | null;
+          sendgrid_message_id?: string | null;
+          sequence_id?: string | null;
+          status?: string | null;
+          subject: string;
+          template_id?: string | null;
+          to_email: string;
+          updated_at?: string | null;
+          user_id?: string | null;
+        };
+        Update: {
+          archived_at?: string;
+          campaign_id?: string | null;
+          clicked_at?: string | null;
+          created_at?: string | null;
+          error_message?: string | null;
+          id?: string;
+          metadata?: Json | null;
+          opened_at?: string | null;
+          provider_message_id?: string | null;
+          sendgrid_message_id?: string | null;
+          sequence_id?: string | null;
+          status?: string | null;
+          subject?: string;
+          template_id?: string | null;
+          to_email?: string;
+          updated_at?: string | null;
+          user_id?: string | null;
+        };
+        Relationships: [];
+      };
       email_webhook_events: {
         Row: {
           dedup_key: string;
@@ -45168,6 +45228,23 @@ export type Database = {
         };
       };
       cleanup_expired_idempotency_keys: { Args: never; Returns: number };
+      cleanup_email_logs: {
+        Args: {
+          p_batch_size?: number;
+          p_cold_retention_days?: number;
+          p_warm_retention_days?: number;
+        };
+        Returns: {
+          archived_cold: number;
+          archived_warm: number;
+          deleted_cold: number;
+          deleted_warm: number;
+        }[];
+      };
+      cleanup_email_webhook_events: {
+        Args: { p_batch_size?: number; p_retention_days?: number };
+        Returns: number;
+      };
       cleanup_expired_sessions: { Args: never; Returns: number };
       cleanup_expired_tags: {
         Args: never;
@@ -48118,6 +48195,15 @@ export type Database = {
             Args: { p_order_id: string; p_refund_ratio?: number };
             Returns: undefined;
           };
+      run_email_maintenance_batch: {
+        Args: {
+          p_batch_size?: number;
+          p_cold_retention_days?: number;
+          p_warm_retention_days?: number;
+          p_webhook_retention_days?: number;
+        };
+        Returns: Json;
+      };
       run_physical_subscription_billing_sql_phase: {
         Args: never;
         Returns: Json;
