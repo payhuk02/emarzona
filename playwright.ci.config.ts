@@ -26,6 +26,8 @@ export default defineConfig({
     '**/enterprise-audit-export.spec.ts',
     '**/enterprise-compliance-moon6.spec.ts',
     '**/platform-routes-smoke.spec.ts',
+    '**/email-unsubscribe.spec.ts',
+    '**/email-phase0-hardening.spec.ts',
   ],
   fullyParallel: true,
   forbidOnly: !!process.env.CI,

@@ -15106,6 +15106,27 @@ export type Database = {
         };
         Relationships: [];
       };
+      email_webhook_events: {
+        Row: {
+          dedup_key: string;
+          event_type: string;
+          processed_at: string;
+          provider_message_id: string | null;
+        };
+        Insert: {
+          dedup_key: string;
+          event_type: string;
+          processed_at?: string;
+          provider_message_id?: string | null;
+        };
+        Update: {
+          dedup_key?: string;
+          event_type?: string;
+          processed_at?: string;
+          provider_message_id?: string | null;
+        };
+        Relationships: [];
+      };
       email_unsubscribes: {
         Row: {
           campaign_id: string | null;
@@ -45116,6 +45137,14 @@ export type Database = {
       };
       check_weekly_commission_reports_job: { Args: never; Returns: undefined };
       check_weekly_digests_job: { Args: never; Returns: undefined };
+      claim_email_webhook_event: {
+        Args: {
+          p_dedup_key: string;
+          p_event_type: string;
+          p_provider_message_id?: string | null;
+        };
+        Returns: boolean;
+      };
       claim_google_indexing_batch: {
         Args: { p_limit?: number };
         Returns: {

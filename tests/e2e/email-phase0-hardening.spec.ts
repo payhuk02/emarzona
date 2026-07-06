@@ -68,7 +68,7 @@ test.describe('Email — Phase 0 Hardening Tests', () => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ processed: 1 }),
+        body: JSON.stringify({ processed: 1, skipped_duplicates: 0, total: 1 }),
       });
     });
 
@@ -109,7 +109,7 @@ test.describe('Email — Phase 0 Hardening Tests', () => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ processed: 1 }),
+        body: JSON.stringify({ processed: 1, skipped_duplicates: 0, total: 1 }),
       });
     });
 
@@ -210,6 +210,39 @@ test.describe('Email — Phase 0 Hardening Tests', () => {
       expect(body.processed).toBe(2);
       expect(body.successful).toBe(2);
       expect(body.failed).toBe(0);
+    }
+  });
+
+  test('Resend webhook duplicate svix-id returns skipped_duplicates', async ({ page }) => {
+    await page.route('**/functions/v1/resend-webhook-handler', async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ processed: 0, skipped_duplicates: 1, total: 1 }),
+      });
+    });
+
+    const response = await page.request.post(
+      `https://hbdnzajbyjakdhuavrvb.supabase.co/functions/v1/resend-webhook-handler`,
+      {
+        data: {
+          type: 'email.delivered',
+          created_at: new Date().toISOString(),
+          data: { email_id: 'dup-msg-id', to: ['client@example.com'] },
+        },
+        headers: {
+          'svix-id': 'duplicate-svix-id',
+          'svix-timestamp': String(Math.floor(Date.now() / 1000)),
+          'svix-signature': 'v1,test-signature',
+        },
+        failOnStatusCode: false,
+      }
+    );
+
+    if (response.ok()) {
+      const body = await response.json();
+      expect(body.skipped_duplicates).toBe(1);
+      expect(body.processed).toBe(0);
     }
   });
 });

@@ -33,6 +33,8 @@ const steps = [
       'supabase/functions/_shared/post-order-payment-fulfillment.ts',
       'supabase/functions/trigger-email-workflows/index.ts',
       'supabase/functions/execute-email-workflow/index.ts',
+      'supabase/functions/_shared/resend-webhook-utils.ts',
+      'supabase/functions/resend-webhook-handler/index.ts',
     ],
   },
   {
@@ -56,6 +58,7 @@ const steps = [
       'supabase/functions/deno.json',
       'supabase/functions/gdpr-export/index.test.ts',
       'supabase/functions/stripe-tax-calculate/index.test.ts',
+      'supabase/functions/_shared/__tests__/resend-webhook-utils.test.ts',
     ],
   },
 ];

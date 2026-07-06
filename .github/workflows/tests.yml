@@ -200,6 +200,8 @@ jobs:
           deno check --config supabase/functions/deno.json supabase/functions/_shared/post-order-payment-fulfillment.ts
           deno check --config supabase/functions/deno.json supabase/functions/trigger-email-workflows/index.ts
           deno check --config supabase/functions/deno.json supabase/functions/execute-email-workflow/index.ts
+          deno check --config supabase/functions/deno.json supabase/functions/_shared/resend-webhook-utils.ts
+          deno check --config supabase/functions/deno.json supabase/functions/resend-webhook-handler/index.ts
 
       - name: Type check Payment V2 / Stripe Tax Edge Functions
         run: |
@@ -211,4 +213,5 @@ jobs:
         run: |
           deno test --allow-env --allow-net --config supabase/functions/deno.json supabase/functions/gdpr-export/index.test.ts
           deno test --allow-env --config supabase/functions/deno.json supabase/functions/stripe-tax-calculate/index.test.ts
+          deno test --allow-env --config supabase/functions/deno.json supabase/functions/_shared/__tests__/resend-webhook-utils.test.ts
 
