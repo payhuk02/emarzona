@@ -133,7 +133,12 @@ test.describe('Email — Phase 0 Hardening Tests', () => {
   });
 
   test('send-email returns 429 on rate limit', async ({ page }) => {
+    // Naviguer vers une page légère pour avoir un contexte navigateur actif
+    // waitUntil: 'domcontentloaded' évite d'attendre le chargement complet du SPA
+    await page.goto('/unsubscribe?email=test@ratelimit.test', { waitUntil: 'domcontentloaded' });
+
     // Mock le send-email endpoint pour simuler un rate limit
+    // page.route intercepte les requêtes faites depuis le contexte de la page (fetch/XHR)
     await page.route('**/functions/v1/send-email', async route => {
       await route.fulfill({
         status: 429,
@@ -145,24 +150,27 @@ test.describe('Email — Phase 0 Hardening Tests', () => {
       });
     });
 
-    const response = await page.request.post(
-      `https://hbdnzajbyjakdhuavrvb.supabase.co/functions/v1/send-email`,
-      {
-        data: {
+    // Utiliser page.evaluate pour exécuter le fetch dans le contexte navigateur
+    // (page.request.post() contourne page.route() — c'est un appel HTTP direct)
+    const result = await page.evaluate(async () => {
+      const res = await fetch('https://hbdnzajbyjakdhuavrvb.supabase.co/functions/v1/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer e2e-mock-access-token',
+        },
+        body: JSON.stringify({
           to: 'test@example.com',
           subject: 'Rate limit test',
           html: '<p>Test</p>',
-        },
-        headers: {
-          Authorization: 'Bearer e2e-mock-access-token',
-        },
-        failOnStatusCode: false,
-      }
-    );
+        }),
+      });
+      const body = await res.json();
+      return { status: res.status, body };
+    });
 
-    expect(response.status()).toBe(429);
-    const body = await response.json();
-    expect(body.retryAfterSeconds).toBe(60);
+    expect(result.status).toBe(429);
+    expect(result.body.retryAfterSeconds).toBe(60);
   });
 
   test('scheduled campaign mock returns correct processing result', async ({ page }) => {
