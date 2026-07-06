@@ -19,24 +19,31 @@ export class CourseOrderStrategy implements OrderStrategy {
       quantity = 1,
       productRecord,
       options,
+      returnUrl,
+      cancelUrl,
+      guestCheckout,
     } = context;
 
     let product = productRecord;
     if (!product) {
-      const { data, error } = await supabase.from('products').select(PRODUCT_FIELDS).eq('id', productId).single();
+      const { data, error } = await supabase
+        .from('products')
+        .select(PRODUCT_FIELDS)
+        .eq('id', productId)
+        .single();
       if (error || !data) throw new Error('Produit non trouvé');
       product = data;
     }
 
-    const {
-      courseId,
-      giftCardId,
-      giftCardAmount = 0,
-    } = options || {};
+    const { courseId, giftCardId, giftCardAmount = 0 } = options || {};
 
     let resolvedCourseId = courseId;
     if (!resolvedCourseId) {
-      const { data } = await supabase.from('courses').select('id').eq('product_id', productId).maybeSingle();
+      const { data } = await supabase
+        .from('courses')
+        .select('id')
+        .eq('product_id', productId)
+        .maybeSingle();
       resolvedCourseId = data?.id;
     }
 
@@ -54,11 +61,16 @@ export class CourseOrderStrategy implements OrderStrategy {
       };
     }
 
-    const paymentOptions = (product.payment_options as Record<string, unknown>) || { payment_type: 'full', percentage_rate: 30 };
+    const paymentOptions = (product.payment_options as Record<string, unknown>) || {
+      payment_type: 'full',
+      percentage_rate: 30,
+    };
     const paymentType = paymentOptions.payment_type || 'full';
     const percentageRate = paymentOptions.percentage_rate || 30;
 
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (user) {
       const { data: existingEnrollment } = await supabase
         .from('course_enrollments')
@@ -85,7 +97,8 @@ export class CourseOrderStrategy implements OrderStrategy {
         }
       );
 
-      if (provisionError) throw new Error(provisionError.message || "Impossible de finaliser l'achat invité.");
+      if (provisionError)
+        throw new Error(provisionError.message || "Impossible de finaliser l'achat invité.");
       if (provisionData?.error) throw new Error(provisionData.error);
       _finalUserId = provisionData?.user_id;
     }
@@ -121,6 +134,7 @@ export class CourseOrderStrategy implements OrderStrategy {
       .insert({
         store_id: storeId,
         customer_id: customerId,
+        customer_email: customerEmail,
         order_number: orderNumber,
         total_amount: totalPrice - (giftCardAmount || 0),
         currency: product.currency,
@@ -134,9 +148,12 @@ export class CourseOrderStrategy implements OrderStrategy {
           course_id: resolvedCourseId,
           course_name: product.name,
           auto_enroll: true,
+          ...(guestCheckout ? { guest_checkout: true } : {}),
         },
       })
-      .select('id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at')
+      .select(
+        'id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at'
+      )
       .single();
 
     if (orderError || !order) {
@@ -159,7 +176,9 @@ export class CourseOrderStrategy implements OrderStrategy {
 
     if (orderItemError || !orderItem) {
       await supabase.from('orders').delete().eq('id', order.id);
-      throw new Error(`Erreur lors de la création de l'élément de commande: ${orderItemError.message}`);
+      throw new Error(
+        `Erreur lors de la création de l'élément de commande: ${orderItemError.message}`
+      );
     }
 
     if (giftCardId && giftCardAmount && giftCardAmount > 0) {
@@ -169,7 +188,9 @@ export class CourseOrderStrategy implements OrderStrategy {
           p_order_id: order.id,
           p_amount: giftCardAmount,
         });
-      } catch (_giftCardErr) { /* ignore */ }
+      } catch (_giftCardErr) {
+        /* ignore */
+      }
     }
 
     import('@/lib/webhooks').then(({ triggerOrderCreatedWebhook }) => {
@@ -193,11 +214,14 @@ export class CourseOrderStrategy implements OrderStrategy {
       customerEmail,
       customerName: customerName || customerEmail.split('@')[0],
       customerPhone,
+      returnUrl,
+      cancelUrl,
       metadata: {
         product_type: 'course',
         order_item_id: orderItem.id,
         course_id: resolvedCourseId,
         auto_enroll: true,
+        ...(guestCheckout ? { guest_checkout: true } : {}),
       },
     });
 

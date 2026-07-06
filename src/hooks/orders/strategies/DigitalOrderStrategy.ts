@@ -29,12 +29,19 @@ export class DigitalOrderStrategy implements OrderStrategy {
       customerPhone,
       productRecord,
       options,
+      returnUrl,
+      cancelUrl,
+      guestCheckout,
     } = context;
 
     // Resolve digital product details if productRecord was missing
     let product = productRecord;
     if (!product) {
-      const { data, error } = await supabase.from('products').select(PRODUCT_FIELDS).eq('id', productId).single();
+      const { data, error } = await supabase
+        .from('products')
+        .select(PRODUCT_FIELDS)
+        .eq('id', productId)
+        .single();
       if (error || !data) throw new Error('Produit non trouvé');
       product = data;
     }
@@ -54,7 +61,11 @@ export class DigitalOrderStrategy implements OrderStrategy {
 
     let resolvedDigitalProductId = digitalProductId;
     if (!resolvedDigitalProductId) {
-      const { data } = await supabase.from('digital_products').select('id').eq('product_id', productId).maybeSingle();
+      const { data } = await supabase
+        .from('digital_products')
+        .select('id')
+        .eq('product_id', productId)
+        .maybeSingle();
       resolvedDigitalProductId = data?.id;
     }
 
@@ -71,7 +82,9 @@ export class DigitalOrderStrategy implements OrderStrategy {
 
     let licenseId: string | undefined;
     if (generateLicense) {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       if (user?.id) {
         const expiresAt = licenseExpiryDays
@@ -117,10 +130,13 @@ export class DigitalOrderStrategy implements OrderStrategy {
 
         if (functionError) {
           logger.error('Guest checkout provisioning error', { error: functionError });
-          throw new Error(functionError.message || "Impossible de générer la licence pour l'invité");
+          throw new Error(
+            functionError.message || "Impossible de générer la licence pour l'invité"
+          );
         }
         if (data?.error) throw new Error(data.error);
-        if (!data?.success || !data?.license_id) throw new Error("Erreur inattendue lors de l'auto-provisioning");
+        if (!data?.success || !data?.license_id)
+          throw new Error("Erreur inattendue lors de l'auto-provisioning");
         licenseId = data.license_id;
       }
     }
@@ -151,14 +167,18 @@ export class DigitalOrderStrategy implements OrderStrategy {
       .insert({
         store_id: storeId,
         customer_id: customerId,
+        customer_email: customerEmail,
         order_number: orderNumber,
         total_amount: finalAmount,
         currency: product.currency,
         payment_status: 'pending',
         status: 'pending',
         affiliate_tracking_cookie: affiliateTrackingCookie,
+        metadata: guestCheckout ? { guest_checkout: true } : undefined,
       })
-      .select('id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at')
+      .select(
+        'id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at'
+      )
       .single();
 
     if (orderError || !order) {
@@ -179,7 +199,9 @@ export class DigitalOrderStrategy implements OrderStrategy {
 
     try {
       await supabase.rpc('create_invoice_from_order', { p_order_id: order.id });
-    } catch (_invoiceErr) { /* ignore */ }
+    } catch (_invoiceErr) {
+      /* ignore */
+    }
 
     import('@/lib/webhooks').then(({ triggerOrderCreatedWebhook }) => {
       triggerOrderCreatedWebhook(order.id, order).catch(() => {});
@@ -235,11 +257,14 @@ export class DigitalOrderStrategy implements OrderStrategy {
       customerEmail,
       customerName: customerName || customerEmail.split('@')[0],
       customerPhone,
+      returnUrl,
+      cancelUrl,
       metadata: {
         product_type: 'digital',
         digital_product_id: resolvedDigitalProductId,
         license_id: licenseId,
         order_item_id: orderItem.id,
+        ...(guestCheckout ? { guest_checkout: true } : {}),
       },
     });
 

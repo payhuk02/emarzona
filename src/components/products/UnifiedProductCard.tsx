@@ -946,12 +946,11 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
                 e.preventDefault();
                 e.stopPropagation();
                 if (product.type === 'physical' && product.stock === 0) return;
-                handleAction('buy', e);
                 if (product.type === 'physical') {
                   setQuickOrderOpen(true);
-                } else {
-                  void marketplaceBuy.handleBuyClick();
+                  return;
                 }
+                void marketplaceBuy.handleBuyClick();
               }}
             />
           )}

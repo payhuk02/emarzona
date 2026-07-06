@@ -1,10 +1,7 @@
 import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { isSupportedCurrency, type Currency } from '@/lib/currency-converter';
-import { initiateMarketplaceDirectBuy } from '@/lib/marketplace/initiate-direct-buy';
 import { useToast } from '@/hooks/use-toast';
-import { safeRedirect } from '@/lib/url-validator';
 import { getMarketplaceProductCTA } from '@/lib/marketplace-product-cta';
 import type { GuestCustomerInfo } from '@/components/checkout/GuestPurchaseDialog';
 import type { PhysicalProductPaymentOptions } from '@/types/physical-product';
@@ -27,8 +24,8 @@ type UseMarketplaceGuestBuyOptions = {
 
 export function useMarketplaceGuestBuy({
   product,
-  price,
-  storeSlug,
+  price: _price,
+  storeSlug: _storeSlug,
 }: UseMarketplaceGuestBuyOptions) {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -37,10 +34,6 @@ export function useMarketplaceGuestBuy({
   const [physicalOpen, setPhysicalOpen] = useState(false);
 
   const cta = getMarketplaceProductCTA(product.product_type, product.payment_options);
-
-  const currency = (
-    isSupportedCurrency(product.currency ?? '') ? product.currency : 'XOF'
-  ) as Currency;
 
   const proceedWithCustomer = useCallback(
     async (customer: GuestCustomerInfo) => {
@@ -78,32 +71,6 @@ export function useMarketplaceGuestBuy({
         if (customer.phone) checkoutParams.set('guestPhone', customer.phone);
 
         if (cta.action === 'checkout') {
-          const result = await initiateMarketplaceDirectBuy({
-            storeId: product.store_id,
-            productId: product.id,
-            amount: price,
-            currency,
-            description: `Achat de ${product.name}`,
-            customerEmail: customer.email,
-            customerName: customer.fullName,
-            customerPhone: customer.phone,
-            productName: product.name,
-            storeSlug,
-            productType: product.product_type,
-            guestCheckout: true,
-          });
-
-          if (result.success && result.checkout_url) {
-            safeRedirect(result.checkout_url, () => {
-              toast({
-                title: 'Erreur',
-                description: 'URL de paiement invalide.',
-                variant: 'destructive',
-              });
-            });
-            return;
-          }
-
           navigate(`/checkout?${checkoutParams.toString()}`);
           return;
         }
@@ -118,7 +85,7 @@ export function useMarketplaceGuestBuy({
         setGuestOpen(false);
       }
     },
-    [cta.action, currency, navigate, price, product, storeSlug, toast]
+    [cta.action, navigate, product, toast]
   );
 
   const handleBuyClick = useCallback(async () => {

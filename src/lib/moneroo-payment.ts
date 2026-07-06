@@ -356,7 +356,7 @@ export const initiateMonerooPayment = async (options: PaymentOptions) => {
       customer_name: customerName,
       customer_phone: normalizedPhone,
       return_url:
-        returnUrl || `${window.location.origin}/checkout/success?transaction_id=${transaction.id}`,
+        returnUrl || `${window.location.origin}/payment/success?transaction_id=${transaction.id}`,
       cancel_url:
         cancelUrl || `${window.location.origin}/checkout/cancel?transaction_id=${transaction.id}`,
       metadata: cleanMetadata,

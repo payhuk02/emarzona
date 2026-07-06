@@ -5,12 +5,12 @@
 import { createStripeConnectCheckout } from '../stripe-connect-client';
 import type { OrchestratedPaymentRequest, OrchestratedPaymentResult } from '../types';
 
-function buildUrls() {
+function buildUrls(returnUrl?: string, cancelUrl?: string) {
   const origin =
     typeof window !== 'undefined' ? window.location.origin : 'https://www.emarzona.com';
   return {
-    successUrl: `${origin}/payment/success`,
-    cancelUrl: `${origin}/payment/cancel`,
+    successUrl: returnUrl || `${origin}/payment/success`,
+    cancelUrl: cancelUrl || `${origin}/payment/cancel`,
   };
 }
 
@@ -37,7 +37,7 @@ export async function createStripeConnectPayment(
     };
   }
 
-  const { successUrl, cancelUrl } = buildUrls();
+  const { successUrl, cancelUrl } = buildUrls(request.returnUrl, request.cancelUrl);
 
   const checkoutToken =
     typeof request.metadata?.checkout_token === 'string'

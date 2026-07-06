@@ -19,11 +19,18 @@ export class GenericOrderStrategy implements OrderStrategy {
       quantity = 1,
       productType = 'generic',
       productRecord,
+      returnUrl,
+      cancelUrl,
+      guestCheckout,
     } = context;
 
     let product = productRecord;
     if (!product) {
-      const { data, error } = await supabase.from('products').select(PRODUCT_FIELDS).eq('id', productId).single();
+      const { data, error } = await supabase
+        .from('products')
+        .select(PRODUCT_FIELDS)
+        .eq('id', productId)
+        .single();
       if (error || !data) throw new Error('Produit non trouvé');
       product = data;
     }
@@ -44,6 +51,7 @@ export class GenericOrderStrategy implements OrderStrategy {
       .insert({
         store_id: storeId,
         customer_id: customerId,
+        customer_email: customerEmail,
         order_number: orderNumber,
         total_amount: totalPrice,
         currency: product.currency,
@@ -54,9 +62,12 @@ export class GenericOrderStrategy implements OrderStrategy {
           product_id: productId,
           product_type: productType,
           flow: 'generic_product_checkout',
+          ...(guestCheckout ? { guest_checkout: true } : {}),
         },
       })
-      .select('id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at')
+      .select(
+        'id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at'
+      )
       .single();
 
     if (orderError || !order) {
@@ -111,9 +122,12 @@ export class GenericOrderStrategy implements OrderStrategy {
       customerEmail,
       customerName: customerName || customerEmail.split('@')[0],
       customerPhone,
+      returnUrl,
+      cancelUrl,
       metadata: {
         product_type: productType,
         order_item_id: orderItem.id,
+        ...(guestCheckout ? { guest_checkout: true } : {}),
       },
     });
 

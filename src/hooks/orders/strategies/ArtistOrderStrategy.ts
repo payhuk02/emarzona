@@ -23,13 +23,20 @@ export class ArtistOrderStrategy implements OrderStrategy {
       quantity = 1,
       productRecord,
       options,
+      returnUrl,
+      cancelUrl,
+      guestCheckout,
     } = context;
 
     let product = productRecord;
     if (!product) {
       product = await retryWithExponentialBackoff(
         async () => {
-          const { data, error } = await supabase.from('products').select(PRODUCT_FIELDS).eq('id', productId).single();
+          const { data, error } = await supabase
+            .from('products')
+            .select(PRODUCT_FIELDS)
+            .eq('id', productId)
+            .single();
           if (error) throw error;
           if (!data) throw new Error('Produit non trouvé');
           return data;
@@ -48,16 +55,15 @@ export class ArtistOrderStrategy implements OrderStrategy {
       );
     }
 
-    const {
-      artistProductId,
-      shippingAddress,
-      giftCardId,
-      giftCardAmount = 0,
-    } = options || {};
+    const { artistProductId, shippingAddress, giftCardId, giftCardAmount = 0 } = options || {};
 
     let resolvedArtistProductId = artistProductId;
     if (!resolvedArtistProductId) {
-      const { data } = await supabase.from('artist_products').select('id').eq('product_id', productId).maybeSingle();
+      const { data } = await supabase
+        .from('artist_products')
+        .select('id')
+        .eq('product_id', productId)
+        .maybeSingle();
       resolvedArtistProductId = data?.id;
     }
 
@@ -74,7 +80,10 @@ export class ArtistOrderStrategy implements OrderStrategy {
       };
     }
 
-    const paymentOptions = (product.payment_options as Record<string, unknown>) || { payment_type: 'full', percentage_rate: 30 };
+    const paymentOptions = (product.payment_options as Record<string, unknown>) || {
+      payment_type: 'full',
+      percentage_rate: 30,
+    };
     const paymentType = paymentOptions.payment_type || 'full';
     const percentageRate = paymentOptions.percentage_rate || 30;
 
@@ -109,7 +118,8 @@ export class ArtistOrderStrategy implements OrderStrategy {
         }
       );
 
-      if (provisionError) throw new Error(provisionError.message || "Impossible de finaliser l'achat invité.");
+      if (provisionError)
+        throw new Error(provisionError.message || "Impossible de finaliser l'achat invité.");
       if (provisionData?.error) throw new Error(provisionData.error);
       finalUserId = provisionData?.user_id;
     }
@@ -149,6 +159,7 @@ export class ArtistOrderStrategy implements OrderStrategy {
       .insert({
         store_id: storeId,
         customer_id: customerId,
+        customer_email: customerEmail,
         order_number: orderNumber,
         total_amount: totalPrice - (giftCardAmount || 0),
         currency: product.currency,
@@ -170,9 +181,12 @@ export class ArtistOrderStrategy implements OrderStrategy {
           shipping_fragile: artistProduct.shipping_fragile,
           shipping_insurance_required: artistProduct.shipping_insurance_required,
           shipping_insurance_amount: artistProduct.shipping_insurance_amount,
+          ...(guestCheckout ? { guest_checkout: true } : {}),
         },
       })
-      .select('id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at')
+      .select(
+        'id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at'
+      )
       .single();
 
     if (orderError || !order) {
@@ -209,7 +223,9 @@ export class ArtistOrderStrategy implements OrderStrategy {
           p_order_id: order.id,
           p_amount: giftCardAmount,
         });
-      } catch (_giftCardErr) { /* non bloquant */ }
+      } catch (_giftCardErr) {
+        /* non bloquant */
+      }
     }
 
     const { isSupportedCurrency } = await import('@/lib/currency-converter');
@@ -231,12 +247,15 @@ export class ArtistOrderStrategy implements OrderStrategy {
           customerEmail,
           customerName: customerName || customerEmail.split('@')[0],
           customerPhone,
+          returnUrl,
+          cancelUrl,
           metadata: {
             product_type: 'artist',
             order_item_id: orderItem.id,
             artist_product_id: resolvedArtistProductId,
             shipping_fragile: artistProduct.shipping_fragile,
             shipping_insurance_required: artistProduct.shipping_insurance_required,
+            ...(guestCheckout ? { guest_checkout: true } : {}),
           },
         });
       },
@@ -246,7 +265,13 @@ export class ArtistOrderStrategy implements OrderStrategy {
         shouldRetry: error => {
           if (error instanceof Error) {
             const msg = error.message.toLowerCase();
-            return msg.includes('network') || msg.includes('timeout') || msg.includes('fetch') || msg.includes('503') || msg.includes('502');
+            return (
+              msg.includes('network') ||
+              msg.includes('timeout') ||
+              msg.includes('fetch') ||
+              msg.includes('503') ||
+              msg.includes('502')
+            );
           }
           return false;
         },

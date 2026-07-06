@@ -14,7 +14,7 @@ import type {
   CheckoutUser,
   CheckoutVariant,
 } from '@/pages/checkout/buy-now/checkout-buy-now-types';
-import { ShoppingBag, CreditCard, Loader2, Shield, Tag } from 'lucide-react';
+import { ShoppingBag, CreditCard, Loader2, Shield, Tag, Truck } from 'lucide-react';
 
 export interface BuyNowOrderSummaryProps {
   product: CheckoutProduct;
@@ -27,6 +27,8 @@ export interface BuyNowOrderSummaryProps {
   productId: string | null;
   user: CheckoutUser;
   submitting: boolean;
+  submitButtonLabel?: string;
+  isCashOnDelivery?: boolean;
   onCouponApply: (couponId: string, discountAmount: number, code: string) => void;
   onCouponRemove: () => void;
 }
@@ -42,6 +44,8 @@ export default function BuyNowOrderSummary({
   productId,
   user,
   submitting,
+  submitButtonLabel = 'Procéder au paiement',
+  isCashOnDelivery = false,
   onCouponApply,
   onCouponRemove,
 }: BuyNowOrderSummaryProps) {
@@ -160,8 +164,20 @@ export default function BuyNowOrderSummary({
 
         <div className="pt-4 border-t">
           <div className="flex items-start gap-2 text-xs text-muted-foreground">
-            <Shield className="h-4 w-4 mt-0.5 flex-shrink-0" />
-            <p>Paiement sécurisé par Moneroo. Vos informations sont protégées.</p>
+            {isCashOnDelivery ? (
+              <>
+                <Truck className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                <p>
+                  Paiement à la livraison. Aucun paiement en ligne requis — vous réglez à la
+                  réception.
+                </p>
+              </>
+            ) : (
+              <>
+                <Shield className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                <p>Paiement sécurisé par Moneroo. Vos informations sont protégées.</p>
+              </>
+            )}
           </div>
         </div>
 
@@ -180,8 +196,12 @@ export default function BuyNowOrderSummary({
               </>
             ) : (
               <>
-                <CreditCard className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                <span className="text-sm sm:text-base">Procéder au paiement</span>
+                {isCashOnDelivery ? (
+                  <Truck className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                ) : (
+                  <CreditCard className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                )}
+                <span className="text-sm sm:text-base">{submitButtonLabel}</span>
               </>
             )}
           </Button>

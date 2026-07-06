@@ -64,6 +64,8 @@ import type { Store } from '@/hooks/useStore';
 import { generateStoreUrl, generateProductUrl } from '@/lib/store-utils';
 import { toUserErrorMessage } from '@/lib/user-error-message';
 import { sanitizeProductDescription } from '@/lib/html-sanitizer';
+import { PhysicalQuickOrderDialog } from '@/components/physical/PhysicalQuickOrderDialog';
+import { parsePhysicalCheckoutOptions } from '@/lib/physical/physical-checkout-display';
 
 const STORES_PUBLIC_FIELDS =
   'id, name, slug, subdomain, description, default_currency, custom_domain, domain_status, logo_url, banner_url, facebook_url, instagram_url, twitter_url, linkedin_url, created_at, updated_at';
@@ -145,6 +147,7 @@ const ProductDetails = () => {
   const [selectedVariantPrice, setSelectedVariantPrice] = useState<number | null>(null);
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
   const [isPurchasing, setIsPurchasing] = useState(false);
+  const [quickOrderOpen, setQuickOrderOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const { toast } = useToast();
   const { user } = useAuth();
@@ -333,7 +336,18 @@ const ProductDetails = () => {
     return calculateDiscount(product.price, product.promotional_price);
   }, [hasPromo, product]);
 
-  // Handler pour l'achat - redirection vers checkout
+  const physicalCheckout = useMemo(
+    () =>
+      product?.product_type === 'physical'
+        ? parsePhysicalCheckoutOptions(product.payment_options)
+        : null,
+    [product]
+  );
+
+  const physicalBuyLabel = physicalCheckout?.cta_button_label ?? 'Commander';
+  const physicalUnitPrice = selectedVariantPrice ?? displayPriceInfo?.price ?? product?.price ?? 0;
+
+  // Handler pour l'achat — dialog rapide (physique) ou checkout buy-now (autres types)
   const handleBuyNow = useCallback(async () => {
     if (!product || !store) {
       toast({
@@ -341,6 +355,11 @@ const ProductDetails = () => {
         description: 'Produit ou boutique non disponible',
         variant: 'destructive',
       });
+      return;
+    }
+
+    if (product.product_type === 'physical') {
+      setQuickOrderOpen(true);
       return;
     }
 
@@ -359,7 +378,6 @@ const ProductDetails = () => {
     try {
       setIsPurchasing(true);
 
-      // Rediriger vers la page checkout avec les paramètres nécessaires
       const checkoutParams = new URLSearchParams({
         productId: String(product.id).trim(),
         storeId: String(storeId).trim(),
@@ -983,10 +1001,14 @@ const ProductDetails = () => {
                       <>
                         <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 mr-2 shrink-0" />
                         <span className="hidden sm:inline">
-                          {getValue('productDetail.cta.buyNow') || 'Acheter maintenant'}
+                          {product.product_type === 'physical'
+                            ? physicalBuyLabel
+                            : getValue('productDetail.cta.buyNow') || 'Acheter maintenant'}
                         </span>
                         <span className="sm:hidden">
-                          {getValue('productDetail.cta.buyNow') || 'Acheter'}
+                          {product.product_type === 'physical'
+                            ? physicalBuyLabel
+                            : getValue('productDetail.cta.buyNow') || 'Acheter'}
                         </span>
                         {selectedVariantPrice &&
                           selectedVariantPrice !== (displayPriceInfo?.price ?? product.price) && (
@@ -1404,6 +1426,22 @@ const ProductDetails = () => {
           twitter_url={(store as Store & { twitter_url?: string | null }).twitter_url}
           linkedin_url={(store as Store & { linkedin_url?: string | null }).linkedin_url}
         />
+
+        {product.product_type === 'physical' && product.store_id && (
+          <PhysicalQuickOrderDialog
+            open={quickOrderOpen}
+            onOpenChange={setQuickOrderOpen}
+            product={{
+              productId: product.id,
+              storeId: product.store_id,
+              name: product.name,
+              price: physicalUnitPrice,
+              currency: product.currency || 'XOF',
+              variantId: selectedVariantId ?? undefined,
+              payment_options: product.payment_options,
+            }}
+          />
+        )}
       </div>
     </>
   );

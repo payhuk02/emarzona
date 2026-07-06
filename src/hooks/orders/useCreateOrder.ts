@@ -31,6 +31,10 @@ export interface CreateOrderOptions {
   serviceOptions?: Partial<CreateServiceOrderOptions>;
   courseOptions?: Partial<CreateCourseOrderOptions>;
   artistOptions?: Partial<CreateArtistOrderOptions>;
+
+  returnUrl?: string;
+  cancelUrl?: string;
+  guestCheckout?: boolean;
 }
 
 export const useCreateOrder = () => {
@@ -50,6 +54,9 @@ export const useCreateOrder = () => {
         serviceOptions,
         courseOptions,
         artistOptions,
+        returnUrl,
+        cancelUrl,
+        guestCheckout,
       } = options;
 
       const { data: product, error: productError } = await supabase
@@ -66,11 +73,21 @@ export const useCreateOrder = () => {
 
       let typeOptions: Record<string, unknown> | undefined;
       switch (productType) {
-        case 'digital': typeOptions = digitalOptions; break;
-        case 'physical': typeOptions = physicalOptions; break;
-        case 'service': typeOptions = serviceOptions; break;
-        case 'course': typeOptions = courseOptions; break;
-        case 'artist': typeOptions = artistOptions; break;
+        case 'digital':
+          typeOptions = digitalOptions;
+          break;
+        case 'physical':
+          typeOptions = physicalOptions;
+          break;
+        case 'service':
+          typeOptions = serviceOptions;
+          break;
+        case 'course':
+          typeOptions = courseOptions;
+          break;
+        case 'artist':
+          typeOptions = artistOptions;
+          break;
       }
 
       if (productType === 'generic') {
@@ -92,6 +109,9 @@ export const useCreateOrder = () => {
         productType,
         productRecord: product,
         options: typeOptions,
+        returnUrl,
+        cancelUrl,
+        guestCheckout,
       });
     },
 

@@ -25,6 +25,9 @@ export class PhysicalOrderStrategy implements OrderStrategy {
       quantity = 1,
       productRecord: product,
       options,
+      returnUrl,
+      cancelUrl,
+      guestCheckout,
     } = context;
 
     if (!product) {
@@ -45,7 +48,7 @@ export class PhysicalOrderStrategy implements OrderStrategy {
     }
 
     const parsedCheckout = parsePhysicalCheckoutOptions(
-      product.payment_options as any
+      product.payment_options as Parameters<typeof parsePhysicalCheckoutOptions>[0]
     );
     const checkoutMethod = checkoutMethodOverride ?? parsedCheckout.checkout_method;
     const isCashOnDelivery = checkoutMethod === 'cash_on_delivery';
@@ -56,7 +59,7 @@ export class PhysicalOrderStrategy implements OrderStrategy {
       .select('id')
       .eq('product_id', productId)
       .maybeSingle();
-      
+
     const resolvedPhysicalProductId = physicalRow?.id;
 
     if (!resolvedPhysicalProductId) {
@@ -64,7 +67,10 @@ export class PhysicalOrderStrategy implements OrderStrategy {
     }
 
     // Récupérer les options de paiement configurées
-    const paymentOptions = (product.payment_options as Record<string, unknown>) || { payment_type: 'full', percentage_rate: 30 };
+    const paymentOptions = (product.payment_options as Record<string, unknown>) || {
+      payment_type: 'full',
+      percentage_rate: 30,
+    };
     const paymentType = isCashOnDelivery ? 'full' : paymentOptions.payment_type || 'full';
     const percentageRate = paymentOptions.percentage_rate || 30;
 
@@ -141,10 +147,12 @@ export class PhysicalOrderStrategy implements OrderStrategy {
         affiliate_tracking_cookie: affiliateTrackingCookie,
         metadata: {
           checkout_method: checkoutMethod,
-          guest_checkout: true,
+          guest_checkout: guestCheckout ?? true,
         },
       })
-      .select('id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at')
+      .select(
+        'id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at'
+      )
       .single();
 
     if (orderError || !order) {
@@ -154,14 +162,11 @@ export class PhysicalOrderStrategy implements OrderStrategy {
     // 8a. Rédimer la carte cadeau
     if (giftCardId && giftCardAmount && giftCardAmount > 0) {
       try {
-        const { data: redeemResult, error: redeemError } = await supabase.rpc(
-          'redeem_gift_card',
-          {
-            p_gift_card_id: giftCardId,
-            p_order_id: order.id,
-            p_amount: giftCardAmount,
-          }
-        );
+        const { data: redeemResult, error: redeemError } = await supabase.rpc('redeem_gift_card', {
+          p_gift_card_id: giftCardId,
+          p_order_id: order.id,
+          p_amount: giftCardAmount,
+        });
         if (redeemError) {
           logger.error('Error redeeming gift card:', redeemError);
         } else if (redeemResult && redeemResult.length > 0 && !redeemResult[0].success) {
@@ -226,15 +231,19 @@ export class PhysicalOrderStrategy implements OrderStrategy {
       throw stockErr instanceof Error ? stockErr : new Error('Stock insuffisant');
     }
 
-    const { data: reservedItem } = await (supabase as any)
+    const { data: reservedItem } = await supabase
       .from('order_items')
       .select('item_metadata')
       .eq('id', orderItem.id)
       .single();
 
-    const reservedMeta = reservedItem?.item_metadata || {};
-    const inventoryId = reservedMeta.inventory_id || '';
-    const inventoryLocation = reservedMeta.inventory_location;
+    const reservedMeta = (reservedItem?.item_metadata ?? {}) as Record<string, unknown>;
+    const inventoryId =
+      typeof reservedMeta.inventory_id === 'string' ? reservedMeta.inventory_id : '';
+    const inventoryLocation =
+      typeof reservedMeta.inventory_location === 'string'
+        ? reservedMeta.inventory_location
+        : undefined;
 
     // Secured payment
     if (paymentType === 'delivery_secured') {
@@ -281,6 +290,8 @@ export class PhysicalOrderStrategy implements OrderStrategy {
       customerEmail,
       customerName: customerName || customerEmail.split('@')[0],
       customerPhone,
+      returnUrl,
+      cancelUrl,
       metadata: {
         product_type: 'physical',
         physical_product_id: resolvedPhysicalProductId,
@@ -295,6 +306,7 @@ export class PhysicalOrderStrategy implements OrderStrategy {
         total_price: totalPrice,
         amount_paid: amountToPay,
         remaining_amount: remainingAmount,
+        ...(guestCheckout ? { guest_checkout: true } : {}),
       },
     });
 

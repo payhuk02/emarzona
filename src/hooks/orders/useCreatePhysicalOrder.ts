@@ -78,6 +78,15 @@ export interface CreatePhysicalOrderOptions {
 
   /** Surcharge du mode checkout (sinon lu depuis payment_options produit) */
   checkoutMethod?: PhysicalCheckoutMethod;
+
+  /** URL de retour après paiement PSP */
+  returnUrl?: string;
+
+  /** URL d'annulation checkout PSP */
+  cancelUrl?: string;
+
+  /** Achat invité sans session auth */
+  guestCheckout?: boolean;
 }
 
 /**
@@ -165,6 +174,9 @@ export const useCreatePhysicalOrder = () => {
         giftCardId,
         giftCardAmount = 0,
         checkoutMethod: checkoutMethodOverride,
+        returnUrl,
+        cancelUrl,
+        guestCheckout,
       } = options;
 
       let resolvedPhysicalProductId = physicalProductId;
@@ -306,7 +318,7 @@ export const useCreatePhysicalOrder = () => {
           affiliate_tracking_cookie: affiliateTrackingCookie,
           metadata: {
             checkout_method: checkoutMethod,
-            guest_checkout: true,
+            guest_checkout: guestCheckout ?? false,
           },
         })
         .select(
@@ -488,6 +500,8 @@ export const useCreatePhysicalOrder = () => {
         customerEmail,
         customerName: customerName || customerEmail.split('@')[0],
         customerPhone,
+        returnUrl,
+        cancelUrl,
         metadata: {
           product_type: 'physical',
           physical_product_id: resolvedPhysicalProductId,
@@ -502,6 +516,7 @@ export const useCreatePhysicalOrder = () => {
           total_price: totalPrice,
           amount_paid: amountToPay,
           remaining_amount: remainingAmount,
+          ...(guestCheckout ? { guest_checkout: true } : {}),
         },
       });
 

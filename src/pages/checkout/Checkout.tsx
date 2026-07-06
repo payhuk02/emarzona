@@ -11,8 +11,6 @@ import { safeRedirect } from '@/lib/url-validator';
 import { logger } from '@/lib/logger';
 import { useLCPPreload } from '@/hooks/useLCPPreload';
 import { generateProductUrl } from '@/lib/store-utils';
-import { redirectToPlatformLogin } from '@/lib/auth-routes';
-import { isSupportedCurrency, type Currency } from '@/lib/currency-converter';
 import { normalizePhoneForPayment } from '@/lib/validation';
 
 /** Client Supabase assoupli pour tables absentes du schéma généré */
@@ -39,9 +37,12 @@ import type {
 import { validateBuyNowForm } from '@/pages/checkout/buy-now/checkout-buy-now-validation';
 import { calculateBuyNowPrice } from '@/pages/checkout/buy-now/checkout-buy-now-pricing';
 import { htmlToPlainText } from '@/lib/html-sanitizer';
-import { createBuyNowOrderBeforePayment } from '@/lib/buy-now-order';
-import { initiatePayment } from '@/lib/payment-service';
-import { releasePhysicalInventoryForOrder } from '@/lib/physical-inventory';
+import { isSupportedCurrency, type Currency } from '@/lib/currency-converter';
+import { useCreatePhysicalOrder } from '@/hooks/orders/useCreatePhysicalOrder';
+import { parsePhysicalCheckoutOptions } from '@/lib/physical/physical-checkout-display';
+import { notifyPhysicalOrderPlaced } from '@/lib/notifications/physical-order-notification';
+import { buildGuestOrderConfirmationPath } from '@/lib/physical/guest-order-confirmation';
+import { useCreateOrder } from '@/hooks/orders/useCreateOrder';
 
 const BuyNowOrderSummary = lazy(() => import('@/components/checkout/buy-now/BuyNowOrderSummary'));
 const BuyNowCustomerForm = lazy(() => import('@/components/checkout/buy-now/BuyNowCustomerForm'));
@@ -58,7 +59,7 @@ function BuyNowSectionFallback() {
 }
 
 const CHECKOUT_PRODUCT_FIELDS =
-  'id, store_id, slug, name, description, short_description, price, promotional_price, currency, image_url, product_type';
+  'id, store_id, slug, name, description, short_description, price, promotional_price, currency, image_url, product_type, payment_options';
 const CHECKOUT_STORE_FIELDS = 'id, name, slug, subdomain, default_currency, logo_url, created_at';
 const CHECKOUT_PUBLIC_STORE_FIELDS =
   'id, name, slug, subdomain, default_currency, logo_url, created_at';
@@ -142,6 +143,22 @@ const Checkout = () => {
 
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof CheckoutFormData, string>>>({});
 
+  const { mutateAsync: createPhysicalOrder } = useCreatePhysicalOrder();
+  const { mutateAsync: createOrder } = useCreateOrder();
+
+  const isGuestBuyer = !user;
+
+  const physicalCheckout = useMemo(
+    () =>
+      product?.product_type === 'physical'
+        ? parsePhysicalCheckoutOptions(product.payment_options)
+        : null,
+    [product]
+  );
+
+  const isPhysicalCod = physicalCheckout?.checkout_method === 'cash_on_delivery';
+  const submitButtonLabel = isPhysicalCod ? 'Confirmer la commande' : 'Procéder au paiement';
+
   // Restaurer le code promo depuis localStorage au chargement
   useEffect(() => {
     try {
@@ -186,15 +203,6 @@ const Checkout = () => {
         const {
           data: { user: currentUser },
         } = await supabase.auth.getUser();
-        if (!currentUser?.email && !isGuestCheckout) {
-          toast({
-            title: 'Authentification requise',
-            description: 'Veuillez vous connecter pour effectuer un achat',
-            variant: 'destructive',
-          });
-          redirectToPlatformLogin(navigate);
-          return;
-        }
         if (currentUser) {
           setUser(currentUser);
         }
@@ -430,7 +438,7 @@ const Checkout = () => {
         return;
       }
 
-      if (!product || !store || !user) {
+      if (!product || !store) {
         toast({
           title: 'Erreur',
           description: 'Données manquantes. Veuillez réessayer.',
@@ -439,9 +447,9 @@ const Checkout = () => {
         return;
       }
 
-      setSubmitting(true);
+      const isPhysical = product.product_type === 'physical';
 
-      let physicalOrderId: string | undefined;
+      setSubmitting(true);
 
       try {
         const finalPrice = calculatePrice();
@@ -450,107 +458,59 @@ const Checkout = () => {
         const customerName = `${formData.firstName} ${formData.lastName}`.trim();
         const customerPhone = normalizePhoneForPayment(formData.phone, formData.country);
 
-        // Vérification importante: s'assurer qu'on utilise bien le prix promo, pas le prix barré
-        const promoPrice = product.promotional_price;
-        const originalPrice = Number(product.price) || 0;
-
-        logger.log('Initiating payment from checkout page:', {
-          productId: product.id,
-          storeId: store.id,
-          amount: finalPrice,
-          originalPrice: originalPrice,
-          promoPrice: promoPrice ? Number(promoPrice) : null,
-          isUsingPromoPrice: promoPrice && Number(promoPrice) < originalPrice,
-          currency: finalCurrency,
-          customerName,
-          customerEmail: formData.email,
-        });
-
-        // Double vérification: si un prix promo existe et est valide, l'utiliser
-        if (promoPrice && Number(promoPrice) < originalPrice && Number(promoPrice) > 0) {
-          const verifiedPrice = Number(promoPrice);
-          if (verifiedPrice !== finalPrice) {
-            logger.warn('Price mismatch detected, using promo price:', {
-              calculatedPrice: finalPrice,
-              promoPrice: verifiedPrice,
-              originalPrice: originalPrice,
-            });
-          }
-        }
-
-        const shippingAddress = {
-          full_name: customerName,
-          email: formData.email,
-          phone: customerPhone,
-          address: formData.address,
-          city: formData.city,
-          country: formData.country,
-          postal_code: formData.postalCode,
-        };
-
-        const isPhysical = product.product_type === 'physical';
-        let orderNumber: string | undefined;
-
         if (isPhysical) {
-          const buyNowOrder = await createBuyNowOrderBeforePayment({
+          const result = await createPhysicalOrder({
+            physicalProductId: '',
             productId: product.id,
             storeId: store.id,
-            productName: product.name ? htmlToPlainText(product.name) : 'Produit',
-            productType: 'physical',
-            unitPrice: finalPrice,
-            quantity: 1,
-            variantId: selectedVariant?.id ?? null,
-            customerId: user.id,
             customerEmail: formData.email,
             customerName,
             customerPhone,
+            quantity: 1,
+            variantId: selectedVariant?.id,
+            guestCheckout: isGuestBuyer,
+            shippingAddress: {
+              street: formData.address,
+              city: formData.city,
+              postal_code: formData.postalCode || '—',
+              country: formData.country,
+            },
+          });
+
+          await notifyPhysicalOrderPlaced({
+            customerEmail: formData.email,
+            customerUserId: user?.id ?? null,
+            productName: product.name ? htmlToPlainText(product.name) : 'Produit',
+            orderNumber: result.orderNumber ?? result.orderId.slice(0, 8),
+            orderId: result.orderId,
+            quantity: 1,
             totalAmount: finalPrice,
             currency: finalCurrency,
-            shippingAddress,
-          });
-          physicalOrderId = buyNowOrder.orderId;
-          orderNumber = buyNowOrder.orderNumber;
-        }
-
-        const paymentResult = await initiatePayment({
-          storeId: store.id,
-          productId: product.id,
-          orderId: physicalOrderId,
-          customerId: user.id,
-          amount: finalPrice,
-          currency: finalCurrency,
-          description: `Achat de ${product.name ? htmlToPlainText(product.name) : 'produit'}`,
-          customerEmail: formData.email,
-          customerName,
-          customerPhone,
-          metadata: {
-            productName: product.name,
-            storeSlug: store.slug || '',
-            userId: user.id,
-            buy_now: true,
-            ...(orderNumber && { order_number: orderNumber }),
-            ...(product.product_type && { productType: product.product_type }),
-            ...(selectedVariant?.id && { variantId: selectedVariant.id }),
+            checkoutMethod: physicalCheckout?.checkout_method ?? 'online',
+            customerName,
             customerPhone,
-            customerAddress: formData.address,
-            customerCity: formData.city,
-            customerCountry: formData.country,
-            customerPostalCode: formData.postalCode,
-            shipping_address: shippingAddress,
-          },
-        });
+            shippingSummary: `${formData.address}, ${formData.city}`,
+          });
 
-        if (!paymentResult.success || !paymentResult.checkout_url) {
-          if (physicalOrderId) {
-            await releasePhysicalInventoryForOrder(physicalOrderId);
+          if (result.cashOnDelivery || !result.checkoutUrl) {
+            const orderNumber = result.orderNumber ?? result.orderId.slice(0, 8);
+            if (user) {
+              navigate('/account/orders', { replace: true });
+            } else {
+              navigate(
+                buildGuestOrderConfirmationPath({
+                  orderId: result.orderId,
+                  orderNumber,
+                  productName: product.name ? htmlToPlainText(product.name) : 'Produit',
+                  cashOnDelivery: true,
+                }),
+                { replace: true }
+              );
+            }
+            setSubmitting(false);
+            return;
           }
-          throw new Error(paymentResult.error || "Impossible d'initialiser le paiement");
-        }
 
-        const checkoutUrl = paymentResult.checkout_url;
-
-        if (checkoutUrl) {
-          // Sauvegarder les informations client dans user_metadata (optionnel)
           try {
             await supabase.auth.updateUser({
               data: {
@@ -563,15 +523,13 @@ const Checkout = () => {
               },
             });
           } catch (updateError) {
-            // Ne pas bloquer le paiement si la mise à jour échoue
             logger.warn(
               'Failed to update user metadata:',
               updateError instanceof Error ? updateError : new Error(String(updateError))
             );
           }
 
-          // Rediriger vers Moneroo
-          safeRedirect(checkoutUrl, () => {
+          safeRedirect(result.checkoutUrl, () => {
             toast({
               title: 'Erreur de paiement',
               description: 'URL de paiement invalide. Veuillez réessayer.',
@@ -579,13 +537,78 @@ const Checkout = () => {
             });
             setSubmitting(false);
           });
-        } else {
+          return;
+        }
+
+        // Services : réservation requise avant paiement
+        if (product.product_type === 'service') {
+          const params = new URLSearchParams({ guestEmail: formData.email });
+          if (customerName) params.set('guestName', customerName);
+          if (customerPhone) params.set('guestPhone', customerPhone);
+          navigate(`/service/${product.id}?${params.toString()}`);
+          setSubmitting(false);
+          return;
+        }
+
+        const orderResult = await createOrder({
+          productId: product.id,
+          storeId: store.id,
+          customerEmail: formData.email,
+          customerName,
+          customerPhone,
+          guestCheckout: isGuestBuyer,
+          digitalOptions: appliedCouponCode
+            ? {
+                couponCode: appliedCouponCode.code,
+                couponDiscountAmount: appliedCouponCode.discountAmount,
+              }
+            : undefined,
+          artistOptions:
+            product.product_type === 'artist'
+              ? {
+                  shippingAddress: {
+                    street: formData.address,
+                    city: formData.city,
+                    postal_code: formData.postalCode || '—',
+                    country: formData.country,
+                  },
+                }
+              : undefined,
+        });
+
+        if (!orderResult.checkoutUrl) {
           throw new Error('URL de paiement non reçue');
         }
-      } catch (_error: unknown) {
-        if (physicalOrderId) {
-          await releasePhysicalInventoryForOrder(physicalOrderId);
+
+        if (user) {
+          try {
+            await supabase.auth.updateUser({
+              data: {
+                full_name: customerName,
+                phone: customerPhone,
+                address: formData.address,
+                city: formData.city,
+                country: formData.country,
+                postal_code: formData.postalCode,
+              },
+            });
+          } catch (updateError) {
+            logger.warn(
+              'Failed to update user metadata:',
+              updateError instanceof Error ? updateError : new Error(String(updateError))
+            );
+          }
         }
+
+        safeRedirect(orderResult.checkoutUrl, () => {
+          toast({
+            title: 'Erreur de paiement',
+            description: 'URL de paiement invalide. Veuillez réessayer.',
+            variant: 'destructive',
+          });
+          setSubmitting(false);
+        });
+      } catch (_error: unknown) {
         const errorObj = _error instanceof Error ? _error : new Error(String(_error));
         logger.error('Payment initiation error:', errorObj);
 
@@ -620,7 +643,22 @@ const Checkout = () => {
         setSubmitting(false);
       }
     },
-    [formData, product, store, user, selectedVariant, calculatePrice, toast, validateForm]
+    [
+      formData,
+      product,
+      store,
+      user,
+      selectedVariant,
+      calculatePrice,
+      toast,
+      validateForm,
+      createPhysicalOrder,
+      createOrder,
+      navigate,
+      physicalCheckout,
+      isGuestBuyer,
+      appliedCouponCode,
+    ]
   );
 
   // Prix affiché - Utiliser useMemo pour garantir la mise à jour quand appliedCouponCode change
@@ -703,7 +741,11 @@ const Checkout = () => {
           </nav>
           <h1 className="text-2xl sm:text-3xl font-bold">Finaliser votre commande</h1>
           <p className="text-muted-foreground mt-2">
-            Complétez vos informations pour procéder au paiement
+            {isPhysicalCod
+              ? 'Complétez vos informations pour confirmer votre commande (paiement à la livraison)'
+              : isGuestBuyer
+                ? 'Achetez en tant qu’invité — renseignez votre email pour accéder à votre espace client après paiement'
+                : 'Complétez vos informations pour procéder au paiement'}
           </p>
         </header>
 
@@ -726,6 +768,8 @@ const Checkout = () => {
                 productId={productId}
                 user={user}
                 submitting={submitting}
+                submitButtonLabel={submitButtonLabel}
+                isCashOnDelivery={isPhysicalCod}
                 onCouponApply={handleCouponApply}
                 onCouponRemove={handleCouponRemove}
               />

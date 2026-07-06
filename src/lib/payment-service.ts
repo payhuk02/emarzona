@@ -14,6 +14,10 @@ import type { PaymentProviderCode } from '@/types/store-payment-connection';
 import { toast } from '@/hooks/use-toast';
 import { checkRateLimit } from './rate-limiter';
 import { extractCheckoutToken, withCheckoutTokenMetadata } from './checkout/checkout-access';
+import {
+  buildPaymentCancelReturnUrl,
+  buildPaymentSuccessReturnUrl,
+} from './checkout/guest-payment-return';
 
 /** Type checkout — `moneroo` legacy UI ; codes orchestrateur après migration UI */
 export type PaymentProvider = 'moneroo' | PaymentProviderCode;
@@ -82,6 +86,22 @@ async function resolvePaymentContext(options: PaymentOptions): Promise<PaymentOp
     ...options,
     metadata: withCheckoutTokenMetadata(options.metadata, checkoutToken),
     checkoutToken,
+    returnUrl:
+      options.returnUrl ??
+      (options.orderId
+        ? buildPaymentSuccessReturnUrl({
+            orderId: options.orderId,
+            guestEmail: options.customerEmail,
+            productType:
+              typeof options.metadata?.product_type === 'string'
+                ? options.metadata.product_type
+                : undefined,
+            guest: options.metadata?.guest_checkout === true,
+          })
+        : options.returnUrl),
+    cancelUrl:
+      options.cancelUrl ??
+      (options.orderId ? buildPaymentCancelReturnUrl(options.orderId) : options.cancelUrl),
   };
 }
 

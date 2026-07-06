@@ -1,15 +1,20 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Download, ShoppingBag, ArrowRight, Loader2 } from 'lucide-react';
+import { CheckCircle, Download, ShoppingBag, ArrowRight, Loader2, LogIn } from 'lucide-react';
 import { OneClickUpsell } from '@/components/upsell/OneClickUpsell';
 import { supabase } from '@/integrations/supabase/client';
 import { verifyTransactionStatus } from '@/lib/payment-service';
 import { logger } from '@/lib/logger';
 import { resolveCourseLearnUrl } from '@/lib/courses/course-learn-redirect';
+import { useAuth } from '@/contexts/AuthContext';
+import { safeRedirect } from '@/lib/url-validator';
+import { requestGuestCustomerAccess } from '@/lib/checkout/guest-customer-access';
+import { resolveCustomerPortalPath } from '@/lib/checkout/guest-payment-return';
 
 type ConfirmationState = 'loading' | 'confirmed' | 'pending' | 'failed';
+type GuestAccessState = 'idle' | 'loading' | 'redirecting' | 'failed';
 
 function mapUrlProviderToPaymentProvider(
   provider: string | null
@@ -24,16 +29,26 @@ function mapUrlProviderToPaymentProvider(
 const PaymentSuccess = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [showUpsell, setShowUpsell] = useState(false);
   const [purchasedProductId, setPurchasedProductId] = useState<string | null>(null);
   const [purchasedProductType, setPurchasedProductType] = useState<string>('digital');
   const [purchasedProductSlug, setPurchasedProductSlug] = useState<string | null>(null);
   const [confirmationState, setConfirmationState] = useState<ConfirmationState>('loading');
+  const [guestAccessState, setGuestAccessState] = useState<GuestAccessState>('idle');
+  const [guestAccessError, setGuestAccessError] = useState<string | null>(null);
 
   const orderId = searchParams.get('order_id');
   const transactionId = searchParams.get('transaction_id');
   const providerParam = searchParams.get('provider');
   const sessionId = searchParams.get('session_id');
+  const isGuestReturn = searchParams.get('guest') === '1';
+  const guestEmail = searchParams.get('email');
+  const productTypeParam = searchParams.get('product_type');
+
+  const portalPath = resolveCustomerPortalPath(
+    purchasedProductType || productTypeParam || 'digital'
+  );
 
   const loadOrderInfo = async (id: string) => {
     try {
@@ -143,6 +158,45 @@ const PaymentSuccess = () => {
     return () => clearTimeout(timer);
   }, [confirmationState, purchasedProductId]);
 
+  useEffect(() => {
+    if (user || !isGuestReturn || confirmationState !== 'confirmed' || !orderId || !guestEmail) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const openGuestPortal = async () => {
+      setGuestAccessState('loading');
+      setGuestAccessError(null);
+
+      const result = await requestGuestCustomerAccess(orderId, guestEmail);
+      if (cancelled) return;
+
+      if (result.success && result.actionLink) {
+        setGuestAccessState('redirecting');
+        safeRedirect(result.actionLink, () => {
+          setGuestAccessState('failed');
+          setGuestAccessError(
+            'Impossible d’ouvrir votre espace client. Utilisez le bouton ci-dessous.'
+          );
+        });
+        return;
+      }
+
+      setGuestAccessState('failed');
+      setGuestAccessError(
+        result.error ||
+          'Connectez-vous avec le même email que lors de l’achat pour accéder à votre espace.'
+      );
+    };
+
+    void openGuestPortal();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user, isGuestReturn, confirmationState, orderId, guestEmail]);
+
   const title =
     confirmationState === 'confirmed'
       ? 'Paiement réussi ! 🎉'
@@ -154,7 +208,11 @@ const PaymentSuccess = () => {
 
   const description =
     confirmationState === 'confirmed'
-      ? 'Merci pour votre achat ! Votre paiement a été confirmé.'
+      ? isGuestReturn && !user && guestAccessState === 'redirecting'
+        ? 'Ouverture sécurisée de votre espace client…'
+        : isGuestReturn && !user && guestAccessState === 'loading'
+          ? 'Préparation de votre accès client…'
+          : 'Merci pour votre achat ! Votre paiement a été confirmé.'
       : confirmationState === 'pending'
         ? 'Votre banque ou PSP finalise encore le paiement. Consultez vos commandes dans quelques instants.'
         : confirmationState === 'failed'
@@ -167,7 +225,7 @@ const PaymentSuccess = () => {
         <CardContent className="p-8 text-center space-y-6">
           <div className="flex justify-center">
             <div className="h-20 w-20 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
-              {confirmationState === 'loading' ? (
+              {confirmationState === 'loading' || guestAccessState === 'loading' ? (
                 <Loader2 className="h-12 w-12 text-green-600 animate-spin" />
               ) : (
                 <CheckCircle
@@ -184,10 +242,13 @@ const PaymentSuccess = () => {
               {title}
             </h1>
             <p className="text-lg text-muted-foreground">{description}</p>
+            {guestAccessError && (
+              <p className="text-sm text-amber-700 dark:text-amber-400 mt-3">{guestAccessError}</p>
+            )}
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center flex-wrap">
-            {confirmationState === 'confirmed' && purchasedProductType === 'course' && (
+            {confirmationState === 'confirmed' && purchasedProductType === 'course' && user && (
               <Button
                 onClick={() =>
                   navigate(
@@ -203,21 +264,43 @@ const PaymentSuccess = () => {
                 <ArrowRight className="h-4 w-4" />
               </Button>
             )}
-            <Button
-              onClick={() => navigate('/account/downloads')}
-              className="flex items-center gap-2"
-            >
-              <Download className="h-4 w-4" />
-              Mes Téléchargements
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => navigate('/account/orders')}
-              className="flex items-center gap-2"
-            >
-              <ShoppingBag className="h-4 w-4" />
-              Mes Commandes
-            </Button>
+            {user ? (
+              <>
+                {purchasedProductType === 'digital' && (
+                  <Button
+                    onClick={() => navigate('/account/downloads')}
+                    className="flex items-center gap-2"
+                  >
+                    <Download className="h-4 w-4" />
+                    Mes téléchargements
+                  </Button>
+                )}
+                <Button
+                  variant="outline"
+                  onClick={() => navigate(portalPath)}
+                  className="flex items-center gap-2"
+                >
+                  <ShoppingBag className="h-4 w-4" />
+                  Mon espace client
+                </Button>
+              </>
+            ) : (
+              <>
+                {guestAccessState === 'failed' && guestEmail && (
+                  <Button asChild className="flex items-center gap-2">
+                    <Link
+                      to={`/login?email=${encodeURIComponent(guestEmail)}&redirect=${encodeURIComponent(portalPath)}`}
+                    >
+                      <LogIn className="h-4 w-4" />
+                      Se connecter ({guestEmail})
+                    </Link>
+                  </Button>
+                )}
+                <Button asChild variant="outline">
+                  <Link to="/register">Créer un compte</Link>
+                </Button>
+              </>
+            )}
             <Button
               variant="outline"
               onClick={() => navigate('/marketplace')}
@@ -230,7 +313,7 @@ const PaymentSuccess = () => {
         </CardContent>
       </Card>
 
-      {purchasedProductId && confirmationState === 'confirmed' && (
+      {purchasedProductId && confirmationState === 'confirmed' && user && (
         <OneClickUpsell
           purchasedProductId={purchasedProductId}
           purchasedProductType={purchasedProductType}

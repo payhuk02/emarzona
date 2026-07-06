@@ -1,4 +1,5 @@
 import type { Currency } from '@/lib/currency-converter';
+import type { PhysicalProductPaymentOptions } from '@/types/physical-product';
 
 export interface CheckoutFormData {
   firstName: string;
@@ -37,6 +38,7 @@ export type CheckoutProduct = {
   short_description?: string | null;
   image_url?: string | null;
   product_type?: string | null;
+  payment_options?: PhysicalProductPaymentOptions | string | null;
   stores?: CheckoutStore | CheckoutStore[] | null;
 } | null;
 

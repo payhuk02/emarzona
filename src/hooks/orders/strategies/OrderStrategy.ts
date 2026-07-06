@@ -31,6 +31,15 @@ export interface OrderStrategyContext {
 
   /** Options spécifiques au type (ex: shippingAddress pour physical) */
   options?: Record<string, unknown>;
+
+  /** URL de retour après paiement PSP */
+  returnUrl?: string;
+
+  /** URL d'annulation checkout PSP */
+  cancelUrl?: string;
+
+  /** Achat invité sans session auth */
+  guestCheckout?: boolean;
 }
 
 export interface OrderCreationResult {

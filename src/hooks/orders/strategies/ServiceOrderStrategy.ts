@@ -22,6 +22,9 @@ export class ServiceOrderStrategy implements OrderStrategy {
       customerPhone,
       productRecord: product,
       options,
+      returnUrl,
+      cancelUrl,
+      guestCheckout,
     } = context;
 
     if (!product) {
@@ -59,7 +62,10 @@ export class ServiceOrderStrategy implements OrderStrategy {
       throw new Error('Produit service non trouvé');
     }
 
-    const paymentOptions = (product.payment_options as Record<string, unknown>) || { payment_type: 'full', percentage_rate: 30 };
+    const paymentOptions = (product.payment_options as Record<string, unknown>) || {
+      payment_type: 'full',
+      percentage_rate: 30,
+    };
     const paymentType = paymentOptions.payment_type || 'full';
     const percentageRate = paymentOptions.percentage_rate || 30;
 
@@ -102,9 +108,13 @@ export class ServiceOrderStrategy implements OrderStrategy {
         today.setHours(0, 0, 0, 0);
         const bookingDateObj = new Date(bookingDate);
         bookingDateObj.setHours(0, 0, 0, 0);
-        const daysDifference = Math.floor((bookingDateObj.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+        const daysDifference = Math.floor(
+          (bookingDateObj.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+        );
         if (daysDifference > serviceProduct.advance_booking_days) {
-          throw new Error(`Vous ne pouvez réserver que jusqu'à ${serviceProduct.advance_booking_days} jours à l'avance.`);
+          throw new Error(
+            `Vous ne pouvez réserver que jusqu'à ${serviceProduct.advance_booking_days} jours à l'avance.`
+          );
         }
         if (daysDifference < 0) {
           throw new Error('Impossible de réserver une date dans le passé.');
@@ -119,8 +129,15 @@ export class ServiceOrderStrategy implements OrderStrategy {
         { p_product_id: productId, p_scheduled_date: bookingDate }
       );
 
-      if (!maxBookingsError && maxBookingsCheck && maxBookingsCheck.length > 0 && !maxBookingsCheck[0].is_within_limit) {
-        throw new Error(maxBookingsCheck[0].message || 'Limite quotidienne de réservations atteinte.');
+      if (
+        !maxBookingsError &&
+        maxBookingsCheck &&
+        maxBookingsCheck.length > 0 &&
+        !maxBookingsCheck[0].is_within_limit
+      ) {
+        throw new Error(
+          maxBookingsCheck[0].message || 'Limite quotidienne de réservations atteinte.'
+        );
       }
 
       if (maxBookingsError) {
@@ -130,7 +147,7 @@ export class ServiceOrderStrategy implements OrderStrategy {
           .eq('product_id', productId)
           .eq('scheduled_date', bookingDate)
           .in('status', ['pending', 'confirmed', 'rescheduled']);
-          
+
         const currentBookingsCount = existingBookingsForDay?.length || 0;
         if (currentBookingsCount >= serviceProduct.max_bookings_per_day) {
           throw new Error(`Le nombre maximum de réservations pour ce jour est atteint.`);
@@ -163,7 +180,12 @@ export class ServiceOrderStrategy implements OrderStrategy {
         }
       );
 
-      if (!conflictError && conflictCheck && conflictCheck.length > 0 && conflictCheck[0].has_conflict) {
+      if (
+        !conflictError &&
+        conflictCheck &&
+        conflictCheck.length > 0 &&
+        conflictCheck[0].has_conflict
+      ) {
         throw new Error(conflictCheck[0].conflict_message || 'Conflit de réservation détecté.');
       }
 
@@ -177,8 +199,12 @@ export class ServiceOrderStrategy implements OrderStrategy {
           .in('status', ['pending', 'confirmed', 'rescheduled']);
 
         const hasConflict = conflictingBookings?.some(booking => {
-          const existingStart = new Date(`${booking.scheduled_date}T${booking.scheduled_start_time}`).getTime();
-          const existingEnd = new Date(`${booking.scheduled_date}T${booking.scheduled_end_time}`).getTime();
+          const existingStart = new Date(
+            `${booking.scheduled_date}T${booking.scheduled_start_time}`
+          ).getTime();
+          const existingEnd = new Date(
+            `${booking.scheduled_date}T${booking.scheduled_end_time}`
+          ).getTime();
           const requestStart = bookingStartDateTime.getTime();
           const requestEnd = bookingEndDateTime.getTime();
           return requestStart < existingEnd && requestEnd > existingStart;
@@ -200,16 +226,23 @@ export class ServiceOrderStrategy implements OrderStrategy {
         .in('status', ['pending', 'confirmed', 'rescheduled']);
 
       if (allBookingsForDate && allBookingsForDate.length > 0) {
-        const bufferStart = bookingStartDateTime.getTime() - serviceProduct.buffer_time_before * 60000;
+        const bufferStart =
+          bookingStartDateTime.getTime() - serviceProduct.buffer_time_before * 60000;
         const bufferEnd = bookingEndDateTime.getTime() + serviceProduct.buffer_time_after * 60000;
 
         const hasGlobalBufferConflict = allBookingsForDate.some(booking => {
-          const existingStart = new Date(`${booking.scheduled_date}T${booking.scheduled_start_time}`).getTime();
-          const existingEnd = new Date(`${booking.scheduled_date}T${booking.scheduled_end_time}`).getTime();
+          const existingStart = new Date(
+            `${booking.scheduled_date}T${booking.scheduled_start_time}`
+          ).getTime();
+          const existingEnd = new Date(
+            `${booking.scheduled_date}T${booking.scheduled_end_time}`
+          ).getTime();
           const requestStart = bookingStartDateTime.getTime();
           const requestEnd = bookingEndDateTime.getTime();
-          return (requestStart < existingEnd && requestEnd > existingStart) ||
-                 (existingStart < bufferEnd && existingEnd > bufferStart);
+          return (
+            (requestStart < existingEnd && requestEnd > existingStart) ||
+            (existingStart < bufferEnd && existingEnd > bufferStart)
+          );
         });
 
         if (hasGlobalBufferConflict) {
@@ -247,9 +280,11 @@ export class ServiceOrderStrategy implements OrderStrategy {
       }
     );
 
-    if (provisionError) throw new Error(provisionError.message || 'Impossible de finaliser la réservation.');
+    if (provisionError)
+      throw new Error(provisionError.message || 'Impossible de finaliser la réservation.');
     if (provisionData?.error) throw new Error(provisionData.error);
-    if (!provisionData?.success || !provisionData?.booking_id) throw new Error('Erreur inattendue lors de la réservation');
+    if (!provisionData?.success || !provisionData?.booking_id)
+      throw new Error('Erreur inattendue lors de la réservation');
 
     const userId = provisionData.user_id;
 
@@ -314,6 +349,7 @@ export class ServiceOrderStrategy implements OrderStrategy {
       .insert({
         store_id: storeId,
         customer_id: customerId,
+        customer_email: customerEmail,
         order_number: orderNumber,
         total_amount: totalPrice - (giftCardAmount || 0),
         currency: product.currency,
@@ -323,8 +359,11 @@ export class ServiceOrderStrategy implements OrderStrategy {
         percentage_paid: percentagePaid,
         remaining_amount: remainingAmount,
         affiliate_tracking_cookie: affiliateTrackingCookie,
+        metadata: guestCheckout ? { guest_checkout: true } : undefined,
       })
-      .select('id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at')
+      .select(
+        'id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at'
+      )
       .single();
 
     if (orderError || !order) {
@@ -348,7 +387,9 @@ export class ServiceOrderStrategy implements OrderStrategy {
     // Créer la facture
     try {
       await supabase.rpc('create_invoice_from_order', { p_order_id: order.id });
-    } catch (_invoiceErr) { /* ignore */ }
+    } catch (_invoiceErr) {
+      /* ignore */
+    }
 
     import('@/lib/webhooks').then(({ triggerOrderCreatedWebhook }) => {
       triggerOrderCreatedWebhook(order.id, order).catch(() => {});
@@ -394,10 +435,15 @@ export class ServiceOrderStrategy implements OrderStrategy {
     }
 
     const formattedBookingDate = new Date(bookingDateTime).toLocaleDateString('fr-FR', {
-      day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     });
 
-    const paymentDescription = paymentType === 'percentage'
+    const paymentDescription =
+      paymentType === 'percentage'
         ? `Acompte ${percentageRate}%: ${product.name} - ${formattedBookingDate}`
         : paymentType === 'delivery_secured'
           ? `Paiement sécurisé: ${product.name} - ${formattedBookingDate}`
@@ -414,6 +460,8 @@ export class ServiceOrderStrategy implements OrderStrategy {
       customerEmail,
       customerName: customerName || customerEmail.split('@')[0],
       customerPhone,
+      returnUrl,
+      cancelUrl,
       metadata: {
         product_type: 'service',
         service_product_id: resolvedServiceProductId,
@@ -427,6 +475,7 @@ export class ServiceOrderStrategy implements OrderStrategy {
         total_price: totalPrice,
         amount_paid: amountToPay,
         remaining_amount: remainingAmount,
+        ...(guestCheckout ? { guest_checkout: true } : {}),
       },
     });
 
