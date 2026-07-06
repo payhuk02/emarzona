@@ -52,20 +52,16 @@ i18n
   // Initialise i18next
   .init({
     resources,
-    fallbackLng: (code: string | readonly string[]) => {
-      const lng = Array.isArray(code) ? code[0] : code;
-      if (lng === 'fr') return ['fr'];
-      if (lng === 'en') return ['en', 'fr'];
-      // ES, DE, PT and unknown locales → English first (Phase 2.5)
-      return ['en', 'fr'];
-    },
+    lng: 'fr',
+    fallbackLng: 'fr',
     debug: import.meta.env.VITE_I18N_DEBUG === 'true',
 
-    // Options de détection
+    // Options de détection — htmlTag (lang="fr") avant navigator pour l'indexation Google
     detection: {
-      order: ['localStorage', 'navigator', 'htmlTag'],
+      order: ['querystring', 'localStorage', 'htmlTag', 'navigator'],
       caches: ['localStorage'],
       lookupLocalStorage: 'emarzona_language',
+      lookupQuerystring: 'lang',
     },
 
     // Options d'interpolation

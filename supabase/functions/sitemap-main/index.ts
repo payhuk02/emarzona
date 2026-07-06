@@ -5,6 +5,7 @@
  */
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { buildWwwProductPublicUrl } from '../_shared/product-public-url.ts';
 
 const SITE = 'https://www.emarzona.com';
 const allowOrigin = Deno.env.get('SITE_URL') || SITE;
@@ -21,6 +22,8 @@ const STATIC_PAGES: Array<{ path: string; changefreq: string; priority: string }
   { path: '/recommendations', changefreq: 'daily', priority: '0.7' },
   { path: '/digital/search', changefreq: 'daily', priority: '0.7' },
   { path: '/products/compare', changefreq: 'weekly', priority: '0.5' },
+  { path: '/art', changefreq: 'daily', priority: '0.8' },
+  { path: '/digital/compare', changefreq: 'weekly', priority: '0.5' },
   { path: '/about', changefreq: 'monthly', priority: '0.6' },
   { path: '/contact', changefreq: 'monthly', priority: '0.6' },
   { path: '/careers', changefreq: 'monthly', priority: '0.5' },
@@ -36,6 +39,7 @@ const STATIC_PAGES: Array<{ path: string; changefreq: string; priority: string }
   { path: '/legal/privacy', changefreq: 'yearly', priority: '0.3' },
   { path: '/legal/cookies', changefreq: 'yearly', priority: '0.3' },
   { path: '/legal/refund', changefreq: 'yearly', priority: '0.3' },
+  { path: '/legal/dpa', changefreq: 'yearly', priority: '0.3' },
 ];
 
 function xmlEscape(s: string): string {
@@ -65,16 +69,21 @@ serve(async () => {
   // Note: les boutiques sont dans sitemap-stores.xml (sous-domaines *.myemarzona.shop)
   // On ne les inclut PAS ici car /store/:slug redirige vers le sous-domaine (302)
 
-  // Produits actifs (URL marketplace)
+  // Produits actifs indexables sur www (URL par type — pas /product/:slug)
   const { data: products } = await supabase
     .from('products')
-    .select('slug, updated_at, store_id')
+    .select('id, slug, updated_at, product_type')
     .eq('is_active', true)
+    .eq('is_draft', false)
     .limit(40000);
 
   for (const p of products ?? []) {
-    if (!p.slug) continue;
-    urls.push(urlNode(`${SITE}/product/${p.slug}`, p.updated_at, 'weekly', '0.7'));
+    const loc = buildWwwProductPublicUrl(
+      { id: p.id, slug: p.slug, product_type: p.product_type },
+      SITE
+    );
+    if (!loc) continue;
+    urls.push(urlNode(loc, p.updated_at, 'weekly', '0.7'));
   }
 
   const { data: blogPosts } = await supabase

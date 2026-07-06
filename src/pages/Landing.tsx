@@ -9,9 +9,9 @@ import { injectLandingCriticalCSS } from '@/lib/landing-critical-css';
 import { ensureLandingPremiumLocale } from '@/i18n/landing-premium-loader';
 import i18n from '@/i18n/config';
 import {
-  getLandingSEO,
   buildLandingHreflangAlternates,
   parseLandingLangFromSearch,
+  resolveLandingPageSEO,
 } from '@/lib/landing-seo';
 import heroCarouselWebp from '@/assets/landing/hero-carousel-entrepreneur.webp';
 
@@ -78,16 +78,18 @@ const Landing = () => {
   useEffect(() => {
     let cancelled = false;
     const langFromUrl = parseLandingLangFromSearch(location.search);
+    const landingLang = langFromUrl ?? 'fr';
 
-    ensureLandingPremiumLocale(langFromUrl ?? undefined)
+    ensureLandingPremiumLocale(landingLang)
       .then(async () => {
-        if (langFromUrl && i18n.language !== langFromUrl) {
-          await i18n.changeLanguage(langFromUrl);
-          document.documentElement.lang = langFromUrl;
+        if (i18n.language !== landingLang) {
+          await i18n.changeLanguage(landingLang);
         }
+        document.documentElement.lang = landingLang;
         if (!cancelled) setReady(true);
       })
       .catch(() => {
+        document.documentElement.lang = 'fr';
         if (!cancelled) setReady(true);
       });
 
@@ -97,7 +99,8 @@ const Landing = () => {
   }, [location.search]);
 
   if (!ready) {
-    const seo = getLandingSEO();
+    const langFromUrl = parseLandingLangFromSearch(location.search);
+    const seo = resolveLandingPageSEO({ langFromUrl });
     return (
       <>
         <SEOMeta
@@ -105,6 +108,7 @@ const Landing = () => {
           description={seo.description}
           keywords={seo.keywords}
           url={seo.url}
+          canonical={seo.canonical}
           imageAlt={seo.imageAlt}
           hreflangAlternates={hreflangAlternates}
         />
@@ -122,9 +126,13 @@ function LandingContent({
   hreflangAlternates: ReturnType<typeof buildLandingHreflangAlternates>;
 }) {
   const { t } = useLandingPremiumT();
-  const seo = getLandingSEO({
-    title: t('seo.title'),
-    description: t('seo.description'),
+  const location = useLocation();
+  const langFromUrl = parseLandingLangFromSearch(location.search);
+  const seo = resolveLandingPageSEO({
+    langFromUrl,
+    translated: langFromUrl
+      ? { title: t('seo.title'), description: t('seo.description') }
+      : undefined,
   });
 
   return (
@@ -134,6 +142,7 @@ function LandingContent({
         description={seo.description}
         keywords={seo.keywords}
         url={seo.url}
+        canonical={seo.canonical}
         imageAlt={seo.imageAlt}
         hreflangAlternates={hreflangAlternates}
       />

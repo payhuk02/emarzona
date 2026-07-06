@@ -32,6 +32,9 @@ const LANDING_HREFLANG_BY_CODE: Record<LanguageCode, string> = {
 };
 
 export function buildLandingLangUrl(lang: LanguageCode, baseUrl = LANDING_CANONICAL_URL): string {
+  if (lang === 'fr') {
+    return baseUrl;
+  }
   const url = new URL(baseUrl);
   url.searchParams.set('lang', lang);
   return url.toString();
@@ -57,4 +60,23 @@ export function buildLandingHreflangAlternates(
 
 export function getLandingSEO(overrides?: Partial<typeof LANDING_SEO_DEFAULTS>) {
   return { ...LANDING_SEO_DEFAULTS, ...overrides };
+}
+
+/** SEO homepage : français par défaut (URL canonique sans ?lang=), traduit seulement si ?lang= explicite. */
+export function resolveLandingPageSEO(options: {
+  langFromUrl: LanguageCode | null;
+  translated?: { title: string; description: string };
+}) {
+  if (!options.langFromUrl) {
+    const seo = getLandingSEO();
+    return { ...seo, url: LANDING_CANONICAL_URL, canonical: LANDING_CANONICAL_URL };
+  }
+
+  const pageUrl = buildLandingLangUrl(options.langFromUrl);
+  const seo = getLandingSEO(
+    options.translated
+      ? { title: options.translated.title, description: options.translated.description }
+      : undefined
+  );
+  return { ...seo, url: pageUrl, canonical: pageUrl };
 }

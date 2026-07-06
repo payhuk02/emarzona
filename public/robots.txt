@@ -30,6 +30,11 @@ Disallow: /auth
 Disallow: /payment/
 Disallow: /unsubscribe
 Disallow: /wishlist/
+Disallow: /download/
+Disallow: /aff/
+Disallow: /verify/
+Disallow: /bundles/
+Disallow: /orders/confirmed
 
 # Bots IA - autorisation explicite
 User-agent: GPTBot
@@ -50,8 +55,9 @@ Allow: /
 User-agent: OAI-SearchBot
 Allow: /
 
-# Fichier d'aide pour les crawlers IA (llms.txt)
+# Fichiers d'aide pour les crawlers IA
 # https://www.emarzona.com/llms.txt
+# https://www.emarzona.com/llms-full.txt
 
 User-agent: CCBot
 Disallow: /

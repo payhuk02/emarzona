@@ -1,28 +1,60 @@
 # Emarzona
 
-> Plateforme e-commerce et marketing tout-en-un pour vendre des produits digitaux, physiques, services, cours en ligne et œuvres d'artistes. Paiements sécurisés, marketplace, programme d'affiliation.
+> Plateforme e-commerce et marketing tout-en-un pour vendre des produits digitaux, physiques, services, cours en ligne et œuvres d'artistes. Paiements sécurisés (FCFA, Mobile Money, Moneroo), marketplace, programme d'affiliation et parrainage.
 
 Emarzona permet aux créateurs, artistes et entrepreneurs de lancer une boutique en ligne, gérer commandes et clients, et développer leur activité en Afrique et à l'international.
 
+## Types de commerce (5 en 1)
+
+- **Produits physiques** : stock, variantes, livraison, paiement à la livraison (COD)
+- **Produits digitaux** : fichiers, licences, téléchargement sécurisé
+- **Services** : réservations, créneaux, prestations
+- **Cours en ligne** : LMS, certificats, curriculum vidéo
+- **Œuvres d'artistes** : éditions limitées, certificats d'authenticité, enchères
+
 ## Pages principales
 
-- [Accueil](https://www.emarzona.com/): Présentation de la plateforme, tarifs et fonctionnalités
-- [Marketplace](https://www.emarzona.com/marketplace): Catalogue public de produits et services
-- [À propos](https://www.emarzona.com/about): Mission et valeurs d'Emarzona
+- [Accueil](https://www.emarzona.com/): Présentation, fonctionnalités et tarifs
+- [Tarifs](https://www.emarzona.com/#tarifs): Abonnements produits physiques et commission 10 % sur digital, services, cours et art
+- [Marketplace](https://www.emarzona.com/marketplace): Catalogue public multitype
+- [Cours en ligne](https://www.emarzona.com/courses): Formations et e-learning
+- [Œuvres d'artistes](https://www.emarzona.com/art): Art digital et physique
+- [Collections](https://www.emarzona.com/collections): Collections artistiques
+- [Enchères](https://www.emarzona.com/auctions): Enchères en ligne
+- [Communauté](https://www.emarzona.com/community): Communauté vendeurs et acheteurs
+- [À propos](https://www.emarzona.com/about): Mission et valeurs
 - [Contact](https://www.emarzona.com/contact): Support, partenariats et presse
-- [Tarifs](https://www.emarzona.com/pricing): Plans et commissions
-- [Centre d'aide](https://www.emarzona.com/help): Tutoriels et assistance générale
-- [FAQ](https://www.emarzona.com/faq): Questions fréquentes structurées (vendeurs et acheteurs)
+- [Centre d'aide](https://www.emarzona.com/help): Tutoriels
+- [FAQ](https://www.emarzona.com/faq): Questions vendeurs et acheteurs
 - [Documentation](https://www.emarzona.com/docs): Guides de démarrage
-- [Blog](https://www.emarzona.com/blog): Articles e-commerce, guides vendeurs et actualités produit
+- [Intégrations](https://www.emarzona.com/integrations): Paiements, analytics, webhooks
+- [Blog](https://www.emarzona.com/blog): Guides e-commerce et actualités
+
+## Affiliation et croissance
+
+- Programme d'affiliation intégré par produit et boutique
+- Commissions configurables, cookies de tracking, liens courts `/aff/`
+- Email marketing, campagnes, séquences automatisées
+- Promotions et codes promo unifiés
+
+## Paiements
+
+- FCFA / XOF et 17+ devises
+- Mobile Money, Moneroo, paiements internationaux
+- Checkout invité, acomptes, paiement sécurisé à la livraison
 
 ## Pages légales
 
-- [CGU](https://www.emarzona.com/legal/terms): Conditions générales d'utilisation
-- [CGV](https://www.emarzona.com/legal/cgv): Conditions générales de vente
-- [Confidentialité](https://www.emarzona.com/legal/privacy): Politique de confidentialité (RGPD)
-- [Cookies](https://www.emarzona.com/legal/cookies): Politique des cookies
-- [Remboursement](https://www.emarzona.com/legal/refund): Politique de remboursement
+- [CGU](https://www.emarzona.com/legal/terms)
+- [CGV](https://www.emarzona.com/legal/cgv)
+- [Confidentialité](https://www.emarzona.com/legal/privacy)
+- [Cookies](https://www.emarzona.com/legal/cookies)
+- [Remboursement](https://www.emarzona.com/legal/refund)
+- [DPA](https://www.emarzona.com/legal/dpa)
+
+## Documentation étendue
+
+Voir aussi : [llms-full.txt](https://www.emarzona.com/llms-full.txt)
 
 ## Contact
 

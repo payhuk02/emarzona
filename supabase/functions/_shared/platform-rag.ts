@@ -3,6 +3,7 @@
  */
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { createOpenRouterEmbedding } from './ai-gateway.ts';
+import { buildWwwProductPublicPath } from './product-public-url.ts';
 const DEFAULT_EMBEDDING_MODEL = 'openai/text-embedding-3-small';
 const CHUNK_SIZE = 900;
 const CHUNK_OVERLAP = 120;
@@ -281,7 +282,7 @@ export async function indexProducts(
 ): Promise<number> {
   const { data: products, error } = await supabase
     .from('products')
-    .select('id, name, description, short_description, category, tags, slug, is_active')
+    .select('id, name, description, short_description, category, tags, slug, product_type, is_active')
     .eq('is_active', true)
     .limit(5000);
 
@@ -310,7 +311,11 @@ export async function indexProducts(
       chunkText: piece,
       metadata: {
         title: product.name,
-        url: product.slug ? `/product/${product.slug}` : undefined,
+        url: buildWwwProductPublicPath({
+          id: product.id,
+          slug: product.slug,
+          product_type: product.product_type,
+        }) ?? undefined,
         category: product.category,
       },
     }));

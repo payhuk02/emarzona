@@ -6,6 +6,7 @@ import {
   buildLandingHreflangAlternates,
   buildLandingLangUrl,
   parseLandingLangFromSearch,
+  resolveLandingPageSEO,
 } from '@/lib/landing-seo';
 
 describe('landing-seo', () => {
@@ -28,11 +29,19 @@ describe('landing-seo', () => {
     expect(alternates.length).toBe(6);
     expect(alternates.map(a => a.hrefLang)).toContain('fr-FR');
     expect(alternates.map(a => a.hrefLang)).toContain('en');
-    expect(alternates.find(a => a.hrefLang === 'x-default')?.href).toContain('lang=fr');
-    expect(alternates.every(a => a.href.includes('lang='))).toBe(true);
+    expect(alternates.find(a => a.hrefLang === 'fr-FR')?.href).toBe(LANDING_CANONICAL_URL);
+    expect(alternates.find(a => a.hrefLang === 'x-default')?.href).toBe(LANDING_CANONICAL_URL);
+    expect(alternates.find(a => a.hrefLang === 'en')?.href).toContain('lang=en');
+  });
+
+  it('resolveLandingPageSEO uses French defaults without lang query', () => {
+    const seo = resolveLandingPageSEO({ langFromUrl: null });
+    expect(seo.title).toBe(LANDING_SEO_DEFAULTS.title);
+    expect(seo.canonical).toBe(LANDING_CANONICAL_URL);
   });
 
   it('builds lang URLs and parses search params', () => {
+    expect(buildLandingLangUrl('fr')).toBe('https://www.emarzona.com/');
     expect(buildLandingLangUrl('en')).toBe('https://www.emarzona.com/?lang=en');
     expect(parseLandingLangFromSearch('?lang=en')).toBe('en');
     expect(parseLandingLangFromSearch('')).toBeNull();

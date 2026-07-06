@@ -60,9 +60,9 @@ interface Meta {
 }
 
 const DEFAULT_META: Meta = {
-  title: 'Emarzona - Plateforme de ecommerce et marketing',
+  title: 'Emarzona — Vendez tout. Gérez tout. Sans limites.',
   description:
-    "Plateforme de ecommerce et marketing. Vendez vos produits digitaux, physiques, services, cours en ligne et oeuvres d'artiste.",
+    "Plateforme e-commerce premium : produits digitaux, physiques, services, cours et œuvres d'artiste. Paiements sécurisés, marketing intégré, marketplace Afrique.",
   image: `${SITE}/og-image.png`,
   url: SITE,
   type: 'website',
@@ -264,8 +264,9 @@ function buildMarketplaceBotMeta(searchParams: URLSearchParams, site: string): M
   }
 
   return {
-    title: 'Marketplace - Explorer les produits | Emarzona',
-    description: DEFAULT_META.description,
+    title: 'Marketplace Emarzona',
+    description:
+      "Découvrez des milliers de produits digitaux, physiques, services, cours en ligne et œuvres d'artistes sur Emarzona. Marketplace sécurisée.",
     image: `${site}/og-marketplace.jpg`,
     url,
     type: 'website',
@@ -279,6 +280,17 @@ async function resolveMeta(req: Request): Promise<Meta> {
 
   if (path === '/marketplace' || path.startsWith('/marketplace/')) {
     return buildMarketplaceBotMeta(url.searchParams, SITE);
+  }
+
+  if (path === '/pricing') {
+    return {
+      title: 'Tarifs | Emarzona',
+      description:
+        'Découvrez les plans et tarifs Emarzona : abonnements produits physiques et commission 10 % sur digital, services, cours et art.',
+      image: DEFAULT_META.image,
+      url: `${SITE}/pricing`,
+      type: 'website',
+    };
   }
 
   // Domaine personnalise vendeur (hors emarzona.com / *.myemarzona.shop)

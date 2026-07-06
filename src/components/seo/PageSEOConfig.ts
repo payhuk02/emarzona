@@ -16,7 +16,7 @@ export interface PageSEOEntry {
 
 /**
  * Map des routes publiques vers leur configuration SEO
- * Les pages dynamiques (/product/:slug) sont gérées individuellement dans leurs composants
+ * Les pages dynamiques (/digital/:id, /physical/:id, etc.) sont gérées dans leurs composants
  */
 export const PAGE_SEO_CONFIG: Record<string, PageSEOEntry> = {
   // === Pages publiques indexables ===
@@ -174,6 +174,10 @@ export const PAGE_SEO_CONFIG: Record<string, PageSEOEntry> = {
   '/legal/refund': {
     title: 'Politique de remboursement | Emarzona',
     description: 'Conditions de remboursement sur la plateforme Emarzona.',
+  },
+  '/legal/dpa': {
+    title: 'Accord de traitement des données (DPA) | Emarzona',
+    description: 'Accord de traitement des données personnelles pour les vendeurs Emarzona.',
   },
 
   // === Pages qui doivent être en noindex ===

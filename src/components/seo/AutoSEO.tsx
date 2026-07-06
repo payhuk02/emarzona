@@ -7,6 +7,7 @@
 import { useLocation } from 'react-router-dom';
 import { SEOMeta } from './SEOMeta';
 import { PAGE_SEO_CONFIG } from './PageSEOConfig';
+import { isPrivateAppRoute, matchNoindexRoute } from '@/lib/seo/seo-route-rules';
 
 export const AutoSEO = () => {
   const { pathname } = useLocation();
@@ -14,18 +15,30 @@ export const AutoSEO = () => {
   // La landing gère son propre SEOMeta + JSON-LD (évite conflit de titres)
   if (pathname === '/') return null;
 
-  // Origine dynamique : preview, custom domain — jamais hardcodée
+  // /pricing gère sa propre meta + redirection vers /#tarifs
+  if (pathname === '/pricing') return null;
+
   const origin =
     typeof window !== 'undefined' ? window.location.origin : 'https://www.emarzona.com';
 
-  // Chercher une config exacte ou la route parente la plus proche
-  const config = PAGE_SEO_CONFIG[pathname];
+  const noindexRule = matchNoindexRoute(pathname);
+  if (noindexRule) {
+    return (
+      <SEOMeta
+        title={noindexRule.title}
+        description={noindexRule.description}
+        url={`${origin}${pathname}`}
+        noindex
+        nofollow
+      />
+    );
+  }
 
-  // Pour les pages dashboard/admin, forcer noindex même sans config
-  const isPrivatePage = /^\/(dashboard|admin|account|settings)/.test(pathname);
+  const config = PAGE_SEO_CONFIG[pathname];
+  const isPrivatePage = isPrivateAppRoute(pathname);
 
   if (!config && !isPrivatePage) {
-    return null; // Pas de config et pas une page privée → pas de meta auto
+    return null;
   }
 
   if (isPrivatePage && !config) {

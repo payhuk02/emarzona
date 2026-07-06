@@ -97,7 +97,10 @@ test.describe('Artist vendor — redirect & RPC create', () => {
     const hreflangs = page.locator('link[rel="alternate"][hreflang]');
     await expect(hreflangs).toHaveCount(6, { timeout: 10_000 });
     await expect(page.locator('link[hreflang="en"]')).toHaveAttribute('href', /lang=en/);
-    await expect(page.locator('link[hreflang="fr-FR"]')).toHaveAttribute('href', /lang=fr/);
+    await expect(page.locator('link[hreflang="fr-FR"]')).toHaveAttribute(
+      'href',
+      /https?:\/\/[^/]+\/?$/
+    );
   });
 
   test('artist wizard draft save creates product + artist_products via RPC', async ({

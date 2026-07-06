@@ -16,6 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ChevronLeft, ChevronRight, ExternalLink, Heart, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { buildWwwProductPublicPath } from '@/lib/seo/product-public-url';
 
 interface ProductRelation {
   id: string;
@@ -149,13 +150,17 @@ export const ArtistGalleryGrid = ({
                         <Eye className="h-4 w-4 mr-1" />
                         Voir
                       </Button>
-                      {product?.slug && (
+                      {product?.id && (
                         <Button
                           variant="secondary"
                           size="sm"
                           onClick={e => {
                             e.stopPropagation();
-                            navigate(`/product/${product.slug}`);
+                            const path = buildWwwProductPublicPath({
+                              id: product.id,
+                              product_type: 'artist',
+                            });
+                            if (path) navigate(path);
                           }}
                         >
                           <ExternalLink className="h-4 w-4 mr-1" />
@@ -262,12 +267,16 @@ export const ArtistGalleryGrid = ({
                       </p>
                     )}
                   </div>
-                  {selectedArtwork.products?.slug && (
+                  {selectedArtwork.products?.id && (
                     <Button
                       variant="outline"
                       onClick={() => {
                         setLightboxOpen(false);
-                        navigate(`/product/${selectedArtwork.products?.slug}`);
+                        const path = buildWwwProductPublicPath({
+                          id: selectedArtwork.products!.id,
+                          product_type: 'artist',
+                        });
+                        if (path) navigate(path);
                       }}
                     >
                       <ExternalLink className="h-4 w-4 mr-2" />
@@ -304,9 +313,3 @@ export const ArtistGalleryGrid = ({
     </>
   );
 };
-
-
-
-
-
-
