@@ -292,7 +292,9 @@
 
 /* Boutons primaires globaux */
 .landing-premium.app-premium
-  .bg-primary.text-primary-foreground:not(.lp-btn-outline):not([data-sidebar]) {
+  .bg-primary.text-primary-foreground:not(.lp-btn-outline):not([data-sidebar]):not(
+    .app-premium-auth-submit
+  ) {
   background: linear-gradient(
     135deg,
     var(--lp-blue-bright) 0%,
@@ -303,7 +305,8 @@
   box-shadow: 0 4px 20px var(--lp-blue-glow);
 }
 
-.landing-premium.app-premium .bg-primary.text-primary-foreground:hover {
+.landing-premium.app-premium
+  .bg-primary.text-primary-foreground:hover:not(.app-premium-auth-submit) {
   filter: brightness(1.05);
 }
 
@@ -351,23 +354,400 @@
   position: relative;
 }
 
-.landing-premium.app-premium .app-premium-auth::before {
+.landing-premium.app-premium .app-premium-auth-layout {
+  position: relative;
+  z-index: 1;
+}
+
+.landing-premium.app-premium .app-premium-auth-form {
+  position: relative;
+  min-height: 100vh;
+  background: linear-gradient(165deg, #0c1a2e 0%, var(--lp-ink) 42%, #050506 100%);
+  isolation: isolate;
+}
+
+.landing-premium.app-premium .app-premium-auth-form::before {
   content: '';
   position: absolute;
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 60% 50% at 70% 30%, rgba(124, 92, 255, 0.12) 0%, transparent 55%),
-    radial-gradient(ellipse 40% 40% at 20% 20%, rgba(201, 162, 39, 0.08) 0%, transparent 50%);
+    radial-gradient(ellipse 70% 55% at 85% 15%, rgba(124, 92, 255, 0.14) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 45% at 10% 85%, rgba(201, 162, 39, 0.1) 0%, transparent 50%),
+    radial-gradient(ellipse 40% 35% at 50% 50%, rgba(37, 99, 235, 0.06) 0%, transparent 60%);
+}
+
+.landing-premium.app-premium .app-premium-auth-form::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.landing-premium.app-premium .app-premium-auth-inner {
+  position: relative;
+  z-index: 1;
+  animation: app-premium-auth-card-in 0.85s var(--lp-ease) both;
+  animation-delay: 0.08s;
+}
+
+@keyframes app-premium-auth-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.landing-premium.app-premium .app-premium-auth-brand {
+  animation: app-premium-auth-card-in 0.75s var(--lp-ease) both;
+}
+
+.landing-premium.app-premium .app-premium-auth-brand .emarzona-brand-name {
+  font-family: var(--lp-serif);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.25));
+}
+
+.landing-premium.app-premium .app-premium-auth-lang button {
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: var(--lp-text-on-dark) !important;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 16px -8px rgba(0, 0, 0, 0.4);
+  transition:
+    background 0.35s var(--lp-ease),
+    border-color 0.35s var(--lp-ease);
+}
+
+.landing-premium.app-premium .app-premium-auth-lang button:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(201, 162, 39, 0.35) !important;
 }
 
 .landing-premium.app-premium .app-premium-auth-card {
   position: relative;
   z-index: 1;
-  border-radius: 1.25rem;
-  border: 1px solid var(--lp-border-light);
-  background: var(--lp-surface-elevated);
-  box-shadow: 0 24px 48px -24px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.99) 0%, rgba(252, 251, 249, 0.98) 100%);
+  box-shadow:
+    0 0 0 1px rgba(201, 162, 39, 0.07),
+    0 32px 64px -28px rgba(0, 0, 0, 0.6),
+    0 0 100px -30px rgba(201, 162, 39, 0.15);
+  animation: app-premium-auth-card-in 0.8s var(--lp-ease) both;
+  animation-delay: 0.12s;
+}
+
+.landing-premium.app-premium .app-premium-auth-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--lp-gold-bright) 25%,
+    var(--lp-gold) 50%,
+    var(--lp-gold-bright) 75%,
+    transparent 100%
+  );
+  opacity: 0.85;
+}
+
+.landing-premium.app-premium .app-premium-auth-title {
+  font-size: clamp(1.75rem, 4vw, 2.125rem) !important;
+  letter-spacing: -0.03em !important;
+  line-height: 1.15 !important;
+}
+
+.landing-premium.app-premium .app-premium-auth-subtitle {
+  color: var(--lp-text-muted) !important;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  max-width: 28ch;
+}
+
+.landing-premium.app-premium .app-premium-auth-tabs-list {
+  width: 100%;
+  height: auto;
+  min-height: 3rem;
+  padding: 0.3rem;
+  border-radius: 0.875rem;
+  background: rgba(15, 15, 18, 0.04);
+  border: 1px solid rgba(15, 15, 18, 0.07);
+  gap: 0.3rem;
+}
+
+.landing-premium.app-premium .app-premium-auth-tab {
+  flex: 1;
+  border-radius: 0.625rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  letter-spacing: 0.015em;
+  color: var(--lp-text-muted);
+  transition:
+    color 0.35s var(--lp-ease),
+    background 0.35s var(--lp-ease),
+    box-shadow 0.35s var(--lp-ease);
+}
+
+.landing-premium.app-premium .app-premium-auth-tab[data-state='active'] {
+  background: #fff;
+  color: var(--lp-text);
+  box-shadow:
+    0 2px 14px -4px rgba(0, 0, 0, 0.14),
+    0 0 0 1px rgba(201, 162, 39, 0.18);
+}
+
+.landing-premium.app-premium
+  .app-premium-auth-card
+  input:not([type='checkbox']):not([type='radio']),
+.landing-premium.app-premium .app-premium-auth-card textarea {
+  background: rgba(250, 249, 247, 0.9);
+  border-color: rgba(15, 15, 18, 0.1);
+  font-size: 0.9375rem;
+  transition:
+    border-color 0.3s var(--lp-ease),
+    box-shadow 0.3s var(--lp-ease),
+    background 0.3s var(--lp-ease);
+}
+
+.landing-premium.app-premium .app-premium-auth-card input:focus,
+.landing-premium.app-premium .app-premium-auth-card textarea:focus {
+  border-color: rgba(201, 162, 39, 0.5);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.14);
+}
+
+.landing-premium.app-premium .app-premium-auth-card label {
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--lp-text);
+}
+
+.landing-premium.app-premium #main-content .app-premium-auth-submit,
+.landing-premium.app-premium #main-content .app-premium-auth-submit.bg-primary {
+  border: none;
+  border-radius: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #fff !important;
+  background: linear-gradient(
+    135deg,
+    #fb923c 0%,
+    var(--lp-orange) 48%,
+    var(--lp-orange-deep) 100%
+  ) !important;
+  box-shadow:
+    0 4px 22px rgba(249, 115, 22, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+  transition:
+    transform 0.35s var(--lp-ease),
+    box-shadow 0.35s var(--lp-ease);
+}
+
+.landing-premium.app-premium #main-content .app-premium-auth-submit:hover:not(:disabled),
+.landing-premium.app-premium
+  #main-content
+  .app-premium-auth-submit.bg-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: none;
+  background: linear-gradient(
+    135deg,
+    #fdba74 0%,
+    var(--lp-orange) 48%,
+    var(--lp-orange-deep) 100%
+  ) !important;
+  box-shadow:
+    0 8px 32px rgba(249, 115, 22, 0.45),
+    0 0 0 1px rgba(201, 162, 39, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24) !important;
+}
+
+.landing-premium.app-premium .app-premium-auth-submit:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.landing-premium.app-premium .app-premium-auth-trust {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem 1rem;
+  margin-top: 1.25rem;
+  padding: 1rem 1.125rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(10px);
+  animation: app-premium-auth-card-in 0.8s var(--lp-ease) both;
+  animation-delay: 0.2s;
+}
+
+.landing-premium.app-premium .app-premium-auth-trust-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: rgba(232, 230, 225, 0.72);
+}
+
+.landing-premium.app-premium .app-premium-auth-trust-item svg {
+  color: var(--lp-gold-bright);
+  flex-shrink: 0;
+  opacity: 0.95;
+}
+
+.landing-premium.app-premium .app-premium-auth-terms {
+  color: rgba(232, 230, 225, 0.5) !important;
+  line-height: 1.5;
+}
+
+.landing-premium.app-premium .app-premium-auth-terms-link {
+  color: rgba(232, 230, 225, 0.78);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.25s var(--lp-ease);
+}
+
+.landing-premium.app-premium .app-premium-auth-terms-link:hover {
+  color: var(--lp-gold-bright);
+}
+
+.landing-premium.app-premium .app-premium-auth-password-wrap {
+  position: relative;
+}
+
+.landing-premium.app-premium .app-premium-auth-password-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 2.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transform: none;
+  flex-shrink: 0;
+}
+
+.landing-premium.app-premium .app-premium-auth-password-toggle:hover {
+  color: hsl(var(--foreground));
+}
+
+.landing-premium.app-premium .app-premium-auth-password-toggle:active {
+  transform: none;
+}
+
+.landing-premium.app-premium .app-premium-auth-password-toggle-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+.landing-premium.app-premium .app-premium-auth-password-toggle-icon svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+}
+
+.landing-premium.app-premium .app-premium-auth-card button[type='button'].text-primary {
+  font-weight: 500;
+  transition: color 0.25s var(--lp-ease);
+}
+
+.landing-premium.app-premium .app-premium-auth-card button[type='button'].text-primary:hover {
+  color: var(--lp-gold-deep);
+}
+
+.landing-premium.app-premium .app-premium-auth-hero {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background: #0a1628;
+}
+
+.landing-premium.app-premium .app-premium-auth-hero-picture {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.landing-premium.app-premium .app-premium-auth-hero-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  object-fit: cover;
+  /* Centré : texte marketing à gauche + dame à droite visibles */
+  object-position: 50% 44%;
+  transform: translateZ(0);
+  filter: contrast(1.03) saturate(1.04);
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+  image-rendering: -webkit-optimize-contrast;
+  animation: app-premium-auth-hero-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes app-premium-auth-hero-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.landing-premium.app-premium .app-premium-auth-hero-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(10, 22, 40, 0.08) 0%, transparent 35%),
+    linear-gradient(180deg, transparent 55%, rgba(10, 22, 40, 0.35) 100%),
+    radial-gradient(ellipse 80% 60% at 15% 40%, rgba(201, 162, 39, 0.06) 0%, transparent 55%);
+}
+
+.landing-premium.app-premium .app-premium-auth-hero-edge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(201, 162, 39, 0.35) 35%,
+    rgba(201, 162, 39, 0.5) 50%,
+    rgba(201, 162, 39, 0.35) 65%,
+    transparent 100%
+  );
+  box-shadow: 0 0 24px rgba(201, 162, 39, 0.15);
 }
 
 /* Inputs */

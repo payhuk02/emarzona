@@ -30,7 +30,7 @@
     "welcome": "Bem-vindo ao Emarzona",
     "welcomeSubtitle": "Sua plataforma de e-commerce de confiança",
     "loading": "Carregando...",
-    "termsNote": "Ao se registrar, você concorda com nossos Termos de Serviço e Política de Privacidade",
+    "termsNote": "Ao continuar, você concorda com nossos <termsLink>Termos de Serviço</termsLink> e Política de Privacidade",
     "login": {
       "title": "Entrar",
       "subtitle": "Entre na sua conta",

@@ -92,7 +92,7 @@
     "welcome": "Bienvenue",
     "welcomeSubtitle": "Connectez-vous ou créez votre compte pour commencer",
     "loading": "Chargement...",
-    "termsNote": "En continuant, vous acceptez nos conditions d'utilisation",
+    "termsNote": "En continuant, vous acceptez nos <termsLink>conditions d'utilisation</termsLink>",
     "login": {
       "title": "Connexion",
       "subtitle": "Connectez-vous à votre compte",

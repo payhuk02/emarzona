@@ -63,7 +63,7 @@
     "welcome": "Welcome",
     "welcomeSubtitle": "Sign in or create your account to get started",
     "loading": "Loading...",
-    "termsNote": "By continuing, you accept our terms of service",
+    "termsNote": "By continuing, you accept our <termsLink>terms of service</termsLink>",
     "login": {
       "title": "Login",
       "subtitle": "Sign in to your account",

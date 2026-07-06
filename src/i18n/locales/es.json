@@ -91,7 +91,7 @@
     "welcome": "Bienvenido",
     "welcomeSubtitle": "Inicia sesión o crea tu cuenta para comenzar",
     "loading": "Cargando...",
-    "termsNote": "Al continuar, aceptas nuestros términos de servicio",
+    "termsNote": "Al continuar, aceptas nuestros <termsLink>términos de servicio</termsLink>",
     "login": {
       "title": "Iniciar sesión",
       "subtitle": "Accede a tu cuenta",

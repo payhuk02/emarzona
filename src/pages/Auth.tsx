@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,7 +13,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { AlertCircle, Eye, EyeOff, Mail, CheckCircle2, Shield } from 'lucide-react';
+import {
+  AlertCircle,
+  Eye,
+  EyeOff,
+  Mail,
+  CheckCircle2,
+  Shield,
+  Truck,
+  Award,
+  Headphones,
+} from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { EmarzonaBrandName } from '@/components/brand/EmarzonaBrandName';
 import {
@@ -49,6 +59,18 @@ import {
   getSsoLoginHref,
   resolveSsoErrorMessage,
 } from '@/lib/sso/enforce-sso-login';
+import { AuthHeroPanel } from '@/components/auth/AuthHeroPanel';
+
+const AUTH_FONTS_ID = 'auth-premium-fonts';
+const AUTH_FONTS_HREF =
+  'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap';
+
+const AUTH_TRUST_ITEMS = [
+  { icon: Shield, label: 'Paiement sécurisé' },
+  { icon: Truck, label: 'Livraison rapide' },
+  { icon: Award, label: 'Qualité garantie' },
+  { icon: Headphones, label: 'Support 7j/7' },
+] as const;
 
 const Auth = () => {
   const { t } = useTranslation();
@@ -92,6 +114,16 @@ const Auth = () => {
     const path = await resolvePostAuthRedirectPath(returnTo);
     navigate(path, { replace: true });
   }, [navigate, returnTo]);
+
+  useEffect(() => {
+    if (!document.getElementById(AUTH_FONTS_ID)) {
+      const link = document.createElement('link');
+      link.id = AUTH_FONTS_ID;
+      link.rel = 'stylesheet';
+      link.href = AUTH_FONTS_HREF;
+      document.head.appendChild(link);
+    }
+  }, []);
 
   // Redirect if already logged in (admins → /admin, vendeurs → /dashboard)
   useEffect(() => {
@@ -512,7 +544,7 @@ const Auth = () => {
   const baseUrl = window.location.origin;
 
   return (
-    <div className="app-premium-auth min-h-screen flex items-center justify-center p-3 sm:p-4 md:p-6 relative">
+    <div className="app-premium-auth min-h-screen relative">
       {/* SEO Meta Tags */}
       <SEOMeta
         title={`${t('nav.login')} / ${t('nav.signup')} - Emarzona`}
@@ -526,313 +558,357 @@ const Auth = () => {
       />
 
       {/* Language Switcher - Top Right */}
-      <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-50">
+      <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-50 app-premium-auth-lang">
         <LanguageSwitcher variant="outline" showLabel={false} />
       </div>
 
-      <div className="w-full max-w-md">
-        <div className="flex justify-center mb-6 sm:mb-8">
-          <Link
-            to="/"
-            className="relative inline-flex items-center gap-2 mb-4 sm:mb-6"
-            aria-label={`Emarzona — ${t('common.backToHome', "Retour à l'accueil")}`}
-          >
-            <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-8 sm:relative sm:left-auto sm:top-auto sm:translate-y-0 sm:h-10 sm:w-10 z-0">
-              {platformLogo ? (
-                <img
-                  src={platformLogo}
-                  alt="Emarzona Logo"
-                  width={40}
-                  height={40}
-                  className="h-full w-full opacity-60 sm:opacity-100 flex-shrink-0 object-contain"
-                  loading="eager"
-                />
-              ) : (
-                <div className="h-full w-full bg-primary rounded flex items-center justify-center opacity-60 sm:opacity-100 flex-shrink-0">
-                  <span className="text-sm font-bold text-primary-foreground">E</span>
+      <div className="app-premium-auth-layout min-h-screen w-full lg:grid lg:grid-cols-[minmax(0,1.12fr)_minmax(0,0.88fr)]">
+        <AuthHeroPanel />
+
+        <div className="app-premium-auth-form flex items-center justify-center p-3 sm:p-4 md:p-6 lg:p-8 xl:p-12">
+          <div className="app-premium-auth-inner w-full max-w-[26rem]">
+            <div className="flex justify-center mb-6 sm:mb-8 app-premium-auth-brand">
+              <Link
+                to="/"
+                className="relative inline-flex items-center gap-2.5"
+                aria-label={`Emarzona — ${t('common.backToHome', "Retour à l'accueil")}`}
+              >
+                <div className="h-10 w-10 sm:h-11 sm:w-11 flex-shrink-0">
+                  {platformLogo ? (
+                    <img
+                      src={platformLogo}
+                      alt="Emarzona Logo"
+                      width={44}
+                      height={44}
+                      className="h-full w-full flex-shrink-0 object-contain drop-shadow-sm"
+                      loading="eager"
+                    />
+                  ) : (
+                    <div className="h-full w-full bg-primary rounded-lg flex items-center justify-center flex-shrink-0 shadow-md">
+                      <span className="text-sm font-bold text-primary-foreground">E</span>
+                    </div>
+                  )}
                 </div>
-              )}
+                <EmarzonaBrandName className="text-2xl sm:text-[1.75rem] tracking-tight" />
+              </Link>
             </div>
-            <EmarzonaBrandName className="relative z-10 pl-9 text-2xl sm:pl-0 sm:text-3xl" />
-          </Link>
-        </div>
 
-        <Card
-          id="main-content"
-          className="app-premium-auth-card shadow-large"
-          role="main"
-          aria-labelledby="auth-title"
-        >
-          <CardHeader className="p-4 sm:p-6">
-            <CardTitle id="auth-title" className="app-premium-page-title text-xl sm:text-2xl">
-              {getValue('auth.welcome') || t('auth.welcome')}
-            </CardTitle>
-            <CardDescription className="text-sm sm:text-base">
-              {getValue('auth.welcomeSubtitle') || t('auth.welcomeSubtitle')}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-4 sm:p-6 pt-0">
-            {error && (
-              <Alert variant="destructive" className="mb-4">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
-            <Tabs
-              value={authTab}
-              onValueChange={value => {
-                const tab = value === 'signup' ? 'signup' : 'login';
-                navigate(getAuthPathForTab(tab), { replace: true });
-                setError('');
-              }}
-              className="w-full"
+            <Card
+              id="main-content"
+              className="app-premium-auth-card"
+              role="main"
+              aria-labelledby="auth-title"
             >
-              <TabsList className="w-full overflow-x-auto flex-nowrap justify-start">
-                <TabsTrigger value="login" className="min-h-[44px] shrink-0">
-                  {getValue('auth.login.title') || t('nav.login')}
-                </TabsTrigger>
-                <TabsTrigger value="signup" className="min-h-[44px] shrink-0">
-                  {getValue('auth.signup.title') || t('nav.signup')}
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="login">
-                {ssoEnforcement && (
-                  <Alert className="mb-4 border-primary/40 bg-primary/5">
-                    <Shield className="h-4 w-4 text-primary" />
-                    <AlertDescription className="space-y-2">
-                      <p>
-                        {ssoEnforcement.store_name
-                          ? `${ssoEnforcement.store_name} exige la connexion SSO`
-                          : 'Connexion SSO obligatoire'}
-                        {ssoEnforcement.idp_display_name
-                          ? ` via ${ssoEnforcement.idp_display_name}`
-                          : ''}
-                        .
-                      </p>
-                      <Button variant="outline" size="sm" className="w-full" asChild>
-                        <Link to={getSsoLoginHref(ssoEnforcement.store_slug)}>
-                          Se connecter avec SSO Enterprise
-                        </Link>
-                      </Button>
-                    </AlertDescription>
+              <CardHeader className="p-5 sm:p-7 pb-4 sm:pb-5 text-center sm:text-left">
+                <CardTitle
+                  id="auth-title"
+                  className="app-premium-page-title app-premium-auth-title"
+                >
+                  {getValue('auth.welcome') || t('auth.welcome')}
+                </CardTitle>
+                <CardDescription className="app-premium-auth-subtitle mt-1.5">
+                  {getValue('auth.welcomeSubtitle') || t('auth.welcomeSubtitle')}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-5 sm:p-7 pt-0">
+                {error && (
+                  <Alert variant="destructive" className="mb-4">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>{error}</AlertDescription>
                   </Alert>
                 )}
-                <form
-                  ref={loginFormRef}
-                  onSubmit={handleSignIn}
-                  className="space-y-4"
-                  aria-label={t('auth.login.formLabel')}
-                  noValidate
-                >
-                  <MobileFormField
-                    label={t('auth.login.email')}
-                    name="email-login"
-                    type="email"
-                    value={loginEmail}
-                    onChange={setLoginEmail}
-                    required
-                    error={error.includes('email') || error.includes('Email') ? error : undefined}
-                    fieldProps={{
-                      disabled: isLoading,
-                      autoComplete: 'email',
-                      placeholder: t('auth.login.emailPlaceholder'),
-                    }}
-                  />
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="password-login">{t('auth.login.password')}</Label>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setShowForgotPassword(true);
-                          setResetSent(false);
-                          setResetError('');
-                          setResetEmail('');
-                        }}
-                        className="text-xs sm:text-sm text-primary hover:underline min-h-[44px] px-2 flex items-center touch-manipulation"
-                      >
-                        {t('auth.login.forgotPassword', 'Mot de passe oublié ?')}
-                      </button>
-                    </div>
-                    <div className="relative">
-                      <Input
-                        id="password-login"
-                        name="password-login"
-                        type={showPassword.login ? 'text' : 'password'}
-                        value={loginPassword}
-                        onChange={e => setLoginPassword(e.target.value)}
-                        placeholder={t('auth.login.passwordPlaceholder')}
-                        required
-                        disabled={isLoading}
-                        autoComplete="current-password"
-                        aria-required="true"
-                        aria-invalid={error.includes('password') || error.includes('mot de passe')}
-                        className="pr-12 min-h-[44px] text-base"
-                      />
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setShowPassword({ ...showPassword, login: !showPassword.login })
-                        }
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation"
-                        aria-label={
-                          showPassword.login
-                            ? 'Masquer le mot de passe'
-                            : 'Afficher le mot de passe'
-                        }
-                        tabIndex={-1}
-                      >
-                        {showPassword.login ? (
-                          <EyeOff className="h-5 w-5" />
-                        ) : (
-                          <Eye className="h-5 w-5" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                  <Button
-                    type="submit"
-                    className="w-full gradient-primary min-h-[44px] text-base touch-manipulation"
-                    disabled={isLoading}
-                    aria-busy={isLoading}
-                  >
-                    {isLoading
-                      ? t('auth.login.buttonLoading')
-                      : getValue('auth.login.button') || t('auth.login.button')}
-                  </Button>
-                </form>
-              </TabsContent>
 
-              <TabsContent value="signup">
-                <form
-                  ref={signupFormRef}
-                  onSubmit={handleSignUp}
-                  className="space-y-4"
-                  aria-label={t('auth.signup.formLabel')}
-                  noValidate
+                <Tabs
+                  value={authTab}
+                  onValueChange={value => {
+                    const tab = value === 'signup' ? 'signup' : 'login';
+                    navigate(getAuthPathForTab(tab), { replace: true });
+                    setError('');
+                  }}
+                  className="w-full app-premium-auth-tabs"
                 >
-                  <MobileFormField
-                    label={t('auth.signup.name')}
-                    name="name"
-                    type="text"
-                    value={signupName}
-                    onChange={setSignupName}
-                    required
-                    error={error.includes('name') || error.includes('nom') ? error : undefined}
-                    fieldProps={{
-                      disabled: isLoading,
-                      autoComplete: 'name',
-                      placeholder: t('auth.signup.namePlaceholder'),
-                    }}
-                  />
-                  <MobileFormField
-                    label={t('auth.signup.email')}
-                    name="email-signup"
-                    type="email"
-                    value={signupEmail}
-                    onChange={setSignupEmail}
-                    required
-                    error={error.includes('email') || error.includes('Email') ? error : undefined}
-                    fieldProps={{
-                      disabled: isLoading,
-                      autoComplete: 'email',
-                      placeholder: t('auth.signup.emailPlaceholder'),
-                    }}
-                  />
-                  <div className="space-y-2">
-                    <Label htmlFor="password-signup">{t('auth.signup.password')}</Label>
-                    <div className="relative">
-                      <Input
-                        id="password-signup"
-                        name="password-signup"
-                        type={showPassword.signup ? 'text' : 'password'}
-                        value={signupPassword}
-                        onChange={e => {
-                          setSignupPassword(e.target.value);
-                          handlePasswordChange(e.target.value, 'signup');
-                        }}
-                        placeholder={t('auth.signup.passwordPlaceholder')}
+                  <TabsList className="app-premium-auth-tabs-list w-full overflow-x-auto flex-nowrap">
+                    <TabsTrigger
+                      value="login"
+                      className="app-premium-auth-tab min-h-[44px] shrink-0"
+                    >
+                      {getValue('auth.login.title') || t('nav.login')}
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="signup"
+                      className="app-premium-auth-tab min-h-[44px] shrink-0"
+                    >
+                      {getValue('auth.signup.title') || t('nav.signup')}
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="login">
+                    {ssoEnforcement && (
+                      <Alert className="mb-4 border-primary/40 bg-primary/5">
+                        <Shield className="h-4 w-4 text-primary" />
+                        <AlertDescription className="space-y-2">
+                          <p>
+                            {ssoEnforcement.store_name
+                              ? `${ssoEnforcement.store_name} exige la connexion SSO`
+                              : 'Connexion SSO obligatoire'}
+                            {ssoEnforcement.idp_display_name
+                              ? ` via ${ssoEnforcement.idp_display_name}`
+                              : ''}
+                            .
+                          </p>
+                          <Button variant="outline" size="sm" className="w-full" asChild>
+                            <Link to={getSsoLoginHref(ssoEnforcement.store_slug)}>
+                              Se connecter avec SSO Enterprise
+                            </Link>
+                          </Button>
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                    <form
+                      ref={loginFormRef}
+                      onSubmit={handleSignIn}
+                      className="space-y-4"
+                      aria-label={t('auth.login.formLabel')}
+                      noValidate
+                    >
+                      <MobileFormField
+                        label={t('auth.login.email')}
+                        name="email-login"
+                        type="email"
+                        value={loginEmail}
+                        onChange={setLoginEmail}
                         required
-                        minLength={6}
-                        disabled={isLoading}
-                        autoComplete="new-password"
-                        aria-required="true"
-                        aria-invalid={error.includes('password') || error.includes('mot de passe')}
-                        className="pr-12 min-h-[44px] text-base"
+                        error={
+                          error.includes('email') || error.includes('Email') ? error : undefined
+                        }
+                        fieldProps={{
+                          disabled: isLoading,
+                          autoComplete: 'email',
+                          placeholder: t('auth.login.emailPlaceholder'),
+                        }}
                       />
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setShowPassword({ ...showPassword, signup: !showPassword.signup })
-                        }
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation"
-                        aria-label={
-                          showPassword.signup
-                            ? 'Masquer le mot de passe'
-                            : 'Afficher le mot de passe'
-                        }
-                        tabIndex={-1}
-                      >
-                        {showPassword.signup ? (
-                          <EyeOff className="h-5 w-5" />
-                        ) : (
-                          <Eye className="h-5 w-5" />
-                        )}
-                      </button>
-                    </div>
-                    {passwordStrength > 0 && (
-                      <div className="space-y-1">
-                        <div className="flex gap-1 h-1.5">
-                          {[1, 2, 3, 4, 5].map(level => (
-                            <div
-                              key={level}
-                              className={`flex-1 rounded-full transition-colors ${
-                                level <= passwordStrength
-                                  ? level <= 2
-                                    ? 'bg-red-500'
-                                    : level <= 4
-                                      ? 'bg-yellow-500'
-                                      : 'bg-green-500'
-                                  : 'bg-muted'
-                              }`}
-                              aria-hidden="true"
-                            />
-                          ))}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="password-login">{t('auth.login.password')}</Label>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowForgotPassword(true);
+                              setResetSent(false);
+                              setResetError('');
+                              setResetEmail('');
+                            }}
+                            className="text-xs sm:text-sm text-primary hover:underline min-h-[44px] px-2 flex items-center touch-manipulation"
+                          >
+                            {t('auth.login.forgotPassword', 'Mot de passe oublié ?')}
+                          </button>
                         </div>
+                        <div className="app-premium-auth-password-wrap relative">
+                          <Input
+                            id="password-login"
+                            name="password-login"
+                            type={showPassword.login ? 'text' : 'password'}
+                            value={loginPassword}
+                            onChange={e => setLoginPassword(e.target.value)}
+                            placeholder={t('auth.login.passwordPlaceholder')}
+                            required
+                            disabled={isLoading}
+                            autoComplete="current-password"
+                            aria-required="true"
+                            aria-invalid={
+                              error.includes('password') || error.includes('mot de passe')
+                            }
+                            className="pr-11 min-h-[44px] text-base"
+                          />
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setShowPassword({ ...showPassword, login: !showPassword.login })
+                            }
+                            className="app-premium-auth-password-toggle"
+                            aria-label={
+                              showPassword.login
+                                ? 'Masquer le mot de passe'
+                                : 'Afficher le mot de passe'
+                            }
+                            tabIndex={-1}
+                          >
+                            <span className="app-premium-auth-password-toggle-icon" aria-hidden>
+                              {showPassword.login ? (
+                                <EyeOff className="h-5 w-5" />
+                              ) : (
+                                <Eye className="h-5 w-5" />
+                              )}
+                            </span>
+                          </button>
+                        </div>
+                      </div>
+                      <Button
+                        type="submit"
+                        className="w-full app-premium-auth-submit min-h-[48px] text-base touch-manipulation"
+                        disabled={isLoading}
+                        aria-busy={isLoading}
+                      >
+                        {isLoading
+                          ? t('auth.login.buttonLoading')
+                          : getValue('auth.login.button') || t('auth.login.button')}
+                      </Button>
+                    </form>
+                  </TabsContent>
+
+                  <TabsContent value="signup">
+                    <form
+                      ref={signupFormRef}
+                      onSubmit={handleSignUp}
+                      className="space-y-4"
+                      aria-label={t('auth.signup.formLabel')}
+                      noValidate
+                    >
+                      <MobileFormField
+                        label={t('auth.signup.name')}
+                        name="name"
+                        type="text"
+                        value={signupName}
+                        onChange={setSignupName}
+                        required
+                        error={error.includes('name') || error.includes('nom') ? error : undefined}
+                        fieldProps={{
+                          disabled: isLoading,
+                          autoComplete: 'name',
+                          placeholder: t('auth.signup.namePlaceholder'),
+                        }}
+                      />
+                      <MobileFormField
+                        label={t('auth.signup.email')}
+                        name="email-signup"
+                        type="email"
+                        value={signupEmail}
+                        onChange={setSignupEmail}
+                        required
+                        error={
+                          error.includes('email') || error.includes('Email') ? error : undefined
+                        }
+                        fieldProps={{
+                          disabled: isLoading,
+                          autoComplete: 'email',
+                          placeholder: t('auth.signup.emailPlaceholder'),
+                        }}
+                      />
+                      <div className="space-y-2">
+                        <Label htmlFor="password-signup">{t('auth.signup.password')}</Label>
+                        <div className="app-premium-auth-password-wrap relative">
+                          <Input
+                            id="password-signup"
+                            name="password-signup"
+                            type={showPassword.signup ? 'text' : 'password'}
+                            value={signupPassword}
+                            onChange={e => {
+                              setSignupPassword(e.target.value);
+                              handlePasswordChange(e.target.value, 'signup');
+                            }}
+                            placeholder={t('auth.signup.passwordPlaceholder')}
+                            required
+                            minLength={6}
+                            disabled={isLoading}
+                            autoComplete="new-password"
+                            aria-required="true"
+                            aria-invalid={
+                              error.includes('password') || error.includes('mot de passe')
+                            }
+                            className="pr-11 min-h-[44px] text-base"
+                          />
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setShowPassword({ ...showPassword, signup: !showPassword.signup })
+                            }
+                            className="app-premium-auth-password-toggle"
+                            aria-label={
+                              showPassword.signup
+                                ? 'Masquer le mot de passe'
+                                : 'Afficher le mot de passe'
+                            }
+                            tabIndex={-1}
+                          >
+                            <span className="app-premium-auth-password-toggle-icon" aria-hidden>
+                              {showPassword.signup ? (
+                                <EyeOff className="h-5 w-5" />
+                              ) : (
+                                <Eye className="h-5 w-5" />
+                              )}
+                            </span>
+                          </button>
+                        </div>
+                        {passwordStrength > 0 && (
+                          <div className="space-y-1">
+                            <div className="flex gap-1 h-1.5">
+                              {[1, 2, 3, 4, 5].map(level => (
+                                <div
+                                  key={level}
+                                  className={`flex-1 rounded-full transition-colors ${
+                                    level <= passwordStrength
+                                      ? level <= 2
+                                        ? 'bg-red-500'
+                                        : level <= 4
+                                          ? 'bg-yellow-500'
+                                          : 'bg-green-500'
+                                      : 'bg-muted'
+                                  }`}
+                                  aria-hidden="true"
+                                />
+                              ))}
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              {passwordStrength <= 2 &&
+                                t('auth.signup.passwordStrength.weak', 'Faible')}
+                              {passwordStrength === 3 &&
+                                t('auth.signup.passwordStrength.medium', 'Moyen')}
+                              {passwordStrength === 4 &&
+                                t('auth.signup.passwordStrength.good', 'Bon')}
+                              {passwordStrength >= 5 &&
+                                t('auth.signup.passwordStrength.strong', 'Fort')}
+                            </p>
+                          </div>
+                        )}
                         <p className="text-xs text-muted-foreground">
-                          {passwordStrength <= 2 &&
-                            t('auth.signup.passwordStrength.weak', 'Faible')}
-                          {passwordStrength === 3 &&
-                            t('auth.signup.passwordStrength.medium', 'Moyen')}
-                          {passwordStrength === 4 && t('auth.signup.passwordStrength.good', 'Bon')}
-                          {passwordStrength >= 5 &&
-                            t('auth.signup.passwordStrength.strong', 'Fort')}
+                          {t('auth.signup.passwordHint')}
                         </p>
                       </div>
-                    )}
-                    <p className="text-xs text-muted-foreground">{t('auth.signup.passwordHint')}</p>
-                  </div>
-                  <Button
-                    type="submit"
-                    className="w-full gradient-primary min-h-[44px] text-base touch-manipulation"
-                    disabled={isLoading}
-                    aria-busy={isLoading}
-                  >
-                    {isLoading
-                      ? t('auth.signup.buttonLoading')
-                      : getValue('auth.signup.button') || t('auth.signup.button')}
-                  </Button>
-                </form>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
+                      <Button
+                        type="submit"
+                        className="w-full app-premium-auth-submit min-h-[48px] text-base touch-manipulation"
+                        disabled={isLoading}
+                        aria-busy={isLoading}
+                      >
+                        {isLoading
+                          ? t('auth.signup.buttonLoading')
+                          : getValue('auth.signup.button') || t('auth.signup.button')}
+                      </Button>
+                    </form>
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
 
-        <p className="text-center text-xs sm:text-sm text-muted-foreground mt-4 px-2">
-          {t('auth.termsNote')}
-        </p>
+            <div className="app-premium-auth-trust" aria-label="Garanties Emarzona">
+              {AUTH_TRUST_ITEMS.map(({ icon: Icon, label }) => (
+                <div key={label} className="app-premium-auth-trust-item">
+                  <Icon className="h-4 w-4" aria-hidden />
+                  <span>{label}</span>
+                </div>
+              ))}
+            </div>
+
+            <p className="app-premium-auth-terms text-center text-xs sm:text-sm mt-5 px-2">
+              <Trans
+                i18nKey="auth.termsNote"
+                components={{
+                  termsLink: <Link to="/legal/terms" className="app-premium-auth-terms-link" />,
+                }}
+              />
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Dialog Réinitialisation du mot de passe */}

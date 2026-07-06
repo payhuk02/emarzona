@@ -92,7 +92,7 @@
     "welcome": "Willkommen",
     "welcomeSubtitle": "Melden Sie sich an oder erstellen Sie Ihr Konto, um zu beginnen",
     "loading": "Lädt...",
-    "termsNote": "Durch Fortfahren akzeptieren Sie unsere Nutzungsbedingungen",
+    "termsNote": "Durch Fortfahren akzeptieren Sie unsere <termsLink>Nutzungsbedingungen</termsLink>",
     "login": {
       "title": "Anmelden",
       "subtitle": "Melden Sie sich bei Ihrem Konto an",
