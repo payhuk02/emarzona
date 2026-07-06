@@ -254,6 +254,7 @@ serve(async req => {
           console.log(
             `Skipping sequence email to ${emailData.recipient_email}: ${eligibility.reason}`
           );
+          await advanceEnrollment(supabase, emailData.enrollment_id);
           continue;
         }
 

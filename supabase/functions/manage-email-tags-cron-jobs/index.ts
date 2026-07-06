@@ -8,6 +8,7 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
+import { authenticatePlatformAdminRequest } from '../_shared/admin-auth-utils.ts';
 
 const defaultAllowedOrigin = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
 const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || defaultAllowedOrigin)
@@ -114,14 +115,10 @@ serve(async req => {
       }
     );
 
-    const {
-      data: { user },
-      error: userError,
-    } = await supabaseUser.auth.getUser();
-
-    if (userError || !user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
+    const adminAuth = await authenticatePlatformAdminRequest(supabaseUser, req);
+    if (!adminAuth.ok) {
+      return new Response(JSON.stringify({ error: adminAuth.error }), {
+        status: adminAuth.status,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }

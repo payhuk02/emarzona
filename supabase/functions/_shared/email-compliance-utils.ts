@@ -35,9 +35,11 @@ export async function isEmailUnsubscribed(
         level: 'error',
         message: 'check_user_unsubscribed failed',
         error: error.message,
+        category,
       })
     );
-    return false;
+    // Fail-closed pour marketing/notification ; transactionnel reste permissif (commandes critiques)
+    return category !== 'transactional';
   }
 
   return data === true;

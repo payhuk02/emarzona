@@ -1831,6 +1831,35 @@
         "blockInserted": "Bloc inséré",
         "blockInsertedDescription": "Le bloc a été inséré dans votre template."
       }
+    },
+    "template": "Template email",
+    "selectTemplate": "Sélectionner un template",
+    "noTemplate": "Aucun template",
+    "unsubscribe": {
+      "title": "Gérer vos préférences email",
+      "description": "Désabonnez-vous des emails marketing ou ajustez vos préférences de notification.",
+      "emailLabel": "Votre adresse email *",
+      "emailPlaceholder": "votre@email.com",
+      "typeLabel": "Type de désabonnement *",
+      "types": {
+        "marketing": "Emails marketing uniquement",
+        "newsletter": "Newsletters uniquement",
+        "transactional": "Emails transactionnels optionnels",
+        "all": "Tous les emails optionnels"
+      },
+      "reasonLabel": "Raison (optionnel)",
+      "reasonPlaceholder": "Dites-nous pourquoi vous vous désabonnez…",
+      "confirm": "Confirmer le désabonnement",
+      "processing": "Traitement…",
+      "settingsLink": "Préférences complètes du compte",
+      "manageAccount": "Gérer toutes mes préférences",
+      "error": "Erreur lors du désabonnement",
+      "success": {
+        "title": "Désabonnement confirmé",
+        "description": "Vos préférences ont été mises à jour",
+        "all": "Vous ne recevrez plus d'emails marketing optionnels.",
+        "type": "Vous êtes désabonné des emails de type {{type}}."
+      }
     }
   },
   "digitalUpdates": {

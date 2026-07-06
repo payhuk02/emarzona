@@ -1686,7 +1686,33 @@
     },
     "template": "Email template",
     "selectTemplate": "Select a template",
-    "noTemplate": "No template"
+    "noTemplate": "No template",
+    "unsubscribe": {
+      "title": "Manage your email preferences",
+      "description": "Unsubscribe from marketing emails or adjust your notification preferences.",
+      "emailLabel": "Your email address *",
+      "emailPlaceholder": "you@example.com",
+      "typeLabel": "Unsubscribe type *",
+      "types": {
+        "marketing": "Marketing emails only",
+        "newsletter": "Newsletters only",
+        "transactional": "Optional transactional emails",
+        "all": "All optional emails"
+      },
+      "reasonLabel": "Reason (optional)",
+      "reasonPlaceholder": "Tell us why you're unsubscribing…",
+      "confirm": "Confirm unsubscribe",
+      "processing": "Processing…",
+      "settingsLink": "Full account preferences",
+      "manageAccount": "Manage all my preferences",
+      "error": "Unsubscribe failed",
+      "success": {
+        "title": "Unsubscribe confirmed",
+        "description": "Your preferences have been updated",
+        "all": "You will no longer receive optional marketing emails.",
+        "type": "You have been unsubscribed from {{type}} emails."
+      }
+    }
   },
   "digitalUpdates": {
     "title": "Update Management",

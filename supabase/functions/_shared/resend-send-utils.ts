@@ -2,7 +2,7 @@
  * Envoi marketing / séquences via Resend (provider unifié)
  */
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { logEmailSend, pickLocalized, replaceVariables } from './email-template-utils.ts';
+import { logEmailSend, pickLocalized, replaceVariables, htmlToText } from './email-template-utils.ts';
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 const RESEND_FROM_EMAIL = Deno.env.get('RESEND_FROM_EMAIL') || 'noreply@mail.emarzona.com';
@@ -104,6 +104,7 @@ export async function sendMarketingEmailViaResend(
         to: [options.to.trim().toLowerCase()],
         subject,
         html,
+        text: htmlToText(html),
         ...(tags.length > 0 ? { tags } : {}),
       }),
     });

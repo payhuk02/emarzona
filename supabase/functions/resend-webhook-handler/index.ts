@@ -53,7 +53,7 @@ async function incrementCampaignMetricFromLog(
   if (!campaignId) return;
   await supabase.rpc('increment_campaign_metric', {
     p_campaign_id: campaignId,
-    p_metric: metric,
+    p_metric_key: metric,
     p_increment: 1,
   });
 }
@@ -196,8 +196,10 @@ async function checkBounceRateAndAlert(): Promise<void> {
 }
 
 function parsePayload(rawBody: string, req: Request): ResendWebhookPayload[] {
+  const allowLegacyWebhook = Deno.env.get('ALLOW_LEGACY_RESEND_WEBHOOK') === 'true';
   const legacyHeader = req.headers.get('x-resend-webhook-secret');
   if (
+    allowLegacyWebhook &&
     legacyHeader &&
     RESEND_WEBHOOK_SECRET &&
     legacyHeader.trim() === RESEND_WEBHOOK_SECRET.trim()

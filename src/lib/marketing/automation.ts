@@ -120,8 +120,8 @@ export class MarketingAutomation {
           ...data,
           unsubscribeUrl:
             typeof window !== 'undefined'
-              ? `${window.location.origin}/unsubscribe?email=${encodeURIComponent(to)}&campaign=${campaignId}`
-              : `/unsubscribe?email=${encodeURIComponent(to)}&campaign=${campaignId}`,
+              ? `${window.location.origin}/unsubscribe?email=${encodeURIComponent(to)}&campaign_id=${campaignId}`
+              : `/unsubscribe?email=${encodeURIComponent(to)}&campaign_id=${campaignId}`,
         },
         type: 'marketing',
       } as SendEmailPayload);
