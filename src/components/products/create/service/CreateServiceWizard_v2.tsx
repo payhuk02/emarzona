@@ -373,12 +373,13 @@ export const CreateServiceWizard = ({
       switch (step) {
         case 1: {
           // 1. Validation client avec Zod
+          const effectiveDuration = formData.duration_minutes ?? formData.duration;
           const result = validateWithZod(serviceSchema, {
             name: formData.name,
             slug: formData.slug,
             description: formData.description,
             price: formData.price,
-            duration: formData.duration,
+            duration: effectiveDuration,
             max_participants: formData.max_participants,
             meeting_url: formData.meeting_url,
             location_address: formData.location_address,
@@ -421,7 +422,7 @@ export const CreateServiceWizard = ({
               name: formData.name,
               slug: formData.slug,
               price: formData.price,
-              duration: formData.duration,
+              duration: effectiveDuration,
               maxParticipants: formData.max_participants,
               meetingUrl: formData.meeting_url,
             });
@@ -452,8 +453,9 @@ export const CreateServiceWizard = ({
 
           break;
         }
-        case 2:
-          if (!formData.duration || formData.duration <= 0) {
+        case 2: {
+          const effectiveDuration = formData.duration_minutes ?? formData.duration;
+          if (!effectiveDuration || effectiveDuration <= 0) {
             errors.push(t('services.errors.durationRequired', 'La durée du service est requise'));
           }
           if (formData.location_type === 'on_site' && !formData.location_address?.trim()) {
@@ -473,6 +475,7 @@ export const CreateServiceWizard = ({
             );
           }
           break;
+        }
 
         case 3:
           if (
@@ -675,9 +678,12 @@ export const CreateServiceWizard = ({
         is_active: !isDraft,
       };
 
+      const bookingOptions = formData.booking_options;
+      const effectiveDuration = formData.duration_minutes ?? formData.duration ?? 60;
+
       const servicePayload: Record<string, unknown> = {
         service_type: formData.service_type || 'appointment',
-        duration_minutes: formData.duration || 60,
+        duration_minutes: effectiveDuration,
         location_type: formData.location_type || 'on_site',
         location_address: formData.location_address,
         meeting_url: formData.meeting_url,
@@ -688,13 +694,16 @@ export const CreateServiceWizard = ({
         deposit_required: formData.deposit_required || false,
         deposit_amount: formData.deposit_amount,
         deposit_type: formData.deposit_type,
-        allow_booking_cancellation: formData.allow_booking_cancellation !== false,
-        cancellation_deadline_hours: formData.cancellation_deadline_hours || 24,
-        require_approval: formData.require_approval || false,
-        buffer_time_before: formData.buffer_time_before || 0,
-        buffer_time_after: formData.buffer_time_after || 0,
-        max_bookings_per_day: formData.max_bookings_per_day,
-        advance_booking_days: formData.advance_booking_days || 30,
+        allow_booking_cancellation:
+          bookingOptions?.allow_booking_cancellation ?? formData.allow_booking_cancellation ?? true,
+        cancellation_deadline_hours:
+          bookingOptions?.cancellation_deadline_hours ?? formData.cancellation_deadline_hours ?? 24,
+        require_approval: bookingOptions?.require_approval ?? formData.require_approval ?? false,
+        buffer_time_before: bookingOptions?.buffer_time_before ?? formData.buffer_time_before ?? 0,
+        buffer_time_after: bookingOptions?.buffer_time_after ?? formData.buffer_time_after ?? 0,
+        max_bookings_per_day: bookingOptions?.max_bookings_per_day ?? formData.max_bookings_per_day,
+        advance_booking_days:
+          bookingOptions?.advance_booking_days ?? formData.advance_booking_days ?? 30,
       };
 
       const rpcResult = await createServiceProductTx(store.id, productPayload, servicePayload);
@@ -781,8 +790,18 @@ export const CreateServiceWizard = ({
       }
 
       // 6. Create resources
-      if (formData.resources && formData.resources.length > 0) {
-        const resourcesData = (formData.resources as ServiceResource[]).map(resource => ({
+      const resourcesToSave: ServiceResource[] =
+        formData.resources && formData.resources.length > 0
+          ? (formData.resources as ServiceResource[])
+          : (formData.resources_needed || []).map(name => ({
+              name,
+              type: 'other',
+              quantity_available: 1,
+              is_required: true,
+            }));
+
+      if (resourcesToSave.length > 0) {
+        const resourcesData = resourcesToSave.map(resource => ({
           service_product_id: serviceProduct.id,
           name: resource.name,
           description: resource.description,
@@ -920,7 +939,7 @@ export const CreateServiceWizard = ({
     // Validate required steps (1-4 are required, 5-7 are optional)
     let allValid = true;
     for (let step = 1; step <= 4; step++) {
-      if (!validateStep(step)) {
+      if (!(await validateStep(step))) {
         allValid = false;
       }
     }

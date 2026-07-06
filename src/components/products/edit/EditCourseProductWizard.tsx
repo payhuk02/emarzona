@@ -47,12 +47,17 @@ import { logger } from '@/lib/logger';
 import { useQuery } from '@tanstack/react-query';
 import type { CourseSection, CourseLesson, CourseFormData } from '@/types/course-form';
 
-const PRODUCT_FIELDS = 'id, store_id, name, slug, description, short_description, category_id, image_url, images, price, currency, promotional_price, pricing_model, free_product_id, licensing_type, license_terms, meta_title, meta_description, og_image, faqs';
-const COURSE_FIELDS = 'id, product_id, level, language, certificate_enabled, certificate_passing_score, learning_objectives, prerequisites, target_audience';
-const PRODUCT_AFFILIATE_FIELDS = 'id, product_id, affiliate_enabled, commission_rate, commission_type, fixed_commission_amount, cookie_duration_days, max_commission_per_sale, min_order_amount, allow_self_referral, require_approval, terms_and_conditions';
-const COURSE_SECTION_FIELDS = 'id, product_id, title, description, order_index';
-const COURSE_LESSON_FIELDS = 'id, section_id, title, description, content, video_url, video_duration, order_index, is_preview, resources';
-const COURSE_TRACKING_FIELDS = 'id, course_id, tracking_enabled, google_analytics_id, facebook_pixel_id, google_tag_manager_id, tiktok_pixel_id, track_video_events, track_lesson_completion, track_quiz_attempts, track_certificate_downloads';
+const PRODUCT_FIELDS =
+  'id, store_id, name, slug, description, short_description, category_id, image_url, images, price, currency, promotional_price, pricing_model, free_product_id, licensing_type, license_terms, meta_title, meta_description, og_image, faqs';
+const COURSE_FIELDS =
+  'id, product_id, level, language, certificate_enabled, certificate_passing_score, learning_objectives, prerequisites, target_audience';
+const PRODUCT_AFFILIATE_FIELDS =
+  'id, product_id, affiliate_enabled, commission_rate, commission_type, fixed_commission_amount, cookie_duration_days, max_commission_per_sale, min_order_amount, allow_self_referral, require_approval, terms_and_conditions';
+const COURSE_SECTION_FIELDS = 'id, course_id, title, description, order_index';
+const COURSE_LESSON_FIELDS =
+  'id, section_id, course_id, title, description, video_url, video_duration_seconds, order_index, is_preview, downloadable_resources, notes, transcript, video_type';
+const COURSE_TRACKING_FIELDS =
+  'id, course_id, tracking_enabled, google_analytics_id, facebook_pixel_id, google_tag_manager_id, tiktok_pixel_id, track_video_events, track_lesson_completion, track_quiz_attempts, track_certificate_downloads';
 
 interface Section {
   id: string;
@@ -135,10 +140,12 @@ const convertToFormData = async (
   if (userId) {
     const { data: ownershipCheck, error: ownershipError } = await supabase
       .from('products')
-      .select(`
+      .select(
+        `
         id,
         stores!inner(user_id)
-      `)
+      `
+      )
       .eq('id', productId)
       .eq('stores.user_id', userId)
       .single();
@@ -157,27 +164,44 @@ const convertToFormData = async (
 
   if (productError) throw productError;
 
-  // 🚀 PERFORMANCE: Requêtes parallèles pour les données de course
-  const [
-    { data: course, error: courseError },
-    { data: affiliateSettings },
-    { data: sectionsData },
-    { data: lessonsData }
-  ] = await Promise.all([
+  // 🚀 PERFORMANCE: Charger course + affiliation, puis curriculum via course_id
+  const [{ data: course, error: courseError }, { data: affiliateSettings }] = await Promise.all([
     // Données de la course
     supabase.from('courses').select(COURSE_FIELDS).eq('product_id', productId).maybeSingle(),
 
     // Paramètres d'affiliation
-    supabase.from('product_affiliate_settings').select(PRODUCT_AFFILIATE_FIELDS).eq('product_id', productId).maybeSingle(),
-
-    // Sections (si course existe)
-    supabase.from('course_sections').select(COURSE_SECTION_FIELDS).eq('product_id', productId).order('order_index', { ascending: true }),
-
-    // Lessons (si course existe)
-    supabase.from('course_lessons').select(COURSE_LESSON_FIELDS).eq('product_id', productId).order('order_index', { ascending: true })
+    supabase
+      .from('product_affiliate_settings')
+      .select(PRODUCT_AFFILIATE_FIELDS)
+      .eq('product_id', productId)
+      .maybeSingle(),
   ]);
 
   if (courseError && courseError.code !== 'PGRST116') throw courseError;
+
+  let sectionsData: Record<string, unknown>[] = [];
+  let lessonsData: Record<string, unknown>[] = [];
+
+  if (course?.id) {
+    const [sectionsResult, lessonsResult] = await Promise.all([
+      supabase
+        .from('course_sections')
+        .select(COURSE_SECTION_FIELDS)
+        .eq('course_id', course.id)
+        .order('order_index', { ascending: true }),
+      supabase
+        .from('course_lessons')
+        .select(COURSE_LESSON_FIELDS)
+        .eq('course_id', course.id)
+        .order('order_index', { ascending: true }),
+    ]);
+
+    if (sectionsResult.error) throw sectionsResult.error;
+    if (lessonsResult.error) throw lessonsResult.error;
+
+    sectionsData = (sectionsResult.data || []) as Record<string, unknown>[];
+    lessonsData = (lessonsResult.data || []) as Record<string, unknown>[];
+  }
 
   // Organize lessons by section
   const sections: Section[] = (sectionsData || []).map((section: Record<string, unknown>) => ({
@@ -191,12 +215,12 @@ const convertToFormData = async (
         id: lesson.id,
         title: lesson.title || '',
         description: lesson.description || undefined,
-        content: lesson.content || undefined,
+        content: lesson.notes || lesson.transcript || undefined,
         video_url: lesson.video_url || undefined,
-        video_duration: lesson.video_duration || undefined,
+        video_duration: lesson.video_duration_seconds || undefined,
         order_index: lesson.order_index || 0,
         is_preview: lesson.is_preview || false,
-        resources: lesson.resources || [],
+        resources: lesson.downloadable_resources || [],
       })) as CourseLesson[],
     isOpen: false,
   }));
@@ -437,16 +461,18 @@ export const EditCourseProductWizard = ({
       if (user) {
         const { data: ownershipCheck, error: ownershipError } = await supabase
           .from('products')
-          .select(`
+          .select(
+            `
             id,
             stores!inner(user_id)
-          `)
+          `
+          )
           .eq('id', productId)
           .eq('stores.user_id', user.id)
           .single();
 
         if (ownershipError || !ownershipCheck) {
-          throw new Error('Vous n\'avez pas les permissions pour modifier ce produit');
+          throw new Error("Vous n'avez pas les permissions pour modifier ce produit");
         }
       }
       // Generate slug if not provided

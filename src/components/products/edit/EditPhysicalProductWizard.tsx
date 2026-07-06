@@ -58,6 +58,7 @@ import { cn } from '@/lib/utils';
 import type {
   PhysicalProductFormData,
   PhysicalProductFormDataUpdate,
+  PhysicalProductOption,
   PhysicalProductVariant,
 } from '@/types/physical-product';
 import {
@@ -70,10 +71,128 @@ import { useQuery } from '@tanstack/react-query';
 const PRODUCT_FIELDS =
   'id, store_id, name, slug, description, short_description, price, compare_at_price, cost_per_item, images, image_url, category_id, tags, meta_title, meta_description, og_image, faqs, payment_options, hide_purchase_count, hide_likes_count, hide_recommendations_count, hide_downloads_count, hide_reviews_count, hide_rating, is_active';
 const PHYSICAL_PRODUCT_FIELDS =
-  'id, product_id, track_inventory, continue_selling_when_out_of_stock, inventory_policy, sku, barcode, requires_shipping, weight, weight_unit, length, width, height, dimensions_unit, shipping_class, free_shipping, whatsapp_number, whatsapp_enabled';
+  'id, product_id, track_inventory, continue_selling_when_out_of_stock, inventory_policy, sku, barcode, requires_shipping, weight, weight_unit, length, width, height, dimensions_unit, shipping_class, free_shipping, whatsapp_number, whatsapp_enabled, has_variants, option1_name, option2_name, option3_name, low_stock_threshold';
 const PRODUCT_VARIANT_FIELDS =
   'id, physical_product_id, option1_value, option2_value, option3_value, price, compare_at_price, cost_per_item, sku, barcode, quantity, weight, image_url';
-const PHYSICAL_PRODUCT_INVENTORY_FIELDS = 'id, product_id, quantity_available';
+const PHYSICAL_PRODUCT_INVENTORY_FIELDS =
+  'id, product_id, variant_id, quantity_available, low_stock_threshold, location_name';
+const PRODUCT_AFFILIATE_FIELDS =
+  'id, product_id, affiliate_enabled, commission_rate, commission_type, fixed_commission_amount, cookie_duration_days, min_order_amount, allow_self_referral, require_approval, terms_and_conditions';
+
+function buildOptionsFromVariants(
+  variants: PhysicalProductVariant[],
+  optionNames?: {
+    option1_name?: string | null;
+    option2_name?: string | null;
+    option3_name?: string | null;
+  }
+): PhysicalProductOption[] {
+  const names = [
+    optionNames?.option1_name || 'Option 1',
+    optionNames?.option2_name || 'Option 2',
+    optionNames?.option3_name || 'Option 3',
+  ];
+  const valueSets = [new Set<string>(), new Set<string>(), new Set<string>()];
+
+  variants.forEach(v => {
+    if (v.option1_value) valueSets[0].add(v.option1_value);
+    if (v.option2_value) valueSets[1].add(v.option2_value);
+    if (v.option3_value) valueSets[2].add(v.option3_value);
+  });
+
+  return valueSets
+    .map((values, index) => ({ name: names[index], values: Array.from(values) }))
+    .filter(option => option.values.length > 0);
+}
+
+async function syncPhysicalProductInventory(
+  physicalProductId: string,
+  productId: string,
+  storeId: string,
+  formData: Partial<PhysicalProductFormData> & {
+    low_stock_threshold?: number;
+    inventory_location?: string;
+  }
+): Promise<void> {
+  await supabase
+    .from('physical_product_inventory')
+    .delete()
+    .eq('physical_product_id', physicalProductId);
+
+  const hasVariants = Boolean(formData.has_variants && formData.variants?.length);
+  const lowStockThreshold = formData.low_stock_threshold || 5;
+  const locationName = formData.inventory_location || 'Default';
+  const trackInventory = formData.track_inventory !== false;
+
+  if (hasVariants && formData.variants) {
+    await supabase
+      .from('physical_product_variants')
+      .delete()
+      .eq('physical_product_id', physicalProductId);
+
+    const variantsData = formData.variants.map((variant: PhysicalProductVariant) => ({
+      physical_product_id: physicalProductId,
+      option1_value: variant.option1_value,
+      option2_value: variant.option2_value ?? null,
+      option3_value: variant.option3_value ?? null,
+      price: variant.price ?? formData.price ?? 0,
+      compare_at_price: variant.compare_at_price ?? null,
+      cost_per_item: variant.cost_per_item ?? null,
+      sku: variant.sku,
+      barcode: variant.barcode ?? null,
+      quantity: variant.quantity ?? 0,
+      weight: variant.weight ?? null,
+      image_url: variant.image_url ?? null,
+    }));
+
+    const { data: insertedVariants, error: variantsError } = await supabase
+      .from('physical_product_variants')
+      .insert(variantsData)
+      .select('id');
+
+    if (variantsError) throw variantsError;
+
+    if (insertedVariants?.length) {
+      const inventoryRows = insertedVariants.map((inserted, index) => ({
+        physical_product_id: physicalProductId,
+        product_id: productId,
+        store_id: storeId,
+        variant_id: inserted.id,
+        location_name: locationName,
+        quantity_available: formData.variants![index]?.quantity ?? 0,
+        quantity_reserved: 0,
+        low_stock_threshold: lowStockThreshold,
+        track_inventory: trackInventory,
+      }));
+
+      const { error: inventoryError } = await supabase
+        .from('physical_product_inventory')
+        .insert(inventoryRows);
+
+      if (inventoryError) throw inventoryError;
+    }
+    return;
+  }
+
+  await supabase
+    .from('physical_product_variants')
+    .delete()
+    .eq('physical_product_id', physicalProductId);
+
+  const { error: inventoryError } = await supabase.from('physical_product_inventory').insert({
+    physical_product_id: physicalProductId,
+    product_id: productId,
+    store_id: storeId,
+    variant_id: null,
+    location_name: locationName,
+    quantity_available: formData.quantity || 0,
+    quantity_reserved: 0,
+    low_stock_threshold: lowStockThreshold,
+    track_inventory: trackInventory,
+  });
+
+  if (inventoryError) throw inventoryError;
+}
 
 const STEPS = [
   {
@@ -185,12 +304,20 @@ const convertToFormData = async (
 
   if (productError) throw productError;
 
-  // 🚀 PERFORMANCE: Requête parallèle pour les données physiques
-  const { data: physicalProduct, error: physicalError } = await supabase
-    .from('physical_products')
-    .select(PHYSICAL_PRODUCT_FIELDS)
-    .eq('product_id', productId)
-    .maybeSingle();
+  // 🚀 PERFORMANCE: Requêtes parallèles produit physique + affiliation
+  const [{ data: physicalProduct, error: physicalError }, { data: affiliateSettings }] =
+    await Promise.all([
+      supabase
+        .from('physical_products')
+        .select(PHYSICAL_PRODUCT_FIELDS)
+        .eq('product_id', productId)
+        .maybeSingle(),
+      supabase
+        .from('product_affiliate_settings')
+        .select(PRODUCT_AFFILIATE_FIELDS)
+        .eq('product_id', productId)
+        .maybeSingle(),
+    ]);
 
   if (physicalError && physicalError.code !== 'PGRST116') throw physicalError;
 
@@ -200,13 +327,48 @@ const convertToFormData = async (
     .select(PRODUCT_VARIANT_FIELDS)
     .eq('physical_product_id', physicalProduct?.id || '');
 
-  // Load inventory
+  // Load inventory (per variant or product-level)
   const { data: inventory } = await supabase
     .from('physical_product_inventory')
     .select(PHYSICAL_PRODUCT_INVENTORY_FIELDS)
     .eq('product_id', productId);
 
-  // Load size chart
+  const inventoryByVariant = new Map(
+    (inventory || [])
+      .filter(row => row.variant_id)
+      .map(row => [row.variant_id as string, row.quantity_available ?? 0])
+  );
+
+  const mappedVariants = (variants || []).map(
+    (v: {
+      id: string;
+      option1_value?: string;
+      option2_value?: string;
+      option3_value?: string;
+      price?: number;
+      compare_at_price?: number | null;
+      cost_per_item?: number | null;
+      sku?: string;
+      barcode?: string;
+      quantity?: number;
+      weight?: number | null;
+      image_url?: string | null;
+    }) => ({
+      id: v.id,
+      option1_value: v.option1_value || '',
+      option2_value: v.option2_value,
+      option3_value: v.option3_value,
+      price: v.price || product.price || 0,
+      compare_at_price: v.compare_at_price,
+      cost_per_item: v.cost_per_item,
+      sku: v.sku || '',
+      barcode: v.barcode,
+      quantity: inventoryByVariant.get(v.id) ?? v.quantity ?? 0,
+      weight: v.weight,
+      image_url: v.image_url,
+    })
+  ) as PhysicalProductVariant[];
+
   const { data: sizeChart } = await supabase
     .from('product_size_charts')
     .select('size_chart_id')
@@ -236,44 +398,20 @@ const convertToFormData = async (
     tags: product.tags || [],
 
     // Variants
-    has_variants: (variants?.length || 0) > 0,
-    variants: (variants || []).map(
-      (v: {
-        id: string;
-        option1_value?: string;
-        option2_value?: string;
-        option3_value?: string;
-        price?: number;
-        compare_at_price?: number | null;
-        cost_per_item?: number | null;
-        sku?: string;
-        barcode?: string;
-        quantity?: number;
-        weight?: number | null;
-        image_url?: string | null;
-      }) => ({
-        id: v.id,
-        option1_value: v.option1_value || '',
-        option2_value: v.option2_value,
-        option3_value: v.option3_value,
-        price: v.price || product.price || 0,
-        compare_at_price: v.compare_at_price,
-        cost_per_item: v.cost_per_item,
-        sku: v.sku || '',
-        barcode: v.barcode,
-        quantity: v.quantity || 0,
-        weight: v.weight,
-        image_url: v.image_url,
-      })
-    ) as PhysicalProductVariant[],
-    options: [], // Will be extracted from variants
+    has_variants: physicalProduct?.has_variants ?? mappedVariants.length > 0,
+    variants: mappedVariants,
+    options: buildOptionsFromVariants(mappedVariants, physicalProduct ?? undefined),
 
     // Inventory
     track_inventory: physicalProduct?.track_inventory ?? true,
     continue_selling_when_out_of_stock:
       physicalProduct?.continue_selling_when_out_of_stock ?? false,
     inventory_policy: (physicalProduct?.inventory_policy as 'deny' | 'continue') || 'deny',
-    quantity: inventory?.[0]?.quantity_available || 0,
+    quantity:
+      inventory?.find(row => !row.variant_id)?.quantity_available ??
+      inventory?.[0]?.quantity_available ??
+      0,
+    low_stock_threshold: physicalProduct?.low_stock_threshold ?? 5,
     sku: physicalProduct?.sku || '',
     barcode: physicalProduct?.barcode || '',
 
@@ -292,15 +430,16 @@ const convertToFormData = async (
 
     // Affiliation (settings stored in product_affiliate_settings)
     affiliate: {
-      enabled: false,
-      commission_rate: 10,
-      commission_type: 'percentage',
-      fixed_commission_amount: 0,
-      cookie_duration_days: 30,
-      min_order_amount: 0,
-      allow_self_referral: false,
-      require_approval: false,
-      terms_and_conditions: '',
+      enabled: affiliateSettings?.affiliate_enabled ?? false,
+      commission_rate: affiliateSettings?.commission_rate ?? 10,
+      commission_type:
+        (affiliateSettings?.commission_type as 'percentage' | 'fixed') || 'percentage',
+      fixed_commission_amount: affiliateSettings?.fixed_commission_amount ?? 0,
+      cookie_duration_days: affiliateSettings?.cookie_duration_days ?? 30,
+      min_order_amount: affiliateSettings?.min_order_amount ?? 0,
+      allow_self_referral: affiliateSettings?.allow_self_referral ?? false,
+      require_approval: affiliateSettings?.require_approval ?? false,
+      terms_and_conditions: affiliateSettings?.terms_and_conditions ?? '',
     },
 
     // SEO & FAQs
@@ -688,7 +827,15 @@ export const EditPhysicalProductWizard = ({
         free_shipping: formData.free_shipping || false,
         whatsapp_number: formData.whatsapp_number?.trim() || null,
         whatsapp_enabled: Boolean(formData.whatsapp_enabled && formData.whatsapp_number?.trim()),
+        has_variants: Boolean(formData.has_variants && formData.variants?.length),
+        option1_name: formData.options?.[0]?.name || null,
+        option2_name: formData.options?.[1]?.name || null,
+        option3_name: formData.options?.[2]?.name || null,
+        low_stock_threshold:
+          (formData as { low_stock_threshold?: number }).low_stock_threshold || 5,
       };
+
+      let physicalProductId = existingPhysical?.id;
 
       if (existingPhysical) {
         const { error: physicalError } = await supabase
@@ -698,11 +845,72 @@ export const EditPhysicalProductWizard = ({
 
         if (physicalError) throw physicalError;
       } else {
-        const { error: physicalError } = await supabase
+        const { data: newPhysical, error: physicalError } = await supabase
           .from('physical_products')
-          .insert(physicalProductData);
+          .insert(physicalProductData)
+          .select('id')
+          .single();
 
         if (physicalError) throw physicalError;
+        physicalProductId = newPhysical.id;
+      }
+
+      if (!physicalProductId) {
+        throw new Error('Enregistrement produit physique introuvable');
+      }
+
+      await syncPhysicalProductInventory(
+        physicalProductId,
+        productId,
+        store.id,
+        formData as Partial<PhysicalProductFormData> & {
+          low_stock_threshold?: number;
+          inventory_location?: string;
+        }
+      );
+
+      // Update affiliate settings
+      if (formData.affiliate?.enabled) {
+        const { data: existingAffiliate } = await supabase
+          .from('product_affiliate_settings')
+          .select('id')
+          .eq('product_id', productId)
+          .limit(1)
+          .maybeSingle();
+
+        const affiliateData = {
+          product_id: productId,
+          store_id: store.id,
+          affiliate_enabled: formData.affiliate.enabled,
+          commission_rate: formData.affiliate.commission_rate,
+          commission_type: formData.affiliate.commission_type,
+          fixed_commission_amount: formData.affiliate.fixed_commission_amount,
+          cookie_duration_days: formData.affiliate.cookie_duration_days,
+          min_order_amount: formData.affiliate.min_order_amount,
+          allow_self_referral: formData.affiliate.allow_self_referral,
+          require_approval: formData.affiliate.require_approval,
+          terms_and_conditions: formData.affiliate.terms_and_conditions,
+        };
+
+        if (existingAffiliate) {
+          const { error: affiliateError } = await supabase
+            .from('product_affiliate_settings')
+            .update(affiliateData)
+            .eq('id', existingAffiliate.id);
+
+          if (affiliateError) throw affiliateError;
+        } else {
+          const { error: affiliateError } = await supabase
+            .from('product_affiliate_settings')
+            .insert(affiliateData);
+
+          if (affiliateError) throw affiliateError;
+        }
+      } else {
+        await supabase
+          .from('product_affiliate_settings')
+          .update({ affiliate_enabled: false })
+          .eq('product_id', productId);
       }
 
       // Update size chart
@@ -745,7 +953,7 @@ export const EditPhysicalProductWizard = ({
     } finally {
       setIsSaving(false);
     }
-  }, [formData, productId, store, onSuccess, toast]);
+  }, [formData, productId, store, onSuccess, toast, user]);
 
   const handleNext = useCallback(async () => {
     const result = await validateStep(currentStep);

@@ -53,10 +53,14 @@ import type {
 } from '@/types/digital-product-form';
 import { useQuery } from '@tanstack/react-query';
 
-const PRODUCT_FIELDS = 'id, store_id, name, slug, description, short_description, category, price, promotional_price, currency, pricing_model, image_url, images, meta_title, meta_description, og_image, faqs, licensing_type, license_terms, free_product_id, hide_purchase_count, hide_likes_count, hide_recommendations_count, hide_downloads_count, hide_reviews_count, hide_rating, is_active';
-const DIGITAL_PRODUCT_FIELDS = 'id, product_id, digital_type, license_type, license_duration_days, max_activations, allow_license_transfer, auto_generate_keys, main_file_url, main_file_version, download_limit, download_expiry_days, require_registration, watermark_enabled, watermark_text, version';
-const DIGITAL_PRODUCT_FILE_FIELDS = 'id, product_id, name, file_url, file_size_mb, file_type, category, version, is_main, order_index';
-const PRODUCT_AFFILIATE_FIELDS = 'id, product_id, affiliate_enabled, commission_rate, commission_type, fixed_commission_amount, cookie_duration_days, min_order_amount, allow_self_referral, require_approval, terms_and_conditions';
+const PRODUCT_FIELDS =
+  'id, store_id, name, slug, description, short_description, category, price, promotional_price, currency, pricing_model, image_url, images, meta_title, meta_description, og_image, faqs, licensing_type, license_terms, free_product_id, hide_purchase_count, hide_likes_count, hide_recommendations_count, hide_downloads_count, hide_reviews_count, hide_rating, is_active';
+const DIGITAL_PRODUCT_FIELDS =
+  'id, product_id, digital_type, license_type, license_duration_days, max_activations, allow_license_transfer, auto_generate_keys, main_file_url, main_file_version, download_limit, download_expiry_days, require_registration, watermark_enabled, watermark_text, version';
+const DIGITAL_PRODUCT_FILE_FIELDS =
+  'id, product_id, name, file_url, file_size_mb, file_type, category, version, is_main, order_index';
+const PRODUCT_AFFILIATE_FIELDS =
+  'id, product_id, affiliate_enabled, commission_rate, commission_type, fixed_commission_amount, cookie_duration_days, min_order_amount, allow_self_referral, require_approval, terms_and_conditions';
 
 const STEPS = [
   {
@@ -109,15 +113,20 @@ interface EditDigitalProductWizardProps {
  * Convert digital product from DB to form data
  * ✅ SÉCURITÉ: Inclut validation de propriété
  */
-const convertToFormData = async (productId: string, userId?: string): Promise<Partial<DigitalProductFormData>> => {
+const convertToFormData = async (
+  productId: string,
+  userId?: string
+): Promise<Partial<DigitalProductFormData>> => {
   // ✅ SÉCURITÉ: Vérifier propriété du produit avant chargement
   if (userId) {
     const { data: ownershipCheck, error: ownershipError } = await supabase
       .from('products')
-      .select(`
+      .select(
+        `
         id,
         stores!inner(user_id)
-      `)
+      `
+      )
       .eq('id', productId)
       .eq('stores.user_id', userId)
       .single();
@@ -137,22 +146,37 @@ const convertToFormData = async (productId: string, userId?: string): Promise<Pa
   if (productError) throw productError;
 
   // 🚀 PERFORMANCE: Requêtes parallèles pour les données liées
-  const [
-    { data: digitalProduct, error: digitalError },
-    { data: files },
-    { data: affiliateSettings }
-  ] = await Promise.all([
-    // Données digitales
-    supabase.from('digital_products').select(DIGITAL_PRODUCT_FIELDS).eq('product_id', productId).maybeSingle(),
+  const [{ data: digitalProduct, error: digitalError }, { data: affiliateSettings }] =
+    await Promise.all([
+      // Données digitales
+      supabase
+        .from('digital_products')
+        .select(DIGITAL_PRODUCT_FIELDS)
+        .eq('product_id', productId)
+        .maybeSingle(),
 
-    // Fichiers (utilise product_id pour la compatibilité)
-    supabase.from('digital_product_files').select(DIGITAL_PRODUCT_FILE_FIELDS).eq('product_id', productId).order('order_index', { ascending: true }),
-
-    // Paramètres d'affiliation
-    supabase.from('product_affiliate_settings').select(PRODUCT_AFFILIATE_FIELDS).eq('product_id', productId).maybeSingle()
-  ]);
+      // Paramètres d'affiliation
+      supabase
+        .from('product_affiliate_settings')
+        .select(PRODUCT_AFFILIATE_FIELDS)
+        .eq('product_id', productId)
+        .maybeSingle(),
+    ]);
 
   if (digitalError && digitalError.code !== 'PGRST116') throw digitalError;
+
+  // Fichiers liés au digital_product (pas au product_id)
+  let files: Array<Record<string, unknown>> = [];
+  if (digitalProduct?.id) {
+    const { data: filesData, error: filesError } = await supabase
+      .from('digital_product_files')
+      .select(DIGITAL_PRODUCT_FILE_FIELDS)
+      .eq('digital_product_id', digitalProduct.id)
+      .order('order_index', { ascending: true });
+
+    if (filesError) throw filesError;
+    files = filesData;
+  }
 
   // Convert files to downloadable_files format
   const downloadableFiles: DigitalProductDownloadableFile[] = (files || []).map(file => ({
@@ -528,16 +552,18 @@ export const EditDigitalProductWizard = ({
       if (user) {
         const { data: ownershipCheck, error: ownershipError } = await supabase
           .from('products')
-          .select(`
+          .select(
+            `
             id,
             stores!inner(user_id)
-          `)
+          `
+          )
           .eq('id', productId)
           .eq('stores.user_id', user.id)
           .single();
 
         if (ownershipError || !ownershipCheck) {
-          throw new Error('Vous n\'avez pas les permissions pour modifier ce produit');
+          throw new Error("Vous n'avez pas les permissions pour modifier ce produit");
         }
       }
       // Generate slug if not provided
@@ -650,6 +676,8 @@ export const EditDigitalProductWizard = ({
         version: formData.version || '1.0',
       };
 
+      let digitalProductId = existingDigital?.id;
+
       if (existingDigital) {
         const { error: digitalError } = await supabase
           .from('digital_products')
@@ -658,26 +686,30 @@ export const EditDigitalProductWizard = ({
 
         if (digitalError) throw digitalError;
       } else {
-        const { error: digitalError } = await supabase
+        const { data: newDigital, error: digitalError } = await supabase
           .from('digital_products')
-          .insert(digitalProductData);
+          .insert(digitalProductData)
+          .select('id')
+          .single();
 
         if (digitalError) throw digitalError;
+        digitalProductId = newDigital.id;
       }
 
       // Update files
-      if (formData.downloadable_files && formData.downloadable_files.length > 0) {
-        // Delete existing files
-        if (existingDigital) {
-          await supabase
-            .from('digital_product_files')
-            .delete()
-            .eq('digital_product_id', existingDigital.id);
-        }
+      if (
+        digitalProductId &&
+        formData.downloadable_files &&
+        formData.downloadable_files.length > 0
+      ) {
+        await supabase
+          .from('digital_product_files')
+          .delete()
+          .eq('digital_product_id', digitalProductId);
 
         // Insert new files
         const filesData = formData.downloadable_files.map((file, index) => ({
-          digital_product_id: existingDigital?.id || productId,
+          digital_product_id: digitalProductId,
           name: file.name,
           file_url: file.url,
           file_type: file.format || file.name?.split('.').pop() || 'unknown',
