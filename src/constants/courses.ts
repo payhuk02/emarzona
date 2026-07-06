@@ -37,51 +37,51 @@ export const COURSE_CATEGORIES = [
 
 // Types de vidéos
 export const VIDEO_TYPES = [
-  { 
-    value: 'upload', 
-    label: 'Upload direct', 
+  {
+    value: 'upload',
+    label: 'Upload direct',
     description: 'Hébergé sur notre plateforme',
-    icon: '📤'
+    icon: '📤',
   },
-  { 
-    value: 'youtube', 
-    label: 'YouTube', 
+  {
+    value: 'youtube',
+    label: 'YouTube',
     description: 'Lien vers une vidéo YouTube',
-    icon: '📺'
+    icon: '📺',
   },
-  { 
-    value: 'vimeo', 
-    label: 'Vimeo', 
+  {
+    value: 'vimeo',
+    label: 'Vimeo',
     description: 'Lien vers une vidéo Vimeo',
-    icon: '🎥'
+    icon: '🎥',
   },
-  { 
-    value: 'google-drive', 
-    label: 'Google Drive', 
+  {
+    value: 'google-drive',
+    label: 'Google Drive',
     description: 'Lien vers Google Drive',
-    icon: '☁️'
+    icon: '☁️',
   },
 ] as const;
 
 // Types de questions quiz
 export const QUIZ_QUESTION_TYPES = [
-  { 
-    value: 'multiple_choice', 
-    label: 'QCM (Choix multiple)', 
+  {
+    value: 'multiple_choice',
+    label: 'QCM (Choix multiple)',
     description: '4 options, 1 réponse correcte',
-    icon: '☑️'
+    icon: '☑️',
   },
-  { 
-    value: 'true_false', 
-    label: 'Vrai/Faux', 
+  {
+    value: 'true_false',
+    label: 'Vrai/Faux',
     description: '2 options',
-    icon: '✓✗'
+    icon: '✓✗',
   },
-  { 
-    value: 'text', 
-    label: 'Réponse textuelle', 
+  {
+    value: 'text',
+    label: 'Réponse textuelle',
     description: 'Réponse libre',
-    icon: '✍️'
+    icon: '✍️',
   },
 ] as const;
 
@@ -90,7 +90,7 @@ export const COURSE_LIMITS = {
   MIN_TITLE_LENGTH: 10,
   MAX_TITLE_LENGTH: 100,
   MIN_DESCRIPTION_LENGTH: 50,
-  MAX_DESCRIPTION_LENGTH: 2000,
+  MAX_DESCRIPTION_WORDS: 5000,
   MIN_SHORT_DESCRIPTION_LENGTH: 20,
   MAX_SHORT_DESCRIPTION_LENGTH: 200,
   MIN_SECTIONS: 1,
@@ -115,11 +115,11 @@ export const COURSE_LIMITS = {
 
 // Messages de progression
 export const PROGRESS_MESSAGES = {
-  0: "Commencez votre apprentissage !",
-  25: "Vous venez de commencer, continuez comme ça !",
-  50: "Bon début ! Vous êtes sur la bonne voie.",
-  75: "Plus de la moitié ! Vous y êtes presque.",
-  100: "Cours terminé ! 🎉",
+  0: 'Commencez votre apprentissage !',
+  25: 'Vous venez de commencer, continuez comme ça !',
+  50: 'Bon début ! Vous êtes sur la bonne voie.',
+  75: 'Plus de la moitié ! Vous y êtes presque.',
+  100: 'Cours terminé ! 🎉',
 } as const;
 
 // Configuration du certificat
@@ -166,7 +166,7 @@ export const VALIDATION_MESSAGES = {
   TITLE_TOO_SHORT: `Le titre doit contenir au moins ${COURSE_LIMITS.MIN_TITLE_LENGTH} caractères`,
   TITLE_TOO_LONG: `Le titre ne peut pas dépasser ${COURSE_LIMITS.MAX_TITLE_LENGTH} caractères`,
   DESCRIPTION_TOO_SHORT: `La description doit contenir au moins ${COURSE_LIMITS.MIN_DESCRIPTION_LENGTH} caractères`,
-  DESCRIPTION_TOO_LONG: `La description ne peut pas dépasser ${COURSE_LIMITS.MAX_DESCRIPTION_LENGTH} caractères`,
+  DESCRIPTION_TOO_LONG: `La description ne peut pas dépasser ${COURSE_LIMITS.MAX_DESCRIPTION_WORDS} mots`,
   INVALID_SLUG: 'Le slug doit contenir uniquement des lettres minuscules, chiffres et tirets',
   INVALID_VIDEO_URL: 'URL de vidéo invalide',
   INSUFFICIENT_OBJECTIVES: `Ajoutez au moins ${COURSE_LIMITS.MIN_OBJECTIVES} objectifs d'apprentissage`,
@@ -177,16 +177,9 @@ export const VALIDATION_MESSAGES = {
 } as const;
 
 // Export des types
-export type CourseLevel = typeof COURSE_LEVELS[number]['value'];
-export type CourseLanguage = typeof COURSE_LANGUAGES[number]['value'];
-export type CourseCategory = typeof COURSE_CATEGORIES[number]['value'];
-export type VideoType = typeof VIDEO_TYPES[number]['value'];
-export type QuizQuestionType = typeof QUIZ_QUESTION_TYPES[number]['value'];
-export type EnrollmentStatus = typeof ENROLLMENT_STATUSES[keyof typeof ENROLLMENT_STATUSES];
-
-
-
-
-
-
-
+export type CourseLevel = (typeof COURSE_LEVELS)[number]['value'];
+export type CourseLanguage = (typeof COURSE_LANGUAGES)[number]['value'];
+export type CourseCategory = (typeof COURSE_CATEGORIES)[number]['value'];
+export type VideoType = (typeof VIDEO_TYPES)[number]['value'];
+export type QuizQuestionType = (typeof QUIZ_QUESTION_TYPES)[number]['value'];
+export type EnrollmentStatus = (typeof ENROLLMENT_STATUSES)[keyof typeof ENROLLMENT_STATUSES];

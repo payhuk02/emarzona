@@ -46,6 +46,11 @@ import { useStore } from '@/hooks/useStore';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { cn } from '@/lib/utils';
+import {
+  PRODUCT_DESCRIPTION_MAX_WORDS,
+  PRODUCT_DESCRIPTION_WORD_LIMIT_MESSAGE,
+} from '@/constants/product-description';
+import { countPlainTextWords } from '@/lib/string-utils';
 
 import type {
   CourseSection,
@@ -328,6 +333,9 @@ export const CreateCourseWizard = ({
           );
         if (!formData.description)
           newErrors.description = t('courses.errors.descRequired', 'La description est requise');
+        else if (countPlainTextWords(formData.description) > PRODUCT_DESCRIPTION_MAX_WORDS) {
+          newErrors.description = PRODUCT_DESCRIPTION_WORD_LIMIT_MESSAGE;
+        }
         if (!formData.level)
           newErrors.level = t('courses.errors.levelRequired', 'Le niveau est requis');
         if (!formData.language)

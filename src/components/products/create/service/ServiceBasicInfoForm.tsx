@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { RichTextEditorPro } from '@/components/ui/rich-text-editor-pro';
+import { PRODUCT_DESCRIPTION_MAX_WORDS } from '@/constants/product-description';
 import { Badge } from '@/components/ui/badge';
 import {
   Select,
@@ -157,6 +158,7 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
           onChange={content => onUpdate({ description: content })}
           placeholder="Décrivez votre service en détail..."
           showWordCount={true}
+          maxWords={PRODUCT_DESCRIPTION_MAX_WORDS}
           maxHeight="400px"
         />
       </div>

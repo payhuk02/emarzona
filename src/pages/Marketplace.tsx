@@ -320,14 +320,14 @@ const Marketplace = () => {
 
   const isLoadingProducts = catalogLoading && hasLoadedOnce;
 
-  const categories = useMemo(() => {
+  const catalogCategories = useMemo(() => {
     const cats = Array.from(
       new Set(catalogProducts.map(p => p.category).filter(Boolean))
     ) as string[];
     return cats.sort();
   }, [catalogProducts]);
 
-  const productTypes = useMemo(() => {
+  const catalogProductTypes = useMemo(() => {
     const types = Array.from(
       new Set(catalogProducts.map(p => p.product_type).filter(Boolean))
     ) as string[];
@@ -343,28 +343,37 @@ const Marketplace = () => {
   const marketplaceFacets = shouldUseUnifiedRpc ? catalogFacets : typeSpecificFacets;
   const facetsLoading = shouldUseUnifiedRpc ? unifiedCatalogLoading : typeFacetsLoading;
 
+  const facetCategories = useMemo(
+    () => marketplaceFacets?.categories ?? [],
+    [marketplaceFacets?.categories]
+  );
+  const facetProductTypes = useMemo(
+    () => marketplaceFacets?.product_types ?? [],
+    [marketplaceFacets?.product_types]
+  );
+
   const categoryFacetMap = useMemo(() => {
     const map: Record<string, number> = {};
-    marketplaceFacets?.categories.forEach(c => {
+    facetCategories.forEach(c => {
       map[c.value] = c.count;
     });
     return map;
-  }, [marketplaceFacets?.categories]);
+  }, [facetCategories]);
 
   const facetCategoryOptions = useMemo(() => {
-    if (marketplaceFacets?.categories.length) {
-      return marketplaceFacets.categories.map(c => c.value);
+    if (facetCategories.length) {
+      return facetCategories.map(c => c.value);
     }
-    return categories;
-  }, [marketplaceFacets?.categories, categories]);
+    return catalogCategories;
+  }, [facetCategories, catalogCategories]);
 
   const productTypeFacetCounts = useMemo(() => {
     const map: Record<string, number> = {};
-    marketplaceFacets?.product_types.forEach(t => {
+    facetProductTypes.forEach(t => {
       map[t.value] = t.count;
     });
     return map;
-  }, [marketplaceFacets?.product_types]);
+  }, [facetProductTypes]);
 
   // ✅ REFACTORING: updateFilter et clearFilters sont maintenant fournis par useMarketplaceFilters
   // Réinitialiser la pagination quand les filtres changent
@@ -465,12 +474,12 @@ const Marketplace = () => {
         (sum, p) => sum + (p.purchases_count || p.reviews_count || 0),
         0
       ),
-      categoriesCount: categories.length,
+      categoriesCount: catalogCategories.length,
       featuredProducts: catalogProducts.filter(
         p => p.promotional_price && p.promotional_price < p.price
       ).length,
     }),
-    [catalogProducts, categories, pagination.totalItems]
+    [catalogProducts, catalogCategories, pagination.totalItems]
   );
 
   const marketplaceSeoData = useMemo(() => {
@@ -628,7 +637,7 @@ const Marketplace = () => {
           showAdvancedSearch={showAdvancedSearch}
           onToggleAdvancedSearch={() => setShowAdvancedSearch(!showAdvancedSearch)}
           onToggleComparison={() => setShowComparison(true)}
-          categories={categories}
+          categories={catalogCategories}
           productTypeFacets={marketplaceFacets?.product_types ?? []}
           facetsTotal={marketplaceFacets?.total}
           facetsLoading={facetsLoading}
@@ -720,7 +729,8 @@ const Marketplace = () => {
                         {['digital', 'physical', 'service', 'course', 'artist']
                           .filter(
                             type =>
-                              productTypeFacetCounts[type] != null || productTypes.includes(type)
+                              productTypeFacetCounts[type] != null ||
+                              catalogProductTypes.includes(type)
                           )
                           .map(type => (
                             <option key={type} value={type}>
@@ -977,8 +987,8 @@ const Marketplace = () => {
           onClose={() => setShowAdvancedSearch(false)}
           filters={filters}
           onFiltersChange={updateFilter}
-          categories={categories}
-          productTypes={productTypes}
+          categories={catalogCategories}
+          productTypes={catalogProductTypes}
           priceRange={priceRange}
           onPriceRangeChange={setPriceRange}
         />

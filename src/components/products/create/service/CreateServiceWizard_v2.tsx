@@ -387,12 +387,14 @@ export const CreateServiceWizard = ({
           if (!result.valid) {
             const nameError = getFieldError(result.errors, 'name');
             const priceError = getFieldError(result.errors, 'price');
+            const descriptionError = getFieldError(result.errors, 'description');
             const durationError = getFieldError(result.errors, 'duration');
             const maxParticipantsError = getFieldError(result.errors, 'max_participants');
             const meetingUrlError = getFieldError(result.errors, 'meeting_url');
 
             if (nameError) errors.push(nameError);
             if (priceError) errors.push(priceError);
+            if (descriptionError) errors.push(descriptionError);
             if (durationError) errors.push(durationError);
             if (maxParticipantsError) errors.push(maxParticipantsError);
             if (meetingUrlError) errors.push(meetingUrlError);

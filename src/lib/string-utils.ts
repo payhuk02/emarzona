@@ -6,7 +6,11 @@
 /**
  * Tronque une chaîne à une longueur maximale
  */
-export function truncate(str: string | null | undefined, maxLength: number, suffix: string = '...'): string {
+export function truncate(
+  str: string | null | undefined,
+  maxLength: number,
+  suffix: string = '...'
+): string {
   if (!str) return '';
   if (str.length <= maxLength) return str;
   return str.substring(0, maxLength - suffix.length) + suffix;
@@ -27,7 +31,7 @@ export function capitalizeWords(str: string | null | undefined): string {
   if (!str) return '';
   return str
     .split(' ')
-    .map((word) => capitalize(word))
+    .map(word => capitalize(word))
     .join(' ');
 }
 
@@ -101,14 +105,19 @@ export function extractKeywords(str: string | null | undefined, minLength: numbe
   return str
     .toLowerCase()
     .split(/\s+/)
-    .filter((word) => word.length >= minLength)
+    .filter(word => word.length >= minLength)
     .filter((word, index, arr) => arr.indexOf(word) === index); // Unique
 }
 
 /**
  * Masque une partie d'une chaîne (ex: email, téléphone)
  */
-export function mask(str: string | null | undefined, start: number = 0, end: number = 0, maskChar: string = '*'): string {
+export function mask(
+  str: string | null | undefined,
+  start: number = 0,
+  end: number = 0,
+  maskChar: string = '*'
+): string {
   if (!str) return '';
   if (str.length <= start + end) return maskChar.repeat(str.length);
   const visibleStart = str.substring(0, start);
@@ -141,13 +150,16 @@ export function maskPhone(phone: string | null | undefined, countryCode: string 
 /**
  * Formate un numéro de téléphone
  */
-export function formatPhone(phone: string | null | undefined, format: string = 'XX XX XX XX XX'): string {
+export function formatPhone(
+  phone: string | null | undefined,
+  format: string = 'XX XX XX XX XX'
+): string {
   if (!phone) return '';
   const digits = phone.replace(/\D/g, '');
-  let  formatted= format;
-  let  digitIndex= 0;
+  let formatted = format;
+  let digitIndex = 0;
 
-  for (let  i= 0; i < formatted.length && digitIndex < digits.length; i++) {
+  for (let i = 0; i < formatted.length && digitIndex < digits.length; i++) {
     if (formatted[i] === 'X') {
       formatted = formatted.substring(0, i) + digits[digitIndex] + formatted.substring(i + 1);
       digitIndex++;
@@ -180,7 +192,36 @@ export function linkify(str: string | null | undefined): string {
  */
 export function wordCount(str: string | null | undefined): number {
   if (!str) return 0;
-  return str.trim().split(/\s+/).filter((word) => word.length > 0).length;
+  return str
+    .trim()
+    .split(/\s+/)
+    .filter(word => word.length > 0).length;
+}
+
+/**
+ * Extrait le texte brut d'une chaîne HTML (sans balises ni entités courantes)
+ */
+export function htmlToPlainTextForCount(html: string | null | undefined): string {
+  if (!html) return '';
+  return html
+    .replace(/<br\s*\/?>/gi, ' ')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&apos;/g, "'")
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Compte les mots d'une description HTML en ignorant les balises
+ */
+export function countPlainTextWords(htmlOrText: string | null | undefined): number {
+  return wordCount(htmlToPlainTextForCount(htmlOrText));
 }
 
 /**
@@ -196,8 +237,8 @@ export function charCount(str: string | null | undefined, includeSpaces: boolean
  */
 export function simpleHash(str: string | null | undefined): string {
   if (!str) return '';
-  let  hash= 0;
-  for (let  i= 0; i < str.length; i++) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i);
     hash = (hash << 5) - hash + char;
     hash = hash & hash; // Convert to 32bit integer
@@ -208,7 +249,11 @@ export function simpleHash(str: string | null | undefined): string {
 /**
  * Vérifie si une chaîne contient un mot
  */
-export function containsWord(str: string | null | undefined, word: string, caseSensitive: boolean = false): boolean {
+export function containsWord(
+  str: string | null | undefined,
+  word: string,
+  caseSensitive: boolean = false
+): boolean {
   if (!str) return false;
   const searchStr = caseSensitive ? str : str.toLowerCase();
   const searchWord = caseSensitive ? word : word.toLowerCase();
@@ -218,7 +263,11 @@ export function containsWord(str: string | null | undefined, word: string, caseS
 /**
  * Remplace la première occurrence
  */
-export function replaceFirst(str: string | null | undefined, search: string, replace: string): string {
+export function replaceFirst(
+  str: string | null | undefined,
+  search: string,
+  replace: string
+): string {
   if (!str) return '';
   return str.replace(search, replace);
 }
@@ -226,7 +275,11 @@ export function replaceFirst(str: string | null | undefined, search: string, rep
 /**
  * Remplace toutes les occurrences
  */
-export function replaceAll(str: string | null | undefined, search: string, replace: string): string {
+export function replaceAll(
+  str: string | null | undefined,
+  search: string,
+  replace: string
+): string {
   if (!str) return '';
   return str.split(search).join(replace);
 }
@@ -249,14 +302,14 @@ export function stripHtml(html: string | null | undefined): string {
  */
 export function escapeHtml(str: string | null | undefined): string {
   if (!str) return '';
-  const  map: Record<string, string> = {
+  const map: Record<string, string> = {
     '&': '&amp;',
     '<': '&lt;',
     '>': '&gt;',
     '"': '&quot;',
     "'": '&#039;',
   };
-  return str.replace(/[&<>"']/g, (m) => map[m]);
+  return str.replace(/[&<>"']/g, m => map[m]);
 }
 
 /**
@@ -264,19 +317,12 @@ export function escapeHtml(str: string | null | undefined): string {
  */
 export function unescapeHtml(str: string | null | undefined): string {
   if (!str) return '';
-  const  map: Record<string, string> = {
+  const map: Record<string, string> = {
     '&amp;': '&',
     '&lt;': '<',
     '&gt;': '>',
     '&quot;': '"',
     '&#039;': "'",
   };
-  return str.replace(/&amp;|&lt;|&gt;|&quot;|&#039;/g, (m) => map[m]);
+  return str.replace(/&amp;|&lt;|&gt;|&quot;|&#039;/g, m => map[m]);
 }
-
-
-
-
-
-
-

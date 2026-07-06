@@ -5,6 +5,20 @@
  */
 
 import { z } from 'zod';
+import { countPlainTextWords } from '@/lib/string-utils';
+import {
+  PRODUCT_DESCRIPTION_MAX_WORDS,
+  PRODUCT_DESCRIPTION_WORD_LIMIT_MESSAGE,
+} from '@/constants/product-description';
+
+const courseProductDescriptionWordLimit = z
+  .string()
+  .min(50, 'La description doit contenir au moins 50 caractères')
+  .refine(
+    val => countPlainTextWords(val) <= PRODUCT_DESCRIPTION_MAX_WORDS,
+    PRODUCT_DESCRIPTION_WORD_LIMIT_MESSAGE
+  )
+  .trim();
 
 // Schéma pour une leçon
 export const courseLessonSchema = z.object({
@@ -121,11 +135,7 @@ export const createCourseSchema = z
       .min(10, 'La description courte doit contenir au moins 10 caractères')
       .max(500, 'La description courte ne peut pas dépasser 500 caractères')
       .trim(),
-    description: z
-      .string()
-      .min(50, 'La description doit contenir au moins 50 caractères')
-      .max(10000, 'La description ne peut pas dépasser 10000 caractères')
-      .trim(),
+    description: courseProductDescriptionWordLimit,
     category: z
       .string()
       .min(2, 'La catégorie doit contenir au moins 2 caractères')
@@ -387,9 +397,3 @@ export function validateCourseData(
   }
   return { success: false, errors: result.error };
 }
-
-
-
-
-
-

@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { RichTextEditorPro } from '@/components/ui/rich-text-editor-pro';
+import { PRODUCT_DESCRIPTION_MAX_WORDS } from '@/constants/product-description';
 import { AIContentGenerator } from '@/components/products/AIContentGenerator';
 import { SelectItem, SelectField } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
@@ -313,14 +314,12 @@ export const CourseBasicInfoForm = ({
               onChange={content => onChange('description', content)}
               placeholder="Décrivez en détail ce que les étudiants apprendront, les objectifs, prérequis et ce qui rend votre cours unique..."
               showWordCount={true}
+              maxWords={PRODUCT_DESCRIPTION_MAX_WORDS}
               maxHeight="500px"
             />
             {errors.description && (
               <p className="text-sm text-red-500 break-words max-w-full">{errors.description}</p>
             )}
-            <p className="text-sm text-muted-foreground">
-              {(formData.description || '').length}/2000 caractères
-            </p>
           </div>
         </CardContent>
       </Card>

@@ -281,16 +281,19 @@ const CreateArtistProductWizardComponent = ({
             });
             return false;
           }
-          // Validation description avec suggestion
-          if (!formData.description || formData.description.trim().length < 10) {
+          // Validation description avec suggestion (texte brut, sans balises HTML)
+          {
             const errorData = getDescriptionError(formData.description);
-            toast({
-              title: errorData.error,
-              description:
-                errorData.suggestion || 'Veuillez ajouter une description (minimum 10 caractères)',
-              variant: 'destructive',
-            });
-            return false;
+            if (errorData.error) {
+              toast({
+                title: errorData.error,
+                description:
+                  errorData.suggestion ||
+                  'Veuillez ajouter une description (minimum 10 caractères)',
+                variant: 'destructive',
+              });
+              return false;
+            }
           }
           // Validation images avec suggestion
           if (!formData.images || formData.images.length === 0) {

@@ -447,6 +447,16 @@ export interface MarketplaceFacetsCachePayload {
   categories: Array<{ value: string; count: number }>;
 }
 
+function normalizeFacetsCachePayload(
+  data: Partial<MarketplaceFacetsCachePayload> | null | undefined
+): MarketplaceFacetsCachePayload {
+  return {
+    total: Number(data?.total ?? 0),
+    product_types: Array.isArray(data?.product_types) ? data.product_types : [],
+    categories: Array.isArray(data?.categories) ? data.categories : [],
+  };
+}
+
 const FACETS_CACHE_TTL_MS = 2 * 60 * 1000;
 
 export async function cacheMarketplaceFacets(
@@ -465,7 +475,7 @@ export function getCachedMarketplaceFacetsSync(
   if (!entry) return null;
   const age = Date.now() - entry.timestamp;
   return {
-    data: entry.data,
+    data: normalizeFacetsCachePayload(entry.data),
     fetchedAt: entry.timestamp,
     isSoftStale: age > MARKETPLACE_CACHE_SOFT_STALE_MS,
   };

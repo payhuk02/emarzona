@@ -23,6 +23,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useStore } from '@/hooks/useStore';
 import { buildSeoFromGenerated, mergeImages } from '@/lib/ai-product-apply';
 import { ImageStudioField } from '@/components/images/ImageStudioField';
+import { PRODUCT_DESCRIPTION_MAX_WORDS } from '@/constants/product-description';
 
 interface PhysicalBasicInfoFormProps {
   data: Partial<PhysicalProductFormData>;
@@ -243,6 +244,7 @@ export const PhysicalBasicInfoForm = ({
           onChange={content => onUpdate({ description: content })}
           placeholder="Décrivez votre produit en détail..."
           showWordCount={true}
+          maxWords={PRODUCT_DESCRIPTION_MAX_WORDS}
           maxHeight="400px"
         />
       </div>

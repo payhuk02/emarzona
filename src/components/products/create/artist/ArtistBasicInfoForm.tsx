@@ -6,6 +6,7 @@
 import React, { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { RichTextEditorPro } from '@/components/ui/rich-text-editor-pro';
+import { PRODUCT_DESCRIPTION_MAX_WORDS } from '@/constants/product-description';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -893,6 +894,8 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate, storeSlug }: ArtistBasic
           content={data.description || ''}
           onChange={value => onUpdate({ description: value })}
           placeholder="Décrivez l'œuvre, son histoire, sa signification, sa technique..."
+          showWordCount={true}
+          maxWords={PRODUCT_DESCRIPTION_MAX_WORDS}
         />
       </div>
 

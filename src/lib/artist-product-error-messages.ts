@@ -5,6 +5,12 @@
  * Messages d'erreur améliorés avec suggestions de correction
  */
 
+import {
+  PRODUCT_DESCRIPTION_MAX_WORDS,
+  PRODUCT_DESCRIPTION_WORD_LIMIT_MESSAGE,
+} from '@/constants/product-description';
+import { countPlainTextWords, htmlToPlainTextForCount } from '@/lib/string-utils';
+
 export interface ErrorMessageWithSuggestion {
   error: string;
   suggestion?: string;
@@ -212,7 +218,9 @@ export function getEditionError(
 export function getDescriptionError(
   description: string | null | undefined
 ): ErrorMessageWithSuggestion {
-  if (!description || !description.trim()) {
+  const plainText = htmlToPlainTextForCount(description);
+
+  if (!plainText) {
     return {
       error: 'Description requise',
       suggestion:
@@ -220,13 +228,22 @@ export function getDescriptionError(
     };
   }
 
-  const length = description.trim().length;
-  const missing = 10 - length;
+  if (countPlainTextWords(description) > PRODUCT_DESCRIPTION_MAX_WORDS) {
+    return {
+      error: 'Description trop longue',
+      suggestion: PRODUCT_DESCRIPTION_WORD_LIMIT_MESSAGE,
+    };
+  }
 
-  return {
-    error: 'Description trop courte',
-    suggestion: `Il manque ${missing} caractère${missing > 1 ? 's' : ''}. Ajoutez plus de détails sur l'œuvre, son histoire, sa technique, sa signification...`,
-  };
+  if (plainText.length < 10) {
+    const missing = 10 - plainText.length;
+    return {
+      error: 'Description trop courte',
+      suggestion: `Il manque ${missing} caractère${missing > 1 ? 's' : ''}. Ajoutez plus de détails sur l'œuvre, son histoire, sa technique, sa signification...`,
+    };
+  }
+
+  return { error: '', suggestion: '' };
 }
 
 /**
@@ -284,7 +301,7 @@ export function formatErrorMessage(errorData: ErrorMessageWithSuggestion): {
 /**
  * Liste des champs avec leurs noms d'affichage
  */
-export const FIELD_DISPLAY_NAMES : Record<string, string> = {
+export const FIELD_DISPLAY_NAMES: Record<string, string> = {
   artist_name: "Nom de l'artiste",
   artist_bio: "Biographie de l'artiste",
   artist_website: "Site web de l'artiste",
@@ -317,10 +334,3 @@ export const FIELD_DISPLAY_NAMES : Record<string, string> = {
 export function getFieldDisplayName(fieldKey: string): string {
   return FIELD_DISPLAY_NAMES[fieldKey] || fieldKey;
 }
-
-
-
-
-
-
-

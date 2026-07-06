@@ -729,17 +729,20 @@ export const CreatePhysicalProductWizard = ({
 
       const physicalPayload: Record<string, unknown> = {
         sku: formData.sku,
+        barcode: formData.barcode,
         weight: formData.weight,
         weight_unit: formData.weight_unit || 'kg',
-        dimensions: {
-          length: formData.dimensions?.length,
-          width: formData.dimensions?.width,
-          height: formData.dimensions?.height,
-          unit: formData.dimensions?.unit || 'cm',
-        },
-        quantity: formData.quantity || 0,
+        length: formData.dimensions?.length,
+        width: formData.dimensions?.width,
+        height: formData.dimensions?.height,
+        dimensions_unit: formData.dimensions?.unit || 'cm',
         track_inventory: formData.track_inventory !== false,
         low_stock_threshold: formData.low_stock_threshold || 5,
+        requires_shipping: formData.requires_shipping !== false,
+        free_shipping: formData.free_shipping ?? false,
+        inventory_policy: formData.inventory_policy || 'deny',
+        continue_selling_when_out_of_stock: formData.continue_selling_when_out_of_stock ?? false,
+        country_of_origin: formData.country_of_origin || 'CI',
       };
 
       const rpcResult = await createPhysicalProductTx(store.id, productPayload, physicalPayload);
@@ -752,22 +755,14 @@ export const CreatePhysicalProductWizard = ({
       };
       const physicalRow = { id: rpcResult.physical_product_id! };
 
-      // Champs physique hors transaction RPC
+      // Champs physique hors transaction RPC (WhatsApp, shipping class)
       await supabase
         .from('physical_products')
         .update({
-          barcode: formData.barcode,
-          length: formData.dimensions?.length,
-          width: formData.dimensions?.width,
-          height: formData.dimensions?.height,
-          dimension_unit: formData.dimensions?.unit || 'cm',
-          requires_shipping: formData.requires_shipping !== false,
-          is_fragile: formData.is_fragile || false,
-          is_perishable: formData.is_perishable || false,
-          customs_value: formData.customs_value,
-          country_of_origin: formData.country_of_origin || 'CI',
+          shipping_class: formData.shipping_class,
           whatsapp_number: formData.whatsapp_number?.trim() || null,
           whatsapp_enabled: Boolean(formData.whatsapp_enabled && formData.whatsapp_number?.trim()),
+          has_variants: Boolean(formData.variants && formData.variants.length > 0),
         })
         .eq('id', physicalRow.id);
 
@@ -775,12 +770,17 @@ export const CreatePhysicalProductWizard = ({
       if (formData.variants && formData.variants.length > 0) {
         const variantsData = formData.variants.map((variant: PhysicalProductVariant) => ({
           physical_product_id: physicalRow.id,
-          variant_name: variant.variant_name,
+          option1_value: variant.option1_value,
+          option2_value: variant.option2_value ?? null,
+          option3_value: variant.option3_value ?? null,
+          price: variant.price ?? formData.price ?? 0,
+          compare_at_price: variant.compare_at_price ?? null,
+          cost_per_item: variant.cost_per_item ?? null,
           sku: variant.sku,
-          price_adjustment: variant.price_adjustment || 0,
-          weight_adjustment: variant.weight_adjustment || 0,
-          image_url: variant.image_url,
-          is_available: variant.is_available !== false,
+          barcode: variant.barcode ?? null,
+          quantity: variant.quantity ?? 0,
+          weight: variant.weight ?? null,
+          image_url: variant.image_url ?? null,
         }));
 
         const { error: variantsError } = await supabase

@@ -9,6 +9,22 @@
 import { z } from 'zod';
 import { validateSlug, validateEmail, validatePhone, validateURL } from './validation-utils';
 import { logger } from './logger';
+import { countPlainTextWords } from './string-utils';
+import {
+  PRODUCT_DESCRIPTION_MAX_WORDS,
+  PRODUCT_DESCRIPTION_WORD_LIMIT_MESSAGE,
+} from '@/constants/product-description';
+
+/** @deprecated Utiliser PRODUCT_DESCRIPTION_MAX_WORDS */
+export const PHYSICAL_PRODUCT_DESCRIPTION_MAX_WORDS = PRODUCT_DESCRIPTION_MAX_WORDS;
+
+const productDescriptionWordLimit = z
+  .union([z.string(), z.literal(''), z.undefined()])
+  .optional()
+  .refine(
+    val => !val || countPlainTextWords(val) <= PRODUCT_DESCRIPTION_MAX_WORDS,
+    PRODUCT_DESCRIPTION_WORD_LIMIT_MESSAGE
+  );
 
 /**
  * Types d'erreurs de validation
@@ -44,10 +60,7 @@ export const digitalProductSchema = z.object({
     .optional()
     .or(z.literal('')),
 
-  description: z
-    .string()
-    .max(2000, 'La description ne peut pas dépasser 2000 caractères')
-    .optional(),
+  description: productDescriptionWordLimit,
 
   price: z
     .number()
@@ -89,10 +102,7 @@ export const physicalProductSchema = z.object({
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Format de slug invalide')
     .optional(),
 
-  description: z
-    .string()
-    .max(2000, 'La description ne peut pas dépasser 2000 caractères')
-    .optional(),
+  description: productDescriptionWordLimit,
 
   price: z
     .number()
@@ -155,13 +165,7 @@ export const physicalProductStep1Schema = z.object({
     ])
     .optional(),
 
-  description: z
-    .union([
-      z.string().max(2000, 'La description ne peut pas dépasser 2000 caractères'),
-      z.literal(''),
-      z.undefined(),
-    ])
-    .optional(),
+  description: productDescriptionWordLimit,
 
   price: z
     .number()
@@ -184,10 +188,7 @@ export const serviceSchema = z.object({
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Format de slug invalide')
     .optional(),
 
-  description: z
-    .string()
-    .max(2000, 'La description ne peut pas dépasser 2000 caractères')
-    .optional(),
+  description: productDescriptionWordLimit,
 
   price: z
     .number()
@@ -221,7 +222,7 @@ export function validateWithZod<T>(schema: z.ZodSchema<T>, data: unknown): Valid
     return { valid: true, errors: [] };
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const  errors: ValidationError[] = error.errors.map(err => ({
+      const errors: ValidationError[] = error.errors.map(err => ({
         field: err.path.join('.'),
         message: err.message,
         type: err.code === 'invalid_type' ? 'format' : 'custom',
@@ -384,9 +385,3 @@ export function getFieldError(errors: ValidationError[], field: string): string 
 export function hasFieldError(errors: ValidationError[], field: string): boolean {
   return errors.some(err => err.field === field);
 }
-
-
-
-
-
-

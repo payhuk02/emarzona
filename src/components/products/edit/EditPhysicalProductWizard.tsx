@@ -70,7 +70,7 @@ import { useQuery } from '@tanstack/react-query';
 const PRODUCT_FIELDS =
   'id, store_id, name, slug, description, short_description, price, compare_at_price, cost_per_item, images, image_url, category_id, tags, meta_title, meta_description, og_image, faqs, payment_options, hide_purchase_count, hide_likes_count, hide_recommendations_count, hide_downloads_count, hide_reviews_count, hide_rating, is_active';
 const PHYSICAL_PRODUCT_FIELDS =
-  'id, product_id, track_inventory, continue_selling_when_out_of_stock, inventory_policy, quantity, sku, barcode, requires_shipping, weight, weight_unit, dimensions, shipping_class, free_shipping, affiliate_settings, whatsapp_number, whatsapp_enabled';
+  'id, product_id, track_inventory, continue_selling_when_out_of_stock, inventory_policy, sku, barcode, requires_shipping, weight, weight_unit, length, width, height, dimensions_unit, shipping_class, free_shipping, whatsapp_number, whatsapp_enabled';
 const PRODUCT_VARIANT_FIELDS =
   'id, physical_product_id, option1_value, option2_value, option3_value, price, compare_at_price, cost_per_item, sku, barcode, quantity, weight, image_url';
 const PHYSICAL_PRODUCT_INVENTORY_FIELDS = 'id, product_id, quantity_available';
@@ -196,9 +196,9 @@ const convertToFormData = async (
 
   // Load variants
   const { data: variants } = await supabase
-    .from('product_variants')
+    .from('physical_product_variants')
     .select(PRODUCT_VARIANT_FIELDS)
-    .eq('physical_product_id', physicalProduct?.id || productId);
+    .eq('physical_product_id', physicalProduct?.id || '');
 
   // Load inventory
   const { data: inventory } = await supabase
@@ -273,7 +273,7 @@ const convertToFormData = async (
     continue_selling_when_out_of_stock:
       physicalProduct?.continue_selling_when_out_of_stock ?? false,
     inventory_policy: (physicalProduct?.inventory_policy as 'deny' | 'continue') || 'deny',
-    quantity: inventory?.[0]?.quantity_available || physicalProduct?.quantity || 0,
+    quantity: inventory?.[0]?.quantity_available || 0,
     sku: physicalProduct?.sku || '',
     barcode: physicalProduct?.barcode || '',
 
@@ -281,17 +281,17 @@ const convertToFormData = async (
     requires_shipping: physicalProduct?.requires_shipping ?? true,
     weight: physicalProduct?.weight || null,
     weight_unit: (physicalProduct?.weight_unit as 'kg' | 'lb' | 'g' | 'oz') || 'kg',
-    dimensions: physicalProduct?.dimensions || {
-      length: null,
-      width: null,
-      height: null,
-      unit: 'cm',
+    dimensions: {
+      length: physicalProduct?.length ?? null,
+      width: physicalProduct?.width ?? null,
+      height: physicalProduct?.height ?? null,
+      unit: (physicalProduct?.dimensions_unit as 'cm' | 'in') || 'cm',
     },
     shipping_class: physicalProduct?.shipping_class || null,
     free_shipping: physicalProduct?.free_shipping || false,
 
-    // Affiliation
-    affiliate: physicalProduct?.affiliate_settings || {
+    // Affiliation (settings stored in product_affiliate_settings)
+    affiliate: {
       enabled: false,
       commission_rate: 10,
       commission_type: 'percentage',
@@ -675,16 +675,17 @@ export const EditPhysicalProductWizard = ({
         track_inventory: formData.track_inventory ?? true,
         continue_selling_when_out_of_stock: formData.continue_selling_when_out_of_stock ?? false,
         inventory_policy: formData.inventory_policy || 'deny',
-        quantity: formData.quantity || 0,
         sku: formData.sku || '',
         barcode: formData.barcode || '',
         requires_shipping: formData.requires_shipping ?? true,
         weight: formData.weight,
         weight_unit: formData.weight_unit || 'kg',
-        dimensions: formData.dimensions,
+        length: formData.dimensions?.length ?? null,
+        width: formData.dimensions?.width ?? null,
+        height: formData.dimensions?.height ?? null,
+        dimensions_unit: formData.dimensions?.unit || 'cm',
         shipping_class: formData.shipping_class,
         free_shipping: formData.free_shipping || false,
-        affiliate_settings: formData.affiliate,
         whatsapp_number: formData.whatsapp_number?.trim() || null,
         whatsapp_enabled: Boolean(formData.whatsapp_enabled && formData.whatsapp_number?.trim()),
       };
