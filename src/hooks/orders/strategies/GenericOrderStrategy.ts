@@ -4,6 +4,13 @@ import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
 import { logger } from '@/lib/logger';
 import { findOrCreateStoreCustomer } from '@/lib/orders/customers-data';
 import { generateOrderNumber } from '@/lib/orders/orders-data';
+import {
+  asOrderProduct,
+  asOrdersInsert,
+  parseStrategyOptions,
+  resolveUnitPrice,
+} from '@/lib/orders/order-strategy-utils';
+import { insertOrderItem } from '@/lib/orders/order-items-client';
 import { OrderStrategy, OrderStrategyContext, OrderCreationResult } from './OrderStrategy';
 
 const PRODUCT_FIELDS = 'id, name, price, promotional_price, currency, product_type';
@@ -24,7 +31,7 @@ export class GenericOrderStrategy implements OrderStrategy {
       guestCheckout,
     } = context;
 
-    let product = productRecord;
+    let product = productRecord ? asOrderProduct(productRecord) : undefined;
     if (!product) {
       const { data, error } = await supabase
         .from('products')
@@ -32,7 +39,7 @@ export class GenericOrderStrategy implements OrderStrategy {
         .eq('id', productId)
         .single();
       if (error || !data) throw new Error('Produit non trouvé');
-      product = data;
+      product = asOrderProduct(data);
     }
 
     const customerId = await findOrCreateStoreCustomer({
@@ -43,28 +50,31 @@ export class GenericOrderStrategy implements OrderStrategy {
     });
 
     const orderNumber = await generateOrderNumber();
-    const totalPrice = (product.promotional_price || product.price) * quantity;
+    const unitPrice = resolveUnitPrice(product);
+    const totalPrice = unitPrice * quantity;
     const affiliateTrackingCookie = getAffiliateTrackingCookie();
 
     const { data: order, error: orderError } = await supabase
       .from('orders')
-      .insert({
-        store_id: storeId,
-        customer_id: customerId,
-        customer_email: customerEmail,
-        order_number: orderNumber,
-        total_amount: totalPrice,
-        currency: product.currency,
-        payment_status: 'pending',
-        status: 'pending',
-        affiliate_tracking_cookie: affiliateTrackingCookie,
-        metadata: {
-          product_id: productId,
-          product_type: productType,
-          flow: 'generic_product_checkout',
-          ...(guestCheckout ? { guest_checkout: true } : {}),
-        },
-      })
+      .insert(
+        asOrdersInsert({
+          store_id: storeId,
+          customer_id: customerId,
+          customer_email: customerEmail,
+          order_number: orderNumber,
+          total_amount: totalPrice,
+          currency: product.currency,
+          payment_status: 'pending',
+          status: 'pending',
+          affiliate_tracking_cookie: affiliateTrackingCookie,
+          metadata: {
+            product_id: productId,
+            product_type: productType,
+            flow: 'generic_product_checkout',
+            ...(guestCheckout ? { guest_checkout: true } : {}),
+          },
+        })
+      )
       .select(
         'id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at'
       )
@@ -89,23 +99,19 @@ export class GenericOrderStrategy implements OrderStrategy {
       });
     });
 
-    const { data: orderItem, error: orderItemError } = await supabase
-      .from('order_items')
-      .insert({
-        order_id: order.id,
-        product_id: productId,
-        product_type: productType === 'generic' ? 'generic' : productType,
-        product_name: product.name,
-        quantity,
-        unit_price: product.promotional_price || product.price,
-        total_price: totalPrice,
-        item_metadata: {
-          product_type: productType,
-          source: 'useCreateOrder_generic',
-        },
-      })
-      .select('id')
-      .single();
+    const { data: orderItem, error: orderItemError } = await insertOrderItem({
+      order_id: order.id,
+      product_id: productId,
+      product_type: productType === 'generic' ? 'generic' : productType,
+      product_name: product.name,
+      quantity,
+      unit_price: unitPrice,
+      total_price: totalPrice,
+      item_metadata: {
+        product_type: productType,
+        source: 'useCreateOrder_generic',
+      },
+    });
 
     if (orderItemError || !orderItem) {
       throw new Error("Erreur lors de la création de l'élément de commande");

@@ -4,6 +4,14 @@ import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
 // import { logger } from '@/lib/logger';
 import { findOrCreateStoreCustomer } from '@/lib/orders/customers-data';
 import { generateOrderNumber } from '@/lib/orders/orders-data';
+import {
+  asOptionalString,
+  asOrderProduct,
+  asOrdersInsert,
+  parsePaymentOptions,
+  parseStrategyOptions,
+  resolveUnitPrice,
+} from '@/lib/orders/order-strategy-utils';
 import { OrderStrategy, OrderStrategyContext, OrderCreationResult } from './OrderStrategy';
 
 const PRODUCT_FIELDS = 'id, name, price, promotional_price, currency, payment_options';
@@ -24,7 +32,7 @@ export class CourseOrderStrategy implements OrderStrategy {
       guestCheckout,
     } = context;
 
-    let product = productRecord;
+    let product = productRecord ? asOrderProduct(productRecord) : undefined;
     if (!product) {
       const { data, error } = await supabase
         .from('products')
@@ -32,12 +40,13 @@ export class CourseOrderStrategy implements OrderStrategy {
         .eq('id', productId)
         .single();
       if (error || !data) throw new Error('Produit non trouvé');
-      product = data;
+      product = asOrderProduct(data);
     }
 
-    const { courseId, giftCardId, giftCardAmount = 0 } = options || {};
+    const opts = parseStrategyOptions(options);
+    const { giftCardId, giftCardAmount = 0 } = opts;
 
-    let resolvedCourseId = courseId;
+    let resolvedCourseId = asOptionalString(opts.courseId);
     if (!resolvedCourseId) {
       const { data } = await supabase
         .from('courses')
@@ -56,17 +65,14 @@ export class CourseOrderStrategy implements OrderStrategy {
       return {
         orderId: `e2e-order-${Date.now()}`,
         orderItemId: `e2e-item-${Date.now()}`,
-        checkoutUrl: `/checkout?e2e=1&storeId=${encodeURIComponent(storeId)}&productId=${encodeURIComponent(productId)}&courseId=${encodeURIComponent(resolvedCourseId)}`,
+        checkoutUrl: `/checkout?e2e=1&storeId=${encodeURIComponent(storeId)}&productId=${encodeURIComponent(productId)}&courseId=${encodeURIComponent(resolvedCourseId!)}`,
         transactionId: `e2e-tx-${Date.now()}`,
       };
     }
 
-    const paymentOptions = (product.payment_options as Record<string, unknown>) || {
-      payment_type: 'full',
-      percentage_rate: 30,
-    };
-    const paymentType = paymentOptions.payment_type || 'full';
-    const percentageRate = paymentOptions.percentage_rate || 30;
+    const { payment_type: paymentType, percentage_rate: percentageRate } = parsePaymentOptions(
+      product.payment_options
+    );
 
     const {
       data: { user },
@@ -110,7 +116,7 @@ export class CourseOrderStrategy implements OrderStrategy {
       phone: customerPhone,
     });
 
-    const basePrice = product.promotional_price || product.price;
+    const basePrice = resolveUnitPrice(product);
     const totalPrice = basePrice * quantity;
 
     let amountToPay = totalPrice;
@@ -131,26 +137,28 @@ export class CourseOrderStrategy implements OrderStrategy {
 
     const { data: order, error: orderError } = await supabase
       .from('orders')
-      .insert({
-        store_id: storeId,
-        customer_id: customerId,
-        customer_email: customerEmail,
-        order_number: orderNumber,
-        total_amount: totalPrice - (giftCardAmount || 0),
-        currency: product.currency,
-        payment_status: 'pending',
-        status: 'pending',
-        payment_type: paymentType,
-        percentage_paid: percentagePaid,
-        remaining_amount: remainingAmount,
-        affiliate_tracking_cookie: affiliateTrackingCookie,
-        metadata: {
-          course_id: resolvedCourseId,
-          course_name: product.name,
-          auto_enroll: true,
-          ...(guestCheckout ? { guest_checkout: true } : {}),
-        },
-      })
+      .insert(
+        asOrdersInsert({
+          store_id: storeId,
+          customer_id: customerId,
+          customer_email: customerEmail,
+          order_number: orderNumber,
+          total_amount: totalPrice - (giftCardAmount || 0),
+          currency: product.currency,
+          payment_status: 'pending',
+          status: 'pending',
+          payment_type: paymentType,
+          percentage_paid: percentagePaid,
+          remaining_amount: remainingAmount,
+          affiliate_tracking_cookie: affiliateTrackingCookie,
+          metadata: {
+            course_id: resolvedCourseId,
+            course_name: product.name,
+            auto_enroll: true,
+            ...(guestCheckout ? { guest_checkout: true } : {}),
+          },
+        })
+      )
       .select(
         'id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at'
       )
@@ -181,7 +189,7 @@ export class CourseOrderStrategy implements OrderStrategy {
       );
     }
 
-    if (giftCardId && giftCardAmount && giftCardAmount > 0) {
+    if (giftCardId && giftCardAmount > 0) {
       try {
         await supabase.rpc('redeem_gift_card', {
           p_gift_card_id: giftCardId,

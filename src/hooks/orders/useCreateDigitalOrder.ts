@@ -20,6 +20,7 @@ import { isSupportedCurrency, type Currency } from '@/lib/currency-converter';
 import { validateCheckoutPromotion } from '@/lib/checkout/promotion';
 import { findOrCreateStoreCustomer } from '@/lib/orders/customers-data';
 import { generateOrderNumber } from '@/lib/orders/orders-data';
+import { insertOrderItem, orderItemsTable } from '@/lib/orders/order-items-client';
 
 const PRODUCT_FIELDS = 'id, name, price, promotional_price, currency';
 
@@ -250,7 +251,7 @@ export const useCreateDigitalOrder = () => {
           orderAmount: baseAmount,
           customerId,
         });
-        if (!validation.valid) {
+        if (validation.valid === false) {
           throw new Error(validation.message);
         }
         promoDiscount = validation.promotion.discountAmount;
@@ -351,25 +352,21 @@ export const useCreateDigitalOrder = () => {
       });
 
       // 10. Créer l'order_item avec les références spécialisées
-      const { data: orderItem, error: orderItemError } = await supabase
-        .from('order_items')
-        .insert({
-          order_id: order.id,
-          product_id: productId,
-          product_type: 'digital',
-          digital_product_id: digitalProductId,
-          license_id: licenseId,
-          product_name: product.name,
-          quantity: 1,
-          unit_price: product.promotional_price || product.price,
-          total_price: product.promotional_price || product.price,
-          item_metadata: {
-            license_generated: !!licenseId,
-            license_type: licenseType,
-          },
-        })
-        .select('id')
-        .single();
+      const { data: orderItem, error: orderItemError } = await insertOrderItem({
+        order_id: order.id,
+        product_id: productId,
+        product_type: 'digital',
+        digital_product_id: digitalProductId,
+        license_id: licenseId,
+        product_name: product.name,
+        quantity: 1,
+        unit_price: product.promotional_price || product.price,
+        total_price: product.promotional_price || product.price,
+        item_metadata: {
+          license_generated: !!licenseId,
+          license_type: licenseType,
+        },
+      });
 
       if (orderItemError || !orderItem) {
         throw new Error("Erreur lors de la création de l'élément de commande");
@@ -449,8 +446,7 @@ export const useCreateDigitalOrder = () => {
 export const useHasPurchasedDigitalProduct = (digitalProductId: string, userEmail: string) => {
   return useMutation({
     mutationFn: async (): Promise<boolean> => {
-      const { data, error } = await supabase
-        .from('order_items')
+      const { data, error } = await orderItemsTable()
         .select(
           `
           id,

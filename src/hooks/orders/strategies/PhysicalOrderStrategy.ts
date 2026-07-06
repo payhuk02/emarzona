@@ -9,10 +9,18 @@ import { logger } from '@/lib/logger';
 import { findOrCreateStoreCustomer } from '@/lib/orders/customers-data';
 import { generateOrderNumber } from '@/lib/orders/orders-data';
 import { parsePhysicalCheckoutOptions } from '@/lib/physical/physical-checkout-display';
+import {
+  asOrderProduct,
+  asOrdersInsert,
+  parsePaymentOptions,
+  parseShippingAddress,
+  parseStrategyOptions,
+  resolveUnitPrice,
+} from '@/lib/orders/order-strategy-utils';
+import { fetchOrderItemExtended, insertOrderItem } from '@/lib/orders/order-items-client';
 import { OrderStrategy, OrderStrategyContext, OrderCreationResult } from './OrderStrategy';
 
-// const PHYSICAL_PRODUCT_FIELDS = 'id, name, price, promotional_price, currency, payment_options';
-const PHYSICAL_PRODUCT_VARIANT_FIELDS = 'id, price_adjustment, is_available';
+const PHYSICAL_PRODUCT_VARIANT_FIELDS = 'id, price, is_available';
 
 export class PhysicalOrderStrategy implements OrderStrategy {
   async createOrder(context: OrderStrategyContext): Promise<OrderCreationResult> {
@@ -34,21 +42,23 @@ export class PhysicalOrderStrategy implements OrderStrategy {
       throw new Error('Produit non fourni à la stratégie');
     }
 
+    const productData = asOrderProduct(product);
+    const opts = parseStrategyOptions(options);
     const {
-      shippingAddress,
       variantId,
       inventoryLocationId,
       giftCardId,
       giftCardAmount = 0,
       checkoutMethod: checkoutMethodOverride,
-    } = options || {};
+    } = opts;
 
-    if (!shippingAddress) {
+    if (!opts.shippingAddress) {
       throw new Error('Adresse de livraison requise pour un produit physique');
     }
+    const shippingAddress = parseShippingAddress(opts.shippingAddress);
 
     const parsedCheckout = parsePhysicalCheckoutOptions(
-      product.payment_options as Parameters<typeof parsePhysicalCheckoutOptions>[0]
+      productData.payment_options as Parameters<typeof parsePhysicalCheckoutOptions>[0]
     );
     const checkoutMethod = checkoutMethodOverride ?? parsedCheckout.checkout_method;
     const isCashOnDelivery = checkoutMethod === 'cash_on_delivery';
@@ -66,13 +76,10 @@ export class PhysicalOrderStrategy implements OrderStrategy {
       throw new Error('Produit physique non trouvé');
     }
 
-    // Récupérer les options de paiement configurées
-    const paymentOptions = (product.payment_options as Record<string, unknown>) || {
-      payment_type: 'full',
-      percentage_rate: 30,
-    };
-    const paymentType = isCashOnDelivery ? 'full' : paymentOptions.payment_type || 'full';
-    const percentageRate = paymentOptions.percentage_rate || 30;
+    const { payment_type: paymentTypeRaw, percentage_rate: percentageRate } = parsePaymentOptions(
+      productData.payment_options
+    );
+    const paymentType = isCashOnDelivery ? 'full' : paymentTypeRaw;
 
     // 3. Récupérer la variante si spécifiée
     let variantPrice = 0;
@@ -91,7 +98,7 @@ export class PhysicalOrderStrategy implements OrderStrategy {
         throw new Error("Cette variante n'est pas disponible");
       }
 
-      variantPrice = variant.price_adjustment || 0;
+      variantPrice = Number(variant.price ?? 0) - resolveUnitPrice(productData);
     }
 
     const customerId = await findOrCreateStoreCustomer({
@@ -105,7 +112,8 @@ export class PhysicalOrderStrategy implements OrderStrategy {
     });
 
     // 6. Calculer le prix total
-    const unitPrice = (product.promotional_price || product.price) + variantPrice;
+    const baseUnitPrice = resolveUnitPrice(productData);
+    const unitPrice = variantId ? baseUnitPrice + variantPrice : baseUnitPrice;
     const totalPrice = unitPrice * quantity;
 
     // Calculer le montant à payer selon le type de paiement
@@ -131,25 +139,27 @@ export class PhysicalOrderStrategy implements OrderStrategy {
 
     const { data: order, error: orderError } = await supabase
       .from('orders')
-      .insert({
-        store_id: storeId,
-        customer_id: customerId,
-        customer_email: customerEmail,
-        order_number: orderNumber,
-        total_amount: totalPrice - (giftCardAmount || 0),
-        currency: product.currency,
-        payment_status: isCashOnDelivery ? 'cod_pending' : 'pending',
-        status: isCashOnDelivery ? 'confirmed' : 'pending',
-        delivery_status: 'pending',
-        payment_type: paymentType,
-        percentage_paid: percentagePaid,
-        remaining_amount: remainingAmount,
-        affiliate_tracking_cookie: affiliateTrackingCookie,
-        metadata: {
-          checkout_method: checkoutMethod,
-          guest_checkout: guestCheckout ?? true,
-        },
-      })
+      .insert(
+        asOrdersInsert({
+          store_id: storeId,
+          customer_id: customerId,
+          customer_email: customerEmail,
+          order_number: orderNumber,
+          total_amount: totalPrice - (giftCardAmount || 0),
+          currency: productData.currency,
+          payment_status: isCashOnDelivery ? 'cod_pending' : 'pending',
+          status: isCashOnDelivery ? 'confirmed' : 'pending',
+          delivery_status: 'pending',
+          payment_type: paymentType,
+          percentage_paid: percentagePaid,
+          remaining_amount: remainingAmount,
+          affiliate_tracking_cookie: affiliateTrackingCookie,
+          metadata: {
+            checkout_method: checkoutMethod,
+            guest_checkout: guestCheckout ?? true,
+          },
+        })
+      )
       .select(
         'id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at'
       )
@@ -160,7 +170,7 @@ export class PhysicalOrderStrategy implements OrderStrategy {
     }
 
     // 8a. Rédimer la carte cadeau
-    if (giftCardId && giftCardAmount && giftCardAmount > 0) {
+    if (giftCardId && giftCardAmount > 0) {
       try {
         const { data: redeemResult, error: redeemError } = await supabase.rpc('redeem_gift_card', {
           p_gift_card_id: giftCardId,
@@ -200,26 +210,22 @@ export class PhysicalOrderStrategy implements OrderStrategy {
     });
 
     // 11. Créer l'order_item
-    const { data: orderItem, error: orderItemError } = await supabase
-      .from('order_items')
-      .insert({
-        order_id: order.id,
-        product_id: productId,
-        product_type: 'physical',
-        physical_product_id: resolvedPhysicalProductId,
-        variant_id: variantId,
-        product_name: product.name,
-        quantity,
-        unit_price: unitPrice,
-        total_price: totalPrice,
-        item_metadata: {
-          variant_price_adjustment: variantPrice,
-          shipping_address: shippingAddress,
-          ...(inventoryLocationId ? { preferred_inventory_id: inventoryLocationId } : {}),
-        },
-      })
-      .select('id')
-      .single();
+    const { data: orderItem, error: orderItemError } = await insertOrderItem({
+      order_id: order.id,
+      product_id: productId,
+      product_type: 'physical',
+      physical_product_id: resolvedPhysicalProductId,
+      variant_id: variantId,
+      product_name: productData.name,
+      quantity,
+      unit_price: unitPrice,
+      total_price: totalPrice,
+      item_metadata: {
+        variant_price_adjustment: variantPrice,
+        shipping_address: shippingAddress,
+        ...(inventoryLocationId ? { preferred_inventory_id: inventoryLocationId } : {}),
+      },
+    });
 
     if (orderItemError || !orderItem) {
       throw new Error("Erreur lors de la création de l'élément de commande");
@@ -231,13 +237,8 @@ export class PhysicalOrderStrategy implements OrderStrategy {
       throw stockErr instanceof Error ? stockErr : new Error('Stock insuffisant');
     }
 
-    const { data: reservedItem } = await supabase
-      .from('order_items')
-      .select('item_metadata')
-      .eq('id', orderItem.id)
-      .single();
-
-    const reservedMeta = (reservedItem?.item_metadata ?? {}) as Record<string, unknown>;
+    const reservedItem = await fetchOrderItemExtended(orderItem.id);
+    const reservedMeta = reservedItem?.item_metadata ?? {};
     const inventoryId =
       typeof reservedMeta.inventory_id === 'string' ? reservedMeta.inventory_id : '';
     const inventoryLocation =
@@ -274,10 +275,10 @@ export class PhysicalOrderStrategy implements OrderStrategy {
     // Payment init
     const paymentDescription =
       paymentType === 'percentage'
-        ? `Acompte ${percentageRate}%: ${product.name} x${quantity}`
+        ? `Acompte ${percentageRate}%: ${productData.name} x${quantity}`
         : paymentType === 'delivery_secured'
-          ? `Paiement sécurisé: ${product.name} x${quantity}`
-          : `Achat: ${product.name} x${quantity}`;
+          ? `Paiement sécurisé: ${productData.name} x${quantity}`
+          : `Achat: ${productData.name} x${quantity}`;
 
     const paymentResult = await initiatePayment({
       storeId,
@@ -285,7 +286,7 @@ export class PhysicalOrderStrategy implements OrderStrategy {
       orderId: order.id,
       customerId,
       amount: finalAmountToPay,
-      currency: product.currency,
+      currency: productData.currency,
       description: paymentDescription,
       customerEmail,
       customerName: customerName || customerEmail.split('@')[0],

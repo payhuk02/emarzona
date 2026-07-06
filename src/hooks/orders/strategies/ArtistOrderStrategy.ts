@@ -6,6 +6,14 @@ import { retryWithExponentialBackoff } from '@/lib/retry-utils';
 import { reserveArtistLimitedEdition } from '@/lib/artist-edition-reservation';
 import { findOrCreateStoreCustomer } from '@/lib/orders/customers-data';
 import { generateOrderNumber } from '@/lib/orders/orders-data';
+import {
+  asOptionalString,
+  asOrderProduct,
+  asOrdersInsert,
+  parsePaymentOptions,
+  parseStrategyOptions,
+  resolveUnitPrice,
+} from '@/lib/orders/order-strategy-utils';
 import { OrderStrategy, OrderStrategyContext, OrderCreationResult } from './OrderStrategy';
 
 const PRODUCT_FIELDS = 'id, name, price, promotional_price, currency, payment_options';
@@ -28,36 +36,39 @@ export class ArtistOrderStrategy implements OrderStrategy {
       guestCheckout,
     } = context;
 
-    let product = productRecord;
+    let product = productRecord ? asOrderProduct(productRecord) : undefined;
     if (!product) {
-      product = await retryWithExponentialBackoff(
-        async () => {
-          const { data, error } = await supabase
-            .from('products')
-            .select(PRODUCT_FIELDS)
-            .eq('id', productId)
-            .single();
-          if (error) throw error;
-          if (!data) throw new Error('Produit non trouvé');
-          return data;
-        },
-        {
-          maxRetries: 3,
-          initialDelay: 1000,
-          shouldRetry: error => {
-            if (error instanceof Error) {
-              const msg = error.message.toLowerCase();
-              return msg.includes('network') || msg.includes('timeout') || msg.includes('fetch');
-            }
-            return false;
+      product = asOrderProduct(
+        await retryWithExponentialBackoff(
+          async () => {
+            const { data, error } = await supabase
+              .from('products')
+              .select(PRODUCT_FIELDS)
+              .eq('id', productId)
+              .single();
+            if (error) throw error;
+            if (!data) throw new Error('Produit non trouvé');
+            return data;
           },
-        }
+          {
+            maxRetries: 3,
+            initialDelay: 1000,
+            shouldRetry: error => {
+              if (error instanceof Error) {
+                const msg = error.message.toLowerCase();
+                return msg.includes('network') || msg.includes('timeout') || msg.includes('fetch');
+              }
+              return false;
+            },
+          }
+        )
       );
     }
 
-    const { artistProductId, shippingAddress, giftCardId, giftCardAmount = 0 } = options || {};
+    const opts = parseStrategyOptions(options);
+    const { shippingAddress, giftCardId, giftCardAmount = 0 } = opts;
 
-    let resolvedArtistProductId = artistProductId;
+    let resolvedArtistProductId = asOptionalString(opts.artistProductId);
     if (!resolvedArtistProductId) {
       const { data } = await supabase
         .from('artist_products')
@@ -75,17 +86,14 @@ export class ArtistOrderStrategy implements OrderStrategy {
       return {
         orderId: `e2e-order-${Date.now()}`,
         orderItemId: `e2e-item-${Date.now()}`,
-        checkoutUrl: `/checkout?e2e=1&storeId=${encodeURIComponent(storeId)}&productId=${encodeURIComponent(productId)}&artistProductId=${encodeURIComponent(resolvedArtistProductId)}`,
+        checkoutUrl: `/checkout?e2e=1&storeId=${encodeURIComponent(storeId)}&productId=${encodeURIComponent(productId)}&artistProductId=${encodeURIComponent(resolvedArtistProductId!)}`,
         transactionId: `e2e-tx-${Date.now()}`,
       };
     }
 
-    const paymentOptions = (product.payment_options as Record<string, unknown>) || {
-      payment_type: 'full',
-      percentage_rate: 30,
-    };
-    const paymentType = paymentOptions.payment_type || 'full';
-    const percentageRate = paymentOptions.percentage_rate || 30;
+    const { payment_type: paymentType, percentage_rate: percentageRate } = parsePaymentOptions(
+      product.payment_options
+    );
 
     const { data: artistProduct, error: artistError } = await supabase
       .from('artist_products')
@@ -131,7 +139,7 @@ export class ArtistOrderStrategy implements OrderStrategy {
       phone: customerPhone,
     });
 
-    const basePrice = product.promotional_price || product.price;
+    const basePrice = resolveUnitPrice(product);
     let totalPrice = basePrice * quantity;
 
     if (artistProduct.shipping_insurance_required && artistProduct.shipping_insurance_amount) {
@@ -156,34 +164,36 @@ export class ArtistOrderStrategy implements OrderStrategy {
 
     const { data: order, error: orderError } = await supabase
       .from('orders')
-      .insert({
-        store_id: storeId,
-        customer_id: customerId,
-        customer_email: customerEmail,
-        order_number: orderNumber,
-        total_amount: totalPrice - (giftCardAmount || 0),
-        currency: product.currency,
-        payment_status: 'pending',
-        status: 'pending',
-        delivery_status: artistProduct.requires_shipping ? 'pending' : null,
-        payment_type: paymentType,
-        percentage_paid: percentagePaid,
-        remaining_amount: remainingAmount,
-        affiliate_tracking_cookie: affiliateTrackingCookie,
-        metadata: {
-          artist_name: artistProduct.artist_name,
-          artwork_title: artistProduct.artwork_title,
-          artwork_year: artistProduct.artwork_year,
-          edition_type: artistProduct.artwork_edition_type,
-          edition_number: artistProduct.edition_number,
-          certificate_of_authenticity: artistProduct.certificate_of_authenticity,
-          signature_authenticated: artistProduct.signature_authenticated,
-          shipping_fragile: artistProduct.shipping_fragile,
-          shipping_insurance_required: artistProduct.shipping_insurance_required,
-          shipping_insurance_amount: artistProduct.shipping_insurance_amount,
-          ...(guestCheckout ? { guest_checkout: true } : {}),
-        },
-      })
+      .insert(
+        asOrdersInsert({
+          store_id: storeId,
+          customer_id: customerId,
+          customer_email: customerEmail,
+          order_number: orderNumber,
+          total_amount: totalPrice - (giftCardAmount || 0),
+          currency: product.currency,
+          payment_status: 'pending',
+          status: 'pending',
+          delivery_status: artistProduct.requires_shipping ? 'pending' : null,
+          payment_type: paymentType,
+          percentage_paid: percentagePaid,
+          remaining_amount: remainingAmount,
+          affiliate_tracking_cookie: affiliateTrackingCookie,
+          metadata: {
+            artist_name: artistProduct.artist_name,
+            artwork_title: artistProduct.artwork_title,
+            artwork_year: artistProduct.artwork_year,
+            edition_type: artistProduct.artwork_edition_type,
+            edition_number: artistProduct.edition_number,
+            certificate_of_authenticity: artistProduct.certificate_of_authenticity,
+            signature_authenticated: artistProduct.signature_authenticated,
+            shipping_fragile: artistProduct.shipping_fragile,
+            shipping_insurance_required: artistProduct.shipping_insurance_required,
+            shipping_insurance_amount: artistProduct.shipping_insurance_amount,
+            ...(guestCheckout ? { guest_checkout: true } : {}),
+          },
+        })
+      )
       .select(
         'id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at'
       )
@@ -216,7 +226,7 @@ export class ArtistOrderStrategy implements OrderStrategy {
       triggerOrderCreatedWebhook(order.id, order).catch(() => {});
     });
 
-    if (giftCardId && giftCardAmount && giftCardAmount > 0) {
+    if (giftCardId && giftCardAmount > 0) {
       try {
         await supabase.rpc('redeem_gift_card', {
           p_gift_card_id: giftCardId,

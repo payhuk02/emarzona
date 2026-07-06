@@ -35,6 +35,7 @@ import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
 import { logger } from '@/lib/logger';
 import { findOrCreateStoreCustomer } from '@/lib/orders/customers-data';
 import { generateOrderNumber } from '@/lib/orders/orders-data';
+import { insertOrderItem } from '@/lib/orders/order-items-client';
 
 const PRODUCT_FIELDS = 'id, name, price, promotional_price, currency, payment_options';
 const SERVICE_PRODUCT_FIELDS =
@@ -685,28 +686,24 @@ export const useCreateServiceOrder = () => {
       });
 
       // 11. Créer l'order_item avec les références spécialisées
-      const { data: orderItem, error: orderItemError } = await supabase
-        .from('order_items')
-        .insert({
-          order_id: order.id,
-          product_id: productId,
-          product_type: 'service',
-          service_product_id: serviceProductId,
-          booking_id: booking.id,
-          product_name: product.name,
-          quantity: 1,
-          unit_price: totalPrice,
-          total_price: totalPrice,
-          item_metadata: {
-            booking_date: bookingDateTime,
-            duration_minutes: actualDuration,
-            number_of_participants: numberOfParticipants,
-            staff_id: staffId,
-            notes,
-          },
-        })
-        .select('id')
-        .single();
+      const { data: orderItem, error: orderItemError } = await insertOrderItem({
+        order_id: order.id,
+        product_id: productId,
+        product_type: 'service',
+        service_product_id: serviceProductId,
+        booking_id: booking.id,
+        product_name: product.name,
+        quantity: 1,
+        unit_price: totalPrice,
+        total_price: totalPrice,
+        item_metadata: {
+          booking_date: bookingDateTime,
+          duration_minutes: actualDuration,
+          number_of_participants: numberOfParticipants,
+          staff_id: staffId,
+          notes,
+        },
+      });
 
       if (orderItemError || !orderItem) {
         // Annuler le booking

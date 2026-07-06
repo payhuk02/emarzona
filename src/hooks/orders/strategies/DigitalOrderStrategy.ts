@@ -6,6 +6,14 @@ import { isSupportedCurrency, type Currency } from '@/lib/currency-converter';
 import { validateCheckoutPromotion } from '@/lib/checkout/promotion';
 import { findOrCreateStoreCustomer } from '@/lib/orders/customers-data';
 import { generateOrderNumber } from '@/lib/orders/orders-data';
+import {
+  asOptionalString,
+  asOrderProduct,
+  asOrdersInsert,
+  parseStrategyOptions,
+  resolveUnitPrice,
+} from '@/lib/orders/order-strategy-utils';
+import { insertOrderItem } from '@/lib/orders/order-items-client';
 import { OrderStrategy, OrderStrategyContext, OrderCreationResult } from './OrderStrategy';
 
 const PRODUCT_FIELDS = 'id, name, price, promotional_price, currency';
@@ -34,8 +42,7 @@ export class DigitalOrderStrategy implements OrderStrategy {
       guestCheckout,
     } = context;
 
-    // Resolve digital product details if productRecord was missing
-    let product = productRecord;
+    let product = productRecord ? asOrderProduct(productRecord) : undefined;
     if (!product) {
       const { data, error } = await supabase
         .from('products')
@@ -43,11 +50,11 @@ export class DigitalOrderStrategy implements OrderStrategy {
         .eq('id', productId)
         .single();
       if (error || !data) throw new Error('Produit non trouvé');
-      product = data;
+      product = asOrderProduct(data);
     }
 
+    const opts = parseStrategyOptions(options);
     const {
-      digitalProductId,
       generateLicense = true,
       licenseType = 'single',
       maxActivations = 1,
@@ -57,9 +64,9 @@ export class DigitalOrderStrategy implements OrderStrategy {
       couponCode,
       couponDiscountAmount = 0,
       promotionId,
-    } = options || {};
+    } = opts;
 
-    let resolvedDigitalProductId = digitalProductId;
+    let resolvedDigitalProductId = asOptionalString(opts.digitalProductId);
     if (!resolvedDigitalProductId) {
       const { data } = await supabase
         .from('digital_products')
@@ -141,7 +148,7 @@ export class DigitalOrderStrategy implements OrderStrategy {
       }
     }
 
-    const baseAmount = Number(product.promotional_price ?? product.price);
+    const baseAmount = resolveUnitPrice(product);
     let promoDiscount = Math.max(0, couponDiscountAmount || 0);
     let resolvedPromotionId = promotionId;
 
@@ -153,7 +160,9 @@ export class DigitalOrderStrategy implements OrderStrategy {
         orderAmount: baseAmount,
         customerId,
       });
-      if (!validation.valid) throw new Error(validation.message);
+      if (validation.valid === false) {
+        throw new Error(validation.message);
+      }
       promoDiscount = validation.promotion.discountAmount;
       resolvedPromotionId = validation.promotion.promotionId;
     }
@@ -164,18 +173,20 @@ export class DigitalOrderStrategy implements OrderStrategy {
 
     const { data: order, error: orderError } = await supabase
       .from('orders')
-      .insert({
-        store_id: storeId,
-        customer_id: customerId,
-        customer_email: customerEmail,
-        order_number: orderNumber,
-        total_amount: finalAmount,
-        currency: product.currency,
-        payment_status: 'pending',
-        status: 'pending',
-        affiliate_tracking_cookie: affiliateTrackingCookie,
-        metadata: guestCheckout ? { guest_checkout: true } : undefined,
-      })
+      .insert(
+        asOrdersInsert({
+          store_id: storeId,
+          customer_id: customerId,
+          customer_email: customerEmail,
+          order_number: orderNumber,
+          total_amount: finalAmount,
+          currency: product.currency,
+          payment_status: 'pending',
+          status: 'pending',
+          affiliate_tracking_cookie: affiliateTrackingCookie,
+          metadata: guestCheckout ? { guest_checkout: true } : undefined,
+        })
+      )
       .select(
         'id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at'
       )
@@ -185,7 +196,7 @@ export class DigitalOrderStrategy implements OrderStrategy {
       throw new Error('Erreur lors de la création de la commande');
     }
 
-    if (giftCardId && giftCardAmount && giftCardAmount > 0) {
+    if (giftCardId && giftCardAmount > 0) {
       try {
         await supabase.rpc('redeem_gift_card', {
           p_gift_card_id: giftCardId,
@@ -207,25 +218,22 @@ export class DigitalOrderStrategy implements OrderStrategy {
       triggerOrderCreatedWebhook(order.id, order).catch(() => {});
     });
 
-    const { data: orderItem, error: orderItemError } = await supabase
-      .from('order_items')
-      .insert({
-        order_id: order.id,
-        product_id: productId,
-        product_type: 'digital',
-        digital_product_id: resolvedDigitalProductId,
-        license_id: licenseId,
-        product_name: product.name,
-        quantity: 1,
-        unit_price: product.promotional_price || product.price,
-        total_price: product.promotional_price || product.price,
-        item_metadata: {
-          license_generated: !!licenseId,
-          license_type: licenseType,
-        },
-      })
-      .select('id')
-      .single();
+    const unitPrice = resolveUnitPrice(product);
+    const { data: orderItem, error: orderItemError } = await insertOrderItem({
+      order_id: order.id,
+      product_id: productId,
+      product_type: 'digital',
+      digital_product_id: resolvedDigitalProductId,
+      license_id: licenseId,
+      product_name: product.name,
+      quantity: 1,
+      unit_price: unitPrice,
+      total_price: unitPrice,
+      item_metadata: {
+        license_generated: !!licenseId,
+        license_type: licenseType,
+      },
+    });
 
     if (orderItemError || !orderItem) {
       throw new Error("Erreur lors de la création de l'élément de commande");
@@ -242,7 +250,7 @@ export class DigitalOrderStrategy implements OrderStrategy {
       });
     }
 
-    const paymentCurrency: Currency = isSupportedCurrency(String(product.currency ?? 'XOF'))
+    const paymentCurrency: Currency = isSupportedCurrency(product.currency)
       ? (product.currency as Currency)
       : 'XOF';
 

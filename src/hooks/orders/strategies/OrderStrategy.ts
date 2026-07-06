@@ -4,6 +4,8 @@
  * en fonction du type de produit.
  */
 
+import type { OrderProductRecord, OrderStrategyOptions } from '@/lib/orders/order-strategy-utils';
+
 export interface OrderStrategyContext {
   /** ID du produit de base */
   productId: string;
@@ -27,10 +29,10 @@ export interface OrderStrategyContext {
   productType: string;
 
   /** Le record du produit (pour éviter de le requêter plusieurs fois) */
-  productRecord?: Record<string, unknown>;
+  productRecord?: OrderProductRecord;
 
   /** Options spécifiques au type (ex: shippingAddress pour physical) */
-  options?: Record<string, unknown>;
+  options?: OrderStrategyOptions;
 
   /** URL de retour après paiement PSP */
   returnUrl?: string;

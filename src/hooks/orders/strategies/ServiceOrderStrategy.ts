@@ -4,6 +4,15 @@ import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
 import { logger } from '@/lib/logger';
 import { findOrCreateStoreCustomer } from '@/lib/orders/customers-data';
 import { generateOrderNumber } from '@/lib/orders/orders-data';
+import {
+  asOptionalString,
+  asOrderProduct,
+  asOrdersInsert,
+  parsePaymentOptions,
+  parseStrategyOptions,
+  resolveUnitPrice,
+} from '@/lib/orders/order-strategy-utils';
+import { insertOrderItem } from '@/lib/orders/order-items-client';
 import { OrderStrategy, OrderStrategyContext, OrderCreationResult } from './OrderStrategy';
 
 const SERVICE_PRODUCT_FIELDS =
@@ -31,8 +40,9 @@ export class ServiceOrderStrategy implements OrderStrategy {
       throw new Error('Produit non fourni à la stratégie');
     }
 
+    const productData = asOrderProduct(product);
+    const opts = parseStrategyOptions(options);
     const {
-      serviceProductId,
       bookingDateTime,
       durationMinutes,
       staffId,
@@ -41,14 +51,13 @@ export class ServiceOrderStrategy implements OrderStrategy {
       giftCardId,
       giftCardAmount = 0,
       checkoutMode = 'immediate',
-    } = options || {};
+    } = opts;
 
     if (!bookingDateTime) {
       throw new Error('Date et heure de réservation requises pour un service');
     }
 
-    // Récupérer le service_product_id si non fourni
-    let resolvedServiceProductId = serviceProductId;
+    let resolvedServiceProductId = asOptionalString(opts.serviceProductId);
     if (!resolvedServiceProductId) {
       const { data: serviceRow } = await supabase
         .from('service_products')
@@ -62,12 +71,9 @@ export class ServiceOrderStrategy implements OrderStrategy {
       throw new Error('Produit service non trouvé');
     }
 
-    const paymentOptions = (product.payment_options as Record<string, unknown>) || {
-      payment_type: 'full',
-      percentage_rate: 30,
-    };
-    const paymentType = paymentOptions.payment_type || 'full';
-    const percentageRate = paymentOptions.percentage_rate || 30;
+    const { payment_type: paymentType, percentage_rate: percentageRate } = parsePaymentOptions(
+      productData.payment_options
+    );
 
     // 2. Récupérer les détails du service
     const { data: serviceProduct, error: serviceError } = await supabase
@@ -85,7 +91,7 @@ export class ServiceOrderStrategy implements OrderStrategy {
       throw new Error(`Nombre maximum de participants: ${serviceProduct.max_participants}`);
     }
 
-    const actualDuration = durationMinutes || serviceProduct.duration_minutes;
+    const actualDuration = durationMinutes ?? serviceProduct.duration_minutes ?? 60;
     const bookingStartDateTime = new Date(bookingDateTime);
     const bookingEndDateTime = new Date(bookingStartDateTime.getTime() + actualDuration * 60000);
     const bookingDate = bookingStartDateTime.toISOString().split('T')[0];
@@ -321,7 +327,7 @@ export class ServiceOrderStrategy implements OrderStrategy {
     });
 
     // 7. Calculer le prix
-    let totalPrice = product.promotional_price || product.price;
+    let totalPrice = resolveUnitPrice(productData);
     if (serviceProduct.pricing_type === 'per_participant') totalPrice *= numberOfParticipants;
     if (serviceProduct.pricing_type === 'per_hour') {
       const hours = actualDuration / 60;
@@ -346,21 +352,23 @@ export class ServiceOrderStrategy implements OrderStrategy {
 
     const { data: order, error: orderError } = await supabase
       .from('orders')
-      .insert({
-        store_id: storeId,
-        customer_id: customerId,
-        customer_email: customerEmail,
-        order_number: orderNumber,
-        total_amount: totalPrice - (giftCardAmount || 0),
-        currency: product.currency,
-        payment_status: 'pending',
-        status: 'pending',
-        payment_type: paymentType,
-        percentage_paid: percentagePaid,
-        remaining_amount: remainingAmount,
-        affiliate_tracking_cookie: affiliateTrackingCookie,
-        metadata: guestCheckout ? { guest_checkout: true } : undefined,
-      })
+      .insert(
+        asOrdersInsert({
+          store_id: storeId,
+          customer_id: customerId,
+          customer_email: customerEmail,
+          order_number: orderNumber,
+          total_amount: totalPrice - (giftCardAmount || 0),
+          currency: productData.currency,
+          payment_status: 'pending',
+          status: 'pending',
+          payment_type: paymentType,
+          percentage_paid: percentagePaid,
+          remaining_amount: remainingAmount,
+          affiliate_tracking_cookie: affiliateTrackingCookie,
+          metadata: guestCheckout ? { guest_checkout: true } : undefined,
+        })
+      )
       .select(
         'id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at'
       )
@@ -372,7 +380,7 @@ export class ServiceOrderStrategy implements OrderStrategy {
     }
 
     // Rédimer la carte cadeau
-    if (giftCardId && giftCardAmount && giftCardAmount > 0) {
+    if (giftCardId && giftCardAmount > 0) {
       try {
         await supabase.rpc('redeem_gift_card', {
           p_gift_card_id: giftCardId,
@@ -395,28 +403,24 @@ export class ServiceOrderStrategy implements OrderStrategy {
       triggerOrderCreatedWebhook(order.id, order).catch(() => {});
     });
 
-    const { data: orderItem, error: orderItemError } = await supabase
-      .from('order_items')
-      .insert({
-        order_id: order.id,
-        product_id: productId,
-        product_type: 'service',
-        service_product_id: resolvedServiceProductId,
-        booking_id: booking.id,
-        product_name: product.name,
-        quantity: 1,
-        unit_price: totalPrice,
-        total_price: totalPrice,
-        item_metadata: {
-          booking_date: bookingDateTime,
-          duration_minutes: actualDuration,
-          number_of_participants: numberOfParticipants,
-          staff_id: staffId,
-          notes,
-        },
-      })
-      .select('id')
-      .single();
+    const { data: orderItem, error: orderItemError } = await insertOrderItem({
+      order_id: order.id,
+      product_id: productId,
+      product_type: 'service',
+      service_product_id: resolvedServiceProductId,
+      booking_id: booking.id,
+      product_name: productData.name,
+      quantity: 1,
+      unit_price: totalPrice,
+      total_price: totalPrice,
+      item_metadata: {
+        booking_date: bookingDateTime,
+        duration_minutes: actualDuration,
+        number_of_participants: numberOfParticipants,
+        staff_id: staffId,
+        notes,
+      },
+    });
 
     if (orderItemError || !orderItem) {
       await supabase.from('service_bookings').update({ status: 'cancelled' }).eq('id', booking.id);
@@ -444,10 +448,10 @@ export class ServiceOrderStrategy implements OrderStrategy {
 
     const paymentDescription =
       paymentType === 'percentage'
-        ? `Acompte ${percentageRate}%: ${product.name} - ${formattedBookingDate}`
+        ? `Acompte ${percentageRate}%: ${productData.name} - ${formattedBookingDate}`
         : paymentType === 'delivery_secured'
-          ? `Paiement sécurisé: ${product.name} - ${formattedBookingDate}`
-          : `Réservation: ${product.name} - ${formattedBookingDate}`;
+          ? `Paiement sécurisé: ${productData.name} - ${formattedBookingDate}`
+          : `Réservation: ${productData.name} - ${formattedBookingDate}`;
 
     const paymentResult = await initiatePayment({
       storeId,
