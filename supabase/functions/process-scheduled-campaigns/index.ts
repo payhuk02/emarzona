@@ -9,6 +9,7 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { sendCampaignAllBatches } from '../_shared/campaign-send-orchestrator.ts';
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 const defaultAllowedOrigin = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
@@ -63,42 +64,30 @@ async function getScheduledCampaignsToSend(supabase: any, limit: number = 10): P
  * Appelle la fonction send-email-campaign pour envoyer une campagne
  */
 async function sendCampaign(
-  supabase: any,
+  supabase: ReturnType<typeof createClient>,
   campaignId: string
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; error?: string; total_sent?: number; batches_processed?: number }> {
   try {
-    // Utiliser supabase.functions.invoke() pour les appels internes
-    // Cette méthode gère automatiquement l'authentification
-    console.log('Calling send-email-campaign for campaign:', campaignId);
+    console.log('Sending campaign (all batches):', campaignId);
+    const result = await sendCampaignAllBatches(supabase, campaignId);
 
-    const { data, error } = await supabase.functions.invoke('send-email-campaign', {
-      body: {
-        campaign_id: campaignId,
-        batch_size: 100,
-        batch_index: 0,
-      },
-    });
-
-    if (error) {
-      console.error('Error invoking send-email-campaign:', error);
-      return { success: false, error: error.message || 'Unknown error' };
+    if (!result.success) {
+      await supabase
+        .from('email_campaigns')
+        .update({ status: 'paused', updated_at: new Date().toISOString() })
+        .eq('id', campaignId);
+      return { success: false, error: result.error, total_sent: result.total_sent };
     }
 
-    // Mettre à jour le statut de la campagne
-    const { error: updateError } = await supabase
-      .from('email_campaigns')
-      .update({ status: 'sending' })
-      .eq('id', campaignId);
-
-    if (updateError) {
-      console.error('Error updating campaign status:', updateError);
-      return { success: false, error: updateError.message };
-    }
-
-    return { success: true };
-  } catch (error: any) {
-    console.error('Error sending campaign:', error);
-    return { success: false, error: error.message };
+    return {
+      success: true,
+      total_sent: result.total_sent,
+      batches_processed: result.batches_processed,
+    };
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('Error sending campaign:', message);
+    return { success: false, error: message };
   }
 }
 

@@ -353,7 +353,7 @@ export const useEmailAnalytics = (options?: {
       const { data, error } = await query;
 
       if (error) {
-        logger.error('Error fetching email analytics', { error, filters });
+        logger.error('Error fetching email analytics', { error, options });
         throw error;
       }
 

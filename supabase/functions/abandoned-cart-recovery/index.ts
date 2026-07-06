@@ -180,13 +180,20 @@ serve(async req => {
         emailBody = `Bonjour,\n\nVous avez laissé des articles dans votre panier. Finalisez votre commande maintenant !\n\nTotal: ${cart.total_amount.toLocaleString('fr-FR')} ${cart.currency}\n\n`;
       }
 
-      // Générer le lien de retour au panier
       const siteUrl = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
       const returnUrl = cart.user_id
         ? `${siteUrl}/cart`
         : `${siteUrl}/cart?session=${cart.session_id}`;
 
-      emailBody += `\nRetourner au panier: ${returnUrl}\n\nÀ bientôt,\nL'équipe Emarzona`;
+      const unsubscribeUrl = cart.customer_email
+        ? `${siteUrl}/unsubscribe?email=${encodeURIComponent(cart.customer_email.trim().toLowerCase())}&type=marketing`
+        : '';
+
+      emailBody += `\nRetourner au panier: ${returnUrl}`;
+      if (unsubscribeUrl) {
+        emailBody += `\n\nSe désabonner: ${unsubscribeUrl}`;
+      }
+      emailBody += `\n\nÀ bientôt,\nL'équipe Emarzona`;
 
       if (RESEND_API_KEY && cart.customer_email) {
         try {
@@ -207,7 +214,14 @@ serve(async req => {
             continue;
           }
 
-          const htmlBody = `<pre style="font-family:Arial,sans-serif;white-space:pre-wrap;line-height:1.6">${emailBody.replace(/</g, '&lt;')}</pre>`;
+          const htmlBody = `<pre style="font-family:Arial,sans-serif;white-space:pre-wrap;line-height:1.6">${emailBody.replace(/</g, '&lt;')}</pre>${
+            unsubscribeUrl
+              ? `<div style="margin-top:24px;padding-top:16px;border-top:1px solid #eaeaea;text-align:center;font-size:12px;color:#888;font-family:Arial,sans-serif;">
+            Cet email vous a été envoyé par Emarzona.<br>
+            <a href="${unsubscribeUrl}" style="color:#667eea;text-decoration:underline;">Se désabonner</a>
+          </div>`
+              : ''
+          }`;
 
           const emailResponse = await fetch('https://api.resend.com/emails', {
             method: 'POST',

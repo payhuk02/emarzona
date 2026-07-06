@@ -123,7 +123,7 @@ serve(async req => {
         message += '\nConsultez vos notifications pour plus de détails.';
 
         // Envoyer le digest
-        const { error: sendError } = await supabase.functions.invoke('send-unified-notification', {
+        const { data: sendResult, error: sendError } = await supabase.functions.invoke('send-unified-notification', {
           body: {
             user_id: pref.user_id,
             type: 'system_announcement',
@@ -143,7 +143,12 @@ serve(async req => {
           throw sendError;
         }
 
-        // Marquer les notifications comme lues
+        const sendPayload = sendResult as { success?: boolean } | null;
+        if (sendPayload?.success === false) {
+          throw new Error('Digest email send failed');
+        }
+
+        // Marquer les notifications comme lues uniquement après envoi réussi
         const notificationIds = notifications.map(n => n.id);
         await supabase
           .from('notifications')

@@ -530,27 +530,63 @@ export class EmailCampaignService {
         throw new Error('Campaign must have a template to be sent');
       }
 
-      // Appeler l'Edge Function send-email-campaign
-      const { data, error } = await supabase.functions.invoke('send-email-campaign', {
-        body: {
-          campaign_id: campaignId,
-          batch_size: 100,
-          batch_index: 0,
-        },
-      });
+      // Appeler l'Edge Function send-email-campaign (tous les batches)
+      let batchIndex = 0;
+      let totalSent = 0;
+      let totalErrors = 0;
+      const maxBatches = 500;
 
-      if (error) {
-        logger.error('Error invoking send-email-campaign Edge Function', { error, campaignId });
-        throw error;
+      await this.updateCampaign(campaignId, { status: 'sending' });
+
+      for (let i = 0; i < maxBatches; i++) {
+        const { data, error } = await supabase.functions.invoke('send-email-campaign', {
+          body: {
+            campaign_id: campaignId,
+            batch_size: 100,
+            batch_index: batchIndex,
+          },
+        });
+
+        if (error) {
+          logger.error('Error invoking send-email-campaign Edge Function', {
+            error,
+            campaignId,
+            batchIndex,
+          });
+          throw error;
+        }
+
+        const batch = (data ?? {}) as {
+          success?: boolean;
+          sent?: number;
+          errors?: number;
+          has_more?: boolean;
+          next_batch_index?: number | null;
+          error?: string;
+        };
+
+        if (batch.success === false) {
+          throw new Error(batch.error || 'Campaign send failed');
+        }
+
+        totalSent += batch.sent ?? 0;
+        totalErrors += batch.errors ?? 0;
+
+        if (!batch.has_more) {
+          logger.info('Campaign sent successfully', {
+            campaignId,
+            totalSent,
+            totalErrors,
+            batches: i + 1,
+          });
+          return true;
+        }
+
+        batchIndex =
+          typeof batch.next_batch_index === 'number' ? batch.next_batch_index : batchIndex + 1;
       }
 
-      // Mettre à jour le statut de la campagne
-      await this.updateCampaign(campaignId, {
-        status: 'sending',
-      });
-
-      logger.info('Campaign sent successfully', { campaignId, data });
-      return true;
+      throw new Error('Campaign batch limit reached; contact support to resume sending.');
     } catch (caught: unknown) {
       logger.error('EmailCampaignService.sendCampaign error', { error: caught, campaignId });
       throw caught instanceof Error ? caught : new Error(getErrorMessage(caught));

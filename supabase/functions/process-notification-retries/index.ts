@@ -7,6 +7,7 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { requireCronOrInternalAuth } from '../_shared/edge-auth-utils.ts';
 
 const defaultAllowedOrigin = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
 const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || defaultAllowedOrigin)
@@ -34,6 +35,9 @@ serve(async req => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
+
+  const authFailure = requireCronOrInternalAuth(req, corsHeaders);
+  if (authFailure) return authFailure;
 
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -87,8 +91,22 @@ serve(async req => {
             is_read: false,
           });
           success = !error;
+        } else if (channel === 'email') {
+          const internalSecret = Deno.env.get('EDGE_INTERNAL_SECRET') ?? '';
+          const invokeHeaders: Record<string, string> = {};
+          if (internalSecret) {
+            invokeHeaders['x-internal-secret'] = internalSecret;
+          }
+
+          const { data: emailResult, error: emailError } = await supabase.functions.invoke(
+            'send-notification-email',
+            { body: notification, headers: invokeHeaders }
+          );
+
+          success =
+            !emailError &&
+            (emailResult as { success?: boolean; skipped?: boolean } | null)?.success !== false;
         } else {
-          // Pour email, SMS, push, appeler les Edge Functions appropriées
           const { error } = await supabase.functions.invoke(`send-${channel}`, {
             body: notification,
           });

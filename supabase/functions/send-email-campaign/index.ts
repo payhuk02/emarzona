@@ -6,7 +6,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { getCampaignRecipients } from '../_shared/campaign-recipients.ts';
-import { canSendEmailToRecipient } from '../_shared/email-compliance-utils.ts';
+import { canSendEmailToRecipient, verifyStoreAccess } from '../_shared/email-compliance-utils.ts';
 import { sendMarketingEmailViaResend } from '../_shared/resend-send-utils.ts';
 import { getProjectRefFromSupabaseUrl, isServiceRoleJwt } from '../_shared/edge-auth-utils.ts';
 import { isRateLimited } from '../_shared/upstash-redis.ts';
@@ -201,44 +201,50 @@ serve(async req => {
       });
     }
     const authClient = createClient(supabaseUrl, supabaseKey);
-    let isAuthorized = false;
+    let isPrivilegedCaller = false;
+    let callerUserId: string | null = null;
+
     if (expectedInternalSecret && internalSecret?.trim() === expectedInternalSecret.trim()) {
-      isAuthorized = true;
+      isPrivilegedCaller = true;
     }
     const authHeader = req.headers.get('authorization');
     const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
-    if (!isAuthorized && token && token === supabaseKey) {
-      isAuthorized = true;
+    if (!isPrivilegedCaller && token && token === supabaseKey) {
+      isPrivilegedCaller = true;
     }
     const projectRef = getProjectRefFromSupabaseUrl(supabaseUrl);
-    if (!isAuthorized && token && isServiceRoleJwt(token, projectRef)) {
-      isAuthorized = true;
+    if (!isPrivilegedCaller && token && isServiceRoleJwt(token, projectRef)) {
+      isPrivilegedCaller = true;
     }
-    if (!isAuthorized && token) {
+    if (!isPrivilegedCaller && token) {
       const { data: userData, error: userError } = await authClient.auth.getUser(token);
       if (!userError && userData.user) {
-        isAuthorized = true;
+        callerUserId = userData.user.id;
       }
     }
-    if (!isAuthorized) {
+    if (!isPrivilegedCaller && !callerUserId) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // --- Rate limiting server-side (Upstash Redis) ---
-    // Les campagnes sont limitées à 10 appels/minute (chaque appel envoie un batch de 100 emails)
-    const rateLimitId = token ? token.slice(0, 16) : (req.headers.get('x-forwarded-for') ?? 'anon');
-    const rl = await isRateLimited(rateLimitId, 'send-email-campaign', 10, 60);
-    if (!rl.allowed) {
-      return new Response(
-        JSON.stringify({ error: 'Too many campaign sends. Please try again later.', retryAfterSeconds: 60 }),
-        {
-          status: 429,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
+    // --- Rate limiting server-side (Upstash Redis) — utilisateurs dashboard uniquement ---
+    if (!isPrivilegedCaller) {
+      const rateLimitId = token ? token.slice(0, 16) : (req.headers.get('x-forwarded-for') ?? 'anon');
+      const rl = await isRateLimited(rateLimitId, 'send-email-campaign', 10, 60);
+      if (!rl.allowed) {
+        return new Response(
+          JSON.stringify({
+            error: 'Too many campaign sends. Please try again later.',
+            retryAfterSeconds: 60,
+          }),
+          {
+            status: 429,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
+        );
+      }
     }
 
     if (!RESEND_API_KEY) {
@@ -275,7 +281,12 @@ serve(async req => {
     }
 
     // Vérifier que la campagne peut être envoyée
-    if (campaign.status !== 'scheduled' && campaign.status !== 'draft') {
+    const canSendStatus =
+      campaign.status === 'scheduled' ||
+      campaign.status === 'draft' ||
+      (campaign.status === 'sending' && batch_index > 0);
+
+    if (!canSendStatus) {
       return new Response(
         JSON.stringify({ error: `Campaign cannot be sent. Current status: ${campaign.status}` }),
         {
@@ -283,6 +294,18 @@ serve(async req => {
           headers: { 'Content-Type': 'application/json' },
         }
       );
+    }
+
+    if (!isPrivilegedCaller && callerUserId) {
+      const storeAccess = await verifyStoreAccess(supabase, callerUserId, {
+        storeId: campaign.store_id,
+      });
+      if (!storeAccess.allowed) {
+        return new Response(JSON.stringify({ error: 'Forbidden: not your store campaign' }), {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
     }
 
     // Template par défaut de la campagne
