@@ -502,7 +502,7 @@ const Checkout = () => {
                   orderId: result.orderId,
                   orderNumber,
                   productName: product.name ? htmlToPlainText(product.name) : 'Produit',
-                  customerEmail,
+                  customerEmail: formData.email,
                   cashOnDelivery: true,
                 }),
                 { replace: true }

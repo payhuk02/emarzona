@@ -2,6 +2,23 @@ import type { Page, Route } from '@playwright/test';
 
 const PROJECT_REF = 'hbdnzajbyjakdhuavrvb';
 
+export const E2E_STORE_ID = '11111111-1111-4111-8111-111111111111';
+export const E2E_USER_ID = '22222222-2222-4222-8222-222222222222';
+export const E2E_SEQUENCE_ID = '33333333-3333-4333-8333-333333333333';
+
+function wantsSingleObject(route: Route): boolean {
+  const accept = route.request().headers()['accept'] ?? '';
+  return accept.includes('application/vnd.pgrst.object+json');
+}
+
+function fulfillJson(route: Route, body: unknown, status = 200): Promise<void> {
+  return route.fulfill({
+    status,
+    contentType: 'application/json',
+    body: JSON.stringify(body),
+  });
+}
+
 /** Mock RPC désabonnement public (évite dépendance clé publishable en CI). */
 export async function mockRecordEmailUnsubscribe(page: Page): Promise<void> {
   await page.route(`**/rest/v1/rpc/record_email_unsubscribe`, async (route: Route) => {
@@ -23,7 +40,7 @@ export async function seedSupabaseAuthSession(page: Page): Promise<void> {
     expires_at: Math.floor(Date.now() / 1000) + 3600,
     refresh_token: 'e2e-mock-refresh-token',
     user: {
-      id: 'e2e-user-id',
+      id: E2E_USER_ID,
       aud: 'authenticated',
       role: 'authenticated',
       email: 'vendor@emarzona.com',
@@ -32,28 +49,54 @@ export async function seedSupabaseAuthSession(page: Page): Promise<void> {
   };
 
   await page.addInitScript(
-    ({ key, value }) => {
+    ({ key, value, storeId }) => {
       sessionStorage.setItem(key, JSON.stringify(value));
+      localStorage.setItem('selectedStoreId', storeId);
     },
-    { key: storageKey, value: session }
+    { key: storageKey, value: session, storeId: E2E_STORE_ID }
   );
 }
 
-export async function mockEmailCampaignApis(page: Page, storeId = 'e2e-store-id'): Promise<void> {
+export async function mockEmailCampaignApis(page: Page, storeId = E2E_STORE_ID): Promise<void> {
+  const storeRow = {
+    id: storeId,
+    user_id: E2E_USER_ID,
+    name: 'Boutique E2E',
+    slug: 'boutique-e2e',
+    subdomain: 'boutique-e2e',
+    description: null,
+    default_currency: 'XOF',
+    custom_domain: null,
+    domain_status: null,
+    domain_verification_token: null,
+    domain_verified_at: null,
+    domain_error_message: null,
+    logo_url: null,
+    banner_url: null,
+    info_message: null,
+    info_message_color: null,
+    info_message_font: null,
+    metadata: {},
+    commerce_type: 'physical',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+
+  await page.route(`**/auth/v1/user`, async (route: Route) => {
+    await fulfillJson(route, {
+      user: {
+        id: E2E_USER_ID,
+        aud: 'authenticated',
+        role: 'authenticated',
+        email: 'vendor@emarzona.com',
+        user_metadata: { full_name: 'E2E Vendor' },
+      },
+    });
+  });
+
   await page.route(`**/rest/v1/stores*`, async (route: Route) => {
     if (route.request().method() === 'GET') {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify([
-          {
-            id: storeId,
-            name: 'Boutique E2E',
-            slug: 'boutique-e2e',
-            user_id: 'e2e-user-id',
-          },
-        ]),
-      });
+      await fulfillJson(route, wantsSingleObject(route) ? storeRow : [storeRow]);
       return;
     }
     await route.continue();
@@ -105,8 +148,8 @@ export async function mockEmailCampaignApis(page: Page, storeId = 'e2e-store-id'
 }
 
 const MOCK_SEQUENCE = {
-  id: 'e2e-sequence-id',
-  store_id: 'e2e-store-id',
+  id: E2E_SEQUENCE_ID,
+  store_id: E2E_STORE_ID,
   name: 'Post-achat invité E2E',
   description: 'Séquence test checkout invité',
   trigger_type: 'event',
@@ -121,7 +164,7 @@ const MOCK_SEQUENCE = {
 /** Mocks séquences email + enrollment invité (post-checkout). */
 export async function mockEmailSequenceApis(
   page: Page,
-  storeId = 'e2e-store-id',
+  storeId = E2E_STORE_ID,
   options?: {
     onEnroll?: (payload: Record<string, unknown>) => void;
   }

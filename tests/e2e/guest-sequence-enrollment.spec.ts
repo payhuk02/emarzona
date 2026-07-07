@@ -3,7 +3,13 @@
  * (chaîne fulfillment complète couverte par Deno: sequence-enrollment-integration.test.ts)
  */
 import { test, expect } from '@playwright/test';
-import { mockEmailSequenceApis, seedSupabaseAuthSession } from './helpers/email-mocks';
+import {
+  E2E_SEQUENCE_ID,
+  E2E_STORE_ID,
+  mockEmailSequenceApis,
+  seedSupabaseAuthSession,
+} from './helpers/email-mocks';
+import { gotoApp } from './shared/e2e-test-config';
 
 const PROJECT_REF = 'hbdnzajbyjakdhuavrvb';
 const SUPABASE_URL = `https://${PROJECT_REF}.supabase.co`;
@@ -21,32 +27,44 @@ test.describe('Email — Guest checkout → sequence enrollment', () => {
       });
     });
 
-    const response = await page.request.post(
-      `${SUPABASE_URL}/rest/v1/rpc/enroll_store_email_in_sequence`,
+    await page.goto('about:blank');
+
+    const result = await page.evaluate(
+      async ({ url, body }) => {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            apikey: 'e2e-test-key',
+            authorization: 'Bearer e2e-test-key',
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify(body),
+        });
+        return {
+          ok: response.ok,
+          status: response.status,
+          body: await response.json(),
+        };
+      },
       {
-        data: {
-          p_store_id: 'e2e-store-id',
-          p_sequence_id: 'e2e-sequence-id',
+        url: `${SUPABASE_URL}/rest/v1/rpc/enroll_store_email_in_sequence`,
+        body: {
+          p_store_id: E2E_STORE_ID,
+          p_sequence_id: E2E_SEQUENCE_ID,
           p_email: 'guest.checkout@example.com',
           p_context: {
             order_id: 'order-e2e-001',
             customer_id: 'cust-e2e-001',
             guest_checkout: true,
             trigger_event: 'order.paid',
-            store_id: 'e2e-store-id',
+            store_id: E2E_STORE_ID,
           },
         },
-        headers: {
-          apikey: 'e2e-test-key',
-          authorization: 'Bearer e2e-test-key',
-          'content-type': 'application/json',
-        },
-        failOnStatusCode: false,
       }
     );
 
-    expect(response.ok()).toBeTruthy();
-    expect(await response.json()).toBe('e2e-enrollment-uuid');
+    expect(result.ok).toBeTruthy();
+    expect(result.body).toBe('e2e-enrollment-uuid');
     expect(enrollPayloads).toHaveLength(1);
     expect(enrollPayloads[0].p_email).toBe('guest.checkout@example.com');
     expect((enrollPayloads[0].p_context as Record<string, unknown>).guest_checkout).toBe(true);
@@ -55,18 +73,18 @@ test.describe('Email — Guest checkout → sequence enrollment', () => {
   test('UI vendeur — inscription manuelle invité par email', async ({ page }) => {
     const enrollPayloads: Record<string, unknown>[] = [];
     await seedSupabaseAuthSession(page);
-    await mockEmailSequenceApis(page, 'e2e-store-id', {
+    await mockEmailSequenceApis(page, E2E_STORE_ID, {
       onEnroll: payload => enrollPayloads.push(payload),
     });
 
-    await page.goto('/dashboard/emails/sequences');
+    await gotoApp(page, '/dashboard/emails/sequences');
 
     if (page.url().includes('/auth')) {
       test.skip(true, 'Session mock non acceptée en CI');
       return;
     }
 
-    await expect(page.getByText(/Post-achat invité E2E|Séquences/i).first()).toBeVisible({
+    await expect(page.getByText(/Post-achat invité E2E|Séquences Email/i).first()).toBeVisible({
       timeout: 15000,
     });
 
@@ -104,22 +122,27 @@ test.describe('Email — Guest checkout → sequence enrollment', () => {
       });
     });
 
-    const response = await page.request.post(
-      `${SUPABASE_URL}/functions/v1/process-email-sequences`,
-      {
-        data: { limit: 5 },
+    await page.goto('about:blank');
+
+    const result = await page.evaluate(async url => {
+      const response = await fetch(url, {
+        method: 'POST',
         headers: {
           'x-cron-secret': 'e2e-cron-secret',
           'content-type': 'application/json',
         },
-        failOnStatusCode: false,
+        body: JSON.stringify({ limit: 5 }),
+      });
+      if (!response.ok) {
+        return { ok: false as const };
       }
-    );
-
-    if (response.ok()) {
       const body = await response.json();
-      expect(body.success).toBe(true);
-      expect(body.processed).toBeGreaterThanOrEqual(1);
+      return { ok: true as const, body };
+    }, `${SUPABASE_URL}/functions/v1/process-email-sequences`);
+
+    if (result.ok) {
+      expect(result.body.success).toBe(true);
+      expect(result.body.processed).toBeGreaterThanOrEqual(1);
     }
   });
 });

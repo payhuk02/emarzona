@@ -392,6 +392,7 @@ async function sendDigitalEmail(
     variables: {
       user_name: payload.customer_name,
       order_id: order.id,
+      order_number: order.order_number ?? order.id,
       product_name: item.product_name,
       download_link: downloadLink,
       download_expires_at: downloadExpiresAt,
@@ -425,6 +426,7 @@ async function sendPhysicalEmail(
     variables: {
       user_name: payload.customer_name,
       order_id: order.id,
+      order_number: order.order_number ?? order.id,
       product_name: item.product_name,
       shipping_address: shippingAddress,
       delivery_date: order.expected_delivery_date || 'À déterminer',
@@ -458,6 +460,7 @@ async function sendServiceEmail(
     variables: {
       user_name: payload.customer_name,
       order_id: order.id,
+      order_number: order.order_number ?? order.id,
       service_name: item.product_name,
       booking_date: bookingDate,
       booking_time: bookingTime,
@@ -539,6 +542,7 @@ async function sendArtistEmail(
     variables: {
       user_name: payload.customer_name,
       order_id: order.id,
+      order_number: order.order_number ?? order.id,
       product_name: item.product_name,
       artist_name: artistProduct.artist?.full_name || artistProduct.artist_name || 'Artiste',
       edition_number: item.item_metadata?.edition_number,
