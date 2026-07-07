@@ -102,6 +102,26 @@ export async function mockEmailCampaignApis(page: Page, storeId = E2E_STORE_ID):
     await route.continue();
   });
 
+  await page.route(`**/rest/v1/store_platform_subscriptions*`, async (route: Route) => {
+    if (route.request().method() === 'GET') {
+      const subscriptionRow = {
+        status: 'active',
+        trial_ends_at: null,
+        current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        metadata: {},
+        platform_vendor_plans: {
+          name: 'Physical Standard E2E',
+          slug: 'physical_standard',
+          monthly_price: 29,
+          trial_days: null,
+        },
+      };
+      await fulfillJson(route, wantsSingleObject(route) ? subscriptionRow : [subscriptionRow]);
+      return;
+    }
+    await route.continue();
+  });
+
   await page.route(`**/rest/v1/email_campaigns*`, async (route: Route) => {
     if (route.request().method() === 'GET') {
       await route.fulfill({

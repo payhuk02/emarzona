@@ -1,7 +1,7 @@
 /**
  * Conformité email : désabonnements et préférences utilisateur
  */
-import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 export type EmailCategory = 'transactional' | 'marketing' | 'notification';
 

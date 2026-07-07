@@ -3,6 +3,12 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { getProjectRefFromSupabaseUrl, isServiceRoleJwt } from '../_shared/edge-auth-utils.ts';
 import { mintOrderDownloadLink } from '../_shared/mint-download-token.ts';
 import { CHECKOUT_GUEST_WINDOW_MS } from '../_shared/order-checkout-auth.ts';
+import {
+  formatOrderDateTime,
+  formatShippingAddress,
+  resolveCustomerPortalLink,
+  resolvePhysicalWhatsAppLink,
+} from '../_shared/physical-order-email-utils.ts';
 
 const ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGINS') || '')
   .split(',')
@@ -411,8 +417,44 @@ async function sendPhysicalEmail(
   item: any,
   payload: EmailPayload
 ): Promise<boolean> {
-  // Récupérer l'adresse de livraison
-  const shippingAddress = order.shipping_address || order.customer?.address || 'Non spécifiée';
+  const siteUrl = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
+  const orderNumber = order.order_number ?? order.id;
+
+  let storeName = 'Boutique';
+  if (order.store_id) {
+    const { data: storeRow } = await supabase
+      .from('stores')
+      .select('name')
+      .eq('id', order.store_id)
+      .maybeSingle();
+    if (storeRow?.name) storeName = storeRow.name;
+  }
+
+  const shippingAddress = formatShippingAddress(order, item);
+  const orderDate = formatOrderDateTime(order.created_at);
+
+  let whatsappLink: string | null = null;
+  let customerPortalLink: string | null = null;
+
+  try {
+    whatsappLink = await resolvePhysicalWhatsAppLink(supabase, {
+      productId: item.product_id,
+      productName: item.product_name,
+      orderNumber,
+    });
+  } catch (error) {
+    console.warn('WhatsApp link resolution failed:', error);
+  }
+
+  try {
+    customerPortalLink = await resolveCustomerPortalLink(supabase, {
+      email: payload.customer_email,
+      siteUrl,
+      productType: 'physical',
+    });
+  } catch (error) {
+    console.warn('Customer portal link resolution failed:', error);
+  }
 
   const result = await invokeSendEmail(supabase, {
     templateSlug: 'order-confirmation-physical',
@@ -423,15 +465,21 @@ async function sendPhysicalEmail(
     productId: item.product_id,
     productName: item.product_name,
     orderId: order.id,
+    storeId: order.store_id,
     variables: {
       user_name: payload.customer_name,
+      user_email: payload.customer_email,
       order_id: order.id,
-      order_number: order.order_number ?? order.id,
+      order_number: orderNumber,
+      store_name: storeName,
       product_name: item.product_name,
+      order_date: orderDate,
       shipping_address: shippingAddress,
-      delivery_date: order.expected_delivery_date || 'À déterminer',
+      delivery_date: order.expected_delivery_date || '',
       tracking_number: order.tracking_number,
       tracking_link: order.tracking_link,
+      whatsapp_link: whatsappLink,
+      customer_portal_link: customerPortalLink,
     },
   });
 

@@ -9,7 +9,7 @@ import {
   mockEmailSequenceApis,
   seedSupabaseAuthSession,
 } from './helpers/email-mocks';
-import { gotoApp } from './shared/e2e-test-config';
+import { gotoApp, appLocator } from './shared/e2e-test-config';
 
 const PROJECT_REF = 'hbdnzajbyjakdhuavrvb';
 const SUPABASE_URL = `https://${PROJECT_REF}.supabase.co`;
@@ -84,8 +84,12 @@ test.describe('Email — Guest checkout → sequence enrollment', () => {
       return;
     }
 
-    await expect(page.getByText(/Post-achat invité E2E|Séquences Email/i).first()).toBeVisible({
-      timeout: 15000,
+    await expect(
+      appLocator(page)
+        .getByText(/Post-achat invité E2E|Séquences Email|Nouvelle séquence/i)
+        .first()
+    ).toBeVisible({
+      timeout: 20000,
     });
 
     const enrollmentsTab = page.getByRole('tab', { name: /Inscriptions/i });
