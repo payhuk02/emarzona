@@ -111,9 +111,20 @@ class MonerooClient {
           const timeoutId = setTimeout(() => controller.abort(), MONEROO_CONFIG.timeout);
 
           try {
+            const payload = data as Record<string, unknown>;
+            const metadata =
+              payload.metadata &&
+              typeof payload.metadata === 'object' &&
+              !Array.isArray(payload.metadata)
+                ? (payload.metadata as Record<string, unknown>)
+                : undefined;
+            const checkoutToken =
+              typeof metadata?.checkout_token === 'string' ? metadata.checkout_token : undefined;
+
             const result = await supabase.functions.invoke('moneroo', {
-              body: { action, data: data as Record<string, unknown> },
+              body: { action, data: payload },
               signal: controller.signal,
+              headers: checkoutToken ? { 'x-checkout-token': checkoutToken } : undefined,
             });
 
             clearTimeout(timeoutId);

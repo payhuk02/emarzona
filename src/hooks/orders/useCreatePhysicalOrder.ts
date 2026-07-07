@@ -447,6 +447,21 @@ export const useCreatePhysicalOrder = () => {
           : 'Stock réservé. Redirection vers le paiement...',
       });
 
+      // Email récapitulatif COD (client connecté)
+      if (data.cashOnDelivery && data.orderId && variables.customerEmail) {
+        import('@/lib/orders/request-order-confirmation-email')
+          .then(async ({ requestOrderConfirmationEmail, resolveCheckoutTokenForOrder }) => {
+            const checkoutToken = await resolveCheckoutTokenForOrder(data.orderId);
+            await requestOrderConfirmationEmail({
+              orderId: data.orderId,
+              customerEmail: variables.customerEmail,
+              customerName: variables.customerName,
+              checkoutToken,
+            });
+          })
+          .catch(err => logger.error('COD confirmation email failed', { error: err }));
+      }
+
       // Déclencher webhook pour achat (en arrière-plan) - Système unifié
       if (data.orderId && variables.storeId) {
         import('@/lib/webhooks/unified-webhook-service')

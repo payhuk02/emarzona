@@ -184,7 +184,9 @@ export class DigitalOrderStrategy implements OrderStrategy {
           payment_status: 'pending',
           status: 'pending',
           affiliate_tracking_cookie: affiliateTrackingCookie,
-          metadata: guestCheckout ? { guest_checkout: true } : undefined,
+          metadata: guestCheckout
+            ? { guest_checkout: true, customer_email: customerEmail }
+            : { customer_email: customerEmail },
         })
       )
       .select(

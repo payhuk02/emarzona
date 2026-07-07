@@ -1,17 +1,38 @@
+import { useEffect, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, Package, ShoppingBag, ArrowRight } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import {
+  requestOrderConfirmationEmail,
+  resolveCheckoutTokenForOrder,
+} from '@/lib/orders/request-order-confirmation-email';
 
 export default function GuestOrderConfirmation() {
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
+  const emailRequestedRef = useRef(false);
 
   const orderId = searchParams.get('orderId');
   const orderNumber = searchParams.get('orderNumber');
   const productName = searchParams.get('product');
+  const customerEmail = searchParams.get('email');
   const isCod = searchParams.get('cod') === '1';
+
+  useEffect(() => {
+    if (!orderId || !customerEmail || emailRequestedRef.current) return;
+    emailRequestedRef.current = true;
+
+    void (async () => {
+      const checkoutToken = await resolveCheckoutTokenForOrder(orderId);
+      await requestOrderConfirmationEmail({
+        orderId,
+        customerEmail,
+        checkoutToken,
+      });
+    })();
+  }, [orderId, customerEmail]);
 
   const displayOrderNumber = orderNumber || orderId?.slice(0, 8) || '—';
   const displayProduct = productName || 'votre produit';

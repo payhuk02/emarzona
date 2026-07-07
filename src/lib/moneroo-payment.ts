@@ -81,6 +81,7 @@ function buildMonerooApiMetadata(
   };
 
   const optionalKeys = [
+    'checkout_token',
     'order_number',
     'variantId',
     'productType',

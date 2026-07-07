@@ -123,6 +123,7 @@ export function PhysicalQuickOrderDialog({
               orderId: result.orderId,
               orderNumber,
               productName: product.name,
+              customerEmail: email.trim(),
               cashOnDelivery: true,
             }),
             { replace: true }

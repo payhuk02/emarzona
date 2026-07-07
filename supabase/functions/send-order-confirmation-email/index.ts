@@ -2,6 +2,7 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { getProjectRefFromSupabaseUrl, isServiceRoleJwt } from '../_shared/edge-auth-utils.ts';
 import { mintOrderDownloadLink } from '../_shared/mint-download-token.ts';
+import { CHECKOUT_GUEST_WINDOW_MS } from '../_shared/order-checkout-auth.ts';
 
 const ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGINS') || '')
   .split(',')
@@ -92,6 +93,16 @@ serve(async req => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+
+    const payload: EmailPayload = await req.json();
+
+    if (!payload.order_id || !payload.customer_email) {
+      return new Response(JSON.stringify({ error: 'order_id and customer_email are required' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const authClient = createClient(supabaseUrl, supabaseServiceKey);
     let isAuthorized = false;
     if (expectedInternalSecret && internalSecret?.trim() === expectedInternalSecret.trim()) {
@@ -112,6 +123,32 @@ serve(async req => {
         isAuthorized = true;
       }
     }
+
+    if (!isAuthorized) {
+      const checkoutToken = req.headers.get('x-checkout-token')?.trim();
+      if (checkoutToken) {
+        const { data: orderRow } = await authClient
+          .from('orders')
+          .select('id, created_at, metadata, customer_id, payment_status, status')
+          .eq('id', payload.order_id)
+          .maybeSingle();
+
+        const orderMetadata = parseOrderMetadata(orderRow?.metadata);
+        const orderToken =
+          typeof orderMetadata.checkout_token === 'string' ? orderMetadata.checkout_token : null;
+        const createdMs = orderRow?.created_at ? new Date(orderRow.created_at).getTime() : NaN;
+        const withinGuestWindow =
+          !Number.isNaN(createdMs) && Date.now() - createdMs <= CHECKOUT_GUEST_WINDOW_MS;
+        const isCodOrConfirmed =
+          orderRow?.payment_status === 'cod_pending' ||
+          orderRow?.status === 'confirmed';
+
+        if (orderToken && checkoutToken === orderToken && (withinGuestWindow || isCodOrConfirmed)) {
+          isAuthorized = true;
+        }
+      }
+    }
+
     if (!isAuthorized) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
@@ -120,15 +157,6 @@ serve(async req => {
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    const payload: EmailPayload = await req.json();
-
-    if (!payload.order_id || !payload.customer_email) {
-      return new Response(JSON.stringify({ error: 'order_id and customer_email are required' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
 
     console.log(`Processing order confirmation emails for order ${payload.order_id}...`);
 

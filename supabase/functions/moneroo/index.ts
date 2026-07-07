@@ -173,6 +173,7 @@ const MONEROO_METADATA_PRIORITY = [
   'store_id',
   'product_id',
   'order_id',
+  'checkout_token',
   'userId',
   'order_number',
   'variantId',

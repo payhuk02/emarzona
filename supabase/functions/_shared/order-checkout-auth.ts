@@ -18,6 +18,28 @@ export interface CheckoutOrderContext {
   checkoutToken: string | null;
 }
 
+async function resolveOrderCustomerEmail(
+  supabase: SupabaseClient,
+  customerId: string | null,
+  metadata: Record<string, unknown> | null
+): Promise<string | null> {
+  const fromMetadata = metadata?.customer_email;
+  if (typeof fromMetadata === 'string' && fromMetadata.trim()) {
+    return fromMetadata.trim().toLowerCase();
+  }
+
+  if (!customerId) return null;
+
+  const { data: customer } = await supabase
+    .from('customers')
+    .select('email')
+    .eq('id', customerId)
+    .maybeSingle();
+
+  const email = customer?.email;
+  return typeof email === 'string' && email.trim() ? email.trim().toLowerCase() : null;
+}
+
 export async function loadCheckoutOrder(
   supabase: SupabaseClient,
   orderId: string,
@@ -25,9 +47,7 @@ export async function loadCheckoutOrder(
 ): Promise<CheckoutOrderContext | null> {
   const { data: order, error } = await supabase
     .from('orders')
-    .select(
-      'id, store_id, total_amount, currency, customer_id, customer_email, payment_status, created_at, metadata'
-    )
+    .select('id, store_id, total_amount, currency, customer_id, payment_status, created_at, metadata')
     .eq('id', orderId)
     .eq('store_id', storeId)
     .maybeSingle();
@@ -47,13 +67,19 @@ export async function loadCheckoutOrder(
   const checkoutToken =
     metadata && typeof metadata.checkout_token === 'string' ? metadata.checkout_token : null;
 
+  const customerEmail = await resolveOrderCustomerEmail(
+    supabase,
+    order.customer_id ?? null,
+    metadata
+  );
+
   return {
     orderId: order.id,
     storeId: order.store_id,
     amount,
     currency: String(order.currency ?? 'XOF').toUpperCase(),
     customerId: order.customer_id ?? null,
-    customerEmail: order.customer_email ?? null,
+    customerEmail,
     paymentStatus: order.payment_status ?? null,
     createdAt: order.created_at,
     checkoutToken,

@@ -7,6 +7,7 @@ describe('buildGuestOrderConfirmationPath', () => {
       orderId: 'abc-123',
       orderNumber: 'ORD-42',
       productName: 'T-shirt premium',
+      customerEmail: 'buyer@example.com',
       cashOnDelivery: true,
     });
 
@@ -14,6 +15,7 @@ describe('buildGuestOrderConfirmationPath', () => {
     expect(path).toContain('orderId=abc-123');
     expect(path).toContain('orderNumber=ORD-42');
     expect(path).toContain('product=T-shirt');
+    expect(path).toContain('email=buyer%40example.com');
     expect(path).toContain('cod=1');
   });
 });
