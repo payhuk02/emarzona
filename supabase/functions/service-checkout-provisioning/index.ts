@@ -106,23 +106,31 @@ serve(async (req: Request) => {
           createUserError.message.toLowerCase().includes('already registered') ||
           createUserError.message.toLowerCase().includes('already exists')
         ) {
-          return new Response(
-            JSON.stringify({
-              error: 'Un compte existe déjà avec cet email.',
-              code: 'USER_ALREADY_EXISTS',
-              message: 'Veuillez vous connecter pour réserver ce service.',
-            }),
-            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
+          const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+            type: 'magiclink',
+            email: email,
+          });
+          if (!linkError && linkData?.user?.id) {
+            userId = linkData.user.id;
+          } else {
+            return new Response(
+              JSON.stringify({
+                error: 'Un compte existe déjà avec cet email.',
+                code: 'USER_ALREADY_EXISTS',
+                message: 'Veuillez vous connecter pour réserver ce service.',
+              }),
+              { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
+        } else {
+          throw createUserError;
         }
-        throw createUserError;
+      } else {
+        if (!userResponse.user?.id) {
+          throw new Error("Impossible de créer l'utilisateur invité.");
+        }
+        userId = userResponse.user.id;
       }
-
-      if (!userResponse.user?.id) {
-        throw new Error("Impossible de créer l'utilisateur invité.");
-      }
-
-      userId = userResponse.user.id;
     }
 
     // 2. Réservation Atomique (Pessimistic Locking)

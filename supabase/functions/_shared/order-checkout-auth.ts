@@ -136,44 +136,50 @@ export async function authorizeCheckoutOrder(
   }
 
   const authHeader = req.headers.get('Authorization');
-  if (!authHeader?.toLowerCase().startsWith('bearer ')) {
-    if (!isWithinGuestCheckoutWindow(order.createdAt)) {
-      return { ok: false, status: 401, error: 'Authentication required for this order' };
-    }
+  let user = null;
+  let isBuyer = false;
+  let isStoreOwner = false;
 
-    const providedToken = resolveCheckoutToken(req, checkoutToken);
-    if (!order.checkoutToken || !providedToken || providedToken !== order.checkoutToken) {
-      return { ok: false, status: 401, error: 'Invalid checkout session' };
-    }
+  // Try to authenticate the user if a bearer token is provided
+  if (authHeader?.toLowerCase().startsWith('bearer ')) {
+    const isAnonKey = authHeader.trim() === `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`;
+    
+    // Only attempt to get user if it's not the anon key
+    if (!isAnonKey) {
+      const supabaseUser = createSupabaseUserClient(authHeader);
+      const { data: userData, error: userError } = await supabaseUser.auth.getUser();
+      
+      if (!userError && userData.user) {
+        user = userData.user;
+        
+        isBuyer = order.customerId === user.id ||
+          (order.customerEmail != null &&
+            order.customerEmail.toLowerCase() === (user.email ?? '').toLowerCase());
 
+        const { data: store } = await supabase
+          .from('stores')
+          .select('user_id')
+          .eq('id', storeId)
+          .maybeSingle();
+
+        isStoreOwner = store?.user_id === user.id;
+      }
+    }
+  }
+
+  // If successfully authenticated and has access, allow
+  if (user && (isBuyer || isStoreOwner)) {
     return { ok: true, order };
   }
 
-  const supabaseUser = createSupabaseUserClient(authHeader);
-  const {
-    data: { user },
-    error: userError,
-  } = await supabaseUser.auth.getUser();
-
-  if (userError || !user) {
-    return { ok: false, status: 401, error: 'Invalid session' };
+  // Otherwise, require guest checkout token validation
+  if (!isWithinGuestCheckoutWindow(order.createdAt)) {
+    return { ok: false, status: 401, error: 'Authentication required for this order' };
   }
 
-  const isBuyer =
-    order.customerId === user.id ||
-    (order.customerEmail != null &&
-      order.customerEmail.toLowerCase() === (user.email ?? '').toLowerCase());
-
-  const { data: store } = await supabase
-    .from('stores')
-    .select('user_id')
-    .eq('id', storeId)
-    .maybeSingle();
-
-  const isStoreOwner = store?.user_id === user.id;
-
-  if (!isBuyer && !isStoreOwner) {
-    return { ok: false, status: 403, error: 'Access denied for this order' };
+  const providedToken = resolveCheckoutToken(req, checkoutToken);
+  if (!order.checkoutToken || !providedToken || providedToken !== order.checkoutToken) {
+    return { ok: false, status: 401, error: 'Invalid checkout session' };
   }
 
   return { ok: true, order };

@@ -11,6 +11,11 @@ import {
   isFailClosedEndpoint,
   RATE_LIMIT_PRESETS,
 } from '../_shared/rate-limit.ts';
+import {
+  getProjectRefFromSupabaseUrl,
+  isServiceRoleJwt,
+} from '../_shared/edge-auth-utils.ts';
+import { createSupabaseUserClient } from '../_shared/supabase-admin.ts';
 
 const defaultAllowedOrigin = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
 const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || defaultAllowedOrigin)
@@ -20,7 +25,10 @@ const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || defaultAllowedOrigin)
 
 function resolveCorsOrigin(originHeader: string | null): string {
   if (!originHeader) return defaultAllowedOrigin;
-  return allowedOrigins.includes(originHeader) ? originHeader : defaultAllowedOrigin;
+  if (allowedOrigins.includes(originHeader) || originHeader.startsWith('http://localhost:')) {
+    return originHeader;
+  }
+  return defaultAllowedOrigin;
 }
 
 function buildCorsHeaders(originHeader: string | null) {
@@ -32,6 +40,40 @@ function buildCorsHeaders(originHeader: string | null) {
     'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
     'Access-Control-Max-Age': '86400',
   };
+}
+
+async function authorizeRateLimitRequest(req: Request): Promise<boolean> {
+  const anonKey = Deno.env.get('SUPABASE_ANON_KEY')?.trim() ?? '';
+  const apikey = req.headers.get('apikey')?.trim() ?? '';
+  if (apikey && anonKey && apikey === anonKey) {
+    return true;
+  }
+
+  const authHeader = req.headers.get('authorization');
+  if (!authHeader?.toLowerCase().startsWith('bearer ')) {
+    return false;
+  }
+
+  const token = authHeader.replace(/^Bearer\s+/i, '').trim();
+  const internalSecret = Deno.env.get('EDGE_INTERNAL_SECRET')?.trim() ?? '';
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+  const projectRef = getProjectRefFromSupabaseUrl(Deno.env.get('SUPABASE_URL') ?? '');
+
+  if (internalSecret && token === internalSecret) return true;
+  if (serviceKey && token === serviceKey) return true;
+  if (isServiceRoleJwt(token, projectRef)) return true;
+  if (anonKey && token === anonKey) return true;
+
+  try {
+    const userClient = createSupabaseUserClient(authHeader);
+    const {
+      data: { user },
+      error,
+    } = await userClient.auth.getUser(token);
+    return !error && !!user;
+  } catch {
+    return false;
+  }
 }
 
 serve(async req => {
@@ -47,16 +89,7 @@ serve(async req => {
   let endpoint = 'default';
 
   try {
-    const authHeader = req.headers.get('authorization');
-    const internalSecret = Deno.env.get('EDGE_INTERNAL_SECRET');
-    const token = authHeader?.replace('Bearer ', '').trim();
 
-    if (!token || token !== internalSecret) {
-      return new Response(JSON.stringify({ error: 'Unauthorized: Internal only' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''

@@ -68,6 +68,10 @@ verify_jwt = false
 [functions.store-robots]
 verify_jwt = false
 
+# Rate limiter : appelé depuis le navigateur (anon key / JWT utilisateur)
+[functions.rate-limiter]
+verify_jwt = false
+
 # ---------------------------------------------------------------------------
 # Auth — confirmation email + SMTP Resend (mail.emarzona.com)
 # Production : configurer aussi le Dashboard Supabase (voir docs/CONFIGURATION_AUTH_EMAIL_RESEND.md)

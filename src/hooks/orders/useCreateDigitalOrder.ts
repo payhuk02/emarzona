@@ -21,6 +21,7 @@ import { validateCheckoutPromotion } from '@/lib/checkout/promotion';
 import { findOrCreateStoreCustomer } from '@/lib/orders/customers-data';
 import { generateOrderNumber } from '@/lib/orders/orders-data';
 import { insertOrderItem, orderItemsTable } from '@/lib/orders/order-items-client';
+import { extractCheckoutToken } from '@/lib/checkout/checkout-access';
 
 const PRODUCT_FIELDS = 'id, name, price, promotional_price, currency';
 
@@ -263,6 +264,11 @@ export const useCreateDigitalOrder = () => {
       // 5. Générer un numéro de commande
       const orderNumber = await generateOrderNumber();
 
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      const isGuestCheckout = !user;
+
       // 6. Créer la commande
       // Récupérer le cookie d'affiliation s'il existe
       const affiliateTrackingCookie = getAffiliateTrackingCookie();
@@ -272,21 +278,48 @@ export const useCreateDigitalOrder = () => {
         .insert({
           store_id: storeId,
           customer_id: customerId,
+          customer_email: customerEmail,
           order_number: orderNumber,
           total_amount: finalAmount,
           currency: product.currency,
           payment_status: 'pending',
           status: 'pending',
           affiliate_tracking_cookie: affiliateTrackingCookie,
+          metadata: {
+            customer_email: customerEmail,
+            ...(isGuestCheckout ? { guest_checkout: true } : {}),
+          },
         })
         .select(
-          'id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at'
+          'id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at, metadata'
         )
         .single();
 
       if (orderError || !order) {
         throw new Error('Erreur lors de la création de la commande');
       }
+
+      const checkoutToken = extractCheckoutToken(order.metadata);
+
+      // #region agent log
+      fetch('http://127.0.0.1:7740/ingest/c21af8ec-02ef-48c9-95f8-23aa8fa2c366', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'fed886' },
+        body: JSON.stringify({
+          sessionId: 'fed886',
+          hypothesisId: 'H4-digital-payment-auth',
+          location: 'useCreateDigitalOrder.ts:createOrder',
+          message: 'Digital order created before payment',
+          data: {
+            orderId: order.id,
+            guestCheckout: isGuestCheckout,
+            hasCheckoutToken: !!checkoutToken,
+            hasCustomerEmail: !!customerEmail,
+          },
+          timestamp: Date.now(),
+        }),
+      }).catch(() => {});
+      // #endregion
 
       // 7. Rédimer la carte cadeau si applicable (APRÈS création commande)
       if (giftCardId && giftCardAmount && giftCardAmount > 0) {
@@ -401,15 +434,38 @@ export const useCreateDigitalOrder = () => {
         customerPhone,
         metadata: {
           product_type: 'digital',
+          order_id: order.id,
+          order_number: order.order_number,
           digital_product_id: digitalProductId,
           license_id: licenseId,
           order_item_id: orderItem.id,
+          ...(checkoutToken ? { checkout_token: checkoutToken } : {}),
+          ...(isGuestCheckout ? { guest_checkout: true } : {}),
         },
+        checkoutToken,
       });
 
       if (!paymentResult.success || !paymentResult.checkout_url) {
-        // Déclencher webhook pour échec de paiement si nécessaire
-        throw new Error("Erreur lors de l'initialisation du paiement");
+        // #region agent log
+        fetch('http://127.0.0.1:7740/ingest/c21af8ec-02ef-48c9-95f8-23aa8fa2c366', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'fed886' },
+          body: JSON.stringify({
+            sessionId: 'fed886',
+            hypothesisId: 'H4-digital-payment-auth',
+            location: 'useCreateDigitalOrder.ts:paymentFailed',
+            message: 'Digital payment initiation failed',
+            data: {
+              orderId: order.id,
+              success: paymentResult.success,
+              error: paymentResult.error ?? null,
+              hasCheckoutUrl: !!paymentResult.checkout_url,
+            },
+            timestamp: Date.now(),
+          }),
+        }).catch(() => {});
+        // #endregion
+        throw new Error(paymentResult.error || "Erreur lors de l'initialisation du paiement");
       }
 
       // 12. Retourner le résultat

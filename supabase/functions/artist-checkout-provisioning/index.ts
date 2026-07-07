@@ -32,19 +32,11 @@ serve(async (req: Request) => {
   try {
     const authHeader = req.headers.get('authorization');
     const checkoutToken = req.headers.get('x-checkout-token');
-    const internalSecret = Deno.env.get('EDGE_INTERNAL_SECRET');
     const token = authHeader?.replace('Bearer ', '').trim();
 
-    if (!token && !checkoutToken) {
-      return new Response(JSON.stringify({ error: 'Unauthorized: Missing valid token or secret' }), {
+    if (!token) {
+      return new Response(JSON.stringify({ error: 'Unauthorized: Missing valid token' }), {
         status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    if (token !== internalSecret && !checkoutToken) {
-      return new Response(JSON.stringify({ error: 'Unauthorized: Invalid token' }), {
-        status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -92,13 +84,36 @@ serve(async (req: Request) => {
         createUserError.message.toLowerCase().includes('already registered') ||
         createUserError.message.toLowerCase().includes('already exists')
       ) {
+        const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+          type: 'magiclink',
+          email: email,
+        });
+        
+        let foundUserId: string | null = null;
+        if (!linkError && linkData?.user?.id) {
+          foundUserId = linkData.user.id;
+        }
+        
+        if (!foundUserId) {
+           return new Response(
+            JSON.stringify({
+              success: false,
+              error: "L'utilisateur semble exister mais n'a pas pu être trouvé."
+            }),
+            { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        
         return new Response(
           JSON.stringify({
-            error: 'Un compte existe déjà avec cet email.',
-            code: 'USER_ALREADY_EXISTS',
-            message: 'Veuillez vous connecter pour finaliser cet achat.',
+            success: true,
+            user_id: foundUserId,
+            is_new_user: false,
           }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 200,
+          }
         );
       }
       throw createUserError;

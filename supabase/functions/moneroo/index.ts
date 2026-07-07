@@ -765,7 +765,7 @@ function getCorsOrigin(req: Request): string {
 function getCorsHeaders(req: Request) {
   return {
     'Access-Control-Allow-Origin': getCorsOrigin(req),
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, stripe-signature, x-checkout-token',
     'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
     'Access-Control-Allow-Credentials': 'true',
     'Access-Control-Max-Age': '86400',
@@ -914,6 +914,7 @@ serve(async req => {
         const validatedData = validation.validated!;
 
         const orderIdForAuth =
+          validatedData.orderId ||
           (validatedData.metadata?.order_id as string | undefined) ||
           (validatedData.metadata?.orderId as string | undefined);
 
@@ -1380,3 +1381,4 @@ serve(async req => {
     );
   }
 });
+

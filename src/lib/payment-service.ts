@@ -82,6 +82,26 @@ async function resolvePaymentContext(options: PaymentOptions): Promise<PaymentOp
     checkoutToken = extractCheckoutToken(order?.metadata);
   }
 
+  // #region agent log
+  fetch('http://127.0.0.1:7740/ingest/c21af8ec-02ef-48c9-95f8-23aa8fa2c366', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'fed886' },
+    body: JSON.stringify({
+      sessionId: 'fed886',
+      hypothesisId: 'H4-digital-payment-auth',
+      location: 'payment-service.ts:resolvePaymentContext',
+      message: 'Payment context resolved',
+      data: {
+        orderId: options.orderId ?? null,
+        hasCheckoutToken: !!checkoutToken,
+        tokenFromOptions: !!options.checkoutToken,
+        tokenFromMetadata: !!extractCheckoutToken(options.metadata),
+      },
+      timestamp: Date.now(),
+    }),
+  }).catch(() => {});
+  // #endregion
+
   return {
     ...options,
     metadata: withCheckoutTokenMetadata(options.metadata, checkoutToken),
@@ -156,26 +176,33 @@ export const initiatePayment = async (options: PaymentOptions): Promise<PaymentR
         preferredProvider: toOrchestratorPreferred(resolvedOptions.provider),
       });
 
-      if (orchestrated.psp_fallback) {
-        const msg = buildPspFallbackUserMessage(
-          orchestrated.psp_fallback.from_provider,
-          orchestrated.psp_fallback.reason
-        );
-        toast({
-          title: msg.title,
-          description: msg.description,
-          duration: 12_000,
-        });
+      if (orchestrated.success && orchestrated.checkout_url) {
+        if (orchestrated.psp_fallback) {
+          const msg = buildPspFallbackUserMessage(
+            orchestrated.psp_fallback.from_provider,
+            orchestrated.psp_fallback.reason
+          );
+          toast({
+            title: msg.title,
+            description: msg.description,
+            duration: 12_000,
+          });
+        }
+
+        return {
+          success: true,
+          transaction_id: orchestrated.transaction_id,
+          checkout_url: orchestrated.checkout_url,
+          provider: toCheckoutProvider(orchestrated.provider),
+          provider_transaction_id: orchestrated.provider_transaction_id,
+        };
       }
 
-      return {
-        success: orchestrated.success,
-        transaction_id: orchestrated.transaction_id,
-        checkout_url: orchestrated.checkout_url,
-        provider: toCheckoutProvider(orchestrated.provider),
-        provider_transaction_id: orchestrated.provider_transaction_id,
+      logger.warn('Orchestrator returned failure, falling back to Moneroo', {
         error: orchestrated.error,
-      };
+        orderId: resolvedOptions.orderId,
+        storeId: resolvedOptions.storeId,
+      });
     } catch (error: unknown) {
       logger.error('CRITICAL: Orchestrator initiatePayment failed, falling back to Moneroo', {
         error,
@@ -209,6 +236,7 @@ export const initiatePayment = async (options: PaymentOptions): Promise<PaymentR
       checkout_url: monerooResult.checkout_url,
       provider: 'moneroo',
       provider_transaction_id: monerooResult.moneroo_transaction_id,
+      error: monerooResult.success ? undefined : 'Paiement Moneroo non initialisé',
     };
   } catch (_error: unknown) {
     const errorObj = _error instanceof Error ? _error : new Error(String(_error));

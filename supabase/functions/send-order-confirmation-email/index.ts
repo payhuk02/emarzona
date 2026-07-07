@@ -9,6 +9,8 @@ import {
   resolveCustomerPortalLink,
   resolvePhysicalWhatsAppLink,
 } from '../_shared/physical-order-email-utils.ts';
+import { buildSellerOrderEmailVariables } from '../_shared/seller-order-email-utils.ts';
+import { createSupabaseAdmin } from '../_shared/supabase-admin.ts';
 
 const ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGINS') || '')
   .split(',')
@@ -287,6 +289,17 @@ serve(async req => {
     const emailsSentCount = emailResults.filter(r => r.emailSent).length;
 
     if (emailsSentCount > 0) {
+      const firstPhysicalItem = (order.order_items || []).find(
+        (i: { product_type?: string }) => i.product_type === 'physical'
+      );
+      if (firstPhysicalItem) {
+        try {
+          await sendSellerOrderNotificationEmail(supabase, order, firstPhysicalItem);
+        } catch (sellerEmailError) {
+          console.warn('Seller order notification email failed:', sellerEmailError);
+        }
+      }
+
       await supabase
         .from('orders')
         .update({
@@ -434,7 +447,7 @@ async function sendPhysicalEmail(
   const orderDate = formatOrderDateTime(order.created_at);
 
   let whatsappLink: string | null = null;
-  let customerPortalLink: string | null = null;
+  let customerPortalLink = `${siteUrl.replace(/\/$/, '')}/login?email=${encodeURIComponent(payload.customer_email.trim())}&redirect=${encodeURIComponent('/account/physical')}`;
 
   try {
     whatsappLink = await resolvePhysicalWhatsAppLink(supabase, {
@@ -605,4 +618,51 @@ async function sendArtistEmail(
   });
 
   return result.ok;
+}
+
+async function sendSellerOrderNotificationEmail(
+  supabase: ReturnType<typeof createClient>,
+  order: Record<string, unknown>,
+  item: Record<string, unknown>
+): Promise<void> {
+  const storeId = order.store_id as string | undefined;
+  if (!storeId) return;
+
+  const { data: storeRow } = await supabase
+    .from('stores')
+    .select('user_id, name')
+    .eq('id', storeId)
+    .maybeSingle();
+
+  if (!storeRow?.user_id) return;
+
+  const admin = createSupabaseAdmin();
+  const { data: sellerUser, error: sellerError } = await admin.auth.admin.getUserById(
+    storeRow.user_id
+  );
+  if (sellerError || !sellerUser.user?.email) {
+    console.warn('Seller email not found for order notification');
+    return;
+  }
+
+  const siteUrl = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
+  const variables = await buildSellerOrderEmailVariables(supabase, {
+    order,
+    item,
+    storeName: storeRow.name ?? 'Boutique',
+    siteUrl,
+  });
+
+  await invokeSendEmail(supabase, {
+    templateSlug: 'seller-order-notification',
+    to: sellerUser.user.email,
+    toName: (sellerUser.user.user_metadata?.full_name as string) || storeRow.name || 'Vendeur',
+    userId: storeRow.user_id,
+    productType: 'physical',
+    productId: item.product_id as string | undefined,
+    productName: item.product_name as string | undefined,
+    orderId: order.id as string,
+    storeId,
+    variables,
+  });
 }

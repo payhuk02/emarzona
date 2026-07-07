@@ -111,11 +111,30 @@ export async function resolveCustomerPortalLink(
     siteUrl: string;
     productType?: string | null;
   }
-): Promise<string | null> {
+): Promise<string> {
   const admin = createSupabaseAdmin();
-  return generateGuestCustomerMagicLink(admin, {
+  const magicLink = await generateGuestCustomerMagicLink(admin, {
     email: options.email,
     productType: options.productType ?? 'physical',
     siteUrl: options.siteUrl,
   });
+  if (magicLink) return magicLink;
+
+  const redirectPath =
+    options.productType === 'digital'
+      ? '/account/downloads'
+      : options.productType === 'physical'
+        ? '/account/physical'
+        : '/account/orders';
+  const base = options.siteUrl.replace(/\/$/, '');
+  return `${base}/login?email=${encodeURIComponent(options.email.trim())}&redirect=${encodeURIComponent(redirectPath)}`;
+}
+
+export function buildCustomerWhatsAppLink(
+  customerPhone: string | null | undefined,
+  clickUrlBase: string,
+  message: string
+): string | null {
+  if (!customerPhone?.trim()) return null;
+  return buildWhatsAppClickUrl(clickUrlBase, customerPhone, message);
 }

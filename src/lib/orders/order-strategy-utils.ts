@@ -149,7 +149,7 @@ export function toOrderItemInsert(row: OrderItemExtendedInsert) {
 }
 
 export function asOrdersInsert(
-  row: Database['public']['Tables']['orders']['Insert'] & { customer_email?: string }
+  row: Database['public']['Tables']['orders']['Insert']
 ): Database['public']['Tables']['orders']['Insert'] {
   return row as Database['public']['Tables']['orders']['Insert'];
 }

@@ -9,7 +9,10 @@ const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || defaultAllowedOrigin)
 
 function resolveCorsOrigin(originHeader: string | null): string {
   if (!originHeader) return defaultAllowedOrigin;
-  return allowedOrigins.includes(originHeader) ? originHeader : defaultAllowedOrigin;
+  if (allowedOrigins.includes(originHeader) || originHeader.startsWith('http://localhost:')) {
+    return originHeader;
+  }
+  return defaultAllowedOrigin;
 }
 
 function buildCorsHeaders(originHeader: string | null) {
@@ -31,20 +34,11 @@ serve(async (req: Request) => {
 
   try {
     const authHeader = req.headers.get('authorization');
-    const checkoutToken = req.headers.get('x-checkout-token');
-    const internalSecret = Deno.env.get('EDGE_INTERNAL_SECRET');
     const token = authHeader?.replace('Bearer ', '').trim();
-
-    if (!token && !checkoutToken) {
-      return new Response(JSON.stringify({ error: 'Unauthorized: Missing valid token or secret' }), {
+    
+    if (!token) {
+      return new Response(JSON.stringify({ error: 'Unauthorized: Missing valid token' }), {
         status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    if (token !== internalSecret && !checkoutToken) {
-      return new Response(JSON.stringify({ error: 'Unauthorized: Invalid token' }), {
-        status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -90,28 +84,48 @@ serve(async (req: Request) => {
       });
 
     if (createUserError) {
-      // Si l'utilisateur existe déjà, l'API retourne souvent un message spécifique
-      if (
-        createUserError.message.toLowerCase().includes('already registered') ||
-        createUserError.message.toLowerCase().includes('already exists')
-      ) {
+      const errorMsg = createUserError.message || '';
+      const isAlreadyExists = errorMsg.toLowerCase().includes('already') || 
+                              errorMsg.toLowerCase().includes('exists') ||
+                              errorMsg.toLowerCase().includes('registered');
+                              
+      if (isAlreadyExists) {
+        const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+          type: 'magiclink',
+          email: email,
+        });
+        
+        let foundUserId: string | null = null;
+        if (!linkError && linkData?.user?.id) {
+          foundUserId = linkData.user.id;
+        }
+        
+        if (!foundUserId) {
+           return new Response(
+            JSON.stringify({
+              success: false,
+              error: "L'utilisateur semble exister mais n'a pas pu être trouvé."
+            }),
+            { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        
+        userId = foundUserId;
+      } else {
         return new Response(
           JSON.stringify({
-            error: 'Un compte existe déjà avec cet email.',
-            code: 'USER_ALREADY_EXISTS',
-            message: 'Veuillez vous connecter pour acheter ce logiciel et y lier votre licence.',
+            success: false,
+            error: "Impossible de créer le compte invité : " + errorMsg
           }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-      throw createUserError;
+    } else {
+      if (!userResponse.user?.id) {
+        throw new Error("Impossible de créer l'utilisateur invité.");
+      }
+      userId = userResponse.user.id;
     }
-
-    if (!userResponse.user?.id) {
-      throw new Error("Impossible de créer l'utilisateur invité.");
-    }
-
-    userId = userResponse.user.id;
 
     // 2. Génération de la clé de licence
     const { data: licenseKey, error: keyError } = await supabaseAdmin.rpc('generate_license_key');
@@ -170,7 +184,7 @@ serve(async (req: Request) => {
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500,
+        status: 200,
       }
     );
   }

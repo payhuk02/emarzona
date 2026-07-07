@@ -143,7 +143,6 @@ export class PhysicalOrderStrategy implements OrderStrategy {
         asOrdersInsert({
           store_id: storeId,
           customer_id: customerId,
-          customer_email: customerEmail,
           order_number: orderNumber,
           total_amount: totalPrice - (giftCardAmount || 0),
           currency: productData.currency,

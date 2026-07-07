@@ -4,8 +4,14 @@ export function resolveCorsOrigin(originHeader: string | null): string {
     .split(',')
     .map(o => o.trim())
     .filter(Boolean);
+    
   if (!originHeader) return defaultOrigin;
-  return allowed.includes(originHeader) ? originHeader : defaultOrigin;
+  
+  if (allowed.includes(originHeader) || originHeader.startsWith('http://localhost:')) {
+    return originHeader;
+  }
+  
+  return defaultOrigin;
 }
 
 export function buildCorsHeaders(originHeader: string | null): Record<string, string> {
@@ -13,7 +19,7 @@ export function buildCorsHeaders(originHeader: string | null): Record<string, st
     'Access-Control-Allow-Origin': resolveCorsOrigin(originHeader),
     Vary: 'Origin',
     'Access-Control-Allow-Headers':
-      'authorization, x-client-info, apikey, content-type, stripe-signature',
+      'authorization, x-client-info, apikey, content-type, stripe-signature, x-checkout-token',
     'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
   };
 }

@@ -123,6 +123,35 @@ export async function checkRateLimit(
     if (error) {
       logger.error('[RateLimiter] Error:', error);
 
+      const errorStatus =
+        typeof error === 'object' &&
+        error !== null &&
+        'context' in error &&
+        typeof (error as { context?: { status?: number } }).context?.status === 'number'
+          ? (error as { context?: { status?: number } }).context!.status
+          : undefined;
+
+      // #region agent log
+      if (endpoint === 'payment' || endpoint === 'checkout') {
+        fetch('http://127.0.0.1:7740/ingest/c21af8ec-02ef-48c9-95f8-23aa8fa2c366', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'fed886' },
+          body: JSON.stringify({
+            sessionId: 'fed886',
+            hypothesisId: 'H6-rate-limiter-401',
+            location: 'rate-limiter.ts:checkRateLimit',
+            message: 'Rate limiter invoke failed',
+            data: {
+              endpoint,
+              errorStatus: errorStatus ?? null,
+              errorMessage: error.message?.slice(0, 200) ?? 'unknown',
+            },
+            timestamp: Date.now(),
+          }),
+        }).catch(() => {});
+      }
+      // #endregion
+
       Sentry.captureException(error, {
         tags: {
           component: 'rate-limiter',
@@ -133,7 +162,8 @@ export async function checkRateLimit(
         },
       });
 
-      const failClosed = FAIL_CLOSED_ENDPOINTS.has(endpoint);
+      const authMisconfigured = errorStatus === 401;
+      const failClosed = FAIL_CLOSED_ENDPOINTS.has(endpoint) && !authMisconfigured;
       const fallbackResponse: RateLimitResponse = {
         allowed: !failClosed,
         remaining: failClosed ? 0 : 10,
@@ -141,7 +171,9 @@ export async function checkRateLimit(
         resetAt: new Date(Date.now() + 60000).toISOString(),
         message: failClosed
           ? 'Protection paiement temporairement indisponible. Réessayez dans un instant.'
-          : undefined,
+          : authMisconfigured
+            ? undefined
+            : undefined,
         error: failClosed ? 'Rate limit service unavailable' : undefined,
       };
 

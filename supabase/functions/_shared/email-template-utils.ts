@@ -69,7 +69,20 @@ export function pickLocalized(
   language: string
 ): string {
   if (!field) return '';
-  if (typeof field === 'string') return field;
+  if (typeof field === 'string') {
+    const trimmed = field.trim();
+    if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+      try {
+        const parsed = JSON.parse(trimmed) as unknown;
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+          return pickLocalized(parsed as Record<string, string>, language);
+        }
+      } catch {
+        /* plain text subject/body */
+      }
+    }
+    return field;
+  }
   if (typeof field !== 'object') return String(field);
   return field[language] || field['fr'] || field['en'] || Object.values(field)[0] || '';
 }
@@ -137,8 +150,32 @@ export async function renderDbTemplate(
   const language =
     options?.language || (await resolveUserLanguage(supabase, options?.userId)) || 'fr';
 
-  const subject = replaceVariables(pickLocalized(template.subject, language), variables);
-  const html = replaceVariables(pickLocalized(template.html_content, language), variables);
+  const subjectRaw = pickLocalized(template.subject, language);
+  const htmlRaw = pickLocalized(template.html_content, language);
+
+  // #region agent log
+  fetch('http://127.0.0.1:7740/ingest/c21af8ec-02ef-48c9-95f8-23aa8fa2c366', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'fed886' },
+    body: JSON.stringify({
+      sessionId: 'fed886',
+      hypothesisId: 'H1-email-json-text',
+      location: 'email-template-utils.ts:renderDbTemplate',
+      message: 'Template localized preview',
+      data: {
+        slug,
+        language,
+        subjectType: typeof template.subject,
+        subjectLooksJson: subjectRaw.trim().startsWith('{"'),
+        subjectPreview: subjectRaw.slice(0, 100),
+      },
+      timestamp: Date.now(),
+    }),
+  }).catch(() => {});
+  // #endregion
+
+  const subject = replaceVariables(subjectRaw, variables);
+  const html = replaceVariables(htmlRaw, variables);
   const textRaw = pickLocalized(template.text_content ?? undefined, language);
   const text = textRaw ? replaceVariables(textRaw, variables) : undefined;
 
