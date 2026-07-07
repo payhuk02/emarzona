@@ -103,3 +103,116 @@ export async function mockEmailCampaignApis(page: Page, storeId = 'e2e-store-id'
     });
   });
 }
+
+const MOCK_SEQUENCE = {
+  id: 'e2e-sequence-id',
+  store_id: 'e2e-store-id',
+  name: 'Post-achat invité E2E',
+  description: 'Séquence test checkout invité',
+  trigger_type: 'event',
+  trigger_config: { event_name: 'order.paid' },
+  status: 'active',
+  enrolled_count: 0,
+  completed_count: 0,
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+};
+
+/** Mocks séquences email + enrollment invité (post-checkout). */
+export async function mockEmailSequenceApis(
+  page: Page,
+  storeId = 'e2e-store-id',
+  options?: {
+    onEnroll?: (payload: Record<string, unknown>) => void;
+  }
+): Promise<void> {
+  await mockEmailCampaignApis(page, storeId);
+
+  await page.route(`**/rest/v1/email_sequences*`, async (route: Route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([{ ...MOCK_SEQUENCE, store_id: storeId }]),
+      });
+      return;
+    }
+    await route.continue();
+  });
+
+  await page.route(`**/rest/v1/email_sequence_steps*`, async (route: Route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          {
+            id: 'e2e-step-1',
+            sequence_id: MOCK_SEQUENCE.id,
+            step_order: 1,
+            template_id: 'e2e-template-id',
+            delay_type: 'immediate',
+            delay_value: 0,
+            created_at: new Date().toISOString(),
+          },
+        ]),
+      });
+      return;
+    }
+    await route.continue();
+  });
+
+  let guestEnrollments: Array<Record<string, unknown>> = [];
+
+  await page.route(`**/rest/v1/email_sequence_enrollments*`, async (route: Route) => {
+    const method = route.request().method();
+    if (method === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(guestEnrollments),
+      });
+      return;
+    }
+    if (method === 'PATCH') {
+      const url = route.request().url();
+      const idMatch = url.match(/id=eq\.([^&]+)/);
+      const enrollmentId = idMatch?.[1];
+      guestEnrollments = guestEnrollments.map(row =>
+        row.id === enrollmentId ? { ...row, status: 'paused' } : row
+      );
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(guestEnrollments.filter(r => r.id === enrollmentId)),
+      });
+      return;
+    }
+    await route.continue();
+  });
+
+  await page.route(`**/rest/v1/rpc/enroll_store_email_in_sequence`, async (route: Route) => {
+    const body = route.request().postDataJSON() as Record<string, unknown>;
+    options?.onEnroll?.(body);
+
+    const enrollment = {
+      id: 'e2e-guest-enrollment-id',
+      sequence_id: body.p_sequence_id,
+      user_id: null,
+      recipient_email: body.p_email,
+      status: 'active',
+      current_step: 1,
+      completed_steps: [],
+      enrolled_at: new Date().toISOString(),
+      next_email_at: new Date().toISOString(),
+      context: body.p_context,
+    };
+    guestEnrollments = [enrollment];
+
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify('e2e-guest-enrollment-id'),
+    });
+  });
+}

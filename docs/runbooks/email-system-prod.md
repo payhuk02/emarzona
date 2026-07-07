@@ -130,6 +130,10 @@ LIMIT 20;
 
 Voir aussi : `docs/runbooks/webhook-idempotency-replay-staging.md` (paiements).
 
+---
+
+**Rapport audit consolidé :** [AUDIT_EMAILING_2026.md](../AUDIT_EMAILING_2026.md)
+
 ## Enrollments invités (séquences post-checkout)
 
 ### Prérequis migration

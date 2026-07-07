@@ -28,6 +28,7 @@ export default defineConfig({
     '**/platform-routes-smoke.spec.ts',
     '**/email-unsubscribe.spec.ts',
     '**/email-phase0-hardening.spec.ts',
+    '**/guest-sequence-enrollment.spec.ts',
   ],
   fullyParallel: true,
   forbidOnly: !!process.env.CI,

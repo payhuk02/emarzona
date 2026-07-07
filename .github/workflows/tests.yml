@@ -217,4 +217,5 @@ jobs:
           deno test --allow-env --config supabase/functions/deno.json supabase/functions/stripe-tax-calculate/index.test.ts
           deno test --allow-env --config supabase/functions/deno.json supabase/functions/_shared/__tests__/resend-webhook-utils.test.ts
           deno test --allow-env --config supabase/functions/deno.json supabase/functions/_shared/__tests__/sequence-enrollment-utils.test.ts
+          deno test --allow-env --config supabase/functions/deno.json supabase/functions/_shared/__tests__/sequence-enrollment-integration.test.ts
 

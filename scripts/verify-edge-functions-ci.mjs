@@ -61,6 +61,7 @@ const steps = [
       'supabase/functions/stripe-tax-calculate/index.test.ts',
       'supabase/functions/_shared/__tests__/resend-webhook-utils.test.ts',
       'supabase/functions/_shared/__tests__/sequence-enrollment-utils.test.ts',
+      'supabase/functions/_shared/__tests__/sequence-enrollment-integration.test.ts',
     ],
   },
 ];
