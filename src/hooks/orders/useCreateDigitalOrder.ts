@@ -278,7 +278,6 @@ export const useCreateDigitalOrder = () => {
         .insert({
           store_id: storeId,
           customer_id: customerId,
-          customer_email: customerEmail,
           order_number: orderNumber,
           total_amount: finalAmount,
           currency: product.currency,
