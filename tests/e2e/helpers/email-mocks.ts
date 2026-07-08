@@ -32,7 +32,12 @@ export async function mockRecordEmailUnsubscribe(page: Page): Promise<void> {
 
 /** Session Supabase minimale pour accéder au dashboard emails. */
 export async function seedSupabaseAuthSession(page: Page): Promise<void> {
-  const storageKey = `sb-${PROJECT_REF}-auth-token`;
+  const supabaseUrl =
+    process.env.VITE_SUPABASE_URL ??
+    process.env.SUPABASE_URL ??
+    `https://${PROJECT_REF}.supabase.co`;
+  const projectRef = new URL(supabaseUrl).hostname.split('.')[0];
+  const storageKey = `sb-${projectRef}-auth-token`;
   const session = {
     access_token: 'e2e-mock-access-token',
     token_type: 'bearer',
@@ -96,7 +101,9 @@ export async function mockEmailCampaignApis(page: Page, storeId = E2E_STORE_ID):
 
   await page.route(`**/rest/v1/stores*`, async (route: Route) => {
     if (route.request().method() === 'GET') {
-      await fulfillJson(route, wantsSingleObject(route) ? storeRow : [storeRow]);
+      const isSingle = wantsSingleObject(route);
+      console.log('stores mock hit! url:', route.request().url(), 'isSingle:', isSingle);
+      await fulfillJson(route, isSingle ? storeRow : [storeRow]);
       return;
     }
     await route.continue();
@@ -116,7 +123,12 @@ export async function mockEmailCampaignApis(page: Page, storeId = E2E_STORE_ID):
           trial_days: null,
         },
       };
-      await fulfillJson(route, wantsSingleObject(route) ? subscriptionRow : [subscriptionRow]);
+      // `useStorePhysicalAccess` utilises `.maybeSingle()` ce qui envoie `Accept: */*` parfois,
+      // on renvoie l'objet direct car on sait que c'est le comportement attendu ici.
+      const url = route.request().url();
+      const isSingle =
+        wantsSingleObject(route) || url.includes('limit=1') || url.includes('limit=2');
+      await fulfillJson(route, isSingle ? subscriptionRow : [subscriptionRow]);
       return;
     }
     await route.continue();

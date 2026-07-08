@@ -71,6 +71,7 @@ test.describe('Email — Guest checkout → sequence enrollment', () => {
   });
 
   test('UI vendeur — inscription manuelle invité par email', async ({ page }) => {
+    page.on('console', msg => console.log('BROWSER:', msg.text()));
     const enrollPayloads: Record<string, unknown>[] = [];
     await seedSupabaseAuthSession(page);
     await mockEmailSequenceApis(page, E2E_STORE_ID, {
@@ -83,6 +84,11 @@ test.describe('Email — Guest checkout → sequence enrollment', () => {
       test.skip(true, 'Session mock non acceptée en CI');
       return;
     }
+
+    const fs = await import('fs');
+    fs.writeFileSync('test-failure.html', await page.content());
+    console.log('Current URL before expect:', page.url());
+    await page.screenshot({ path: 'test-failure.png' });
 
     await expect(
       appLocator(page)

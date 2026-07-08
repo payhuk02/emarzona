@@ -50,8 +50,10 @@ function daysUntil(iso: string | null): number | null {
 
 export function useStorePhysicalAccess(storeId?: string | null): StorePhysicalAccessState {
   const [state, setState] = useState(defaultState);
+  const [fetchedStoreId, setFetchedStoreId] = useState<string | null | undefined>(undefined);
 
   const refresh = useCallback(async () => {
+    setFetchedStoreId(storeId);
     if (!storeId) {
       setState({ ...defaultState, loading: false });
       return;
@@ -116,7 +118,9 @@ export function useStorePhysicalAccess(storeId?: string | null): StorePhysicalAc
     refresh();
   }, [refresh]);
 
-  return { ...state, refresh };
+  const isSynchronizing = fetchedStoreId !== storeId;
+
+  return { ...state, loading: state.loading || isSynchronizing, refresh };
 }
 
 export { PHYSICAL_TRIAL_DAYS };

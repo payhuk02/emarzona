@@ -144,6 +144,8 @@ export const useStore = () => {
           .eq('user_id', user.id)
           .single();
 
+        console.log('useStore data:', data, 'error:', error);
+
         if (error) {
           logger.error('❌ [useStore] Erreur DB:', error);
           setStore(null);

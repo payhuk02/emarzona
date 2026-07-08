@@ -142,6 +142,8 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
         .eq('user_id', user.id)
         .order('created_at', { ascending: true });
 
+      console.log('StoreContext fetchStores data:', data, 'error:', fetchError);
+
       if (fetchError) {
         throw fetchError;
       }
