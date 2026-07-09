@@ -559,7 +559,7 @@ export const DigitalProductsList = () => {
           </div>
           <div className="flex items-center gap-2">
             <Button
-              onSelect={handleRefresh}
+              onClick={handleRefresh}
               size="sm"
               variant="outline"
               className="h-9 sm:h-10 transition-all hover:scale-105 text-xs sm:text-sm"
@@ -629,7 +629,7 @@ export const DigitalProductsList = () => {
               </SelectContent>
             </Select>
             <Button
-              onSelect={() => navigate('/dashboard/products/new/digital')}
+              onClick={() => navigate('/dashboard/products/new/digital')}
               size="sm"
               className="h-9 sm:h-10 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-xs sm:text-sm min-h-[44px] touch-manipulation"
             >
@@ -755,7 +755,7 @@ export const DigitalProductsList = () => {
                       variant="ghost"
                       size="icon"
                       className="h-7 w-7 sm:h-8 sm:w-8"
-                      onSelect={() => handleSearchChange('')}
+                      onClick={() => handleSearchChange('')}
                       aria-label={t('digitalProducts.clearSearch', 'Effacer la recherche')}
                     >
                       <X className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -774,7 +774,7 @@ export const DigitalProductsList = () => {
               <Button
                 variant="outline"
                 size="sm"
-                onSelect={handleViewModeToggle}
+                onClick={handleViewModeToggle}
                 className="h-9 sm:h-10 text-xs sm:text-sm min-h-[44px] touch-manipulation"
                 aria-label={
                   viewMode === 'grid'
@@ -945,7 +945,7 @@ export const DigitalProductsList = () => {
                         )}
                       </p>
                       <Button
-                        onSelect={() => navigate('/dashboard/products/new?type=digital')}
+                        onClick={() => navigate('/dashboard/products/new?type=digital')}
                         size="lg"
                         className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 active:scale-95 min-h-[44px] px-6 sm:px-8 touch-manipulation"
                       >
@@ -1064,7 +1064,7 @@ export const DigitalProductsList = () => {
                                       <Button
                                         variant="outline"
                                         size="sm"
-                                        onSelect={() => {
+                                        onClick={() => {
                                           if (store?.slug && product?.slug) {
                                             navigate(
                                               generateProductUrl(
@@ -1091,7 +1091,7 @@ export const DigitalProductsList = () => {
                                       <Button
                                         variant="outline"
                                         size="sm"
-                                        onSelect={() => {
+                                        onClick={() => {
                                           if (product?.id) {
                                             navigate(`/dashboard/products/${product.id}/edit`);
                                           } else {
@@ -1112,7 +1112,7 @@ export const DigitalProductsList = () => {
                                       <Button
                                         size="sm"
                                         className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-                                        onSelect={() => {
+                                        onClick={() => {
                                           if (store?.slug && product?.slug) {
                                             navigate(
                                               generateProductUrl(
@@ -1174,7 +1174,7 @@ export const DigitalProductsList = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          onSelect={() => handlePageChange(1)}
+                          onClick={() => handlePageChange(1)}
                           disabled={currentPage === 1}
                           className="hidden sm:flex"
                           aria-label={t('digitalProducts.firstPage', 'Première page')}
@@ -1184,7 +1184,7 @@ export const DigitalProductsList = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          onSelect={() => handlePageChange(currentPage - 1)}
+                          onClick={() => handlePageChange(currentPage - 1)}
                           disabled={currentPage === 1}
                           aria-label={t('digitalProducts.previousPage', 'Page précédente')}
                         >
@@ -1201,7 +1201,7 @@ export const DigitalProductsList = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          onSelect={() => handlePageChange(currentPage + 1)}
+                          onClick={() => handlePageChange(currentPage + 1)}
                           disabled={currentPage === totalPages}
                           aria-label={t('digitalProducts.nextPage', 'Page suivante')}
                         >
@@ -1210,7 +1210,7 @@ export const DigitalProductsList = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          onSelect={() => handlePageChange(totalPages)}
+                          onClick={() => handlePageChange(totalPages)}
                           disabled={currentPage === totalPages}
                           className="hidden sm:flex"
                           aria-label={t('digitalProducts.lastPage', 'Dernière page')}
@@ -1347,7 +1347,7 @@ export const DigitalProductsList = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onSelect={() => handlePageChange(1)}
+                            onClick={() => handlePageChange(1)}
                             disabled={currentPage === 1}
                             className="hidden sm:flex"
                             aria-label={t('digitalProducts.firstPage', 'Première page')}
@@ -1357,7 +1357,7 @@ export const DigitalProductsList = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onSelect={() => handlePageChange(currentPage - 1)}
+                            onClick={() => handlePageChange(currentPage - 1)}
                             disabled={currentPage === 1}
                             aria-label={t('digitalProducts.previousPage', 'Page précédente')}
                           >
@@ -1374,7 +1374,7 @@ export const DigitalProductsList = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onSelect={() => handlePageChange(currentPage + 1)}
+                            onClick={() => handlePageChange(currentPage + 1)}
                             disabled={currentPage === activeTotalPages}
                             aria-label={t('digitalProducts.nextPage', 'Page suivante')}
                           >
@@ -1383,7 +1383,7 @@ export const DigitalProductsList = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onSelect={() => handlePageChange(activeTotalPages)}
+                            onClick={() => handlePageChange(activeTotalPages)}
                             disabled={currentPage === activeTotalPages}
                             className="hidden sm:flex"
                             aria-label={t('digitalProducts.lastPage', 'Dernière page')}
@@ -1521,7 +1521,7 @@ export const DigitalProductsList = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onSelect={() => handlePageChange(1)}
+                            onClick={() => handlePageChange(1)}
                             disabled={currentPage === 1}
                             className="hidden sm:flex"
                             aria-label={t('digitalProducts.firstPage', 'Première page')}
@@ -1531,7 +1531,7 @@ export const DigitalProductsList = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onSelect={() => handlePageChange(currentPage - 1)}
+                            onClick={() => handlePageChange(currentPage - 1)}
                             disabled={currentPage === 1}
                             aria-label={t('digitalProducts.previousPage', 'Page précédente')}
                           >
@@ -1548,7 +1548,7 @@ export const DigitalProductsList = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onSelect={() => handlePageChange(currentPage + 1)}
+                            onClick={() => handlePageChange(currentPage + 1)}
                             disabled={currentPage === draftTotalPages}
                             aria-label={t('digitalProducts.nextPage', 'Page suivante')}
                           >
@@ -1557,7 +1557,7 @@ export const DigitalProductsList = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onSelect={() => handlePageChange(draftTotalPages)}
+                            onClick={() => handlePageChange(draftTotalPages)}
                             disabled={currentPage === draftTotalPages}
                             className="hidden sm:flex"
                             aria-label={t('digitalProducts.lastPage', 'Dernière page')}
