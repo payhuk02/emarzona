@@ -125,7 +125,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
 
   // Charger toutes les boutiques de l'utilisateur
   const fetchStores = useCallback(async () => {
-    if (!user) {
+    if (!user?.id) {
       setStores([]);
       setSelectedStoreIdState(null);
       setLoading(false);
@@ -180,7 +180,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     } finally {
       setLoading(false);
     }
-  }, [user, getStoredStoreId, saveStoreIdToStorage]);
+  }, [user?.id, getStoredStoreId, saveStoreIdToStorage]);
 
   // ✅ FIX: Charger les boutiques de manière plus stable
   useEffect(() => {
