@@ -184,17 +184,17 @@ export const PAGE_SEO_CONFIG: Record<string, PageSEOEntry> = {
   '/login': {
     title: 'Connexion | Emarzona',
     description: 'Connectez-vous à votre compte Emarzona.',
-    noindex: true,
+    noindex: false,
   },
   '/register': {
     title: 'Inscription | Emarzona',
     description: 'Créez votre compte Emarzona gratuitement.',
-    noindex: true,
+    noindex: false,
   },
   '/auth': {
     title: 'Connexion | Emarzona',
     description: 'Connectez-vous à votre compte Emarzona.',
-    noindex: true,
+    noindex: false,
   },
   '/cart': {
     title: 'Panier | Emarzona',

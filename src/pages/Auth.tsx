@@ -554,7 +554,7 @@ const Auth = () => {
         canonical={`${baseUrl}${authTab === 'signup' ? AUTH_REGISTER_PATH : AUTH_LOGIN_PATH}`}
         type="website"
         locale="fr_FR"
-        noindex={true}
+        noindex={false}
       />
 
       {/* Language Switcher - Top Right */}

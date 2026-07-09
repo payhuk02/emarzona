@@ -218,13 +218,11 @@ function usePlatformCustomizationState() {
       );
 
       if (!publicError && publicData && typeof publicData === 'object') {
-        const pages = (publicData as { pages?: PlatformCustomizationData['pages'] }).pages;
-        if (pages && typeof pages === 'object') {
-          setCustomizationData(prev => ({
-            ...prev,
-            pages,
-          }));
-        }
+        const data = publicData as PlatformCustomizationData;
+        setCustomizationData(prev => ({
+          ...prev,
+          ...data,
+        }));
       } else if (
         publicError &&
         !(
@@ -382,46 +380,29 @@ function usePlatformCustomizationState() {
           return true;
         }
 
-        // Vérifier optimistic locking (conflit de modification)
-        const { data: currentSettings, error: fetchError } = await supabase
+        // Sauvegarder dans Supabase
+        const { error, data: insertedData } = await supabase
           .from('platform_settings')
+          .upsert(
+            {
+              key: 'customization',
+              settings: updatedData,
+              updated_at: new Date().toISOString(),
+            },
+            { onConflict: 'key' }
+          )
           .select('updated_at')
-          .eq('key', 'customization')
           .maybeSingle();
 
-        if (fetchError && fetchError.code !== 'PGRST116') {
-          throw fetchError;
+        if (error) {
+          throw error;
         }
 
-        // Si les données ont été modifiées depuis le dernier chargement
-        if (currentSettings?.updated_at && lastSavedTimestampRef.current) {
-          if (currentSettings.updated_at !== lastSavedTimestampRef.current) {
-            logger.warn('Conflit de modification détecté', {
-              lastSaved: lastSavedTimestampRef.current,
-              current: currentSettings.updated_at,
-              level: 'section',
-            });
-            toast({
-              title: '⚠️ Conflit de modification',
-              description:
-                'Les données ont été modifiées par un autre administrateur. Rechargez la page pour voir les dernières modifications.',
-              variant: 'default',
-            });
-            // Recharger les données
-            await load();
-            setIsSaving(false);
-            return false;
-          }
+        if (!insertedData) {
+          throw new Error(
+            "Refus de sécurité (RLS) de la base de données. L'enregistrement a échoué silencieusement."
+          );
         }
-
-        // Sauvegarder dans Supabase
-        const { error } = await supabase.from('platform_settings').upsert({
-          key: 'customization',
-          settings: updatedData,
-          updated_at: new Date().toISOString(),
-        });
-
-        if (error) throw error;
 
         // Mettre à jour le timestamp de dernière sauvegarde
         const newTimestamp = new Date().toISOString();
@@ -508,44 +489,29 @@ function usePlatformCustomizationState() {
         return false;
       }
 
-      // Vérifier optimistic locking
-      const { data: currentSettings, error: fetchError } = await supabase
+      // Supabase upsert avec gestion du conflit sur la clé primaire
+      const { error, data: insertedData } = await supabase
         .from('platform_settings')
+        .upsert(
+          {
+            key: 'customization',
+            settings: validation.data || currentData,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'key' }
+        )
         .select('updated_at')
-        .eq('key', 'customization')
         .maybeSingle();
 
-      if (fetchError && fetchError.code !== 'PGRST116') {
-        throw fetchError;
+      if (error) {
+        throw error;
       }
 
-      if (currentSettings?.updated_at && lastSavedTimestampRef.current) {
-        if (currentSettings.updated_at !== lastSavedTimestampRef.current) {
-          logger.warn('Conflit de modification détecté lors de la sauvegarde globale', {
-            lastSaved: lastSavedTimestampRef.current,
-            current: currentSettings.updated_at,
-            level: 'section',
-          });
-          toast({
-            title: '⚠️ Conflit de modification',
-            description:
-              'Les données ont été modifiées par un autre administrateur. Rechargez la page pour voir les dernières modifications.',
-            variant: 'default',
-          });
-          await load();
-          setIsSaving(false);
-          return false;
-        }
+      if (!insertedData) {
+        throw new Error(
+          "Refus de sécurité (RLS) de la base de données. L'enregistrement a échoué silencieusement."
+        );
       }
-
-      // Supabase upsert avec gestion du conflit sur la clé primaire
-      const { error } = await supabase.from('platform_settings').upsert({
-        key: 'customization',
-        settings: validation.data || currentData,
-        updated_at: new Date().toISOString(),
-      });
-
-      if (error) throw error;
 
       // Mettre à jour le timestamp
       const newTimestamp = new Date().toISOString();

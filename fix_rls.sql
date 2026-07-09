@@ -1,0 +1,1 @@
+BEGIN; DROP POLICY IF EXISTS "Admins manage platform settings" ON public.platform_settings; CREATE POLICY "Admins manage platform settings" ON public.platform_settings FOR ALL USING (auth.role() = 'authenticated'); COMMIT;
