@@ -147,8 +147,8 @@ export const useAdminStats = () => {
         supabase.from('stores').select('id', { count: 'exact', head: true }),
         supabase.from('products').select('id', { count: 'exact', head: true }),
         supabase.from('orders').select('id', { count: 'exact', head: true }),
-        supabase.from('payments').select('amount').eq('status', 'completed'),
-        supabase.from('platform_commissions').select('commission_amount').eq('status', 'completed'),
+        supabase.from('payments').select('amount').in('status', ['completed', 'succeeded', 'paid', 'successful']),
+        supabase.from('platform_commissions').select('commission_amount').in('status', ['completed', 'paid', 'successful']),
         supabase.from('store_platform_subscriptions').select('mrr_amount, status'),
         supabase.from('referrals').select('id', { count: 'exact', head: true }),
         supabase

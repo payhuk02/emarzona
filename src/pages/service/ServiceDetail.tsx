@@ -547,7 +547,7 @@ export default function ServiceDetail() {
 
   if (isLoading) {
     return (
-      <AppPageShell mainClassName="p-8">
+      <AppPageShell mainClassName="p-8" hideSidebar={true} showUtilityBar={false} hideHorizontalNav={true}>
         <div className="space-y-8">
           <Skeleton className="h-10 w-32" />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -561,7 +561,7 @@ export default function ServiceDetail() {
 
   if (!service) {
     return (
-      <AppPageShell mainClassName="p-8">
+      <AppPageShell mainClassName="p-8" hideSidebar={true} showUtilityBar={false} hideHorizontalNav={true}>
         <Card className="border-destructive">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 text-destructive">
@@ -584,7 +584,7 @@ export default function ServiceDetail() {
   const isGroup = service?.service?.booking_type === 'group';
 
   return (
-    <AppPageShell mainClassName="p-8">
+    <AppPageShell mainClassName="p-8" hideSidebar={true} showUtilityBar={false} hideHorizontalNav={true}>
       {/* SEO Meta Tags */}
       <SEOMeta
         title={service.name}

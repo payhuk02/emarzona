@@ -21,10 +21,20 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import { formatCurrency } from '@/lib/utils';
-import { ShoppingCart, Download, Search, TrendingUp, DollarSign } from 'lucide-react';
+import { ShoppingCart, Download, Search, TrendingUp, DollarSign, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useAdminSalesList, useAdminCommissionsList } from '@/hooks/useAdminSales';
 import type { Payment } from '@/hooks/usePayments';
 import type { PlatformCommission } from '@/hooks/usePlatformCommissions';
+
+const PAGE_SIZES = [10, 20, 50, 100];
 
 const ADMIN_PAYMENT_FIELDS =
   'id, store_id, order_id, amount, commission_amount, status, created_at, stores!inner(name), orders(order_number)';
@@ -41,48 +51,54 @@ const AdminSales = () => {
   const statsRef = useScrollAnimation<HTMLDivElement>();
   const tablesRef = useScrollAnimation<HTMLDivElement>();
 
-  const { data: sales, isLoading } = useQuery({
-    queryKey: ['admin-sales'],
+  const [pageSales, setPageSales] = useState(1);
+  const [pageSizeSales, setPageSizeSales] = useState(20);
+  const [pageCommissions, setPageCommissions] = useState(1);
+  const [pageSizeCommissions, setPageSizeCommissions] = useState(20);
+
+  const { sales: pagedSales, totalCount: totalSalesCount, loading: salesLoading } = useAdminSalesList({
+    page: pageSales,
+    pageSize: pageSizeSales,
+    search: searchTerm
+  });
+
+  const { commissions: pagedCommissions, totalCount: totalCommissionsCount, loading: commissionsLoading } = useAdminCommissionsList({
+    page: pageCommissions,
+    pageSize: pageSizeCommissions
+  });
+
+  // Fast fetch for stats only (no joins)
+  const { data: statsData, isLoading: statsLoading } = useQuery({
+    queryKey: ['admin-sales-stats'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('payments')
-        .select(ADMIN_PAYMENT_FIELDS)
-        .order('created_at', { ascending: false });
+        .select('amount, commission_amount, status')
+        .eq('status', 'completed');
 
       if (error) throw error;
       return data || [];
     },
   });
 
-  const { data: commissions } = useQuery({
-    queryKey: ['admin-commissions'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('platform_commissions')
-        .select(PLATFORM_COMMISSION_FIELDS)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      return data;
-    },
-  });
+  const isLoading = salesLoading || commissionsLoading || statsLoading;
 
   const totalRevenue = useMemo(
-    () => sales?.reduce((sum, s) => sum + Number(s.amount), 0) || 0,
-    [sales]
+    () => statsData?.reduce((sum, s) => sum + Number(s.amount), 0) || 0,
+    [statsData]
   );
   const totalCommissions = useMemo(
-    () => commissions?.reduce((sum, c) => sum + Number(c.commission_amount), 0) || 0,
-    [commissions]
+    () => statsData?.reduce((sum, c) => sum + Number(c.commission_amount || 0), 0) || 0,
+    [statsData]
   );
 
   useEffect(() => {
-    if (!isLoading && sales && commissions) {
+    if (!isLoading) {
       logger.info(
-        `Admin Sales: ${sales.length} ventes, ${commissions.length} commissions chargées`
+        `Admin Sales Loaded`
       );
     }
-  }, [isLoading, sales, commissions]);
+  }, [isLoading]);
 
   const exportToCSV = useCallback(
     (type: 'sales' | 'commissions') => {
@@ -129,21 +145,32 @@ const AdminSales = () => {
         description: `Les données ont été exportées avec succès.`,
       });
     },
-    [sales, commissions, toast]
+    [toast] // Removed full lists from dependencies since we will fetch all for export
   );
 
-  const filteredSales = useMemo(
-    () =>
-      sales?.filter((sale: Payment) => {
-        const storeName = sale.stores?.[0]?.name || '';
-        const orderNumber = sale.orders?.[0]?.order_number || '';
-        return (
-          storeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          orderNumber.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-      }) || [],
-    [sales, searchTerm]
-  );
+  const handleExport = async (type: 'sales' | 'commissions') => {
+    try {
+      const table = type === 'sales' ? 'payments' : 'platform_commissions';
+      const fields = type === 'sales' ? ADMIN_PAYMENT_FIELDS : PLATFORM_COMMISSION_FIELDS;
+      
+      const { data, error } = await supabase
+        .from(table)
+        .select(fields)
+        .order('created_at', { ascending: false });
+        
+      if (error) throw error;
+      
+      exportToCSV(type, data);
+    } catch (e) {
+      toast({
+        title: 'Erreur d\'export',
+        description: 'Impossible d\'exporter les données',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const filteredSales = pagedSales;
 
   if (isLoading) {
     return (
@@ -202,7 +229,7 @@ const AdminSales = () => {
                 {formatCurrency(totalRevenue)}
               </div>
               <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
-                {sales?.length || 0} ventes
+                {statsData?.length || 0} ventes terminées
               </p>
             </CardContent>
           </Card>
@@ -258,7 +285,7 @@ const AdminSales = () => {
                     <CardDescription>Toutes les transactions effectuées</CardDescription>
                   </div>
                   <Button
-                    onClick={() => exportToCSV('sales')}
+                    onClick={() => handleExport('sales')}
                     variant="outline"
                     size="sm"
                     className="min-h-[44px]"
@@ -368,6 +395,49 @@ const AdminSales = () => {
                     Aucune vente trouvée
                   </div>
                 )}
+                {totalSalesCount > 0 && (
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-4 border-t">
+                    <p className="text-sm text-muted-foreground">
+                      {(pageSales - 1) * pageSizeSales + 1}–{Math.min(pageSales * pageSizeSales, totalSalesCount)} sur {totalSalesCount}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <Select
+                        value={pageSizeSales.toString()}
+                        onValueChange={value => {
+                          setPageSizeSales(Number(value));
+                          setPageSales(1);
+                        }}
+                      >
+                        <SelectTrigger className="w-[100px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {PAGE_SIZES.map(size => (
+                            <SelectItem key={size} value={size.toString()}>
+                              {size} / page
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        disabled={pageSales <= 1}
+                        onClick={() => setPageSales(pageSales - 1)}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        disabled={pageSales >= Math.ceil(totalSalesCount / pageSizeSales)}
+                        onClick={() => setPageSales(pageSales + 1)}
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -403,7 +473,7 @@ const AdminSales = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {commissions?.map(commission => (
+                    {pagedCommissions?.map(commission => (
                       <TableRow key={commission.id}>
                         <TableCell>
                           {new Date(commission.created_at).toLocaleDateString('fr-FR')}
@@ -428,9 +498,52 @@ const AdminSales = () => {
                     ))}
                   </TableBody>
                 </Table>
-                {commissions?.length === 0 && (
+                {pagedCommissions?.length === 0 && (
                   <div className="text-center py-12 text-muted-foreground">
                     Aucune commission trouvée
+                  </div>
+                )}
+                {totalCommissionsCount > 0 && (
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-4 border-t">
+                    <p className="text-sm text-muted-foreground">
+                      {(pageCommissions - 1) * pageSizeCommissions + 1}–{Math.min(pageCommissions * pageSizeCommissions, totalCommissionsCount)} sur {totalCommissionsCount}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <Select
+                        value={pageSizeCommissions.toString()}
+                        onValueChange={value => {
+                          setPageSizeCommissions(Number(value));
+                          setPageCommissions(1);
+                        }}
+                      >
+                        <SelectTrigger className="w-[100px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {PAGE_SIZES.map(size => (
+                            <SelectItem key={size} value={size.toString()}>
+                              {size} / page
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        disabled={pageCommissions <= 1}
+                        onClick={() => setPageCommissions(pageCommissions - 1)}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        disabled={pageCommissions >= Math.ceil(totalCommissionsCount / pageSizeCommissions)}
+                        onClick={() => setPageCommissions(pageCommissions + 1)}
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 )}
               </CardContent>

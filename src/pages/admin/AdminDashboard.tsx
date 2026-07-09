@@ -26,6 +26,7 @@ import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/lib/utils';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { convertCurrency } from '@/lib/currency-converter';
 
 const AdminDashboard = () => {
   const { stats, loading } = useAdminStats();
@@ -139,7 +140,7 @@ const AdminDashboard = () => {
       },
       {
         title: 'MRR plateforme',
-        value: formatCurrency(stats.platformMrr),
+        value: formatCurrency(convertCurrency(stats.platformMrr, 'USD', 'XOF'), 'XOF'),
         icon: BarChart3,
         description: `${stats.activeSubscriptions} abonnement(s) actifs / essai`,
         color: 'text-violet-600',

@@ -33,86 +33,44 @@ import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { MobileTableCard } from '@/components/ui/mobile-table-card';
 
-interface StoreData {
-  id: string;
-  name: string;
-  slug: string;
-  user_id: string;
-  created_at: string;
-  owner_name?: string;
-  products_count?: number;
-}
+import { MobileTableCard } from '@/components/ui/mobile-table-card';
+import { useAdminStores, type StoreProfile } from '@/hooks/useAdminStores';
+import { useDebounce } from '@/hooks/useDebounce';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from 'lucide-react';
+
+const ADMIN_STORE_PAGE_SIZES = [10, 20, 50, 100];
+
 
 const AdminStores = () => {
-  const [stores, setStores] = useState<StoreData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedStore, setSelectedStore] = useState<string | null>(null);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const { deleteStore } = useAdminActions();
-  const navigate = useNavigate();
-  const isMobile = useIsMobile();
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const debouncedSearch = useDebounce(searchTerm, 300);
 
-  // Animations au scroll
-  const headerRef = useScrollAnimation<HTMLDivElement>();
-  const tableRef = useScrollAnimation<HTMLDivElement>();
+  const { stores, totalCount, loading, refetch: fetchStores } = useAdminStores({
+    page,
+    pageSize,
+    search: debouncedSearch,
+  });
 
-  const fetchStores = useCallback(async () => {
-    logger.info('Chargement des boutiques admin');
-    try {
-      const { data, error } = await supabase
-        .from('stores')
-        .select('id,name,slug,user_id,created_at')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      const storesWithDetails = await Promise.all(
-        (data || []).map(async store => {
-          const { data: profileData } = await supabase
-            .from('profiles')
-            .select('display_name')
-            .eq('user_id', store.user_id)
-            .limit(1);
-
-          const { count } = await supabase
-            .from('products')
-            .select('id', { count: 'exact', head: true })
-            .eq('store_id', store.id);
-
-          return {
-            ...store,
-            owner_name:
-              profileData && profileData.length > 0
-                ? profileData[0].display_name || 'Inconnu'
-                : 'Inconnu',
-            products_count: count || 0,
-          };
-        })
-      );
-
-      setStores(storesWithDetails);
-      logger.info(`${storesWithDetails.length} boutiques chargées`);
-    } catch (_error: unknown) {
-      logger.error('Erreur lors du chargement des boutiques:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+  const from = totalCount === 0 ? 0 : (page - 1) * pageSize + 1;
+  const to = Math.min(page * pageSize, totalCount);
 
   useEffect(() => {
-    fetchStores();
-  }, [fetchStores]);
-
-  const filteredStores = useMemo(
-    () =>
-      stores.filter(
-        store =>
-          store.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          store.owner_name?.toLowerCase().includes(searchTerm.toLowerCase())
-      ),
-    [stores, searchTerm]
-  );
+    setPage(1);
+  }, [debouncedSearch, pageSize]);
 
   if (loading) {
     return (
@@ -146,8 +104,7 @@ const AdminStores = () => {
               </span>
             </h1>
             <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">
-              {stores.length} boutique{stores.length > 1 ? 's' : ''} créée
-              {stores.length > 1 ? 's' : ''}
+              {totalCount} boutique{totalCount > 1 ? 's' : ''} créée{totalCount > 1 ? 's' : ''}
             </p>
           </div>
         </div>
@@ -167,11 +124,11 @@ const AdminStores = () => {
             </div>
           </CardHeader>
           <CardContent>
-            {filteredStores.length === 0 ? (
+            {stores.length === 0 && !loading ? (
               <div className="text-center py-12 text-muted-foreground">Aucune boutique trouvée</div>
             ) : isMobile ? (
               <MobileTableCard
-                data={filteredStores}
+                data={stores}
                 columns={[
                   {
                     key: 'name',
@@ -195,7 +152,7 @@ const AdminStores = () => {
                     priority: 'medium',
                     render: value => (
                       <span className="text-muted-foreground">
-                        {new Date(value).toLocaleDateString('fr-FR')}
+                        {new Date(value as string).toLocaleDateString('fr-FR')}
                       </span>
                     ),
                   },
@@ -205,7 +162,7 @@ const AdminStores = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => window.open(generateStoreUrl(row.slug, row.subdomain), '_blank')}
+                      onClick={() => window.open(generateStoreUrl(row.slug, row.slug), '_blank')}
                       className="min-h-[44px] min-w-[44px]"
                       aria-label="Voir la boutique"
                     >
@@ -238,7 +195,7 @@ const AdminStores = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredStores.map(store => (
+                  {stores.map(store => (
                     <TableRow key={store.id}>
                       <TableCell className="font-medium">{store.name}</TableCell>
                       <TableCell>{store.owner_name}</TableCell>
@@ -251,7 +208,7 @@ const AdminStores = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => window.open(generateStoreUrl(store.slug, store.subdomain), '_blank')}
+                            onClick={() => window.open(generateStoreUrl(store.slug, store.slug), '_blank')}
                             className="min-h-[44px] min-w-[44px] sm:min-w-auto"
                             aria-label="Voir la boutique"
                           >
@@ -276,6 +233,69 @@ const AdminStores = () => {
                   ))}
                 </TableBody>
               </Table>
+            )}
+
+            {totalCount > 0 && (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-4 border-t">
+                <p className="text-sm text-muted-foreground">
+                  {from}–{to} sur {totalCount} boutiques
+                </p>
+                <div className="flex items-center gap-2">
+                  <Select
+                    value={pageSize.toString()}
+                    onValueChange={value => {
+                      setPageSize(Number(value));
+                      setPage(1);
+                    }}
+                  >
+                    <SelectTrigger className="w-[100px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ADMIN_STORE_PAGE_SIZES.map(size => (
+                        <SelectItem key={size} value={size.toString()}>
+                          {size} / page
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    disabled={page <= 1}
+                    onClick={() => setPage(1)}
+                  >
+                    <ChevronsLeft className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    disabled={page <= 1}
+                    onClick={() => setPage(page - 1)}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <span className="text-sm px-2">
+                    {page} / {totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    disabled={page >= totalPages}
+                    onClick={() => setPage(page + 1)}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    disabled={page >= totalPages}
+                    onClick={() => setPage(totalPages)}
+                  >
+                    <ChevronsRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
             )}
           </CardContent>
         </Card>

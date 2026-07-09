@@ -53,7 +53,6 @@ import {
   AlertTriangle,
   FileDown,
 } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { useStore } from '@/hooks/useStore';
 import {
   useDigitalProducts,
@@ -153,15 +152,7 @@ export const DigitalProductsList = () => {
   /**
    * Utiliser directement les données avec la structure product incluse
    */
-  type DigitalProductRow = {
-    product?: {
-      name?: string;
-      description?: string;
-      is_active?: boolean;
-    };
-    digital_type?: string;
-    status?: string;
-  } & Record<string, unknown>;
+  type DigitalProductRow = any;
 
   const products = useMemo<DigitalProductRow[]>(() => {
     if (!productsData) return [];
@@ -607,27 +598,27 @@ export const DigitalProductsList = () => {
                 </SelectItem>
                 {selectedProducts.size > 0 && (
                   <>
-                    <DropdownMenuSeparator />
+                    <div className="h-px bg-border my-1" />
                     <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
                       Exporter sélectionnés ({selectedProducts.size})
                     </div>
                     <SelectItem
                       value="export-csv-selected"
-                      onSelect={() => handleExport(selectedProducts, 'csv')}
+                      onSelect={() => handleExport(Array.from(selectedProducts), 'csv')}
                     >
                       <FileDown className="h-4 w-4 mr-2" />
                       CSV
                     </SelectItem>
                     <SelectItem
                       value="export-excel-selected"
-                      onSelect={() => handleExport(selectedProducts, 'excel')}
+                      onSelect={() => handleExport(Array.from(selectedProducts), 'excel')}
                     >
                       <FileDown className="h-4 w-4 mr-2" />
                       Excel (.xlsx)
                     </SelectItem>
                     <SelectItem
                       value="export-pdf-selected"
-                      onSelect={() => handleExport(selectedProducts, 'pdf')}
+                      onSelect={() => handleExport(Array.from(selectedProducts), 'pdf')}
                     >
                       <FileDown className="h-4 w-4 mr-2" />
                       PDF

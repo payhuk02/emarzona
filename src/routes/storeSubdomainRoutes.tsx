@@ -8,7 +8,7 @@
 
 import React, { Suspense } from 'react';
 import { lazyPage } from '@/routes/lazyPage';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import { StoreSlugProvider } from '@/contexts/StoreSlugContext';
 import { StoreSubdomainNav } from '@/components/storefront/StoreSubdomainNav';
 import { RedirectToPlatformAuth } from '@/components/auth/RedirectToPlatformAuth';
@@ -62,14 +62,19 @@ export function StoreSubdomainRoutes({
   storeThemeColors,
   commerceType,
 }: StoreSubdomainRoutesProps) {
+  const location = useLocation();
+  const isProductDetail = location.pathname.startsWith('/products/');
+
   return (
     <StoreSlugProvider slug={storeSlug}>
-      <StoreSubdomainNav
-        storeName={storeName}
-        logoUrl={logoUrl || undefined}
-        themeColors={storeThemeColors}
-        commerceType={commerceType}
-      />
+      {!isProductDetail && (
+        <StoreSubdomainNav
+          storeName={storeName}
+          logoUrl={logoUrl || undefined}
+          themeColors={storeThemeColors}
+          commerceType={commerceType}
+        />
+      )}
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
           {/* Root = Storefront de la boutique */}

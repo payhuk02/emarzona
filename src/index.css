@@ -34,7 +34,7 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 220 40% 10%; /* Plus foncé pour meilleur contraste */
 
-    --primary: 217 91% 52%; /* Bleu #2563EB — contraste WCAG AA 4.5:1 avec texte blanc */
+    --primary: 24.6 95% 53.1%; /* Orange Premium #f97316 — conversion optimisée */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 0 0% 96%; /* Gris très clair moderne */
@@ -51,11 +51,11 @@ All colors MUST be HSL.
 
     --border: 0 0% 90%; /* Gris clair moderne */
     --input: 0 0% 90%; /* Gris clair moderne */
-    --ring: 217 91% 52%; /* Bleu moderne */
+    --ring: 24.6 95% 53.1%; /* Orange moderne */
 
     --radius: 0.5rem; /* 8px - Border radius moderne et cohérent */
 
-    --gradient-primary: linear-gradient(135deg, hsl(217, 91%, 60%) 0%, hsl(217, 91%, 50%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(24.6, 95%, 60%) 0%, hsl(24.6, 95%, 50%) 100%);
     --gradient-accent: linear-gradient(135deg, hsl(38, 92%, 50%) 0%, hsl(38, 92%, 45%) 100%);
     --gradient-hero: linear-gradient(135deg, hsl(220, 50%, 12%) 0%, hsl(220, 45%, 18%) 100%);
     --gradient-dark: linear-gradient(180deg, hsl(220, 30%, 12%) 0%, hsl(220, 35%, 18%) 100%);
@@ -88,7 +88,7 @@ All colors MUST be HSL.
     --popover: 220 30% 12%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 217 91% 65%; /* Bleu moderne plus clair pour dark mode */
+    --primary: 24.6 95% 58%; /* Orange moderne plus clair pour dark mode */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 0 0% 18%; /* Gris foncé moderne */
@@ -105,9 +105,9 @@ All colors MUST be HSL.
 
     --border: 0 0% 20%; /* Gris foncé */
     --input: 0 0% 20%; /* Gris foncé */
-    --ring: 217 91% 65%; /* Bleu moderne */
+    --ring: 24.6 95% 58%; /* Orange moderne */
 
-    --gradient-primary: linear-gradient(135deg, hsl(217, 91%, 65%) 0%, hsl(217, 91%, 55%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(24.6, 95%, 65%) 0%, hsl(24.6, 95%, 55%) 100%);
     --gradient-accent: linear-gradient(135deg, hsl(38, 92%, 55%) 0%, hsl(38, 92%, 50%) 100%);
     --gradient-hero: linear-gradient(135deg, hsl(220, 50%, 12%) 0%, hsl(220, 45%, 18%) 100%);
     --gradient-dark: linear-gradient(180deg, hsl(220, 35%, 8%) 0%, hsl(220, 40%, 14%) 100%);

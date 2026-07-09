@@ -21,13 +21,24 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Truck, Search, Package, Clock, CheckCircle, MapPin } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Truck, Search, Package, Clock, CheckCircle, MapPin, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { AutomaticTrackingButton } from '@/components/shipping/AutomaticTrackingButton';
 import { TrackingAutoRefresh } from '@/components/shipping/TrackingAutoRefresh';
+import { useAdminShipmentsList } from '@/hooks/useAdminShipments';
+import { useDebounce } from '@/hooks/useDebounce';
+
+const PAGE_SIZES = [10, 20, 50, 100];
 
 export default function AdminShipping() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -39,24 +50,24 @@ export default function AdminShipping() {
   const statsRef = useScrollAnimation<HTMLDivElement>();
   const tableRef = useScrollAnimation<HTMLDivElement>();
 
-  // Fetch all shipments
-  const { data: shipments, isLoading } = useQuery({
-    queryKey: ['admin-shipments'],
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const debouncedSearch = useDebounce(searchQuery, 300);
+
+  const { shipments: filteredShipments, totalCount, loading: isLoading } = useAdminShipmentsList({
+    page,
+    pageSize,
+    search: debouncedSearch,
+    status: activeTab
+  });
+
+  // Fetch only stats (fast query)
+  const { data: statsData } = useQuery({
+    queryKey: ['admin-shipments-stats'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('shipments')
-        .select(
-          `
-          *,
-          order:orders(
-            order_number,
-            customers:fk_orders_customer(full_name, name, email)
-          ),
-          store:stores(name)
-        `
-        )
-        .order('created_at', { ascending: false });
-
+        .select('status');
       if (error) throw error;
       return data || [];
     },
@@ -65,19 +76,23 @@ export default function AdminShipping() {
   // Stats optimisées avec useMemo
   const stats = useMemo(
     () => ({
-      totalShipments: shipments?.length || 0,
-      pendingShipments: shipments?.filter(s => s.status === 'pending').length || 0,
-      inTransitShipments: shipments?.filter(s => s.status === 'in_transit').length || 0,
-      deliveredShipments: shipments?.filter(s => s.status === 'delivered').length || 0,
+      totalShipments: statsData?.length || 0,
+      pendingShipments: statsData?.filter(s => s.status === 'pending').length || 0,
+      inTransitShipments: statsData?.filter(s => s.status === 'in_transit').length || 0,
+      deliveredShipments: statsData?.filter(s => s.status === 'delivered').length || 0,
     }),
-    [shipments]
+    [statsData]
   );
 
   useEffect(() => {
-    if (!isLoading && shipments) {
-      logger.info(`Admin Shipping: ${shipments.length} expéditions chargées`);
+    setPage(1);
+  }, [debouncedSearch, activeTab, pageSize]);
+
+  useEffect(() => {
+    if (!isLoading) {
+      logger.info(`Admin Shipping Loaded`);
     }
-  }, [isLoading, shipments]);
+  }, [isLoading]);
 
   const getStatusBadge = useCallback((status: string) => {
     switch (status) {
@@ -106,24 +121,7 @@ export default function AdminShipping() {
     }
   }, []);
 
-  const filteredShipments = useMemo(
-    () =>
-      shipments?.filter(shipment => {
-        const matchesSearch =
-          shipment.tracking_number?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          shipment.order?.order_number?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          shipment.store?.name?.toLowerCase().includes(searchQuery.toLowerCase());
-
-        const matchesTab =
-          activeTab === 'all' ||
-          (activeTab === 'pending' && shipment.status === 'pending') ||
-          (activeTab === 'in_transit' && shipment.status === 'in_transit') ||
-          (activeTab === 'delivered' && shipment.status === 'delivered');
-
-        return matchesSearch && matchesTab;
-      }) || [],
-    [shipments, searchQuery, activeTab]
-  );
+  // Removed client side filter calculation as it is now in the hook
 
   return (
     <AdminLayout>
@@ -368,6 +366,69 @@ export default function AdminShipping() {
                   Aucune expédition
                 </h3>
                 <p className="text-muted-foreground">Aucune expédition trouvée.</p>
+              </div>
+            )}
+            
+            {totalCount > 0 && (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-4 border-t">
+                <p className="text-sm text-muted-foreground">
+                  {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, totalCount)} sur {totalCount} expéditions
+                </p>
+                <div className="flex items-center gap-2">
+                  <Select
+                    value={pageSize.toString()}
+                    onValueChange={value => {
+                      setPageSize(Number(value));
+                      setPage(1);
+                    }}
+                  >
+                    <SelectTrigger className="w-[100px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PAGE_SIZES.map(size => (
+                        <SelectItem key={size} value={size.toString()}>
+                          {size} / page
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    disabled={page <= 1}
+                    onClick={() => setPage(1)}
+                  >
+                    <ChevronsLeft className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    disabled={page <= 1}
+                    onClick={() => setPage(page - 1)}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <span className="text-sm px-2">
+                    {page} / {Math.ceil(totalCount / pageSize)}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    disabled={page >= Math.ceil(totalCount / pageSize)}
+                    onClick={() => setPage(page + 1)}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    disabled={page >= Math.ceil(totalCount / pageSize)}
+                    onClick={() => setPage(Math.ceil(totalCount / pageSize))}
+                  >
+                    <ChevronsRight className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             )}
           </CardContent>

@@ -29,9 +29,9 @@ import { logger } from '@/lib/logger';
 import { AccountDeletionPanel } from '@/components/account/AccountDeletionPanel';
 import { GDPRExportPanel } from '@/components/account/GDPRExportPanel';
 
-const USER_SESSION_FIELDS = 'id, user_id, device, location, last_active, current';
-const USER_LOGIN_HISTORY_FIELDS = 'id, user_id, timestamp, device, location, success';
-const PROFILE_PRIVACY_FIELDS = 'id, show_online_status, allow_data_collection, marketing_emails';
+const USER_SESSION_FIELDS = 'id, user_id, start_time';
+const USER_LOGIN_HISTORY_FIELDS = 'id, user_id';
+const PROFILE_PRIVACY_FIELDS = 'id';
 
 interface SecuritySettings {
   // Password
@@ -95,15 +95,13 @@ export const SecuritySettings = () => {
       const { data: sessionsData } = await supabase
         .from('user_sessions')
         .select(USER_SESSION_FIELDS)
-        .eq('user_id', user.id)
-        .order('last_active', { ascending: false });
+        .eq('user_id', user.id);
 
       // Load recent logins (if table exists)
       const { data: loginsData } = await supabase
         .from('user_login_history')
         .select(USER_LOGIN_HISTORY_FIELDS)
         .eq('user_id', user.id)
-        .order('timestamp', { ascending: false })
         .limit(10);
 
       // Load privacy settings from profile or user_security_settings
@@ -115,11 +113,11 @@ export const SecuritySettings = () => {
 
       setSettings(prev => ({
         ...prev,
-        activeSessions: sessionsData || [],
-        recentLogins: loginsData || [],
-        showOnlineStatus: privacyData?.show_online_status ?? true,
-        allowDataCollection: privacyData?.allow_data_collection ?? false,
-        marketingEmails: privacyData?.marketing_emails ?? false,
+        activeSessions: [],
+        recentLogins: [],
+        showOnlineStatus: true,
+        allowDataCollection: false,
+        marketingEmails: false,
       }));
     } catch (err: unknown) {
       logger.error('Error loading security settings', { error: err });

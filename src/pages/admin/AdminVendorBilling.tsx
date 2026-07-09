@@ -28,6 +28,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { formatCurrency } from '@/lib/utils';
+import { convertCurrency } from '@/lib/currency-converter';
 import { Package, CreditCard, Layers, TrendingUp } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -161,7 +162,7 @@ export default function AdminVendorBilling() {
                 <CardDescription>MRR plateforme</CardDescription>
                 <CardTitle className="text-xl flex items-center gap-2">
                   <TrendingUp className="h-5 w-5 text-green-600" />
-                  {formatCurrency(stats.mrr)}
+                  {formatCurrency(convertCurrency(stats.mrr, 'USD', 'XOF'))}
                 </CardTitle>
               </CardHeader>
             </Card>
@@ -214,7 +215,7 @@ export default function AdminVendorBilling() {
                         <TableRow key={p.id}>
                           <TableCell className="font-medium">{p.name}</TableCell>
                           <TableCell>{p.trial_days ? `${p.trial_days} jours` : '—'}</TableCell>
-                          <TableCell>{formatCurrency(Number(p.monthly_price))}</TableCell>
+                          <TableCell>{formatCurrency(convertCurrency(Number(p.monthly_price), 'USD', 'XOF'))}</TableCell>
                           <TableCell>
                             {stats.byPlan.find(b => b.plan === p.name)?.count ?? 0}
                           </TableCell>
@@ -269,7 +270,7 @@ export default function AdminVendorBilling() {
                             <TableCell className="font-medium">{row.stores?.name ?? '—'}</TableCell>
                             <TableCell>{row.platform_vendor_plans?.name ?? '—'}</TableCell>
                             <TableCell>{statusBadge(row.status)}</TableCell>
-                            <TableCell>{formatCurrency(Number(row.mrr_amount))}</TableCell>
+                            <TableCell>{formatCurrency(convertCurrency(Number(row.mrr_amount), 'USD', 'XOF'))}</TableCell>
                             <TableCell className="text-sm text-muted-foreground">
                               {row.current_period_end
                                 ? format(new Date(row.current_period_end), 'dd MMM yyyy', {

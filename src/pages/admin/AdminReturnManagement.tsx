@@ -47,6 +47,9 @@ import {
   useProcessRefund,
   type ProductReturn,
 } from '@/hooks/returns/useReturns';
+import { useAdminReturnsList } from '@/hooks/useAdminReturns';
+import { useAdmin } from '@/hooks/useAdmin';
+import { useDebounce } from '@/hooks/useDebounce';
 
 // Type pour les retours avec relations depuis Supabase
 type ReturnWithRelations = ProductReturn & {
@@ -69,11 +72,12 @@ import {
   Package,
   DollarSign,
   CheckCircle2,
-  XCircle,
-  Clock,
-  AlertCircle,
   Edit,
   MoreVertical,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -86,13 +90,29 @@ import { getPaymentProviderLabel } from '@/lib/payments/payment-provider-labels'
 
 export default function AdminReturnManagement() {
   const { store } = useStore();
+  const { isAdmin } = useAdmin();
   const { toast } = useToast();
   const isMobile = useIsMobile();
-  const { data: returns, isLoading } = useStoreReturns(store?.id);
-  const updateStatus = useUpdateReturnStatus();
-  const processRefund = useProcessRefund();
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const debouncedSearch = useDebounce(searchTerm, 300);
+
+  // If the user is admin and not acting as a store, pass undefined for storeId
+  // The hook will fetch all returns if storeId is undefined.
+  const { returns, loading: isLoading, totalCount, refetch } = useAdminReturnsList({
+    page,
+    pageSize,
+    search: debouncedSearch,
+    status: statusFilter,
+    storeId: isAdmin && !store ? undefined : store?.id
+  });
+
+  const updateStatus = useUpdateReturnStatus();
+  const processRefund = useProcessRefund();
+  
   const [selectedReturnId, setSelectedReturnId] = useState<string | null>(null);
   const [refundDialogOpen, setRefundDialogOpen] = useState(false);
   const [refundAmount, setRefundAmount] = useState('');
@@ -147,14 +167,9 @@ export default function AdminReturnManagement() {
     };
   }, [refundDialogOpen, selectedReturnId, refundMethod]);
 
-  const filteredReturns = (returns || []).filter(r => {
-    const returnTyped = r as ReturnWithRelations;
-    const matchesSearch =
-      returnTyped.return_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      returnTyped.products?.name?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || returnTyped.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  // Search and status filtering is now handled mostly by the hook.
+  // We just use the returns as filteredReturns directly.
+  const filteredReturns = returns || [];
 
   const handleApprove = async (returnId: string) => {
     try {
@@ -163,6 +178,7 @@ export default function AdminReturnManagement() {
         status: 'approved',
         notes: 'Retour approuvé',
       });
+      refetch();
     } catch (error) {
       // Error handled by hook
     }
@@ -175,6 +191,7 @@ export default function AdminReturnManagement() {
         status: 'rejected',
         notes: reason,
       });
+      refetch();
     } catch (error) {
       // Error handled by hook
     }
@@ -205,6 +222,7 @@ export default function AdminReturnManagement() {
       setSelectedReturnId(null);
       setRefundAmount('');
       setRefundReason('');
+      refetch();
     } catch (error) {
       // Error handled by hook
     }
@@ -270,8 +288,8 @@ export default function AdminReturnManagement() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
             <CardContent className="pt-6">
-              <div className="text-2xl font-bold">{returns?.length || 0}</div>
-              <div className="text-sm text-muted-foreground">Total retours</div>
+              <div className="text-2xl font-bold">{totalCount}</div>
+              <div className="text-sm text-muted-foreground">Total retours (filtrés)</div>
             </CardContent>
           </Card>
           <Card>
@@ -673,6 +691,66 @@ export default function AdminReturnManagement() {
                     ? 'Aucun retour trouvé'
                     : 'Aucun retour pour le moment'}
                 </p>
+              </div>
+            )}
+            
+            {totalCount > 0 && (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-4 border-t">
+                <p className="text-sm text-muted-foreground">
+                  {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, totalCount)} sur {totalCount}
+                </p>
+                <div className="flex items-center gap-2">
+                  <Select
+                    value={pageSize.toString()}
+                    onValueChange={value => {
+                      setPageSize(Number(value));
+                      setPage(1);
+                    }}
+                  >
+                    <SelectTrigger className="w-[100px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[10, 20, 50, 100].map(size => (
+                        <SelectItem key={size} value={size.toString()}>
+                          {size} / page
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    disabled={page <= 1}
+                    onClick={() => setPage(1)}
+                  >
+                    <ChevronsLeft className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    disabled={page <= 1}
+                    onClick={() => setPage(page - 1)}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    disabled={page >= Math.ceil(totalCount / pageSize)}
+                    onClick={() => setPage(page + 1)}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    disabled={page >= Math.ceil(totalCount / pageSize)}
+                    onClick={() => setPage(Math.ceil(totalCount / pageSize))}
+                  >
+                    <ChevronsRight className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             )}
           </CardContent>

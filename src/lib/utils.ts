@@ -17,11 +17,14 @@ export function formatCurrency(
   currency: string = 'XOF',
   locale: string = 'fr-FR'
 ): string {
+  const zeroDecimal = ['XOF', 'XAF', 'XPF', 'JPY', 'KRW', 'VND', 'CLP', 'UGX', 'RWF'];
+  const fractionDigits = zeroDecimal.includes(currency.toUpperCase()) ? 0 : 2;
+
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
   }).format(amount);
 }
 

@@ -121,13 +121,12 @@ async function fetchOperationalCounts(storeId: string): Promise<DashboardOperati
       .eq('store_id', storeId)
       .eq('product_type', 'physical')
       .eq('is_active', true)
-      .not('stock_quantity', 'is', null)
-      .lte('stock_quantity', 5),
+      .not('stock', 'is', null)
+      .lte('stock', 5),
     supabase
       .from('reviews')
       .select('id, products!inner(store_id)', { count: 'exact', head: true })
-      .eq('products.store_id', storeId)
-      .eq('is_approved', false),
+      .eq('products.store_id', storeId),
   ]);
 
   const pendingOrders = pendingRes.count ?? 0;

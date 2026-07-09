@@ -203,7 +203,7 @@ const AdvancedOrderContent: React.FC<{ store: Store }> = ({ store }) => {
             <Button
               onClick={handleRefresh}
               size="sm"
-              className="min-h-[44px] h-9 sm:h-10 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-xs sm:text-sm"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 min-h-[44px] h-9 sm:h-10 text-xs sm:text-sm"
             >
               <RefreshCw className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
               <span className="hidden sm:inline">Rafraîchir</span>
@@ -419,7 +419,7 @@ const AdvancedOrderContent: React.FC<{ store: Store }> = ({ store }) => {
           <TabsList className="grid w-full grid-cols-2 h-auto bg-muted/50 backdrop-blur-sm">
             <TabsTrigger
               value="payments"
-              className="flex items-center gap-1.5 sm:gap-2 h-9 sm:h-10 md:h-11 text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-cyan-600 data-[state=active]:text-white"
+              className="flex items-center gap-1.5 sm:gap-2 h-9 sm:h-10 md:h-11 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
             >
               <CreditCard className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
               <span className="hidden sm:inline">
@@ -431,7 +431,7 @@ const AdvancedOrderContent: React.FC<{ store: Store }> = ({ store }) => {
             </TabsTrigger>
             <TabsTrigger
               value="messaging"
-              className="flex items-center gap-1.5 sm:gap-2 h-9 sm:h-10 md:h-11 text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white"
+              className="flex items-center gap-1.5 sm:gap-2 h-9 sm:h-10 md:h-11 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
             >
               <MessageSquare className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
               <span className="hidden sm:inline">
@@ -750,7 +750,7 @@ const AdvancedOrderManagement = () => {
             <CardContent className="text-center p-6 sm:p-8 pt-0">
               <Button
                 onClick={() => navigate('/dashboard/store')}
-                className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
               >
                 {t('advancedOrders.noStore.createStore', 'Créer ma boutique')}
               </Button>

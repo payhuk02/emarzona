@@ -412,7 +412,7 @@ const Orders = () => {
                 setIsCreateDialogOpen(true);
                 logger.info('Ouverture dialog création commande');
               }}
-              className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 min-h-[44px] h-11 sm:h-12 text-xs sm:text-sm flex-1 sm:flex-none"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 min-h-[44px] h-11 sm:h-12 text-xs sm:text-sm flex-1 sm:flex-none"
               aria-label={t('orders.new', 'Nouvelle commande')}
             >
               <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
@@ -711,7 +711,7 @@ const Orders = () => {
                       setIsCreateDialogOpen(true);
                       logger.info('Ouverture dialog création depuis état vide');
                     }}
-                    className="min-h-[44px] bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-xs sm:text-sm md:text-base"
+                    className="min-h-[44px] bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-xs sm:text-sm md:text-base"
                     aria-label={t('orders.empty.createFirst', 'Créer votre première commande')}
                   >
                     <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-2" aria-hidden="true" />
