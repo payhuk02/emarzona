@@ -10,6 +10,8 @@ import { useState, useMemo, CSSProperties } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { isNavItemActive } from '@/config/navigation.helpers';
+import type { StoreCommerceType } from '@/constants/store-commerce-types';
+import { parseStoreCommerceType } from '@/lib/billing/store-commerce-access';
 
 interface StoreThemeColors {
   primaryColor?: string;
@@ -23,14 +25,8 @@ interface StoreSubdomainNavProps {
   storeName?: string;
   logoUrl?: string;
   themeColors?: StoreThemeColors;
+  commerceType?: StoreCommerceType | null;
 }
-
-const navItems = [
-  { label: 'Boutique', path: '/', icon: Store },
-  { label: 'Portfolio', path: '/portfolio', icon: Palette },
-  { label: 'Collections', path: '/collections', icon: FolderOpen },
-  { label: 'Enchères', path: '/auctions', icon: Gavel },
-];
 
 /**
  * Convertit un hex en rgba avec opacité
@@ -42,11 +38,35 @@ function hexToRgba(hex: string, alpha: number): string {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-export function StoreSubdomainNav({ storeName, logoUrl, themeColors }: StoreSubdomainNavProps) {
+export function StoreSubdomainNav({
+  storeName,
+  logoUrl,
+  themeColors,
+  commerceType,
+}: StoreSubdomainNavProps) {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const hasTheme = themeColors?.primaryColor;
+  const effectiveCommerceType = parseStoreCommerceType(commerceType);
+
+  const navItems = useMemo(() => {
+    const items = [{ label: 'Boutique', path: '/', icon: Store }];
+
+    if (effectiveCommerceType === 'artist' || effectiveCommerceType === 'digital') {
+      items.push({ label: 'Portfolio', path: '/portfolio', icon: Palette });
+    }
+
+    if (effectiveCommerceType !== 'service') {
+      items.push({ label: 'Collections', path: '/collections', icon: FolderOpen });
+    }
+
+    if (effectiveCommerceType === 'artist') {
+      items.push({ label: 'Enchères', path: '/auctions', icon: Gavel });
+    }
+
+    return items;
+  }, [effectiveCommerceType]);
 
   const navStyle = useMemo<CSSProperties>(() => {
     if (!hasTheme) return {};

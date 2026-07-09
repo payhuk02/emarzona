@@ -11,6 +11,7 @@
 import { useEffect, ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useCurrentStoreBySubdomain } from '@/hooks/useStoreBySubdomain';
+import type { StoreCommerceType } from '@/constants/store-commerce-types';
 import { detectSubdomain, RESERVED_SUBDOMAINS } from '@/lib/subdomain-detector';
 import { logger } from '@/lib/logger';
 import { useStoreContext } from '@/contexts/StoreContext';
@@ -34,7 +35,8 @@ export function SubdomainMiddleware({ children }: SubdomainMiddlewareProps) {
   const { data: store, isLoading, isError, error, isFetched } = useCurrentStoreBySubdomain();
 
   useEffect(() => {
-    const isStoreSubdomain = subdomainInfo.isStoreDomain && subdomainInfo.isSubdomain && subdomainInfo.subdomain;
+    const isStoreSubdomain =
+      subdomainInfo.isStoreDomain && subdomainInfo.isSubdomain && subdomainInfo.subdomain;
     const isCustomDomain = subdomainInfo.isCustomDomain && subdomainInfo.customDomain;
 
     if (isStoreSubdomain || isCustomDomain) {
@@ -69,9 +71,10 @@ export function SubdomainMiddleware({ children }: SubdomainMiddlewareProps) {
   }, [subdomainInfo]);
 
   // Bloquer les sous-domaines réservés
-  const isReservedSubdomain = subdomainInfo.isStoreDomain && subdomainInfo.isSubdomain && subdomainInfo.subdomain
-    ? RESERVED_SUBDOMAINS.includes(subdomainInfo.subdomain.toLowerCase())
-    : false;
+  const isReservedSubdomain =
+    subdomainInfo.isStoreDomain && subdomainInfo.isSubdomain && subdomainInfo.subdomain
+      ? RESERVED_SUBDOMAINS.includes(subdomainInfo.subdomain.toLowerCase())
+      : false;
 
   // Déterminer si on doit résoudre une boutique
   const shouldResolveStore =
@@ -115,6 +118,7 @@ export function SubdomainMiddleware({ children }: SubdomainMiddlewareProps) {
         storeSlug={store.slug}
         storeName={store.name}
         logoUrl={store.logo_url}
+        commerceType={store.commerce_type as StoreCommerceType}
         storeThemeColors={{
           primaryColor: store.primary_color,
           secondaryColor: store.secondary_color,

@@ -12,6 +12,7 @@ import { Routes, Route } from 'react-router-dom';
 import { StoreSlugProvider } from '@/contexts/StoreSlugContext';
 import { StoreSubdomainNav } from '@/components/storefront/StoreSubdomainNav';
 import { RedirectToPlatformAuth } from '@/components/auth/RedirectToPlatformAuth';
+import type { StoreCommerceType } from '@/constants/store-commerce-types';
 
 const Storefront = lazyPage(() => import('@/pages/Storefront'));
 const ProductDetail = lazyPage(() => import('@/pages/ProductDetail'));
@@ -42,6 +43,7 @@ interface StoreSubdomainRoutesProps {
     backgroundColor?: string;
     textColor?: string;
   };
+  commerceType?: StoreCommerceType | null;
 }
 
 const LoadingFallback = () => (
@@ -58,6 +60,7 @@ export function StoreSubdomainRoutes({
   storeName,
   logoUrl,
   storeThemeColors,
+  commerceType,
 }: StoreSubdomainRoutesProps) {
   return (
     <StoreSlugProvider slug={storeSlug}>
@@ -65,6 +68,7 @@ export function StoreSubdomainRoutes({
         storeName={storeName}
         logoUrl={logoUrl || undefined}
         themeColors={storeThemeColors}
+        commerceType={commerceType}
       />
       <Suspense fallback={<LoadingFallback />}>
         <Routes>

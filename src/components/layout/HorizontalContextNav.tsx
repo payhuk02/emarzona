@@ -44,9 +44,9 @@ function MegaMenuLink({
   const Icon = item.icon;
   const active = isNavItemActive(item.url, location.pathname, location.search, 'prefix');
   const linkClassName = cn(
-    'group flex w-full items-start gap-3 rounded-xl text-sm transition-all duration-300 ease-out',
-    variant === 'sidebar' ? 'min-h-[44px] touch-manipulation px-3 py-2.5' : 'p-3.5',
-    'hover:bg-accent/80 hover:shadow-sm hover:-translate-y-0.5 focus:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30',
+    'group flex w-full items-start gap-3 rounded-xl text-sm transition-colors duration-200 ease-out',
+    variant === 'sidebar' ? 'min-h-[44px] touch-manipulation px-3 py-2.5' : 'p-2.5',
+    'hover:bg-accent/80 hover:shadow-sm focus:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30',
     active
       ? 'bg-primary/5 text-primary font-semibold shadow-sm'
       : 'text-foreground/80 hover:text-foreground'
@@ -56,7 +56,7 @@ function MegaMenuLink({
     <>
       <div
         className={cn(
-          'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition-all duration-300 shadow-sm',
+          'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-all duration-300 shadow-sm mt-0.5',
           active
             ? 'border-primary/20 bg-primary/10 text-primary shadow-primary/10'
             : 'border-border/40 bg-gradient-to-b from-background to-background/80 text-muted-foreground group-hover:border-foreground/20 group-hover:text-foreground group-hover:shadow-md group-hover:bg-background'
@@ -165,7 +165,7 @@ function MegaMenuPanel({
       className={cn(
         isSidebar
           ? 'flex flex-col gap-0.5 px-1 py-1'
-          : 'grid gap-1.5 p-5 sm:grid-cols-2 md:w-[580px] lg:w-[720px] max-h-[min(74vh,520px)] overflow-y-auto bg-background/80 backdrop-blur-2xl border border-white/10 shadow-2xl rounded-xl'
+          : 'grid gap-1 p-3 sm:grid-cols-2 md:w-[480px] lg:w-[560px] max-h-[min(74vh,520px)] overflow-y-auto bg-background/80 backdrop-blur-2xl border border-white/10 shadow-2xl rounded-xl'
       )}
     >
       {domain.items.map(item => (
