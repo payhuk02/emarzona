@@ -152,6 +152,7 @@ export const DigitalProductsList = () => {
   /**
    * Utiliser directement les données avec la structure product incluse
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   type DigitalProductRow = any;
 
   const products = useMemo<DigitalProductRow[]>(() => {
