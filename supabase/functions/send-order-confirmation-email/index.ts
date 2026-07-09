@@ -289,12 +289,10 @@ serve(async req => {
     const emailsSentCount = emailResults.filter(r => r.emailSent).length;
 
     if (emailsSentCount > 0) {
-      const firstPhysicalItem = (order.order_items || []).find(
-        (i: { product_type?: string }) => i.product_type === 'physical'
-      );
-      if (firstPhysicalItem) {
+      const firstItem = (order.order_items || [])[0];
+      if (firstItem) {
         try {
-          await sendSellerOrderNotificationEmail(supabase, order, firstPhysicalItem);
+          await sendSellerOrderNotificationEmail(supabase, order, firstItem);
         } catch (sellerEmailError) {
           console.warn('Seller order notification email failed:', sellerEmailError);
         }
@@ -658,7 +656,7 @@ async function sendSellerOrderNotificationEmail(
     to: sellerUser.user.email,
     toName: (sellerUser.user.user_metadata?.full_name as string) || storeRow.name || 'Vendeur',
     userId: storeRow.user_id,
-    productType: 'physical',
+    productType: (item.product_type as string) || 'generic',
     productId: item.product_id as string | undefined,
     productName: item.product_name as string | undefined,
     orderId: order.id as string,
