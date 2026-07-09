@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
@@ -75,23 +75,14 @@ interface UseOrdersOptions {
 
 export const useOrders = (storeId?: string, options: UseOrdersOptions = {}) => {
   const { page = 0, pageSize = 25, sortBy = 'created_at', sortDirection = 'desc' } = options;
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
   const { toast } = useToast();
 
   const fetchOrders = async () => {
     if (!storeId) {
-      setLoading(false);
-      setError(null);
-      return;
+      return { data: [], count: 0 };
     }
 
     try {
-      setLoading(true);
-      setError(null);
-
       const from = page * pageSize;
       const to = from + pageSize - 1;
 
@@ -135,10 +126,7 @@ export const useOrders = (storeId?: string, options: UseOrdersOptions = {}) => {
             code: errorCode,
             message: errorMessage,
           });
-          setOrders([]);
-          setTotalCount(0);
-          setError(null); // Pas d'erreur critique, juste table absente
-          return;
+          return { data: [], count: 0 };
         }
 
         // Erreur 400 (Bad Request) - souvent RLS ou syntaxe
@@ -152,10 +140,7 @@ export const useOrders = (storeId?: string, options: UseOrdersOptions = {}) => {
             message: errorMessage,
             storeId,
           });
-          setOrders([]);
-          setTotalCount(0);
-          setError(null); // Pas d'erreur critique pour l'UI
-          return;
+          return { data: [], count: 0 };
         }
 
         // Erreur de permissions (403)
@@ -170,10 +155,7 @@ export const useOrders = (storeId?: string, options: UseOrdersOptions = {}) => {
             message: errorMessage,
             storeId,
           });
-          setOrders([]);
-          setTotalCount(0);
-          setError(null);
-          return;
+          return { data: [], count: 0 };
         }
 
         // Autres erreurs - logger et propager
@@ -185,9 +167,7 @@ export const useOrders = (storeId?: string, options: UseOrdersOptions = {}) => {
         throw queryError;
       }
 
-      setOrders((data || []) as unknown as Order[]);
-      setTotalCount(count || 0);
-      setError(null);
+      return { data: (data || []) as unknown as Order[], count: count || 0 };
     } catch (_err: unknown) {
       const error = _err instanceof Error ? _err : new Error('Erreur inconnue');
       const errorCode =
@@ -212,7 +192,6 @@ export const useOrders = (storeId?: string, options: UseOrdersOptions = {}) => {
           code: errorCode,
           filters: { storeId },
         });
-        setError(null); // Pas d'erreur pour l'UI
       } else {
         logger.error('Erreur lors de la récupération des commandes', {
           error: errorMessage,
@@ -229,16 +208,25 @@ export const useOrders = (storeId?: string, options: UseOrdersOptions = {}) => {
       }
 
       // Toujours retourner un tableau vide en cas d'erreur pour éviter de casser l'UI
-      setOrders([]);
-      setTotalCount(0);
-    } finally {
-      setLoading(false);
+      return { data: [], count: 0 };
     }
   };
 
-  useEffect(() => {
-    fetchOrders();
-  }, [storeId, page, pageSize, sortBy, sortDirection]);
+  const {
+    data: queryData,
+    isLoading: loading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ['orders', storeId, page, pageSize, sortBy, sortDirection],
+    queryFn: fetchOrders,
+    enabled: !!storeId,
+    staleTime: 2 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
+  });
+
+  const orders = queryData?.data || [];
+  const totalCount = queryData?.count || 0;
 
   // Function to fetch transactions for a specific order
   const fetchOrderTransactions = async (orderId: string): Promise<OrderTransaction[]> => {
@@ -280,8 +268,8 @@ export const useOrders = (storeId?: string, options: UseOrdersOptions = {}) => {
     orders,
     loading,
     totalCount,
-    error,
-    refetch: fetchOrders,
+    error: error as Error | null,
+    refetch,
     fetchOrderTransactions,
   };
 };

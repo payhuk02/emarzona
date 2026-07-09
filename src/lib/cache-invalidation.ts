@@ -211,6 +211,8 @@ const ENTITY_QUERY_KEY_MAP: Record<
   [EntityType.PRODUCT]: (id, context) => {
     const keys: unknown[][] = [
       ['products'],
+      ['products-optimized'],
+      ['storefront-products'],
       ['marketplace-products'],
       ['marketplace-facets'],
       ['filtered-products'],

@@ -143,14 +143,26 @@ export default function MyOrders() {
 
   // Fetch orders
   const { data: allOrders, isLoading } = useQuery({
-    queryKey: ['customer-orders', user?.id, statusFilter, typeFilter],
+    queryKey: ['customer-orders', user?.id, user?.email, statusFilter, typeFilter],
     queryFn: async (): Promise<Order[]> => {
-      if (!user?.id) return [];
+      if (!user?.email) return [];
+
+      // Fetch all customer profiles for this user's email across all stores
+      const { data: customersData, error: customerError } = await supabase
+        .from('customers')
+        .select('id')
+        .eq('email', user.email);
+
+      if (customerError || !customersData || customersData.length === 0) {
+        return [];
+      }
+
+      const customerIds = customersData.map(c => c.id);
 
       let query = supabase
         .from('orders')
         .select(CUSTOMER_ORDER_FIELDS)
-        .eq('customer_id', user.id)
+        .in('customer_id', customerIds)
         .order('created_at', { ascending: false });
 
       // Filter by status
@@ -186,7 +198,7 @@ export default function MyOrders() {
 
       return ordersWithItems.filter(order => order.items.length > 0);
     },
-    enabled: !!user?.id,
+    enabled: !!user?.email,
   });
 
   // Filter by search query (client-side filtering for better UX)

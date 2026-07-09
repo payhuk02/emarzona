@@ -421,47 +421,31 @@ const Products = () => {
           return;
         }
 
-        // Créer le nouveau produit dupliqué
+        // Créer le nouveau produit dupliqué via useProductManagement
         const timestamp = Date.now();
         const newSlug = `${product.slug}-copie-${timestamp}`;
 
-        const { data: duplicatedProduct, error } = await supabase
-          .from('products')
-          .insert({
-            store_id: product.store_id,
-            name: `${product.name} (copie)`,
-            slug: newSlug,
-            description: product.description,
-            price: product.price,
-            image_url: product.image_url,
-            product_type: product.product_type,
-            category: product.category,
-            is_active: false, // Désactivé par défaut pour éviter les conflits
-            stock_quantity: product.stock_quantity,
-            sku: product.sku ? `${product.sku}-COPY-${timestamp}` : null,
-          })
-          .select()
-          .single();
+        const success = await createProduct({
+          name: `${product.name} (copie)`,
+          slug: newSlug,
+          description: product.description || undefined,
+          price: product.price,
+          currency: product.currency || 'XOF',
+          category: product.category || undefined,
+          product_type: product.product_type,
+          image_url: product.image_url || undefined,
+        });
 
-        if (error) {
-          throw error;
+        if (!success) {
+          throw new Error('Erreur lors de la création du produit dupliqué');
         }
 
-        invalidateCatalogCaches(queryClient);
-        await refetch();
         logger.info('Produit dupliqué avec succès', {
           originalId: productId,
-          newId: duplicatedProduct?.id,
+          newSlug,
         });
 
-        toast({
-          title: t('products.duplicate.success', '✅ Produit dupliqué'),
-          description: t(
-            'products.duplicate.successDescription',
-            '"{{name}}" a été dupliqué. Le nouveau produit est désactivé par défaut.',
-            { name: product.name }
-          ),
-        });
+        // useProductManagement s'occupe déjà des toasts et du rafraîchissement
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
         logger.error(

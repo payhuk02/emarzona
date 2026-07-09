@@ -44,26 +44,28 @@ function MegaMenuLink({
   const Icon = item.icon;
   const active = isNavItemActive(item.url, location.pathname, location.search, 'prefix');
   const linkClassName = cn(
-    'group flex w-full items-start gap-3 rounded-xl text-sm transition-all duration-200',
-    variant === 'sidebar' ? 'min-h-[44px] touch-manipulation px-3 py-2.5' : 'p-3',
-    'hover:bg-accent/50 hover:shadow-sm focus:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-    active ? 'bg-primary/5 text-primary font-medium' : 'text-foreground/80 hover:text-foreground'
+    'group flex w-full items-start gap-3 rounded-xl text-sm transition-all duration-300 ease-out',
+    variant === 'sidebar' ? 'min-h-[44px] touch-manipulation px-3 py-2.5' : 'p-3.5',
+    'hover:bg-accent/80 hover:shadow-sm hover:-translate-y-0.5 focus:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30',
+    active
+      ? 'bg-primary/5 text-primary font-semibold shadow-sm'
+      : 'text-foreground/80 hover:text-foreground'
   );
 
   const renderContent = () => (
     <>
       <div
         className={cn(
-          'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition-all duration-200',
+          'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition-all duration-300 shadow-sm',
           active
-            ? 'border-primary/20 bg-primary/10 text-primary'
-            : 'border-border/50 bg-background text-muted-foreground group-hover:border-foreground/20 group-hover:text-foreground group-hover:shadow-sm'
+            ? 'border-primary/20 bg-primary/10 text-primary shadow-primary/10'
+            : 'border-border/40 bg-gradient-to-b from-background to-background/80 text-muted-foreground group-hover:border-foreground/20 group-hover:text-foreground group-hover:shadow-md group-hover:bg-background'
         )}
       >
         <Icon
           className={cn(
             'h-4 w-4',
-            active ? '' : 'group-hover:scale-110 transition-transform duration-200'
+            active ? '' : 'group-hover:scale-110 transition-transform duration-300 ease-out'
           )}
           aria-hidden
         />
@@ -128,7 +130,7 @@ function MegaMenuPanel({
         className={cn(
           isSidebar
             ? 'flex flex-col gap-5 px-1 py-1'
-            : 'grid gap-4 p-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:w-[760px] lg:w-[940px] xl:w-[1080px] max-h-[min(74vh,560px)] overflow-y-auto'
+            : 'grid gap-4 p-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:w-[760px] lg:w-[940px] xl:w-[1080px] max-h-[min(74vh,560px)] overflow-y-auto bg-background/80 backdrop-blur-2xl border border-white/10 shadow-2xl rounded-xl'
         )}
       >
         {domain.subgroups.map(group => (
@@ -163,7 +165,7 @@ function MegaMenuPanel({
       className={cn(
         isSidebar
           ? 'flex flex-col gap-0.5 px-1 py-1'
-          : 'grid gap-1.5 p-4 sm:grid-cols-2 md:w-[580px] lg:w-[720px] max-h-[min(74vh,520px)] overflow-y-auto'
+          : 'grid gap-1.5 p-5 sm:grid-cols-2 md:w-[580px] lg:w-[720px] max-h-[min(74vh,520px)] overflow-y-auto bg-background/80 backdrop-blur-2xl border border-white/10 shadow-2xl rounded-xl'
       )}
     >
       {domain.items.map(item => (

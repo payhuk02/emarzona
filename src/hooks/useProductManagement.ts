@@ -66,19 +66,66 @@ export const useProductManagement = (storeId: string) => {
             return false;
           }
 
-          const { error } = await supabase.from('products').insert({
-            store_id: storeId,
+          const baseProductPayload = {
             name: productData.name,
             slug,
-            description: productData.description,
-            price: productData.price,
+            description: productData.description || null,
+            price: productData.price || 0,
             currency: productData.currency || 'XOF',
-            category: productData.category,
-            product_type: productData.product_type,
-            image_url: productData.image_url,
-          });
+            category_id: productData.category || null,
+            image_url: productData.image_url || null,
+            product_type: productData.product_type || 'digital',
+            is_active: false, // Inactive by default for CSV imports/duplicates to allow review
+          };
 
-          if (error) throw error;
+          let resultError = null;
+
+          if (productData.product_type === 'physical') {
+            const { error } = await supabase.rpc('create_physical_product_tx', {
+              p_store_id: storeId,
+              p_product: baseProductPayload,
+              p_physical: { requires_shipping: true },
+            });
+            resultError = error;
+          } else if (productData.product_type === 'service') {
+            const { error } = await supabase.rpc('create_service_product_tx', {
+              p_store_id: storeId,
+              p_product: baseProductPayload,
+              p_service: { duration_minutes: 60 },
+            });
+            resultError = error;
+          } else if (productData.product_type === 'artist') {
+            const { error } = await supabase.rpc('create_artist_product_tx', {
+              p_store_id: storeId,
+              p_product: baseProductPayload,
+              p_artist: { medium: 'unknown' },
+            });
+            resultError = error;
+          } else if (productData.product_type === 'digital' || !productData.product_type) {
+            const { error } = await supabase.rpc('create_digital_product_tx', {
+              p_store_id: storeId,
+              p_product: baseProductPayload,
+              p_digital: {},
+              p_files: [],
+            });
+            resultError = error;
+          } else {
+            // Generic fallback for any other types (e.g. 'course')
+            const { error } = await supabase.from('products').insert({
+              store_id: storeId,
+              name: productData.name,
+              slug,
+              description: productData.description,
+              price: productData.price,
+              currency: productData.currency || 'XOF',
+              category: productData.category,
+              product_type: productData.product_type,
+              image_url: productData.image_url,
+            });
+            resultError = error;
+          }
+
+          if (resultError) throw resultError;
 
           invalidateCatalogCaches(queryClient);
           queryClient.invalidateQueries({ queryKey: ['products', storeId] });

@@ -17,8 +17,8 @@ export function DashboardOnboarding() {
   const { getValue } = usePageCustomization('dashboard');
 
   return (
-    <AppPageShell hideSidebar hideHorizontalNav>
-      <div className="container mx-auto p-3 sm:p-4 lg:p-6 flex min-h-[calc(100vh-64px)] items-center justify-center">
+    <AppPageShell hideSidebar hideHorizontalNav showUtilityBar={false}>
+      <div className="container mx-auto p-3 sm:p-4 lg:p-6 flex min-h-screen items-center justify-center">
         <Card className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in zoom-in-95 duration-500">
           <CardContent className="pt-8 sm:pt-12 pb-8 sm:pb-12">
             <LayoutDashboard
