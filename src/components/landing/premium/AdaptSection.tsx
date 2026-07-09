@@ -2,13 +2,18 @@ import { Link } from 'react-router-dom';
 import { Check } from 'lucide-react';
 import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
 import { usePremiumReveal } from './usePremiumReveal';
+import { usePlatformCustomizationContext } from '@/contexts/PlatformCustomizationContext';
 import adaptPremiumWebp from '@/assets/landing/adapt-entrepreneur.webp';
 import adaptPremiumPng from '@/assets/landing/adapt-entrepreneur.png';
 
 export function AdaptSection() {
   const { t } = useLandingPremiumT();
+  const { customizationData } = usePlatformCustomizationContext();
   const { ref: textRef, className: textReveal } = usePremiumReveal();
   const benefits = t('adapt.benefits', { returnObjects: true }) as string[];
+
+  const customAdaptUrl = customizationData?.media?.images?.landingAdapt as string | undefined;
+  const imgSrc = customAdaptUrl || adaptPremiumPng;
 
   return (
     <section className="lp-section-pad lp-section-muted">
@@ -16,9 +21,9 @@ export function AdaptSection() {
         <div className="lp-adapt-visual relative mx-auto w-full lg:mx-0">
           <div className="lp-adapt-photo relative overflow-hidden rounded-2xl shadow-[0_32px_64px_-32px_rgba(0,0,0,0.25)]">
             <picture>
-              <source srcSet={adaptPremiumWebp} type="image/webp" />
+              {!customAdaptUrl && <source srcSet={adaptPremiumWebp} type="image/webp" />}
               <img
-                src={adaptPremiumPng}
+                src={imgSrc}
                 alt={t('adapt.photoAlt')}
                 loading="eager"
                 fetchPriority="high"
@@ -27,7 +32,7 @@ export function AdaptSection() {
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 decoding="async"
                 data-no-mobile-opt
-                className="lp-adapt-photo__img"
+                className="lp-adapt-photo__img object-cover w-full h-full"
               />
             </picture>
           </div>

@@ -8,7 +8,8 @@ export type CustomizationSection =
   | 'notifications'
   | 'landing'
   | 'footer'
-  | 'pages';
+  | 'pages'
+  | 'media';
 
 export const PLATFORM_CUSTOMIZATION_PATH = '/admin/platform-customization';
 
@@ -23,6 +24,7 @@ export const CUSTOMIZATION_SECTION_IDS: readonly CustomizationSection[] = [
   'landing',
   'footer',
   'pages',
+  'media',
 ] as const;
 
 export function isValidCustomizationSection(value: string | null): value is CustomizationSection {

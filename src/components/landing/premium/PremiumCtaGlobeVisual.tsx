@@ -1,9 +1,14 @@
 import { motion, useReducedMotion } from 'framer-motion';
+import { usePlatformCustomizationContext } from '@/contexts/PlatformCustomizationContext';
 import ctaGlobePng from '@/assets/landing/cta-globe.png';
 
 /** Globe terrestre + flèches curvilignes pour le CTA final */
 export function PremiumCtaGlobeVisual() {
   const reducedMotion = useReducedMotion();
+  const { customizationData } = usePlatformCustomizationContext();
+
+  const customGlobeUrl = customizationData?.media?.images?.landingGlobe as string | undefined;
+  const imgSrc = customGlobeUrl || ctaGlobePng;
 
   return (
     <div
@@ -105,7 +110,7 @@ export function PremiumCtaGlobeVisual() {
           transition={reducedMotion ? {} : { duration: 28, repeat: Infinity, ease: 'linear' }}
         >
           <img
-            src={ctaGlobePng}
+            src={imgSrc}
             alt=""
             className="lp-cta-globe__img h-full w-full rounded-full object-cover"
             width={400}

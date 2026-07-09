@@ -15,11 +15,13 @@ import heroCoursesSm from '@/assets/landing/hero-carousel-courses-480.webp';
 import heroArtist from '@/assets/landing/hero-carousel-artist.webp';
 import heroArtistSm from '@/assets/landing/hero-carousel-artist-480.webp';
 
+import { usePlatformCustomizationContext } from '@/contexts/PlatformCustomizationContext';
+
 const SLIDE_INTERVAL_MS = 5500;
 const SLIDE_WIDTH = 640;
 const SLIDE_HEIGHT = 351;
 
-const slides = [
+const defaultSlides = [
   { key: 'entrepreneur', webp: heroEntrepreneur, webpSm: heroEntrepreneurSm, transparent: true },
   { key: 'physical', webp: heroPhysical, webpSm: heroPhysicalSm, transparent: false },
   { key: 'digital', webp: heroDigital, webpSm: heroDigitalSm, transparent: false },
@@ -30,13 +32,28 @@ const slides = [
 
 export function PremiumHeroCarousel() {
   const { t } = useLandingPremiumT();
+  const { customizationData } = usePlatformCustomizationContext();
   const reducedMotion = useReducedMotion();
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
 
-  const goTo = useCallback((index: number) => {
-    setActive((index + slides.length) % slides.length);
-  }, []);
+  const customCarouselImages = customizationData?.media?.images?.landingCarousel || {};
+
+  const slides = defaultSlides.map(slide => {
+    const customUrl = customCarouselImages[slide.key];
+    return {
+      ...slide,
+      webp: customUrl || slide.webp,
+      webpSm: customUrl || slide.webpSm, // if custom url, use it for both small and large
+    };
+  });
+
+  const goTo = useCallback(
+    (index: number) => {
+      setActive((index + slides.length) % slides.length);
+    },
+    [slides.length]
+  );
 
   const next = useCallback(() => goTo(active + 1), [active, goTo]);
 
@@ -64,6 +81,7 @@ export function PremiumHeroCarousel() {
       <div className="lp-hero-carousel__stage relative">
         {slides.map((slide, index) => {
           const isActive = index === active;
+          const isCustom = !!customCarouselImages[slide.key];
           return (
             <motion.div
               key={slide.key}
@@ -75,7 +93,9 @@ export function PremiumHeroCarousel() {
               style={{ pointerEvents: isActive ? 'auto' : 'none' }}
             >
               <picture className="lp-hero-carousel__picture">
-                <source media="(max-width: 640px)" srcSet={slide.webpSm} type="image/webp" />
+                {!isCustom && (
+                  <source media="(max-width: 640px)" srcSet={slide.webpSm} type="image/webp" />
+                )}
                 <img
                   src={slide.webp}
                   alt={t(`hero.carousel.slides.${slide.key}.alt`)}

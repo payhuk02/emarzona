@@ -40,6 +40,7 @@ import { NotificationsSection } from '@/components/admin/customization/Notificat
 import { PagesCustomizationSection } from '@/components/admin/customization/PagesCustomizationSection';
 import { LandingPageCustomizationSection } from '@/components/admin/customization/LandingPageCustomizationSection';
 import { FooterCustomizationSection } from '@/components/admin/customization/FooterCustomizationSection';
+import { MediaSection } from '@/components/admin/customization/MediaSection';
 import { usePlatformCustomization } from '@/hooks/admin/usePlatformCustomization';
 import { exportCustomization, importCustomization } from '@/lib/platform-customization-export';
 import { logger } from '@/lib/logger';
@@ -134,6 +135,13 @@ const sections: SectionConfig[] = [
     description: 'Personnalisation de chaque page',
     badge: 'Nouveau',
   },
+  {
+    id: 'media',
+    label: 'Médias & Ressources',
+    icon: Upload,
+    description: 'Gestion des images de la plateforme',
+    badge: 'CMS',
+  },
 ];
 
 function renderSectionContent(
@@ -161,6 +169,8 @@ function renderSectionContent(
       return <FooterCustomizationSection onChange={onChange} />;
     case 'pages':
       return <PagesCustomizationSection onChange={onChange} />;
+    case 'media':
+      return <MediaSection onChange={onChange} />;
     default:
       return null;
   }
