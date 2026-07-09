@@ -260,7 +260,7 @@ export function canAccessCommercePath(
   }
   const rule = getRouteCapabilityRule(pathname);
   if (!rule) {
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env?.DEV) {
       console.warn(`[Gating] Route non mappée bloquée par défaut (Default Deny): ${pathname}`);
     }
     return false;

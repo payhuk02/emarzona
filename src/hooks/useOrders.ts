@@ -198,7 +198,6 @@ export const useOrders = (storeId?: string, options: UseOrdersOptions = {}) => {
           code: errorCode,
           filters: { storeId },
         });
-        setError(error);
         // Afficher un toast uniquement pour les erreurs critiques
         toast({
           title: 'Erreur',
