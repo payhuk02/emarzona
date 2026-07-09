@@ -1,7 +1,7 @@
 /**
  * A/B test helpers for campaign sends
  */
-import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
+import type { SupabaseClient } from 'npm:@supabase/supabase-js@2.58.0';
 import type { MarketingTemplate } from './resend-send-utils.ts';
 
 export interface ABVariantConfig {

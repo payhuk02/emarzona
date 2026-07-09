@@ -3,7 +3,7 @@
  * Génère descriptions premium + SEO + image pour les 5 verticales Emarzona.
  */
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'npm:@supabase/supabase-js@2.58.0';
 import { requireAuthenticatedUser } from '../_shared/edge-auth-utils.ts';
 import { retrievePlatformRagContext, type RagSettings } from '../_shared/platform-rag.ts';
 import {

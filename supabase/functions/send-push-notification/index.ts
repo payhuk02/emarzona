@@ -1,5 +1,5 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
+import { createClient } from 'npm:@supabase/supabase-js@2.58.0';
 import { buildPushHTTPRequest } from 'npm:@pushforge/builder@2.0.5';
 import { resolveVapidPrivateJWK } from '../_shared/vapid-utils.ts';
 

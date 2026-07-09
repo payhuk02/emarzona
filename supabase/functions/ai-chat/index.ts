@@ -3,7 +3,7 @@
  * Authenticated users only — rate limited (20/min/user).
  */
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'npm:@supabase/supabase-js@2.58.0';
 import { requireAuthenticatedUser } from '../_shared/edge-auth-utils.ts';
 import { enforceRateLimit, getClientIp, RATE_LIMIT_PRESETS } from '../_shared/rate-limit.ts';
 import { retrievePlatformRagContext, type RagSettings } from '../_shared/platform-rag.ts';

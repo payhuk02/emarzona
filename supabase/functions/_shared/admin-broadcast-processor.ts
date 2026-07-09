@@ -1,7 +1,7 @@
 /**
  * Logique partagée : envoi admin broadcast (email, in-app, popup)
  */
-import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
+import type { SupabaseClient } from 'npm:@supabase/supabase-js@2.58.0';
 import { canSendEmailToRecipient } from './email-compliance-utils.ts';
 import { logEmailSend } from './email-template-utils.ts';
 import { renderNotificationEmail } from './notification-email-utils.ts';

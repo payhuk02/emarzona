@@ -2,7 +2,7 @@
  * Auth helpers for Edge Functions (JWT service_role + secrets)
  */
 
-import { createClient, type User } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
+import { createClient, type User } from 'npm:@supabase/supabase-js@2.58.0';
 
 export function getProjectRefFromSupabaseUrl(url: string): string | null {
   const match = url.match(/https:\/\/([^.]+)\.supabase\.co/);

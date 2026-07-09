@@ -1,7 +1,7 @@
 /**
  * Admin panel permission checks for Edge Functions
  */
-import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
+import type { SupabaseClient } from 'npm:@supabase/supabase-js@2.58.0';
 
 const PLATFORM_ROLE_PRIORITY = [
   'super_admin',

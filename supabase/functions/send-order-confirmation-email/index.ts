@@ -1,5 +1,5 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'npm:@supabase/supabase-js@2.58.0';
 import { getProjectRefFromSupabaseUrl, isServiceRoleJwt } from '../_shared/edge-auth-utils.ts';
 import { mintOrderDownloadLink } from '../_shared/mint-download-token.ts';
 import { CHECKOUT_GUEST_WINDOW_MS } from '../_shared/order-checkout-auth.ts';

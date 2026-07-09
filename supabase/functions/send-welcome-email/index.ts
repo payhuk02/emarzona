@@ -3,7 +3,7 @@
  * Appelé par le trigger SQL ou en interne (service role / EDGE_INTERNAL_SECRET).
  */
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'npm:@supabase/supabase-js@2.58.0';
 import { getProjectRefFromSupabaseUrl, isServiceRoleJwt } from '../_shared/edge-auth-utils.ts';
 
 const EDGE_INTERNAL_SECRET = Deno.env.get('EDGE_INTERNAL_SECRET');

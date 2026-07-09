@@ -1,7 +1,7 @@
 /**
  * RAG plateforme — chunking, embeddings (1536D) et retrieval via match_platform_content.
  */
-import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import type { SupabaseClient } from 'npm:@supabase/supabase-js@2.58.0';
 import { createOpenRouterEmbedding } from './ai-gateway.ts';
 import { buildWwwProductPublicPath } from './product-public-url.ts';
 const DEFAULT_EMBEDDING_MODEL = 'openai/text-embedding-3-small';

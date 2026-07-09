@@ -4,7 +4,7 @@
  * - Webhook Resend → resend-webhook-handler (si RESEND_API_KEY configurée)
  */
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'npm:@supabase/supabase-js@2.58.0';
 
 const PROJECT_REF = 'hbdnzajbyjakdhuavrvb';
 const RESEND_EVENTS = [

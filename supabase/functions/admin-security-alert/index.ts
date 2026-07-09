@@ -2,7 +2,7 @@
  * Alerte sécurité admin — email + webhook sur actions sensibles (KYC reject, RBAC, etc.)
  */
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
+import { createClient } from 'npm:@supabase/supabase-js@2.58.0';
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 const RESEND_FROM_EMAIL = Deno.env.get('RESEND_FROM_EMAIL') || 'noreply@mail.emarzona.com';

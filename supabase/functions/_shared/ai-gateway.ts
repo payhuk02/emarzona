@@ -1,7 +1,7 @@
 /**
  * Résolution clé API + appels multi-providers (OpenRouter, Google Gemini direct).
  */
-import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import type { SupabaseClient } from 'npm:@supabase/supabase-js@2.58.0';
 import { decryptApiKey } from './ai-crypto.ts';
 import {
   defaultFreeTextModel,

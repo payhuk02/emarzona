@@ -1,4 +1,4 @@
-import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
+import type { SupabaseClient } from 'npm:@supabase/supabase-js@2.58.0';
 import { createSupabaseUserClient } from './supabase-admin.ts';
 
 const TERMINAL_PAYMENT_STATUSES = new Set(['paid', 'completed', 'refunded', 'cancelled']);

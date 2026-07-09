@@ -1,4 +1,4 @@
-import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
+import type { SupabaseClient } from 'npm:@supabase/supabase-js@2.58.0';
 import { resolvePaidOrderStatusForOrder } from './order-status.ts';
 import { sanitizePaymentWebhookPayload } from './payment-log-sanitize.ts';
 import { upstashSetNx } from './upstash-redis.ts';

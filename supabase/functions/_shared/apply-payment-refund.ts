@@ -1,7 +1,7 @@
 /**
  * Mise à jour DB après remboursement (tous PSP) — délègue à apply_transaction_refund (SQL)
  */
-import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
+import type { SupabaseClient } from 'npm:@supabase/supabase-js@2.58.0';
 
 export interface ApplyRefundInput {
   refundId: string;
