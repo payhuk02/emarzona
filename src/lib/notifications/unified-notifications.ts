@@ -482,69 +482,12 @@ async function sendSMSNotification(notification: UnifiedNotification): Promise<v
  * Envoyer une notification push
  */
 async function sendPushNotification(notification: UnifiedNotification): Promise<void> {
-  try {
-    const { data: preferences } = await supabase
-      .from('notification_preferences')
-      .select(
-        'sound_notifications, vibration_notifications, vibration_intensity, pause_until, push_notifications'
-      )
-      .eq('user_id', notification.user_id)
-      .maybeSingle();
-
-    if (isNotificationPaused(preferences?.pause_until)) {
-      logger.info('Push skipped — user in do-not-disturb', { userId: notification.user_id });
-      return;
-    }
-
-    if (preferences?.push_notifications === false) {
-      logger.info('Push skipped — global push disabled', { userId: notification.user_id });
-      return;
-    }
-
-    // Respecter les préférences utilisateur (true par défaut)
-    const soundEnabled = preferences?.sound_notifications !== false;
-    const vibrationEnabled = preferences?.vibration_notifications !== false;
-    const vibrationIntensity = parseVibrationIntensity(preferences?.vibration_intensity);
-
-    const vibratePattern = getVibrationPattern(vibrationIntensity, vibrationEnabled);
-
-    const { error: invokeError } = await supabase.functions.invoke('send-push-notification', {
-      body: {
-        user_id: notification.user_id,
-        title: notification.title,
-        body: notification.message,
-        url: notification.action_url || '/',
-        tag: notification.type,
-        priority: notification.priority,
-        silent: !soundEnabled,
-        requireInteraction: notification.priority === 'urgent' || notification.priority === 'high',
-        vibrate: vibratePattern,
-        data: {
-          ...notification.metadata,
-          type: notification.type,
-          soundEnabled,
-          vibrationEnabled,
-          vibrationIntensity,
-        },
-      },
-    });
-
-    if (invokeError) {
-      throw invokeError;
-    }
-
-    logger.info('Push notification sent with user preferences', {
-      userId: notification.user_id,
-      type: notification.type,
-      soundEnabled,
-      vibrationEnabled,
-      vibrationIntensity,
-    });
-  } catch (caughtError: unknown) {
-    const errorMessage = caughtError instanceof Error ? caughtError.message : 'Unknown error';
-    logger.error('Error sending push notification', { error: errorMessage, notification });
-    throw caughtError;
-  }
+  // Le push est désormais géré à 100% par le backend (Trigger SQL: trigger_send_push_notification_on_insert)
+  // dès qu'une notification est insérée en base de données.
+  // Cela garantit que le Push fonctionne même quand l'app est fermée.
+  logger.info('Push notification dispatch skipped on frontend (handled by backend trigger)', {
+    type: notification.type,
+  });
 }
 
 /**
