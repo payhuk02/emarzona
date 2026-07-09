@@ -44,12 +44,37 @@ function MegaMenuLink({
   const Icon = item.icon;
   const active = isNavItemActive(item.url, location.pathname, location.search, 'prefix');
   const linkClassName = cn(
-    'flex w-full items-center gap-3 rounded-md text-sm transition-colors',
-    variant === 'sidebar'
-      ? 'min-h-[44px] touch-manipulation px-3 py-2.5'
-      : 'items-start gap-2.5 px-2.5 py-2.5 min-h-[52px]',
-    'hover:bg-accent/60 focus:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-    active && 'bg-primary/10 text-primary font-medium'
+    'group flex w-full items-start gap-3 rounded-xl text-sm transition-all duration-200',
+    variant === 'sidebar' ? 'min-h-[44px] touch-manipulation px-3 py-2.5' : 'p-3',
+    'hover:bg-accent/50 hover:shadow-sm focus:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+    active ? 'bg-primary/5 text-primary font-medium' : 'text-foreground/80 hover:text-foreground'
+  );
+
+  const renderContent = () => (
+    <>
+      <div
+        className={cn(
+          'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition-all duration-200',
+          active
+            ? 'border-primary/20 bg-primary/10 text-primary'
+            : 'border-border/50 bg-background text-muted-foreground group-hover:border-foreground/20 group-hover:text-foreground group-hover:shadow-sm'
+        )}
+      >
+        <Icon
+          className={cn(
+            'h-4 w-4',
+            active ? '' : 'group-hover:scale-110 transition-transform duration-200'
+          )}
+          aria-hidden
+        />
+      </div>
+      <div className="flex flex-col gap-1 mt-0.5">
+        <span className="leading-snug break-words line-clamp-2">
+          {item.title}
+          {item.locked && <Lock className="inline-block ml-1.5 h-3 w-3 opacity-70" aria-hidden />}
+        </span>
+      </div>
+    </>
   );
 
   if (item.locked) {
@@ -60,13 +85,9 @@ function MegaMenuLink({
           onNavigate(item);
           onAfterNavigate?.();
         }}
-        className={cn(linkClassName, 'text-left text-muted-foreground')}
+        className={cn(linkClassName, 'text-left')}
       >
-        <Icon className="h-4 w-4 shrink-0 opacity-60" aria-hidden />
-        <span className="flex-1 leading-snug break-words line-clamp-2">
-          {item.title}
-          <Lock className="inline-block ml-1 h-3 w-3 opacity-70" aria-hidden />
-        </span>
+        {renderContent()}
       </button>
     );
   }
@@ -74,8 +95,7 @@ function MegaMenuLink({
   if (variant === 'sidebar') {
     return (
       <NavLink to={item.url} onClick={() => onAfterNavigate?.()} className={linkClassName}>
-        <Icon className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-        <span className="leading-snug break-words line-clamp-2">{item.title}</span>
+        {renderContent()}
       </NavLink>
     );
   }
@@ -83,8 +103,7 @@ function MegaMenuLink({
   return (
     <NavigationMenuLink asChild>
       <NavLink to={item.url} onClick={() => onAfterNavigate?.()} className={linkClassName}>
-        <Icon className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-        <span className="leading-snug break-words line-clamp-2">{item.title}</span>
+        {renderContent()}
       </NavLink>
     </NavigationMenuLink>
   );
@@ -116,8 +135,8 @@ function MegaMenuPanel({
           <div key={group.groupKey} className="min-w-0 space-y-1.5">
             <p
               className={cn(
-                'font-semibold uppercase tracking-wider text-muted-foreground',
-                isSidebar ? 'px-3 text-xs' : 'px-2 text-[11px]'
+                'font-bold uppercase tracking-widest text-primary/80 mb-2',
+                isSidebar ? 'px-3 text-xs' : 'px-2 text-[10px]'
               )}
             >
               {group.label}

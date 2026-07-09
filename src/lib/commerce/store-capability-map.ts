@@ -6,7 +6,8 @@ import {
 
 type RouteRule = {
   allowedTypes: readonly StoreCommerceType[];
-  pathPrefixes: readonly string[];
+  pathPrefixes?: readonly string[];
+  exactPaths?: readonly string[];
   label: string;
 };
 
@@ -39,6 +40,46 @@ export const VENDOR_PRODUCT_LIST_PATH_BY_TYPE: Record<StoreCommerceType, string>
 export function getVendorProductListPath(commerceType?: StoreCommerceType | null): string {
   return VENDOR_PRODUCT_LIST_PATH_BY_TYPE[parseStoreCommerceType(commerceType)];
 }
+
+const COMMON_SELLER_PATHS = [
+  '/dashboard',
+  '/marketplace',
+  '/vendor/messaging',
+  '/account',
+  '/cart',
+  '/notifications',
+  '/dashboard/abandoned-carts',
+  '/dashboard/advanced-orders',
+  '/dashboard/ai-chatbot',
+  '/dashboard/coupons',
+  '/dashboard/cross-type-bundles',
+  '/dashboard/customers',
+  '/dashboard/domain',
+  '/dashboard/image-studio',
+  '/dashboard/kyc',
+  '/dashboard/marketing',
+  '/dashboard/orders',
+  '/dashboard/pay-balance',
+  '/dashboard/payment-connections',
+  '/dashboard/payment-management',
+  '/dashboard/payment-methods',
+  '/dashboard/payments',
+  '/dashboard/payments-customers',
+  '/dashboard/pixels',
+  '/dashboard/products',
+  '/dashboard/promotions',
+  '/dashboard/promotions/stats',
+  '/dashboard/referrals',
+  '/dashboard/reviews',
+  '/dashboard/seo',
+  '/dashboard/seo/inspector',
+  '/dashboard/settings',
+  '/dashboard/store',
+  '/dashboard/store/team',
+  '/dashboard/tasks',
+  '/dashboard/taxes',
+  '/dashboard/withdrawals',
+];
 
 const PRODUCT_CREATE_ROUTE_RULES: readonly RouteRule[] = [
   {
@@ -163,6 +204,12 @@ const ROUTE_CAPABILITY_RULES: readonly RouteRule[] = [
     allowedTypes: ['physical'],
     pathPrefixes: ['/products/compare'],
   },
+  {
+    label: 'Routes Vendeurs Communes',
+    allowedTypes: ALL_TYPES,
+    pathPrefixes: [...COMMON_SELLER_PATHS.filter(p => p !== '/dashboard'), '/account'],
+    exactPaths: ['/dashboard'],
+  },
 ];
 
 function normalizePath(pathname: string): string {
@@ -188,8 +235,12 @@ export function resolveStoreCommerceTypeFromStore(store: {
 }
 
 export function getRouteCapabilityRule(pathname: string): RouteRule | null {
+  const normalized = normalizePath(pathname);
   for (const rule of ROUTE_CAPABILITY_RULES) {
-    if (rule.pathPrefixes.some(prefix => matchesPrefix(pathname, prefix))) {
+    if (rule.exactPaths?.some(exact => normalizePath(exact) === normalized)) {
+      return rule;
+    }
+    if (rule.pathPrefixes?.some(prefix => matchesPrefix(pathname, prefix))) {
       return rule;
     }
   }
@@ -209,7 +260,10 @@ export function canAccessCommercePath(
   }
   const rule = getRouteCapabilityRule(pathname);
   if (!rule) {
-    return true;
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(`[Gating] Route non mappée bloquée par défaut (Default Deny): ${pathname}`);
+    }
+    return false;
   }
   const effectiveType = parseStoreCommerceType(commerceType);
   return rule.allowedTypes.includes(effectiveType);

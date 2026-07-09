@@ -31,6 +31,8 @@ export type AppPageShellProps = {
   /** Classes on <main id="main-content"> */
   mainClassName?: string;
   showUtilityBar?: boolean;
+  hideSidebar?: boolean;
+  hideHorizontalNav?: boolean;
 };
 
 export function AppPageShell({
@@ -40,6 +42,8 @@ export function AppPageShell({
   className,
   mainClassName,
   showUtilityBar = true,
+  hideSidebar = false,
+  hideHorizontalNav = false,
 }: AppPageShellProps) {
   const { t } = useTranslation();
   const location = useLocation();
@@ -51,10 +55,10 @@ export function AppPageShell({
       <div
         className={cn('flex min-h-screen w-full bg-background overflow-x-hidden', shellClassName)}
       >
-        <AppSidebar />
+        {!hideSidebar && <AppSidebar />}
         <div className={cn('flex flex-1 flex-col min-w-0 min-h-screen', className)}>
           {showUtilityBar && <UtilityBarHeader />}
-          {showHorizontalNav && (
+          {showHorizontalNav && !hideHorizontalNav && (
             <Suspense fallback={null}>
               <HorizontalContextNav />
             </Suspense>

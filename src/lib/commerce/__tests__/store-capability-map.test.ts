@@ -59,15 +59,15 @@ describe('store-capability-map', () => {
 
   it('avoids false positives on route boundaries', () => {
     // Should not match "/dashboard/services" rule because segment is "serviceship".
-    expect(canAccessCommercePath('/dashboard/serviceship', 'digital')).toBe(true);
+    expect(canAccessCommercePath('/dashboard/serviceship', 'digital')).toBe(false);
     expect(getRouteCapabilityRule('/dashboard/serviceship')).toBeNull();
 
     // Should not match "/dashboard/courses" rule because segment is "courseship".
-    expect(canAccessCommercePath('/dashboard/courseship', 'service')).toBe(true);
+    expect(canAccessCommercePath('/dashboard/courseship', 'service')).toBe(false);
     expect(getRouteCapabilityRule('/dashboard/courseship')).toBeNull();
 
     // Should not match "/dashboard/digital" rule because segment is "digitalized".
-    expect(canAccessCommercePath('/dashboard/digitalized', 'service')).toBe(true);
+    expect(canAccessCommercePath('/dashboard/digitalized', 'service')).toBe(false);
     expect(getRouteCapabilityRule('/dashboard/digitalized')).toBeNull();
   });
 
