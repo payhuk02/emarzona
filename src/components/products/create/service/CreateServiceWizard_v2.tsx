@@ -713,21 +713,13 @@ export const CreateServiceWizard = ({
           bookingOptions?.advance_booking_days ?? formData.advance_booking_days ?? 30,
       };
 
-      const rpcResult = await createServiceProductTx(store.id, productPayload, servicePayload);
-      const product = {
-        id: rpcResult.product_id,
-        name: formData.name,
-        product_type: 'service' as const,
-        price: formData.pricing_model === 'free' ? 0 : formData.price || 0,
-        currency: formData.currency || 'XOF',
-      };
-      const serviceProduct = { id: rpcResult.service_product_id! };
+      let staffData: Record<string, unknown>[] = [];
+      let slotsData: Record<string, unknown>[] = [];
+      let resourcesData: Record<string, unknown>[] = [];
 
       // 4. Create staff members
       if (formData.staff_members && formData.staff_members.length > 0) {
-        const staffData = formData.staff_members.map(member => ({
-          service_product_id: serviceProduct.id,
-          store_id: store.id,
+        staffData = formData.staff_members.map(member => ({
           name: member.name,
           role: member.role,
           bio: member.bio,
@@ -736,17 +728,11 @@ export const CreateServiceWizard = ({
           avatar_url: member.avatar_url,
           is_active: member.is_active !== false,
         }));
-
-        const { error: staffError } = await supabase
-          .from('service_staff_members')
-          .insert(staffData);
-
-        if (staffError) throw staffError;
       }
 
       // 5. Create availability slots
       if (formData.availability_slots && formData.availability_slots.length > 0) {
-        const slotsData = formData.availability_slots
+        slotsData = formData.availability_slots
           .map(
             (
               slot: ServiceAvailabilitySlot & {
@@ -756,19 +742,13 @@ export const CreateServiceWizard = ({
                 is_available?: boolean;
               }
             ) => {
-              // Le formulaire utilise 'day', mais la BDD attend 'day_of_week'
-              // Support des deux pour compatibilité
               const dayOfWeek = slot.day_of_week ?? slot.day;
-
-              // Valider que day_of_week est défini et valide (0-6)
               if (dayOfWeek === undefined || dayOfWeek === null || dayOfWeek < 0 || dayOfWeek > 6) {
                 throw new Error(
                   `Le jour de la semaine (day_of_week) est requis et doit être entre 0 (Dimanche) et 6 (Samedi) pour le créneau ${slot.start_time}-${slot.end_time}`
                 );
               }
-
               return {
-                service_product_id: serviceProduct.id,
                 day_of_week: dayOfWeek,
                 start_time: slot.start_time,
                 end_time: slot.end_time,
@@ -777,23 +757,7 @@ export const CreateServiceWizard = ({
               };
             }
           )
-          .filter(Boolean); // Filtrer les valeurs invalides (ne devrait pas être nécessaire mais sécurité)
-
-        // Ne pas insérer si aucun slot valide
-        if (slotsData.length === 0) {
-          logger.warn('Aucun créneau de disponibilité valide à insérer');
-        } else {
-          const { error: slotsError } = await supabase
-            .from('service_availability_slots')
-            .insert(slotsData);
-
-          if (slotsError) {
-            logger.error('Erreur insertion availability slots', { error: slotsError, slotsData });
-            throw new Error(
-              `Erreur lors de la création des créneaux de disponibilité: ${slotsError.message}`
-            );
-          }
-        }
+          .filter(Boolean);
       }
 
       // 6. Create resources
@@ -808,21 +772,32 @@ export const CreateServiceWizard = ({
             }));
 
       if (resourcesToSave.length > 0) {
-        const resourcesData = resourcesToSave.map(resource => ({
-          service_product_id: serviceProduct.id,
+        resourcesData = resourcesToSave.map(resource => ({
           name: resource.name,
           description: resource.description,
           resource_type: resource.type || 'other',
-          quantity: resource.quantity_available || 1,
-          is_required: resource.is_required !== false,
+          quantity_available: resource.quantity_available || 1,
+          is_active: resource.is_required !== false,
         }));
-
-        const { error: resourcesError } = await supabase
-          .from('service_resources')
-          .insert(resourcesData);
-
-        if (resourcesError) throw resourcesError;
       }
+
+      const rpcResult = await createServiceProductTx(
+        store.id,
+        productPayload,
+        servicePayload,
+        staffData,
+        slotsData,
+        resourcesData
+      );
+
+      const product = {
+        id: rpcResult.product_id,
+        name: formData.name,
+        product_type: 'service' as const,
+        price: formData.pricing_model === 'free' ? 0 : formData.price || 0,
+        currency: formData.currency || 'XOF',
+      };
+      const serviceProduct = { id: rpcResult.service_product_id! };
 
       // 7. Create affiliate settings if enabled
       if (formData.affiliate && formData.affiliate.enabled) {
@@ -842,7 +817,10 @@ export const CreateServiceWizard = ({
         });
 
         if (affiliateError) {
-          logger.error('Affiliate settings error', { error: affiliateError, productId });
+          logger.error('Affiliate settings error', {
+            error: affiliateError,
+            productId: product.id,
+          });
         }
       }
 

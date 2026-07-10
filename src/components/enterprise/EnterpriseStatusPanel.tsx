@@ -42,16 +42,37 @@ export function EnterpriseStatusPanel() {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex flex-wrap items-center gap-3">
-          <Badge variant={variant}>{label}</Badge>
+          <Badge
+            variant={variant}
+            className={
+              overall === 'degraded'
+                ? 'bg-amber-500 hover:bg-amber-600 text-white border-transparent'
+                : ''
+            }
+          >
+            {label}
+          </Badge>
           <span className="text-sm text-muted-foreground">
             Uptime 30j : <strong>{Number(data?.uptime_30d ?? 99.9).toFixed(2)}%</strong>
           </span>
         </div>
-        <ul className="text-sm space-y-1.5">
+        <ul className="text-sm space-y-2">
           {(data?.services ?? []).slice(0, 4).map(s => (
-            <li key={s.service_key} className="flex justify-between gap-2">
+            <li key={s.service_key} className="flex justify-between items-center gap-2">
               <span className="text-muted-foreground">{s.service_label}</span>
-              <span className="font-medium capitalize">{s.status}</span>
+              <span
+                className={`font-medium capitalize text-xs px-2 py-0.5 rounded-full ${
+                  s.status === 'operational'
+                    ? 'bg-green-500/10 text-green-600 dark:text-green-400'
+                    : s.status === 'degraded'
+                      ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
+                      : s.status === 'outage'
+                        ? 'bg-red-500/10 text-red-600 dark:text-red-400'
+                        : 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
+                }`}
+              >
+                {s.status}
+              </span>
             </li>
           ))}
         </ul>

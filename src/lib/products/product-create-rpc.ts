@@ -65,12 +65,18 @@ export async function createDigitalProductTx(
 export async function createServiceProductTx(
   storeId: string,
   product: Record<string, unknown>,
-  service: Record<string, unknown>
+  service: Record<string, unknown>,
+  staff: Record<string, unknown>[] = [],
+  slots: Record<string, unknown>[] = [],
+  resources: Record<string, unknown>[] = []
 ): Promise<ProductCreateRpcResult> {
   const { data, error } = await rpc('create_service_product_tx', {
     p_store_id: storeId,
     p_product: product,
     p_service: service,
+    p_staff: staff,
+    p_slots: slots,
+    p_resources: resources,
   });
   return parseRpcResult(data, error);
 }
@@ -78,12 +84,20 @@ export async function createServiceProductTx(
 export async function createPhysicalProductTx(
   storeId: string,
   product: Record<string, unknown>,
-  physical: Record<string, unknown>
+  physical: Record<string, unknown>,
+  variants: Record<string, unknown>[] = [],
+  inventory: Record<string, unknown>[] = [],
+  sizeChartId: string | null = null,
+  affiliate: Record<string, unknown> | null = null
 ): Promise<ProductCreateRpcResult> {
   const { data, error } = await rpc('create_physical_product_tx', {
     p_store_id: storeId,
     p_product: product,
     p_physical: physical,
+    p_variants: variants,
+    p_inventory: inventory,
+    p_size_chart_id: sizeChartId,
+    p_affiliate: affiliate,
   });
   return parseRpcResult(data, error);
 }

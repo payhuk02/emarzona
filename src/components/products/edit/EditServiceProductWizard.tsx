@@ -660,122 +660,54 @@ export const EditServiceProductWizard = ({
         advance_booking_days: formData.booking_options?.advance_booking_days || 30,
       };
 
+      let affiliatePayload = null;
+      if (formData.affiliate?.enabled) {
+        affiliatePayload = {
+          enabled: formData.affiliate.enabled ?? false,
+          commission_rate: formData.affiliate.commission_rate ?? 10,
+          commission_type: formData.affiliate.commission_type ?? 'percentage',
+          fixed_commission_amount: formData.affiliate.fixed_commission_amount ?? 0,
+          cookie_duration_days: formData.affiliate.cookie_duration_days ?? 30,
+          min_order_amount: formData.affiliate.min_order_amount ?? 0,
+          allow_self_referral: formData.affiliate.allow_self_referral ?? false,
+          require_approval: formData.affiliate.require_approval ?? false,
+          terms_and_conditions: formData.affiliate.terms_and_conditions ?? '',
+        };
+      }
+
+      const slotsData = (formData.availability_slots || []).map(slot => ({
+        day_of_week: slot.day,
+        start_time: slot.start_time,
+        end_time: slot.end_time,
+      }));
+
+      const staffData = (formData.staff_members || []).map(staff => ({
+        name: staff.name,
+        email: staff.email,
+        role: staff.role || null,
+        avatar_url: staff.avatar_url || null,
+        availability: staff.availability || null,
+      }));
+
+      const resourcesList = formData.resources || formData.resources_needed || [];
+      const resourcesData = resourcesList.map((resource: string) => ({
+        resource_name: resource,
+      }));
+
       const rpcResult = await updateServiceProductTx(
         store.id,
         productId,
         productPayload,
-        servicePayload
+        servicePayload,
+        staffData,
+        slotsData,
+        resourcesData,
+        affiliatePayload
       );
 
       const serviceProductId = rpcResult.service_product_id;
-
-      // Update availability slots
-      if (serviceProductId && formData.availability_slots) {
-        // Delete existing slots
-        await supabase
-          .from('service_availability_slots')
-          .delete()
-          .eq('service_product_id', serviceProductId);
-
-        // Insert new slots
-        if (formData.availability_slots.length > 0) {
-          const slotsData = formData.availability_slots.map(slot => ({
-            service_product_id: serviceProductId,
-            day_of_week: slot.day,
-            start_time: slot.start_time,
-            end_time: slot.end_time,
-          }));
-
-          const { error: slotsError } = await supabase
-            .from('service_availability_slots')
-            .insert(slotsData);
-
-          if (slotsError) throw slotsError;
-        }
-      }
-
-      // Update staff members
-      if (serviceProductId && formData.staff_members) {
-        // Delete existing staff
-        await supabase
-          .from('service_staff_members')
-          .delete()
-          .eq('service_product_id', serviceProductId);
-
-        // Insert new staff
-        if (formData.staff_members.length > 0) {
-          const staffData = formData.staff_members.map(staff => ({
-            service_product_id: serviceProductId,
-            name: staff.name,
-            email: staff.email,
-            role: staff.role || null,
-            avatar_url: staff.avatar_url || null,
-            availability: staff.availability || null,
-          }));
-
-          const { error: staffError } = await supabase
-            .from('service_staff_members')
-            .insert(staffData);
-
-          if (staffError) throw staffError;
-        }
-      }
-
-      // Update resources
-      if (serviceProductId && (formData.resources || formData.resources_needed)) {
-        // Delete existing resources
-        await supabase
-          .from('service_resources')
-          .delete()
-          .eq('service_product_id', serviceProductId);
-
-        // Insert new resources
-        const resourcesList = formData.resources || formData.resources_needed || [];
-        if (resourcesList.length > 0) {
-          const resourcesData = resourcesList.map((resource: string) => ({
-            service_product_id: serviceProductId,
-            resource_name: resource,
-          }));
-
-          const { error: resourcesError } = await supabase
-            .from('service_resources')
-            .insert(resourcesData);
-
-          if (resourcesError) throw resourcesError;
-        }
-      }
-
-      // Update affiliate settings
-      if (formData.affiliate?.enabled) {
-        const { data: existingAffiliate } = await supabase
-          .from('product_affiliate_settings')
-          .select('id')
-          .eq('product_id', productId)
-          .limit(1)
-          .maybeSingle();
-
-        const affiliateData = {
-          product_id: productId,
-          store_id: store.id,
-          affiliate_enabled: formData.affiliate.enabled,
-          commission_rate: formData.affiliate.commission_rate,
-          commission_type: formData.affiliate.commission_type,
-          fixed_commission_amount: formData.affiliate.fixed_commission_amount,
-          cookie_duration_days: formData.affiliate.cookie_duration_days,
-          min_order_amount: formData.affiliate.min_order_amount,
-          allow_self_referral: formData.affiliate.allow_self_referral,
-          require_approval: formData.affiliate.require_approval,
-          terms_and_conditions: formData.affiliate.terms_and_conditions,
-        };
-
-        if (existingAffiliate) {
-          await supabase
-            .from('product_affiliate_settings')
-            .update(affiliateData)
-            .eq('id', existingAffiliate.id);
-        } else {
-          await supabase.from('product_affiliate_settings').insert(affiliateData);
-        }
+      if (!serviceProductId) {
+        throw new Error('Enregistrement produit service introuvable');
       }
 
       toast({

@@ -768,25 +768,16 @@ export const CreatePhysicalProductWizard = ({
         option3_name: formData.options?.[2]?.name || null,
       };
 
-      const rpcResult = await createPhysicalProductTx(store.id, productPayload, physicalPayload);
-      const product = {
-        id: rpcResult.product_id,
-        name: formData.name,
-        product_type: 'physical' as const,
-        price: formData.price || 0,
-        currency: 'XOF',
-      };
-      const physicalRow = { id: rpcResult.physical_product_id! };
-
       const hasVariants = Boolean(formData.variants && formData.variants.length > 0);
       const lowStockThreshold = formData.low_stock_threshold || 5;
       const locationName = formData.inventory_location || 'Default';
       const trackInventory = formData.track_inventory !== false;
 
-      // 4. Create variants + inventory rows (per variant or product-level)
+      let variantsData: Record<string, unknown>[] = [];
+      let inventoryData: Record<string, unknown>[] = [];
+
       if (hasVariants && formData.variants) {
-        const variantsData = formData.variants.map((variant: PhysicalProductVariant) => ({
-          physical_product_id: physicalRow.id,
+        variantsData = formData.variants.map((variant: PhysicalProductVariant) => ({
           option1_value: variant.option1_value,
           option2_value: variant.option2_value ?? null,
           option3_value: variant.option3_value ?? null,
@@ -800,79 +791,55 @@ export const CreatePhysicalProductWizard = ({
           image_url: variant.image_url ?? null,
         }));
 
-        const { data: insertedVariants, error: variantsError } = await supabase
-          .from('physical_product_variants')
-          .insert(variantsData)
-          .select('id');
-
-        if (variantsError) throw variantsError;
-
-        if (insertedVariants?.length) {
-          const inventoryRows = insertedVariants.map((inserted, index) => ({
-            physical_product_id: physicalRow.id,
-            product_id: product.id,
-            store_id: store.id,
-            variant_id: inserted.id,
-            location_name: locationName,
-            quantity_available: formData.variants![index]?.quantity ?? 0,
-            quantity_reserved: 0,
-            low_stock_threshold: lowStockThreshold,
-            track_inventory: trackInventory,
-          }));
-
-          const { error: inventoryError } = await supabase
-            .from('physical_product_inventory')
-            .insert(inventoryRows);
-
-          if (inventoryError) throw inventoryError;
-        }
-      } else {
-        const { error: inventoryError } = await supabase.from('physical_product_inventory').insert({
-          physical_product_id: physicalRow.id,
-          product_id: product.id,
-          store_id: store.id,
-          variant_id: null,
+        inventoryData = formData.variants.map(variant => ({
           location_name: locationName,
-          quantity_available: formData.quantity || 0,
-          quantity_reserved: 0,
+          quantity_available: variant.quantity ?? 0,
           low_stock_threshold: lowStockThreshold,
           track_inventory: trackInventory,
-        });
-
-        if (inventoryError) throw inventoryError;
-      }
-      if (formData.size_chart_id) {
-        const { error: sizeChartError } = await supabase.from('product_size_charts').insert({
-          product_id: product.id,
-          size_chart_id: formData.size_chart_id,
-        });
-
-        if (sizeChartError) {
-          logger.error('Error linking size chart:', sizeChartError);
-          // Ne pas faire échouer la création si le size chart échoue
-        }
+        }));
+      } else {
+        inventoryData = [
+          {
+            location_name: locationName,
+            quantity_available: formData.quantity || 0,
+            low_stock_threshold: lowStockThreshold,
+            track_inventory: trackInventory,
+          },
+        ];
       }
 
-      // 5. Link size chart if selected
-      if (formData.affiliate && formData.affiliate.enabled) {
-        const { error: affiliateError } = await supabase.from('product_affiliate_settings').insert({
-          product_id: product.id,
-          store_id: store.id,
-          affiliate_enabled: formData.affiliate.enabled,
-          commission_rate: formData.affiliate.commission_rate,
-          commission_type: formData.affiliate.commission_type,
-          fixed_commission_amount: formData.affiliate.fixed_commission_amount,
-          cookie_duration_days: formData.affiliate.cookie_duration_days,
-          min_order_amount: formData.affiliate.min_order_amount,
-          allow_self_referral: formData.affiliate.allow_self_referral,
-          require_approval: formData.affiliate.require_approval,
-          terms_and_conditions: formData.affiliate.terms_and_conditions,
-        });
+      const affiliateData =
+        formData.affiliate && formData.affiliate.enabled
+          ? {
+              enabled: formData.affiliate.enabled,
+              commission_rate: formData.affiliate.commission_rate,
+              commission_type: formData.affiliate.commission_type,
+              fixed_commission_amount: formData.affiliate.fixed_commission_amount,
+              cookie_duration_days: formData.affiliate.cookie_duration_days,
+              min_order_amount: formData.affiliate.min_order_amount,
+              allow_self_referral: formData.affiliate.allow_self_referral,
+              require_approval: formData.affiliate.require_approval,
+              terms_and_conditions: formData.affiliate.terms_and_conditions,
+            }
+          : null;
 
-        if (affiliateError) {
-          logger.error('Affiliate settings error', { error: affiliateError, productId });
-        }
-      }
+      const rpcResult = await createPhysicalProductTx(
+        store.id,
+        productPayload,
+        physicalPayload,
+        variantsData,
+        inventoryData,
+        formData.size_chart_id || null,
+        affiliateData
+      );
+
+      const product = {
+        id: rpcResult.product_id,
+        name: formData.name,
+        product_type: 'physical' as const,
+        price: formData.price || 0,
+        currency: 'XOF',
+      };
 
       // Clear draft from localStorage on success
       try {

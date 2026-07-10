@@ -107,95 +107,6 @@ function buildOptionsFromVariants(
     .filter(option => option.values.length > 0);
 }
 
-async function syncPhysicalProductInventory(
-  physicalProductId: string,
-  productId: string,
-  storeId: string,
-  formData: Partial<PhysicalProductFormData> & {
-    low_stock_threshold?: number;
-    inventory_location?: string;
-  }
-): Promise<void> {
-  await supabase
-    .from('physical_product_inventory')
-    .delete()
-    .eq('physical_product_id', physicalProductId);
-
-  const hasVariants = Boolean(formData.has_variants && formData.variants?.length);
-  const lowStockThreshold = formData.low_stock_threshold || 5;
-  const locationName = formData.inventory_location || 'Default';
-  const trackInventory = formData.track_inventory !== false;
-
-  if (hasVariants && formData.variants) {
-    await supabase
-      .from('physical_product_variants')
-      .delete()
-      .eq('physical_product_id', physicalProductId);
-
-    const variantsData = formData.variants.map((variant: PhysicalProductVariant) => ({
-      physical_product_id: physicalProductId,
-      option1_value: variant.option1_value,
-      option2_value: variant.option2_value ?? null,
-      option3_value: variant.option3_value ?? null,
-      price: variant.price ?? formData.price ?? 0,
-      compare_at_price: variant.compare_at_price ?? null,
-      cost_per_item: variant.cost_per_item ?? null,
-      sku: variant.sku,
-      barcode: variant.barcode ?? null,
-      quantity: variant.quantity ?? 0,
-      weight: variant.weight ?? null,
-      image_url: variant.image_url ?? null,
-    }));
-
-    const { data: insertedVariants, error: variantsError } = await supabase
-      .from('physical_product_variants')
-      .insert(variantsData)
-      .select('id');
-
-    if (variantsError) throw variantsError;
-
-    if (insertedVariants?.length) {
-      const inventoryRows = insertedVariants.map((inserted, index) => ({
-        physical_product_id: physicalProductId,
-        product_id: productId,
-        store_id: storeId,
-        variant_id: inserted.id,
-        location_name: locationName,
-        quantity_available: formData.variants![index]?.quantity ?? 0,
-        quantity_reserved: 0,
-        low_stock_threshold: lowStockThreshold,
-        track_inventory: trackInventory,
-      }));
-
-      const { error: inventoryError } = await supabase
-        .from('physical_product_inventory')
-        .insert(inventoryRows);
-
-      if (inventoryError) throw inventoryError;
-    }
-    return;
-  }
-
-  await supabase
-    .from('physical_product_variants')
-    .delete()
-    .eq('physical_product_id', physicalProductId);
-
-  const { error: inventoryError } = await supabase.from('physical_product_inventory').insert({
-    physical_product_id: physicalProductId,
-    product_id: productId,
-    store_id: storeId,
-    variant_id: null,
-    location_name: locationName,
-    quantity_available: formData.quantity || 0,
-    quantity_reserved: 0,
-    low_stock_threshold: lowStockThreshold,
-    track_inventory: trackInventory,
-  });
-
-  if (inventoryError) throw inventoryError;
-}
-
 const STEPS = [
   {
     id: 1,
@@ -852,92 +763,74 @@ export const EditPhysicalProductWizard = ({
           (formData as { low_stock_threshold?: number }).low_stock_threshold || 5,
       };
 
+      const hasVariants = Boolean(formData.has_variants && formData.variants?.length);
+      const lowStockThreshold = formData.low_stock_threshold || 5;
+      const locationName = formData.inventory_location || 'Default';
+      const trackInventory = formData.track_inventory !== false;
+
+      let variantsData: Record<string, unknown>[] = [];
+      let inventoryData: Record<string, unknown>[] = [];
+
+      if (hasVariants && formData.variants) {
+        variantsData = formData.variants.map((variant: PhysicalProductVariant) => ({
+          option1_value: variant.option1_value,
+          option2_value: variant.option2_value ?? null,
+          option3_value: variant.option3_value ?? null,
+          price: variant.price ?? formData.price ?? 0,
+          compare_at_price: variant.compare_at_price ?? null,
+          cost_per_item: variant.cost_per_item ?? null,
+          sku: variant.sku,
+          barcode: variant.barcode ?? null,
+          quantity: variant.quantity ?? 0,
+          weight: variant.weight ?? null,
+          image_url: variant.image_url ?? null,
+        }));
+
+        inventoryData = formData.variants.map((variant: PhysicalProductVariant) => ({
+          location_name: locationName,
+          quantity_available: variant.quantity ?? 0,
+          low_stock_threshold: lowStockThreshold,
+          track_inventory: trackInventory,
+        }));
+      } else {
+        inventoryData = [
+          {
+            location_name: locationName,
+            quantity_available: formData.quantity || 0,
+            low_stock_threshold: lowStockThreshold,
+            track_inventory: trackInventory,
+          },
+        ];
+      }
+
+      const affiliatePayload = formData.affiliate
+        ? {
+            enabled: formData.affiliate.enabled ?? false,
+            commission_rate: formData.affiliate.commission_rate ?? 10,
+            commission_type: formData.affiliate.commission_type ?? 'percentage',
+            fixed_commission_amount: formData.affiliate.fixed_commission_amount ?? 0,
+            cookie_duration_days: formData.affiliate.cookie_duration_days ?? 30,
+            min_order_amount: formData.affiliate.min_order_amount ?? 0,
+            allow_self_referral: formData.affiliate.allow_self_referral ?? false,
+            require_approval: formData.affiliate.require_approval ?? false,
+            terms_and_conditions: formData.affiliate.terms_and_conditions ?? '',
+          }
+        : null;
+
       const rpcResult = await updatePhysicalProductTx(
         store.id,
         productId,
         productPayload,
-        physicalPayload
+        physicalPayload,
+        variantsData,
+        inventoryData,
+        formData.size_chart_id || null,
+        affiliatePayload
       );
 
       const physicalProductId = rpcResult.physical_product_id;
       if (!physicalProductId) {
         throw new Error('Enregistrement produit physique introuvable');
-      }
-
-      await syncPhysicalProductInventory(
-        physicalProductId,
-        productId,
-        store.id,
-        formData as Partial<PhysicalProductFormData> & {
-          low_stock_threshold?: number;
-          inventory_location?: string;
-        }
-      );
-
-      // Update affiliate settings
-      if (formData.affiliate?.enabled) {
-        const { data: existingAffiliate } = await supabase
-          .from('product_affiliate_settings')
-          .select('id')
-          .eq('product_id', productId)
-          .limit(1)
-          .maybeSingle();
-
-        const affiliateData = {
-          product_id: productId,
-          store_id: store.id,
-          affiliate_enabled: formData.affiliate.enabled,
-          commission_rate: formData.affiliate.commission_rate,
-          commission_type: formData.affiliate.commission_type,
-          fixed_commission_amount: formData.affiliate.fixed_commission_amount,
-          cookie_duration_days: formData.affiliate.cookie_duration_days,
-          min_order_amount: formData.affiliate.min_order_amount,
-          allow_self_referral: formData.affiliate.allow_self_referral,
-          require_approval: formData.affiliate.require_approval,
-          terms_and_conditions: formData.affiliate.terms_and_conditions,
-        };
-
-        if (existingAffiliate) {
-          const { error: affiliateError } = await supabase
-            .from('product_affiliate_settings')
-            .update(affiliateData)
-            .eq('id', existingAffiliate.id);
-
-          if (affiliateError) throw affiliateError;
-        } else {
-          const { error: affiliateError } = await supabase
-            .from('product_affiliate_settings')
-            .insert(affiliateData);
-
-          if (affiliateError) throw affiliateError;
-        }
-      } else {
-        await supabase
-          .from('product_affiliate_settings')
-          .update({ affiliate_enabled: false })
-          .eq('product_id', productId);
-      }
-
-      // Update size chart
-      if (formData.size_chart_id) {
-        const { data: existingSizeChart } = await supabase
-          .from('product_size_charts')
-          .select('id')
-          .eq('product_id', productId)
-          .limit(1)
-          .maybeSingle();
-
-        if (existingSizeChart) {
-          await supabase
-            .from('product_size_charts')
-            .update({ size_chart_id: formData.size_chart_id })
-            .eq('id', existingSizeChart.id);
-        } else {
-          await supabase.from('product_size_charts').insert({
-            product_id: productId,
-            size_chart_id: formData.size_chart_id,
-          });
-        }
       }
 
       toast({

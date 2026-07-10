@@ -73,8 +73,6 @@ import { isSellerNavItemActive, resolveSellerNavUrl } from '@/lib/navigation/ven
 import { logger } from '@/lib/logger';
 import { LogoImageWithFallback } from '@/components/sidebar/LogoImageWithFallback';
 
-const MAX_RECENT_ITEMS = 2;
-
 const isNavItemPlanLocked = (
   url: string,
   planSlug: string | null,
@@ -123,8 +121,7 @@ export function AppSidebar() {
   const isCollapsed = state === 'collapsed' && !isMobile;
   const { persona, setPersona } = useSidebarPersona(isAdmin);
   const [commandOpen, setCommandOpen] = useState(false);
-  const [pinnedUrls, setPinnedUrls] = useState<string[]>([]);
-  const [recentUrls, setRecentUrls] = useState<string[]>([]);
+
   const [collapsedSections, setCollapsedSections] = useState<string[]>([]);
   const [prefsHydrated, setPrefsHydrated] = useState(false);
   const [storesMenuOpen, setStoresMenuOpen] = useState(false);
@@ -224,20 +221,12 @@ export function AppSidebar() {
   useEffect(() => {
     setPrefsHydrated(false);
     try {
-      const storedPinned = readSidebarJsonPref<string[]>(SIDEBAR_PREF_KEYS.pinnedUrls, userId);
-      const storedRecent = readSidebarJsonPref<string[]>(SIDEBAR_PREF_KEYS.recentUrls, userId);
       const storedCollapsed = readSidebarJsonPref<string[]>(
         SIDEBAR_PREF_KEYS.collapsedSections,
         userId
       );
       const storedStores = readSidebarJsonPref<boolean>(SIDEBAR_PREF_KEYS.storesExpanded, userId);
 
-      setPinnedUrls(storedPinned ?? []);
-      if (storedRecent) {
-        setRecentUrls(Array.isArray(storedRecent) ? storedRecent.slice(0, MAX_RECENT_ITEMS) : []);
-      } else {
-        setRecentUrls([]);
-      }
       if (storedCollapsed) setCollapsedSections(storedCollapsed);
       if (storedStores !== null) setStoresMenuOpen(storedStores);
       setPrefsHydrated(true);
@@ -283,64 +272,13 @@ export function AppSidebar() {
 
   useEffect(() => {
     if (!prefsHydrated) return;
-    writeSidebarJsonPref(SIDEBAR_PREF_KEYS.pinnedUrls, pinnedUrls, userId);
-  }, [pinnedUrls, prefsHydrated, userId]);
-
-  useEffect(() => {
-    if (!prefsHydrated) return;
-    writeSidebarJsonPref(SIDEBAR_PREF_KEYS.recentUrls, recentUrls, userId);
-  }, [recentUrls, prefsHydrated, userId]);
-
-  useEffect(() => {
-    if (!prefsHydrated) return;
     writeSidebarJsonPref(SIDEBAR_PREF_KEYS.collapsedSections, collapsedSections, userId);
   }, [collapsedSections, prefsHydrated, userId]);
-
-  useEffect(() => {
-    if (!currentNavItem?.url) return;
-
-    setRecentUrls(prev => {
-      const deduped = prev.filter(url => url !== currentNavItem.url);
-      return [currentNavItem.url, ...deduped].slice(0, MAX_RECENT_ITEMS);
-    });
-  }, [currentNavItem?.url]);
 
   const toggleSectionCollapse = (sectionKey: string) => {
     setCollapsedSections(prev =>
       prev.includes(sectionKey) ? prev.filter(key => key !== sectionKey) : [...prev, sectionKey]
     );
-  };
-
-  const togglePinForCurrentPage = () => {
-    if (!currentNavItem?.url) return;
-    setPinnedUrls(prev =>
-      prev.includes(currentNavItem.url)
-        ? prev.filter(url => url !== currentNavItem.url)
-        : [currentNavItem.url, ...prev].slice(0, 10)
-    );
-  };
-
-  const pinnedItems = useMemo(
-    () => allCurrentEntries.filter(item => pinnedUrls.includes(item.url)),
-    [allCurrentEntries, pinnedUrls]
-  );
-
-  const recentItems = useMemo(
-    () =>
-      recentUrls
-        .map(url => allCurrentEntries.find(item => item.url === url))
-        .filter((item): item is (typeof allCurrentEntries)[number] => Boolean(item))
-        .filter(item => !pinnedUrls.includes(item.url))
-        .slice(0, MAX_RECENT_ITEMS),
-    [allCurrentEntries, recentUrls, pinnedUrls]
-  );
-
-  const collapseAllSections = () => {
-    setCollapsedSections(activeSections.map(s => s.sectionKey));
-  };
-
-  const expandAllSections = () => {
-    setCollapsedSections([]);
   };
 
   const handleLockedNavClick = (itemTitle: string, itemUrl: string) => {
@@ -429,116 +367,7 @@ export function AppSidebar() {
           isCollapsed={isCollapsed}
           onPersonaChange={handlePersonaChange}
         />
-        {!isCollapsed && (
-          <div className="mt-2 flex items-center justify-between gap-2 flex-wrap">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={togglePinForCurrentPage}
-              disabled={!currentNavItem}
-              className="h-7 px-2 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
-            >
-              {currentNavItem && pinnedUrls.includes(currentNavItem.url)
-                ? t('sidebar.context.unpin')
-                : t('sidebar.context.pin')}
-            </Button>
-            <div className="flex gap-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={expandAllSections}
-                className="h-7 px-2 text-[10px] text-muted-foreground hover:text-foreground hover:bg-accent"
-              >
-                {t('sidebar.chrome.expandAll')}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={collapseAllSections}
-                className="h-7 px-2 text-[10px] text-muted-foreground hover:text-foreground hover:bg-accent"
-              >
-                {t('sidebar.chrome.collapseAll')}
-              </Button>
-            </div>
-          </div>
-        )}
       </div>
-
-      {/* Épinglés en mode rail */}
-      {isCollapsed && pinnedItems.length > 0 && (
-        <div className="app-sidebar-pinned-rail shrink-0 flex flex-col items-center gap-1 py-2 border-b border-border">
-          {pinnedItems.slice(0, 3).map(item => {
-            const Icon = resolveNavItemIcon(item.url, item.icon);
-            return (
-              <Button
-                key={`rail-pin-${item.url}`}
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-muted-foreground hover:bg-accent hover:text-foreground"
-                onClick={() => navigateToNavItem(item)}
-                title={item.title}
-                aria-label={item.title}
-              >
-                <Icon className="h-4 w-4" />
-              </Button>
-            );
-          })}
-        </div>
-      )}
-
-      {!isCollapsed && (pinnedItems.length > 0 || recentItems.length > 0) && (
-        <div className="shrink-0 px-3 py-2 border-b border-border space-y-2">
-          {pinnedItems.length > 0 && (
-            <div>
-              <p className="text-[11px] uppercase tracking-wide text-muted-foreground font-semibold mb-1">
-                {t('sidebar.chrome.pinnedAccess')}
-              </p>
-              <div className="space-y-1">
-                {pinnedItems.slice(0, 5).map(item => {
-                  const PinIcon = resolveNavItemIcon(item.url, item.icon);
-                  return (
-                    <Button
-                      key={`pin-${item.url}`}
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => navigateToNavItem(item)}
-                      className="w-full justify-start h-7 px-2 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
-                    >
-                      <PinIcon className="h-3.5 w-3.5 mr-2 shrink-0 stroke-[2]" />
-                      <span className="truncate">{item.title}</span>
-                    </Button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-          {recentItems.length > 0 && (
-            <div>
-              <p className="text-[11px] uppercase tracking-wide text-muted-foreground font-semibold mb-1 flex items-center gap-1">
-                <Clock3 className="h-3 w-3" />
-                {t('sidebar.context.recent')}
-              </p>
-              <div className="space-y-1">
-                {recentItems.slice(0, MAX_RECENT_ITEMS).map(item => {
-                  const RecentIcon = resolveNavItemIcon(item.url, item.icon);
-                  return (
-                    <Button
-                      key={`recent-${item.url}`}
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => navigateToNavItem(item)}
-                      className="w-full justify-start h-7 px-2 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
-                    >
-                      <RecentIcon className="h-3.5 w-3.5 mr-2 shrink-0 stroke-[2]" />
-                      <span className="truncate">{item.title}</span>
-                    </Button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
 
       <SidebarContent className="app-sidebar-scroll flex-1 min-h-0 overflow-y-auto scrollbar-thin">
         {/* Menu Items - Organisé par sections */}
