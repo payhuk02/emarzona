@@ -75,12 +75,12 @@ describe('horizontal nav commerce gating', () => {
       t: mockT,
     });
 
-    const ventes = domains.find(d => d.domainKey === 'ventes_logistique');
-    const physicalGroup = ventes?.subgroups?.find(g => g.groupKey === 'produits_physiques');
+    const logistique = domains.find(d => d.domainKey === 'logistique' || d.domainKey === 'ventes_logistique');
+    const physicalGroup = logistique?.subgroups?.find(g => g.groupKey === 'produits_physiques');
     expect(physicalGroup).toBeDefined();
     expect(physicalGroup!.items.map(i => i.path)).toContain('/dashboard/physical-products');
 
-    const autres = ventes?.subgroups?.find(g => g.groupKey === 'other');
+    const autres = logistique?.subgroups?.find(g => g.groupKey === 'other');
     const autresPathsList = autres?.items.map(i => i.path) ?? [];
     expect(autresPathsList).not.toContain('/dashboard/physical-products');
     expect(autresPathsList).not.toContain('/dashboard/physical-inventory');

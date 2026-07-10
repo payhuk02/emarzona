@@ -37,6 +37,7 @@ describe('resolveHorizontalNavDomains', () => {
     expect(domains.map(d => d.shortLabel)).toEqual([
       'Produits',
       'Ventes',
+      'Logistique',
       'Finance',
       'Marketing',
       'Analytics',
