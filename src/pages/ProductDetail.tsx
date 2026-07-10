@@ -38,6 +38,7 @@ import { SafeHTML } from '@/components/security/SafeHTML';
 import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
 import { CountdownTimer } from '@/components/ui/countdown-timer';
+import { PhysicalProductShippingDetails } from '@/components/physical/PhysicalProductShippingDetails';
 import { CustomFieldsDisplay } from '@/components/products/CustomFieldsDisplay';
 import { ProductVariantSelector } from '@/components/products/ProductVariantSelector';
 import { SEOMeta, ProductSchema, BreadcrumbSchema } from '@/components/seo';
@@ -1285,6 +1286,20 @@ const ProductDetails = () => {
                       </div>
                     </div>
                   )}
+
+                {/* 🚚 NOUVEAU: Informations d'expédition (uniquement pour les produits physiques) */}
+                {product.product_type === 'physical' && product.store_id && (
+                  <div className="pt-4 sm:pt-6 border-t border-border">
+                    <PhysicalProductShippingDetails
+                      storeId={product.store_id}
+                      countryOfOrigin={
+                        (product as unknown as { physical?: { country_of_origin?: string } })
+                          .physical?.country_of_origin
+                      }
+                      currency={product.currency || 'XOF'}
+                    />
+                  </div>
+                )}
 
                 {/* 📝 NOUVEAU: Champs personnalisés */}
                 {product.custom_fields &&

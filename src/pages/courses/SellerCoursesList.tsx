@@ -27,6 +27,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { formatFcfa } from '@/lib/format/fcfa';
+import { ProductManagementActions } from '@/components/products/ProductManagementActions';
 
 export default function SellerCoursesList() {
   const { t } = useTranslation();
@@ -118,7 +119,26 @@ export default function SellerCoursesList() {
             {filtered.map(course => {
               const meta = course.courses?.[0];
               return (
-                <Card key={course.id} className="overflow-hidden">
+                <Card key={course.id} className="overflow-hidden relative">
+                  <div className="absolute top-2 right-2 z-10">
+                    <ProductManagementActions
+                      product={{
+                        id: course.id,
+                        slug: course.slug || course.id, // Fallback to id if slug is missing
+                        name: course.name,
+                        is_active: course.is_active,
+                      }}
+                      storeSlug={store?.slug}
+                      storeSubdomain={store?.subdomain}
+                      onEdit={() => navigate(`/dashboard/products/${course.id}/edit`)}
+                      onDelete={() => setDeleteId(course.id)}
+                      triggerProps={{
+                        variant: 'secondary',
+                        className:
+                          'h-8 w-8 min-h-[44px] min-w-[44px] touch-manipulation shadow-md bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-800',
+                      }}
+                    />
+                  </div>
                   {course.image_url ? (
                     <img
                       src={course.image_url}
@@ -133,8 +153,13 @@ export default function SellerCoursesList() {
                   )}
                   <CardContent className="space-y-3 p-4">
                     <div className="flex items-start justify-between gap-2">
-                      <h2 className="line-clamp-2 font-semibold leading-snug">{course.name}</h2>
-                      <Badge variant={course.is_draft ? 'secondary' : 'default'}>
+                      <h2 className="line-clamp-2 font-semibold leading-snug pr-8">
+                        {course.name}
+                      </h2>
+                      <Badge
+                        variant={course.is_draft ? 'secondary' : 'default'}
+                        className="shrink-0"
+                      >
                         {course.is_draft
                           ? t('courses.seller.draft', 'Brouillon')
                           : course.is_active

@@ -25,8 +25,9 @@ import {
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
+import { ProductManagementActions } from '@/components/products/ProductManagementActions';
 import { PriceStockAlertButton } from '@/components/marketplace/PriceStockAlertButton';
 import { PaymentOptionsBadge, getPaymentOptions } from '@/components/products/PaymentOptionsBadge';
 import { PricingModelBadge } from '@/components/products/PricingModelBadge';
@@ -116,6 +117,7 @@ const DigitalProductCardComponent = ({
   const isFeatured = variant === 'featured';
   const { toast } = useToast();
   const { store } = useStore();
+  const navigate = useNavigate();
   const [isFavorite, setIsFavorite] = useState(false);
   const [isZoomOpen, setIsZoomOpen] = useState(false);
   const imageSizes =
@@ -256,10 +258,32 @@ const DigitalProductCardComponent = ({
 
         {/* Version badge */}
         {product.version && (
-          <div className={cn('absolute top-2 z-10', selectable ? 'right-2' : 'left-2')}>
+          <div className="absolute bottom-2 left-2 z-10">
             <Badge variant="secondary" className="text-xs shadow-lg">
               v{product.version}
             </Badge>
+          </div>
+        )}
+
+        {/* Menu d'actions standardisé */}
+        {showActions && (
+          <div className="absolute top-2 right-2 z-20">
+            <ProductManagementActions
+              product={{
+                id: product.id,
+                slug: product.slug,
+                name: product.name,
+                is_active: product.is_active,
+              }}
+              storeSlug={store?.slug}
+              storeSubdomain={store?.subdomain}
+              onEdit={() => navigate(`/dashboard/products/${product.id}/edit`)}
+              triggerProps={{
+                variant: 'secondary',
+                className:
+                  'h-8 w-8 sm:h-8 sm:w-8 min-h-[44px] min-w-[44px] touch-manipulation shadow-md bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-800',
+              }}
+            />
           </div>
         )}
       </div>
@@ -567,9 +591,3 @@ export const DigitalProductsGrid = ({
     </div>
   );
 };
-
-
-
-
-
-

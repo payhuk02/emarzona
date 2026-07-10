@@ -22,6 +22,7 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { ProductManagementActions } from '@/components/products/ProductManagementActions';
 import {
   Select,
   SelectContent,
@@ -319,67 +320,26 @@ const ProductCardDashboardComponent = ({
             <span className="sm:hidden">Modif.</span>
           </Button>
 
-          <Select>
-            <SelectTrigger
-              className="hover:bg-accent/50 transition-all duration-200 hover:scale-105 active:scale-95 touch-manipulation min-h-[44px] sm:min-h-[38px] min-w-[44px] sm:min-w-[38px] px-2"
-              aria-label={`Actions pour ${product.name || product.id}`}
-            >
-              <MoreVertical className="h-3 w-3 sm:h-3.5 sm:w-3.5 lg:h-4 lg:w-4" />
-            </SelectTrigger>
-            <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-              {onQuickView && (
-                <SelectItem value="quickview" onSelect={onQuickView}>
-                  <span className="flex items-center">
-                    <Eye className="h-4 w-4 mr-2" />
-                    Aperçu rapide
-                  </span>
-                </SelectItem>
-              )}
-              <SelectItem value="copylink" onSelect={handleCopyLink}>
-                <span className="flex items-center">
-                  <Copy className="h-4 w-4 mr-2" />
-                  Copier le lien
-                </span>
-              </SelectItem>
-              <SelectItem value="preview" onSelect={handlePreview}>
-                <span className="flex items-center">
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  Prévisualiser
-                </span>
-              </SelectItem>
-              {onDuplicate && (
-                <SelectItem value="duplicate" onSelect={onDuplicate}>
-                  <span className="flex items-center">
-                    <FileStack className="h-4 w-4 mr-2" />
-                    Dupliquer
-                  </span>
-                </SelectItem>
-              )}
-              {onToggleStatus && (
-                <SelectItem value="toggle" onSelect={onToggleStatus}>
-                  <span className="flex items-center">
-                    {product.is_active ? (
-                      <>
-                        <EyeOff className="h-4 w-4 mr-2" />
-                        Désactiver
-                      </>
-                    ) : (
-                      <>
-                        <Eye className="h-4 w-4 mr-2" />
-                        Activer
-                      </>
-                    )}
-                  </span>
-                </SelectItem>
-              )}
-              <SelectItem value="delete" onSelect={onDelete} className="text-destructive">
-                <span className="flex items-center">
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Supprimer
-                </span>
-              </SelectItem>
-            </SelectContent>
-          </Select>
+          <ProductManagementActions
+            product={{
+              id: product.id,
+              slug: product.slug,
+              name: product.name,
+              is_active: product.is_active,
+            }}
+            storeSlug={storeSlug}
+            storeSubdomain={undefined /* Si disponible dans les props, sinon undefined */}
+            onEdit={onEdit ? () => onEdit() : undefined}
+            onDelete={onDelete ? () => onDelete() : undefined}
+            onDuplicate={onDuplicate ? () => onDuplicate() : undefined}
+            onToggleStatus={onToggleStatus ? () => onToggleStatus() : undefined}
+            onQuickView={onQuickView ? () => onQuickView() : undefined}
+            triggerProps={{
+              variant: 'ghost',
+              className:
+                'hover:bg-accent/50 transition-all duration-200 hover:scale-105 active:scale-95 touch-manipulation min-h-[44px] sm:min-h-[38px] min-w-[44px] sm:min-w-[38px] px-2 border',
+            }}
+          />
         </div>
       </CardContent>
     </Card>

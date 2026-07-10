@@ -34,7 +34,7 @@ import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { VariantSelector } from '@/components/physical/VariantSelector';
 import { InventoryStockIndicator } from '@/components/physical/InventoryStockIndicator';
-import { PhysicalProductDeliveryEstimate } from '@/components/physical/PhysicalProductDeliveryEstimate';
+import { PhysicalProductShippingDetails } from '@/components/physical/PhysicalProductShippingDetails';
 import { ProductReviewsHeroSummary } from '@/components/physical/ProductReviewsHeroSummary';
 import { PhysicalProductPreOrderCard } from '@/components/physical/PhysicalProductPreOrderCard';
 import { SizeChartDisplay } from '@/components/physical/SizeChartDisplay';
@@ -273,7 +273,12 @@ export default function PhysicalProductDetail() {
 
   if (isLoading) {
     return (
-      <AppPageShell mainClassName="p-8" hideSidebar={true} showUtilityBar={false} hideHorizontalNav={true}>
+      <AppPageShell
+        mainClassName="p-8"
+        hideSidebar={true}
+        showUtilityBar={false}
+        hideHorizontalNav={true}
+      >
         <div className="space-y-8">
           <Skeleton className="h-10 w-32" />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -287,7 +292,12 @@ export default function PhysicalProductDetail() {
 
   if (!product) {
     return (
-      <AppPageShell mainClassName="p-8" hideSidebar={true} showUtilityBar={false} hideHorizontalNav={true}>
+      <AppPageShell
+        mainClassName="p-8"
+        hideSidebar={true}
+        showUtilityBar={false}
+        hideHorizontalNav={true}
+      >
         <Card className="border-destructive">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 text-destructive">
@@ -319,7 +329,12 @@ export default function PhysicalProductDetail() {
   const productUrl = `${window.location.origin}/physical/${productId}`;
 
   return (
-    <AppPageShell mainClassName="p-8" hideSidebar={true} showUtilityBar={false} hideHorizontalNav={true}>
+    <AppPageShell
+      mainClassName="p-8"
+      hideSidebar={true}
+      showUtilityBar={false}
+      hideHorizontalNav={true}
+    >
       {/* SEO Meta Tags */}
       <SEOMeta
         title={product.name}
@@ -460,7 +475,13 @@ export default function PhysicalProductDetail() {
             currency={product?.currency}
           />
 
-          {productId && <PhysicalProductDeliveryEstimate productId={productId} />}
+          {product?.store_id && (
+            <PhysicalProductShippingDetails
+              storeId={product.store_id}
+              countryOfOrigin={product.physical?.country_of_origin}
+              currency={product.currency}
+            />
+          )}
 
           <div className="grid grid-cols-3 gap-2 text-center">
             <div className="rounded-lg border bg-muted/30 p-3">

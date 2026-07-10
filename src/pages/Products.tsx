@@ -61,6 +61,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { SafeHTML } from '@/components/security/SafeHTML';
+import { FeatureErrorBoundary } from '@/components/monitoring/FeatureErrorBoundary';
 import {
   Sheet,
   SheetContent,
@@ -1071,74 +1072,76 @@ const Products = () => {
                   aria-label={t('products.list.ariaLabel', 'Liste des produits')}
                   className="animate-in fade-in slide-in-from-bottom-4 duration-700"
                 >
-                  {/* Utiliser VirtualizedList pour les grandes listes (20+ produits) */}
-                  {paginatedProducts.length >= 20 ? (
-                    <VirtualizedList
-                      count={paginatedProducts.length}
-                      renderItem={index => {
-                        const product = paginatedProducts[index];
-                        if (!product) return null;
+                  <FeatureErrorBoundary featureName="la liste des produits">
+                    {/* Utiliser VirtualizedList pour les grandes listes (20+ produits) */}
+                    {paginatedProducts.length >= 20 ? (
+                      <VirtualizedList
+                        count={paginatedProducts.length}
+                        renderItem={index => {
+                          const product = paginatedProducts[index];
+                          if (!product) return null;
 
-                        return (
-                          <ProductListView
+                          return (
+                            <ProductListView
+                              key={product.id}
+                              product={product}
+                              storeSlug={store.slug}
+                              onEdit={() => handleProductEdit(product)}
+                              onDelete={() => setDeletingProductId(product.id)}
+                              onToggleStatus={() => handleToggleStatus(product.id)}
+                              onDuplicate={() => handleDuplicateProduct(product.id)}
+                              onQuickView={() => setQuickViewProduct(product)}
+                              isSelected={selectedProducts.includes(product.id)}
+                              onSelect={selected => {
+                                if (selected) {
+                                  setSelectedProducts([...selectedProducts, product.id]);
+                                } else {
+                                  setSelectedProducts(
+                                    selectedProducts.filter(id => id !== product.id)
+                                  );
+                                }
+                              }}
+                            />
+                          );
+                        }}
+                        loading={productsLoadingState}
+                        loadingCount={itemsPerPage}
+                        estimateSize={isMobile ? 150 : 180}
+                        itemClassName="space-y-3 sm:space-y-4"
+                        emptyMessage={t('products.noProducts', 'Aucun produit trouvé')}
+                      />
+                    ) : (
+                      <div className="space-y-3 sm:space-y-4">
+                        {paginatedProducts.map((product, index) => (
+                          <div
                             key={product.id}
-                            product={product}
-                            storeSlug={store.slug}
-                            onEdit={() => handleProductEdit(product)}
-                            onDelete={() => setDeletingProductId(product.id)}
-                            onToggleStatus={() => handleToggleStatus(product.id)}
-                            onDuplicate={() => handleDuplicateProduct(product.id)}
-                            onQuickView={() => setQuickViewProduct(product)}
-                            isSelected={selectedProducts.includes(product.id)}
-                            onSelect={selected => {
-                              if (selected) {
-                                setSelectedProducts([...selectedProducts, product.id]);
-                              } else {
-                                setSelectedProducts(
-                                  selectedProducts.filter(id => id !== product.id)
-                                );
-                              }
-                            }}
-                          />
-                        );
-                      }}
-                      loading={productsLoadingState}
-                      loadingCount={itemsPerPage}
-                      estimateSize={isMobile ? 150 : 180}
-                      itemClassName="space-y-3 sm:space-y-4"
-                      emptyMessage={t('products.noProducts', 'Aucun produit trouvé')}
-                    />
-                  ) : (
-                    <div className="space-y-3 sm:space-y-4">
-                      {paginatedProducts.map((product, index) => (
-                        <div
-                          key={product.id}
-                          className="animate-in fade-in slide-in-from-left-2"
-                          style={{ animationDelay: `${index * 30}ms` }}
-                        >
-                          <ProductListView
-                            product={product}
-                            storeSlug={store.slug}
-                            onEdit={() => handleProductEdit(product)}
-                            onDelete={() => setDeletingProductId(product.id)}
-                            onToggleStatus={() => handleToggleStatus(product.id)}
-                            onDuplicate={() => handleDuplicateProduct(product.id)}
-                            onQuickView={() => setQuickViewProduct(product)}
-                            isSelected={selectedProducts.includes(product.id)}
-                            onSelect={selected => {
-                              if (selected) {
-                                setSelectedProducts([...selectedProducts, product.id]);
-                              } else {
-                                setSelectedProducts(
-                                  selectedProducts.filter(id => id !== product.id)
-                                );
-                              }
-                            }}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                            className="animate-in fade-in slide-in-from-left-2"
+                            style={{ animationDelay: `${index * 30}ms` }}
+                          >
+                            <ProductListView
+                              product={product}
+                              storeSlug={store.slug}
+                              onEdit={() => handleProductEdit(product)}
+                              onDelete={() => setDeletingProductId(product.id)}
+                              onToggleStatus={() => handleToggleStatus(product.id)}
+                              onDuplicate={() => handleDuplicateProduct(product.id)}
+                              onQuickView={() => setQuickViewProduct(product)}
+                              isSelected={selectedProducts.includes(product.id)}
+                              onSelect={selected => {
+                                if (selected) {
+                                  setSelectedProducts([...selectedProducts, product.id]);
+                                } else {
+                                  setSelectedProducts(
+                                    selectedProducts.filter(id => id !== product.id)
+                                  );
+                                }
+                              }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </FeatureErrorBoundary>
                 </div>
 
                 {/* Pagination avec design amélioré */}

@@ -31,6 +31,7 @@ import type { Product } from '@/types/product';
 import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
 import { PriceStockAlertButton } from '@/components/marketplace/PriceStockAlertButton';
 import { supabase } from '@/integrations/supabase/client';
+import { ProductManagementActions } from '@/components/products/ProductManagementActions';
 
 interface ServiceCardProps {
   service: ServiceProduct & { product?: Product };
@@ -115,32 +116,24 @@ const ServiceCardComponent = ({
 
         {/* Actions Menu */}
         {showActions && (
-          <div className="absolute top-2 right-2">
-            <StableDropdownMenu
-              triggerContent={<MoreVertical className="h-4 w-4" />}
-              triggerProps={{
-                variant: 'secondary' as const,
-                size: 'icon' as const,
-                className: 'h-11 w-11 sm:h-8 sm:w-8',
-                'aria-label': `Actions pour ${service.name || service.id}`,
+          <div className="absolute top-2 right-2 z-10">
+            <ProductManagementActions
+              product={{
+                id: service.id,
+                slug: service.product?.slug || service.id,
+                name: service.product?.name,
+                is_active: service.product?.is_active,
               }}
-            >
-              <SelectItem
-                value="edit"
-                onSelect={() => onEdit?.(service.product_id || service.product?.id || service.id)}
-              >
-                <Edit className="h-4 w-4 mr-2" />
-                Modifier
-              </SelectItem>
-              <SelectItem
-                value="delete"
-                onSelect={() => onDelete?.(service.id)}
-                className="text-destructive"
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Supprimer
-              </SelectItem>
-            </StableDropdownMenu>
+              storeSlug={service.product?.store?.slug}
+              storeSubdomain={service.product?.store?.subdomain}
+              onEdit={id => onEdit?.(service.product_id || service.product?.id || id)}
+              onDelete={() => onDelete?.(service.id)}
+              triggerProps={{
+                variant: 'secondary',
+                className:
+                  'h-8 w-8 sm:h-8 sm:w-8 min-h-[44px] min-w-[44px] touch-manipulation shadow-md bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-800',
+              }}
+            />
           </div>
         )}
       </div>

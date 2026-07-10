@@ -29,6 +29,7 @@ import { LazyImage } from '@/components/ui/LazyImage';
 import { getImageAttributesForPreset } from '@/lib/image-transform';
 import { PriceStockAlertButton } from '@/components/marketplace/PriceStockAlertButton';
 import { supabase } from '@/integrations/supabase/client';
+import { ProductManagementActions } from '@/components/products/ProductManagementActions';
 
 interface PhysicalProductCardProps {
   product: PhysicalProduct & { product?: Product };
@@ -108,32 +109,24 @@ const PhysicalProductCardComponent = ({ product, onEdit, onDelete }: PhysicalPro
         </div>
 
         {/* Actions Menu */}
-        <div className="absolute top-2 right-2">
-          <StableDropdownMenu
-            triggerContent={<MoreVertical className="h-4 w-4" />}
-            triggerProps={{
-              variant: 'secondary' as const,
-              size: 'icon' as const,
-              className: 'h-8 w-8 sm:h-8 sm:w-8 min-h-[44px] min-w-[44px] touch-manipulation',
-              'aria-label': `Actions pour ${product.name || product.id}`,
+        <div className="absolute top-2 right-2 z-10">
+          <ProductManagementActions
+            product={{
+              id: product.id,
+              slug: product.product?.slug || product.id,
+              name: product.product?.name,
+              is_active: product.product?.is_active,
             }}
-          >
-            <SelectItem
-              value="edit"
-              onSelect={() => onEdit?.(product.product_id || product.product?.id || product.id)}
-            >
-              <Edit className="h-4 w-4 mr-2" />
-              Modifier
-            </SelectItem>
-            <SelectItem
-              value="delete"
-              onSelect={() => onDelete?.(product.id)}
-              className="text-destructive"
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Supprimer
-            </SelectItem>
-          </StableDropdownMenu>
+            storeSlug={product.product?.store?.slug}
+            storeSubdomain={product.product?.store?.subdomain}
+            onEdit={id => onEdit?.(product.product_id || product.product?.id || id)}
+            onDelete={() => onDelete?.(product.id)}
+            triggerProps={{
+              variant: 'secondary',
+              className:
+                'h-8 w-8 sm:h-8 sm:w-8 min-h-[44px] min-w-[44px] touch-manipulation shadow-md bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-800',
+            }}
+          />
         </div>
       </div>
 

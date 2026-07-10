@@ -2,6 +2,8 @@ import { HelmetProvider } from 'react-helmet-async';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { QueryClientProvider } from '@tanstack/react-query';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
+import { createIDBPersister } from '@/lib/cache/persister';
 import { BrowserRouter, Routes, useLocation } from 'react-router-dom';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { StoreProvider } from '@/contexts/StoreContext';
@@ -326,10 +328,11 @@ const AppContent = () => {
 };
 
 const queryClient = createOptimizedQueryClient();
+const persister = createIDBPersister('emarzona-react-query');
 
 const App = () => (
   <HelmetProvider>
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
       <TooltipProvider>
         <Toaster />
         <BrowserRouter
@@ -352,7 +355,7 @@ const App = () => (
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   </HelmetProvider>
 );
 
