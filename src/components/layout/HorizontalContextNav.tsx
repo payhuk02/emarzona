@@ -291,17 +291,16 @@ export function HorizontalContextNav() {
         >
           <NavigationMenuList className="flex flex-wrap justify-start gap-0.5 py-1.5">
             {domains.map((domain, index) => {
-              // Décalage manuel pour éviter que les menus ne chevauchent la sidebar à gauche ou ne sortent à droite
-              let offsetClass = '';
-              if (index === 0)
-                offsetClass = 'ml-[200px]'; // Produits
-              else if (index === 1)
-                offsetClass = 'ml-[120px]'; // Ventes
-              else if (index === 2)
-                offsetClass = 'ml-[40px]'; // Logistique
-              else if (index === domains.length - 3) offsetClass = '-ml-[40px]';
-              else if (index === domains.length - 2) offsetClass = '-ml-[120px]';
-              else if (index === domains.length - 1) offsetClass = '-ml-[200px]';
+              // Positionnement intelligent pour éviter de déborder sur la sidebar ou hors de l'écran
+              let positionClass = '';
+              if (index === 0) {
+                positionClass = 'left-0 translate-x-0';
+              } else if (index === 1 || index === 2) {
+                // Ventes & Logistique : aligné à gauche avec un léger décalage ou juste au niveau du trigger
+                positionClass = 'left-0 translate-x-0 md:-ml-4';
+              } else if (index >= domains.length - 2) {
+                positionClass = 'right-0 left-auto translate-x-0';
+              }
 
               return (
                 <NavigationMenuItem key={domain.domainKey}>
@@ -328,7 +327,7 @@ export function HorizontalContextNav() {
                       >
                         {domain.shortLabel}
                       </NavigationMenuTrigger>
-                      <NavigationMenuContent className={offsetClass}>
+                      <NavigationMenuContent className={positionClass}>
                         <MegaMenuPanel domain={domain} onNavigate={handleNavigate} />
                       </NavigationMenuContent>
                     </>

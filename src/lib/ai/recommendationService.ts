@@ -126,7 +126,7 @@ const defaultRecommendationSettings: RecommendationSettings = {
   },
 };
 
-class RecommendationService {
+export class RecommendationService {
   private settings: RecommendationSettings = defaultRecommendationSettings;
 
   constructor() {
@@ -148,26 +148,25 @@ class RecommendationService {
         throw error;
       }
 
-      if (data) {
+      if (data && typeof data === 'object') {
         const loadedSettings = data as RecommendationSettings;
-        // Validation basique des données chargées
-        if (loadedSettings && typeof loadedSettings === 'object') {
-          this.settings = { ...defaultRecommendationSettings, ...loadedSettings };
-          logger.info('Recommendation settings loaded successfully.');
-        } else {
-          logger.warn('Invalid recommendation settings format, using defaults.');
-        }
+        this.settings = { ...defaultRecommendationSettings, ...loadedSettings };
+        logger.info('Recommendation settings loaded successfully.');
+      } else {
+        this.settings = { ...defaultRecommendationSettings };
+        logger.warn('Invalid recommendation settings format, using defaults.');
       }
     } catch (error) {
       logger.error('Error loading recommendation settings', { error });
       logger.warn('Using default recommendation settings due to load error.');
+      this.settings = { ...defaultRecommendationSettings };
     }
   }
 
   // Méthode principale pour obtenir les recommandations
   public async getRecommendations(
     userId: string | undefined,
-    _sessionContext: ChatSessionContext,
+    sessionContext: ChatSessionContext,
     currentProductId?: string // Si la recommandation est pour un produit spécifique
   ): Promise<RecommendedProduct[]> {
     await this.loadSettings(); // S'assurer que les derniers paramètres sont chargés

@@ -34,6 +34,7 @@ type TestCustomer = Pick<
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: {
     from: vi.fn(),
+    rpc: vi.fn(),
     auth: {
       getUser: vi.fn(),
     },
@@ -97,18 +98,25 @@ describe('Multi-Stores Isolation Tests', () => {
       },
     });
 
-    // Chaîne PostgREST : chaque maillon renvoie le même objet (pas mockReturnThis — sinon this est faux en strict mode)
-    const chain = {
+    // Mock thenable interface on chain
+    const chain: any = {
       select: vi.fn(),
       eq: vi.fn(),
       order: vi.fn(),
       range: vi.fn(),
       single: vi.fn(),
+      then: vi.fn(),
     };
-    chain.select.mockImplementation(() => chain);
-    chain.eq.mockImplementation(() => chain);
-    chain.order.mockImplementation(() => chain);
-    chain.range.mockImplementation(() => chain);
+    
+    // Default chain behaviour (return self to allow chaining)
+    chain.select.mockReturnValue(chain);
+    chain.eq.mockReturnValue(chain);
+    chain.order.mockReturnValue(chain);
+    chain.range.mockReturnValue(chain);
+    chain.single.mockReturnValue(chain);
+
+    // By default, 'then' resolves to empty data. Tests can override this.
+    chain.then.mockImplementation((resolve: any) => resolve({ data: [], error: null, count: 0 }));
 
     mockSelect = chain.select;
     mockEq = chain.eq;
@@ -116,7 +124,7 @@ describe('Multi-Stores Isolation Tests', () => {
     mockRange = chain.range;
     mockSingle = chain.single;
 
-    (supabase.from as ReturnType<typeof vi.fn>).mockImplementation(() => chain);
+    (supabase.from as ReturnType<typeof vi.fn>).mockReturnValue(chain);
   });
 
   afterEach(() => {
@@ -134,7 +142,7 @@ describe('Multi-Stores Isolation Tests', () => {
         { id: 'product-2', name: 'Product 2', store_id: 'store-1' },
       ];
 
-      mockSelect.mockResolvedValue({
+      (supabase.rpc as ReturnType<typeof vi.fn>).mockResolvedValue({
         data: store1Products,
         error: null,
       });
@@ -142,11 +150,11 @@ describe('Multi-Stores Isolation Tests', () => {
       const { result } = renderHook(() => useProducts('store-1'), { wrapper });
 
       await waitFor(() => {
-        expect(result.current.loading).toBe(false);
+        expect(result.current.isLoading).toBe(false);
       });
 
       // Vérifier que la requête a filtré par store_id
-      expect(mockEq).toHaveBeenCalledWith('store_id', 'store-1');
+      expect(supabase.rpc).toHaveBeenCalledWith('get_products_management', expect.objectContaining({ p_store_id: 'store-1' }));
       expect(result.current.products).toHaveLength(2);
       expect(result.current.products.every(p => p.store_id === 'store-1')).toBe(true);
     });
@@ -158,7 +166,7 @@ describe('Multi-Stores Isolation Tests', () => {
         { id: 'product-3', name: 'Product 3', store_id: 'store-1' },
       ];
 
-      mockSelect.mockResolvedValue({
+      (supabase.rpc as ReturnType<typeof vi.fn>).mockResolvedValue({
         data: allProducts.filter(p => p.store_id === 'store-1'),
         error: null,
       });
@@ -166,7 +174,7 @@ describe('Multi-Stores Isolation Tests', () => {
       const { result } = renderHook(() => useProducts('store-1'), { wrapper });
 
       await waitFor(() => {
-        expect(result.current.loading).toBe(false);
+        expect(result.current.isLoading).toBe(false);
       });
 
       // Vérifier que seuls les produits de store-1 sont retournés
@@ -179,7 +187,7 @@ describe('Multi-Stores Isolation Tests', () => {
       const { result } = renderHook(() => useProducts(null), { wrapper });
 
       expect(result.current.products).toEqual([]);
-      expect(result.current.loading).toBe(false);
+      expect(result.current.isLoading).toBe(false);
     });
   });
 
@@ -190,11 +198,14 @@ describe('Multi-Stores Isolation Tests', () => {
         { id: 'order-2', order_number: 'ORD-002', store_id: 'store-1', total_amount: 200 },
       ];
 
-      mockSelect.mockResolvedValue({
+      const chainResponse = {
         data: store1Orders,
         error: null,
         count: 2,
-      });
+      };
+      
+      const chain = (supabase.from as ReturnType<typeof vi.fn>)();
+      chain.then.mockImplementation((resolve: any) => resolve(chainResponse));
 
       const { result } = renderHook(() => useOrders('store-1'), { wrapper });
 
@@ -215,11 +226,14 @@ describe('Multi-Stores Isolation Tests', () => {
         { id: 'order-3', order_number: 'ORD-003', store_id: 'store-1', total_amount: 300 },
       ];
 
-      mockSelect.mockResolvedValue({
+      const chainResponse = {
         data: allOrders.filter(o => o.store_id === 'store-1'),
         error: null,
         count: 2,
-      });
+      };
+      
+      const chain = (supabase.from as ReturnType<typeof vi.fn>)();
+      chain.then.mockImplementation((resolve: any) => resolve(chainResponse));
 
       const { result } = renderHook(() => useOrders('store-1'), { wrapper });
 
@@ -251,11 +265,13 @@ describe('Multi-Stores Isolation Tests', () => {
         { id: 'customer-2', name: 'Customer 2', store_id: 'store-1', email: 'c2@test.com' },
       ];
 
-      mockSelect.mockResolvedValue({
+      const chainResponse = {
         data: store1Customers,
         error: null,
         count: 2,
-      });
+      };
+      const chain = (supabase.from as ReturnType<typeof vi.fn>)();
+      chain.then.mockImplementation((resolve: any) => resolve(chainResponse));
 
       const { result } = renderHook(() => useCustomers('store-1'), { wrapper });
 
@@ -278,11 +294,13 @@ describe('Multi-Stores Isolation Tests', () => {
         { id: 'customer-3', name: 'Customer 3', store_id: 'store-1', email: 'c3@test.com' },
       ];
 
-      mockSelect.mockResolvedValue({
+      const chainResponse = {
         data: allCustomers.filter(c => c.store_id === 'store-1'),
         error: null,
         count: 2,
-      });
+      };
+      const chain = (supabase.from as ReturnType<typeof vi.fn>)();
+      chain.then.mockImplementation((resolve: any) => resolve(chainResponse));
 
       const { result } = renderHook(() => useCustomers('store-1'), { wrapper });
 
@@ -307,8 +325,7 @@ describe('Multi-Stores Isolation Tests', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.data?.data).toEqual([]);
-      expect(result.current.data?.count).toBe(0);
+      expect(result.current.data).toBeUndefined(); // React Query returns undefined before first fetch or on disabled query
     });
   });
 
@@ -441,7 +458,7 @@ describe('Multi-Stores Isolation Tests', () => {
       const store2Products = [{ id: 'product-2', name: 'Product 2', store_id: 'store-2' }];
 
       // Test store-1
-      mockSelect.mockResolvedValueOnce({
+      (supabase.rpc as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
         data: store1Products,
         error: null,
       });
@@ -449,14 +466,14 @@ describe('Multi-Stores Isolation Tests', () => {
       const { result: result1 } = renderHook(() => useProducts('store-1'), { wrapper });
 
       await waitFor(() => {
-        expect(result1.current.loading).toBe(false);
+        expect(result1.current.isLoading).toBe(false);
       });
 
       expect(result1.current.products).toHaveLength(1);
       expect(result1.current.products[0].store_id).toBe('store-1');
 
       // Test store-2
-      mockSelect.mockResolvedValueOnce({
+      (supabase.rpc as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
         data: store2Products,
         error: null,
       });
@@ -464,15 +481,15 @@ describe('Multi-Stores Isolation Tests', () => {
       const { result: result2 } = renderHook(() => useProducts('store-2'), { wrapper });
 
       await waitFor(() => {
-        expect(result2.current.loading).toBe(false);
+        expect(result2.current.isLoading).toBe(false);
       });
 
       expect(result2.current.products).toHaveLength(1);
       expect(result2.current.products[0].store_id).toBe('store-2');
 
       // Vérifier que les deux requêtes ont utilisé le bon store_id
-      expect(mockEq).toHaveBeenCalledWith('store_id', 'store-1');
-      expect(mockEq).toHaveBeenCalledWith('store_id', 'store-2');
+      expect(supabase.rpc).toHaveBeenCalledWith('get_products_management', expect.objectContaining({ p_store_id: 'store-1' }));
+      expect(supabase.rpc).toHaveBeenCalledWith('get_products_management', expect.objectContaining({ p_store_id: 'store-2' }));
     });
 
     it('should prevent orders from store-2 appearing in store-1 queries', async () => {
@@ -482,13 +499,15 @@ describe('Multi-Stores Isolation Tests', () => {
       const store2Orders = [
         { id: 'order-2', order_number: 'ORD-002', store_id: 'store-2', total_amount: 200 },
       ];
-
+      
+      const chain = (supabase.from as ReturnType<typeof vi.fn>)();
+      
       // Test store-1
-      mockSelect.mockResolvedValueOnce({
+      chain.then.mockImplementationOnce((resolve: any) => resolve({
         data: store1Orders,
         error: null,
         count: 1,
-      });
+      }));
 
       const { result: result1 } = renderHook(() => useOrders('store-1'), { wrapper });
 
@@ -500,11 +519,11 @@ describe('Multi-Stores Isolation Tests', () => {
       expect(result1.current.orders[0].store_id).toBe('store-1');
 
       // Test store-2
-      mockSelect.mockResolvedValueOnce({
+      chain.then.mockImplementationOnce((resolve: any) => resolve({
         data: store2Orders,
         error: null,
         count: 1,
-      });
+      }));
 
       const { result: result2 } = renderHook(() => useOrders('store-2'), { wrapper });
 
@@ -529,11 +548,11 @@ describe('Multi-Stores Isolation Tests', () => {
 
       // Test customers
       const { result: customersResult } = renderHook(() => useCustomers(undefined), { wrapper });
-      expect(customersResult.current.data?.data).toEqual([]);
+      expect(customersResult.current.data).toBeUndefined();
     });
 
     it('should filter by store_id in all queries', async () => {
-      mockSelect.mockResolvedValue({
+      (supabase.rpc as ReturnType<typeof vi.fn>).mockResolvedValue({
         data: [],
         error: null,
       });
@@ -541,7 +560,7 @@ describe('Multi-Stores Isolation Tests', () => {
       // Test products
       renderHook(() => useProducts('store-1'), { wrapper });
       await waitFor(() => {
-        expect(mockEq).toHaveBeenCalledWith('store_id', 'store-1');
+        expect(supabase.rpc).toHaveBeenCalledWith('get_products_management', expect.objectContaining({ p_store_id: 'store-1' }));
       });
 
       vi.clearAllMocks();
@@ -555,11 +574,12 @@ describe('Multi-Stores Isolation Tests', () => {
       vi.clearAllMocks();
 
       // Test customers
-      mockSelect.mockResolvedValue({
+      const chain = (supabase.from as ReturnType<typeof vi.fn>)();
+      chain.then.mockImplementation((resolve: any) => resolve({
         data: [],
         error: null,
         count: 0,
-      });
+      }));
       renderHook(() => useCustomers('store-1'), { wrapper });
       await waitFor(() => {
         expect(mockEq).toHaveBeenCalledWith('store_id', 'store-1');

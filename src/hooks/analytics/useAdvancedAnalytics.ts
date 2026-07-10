@@ -362,6 +362,47 @@ export const useCreateAdvancedDashboard = () => {
 };
 
 /**
+ * useUpdateAdvancedDashboard - Mettre à jour un dashboard d'analytics
+ */
+export const useUpdateAdvancedDashboard = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async ({ id, ...dashboard }: Partial<AdvancedAnalyticsDashboard> & { id: string }) => {
+      const { data, error } = await supabase
+        .from('advanced_analytics_dashboards')
+        .update(dashboard)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        logger.error('Error updating advanced dashboard', { error, dashboard });
+        throw error;
+      }
+
+      return data as AdvancedAnalyticsDashboard;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['advanced-dashboards'] });
+      toast({
+        title: '✅ Dashboard mis à jour',
+        description: 'Le dashboard a été mis à jour avec succès',
+      });
+    },
+    onError: (error: any) => {
+      logger.error('Error in useUpdateAdvancedDashboard', { error });
+      toast({
+        title: '❌ Erreur',
+        description: error.message || 'Impossible de mettre à jour le dashboard',
+        variant: 'destructive',
+      });
+    },
+  });
+};
+
+/**
  * useCreateAnalyticsAlert - Créer une alerte d'analytics
  */
 export const useCreateAnalyticsAlert = () => {

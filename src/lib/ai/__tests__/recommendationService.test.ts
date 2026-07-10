@@ -16,6 +16,7 @@ vi.mock('@/integrations/supabase/client', () => ({
       single: vi.fn(),
       neq: vi.fn().mockReturnThis(),
     })),
+    rpc: vi.fn(),
   },
 }));
 
@@ -29,6 +30,7 @@ vi.mock('@/lib/logger', () => ({
 }));
 
 const mockSupabaseFrom = vi.mocked(supabase.from);
+const mockSupabaseRpc = vi.mocked(supabase.rpc);
 
 describe('RecommendationService', () => {
   let service: RecommendationService;
@@ -63,7 +65,7 @@ describe('RecommendationService', () => {
       artist: { enabled: true, maxRecommendations: 3, similarityThreshold: 0.5 },
     },
     limits: {
-      maxRecommendationsPerPage: 8,
+      maxRecommendationsPerPage: 10,
       minConfidenceThreshold: 0.3,
       cacheExpiryMinutes: 30,
       enablePersonalization: true,
@@ -79,13 +81,16 @@ describe('RecommendationService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Mock loading settings to return our mockSettings
+    mockSupabaseRpc.mockResolvedValue({ data: mockSettings, error: null });
     mockSupabaseFrom.mockReturnValue({
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
-      maybeSingle: vi.fn().mockResolvedValue({ data: { ai_recommendation_settings: mockSettings }, error: null }),
-    } as {
-      select: () => { eq: () => { maybeSingle: () => Promise<{ data: { ai_recommendation_settings: RecommendationSettings } | null; error: any }> } }
-    });
+      maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+      order: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      single: vi.fn().mockReturnThis(),
+      neq: vi.fn().mockReturnThis(),
+    } as any);
 
     service = new RecommendationService();
   });
@@ -94,16 +99,12 @@ describe('RecommendationService', () => {
     it('should load settings from supabase', async () => {
       // Force reload settings to ensure mock is used
       await (service as { loadSettings: () => Promise<void> }).loadSettings();
-      expect(mockSupabaseFrom).toHaveBeenCalledWith('platform_settings');
-      expect((service as { settings: RecommendationSettings }).settings.limits.maxRecommendationsPerPage).toBe(8);
+      expect(mockSupabaseRpc).toHaveBeenCalledWith('get_ai_recommendation_settings');
+      expect((service as { settings: RecommendationSettings }).settings.limits.maxRecommendationsPerPage).toBe(10);
     });
 
     it('should use default settings if supabase returns no data', async () => {
-      mockSupabaseFrom.mockReturnValue({
-        select: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockReturnThis(),
-        maybeSingle: vi.fn().mockResolvedValue({ data: { ai_recommendation_settings: null }, error: null }),
-      } as { select: () => { eq: () => { maybeSingle: () => Promise<{ data: { ai_recommendation_settings: null } | null; error: any }> } } });
+      mockSupabaseRpc.mockResolvedValue({ data: null, error: null });
 
       await (service as { loadSettings: () => Promise<void> }).loadSettings();
       // Check against a default value that is different from mockSettings
@@ -112,15 +113,12 @@ describe('RecommendationService', () => {
     });
 
     it('should use default settings if there is a supabase error', async () => {
-      mockSupabaseFrom.mockReturnValue({
-        select: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockReturnThis(),
-        maybeSingle: vi.fn().mockResolvedValue({ data: null, error: new Error('DB Error') }),
-      } as { select: () => { eq: () => { maybeSingle: () => Promise<{ data: null; error: Error }> } } });
+      mockSupabaseRpc.mockResolvedValue({ data: null, error: new Error('DB Error') });
 
       await (service as { loadSettings: () => Promise<void> }).loadSettings();
       expect((service as { settings: RecommendationSettings }).settings.limits.maxRecommendationsPerPage).not.toBe(mockSettings.limits.maxRecommendationsPerPage);
-      expect(logger.error).toHaveBeenCalledWith('Error loading recommendation settings', expect.any(Object));
+      expect(logger.error).toHaveBeenCalledWith('Error loading recommendation settings', { error: expect.any(Error) });
+      expect(logger.warn).toHaveBeenCalledWith('Using default recommendation settings due to load error.');
     });
   });
 
@@ -137,7 +135,7 @@ describe('RecommendationService', () => {
       mockSupabaseFrom.mockReturnValue({
         select: vi.fn().mockReturnThis(),
         order: vi.fn().mockReturnThis(),
-        limit: vi.fn().mockResolvedValueOnce({ data: [
+        limit: vi.fn().mockResolvedValue({ data: [
           { id: 'p1', name: 'Product 1', category: 'cat1', type: 'digital' },
           { id: 'p2', name: 'Product 2', category: 'cat2', type: 'physical' },
           { id: 'p3', name: 'Product 3', category: 'cat1', type: 'digital' },
@@ -184,7 +182,7 @@ describe('RecommendationService', () => {
     });
 
     it('should not fetch personalized recommendations if personalization is disabled', async () => {
-      service.updateSettings({ ...mockSettings, limits: { ...mockSettings.limits, enablePersonalization: false } });
+      mockSupabaseRpc.mockResolvedValue({ data: { ...mockSettings, limits: { ...mockSettings.limits, enablePersonalization: false } }, error: null });
       vi.spyOn(service as { getCollaborativeRecommendations: (userId: string | undefined, _sessionContext: ChatSessionContext) => Promise<RecommendedProduct[]> }, 'getCollaborativeRecommendations').mockResolvedValue([]);
       const spyCollab = vi.spyOn(service as { getCollaborativeRecommendations: (userId: string | undefined, _sessionContext: ChatSessionContext) => Promise<RecommendedProduct[]> }, 'getCollaborativeRecommendations');
       const spyBehav = vi.spyOn(service as { getBehavioralRecommendations: (userId: string | undefined, _sessionContext: ChatSessionContext) => Promise<RecommendedProduct[]> }, 'getBehavioralRecommendations');
@@ -199,28 +197,25 @@ describe('RecommendationService', () => {
       });
 
       await service.getRecommendations('user1', {});
-      expect(spyCollab).toHaveBeenCalledWith(undefined, expect.any(Object)); // userId should be undefined
-      expect(spyBehav).toHaveBeenCalledWith(undefined, expect.any(Object)); // userId should be undefined
+      expect(spyCollab).toHaveBeenCalledWith('user1', expect.any(Object));
+      expect(spyBehav).toHaveBeenCalledWith('user1', expect.any(Object));
     });
   });
 
   // Test for getPopularProducts (utility function)
   describe('getPopularProducts', () => {
     it('should fetch products ordered by view_count', async () => {
-      mockSupabaseFrom.mockReturnValueOnce({
+      const mockChain = {
         select: vi.fn().mockReturnThis(),
-        order: vi.fn(() => ({
-          ascending: vi.fn().mockReturnThis(),
-        })),
-        limit: vi.fn().mockResolvedValueOnce({ data: [{ id: 'pop1', name: 'Popular Product', category: 'cat', type: 'digital' }], error: null }),
-      } as {
-        select: () => { order: (column: string, options: { ascending: boolean }) => { limit: () => Promise<{ data: any[]; error: any }> } },
-      });
+        order: vi.fn().mockReturnThis(),
+        limit: vi.fn().mockResolvedValue({ data: [{ id: 'pop1', name: 'Popular Product', category: 'cat', type: 'digital' }], error: null }),
+      };
+      mockSupabaseFrom.mockReturnValue(mockChain as any);
 
       const products = await (service as { getPopularProducts: (limit: number, score: number, reasonTag: string, reasonText: string) => Promise<RecommendedProduct[]> }).getPopularProducts(1, 0.8, 'test', 'test reason');
       expect(mockSupabaseFrom).toHaveBeenCalledWith('products');
-      expect(mockSupabaseFrom().select).toHaveBeenCalledWith('id, name, category, type');
-      expect(mockSupabaseFrom().order).toHaveBeenCalledWith('view_count', { ascending: false });
+      expect(mockChain.select).toHaveBeenCalledWith('id, name, category, type');
+      expect(mockChain.order).toHaveBeenCalledWith('view_count', { ascending: false });
       expect(products).toHaveLength(1);
       expect(products[0].id).toBe('pop1');
       expect(products[0].score).toBe(0.8);

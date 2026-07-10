@@ -69,6 +69,7 @@ import { useStore } from '@/hooks/useStore';
 import {
   useAdvancedDashboards,
   useCreateAdvancedDashboard,
+  useUpdateAdvancedDashboard,
   useAnalyticsAlerts,
   useAnalyticsGoals,
   useCreateAnalyticsAlert,
@@ -81,27 +82,20 @@ import { useToast } from '@/hooks/use-toast';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function AnalyticsDashboardsManagement() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { toast } = useToast();
   const { store, loading: storeLoading } = useStore();
   const { user } = useAuth();
   const { data: dashboards = [], isLoading: dashboardsLoading } = useAdvancedDashboards(store?.id);
-  const { data: alerts = [] } = useAnalyticsAlerts(store?.id);
   const { data: goals = [] } = useAnalyticsGoals(store?.id);
   const createDashboard = useCreateAdvancedDashboard();
-  const createAlert = useCreateAnalyticsAlert();
-  const createGoal = useCreateAnalyticsGoal();
+  const updateDashboard = useUpdateAdvancedDashboard();
 
   // State
   const [searchQuery, setSearchQuery] = useState('');
@@ -109,7 +103,7 @@ export default function AnalyticsDashboardsManagement() {
   const [editingDashboardId, setEditingDashboardId] = useState<string | null>(null);
   const [deletingDashboardId, setDeletingDashboardId] = useState<string | null>(null);
   const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false);
-  const [isGoalDialogOpen, setIsGoalDialogOpen] = useState(false);
+  const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState<Partial<AdvancedAnalyticsDashboard>>({
@@ -160,12 +154,20 @@ export default function AnalyticsDashboardsManagement() {
     }
 
     try {
-      await createDashboard.mutateAsync({
-        ...formData,
-        store_id: store.id,
-        user_id: user.id,
-      });
+      if (editingDashboardId) {
+        await updateDashboard.mutateAsync({
+          id: editingDashboardId,
+          ...formData,
+        });
+      } else {
+        await createDashboard.mutateAsync({
+          ...formData,
+          store_id: store.id,
+          user_id: user.id,
+        });
+      }
       setIsCreateDialogOpen(false);
+      setEditingDashboardId(null);
       setFormData({
         name: '',
         description: '',
@@ -179,10 +181,10 @@ export default function AnalyticsDashboardsManagement() {
         widgets: [],
       });
     } catch (_error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage = _error instanceof Error ? _error.message : String(_error);
       toast({
         title: '❌ Erreur',
-        description: errorMessage || 'Impossible de créer le dashboard',
+        description: errorMessage || 'Impossible d\'enregistrer le dashboard',
         variant: 'destructive',
       });
     }
@@ -198,12 +200,13 @@ export default function AnalyticsDashboardsManagement() {
       if (error) throw error;
 
       setDeletingDashboardId(null);
+      queryClient.invalidateQueries({ queryKey: ['advanced-dashboards'] });
       toast({
         title: '✅ Dashboard supprimé',
         description: 'Le dashboard a été supprimé avec succès',
       });
     } catch (_error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage = _error instanceof Error ? _error.message : String(_error);
       toast({
         title: '❌ Erreur',
         description: errorMessage || 'Impossible de supprimer le dashboard',
@@ -227,12 +230,13 @@ export default function AnalyticsDashboardsManagement() {
         .update({ is_default: true })
         .eq('id', dashboardId);
 
+      queryClient.invalidateQueries({ queryKey: ['advanced-dashboards'] });
       toast({
         title: '✅ Dashboard par défaut',
         description: 'Le dashboard a été défini comme défaut',
       });
     } catch (_error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage = _error instanceof Error ? _error.message : String(_error);
       toast({
         title: '❌ Erreur',
         description: errorMessage || 'Impossible de définir le dashboard par défaut',
@@ -421,7 +425,7 @@ export default function AnalyticsDashboardsManagement() {
                             </SelectTrigger>
                             <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                               <SelectItem
-                                value="edit"
+                                value="view"
                                 onSelect={() => navigate(`/dashboard/analytics/${dashboard.id}`)}
                               >
                                 <Eye className="h-4 w-4 mr-2" />
@@ -429,7 +433,7 @@ export default function AnalyticsDashboardsManagement() {
                               </SelectItem>
                               {!dashboard.is_default && (
                                 <SelectItem
-                                  value="delete"
+                                  value="set_default"
                                   onSelect={() => handleSetDefault(dashboard.id)}
                                 >
                                   <Star className="h-4 w-4 mr-2" />
@@ -437,14 +441,28 @@ export default function AnalyticsDashboardsManagement() {
                                 </SelectItem>
                               )}
                               <SelectItem
-                                value="copy"
-                                onSelect={() => setEditingDashboardId(dashboard.id)}
+                                value="edit"
+                                onSelect={() => {
+                                  setEditingDashboardId(dashboard.id);
+                                  setFormData({
+                                    name: dashboard.name,
+                                    description: dashboard.description || '',
+                                    date_range_type: dashboard.date_range_type,
+                                    auto_refresh: dashboard.auto_refresh,
+                                    refresh_interval: dashboard.refresh_interval,
+                                    is_active: dashboard.is_active,
+                                    is_default: dashboard.is_default,
+                                    is_shared: dashboard.is_shared,
+                                    layout: dashboard.layout,
+                                    widgets: dashboard.widgets,
+                                  });
+                                }}
                               >
                                 <Edit className="h-4 w-4 mr-2" />
                                 Éditer
                               </SelectItem>
                               <SelectItem
-                                value="view"
+                                value="delete"
                                 onSelect={() => setDeletingDashboardId(dashboard.id)}
                                 className="text-red-600"
                               >

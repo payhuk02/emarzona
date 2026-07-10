@@ -11,6 +11,7 @@ export const CHATBOT_RESPONSES = {
   ORDER_FETCH_ERROR: "Je rencontre un problème pour accéder à vos commandes. Puis-je vous aider autrement ?",
   PRODUCT_SEARCH_ERROR: "Je rencontre un problème avec la recherche. Essayez de naviguer directement dans notre marketplace.",
   RECOMMENDATION_ERROR: "Découvrez nos produits populaires dans notre marketplace !",
+  CREATE_SUPPORT_TICKET_ACTION_LABEL: 'Créer un ticket support',
 
   // Messages d'accueil (gérés dans useAIChatbot.ts mais ici pour référence si besoin)
   WELCOME_MESSAGE: "👋 Bonjour ! Je suis votre assistant IA. Je peux vous aider avec vos commandes, recommandations de produits, informations de livraison, et bien plus encore. Que puis-je faire pour vous ?",
