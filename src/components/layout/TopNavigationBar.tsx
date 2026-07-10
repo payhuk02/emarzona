@@ -93,7 +93,7 @@ export const TopNavigationBar = () => {
     isNavItemActive(url, location.pathname, location.search, 'prefix');
 
   return (
-    <header className="app-premium-topnav fixed top-0 left-0 right-0 z-50 border-b shadow-sm overflow-visible">
+    <header className="app-premium-topnav fixed top-0 left-0 right-0 z-50 glass-header overflow-visible">
       <div className="mx-auto w-full max-w-[100vw] px-3 sm:px-4 lg:px-5">
         <div className="flex h-16 items-center gap-2 sm:gap-3 min-w-0 w-full">
           <div className="flex items-center gap-0.5 shrink-0">

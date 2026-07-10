@@ -125,12 +125,19 @@ function MegaMenuPanel({
   const isSidebar = variant === 'sidebar';
 
   if (domain.subgroups) {
+    const subgroupCount = domain.subgroups.length;
+    let gridClass = 'grid gap-3 p-3 ';
+    if (subgroupCount === 1) gridClass += 'grid-cols-1 w-[240px]';
+    else if (subgroupCount === 2) gridClass += 'grid-cols-2 w-[440px]';
+    else if (subgroupCount === 3) gridClass += 'grid-cols-3 w-[600px]';
+    else gridClass += 'md:grid-cols-2 lg:grid-cols-3 md:w-[600px] lg:w-[800px]';
+
     return (
       <div
         className={cn(
           isSidebar
             ? 'flex flex-col gap-5 px-1 py-1'
-            : 'grid gap-4 p-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:w-[760px] lg:w-[940px] xl:w-[1080px] max-h-[min(74vh,560px)] overflow-y-auto bg-background/80 backdrop-blur-2xl border border-white/10 shadow-2xl rounded-xl'
+            : `${gridClass} max-h-[min(74vh,560px)] overflow-y-auto bg-background/80 backdrop-blur-2xl border border-white/10 shadow-2xl rounded-xl`
         )}
       >
         {domain.subgroups.map(group => (
@@ -283,38 +290,52 @@ export function HorizontalContextNav() {
           aria-label={navAriaLabel}
         >
           <NavigationMenuList className="flex flex-wrap justify-start gap-0.5 py-1.5">
-            {domains.map(domain => (
-              <NavigationMenuItem key={domain.domainKey}>
-                {domain.items.length <= 1 && domain.rootPath ? (
-                  <NavigationMenuLink asChild>
-                    <NavLink
-                      to={domain.rootPath}
-                      className={cn(
-                        navigationMenuTriggerStyle(),
-                        'h-9 px-3 text-sm font-medium',
-                        domain.isActive && 'bg-primary/10 text-primary shadow-none'
-                      )}
-                    >
-                      {domain.shortLabel}
-                    </NavLink>
-                  </NavigationMenuLink>
-                ) : (
-                  <>
-                    <NavigationMenuTrigger
-                      className={cn(
-                        'h-9 bg-transparent px-3 text-sm font-medium data-[state=open]:bg-accent/50',
-                        domain.isActive && 'text-primary bg-primary/5'
-                      )}
-                    >
-                      {domain.shortLabel}
-                    </NavigationMenuTrigger>
-                    <NavigationMenuContent>
-                      <MegaMenuPanel domain={domain} onNavigate={handleNavigate} />
-                    </NavigationMenuContent>
-                  </>
-                )}
-              </NavigationMenuItem>
-            ))}
+            {domains.map((domain, index) => {
+              // Décalage manuel pour éviter que les menus ne chevauchent la sidebar à gauche ou ne sortent à droite
+              let offsetClass = '';
+              if (index === 0)
+                offsetClass = 'ml-[200px]'; // Produits
+              else if (index === 1)
+                offsetClass = 'ml-[120px]'; // Ventes
+              else if (index === 2)
+                offsetClass = 'ml-[40px]'; // Logistique
+              else if (index === domains.length - 3) offsetClass = '-ml-[40px]';
+              else if (index === domains.length - 2) offsetClass = '-ml-[120px]';
+              else if (index === domains.length - 1) offsetClass = '-ml-[200px]';
+
+              return (
+                <NavigationMenuItem key={domain.domainKey}>
+                  {domain.items.length <= 1 && domain.rootPath ? (
+                    <NavigationMenuLink asChild>
+                      <NavLink
+                        to={domain.rootPath}
+                        className={cn(
+                          navigationMenuTriggerStyle(),
+                          'h-9 px-3 text-sm font-medium',
+                          domain.isActive && 'bg-primary/10 text-primary shadow-none'
+                        )}
+                      >
+                        {domain.shortLabel}
+                      </NavLink>
+                    </NavigationMenuLink>
+                  ) : (
+                    <>
+                      <NavigationMenuTrigger
+                        className={cn(
+                          'h-9 bg-transparent px-3 text-sm font-medium data-[state=open]:bg-accent/50',
+                          domain.isActive && 'text-primary bg-primary/5'
+                        )}
+                      >
+                        {domain.shortLabel}
+                      </NavigationMenuTrigger>
+                      <NavigationMenuContent className={offsetClass}>
+                        <MegaMenuPanel domain={domain} onNavigate={handleNavigate} />
+                      </NavigationMenuContent>
+                    </>
+                  )}
+                </NavigationMenuItem>
+              );
+            })}
           </NavigationMenuList>
         </NavigationMenu>
       </div>

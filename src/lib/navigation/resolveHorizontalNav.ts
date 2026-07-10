@@ -184,9 +184,19 @@ function resolveSellerHorizontalNavDomains(
     const section = byKey.get(spec.sectionKey);
     if (!section || section.items.length === 0) continue;
 
-    const items = section.items.map(item =>
-      toLink(item, input.physicalPlanSlug, input.commerceType)
-    );
+    let items = section.items.map(item => toLink(item, input.physicalPlanSlug, input.commerceType));
+
+    // Si le domaine est partagé (comme ventes et logistique qui pointent vers ventes_logistique),
+    // on filtre les items pour ne garder que ceux déclarés dans leurs sous-groupes respectifs.
+    const subgroupDefs = HORIZONTAL_MEGA_SUBGROUPS[spec.domainKey];
+    if (subgroupDefs && spec.sectionKey === 'ventes_logistique') {
+      items = items.filter(item =>
+        subgroupDefs.some(
+          def => def.paths.includes(item.path) || def.paths.some(p => item.path.startsWith(`${p}/`))
+        )
+      );
+    }
+
     const isActive =
       items.some(item =>
         isSellerNavItemActive(item.url, input.pathname, input.search, 'prefix', input.commerceType)
@@ -213,7 +223,7 @@ function resolveSellerHorizontalNavDomains(
       shortLabel,
       label: section.label,
       items,
-      subgroups: buildSubgroups(spec.sectionKey, items, input.t, HORIZONTAL_MEGA_SUBGROUPS),
+      subgroups: buildSubgroups(spec.domainKey, items, input.t, HORIZONTAL_MEGA_SUBGROUPS),
       isActive,
     });
   }

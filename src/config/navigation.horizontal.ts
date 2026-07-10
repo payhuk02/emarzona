@@ -45,11 +45,18 @@ export const SELLER_HORIZONTAL_NAV_SECTIONS: HorizontalNavSectionSpec[] = [
     rootPath: '/dashboard/products',
   },
   {
-    domainKey: 'ventes_logistique',
+    domainKey: 'ventes',
     sectionKey: 'ventes_logistique',
     shortLabelKey: 'sidebar.chrome.sellerNavVentes',
     shortLabel: 'Ventes',
     rootPath: '/dashboard/orders',
+  },
+  {
+    domainKey: 'logistique',
+    sectionKey: 'ventes_logistique',
+    shortLabelKey: 'sidebar.chrome.sellerNavLogistique',
+    shortLabel: 'Logistique',
+    rootPath: '/dashboard/inventory',
   },
   {
     domainKey: 'finance_paiements',
@@ -149,7 +156,12 @@ export const BUYER_HORIZONTAL_NAV_SECTIONS: HorizontalNavSectionSpec[] = [
 export const HORIZONTAL_MEGA_SUBGROUPS: Partial<
   Record<string, Pick<ContextSidebarGroupConfig, 'groupKey' | 'defaultLabel' | 'paths'>[]>
 > = {
-  ventes_logistique: PHASE6_CONTEXT_CONFIGS.sales.groups,
+  ventes: PHASE6_CONTEXT_CONFIGS.sales.groups.filter(g =>
+    ['commandes_clients', 'services_reservations'].includes(g.groupKey)
+  ),
+  logistique: PHASE6_CONTEXT_CONFIGS.sales.groups.filter(g =>
+    ['logistique_inventaire', 'optimisation', 'produits_physiques'].includes(g.groupKey)
+  ),
   finance_paiements: [
     {
       groupKey: 'encaissements',

@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useDashboardStatsOptimized as useAdvancedDashboardStats } from '@/hooks/useDashboardStats';
 import { useStore } from '@/hooks/useStore';
+import { useNotifications, useMarkAsRead } from '@/hooks/useNotifications';
 import {
   AdvancedStatsCard,
   RevenueChart,
@@ -47,70 +48,54 @@ const AdvancedDashboard = () => {
   const navigate = useNavigate();
   const [lastUpdated, setLastUpdated] = useState(new Date().toISOString());
 
-  // Données simulées pour les notifications
-  const notifications = useMemo(
-    () => [
-      {
-        id: '1',
-        title: t('dashboard.notifications.newOrder'),
-        message: t('dashboard.notifications.newOrderMessage', {
-          orderNumber: 'ORD-20250121-0001',
-          amount: '25,000',
-        }),
-        type: 'success' as const,
-        timestamp: new Date().toISOString(),
-        read: false,
-      },
-      {
-        id: '2',
-        title: t('dashboard.notifications.outOfStock'),
-        message: t('dashboard.notifications.outOfStockMessage', {
-          productName: 'Formation Expert',
-        }),
-        type: 'warning' as const,
-        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-        read: false,
-      },
-      {
-        id: '3',
-        title: t('dashboard.notifications.paymentReceived'),
-        message: t('dashboard.notifications.paymentReceivedMessage', { amount: '15,000' }),
-        type: 'success' as const,
-        timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-        read: true,
-      },
-    ],
-    [t]
-  );
+  const { data: notificationsData } = useNotifications({ page: 1, pageSize: 5 });
+  const { mutate: markAsRead } = useMarkAsRead();
 
-  // Objectifs simulés
+  // Notifications dynamiques depuis la base de données
+  const notifications = useMemo(() => {
+    if (!notificationsData?.data) return [];
+    return notificationsData.data.map(n => ({
+      id: n.id,
+      title: n.title,
+      message: n.message,
+      type: (n.priority === 'high' || n.priority === 'urgent' ? 'warning' : 'info') as
+        | 'info'
+        | 'success'
+        | 'warning'
+        | 'error',
+      timestamp: n.created_at,
+      read: n.is_read,
+    }));
+  }, [notificationsData]);
+
+  // Objectifs dynamiques basés sur les statistiques actuelles (temporaire avant backend complet)
   const goals = useMemo(
     () => [
       {
         id: '1',
         title: t('dashboard.goals.monthlyRevenue'),
-        target: 500000,
+        target: stats.totalRevenue > 0 ? stats.totalRevenue * 1.2 : 500000,
         current: stats.totalRevenue,
         unit: 'FCFA',
-        deadline: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(),
+        deadline: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString(),
         color: 'primary',
       },
       {
         id: '2',
         title: t('dashboard.goals.newCustomers'),
-        target: 50,
+        target: stats.totalCustomers > 0 ? Math.floor(stats.totalCustomers * 1.5) : 50,
         current: stats.totalCustomers,
         unit: t('dashboard.goals.customersUnit'),
-        deadline: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
+        deadline: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString(),
         color: 'green',
       },
       {
         id: '3',
         title: t('dashboard.goals.productsSold'),
-        target: 100,
+        target: stats.totalOrders > 0 ? Math.floor(stats.totalOrders * 1.3) : 100,
         current: stats.totalOrders,
         unit: t('dashboard.goals.ordersUnit'),
-        deadline: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000).toISOString(),
+        deadline: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString(),
         color: 'blue',
       },
     ],
@@ -158,6 +143,7 @@ const AdvancedDashboard = () => {
 
   const handleMarkNotificationAsRead = (id: string) => {
     logger.debug('Marking notification as read', { notificationId: id });
+    markAsRead(id);
   };
 
   const handleViewAllNotifications = () => {

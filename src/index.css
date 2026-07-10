@@ -64,6 +64,8 @@ All colors MUST be HSL.
     --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     --shadow-large: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.3);
+    --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.08);
+    --shadow-float: 0 12px 36px -4px rgba(0, 0, 0, 0.12), 0 4px 12px -2px rgba(0, 0, 0, 0.08);
 
     --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 
@@ -116,6 +118,8 @@ All colors MUST be HSL.
     --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
     --shadow-large: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
     --shadow-glow: 0 0 30px rgba(59, 130, 246, 0.4);
+    --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    --shadow-float: 0 12px 36px -4px rgba(0, 0, 0, 0.5), 0 4px 12px -2px rgba(0, 0, 0, 0.4);
 
     /* Sidebar toujours en thème clair même en mode sombre */
     --sidebar-background: 0 0% 100%;
@@ -799,6 +803,39 @@ All colors MUST be HSL.
 
   .shadow-large {
     box-shadow: var(--shadow-large);
+  }
+
+  .shadow-glass {
+    box-shadow: var(--shadow-glass);
+  }
+
+  .shadow-float {
+    box-shadow: var(--shadow-float);
+  }
+
+  .glass-panel {
+    background: rgba(var(--background), 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(var(--border), 0.4);
+    box-shadow: var(--shadow-glass);
+  }
+
+  .glass-header {
+    background: rgba(var(--background), 0.65);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(var(--border), 0.3);
+  }
+
+  .hover-scale-premium {
+    transition:
+      transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .hover-scale-premium:hover {
+    transform: scale(1.02);
+    box-shadow: var(--shadow-float);
   }
 
   .shadow-glow {

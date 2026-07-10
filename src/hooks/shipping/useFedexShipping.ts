@@ -13,7 +13,7 @@ import type { FedexShipmentRequest, FedexRateRequest } from '@/services/fedex';
 import { useToast } from '@/hooks/use-toast';
 
 const SHIPPING_CARRIER_FIELDS =
-  'id, store_id, name, code, description, is_active, is_default, credentials, config, supports_tracking, supports_labels, supports_pickup, created_at, updated_at';
+  'id, store_id, name, code, is_active, api_enabled, supports_tracking, supports_labels, supports_pickup, created_at, updated_at';
 const SHIPMENT_FIELDS =
   'id, order_id, carrier_id, store_id, tracking_number, tracking_url, service_type, status, weight_value, shipping_cost, currency, ship_from, ship_to, estimated_delivery, actual_delivery, tracking_events, created_at, updated_at';
 const ORDER_FIELDS =

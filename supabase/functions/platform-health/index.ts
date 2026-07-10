@@ -30,7 +30,9 @@ async function probeSupabase(): Promise<ProbeResult> {
     };
   }
   try {
-    const res = await fetch(`${url}/rest/v1/`, {
+    // Utiliser une requête sur une table spécifique avec limit=1 au lieu de la racine (qui génère l'OpenAPI spec complet)
+    const res = await fetch(`${url}/rest/v1/platform_sla_checks?select=id&limit=1`, {
+      method: 'HEAD',
       headers: { apikey: key, Authorization: `Bearer ${key}` },
     });
     const latency = Date.now() - start;

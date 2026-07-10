@@ -227,7 +227,9 @@ export async function trackShipment(shipmentId: string): Promise<boolean> {
         carrier:shipping_carriers (
           id,
           name,
-          api_config
+          api_key,
+          api_secret,
+          api_endpoint
         )
       `
       )
@@ -246,7 +248,9 @@ export async function trackShipment(shipmentId: string): Promise<boolean> {
 
     const carrier = shipment.carrier as {
       name: string;
-      api_config?: Record<string, unknown>;
+      api_key?: string;
+      api_secret?: string;
+      api_endpoint?: string;
     } | null;
 
     if (!carrier) {
@@ -255,7 +259,11 @@ export async function trackShipment(shipmentId: string): Promise<boolean> {
     }
 
     // Obtenir l'adaptateur approprié
-    const adapter = getCarrierAdapter(carrier.name, carrier.api_config);
+    const adapter = getCarrierAdapter(carrier.name, {
+      api_key: carrier.api_key,
+      api_secret: carrier.api_secret,
+      api_endpoint: carrier.api_endpoint,
+    });
 
     if (!adapter) {
       logger.warn('No adapter for carrier', { carrierName: carrier.name, shipmentId });
@@ -263,7 +271,11 @@ export async function trackShipment(shipmentId: string): Promise<boolean> {
     }
 
     // Appeler l'API de tracking
-    const trackingResponse = await adapter.track(shipment.tracking_number, carrier.api_config);
+    const trackingResponse = await adapter.track(shipment.tracking_number, {
+      api_key: carrier.api_key,
+      api_secret: carrier.api_secret,
+      api_endpoint: carrier.api_endpoint,
+    });
 
     if (!trackingResponse.success) {
       logger.error('Tracking failed', {
@@ -307,7 +319,9 @@ export async function trackPendingShipments(): Promise<{ success: number; failed
         carrier:shipping_carriers (
           id,
           name,
-          api_config
+          api_key,
+          api_secret,
+          api_endpoint
         )
       `
       )
