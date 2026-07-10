@@ -103,7 +103,6 @@ export default function AnalyticsDashboardsManagement() {
   const [editingDashboardId, setEditingDashboardId] = useState<string | null>(null);
   const [deletingDashboardId, setDeletingDashboardId] = useState<string | null>(null);
   const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false);
-  const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState<Partial<AdvancedAnalyticsDashboard>>({

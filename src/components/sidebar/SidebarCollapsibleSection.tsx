@@ -52,7 +52,7 @@ export function SidebarCollapsibleSection({
       <div
         id={panelId}
         className={cn(
-          'app-sidebar-accordion grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]',
+          'app-sidebar-accordion grid transition-[grid-template-rows] duration-300 ease-out',
           isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
         )}
       >
