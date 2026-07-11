@@ -3,10 +3,16 @@
  * Bibliothèque de thèmes prédéfinis pour les boutiques
  */
 
+import type { StoreCommerceType } from '@/constants/store-commerce-types';
+import { parseStoreCommerceType } from '@/lib/billing/store-commerce-access';
+import { getStoreVerticalProfile } from '@/lib/commerce/store-vertical-config';
+
 export interface StoreThemeTemplate {
   id: string;
   name: string;
   description: string;
+  /** Commerce types for which this template is recommended (omit = all). */
+  recommendedFor?: readonly import('@/constants/store-commerce-types').StoreCommerceType[];
   preview: {
     primaryColor: string;
     secondaryColor: string;
@@ -48,11 +54,12 @@ export interface StoreThemeTemplate {
   };
 }
 
-export const STORE_THEME_TEMPLATES : StoreThemeTemplate[] = [
+export const STORE_THEME_TEMPLATES: StoreThemeTemplate[] = [
   {
     id: 'modern-blue',
     name: 'Bleu Moderne',
     description: 'Thème professionnel avec palette bleue moderne',
+    recommendedFor: ['physical', 'service', 'course'],
     preview: {
       primaryColor: '#3b82f6',
       secondaryColor: '#8b5cf6',
@@ -97,6 +104,7 @@ export const STORE_THEME_TEMPLATES : StoreThemeTemplate[] = [
     id: 'elegant-purple',
     name: 'Violet Élégant',
     description: 'Thème sophistiqué avec palette violette',
+    recommendedFor: ['course', 'artist', 'digital'],
     preview: {
       primaryColor: '#8b5cf6',
       secondaryColor: '#ec4899',
@@ -141,6 +149,7 @@ export const STORE_THEME_TEMPLATES : StoreThemeTemplate[] = [
     id: 'minimal-gray',
     name: 'Gris Minimaliste',
     description: 'Design épuré et minimaliste en nuances de gris',
+    recommendedFor: ['physical', 'service', 'artist'],
     preview: {
       primaryColor: '#374151',
       secondaryColor: '#6b7280',
@@ -185,6 +194,7 @@ export const STORE_THEME_TEMPLATES : StoreThemeTemplate[] = [
     id: 'vibrant-orange',
     name: 'Orange Vibrant',
     description: 'Thème énergique avec palette orange et rouge',
+    recommendedFor: ['physical'],
     preview: {
       primaryColor: '#f97316',
       secondaryColor: '#ef4444',
@@ -229,6 +239,7 @@ export const STORE_THEME_TEMPLATES : StoreThemeTemplate[] = [
     id: 'nature-green',
     name: 'Vert Nature',
     description: 'Thème apaisant avec palette verte naturelle',
+    recommendedFor: ['physical'],
     preview: {
       primaryColor: '#10b981',
       secondaryColor: '#059669',
@@ -273,6 +284,7 @@ export const STORE_THEME_TEMPLATES : StoreThemeTemplate[] = [
     id: 'dark-mode',
     name: 'Mode Sombre',
     description: 'Thème sombre moderne pour une expérience premium',
+    recommendedFor: ['digital', 'course', 'artist'],
     preview: {
       primaryColor: '#6366f1',
       secondaryColor: '#8b5cf6',
@@ -326,11 +338,19 @@ export function applyThemeTemplate(template: StoreThemeTemplate) {
   };
 }
 
+export function getThemeTemplateById(id: string): StoreThemeTemplate | undefined {
+  return STORE_THEME_TEMPLATES.find(t => t.id === id);
+}
 
-
-
-
-
-
-
-
+export function getRecommendedThemeTemplates(
+  commerceType?: StoreCommerceType | null
+): StoreThemeTemplate[] {
+  const type = parseStoreCommerceType(commerceType);
+  const profile = getStoreVerticalProfile(type);
+  const recommended = new Set(profile.recommendedThemeTemplateIds);
+  const byId = profile.recommendedThemeTemplateIds
+    .map(id => getThemeTemplateById(id))
+    .filter((t): t is StoreThemeTemplate => !!t);
+  const rest = STORE_THEME_TEMPLATES.filter(t => !recommended.has(t.id));
+  return [...byId, ...rest];
+}

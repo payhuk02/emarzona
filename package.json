@@ -164,6 +164,7 @@
     "issues:create:api": "powershell -ExecutionPolicy Bypass -File scripts/create-github-issues-api.ps1",
     "supabase:types": "npx supabase gen types typescript --project-id hbdnzajbyjakdhuavrvb --schema public > src/integrations/supabase/types.ts",
     "supabase:types:check": "npx supabase gen types typescript --project-id hbdnzajbyjakdhuavrvb --schema public",
+    "deploy:store-commerce-type-guard": "powershell -ExecutionPolicy Bypass -File scripts/deploy-store-commerce-type-guard.ps1",
     "icons:generate": "node scripts/generate-platform-icons.mjs",
     "audit:aria": "node scripts/audit-aria-labels.js",
     "audit:console": "node scripts/audit-console-logs.js",

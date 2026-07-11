@@ -8,6 +8,22 @@ import { sanitizeStorePayload } from '@/lib/store-payload-utils';
 import type { StoreCommerceType } from '@/constants/store-commerce-types';
 import type { Json } from '@/integrations/supabase/types';
 import { resolveStoreCommerceTypeFromStore } from '@/lib/commerce/store-capability-map';
+import { buildStoreCreateDefaults } from '@/lib/commerce/store-create-defaults';
+import { STORE_COMMERCE_TYPES } from '@/constants/store-commerce-types';
+
+export interface CreateStoreParams {
+  name: string;
+  commerce_type: StoreCommerceType;
+  description?: string;
+  slug?: string;
+}
+
+function assertValidCommerceType(value: unknown): StoreCommerceType {
+  if (typeof value === 'string' && (STORE_COMMERCE_TYPES as readonly string[]).includes(value)) {
+    return value as StoreCommerceType;
+  }
+  throw new Error('Le type de boutique (commerce_type) est obligatoire.');
+}
 
 const STORE_FIELDS =
   'id, user_id, name, slug, subdomain, description, default_currency, custom_domain, domain_status, domain_verification_token, domain_verified_at, domain_error_message, logo_url, banner_url, info_message, info_message_color, info_message_font, metadata, commerce_type, created_at, updated_at';
@@ -144,8 +160,6 @@ export const useStore = () => {
           .eq('user_id', user.id)
           .single();
 
-        console.log('useStore data:', data, 'error:', error);
-
         if (error) {
           logger.error('❌ [useStore] Erreur DB:', error);
           setStore(null);
@@ -173,9 +187,14 @@ export const useStore = () => {
     }
   }, [user?.id, selectedStoreId, contextStore?.id, toast]);
 
-  const createStore = async (name: string, description?: string) => {
+  const createStore = async (params: CreateStoreParams) => {
     try {
       if (!user) throw new Error('Non authentifié');
+
+      const name = params.name?.trim();
+      if (!name) throw new Error('Le nom de la boutique est requis');
+
+      const commerceType = assertValidCommerceType(params.commerce_type);
 
       // Vérifier la limite de 3 boutiques
       const { data: existingStores, error: checkError } = await supabase
@@ -199,7 +218,7 @@ export const useStore = () => {
         return false;
       }
 
-      const slug = generateSlug(name);
+      const slug = (params.slug?.trim() || generateSlug(name)).toLowerCase();
 
       // Vérifier disponibilité
       const isAvailable = await checkSlugAvailability(slug);
@@ -214,14 +233,20 @@ export const useStore = () => {
 
       // Le subdomain sera généré automatiquement par le trigger SQL
       // à partir du slug lors de l'insertion
+      const verticalDefaults = buildStoreCreateDefaults(commerceType);
       const { data, error } = await supabase
         .from('stores')
-        .insert({
-          user_id: user.id,
-          name,
-          slug,
-          description: description || null,
-        })
+        .insert(
+          sanitizeStorePayload({
+            ...verticalDefaults,
+            user_id: user.id,
+            name,
+            slug,
+            description: params.description?.trim() || null,
+            commerce_type: commerceType,
+            metadata: { commerce_type: commerceType },
+          })
+        )
         .select()
         .limit(1);
 

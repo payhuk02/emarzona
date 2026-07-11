@@ -111,6 +111,7 @@ const Settings = lazyPage(() => import('@/pages/Settings'));
 const CreateProduct = lazyPage(() => import('@/pages/CreateProduct'));
 const StorePhysicalBilling = lazyPage(() => import('@/pages/dashboard/StorePhysicalBilling'));
 const PhysicalStoreOnboarding = lazyPage(() => import('@/pages/dashboard/PhysicalStoreOnboarding'));
+const StoreVerticalOnboarding = lazyPage(() => import('@/pages/dashboard/StoreVerticalOnboarding'));
 const EditProduct = lazyPage(() => import('@/pages/EditProduct'));
 const KYC = lazyPage(() => import('@/pages/KYC'));
 const Referrals = lazyPage(() => import('@/pages/Referrals'));
@@ -322,6 +323,7 @@ export const dashboardRoutes = (
     {pr('/dashboard/products/new', CreateProduct)}
     {pr('/dashboard/products/new/:type', CreateProduct)}
     {pr('/dashboard/onboarding/physical-subscription', PhysicalStoreOnboarding)}
+    {pr('/dashboard/onboarding/store', StoreVerticalOnboarding)}
     {pr('/dashboard/billing/physical', StorePhysicalBilling)}
     {pr('/dashboard/products/:id/edit', EditProduct)}
 

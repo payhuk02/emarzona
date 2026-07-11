@@ -6,101 +6,19 @@
  * Inspiré de: CreatePhysicalProductWizard
  */
 
-import React, { useMemo, useCallback, useRef } from 'react';
+import React, { useMemo, useCallback, useRef, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import {
-  Info,
-  Palette,
-  MapPin,
-  Search,
-  FileText,
-  Globe,
-  MessageSquare,
-  BarChart3,
-  Truck,
-  Bell,
-  CheckCircle2,
-  AlertCircle,
-  Settings,
-} from 'lucide-react';
+import { CheckCircle2, AlertCircle, Settings, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import type { Store } from '@/hooks/useStores';
-
-// Configuration des étapes de personnalisation
-const STEPS = [
-  {
-    id: 1,
-    title: 'Informations',
-    description: 'Nom, description, contact',
-    icon: Info,
-    key: 'settings',
-  },
-  {
-    id: 2,
-    title: 'Apparence',
-    description: 'Logo, bannière, thème',
-    icon: Palette,
-    key: 'appearance',
-  },
-  {
-    id: 3,
-    title: 'Localisation',
-    description: 'Adresse, horaires',
-    icon: MapPin,
-    key: 'location',
-  },
-  {
-    id: 4,
-    title: 'SEO',
-    description: 'Référencement',
-    icon: Search,
-    key: 'seo',
-  },
-  {
-    id: 5,
-    title: 'Pages Légales',
-    description: 'CGV, confidentialité',
-    icon: FileText,
-    key: 'legal',
-  },
-  {
-    id: 6,
-    title: 'URL',
-    description: 'Domaine personnalisé',
-    icon: Globe,
-    key: 'url',
-  },
-  {
-    id: 7,
-    title: 'Marketing',
-    description: 'Contenu marketing',
-    icon: MessageSquare,
-    key: 'marketing',
-  },
-  {
-    id: 8,
-    title: 'Analytics',
-    description: 'Statistiques',
-    icon: BarChart3,
-    key: 'analytics',
-  },
-  {
-    id: 9,
-    title: 'Commerce',
-    description: 'Paramètres commerce',
-    icon: Truck,
-    key: 'commerce',
-  },
-  {
-    id: 10,
-    title: 'Notifications',
-    description: 'Alertes et notifications',
-    icon: Bell,
-    key: 'notifications',
-  },
-];
+import {
+  getStoreCustomizationSteps,
+  isStoreCustomizationTabVisible,
+  type StoreCustomizationStepKey,
+} from '@/lib/commerce/store-customization-steps';
+import { resolveStoreCommerceTypeFromStore } from '@/lib/commerce/store-capability-map';
 
 interface StoreCustomizationWizardProps {
   store: Store;
@@ -122,40 +40,42 @@ export const StoreCustomizationWizard = ({
   const headerRef = useScrollAnimation<HTMLDivElement>();
   const stepsRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const commerceType = resolveStoreCommerceTypeFromStore(store);
 
-  // Trouver l'étape actuelle basée sur currentTab
+  const steps = useMemo(() => getStoreCustomizationSteps(commerceType), [commerceType]);
+
   const currentStep = useMemo(() => {
     if (currentTab) {
-      const step = STEPS.find(s => s.key === currentTab);
+      const step = steps.find(s => s.key === currentTab);
       return step ? step.id : 1;
     }
     return 1;
-  }, [currentTab]);
+  }, [currentTab, steps]);
 
-  /**
-   * Navigation vers une étape
-   */
+  useEffect(() => {
+    if (!currentTab || !onTabChange) return;
+    if (!isStoreCustomizationTabVisible(currentTab as StoreCustomizationStepKey, commerceType)) {
+      onTabChange('settings');
+    }
+  }, [commerceType, currentTab, onTabChange]);
+
   const handleStepClick = useCallback(
     (stepId: number) => {
-      const step = STEPS.find(s => s.id === stepId);
+      const step = steps.find(s => s.id === stepId);
       if (step && onTabChange) {
         const isSameStep = currentStep === stepId;
 
-        // Changer d'onglet seulement si ce n'est pas la même étape
         if (!isSameStep) {
           onTabChange(step.key);
         }
 
-        // Scroller vers le contenu de l'étape (en bas) avec offset pour le header
-        // Utiliser requestAnimationFrame pour une meilleure performance
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
             if (contentRef.current) {
-              const headerOffset = 80; // Offset pour le header fixe
+              const headerOffset = 80;
               const elementPosition = contentRef.current.getBoundingClientRect().top;
               const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
 
-              // Vérifier si l'élément est déjà visible pour éviter les scrolls inutiles
               const isVisible =
                 elementPosition >= headerOffset && elementPosition <= window.innerHeight - 100;
 
@@ -170,20 +90,17 @@ export const StoreCustomizationWizard = ({
         });
       }
     },
-    [onTabChange, currentStep]
+    [onTabChange, currentStep, steps]
   );
 
-  /**
-   * Calcul du progrès
-   */
-  const progress = useMemo(() => (currentStep / STEPS.length) * 100, [currentStep]);
+  const progress = useMemo(
+    () => (steps.length > 0 ? (currentStep / steps.length) * 100 : 0),
+    [currentStep, steps.length]
+  );
 
-  /**
-   * Vérifier si une étape est complétée (basé sur les données de la boutique)
-   */
   const isStepCompleted = useCallback(
     (stepId: number): boolean => {
-      const step = STEPS.find(s => s.id === stepId);
+      const step = steps.find(s => s.id === stepId);
       if (!step) return false;
 
       switch (step.key) {
@@ -204,28 +121,22 @@ export const StoreCustomizationWizard = ({
         case 'analytics':
           return !!(store.google_analytics_id || store.facebook_pixel_id);
         case 'commerce':
-          return true; // Toujours disponible
+          return !!(store.free_shipping_threshold != null || store.minimum_order_amount != null);
         case 'notifications':
-          return true; // Toujours disponible
+          return true;
         default:
           return false;
       }
     },
-    [store]
+    [store, steps]
   );
 
-  /**
-   * Vérifier si une étape a des erreurs
-   */
-  const hasStepErrors = useCallback((): boolean => {
-    // Pour l'instant, pas de validation d'erreurs
-    // Peut être étendu plus tard
-    return false;
-  }, []);
+  const hasStepErrors = useCallback((): boolean => false, []);
+
+  const activeStep = steps[currentStep - 1];
 
   return (
     <div className={cn('w-full space-y-4 sm:space-y-6', className)}>
-      {/* Header avec progression */}
       <div ref={headerRef} className="animate-in fade-in slide-in-from-top-4 duration-700">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
           <div className="flex items-center gap-2 sm:gap-3">
@@ -240,17 +151,16 @@ export const StoreCustomizationWizard = ({
                 Personnalisation de la boutique
               </h2>
               <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">
-                Configurez tous les aspects de votre boutique en ligne
+                Configurez les paramètres adaptés à votre type de boutique
               </p>
             </div>
           </div>
         </div>
 
-        {/* Progress Bar */}
         <div className="space-y-2">
           <div className="flex items-center justify-between text-xs sm:text-sm">
             <span className="font-medium">
-              Étape {currentStep} sur {STEPS.length}
+              Étape {currentStep} sur {steps.length}
             </span>
             <span className="text-muted-foreground">{Math.round(progress)}% complété</span>
           </div>
@@ -258,14 +168,13 @@ export const StoreCustomizationWizard = ({
         </div>
       </div>
 
-      {/* Steps Indicator - Grille de cartes */}
       <Card
         ref={stepsRef}
         className="border-border/50 bg-card/50 backdrop-blur-sm shadow-lg animate-in fade-in slide-in-from-bottom-4 duration-700"
       >
         <CardContent className="p-3 sm:p-4 lg:p-6">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3">
-            {STEPS.map((step, index) => {
+            {steps.map((step, index) => {
               const Icon = step.icon;
               const isActive = currentStep === step.id;
               const isCompleted = isStepCompleted(step.id);
@@ -273,7 +182,7 @@ export const StoreCustomizationWizard = ({
 
               return (
                 <button
-                  key={step.id}
+                  key={step.key}
                   onClick={() => handleStepClick(step.id)}
                   role="tab"
                   aria-selected={isActive}
@@ -342,7 +251,6 @@ export const StoreCustomizationWizard = ({
         </CardContent>
       </Card>
 
-      {/* Contenu de l'étape actuelle */}
       <Card
         ref={contentRef}
         className="border-border/50 bg-card/50 backdrop-blur-sm shadow-lg animate-in fade-in slide-in-from-bottom-4 duration-500"
@@ -350,13 +258,13 @@ export const StoreCustomizationWizard = ({
       >
         <CardHeader className="p-3 sm:p-4 lg:p-6">
           <CardTitle className="flex items-center gap-2 sm:gap-3 text-base sm:text-lg lg:text-xl">
-            {React.createElement(STEPS[currentStep - 1]?.icon || Info, {
+            {React.createElement(activeStep?.icon || Info, {
               className: 'h-4 w-4 sm:h-5 sm:w-5',
             })}
-            {STEPS[currentStep - 1]?.title || 'Informations'}
+            {activeStep?.title || 'Informations'}
           </CardTitle>
           <CardDescription className="text-xs sm:text-sm flex items-center gap-2">
-            {STEPS[currentStep - 1]?.description || 'Configurez les paramètres de base'}
+            {activeStep?.description || 'Configurez les paramètres de base'}
           </CardDescription>
         </CardHeader>
         <CardContent className="p-3 sm:p-4 lg:p-6 pt-0">
@@ -366,9 +274,3 @@ export const StoreCustomizationWizard = ({
     </div>
   );
 };
-
-
-
-
-
-

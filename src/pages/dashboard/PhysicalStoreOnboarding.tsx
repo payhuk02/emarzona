@@ -5,9 +5,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Gift, Rocket, Sparkles } from 'lucide-react';
+import { StoreOnboardingChecklist } from '@/components/store/StoreOnboardingChecklist';
 import { PHYSICAL_TRIAL_DAYS } from '@/hooks/billing/useStorePhysicalAccess';
 import { useStore } from '@/hooks/useStore';
 import { useAnalytics } from '@/hooks/useAnalytics';
+import { getStoreOnboardingSteps } from '@/lib/commerce/store-vertical-config';
 
 const PhysicalStoreOnboarding = () => {
   const navigate = useNavigate();
@@ -20,6 +22,11 @@ const PhysicalStoreOnboarding = () => {
     [storeIdFromQuery, store?.id]
   );
   const { trackEvent } = useAnalytics(analyticsStoreId);
+
+  const onboardingSteps = useMemo(
+    () => (analyticsStoreId ? getStoreOnboardingSteps('physical', analyticsStoreId) : []),
+    [analyticsStoreId]
+  );
 
   useEffect(() => {
     if (!analyticsStoreId || seenTrackedRef.current) {
@@ -56,6 +63,14 @@ const PhysicalStoreOnboarding = () => {
           </CardHeader>
 
           <CardContent className="space-y-4">
+            {onboardingSteps.length > 0 && (
+              <StoreOnboardingChecklist
+                steps={onboardingSteps}
+                title="Configurez votre boutique physique"
+                description="Essai gratuit actif"
+              />
+            )}
+
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="rounded-lg border bg-muted/20 p-3">
                 <p className="text-sm font-medium flex items-center gap-2">

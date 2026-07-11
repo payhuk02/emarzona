@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useQueries } from '@tanstack/react-query';
 import { useStores } from '@/hooks/useStores';
 import { useStoreContext } from '@/contexts/StoreContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -48,6 +49,10 @@ import {
   STORE_COMMERCE_TYPE_LABELS,
   type StoreCommerceType,
 } from '@/constants/store-commerce-types';
+import type { StoreCommerceTypeChangeStatus } from '@/hooks/useStoreCommerceTypeGuard';
+import { supabase } from '@/integrations/supabase/client';
+import { parseStoreCommerceType } from '@/lib/billing/store-commerce-access';
+import { getStoreOnboardingPath } from '@/lib/commerce/store-vertical-config';
 
 export const StoreSettings = ({ action }: { action?: string | null }) => {
   const {
@@ -84,6 +89,39 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
   } | null>(null);
   const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
 
+  const commerceTypeGuardQueries = useQueries({
+    queries: stores.map(store => ({
+      queryKey: ['store-commerce-type-guard', store.id],
+      queryFn: async (): Promise<StoreCommerceTypeChangeStatus> => {
+        const { data, error } = await supabase.rpc('store_commerce_type_change_status', {
+          p_store_id: store.id,
+        });
+        if (error) throw error;
+        const row = data as Record<string, unknown> | null;
+        return {
+          can_change: row?.can_change === true,
+          product_count:
+            typeof row?.product_count === 'number'
+              ? row.product_count
+              : Number(row?.product_count ?? 0),
+          current_type: parseStoreCommerceType(row?.current_type),
+        };
+      },
+      staleTime: 30_000,
+    })),
+  });
+
+  const commerceTypeGuardByStoreId = useMemo(() => {
+    const map: Record<string, StoreCommerceTypeChangeStatus> = {};
+    stores.forEach((store, index) => {
+      const status = commerceTypeGuardQueries[index]?.data;
+      if (status) {
+        map[store.id] = status;
+      }
+    });
+    return map;
+  }, [stores, commerceTypeGuardQueries]);
+
   // Sélectionner la première boutique par défaut
   useEffect(() => {
     if (stores.length > 0 && !selectedStore) {
@@ -109,6 +147,17 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
     to: StoreCommerceType
   ) => {
     if (from === to) return;
+
+    const guard = commerceTypeGuardByStoreId[storeId];
+    if (guard && !guard.can_change) {
+      toast({
+        title: 'Changement impossible',
+        description: `Cette boutique contient ${guard.product_count} produit(s). Le type ne peut plus être modifié.`,
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setPendingCommerceChange({ storeId, storeName, from, to });
   };
 
@@ -139,9 +188,7 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
         description: `Votre boutique est maintenant de type « ${STORE_COMMERCE_TYPE_LABELS[to]} ». Le menu vendeur a été adapté.`,
       });
       if (to === 'physical') {
-        navigate(
-          `/dashboard/onboarding/physical-subscription?storeId=${encodeURIComponent(storeId)}`
-        );
+        navigate(getStoreOnboardingPath(storeId, 'physical'));
       }
     } catch (error) {
       logger.error('Erreur lors du changement de type de boutique', { error });
@@ -178,10 +225,7 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
       // Rafraîchir le contexte pour mettre à jour la liste
       await refreshStores();
 
-      const targetPath =
-        newStoreData.commerceType === 'physical'
-          ? `/dashboard/onboarding/physical-subscription?storeId=${encodeURIComponent(createdStore.id)}`
-          : '/dashboard';
+      const targetPath = getStoreOnboardingPath(createdStore.id, newStoreData.commerceType);
 
       setNewStoreData({ name: '', description: '', slug: '', commerceType: 'physical' });
       setIsCreating(false);
@@ -430,54 +474,68 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
                     </div>
                   </CardHeader>
                   <CardContent className="pt-0 border-t">
-                    <div className="flex flex-col sm:flex-row sm:items-end gap-3 pt-4">
-                      <div className="flex-1 space-y-2">
-                        <Label htmlFor={`commerce_type_${store.id}`}>Type de boutique</Label>
-                        <Select
-                          value={commerceTypeDraft[store.id] ?? store.commerce_type ?? 'physical'}
-                          onValueChange={value =>
-                            handleCommerceTypeDraftChange(store.id, value as StoreCommerceType)
-                          }
-                        >
-                          <SelectTrigger id={`commerce_type_${store.id}`}>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {Object.entries(STORE_COMMERCE_TYPE_LABELS).map(([value, label]) => (
-                              <SelectItem key={value} value={value}>
-                                {label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <p className="text-xs text-muted-foreground">
-                          Modifier le type adapte les menus vendeur (sidebar, navbar) et les modules
-                          accessibles. Les produits existants ne sont pas supprimés.
-                        </p>
-                      </div>
-                      <Button
-                        variant="secondary"
-                        disabled={
-                          saving ||
-                          (commerceTypeDraft[store.id] ?? store.commerce_type ?? 'physical') ===
-                            (store.commerce_type ?? 'physical')
-                        }
-                        onClick={() =>
-                          handleRequestCommerceTypeChange(
-                            store.id,
-                            store.name,
-                            store.commerce_type ?? 'physical',
-                            commerceTypeDraft[store.id] ?? store.commerce_type ?? 'physical'
-                          )
-                        }
-                      >
-                        {saving ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          'Appliquer le type'
-                        )}
-                      </Button>
-                    </div>
+                    {(() => {
+                      const guard = commerceTypeGuardByStoreId[store.id];
+                      const typeLocked = guard?.can_change === false;
+                      const productCount = guard?.product_count ?? 0;
+                      return (
+                        <div className="flex flex-col sm:flex-row sm:items-end gap-3 pt-4">
+                          <div className="flex-1 space-y-2">
+                            <Label htmlFor={`commerce_type_${store.id}`}>Type de boutique</Label>
+                            <Select
+                              value={
+                                commerceTypeDraft[store.id] ?? store.commerce_type ?? 'physical'
+                              }
+                              onValueChange={value =>
+                                handleCommerceTypeDraftChange(store.id, value as StoreCommerceType)
+                              }
+                              disabled={typeLocked}
+                            >
+                              <SelectTrigger id={`commerce_type_${store.id}`}>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {Object.entries(STORE_COMMERCE_TYPE_LABELS).map(
+                                  ([value, label]) => (
+                                    <SelectItem key={value} value={value}>
+                                      {label}
+                                    </SelectItem>
+                                  )
+                                )}
+                              </SelectContent>
+                            </Select>
+                            <p className="text-xs text-muted-foreground">
+                              {typeLocked
+                                ? `Type verrouillé : ${productCount} produit(s) en catalogue. Créez une nouvelle boutique pour changer de vertical.`
+                                : 'Le type adapte les menus vendeur. Il sera verrouillé après publication du premier produit.'}
+                            </p>
+                          </div>
+                          <Button
+                            variant="secondary"
+                            disabled={
+                              saving ||
+                              typeLocked ||
+                              (commerceTypeDraft[store.id] ?? store.commerce_type ?? 'physical') ===
+                                (store.commerce_type ?? 'physical')
+                            }
+                            onClick={() =>
+                              handleRequestCommerceTypeChange(
+                                store.id,
+                                store.name,
+                                store.commerce_type ?? 'physical',
+                                commerceTypeDraft[store.id] ?? store.commerce_type ?? 'physical'
+                              )
+                            }
+                          >
+                            {saving ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              'Appliquer le type'
+                            )}
+                          </Button>
+                        </div>
+                      );
+                    })()}
                   </CardContent>
                 </Card>
               ))}
@@ -625,8 +683,8 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
                   La boutique « {pendingCommerceChange.storeName} » passera de{' '}
                   <strong>{STORE_COMMERCE_TYPE_LABELS[pendingCommerceChange.from]}</strong> à{' '}
                   <strong>{STORE_COMMERCE_TYPE_LABELS[pendingCommerceChange.to]}</strong>. Les menus
-                  vendeur (sidebar, navbar horizontale) et les routes dashboard seront filtrés en
-                  conséquence. Vos produits et commandes existants sont conservés.
+                  vendeur seront adaptés au nouveau type. Cette action n&apos;est possible que tant
+                  qu&apos;aucun produit n&apos;est publié dans la boutique.
                   {pendingCommerceChange.to === 'physical' ? (
                     <>
                       {' '}

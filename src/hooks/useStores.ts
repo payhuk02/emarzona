@@ -5,7 +5,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
 import type { Database } from '@/integrations/supabase/types';
 import type { StoreCommerceType } from '@/constants/store-commerce-types';
+import { STORE_COMMERCE_TYPES } from '@/constants/store-commerce-types';
 import { resolveStoreCommerceTypeFromStore } from '@/lib/commerce/store-capability-map';
+import { buildStoreCreateDefaults } from '@/lib/commerce/store-create-defaults';
 
 type StoreInsert = Database['public']['Tables']['stores']['Insert'];
 type StoreUpdate = Database['public']['Tables']['stores']['Update'];
@@ -195,6 +197,13 @@ export interface Store {
 
 const MAX_STORES_PER_USER = 3;
 
+function assertCreateStoreCommerceType(value: unknown): StoreCommerceType {
+  if (typeof value === 'string' && (STORE_COMMERCE_TYPES as readonly string[]).includes(value)) {
+    return value as StoreCommerceType;
+  }
+  throw new Error('Le type de boutique (commerce_type) est obligatoire.');
+}
+
 // Hook optimisé avec React Query cache
 export const useStores = () => {
   const { toast } = useToast();
@@ -278,11 +287,21 @@ export const useStores = () => {
         throw new Error(`Limite de ${MAX_STORES_PER_USER} boutiques atteinte.`);
       }
 
+      const commerceType = assertCreateStoreCommerceType(storeData.commerce_type);
+      const verticalDefaults = buildStoreCreateDefaults(commerceType);
+      const metadata =
+        storeData.metadata && typeof storeData.metadata === 'object'
+          ? { ...(storeData.metadata as Record<string, unknown>), commerce_type: commerceType }
+          : { commerce_type: commerceType };
+
       const { data, error } = await supabase
         .from('stores')
         .insert([
           {
+            ...verticalDefaults,
             ...storeData,
+            commerce_type: commerceType,
+            metadata,
             user_id: authUser.id,
             is_active: true,
           } as unknown as StoreInsert,
@@ -316,6 +335,30 @@ export const useStores = () => {
   // Mutation pour mettre à jour une boutique
   const updateStoreMutation = useMutation({
     mutationFn: async ({ storeId, updates }: { storeId: string; updates: Partial<Store> }) => {
+      if (updates.commerce_type !== undefined) {
+        const nextType = assertCreateStoreCommerceType(updates.commerce_type);
+        const { data: status, error: statusError } = await supabase.rpc(
+          'store_commerce_type_change_status',
+          { p_store_id: storeId }
+        );
+        if (statusError) throw statusError;
+        const canChange = (status as { can_change?: boolean } | null)?.can_change === true;
+        if (!canChange) {
+          const count = (status as { product_count?: number } | null)?.product_count ?? 0;
+          throw new Error(
+            `Impossible de changer le type : ${count} produit(s) déjà publié(s) dans cette boutique.`
+          );
+        }
+        updates = {
+          ...updates,
+          commerce_type: nextType,
+          metadata: {
+            ...((updates.metadata as Record<string, unknown> | undefined) ?? {}),
+            commerce_type: nextType,
+          },
+        };
+      }
+
       const { data, error } = await supabase
         .from('stores')
         .update(updates as unknown as StoreUpdate)

@@ -52,6 +52,11 @@ import {
   STORE_COMMERCE_TYPE_LABELS,
   type StoreCommerceType,
 } from '@/constants/store-commerce-types';
+import { resolveStoreCommerceTypeFromStore } from '@/lib/commerce/store-capability-map';
+import { useStoreCommerceTypeGuard } from '@/hooks/useStoreCommerceTypeGuard';
+import { buildStoreCreateDefaults } from '@/lib/commerce/store-create-defaults';
+import { getStoreOnboardingPath } from '@/lib/commerce/store-vertical-config';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface StoreFormProps {
   onSuccess: () => void;
@@ -246,8 +251,12 @@ const StoreForm = ({
   const [customScriptsEnabled, setCustomScriptsEnabled] = useState(
     initialData?.custom_scripts_enabled || false
   );
-  const [commerceType, setCommerceType] = useState<StoreCommerceType>(
-    (initialData?.metadata?.commerce_type as StoreCommerceType | undefined) || 'physical'
+  const [commerceType, setCommerceType] = useState<StoreCommerceType>(() =>
+    initialData
+      ? resolveStoreCommerceTypeFromStore(
+          initialData as { commerce_type?: unknown; metadata?: Record<string, unknown> | null }
+        )
+      : 'physical'
   );
 
   // Phase 1 - Thème et couleurs
@@ -351,6 +360,10 @@ const StoreForm = ({
   const navigate = useNavigate();
   const { refreshStores } = useStoreContext();
   const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
+  const isEditing = Boolean(initialData?.id);
+  const { data: commerceTypeGuard } = useStoreCommerceTypeGuard(initialData?.id);
+  const commerceTypeLocked = isEditing && commerceTypeGuard?.can_change === false;
+  const catalogProductCount = commerceTypeGuard?.product_count ?? 0;
 
   const checkSlugAvailability = useCallback(
     async (slugToCheck: string) => {
@@ -701,11 +714,15 @@ const StoreForm = ({
             tiktok_pixel_enabled: tiktokPixelEnabled,
             custom_tracking_scripts: customTrackingScripts.trim() || null,
             custom_scripts_enabled: customScriptsEnabled,
-            commerce_type: commerceType,
-            metadata: {
-              ...(initialData?.metadata ?? {}),
-              commerce_type: commerceType,
-            },
+            ...(commerceTypeLocked
+              ? {}
+              : {
+                  commerce_type: commerceType,
+                  metadata: {
+                    ...(initialData?.metadata ?? {}),
+                    commerce_type: commerceType,
+                  },
+                }),
           };
 
           const updateData = sanitizeStorePayload(rawUpdateData);
@@ -832,6 +849,7 @@ const StoreForm = ({
             [key: string]: unknown;
           }
           const rawInsertData: StoreInsertData = {
+            ...buildStoreCreateDefaults(commerceType),
             user_id: user.id,
             name,
             slug,
@@ -958,10 +976,7 @@ const StoreForm = ({
           // Rafraîchir la liste des boutiques et sélectionner la nouvelle
           await refreshStores();
           // La nouvelle boutique sera automatiquement sélectionnée par le contexte
-          const redirectTarget =
-            commerceType === 'physical'
-              ? `/dashboard/onboarding/physical-subscription?storeId=${encodeURIComponent(createdStore.id)}`
-              : '/dashboard';
+          const redirectTarget = getStoreOnboardingPath(createdStore.id, commerceType);
           navigate(redirectTarget, { replace: true });
         }
 
@@ -1166,6 +1181,7 @@ const StoreForm = ({
                 <Select
                   value={commerceType}
                   onValueChange={value => setCommerceType(value as StoreCommerceType)}
+                  disabled={commerceTypeLocked}
                 >
                   <SelectTrigger id="commerce_type">
                     <SelectValue placeholder="Choisir un type de boutique" />
@@ -1178,9 +1194,22 @@ const StoreForm = ({
                     ))}
                   </SelectContent>
                 </Select>
-                <p className="text-xs text-muted-foreground">
-                  L&apos;abonnement est requis uniquement pour le type Produits physiques.
-                </p>
+                {commerceTypeLocked ? (
+                  <Alert>
+                    <AlertDescription>
+                      Le type de boutique est verrouillé car {catalogProductCount} produit
+                      {catalogProductCount > 1 ? 's sont' : ' est'} déjà publié
+                      {catalogProductCount > 1 ? 's' : ''}. Créez une nouvelle boutique pour changer
+                      de vertical.
+                    </AlertDescription>
+                  </Alert>
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    {isEditing
+                      ? 'Le type ne pourra plus être modifié après publication du premier produit.'
+                      : "L'abonnement est requis uniquement pour le type Produits physiques."}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
