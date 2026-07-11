@@ -76,7 +76,7 @@ export default function SharedWishlist() {
         navigate(`/courses/${product.id}`);
         break;
       default:
-        navigate(`/marketplace/${storeSlug}/${product.slug}`);
+        navigate(`/marketplace/${storeSlug}/${product.slug || product.id}`);
     }
   };
 
@@ -86,7 +86,7 @@ export default function SharedWishlist() {
         <div className="container mx-auto px-4 py-8 max-w-7xl">
           <Skeleton className="h-10 w-64 mb-6" />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
+            {[1, 2, 3].map(i => (
               <Skeleton key={i} className="h-96" />
             ))}
           </div>
@@ -130,9 +130,7 @@ export default function SharedWishlist() {
         {products.length === 0 ? (
           <Alert>
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              Cette wishlist est vide
-            </AlertDescription>
+            <AlertDescription>Cette wishlist est vide</AlertDescription>
           </Alert>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -145,14 +143,11 @@ export default function SharedWishlist() {
                       src={product.image_url || '/placeholder-product.png'}
                       alt={product.name}
                       className="w-full h-48 object-cover rounded-t-lg"
-                      onError={(e) => {
+                      onError={e => {
                         (e.target as HTMLImageElement).src = '/placeholder-product.png';
                       }}
                     />
-                    <Badge
-                      className="absolute top-2 left-2"
-                      variant="secondary"
-                    >
+                    <Badge className="absolute top-2 left-2" variant="secondary">
                       {getProductTypeIcon(product.product_type)}
                       <span className="ml-1 capitalize">{product.product_type}</span>
                     </Badge>
@@ -185,10 +180,7 @@ export default function SharedWishlist() {
                         </span>
                       )}
                     </div>
-                    <Button
-                      className="w-full"
-                      onClick={() => handleViewProduct(product)}
-                    >
+                    <Button className="w-full" onClick={() => handleViewProduct(product)}>
                       <ShoppingCart className="h-4 w-4 mr-2" />
                       Voir le produit
                     </Button>
@@ -202,10 +194,3 @@ export default function SharedWishlist() {
     </div>
   );
 }
-
-
-
-
-
-
-

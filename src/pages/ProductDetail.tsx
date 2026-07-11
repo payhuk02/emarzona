@@ -300,7 +300,8 @@ const ProductDetails = () => {
 
   // Calculs et hooks AVANT les early returns
   const productUrl = useMemo(
-    () => (product && store ? generateProductUrl(store.slug, product.slug, store.subdomain) : ''),
+    () =>
+      product && store ? generateProductUrl(store.slug, product.slug || '', store.subdomain) : '',
     [product, store]
   );
 
@@ -673,7 +674,7 @@ const ProductDetails = () => {
                         {/* ✅ Alignée en haut au même niveau que le titre */}
                         <div className="relative w-full aspect-[3/2] overflow-hidden bg-muted/30 border-2 border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-300 group">
                           <Link
-                            to={generateProductUrl(store.slug, product.slug, store.subdomain)}
+                            to={generateProductUrl(store.slug, product.slug || '', store.subdomain)}
                             className="block w-full h-full"
                           >
                             {currentImage && (
@@ -904,7 +905,7 @@ const ProductDetails = () => {
                           </p>
                         )}
                         <Link
-                          to={`/products/${product.paid_product.slug}`}
+                          to={`/products/${product.paid_product?.slug || product.paid_product?.id}`}
                           className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-colors font-medium text-xs sm:text-sm touch-manipulation min-h-[44px] w-full sm:w-auto justify-center sm:justify-start"
                         >
                           <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
@@ -939,7 +940,7 @@ const ProductDetails = () => {
                           version complète.
                         </p>
                         <Link
-                          to={`/products/${product.free_product.slug}`}
+                          to={`/products/${product.free_product?.slug || product.free_product?.id}`}
                           className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 transition-colors font-medium text-xs sm:text-sm touch-manipulation min-h-[44px] w-full sm:w-auto justify-center sm:justify-start"
                         >
                           <Gift className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />

@@ -262,7 +262,7 @@ const Storefront = () => {
       return {
         id: product.id,
         name: product.name,
-        url: generateProductUrl(store.slug, product.slug, store.subdomain),
+        url: generateProductUrl(store.slug, product.slug || '', store.subdomain),
         image: product.image_url || undefined,
         description: productExtras.short_description || product.description || undefined,
         price: productExtras.promotional_price || product.price || undefined,

@@ -391,7 +391,7 @@ export const checkAndSendPriceDropNotifications = async (): Promise<{
         userName: (user.user_metadata?.full_name as string) || user.email,
         productId: alert.product_id,
         productName: product.name,
-        productSlug: product.slug,
+        productSlug: product.slug || product.id,
         oldPrice: Number(alert.old_price),
         newPrice: Number(alert.new_price),
         priceDropPercentage: Number(alert.price_drop_percentage),
@@ -490,7 +490,7 @@ export const checkAndSendLicenseExpiringNotifications = async (): Promise<{
           licenseId: license.id,
           productId: license.product_id,
           productName: product.name,
-          productSlug: product.slug,
+          productSlug: product.slug || product.id,
           expiresAt: license.expires_at,
           daysUntilExpiry,
         });

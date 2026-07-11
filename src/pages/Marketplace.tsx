@@ -509,7 +509,7 @@ const Marketplace = () => {
       name: product.name,
       url: generateProductUrl(
         product.stores?.slug || 'default',
-        product.slug,
+        product.slug || product.id,
         product.stores?.subdomain
       ),
       image: product.image_url || undefined,

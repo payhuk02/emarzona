@@ -216,6 +216,7 @@ const convertToFormData = async (
     .single();
 
   if (productError) throw productError;
+  if (!product) throw new Error('Produit non trouvé');
 
   // 🚀 PERFORMANCE: Requêtes parallèles produit physique + affiliation
   const [{ data: physicalProduct, error: physicalError }, { data: affiliateSettings }] =

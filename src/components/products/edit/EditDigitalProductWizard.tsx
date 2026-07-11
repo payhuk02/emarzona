@@ -145,6 +145,7 @@ const convertToFormData = async (
     .single();
 
   if (productError) throw productError;
+  if (!product) throw new Error('Produit non trouvé');
 
   // 🚀 PERFORMANCE: Requêtes parallèles pour les données liées
   const [{ data: digitalProduct, error: digitalError }, { data: affiliateSettings }] =

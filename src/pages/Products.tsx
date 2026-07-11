@@ -424,7 +424,7 @@ const Products = () => {
 
         // Créer le nouveau produit dupliqué via useProductManagement
         const timestamp = Date.now();
-        const newSlug = `${product.slug}-copie-${timestamp}`;
+        const newSlug = `${product.slug || product.id}-copie-${timestamp}`;
 
         const success = await createProduct({
           name: `${product.name} (copie)`,
@@ -512,7 +512,7 @@ const Products = () => {
             batch.map(product =>
               createProduct({
                 name: product.name,
-                slug: product.slug,
+                slug: product.slug || product.id,
                 description: product.description || undefined,
                 price: product.price,
                 currency: product.currency || 'XOF',

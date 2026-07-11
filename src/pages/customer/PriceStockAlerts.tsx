@@ -438,7 +438,7 @@ export default function PriceStockAlerts() {
                                   <Link
                                     to={generateProductUrl(
                                       product.stores?.slug || 'default',
-                                      product.slug,
+                                      product.slug || product.id,
                                       product.stores?.subdomain
                                     )}
                                     className="flex-shrink-0 self-start"
@@ -593,7 +593,7 @@ export default function PriceStockAlerts() {
                                   <Link
                                     to={generateProductUrl(
                                       product.stores?.slug || 'default',
-                                      product.slug,
+                                      product.slug || product.id,
                                       product.stores?.subdomain
                                     )}
                                     className="flex-shrink-0 self-start"

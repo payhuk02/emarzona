@@ -171,6 +171,7 @@ const convertToFormData = async (
     .single();
 
   if (productError) throw productError;
+  if (!product) throw new Error('Produit non trouvé');
 
   // 🚀 PERFORMANCE: Requête parallèle pour les données de service
   const { data: serviceProduct, error: serviceError } = await supabase

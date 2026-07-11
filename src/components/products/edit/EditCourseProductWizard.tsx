@@ -165,6 +165,7 @@ const convertToFormData = async (
     .single();
 
   if (productError) throw productError;
+  if (!product) throw new Error('Produit non trouvé');
 
   // 🚀 PERFORMANCE: Charger course + affiliation, puis curriculum via course_id
   const [{ data: course, error: courseError }, { data: affiliateSettings }] = await Promise.all([

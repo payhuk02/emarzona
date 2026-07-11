@@ -1069,7 +1069,7 @@ export const DigitalProductsList = () => {
                                             navigate(
                                               generateProductUrl(
                                                 store.slug,
-                                                product.slug,
+                                                product.slug || product.id,
                                                 store.subdomain
                                               )
                                             );
@@ -1117,7 +1117,7 @@ export const DigitalProductsList = () => {
                                             navigate(
                                               generateProductUrl(
                                                 store.slug,
-                                                product.slug,
+                                                product.slug || product.id,
                                                 store.subdomain
                                               )
                                             );
