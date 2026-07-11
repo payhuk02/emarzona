@@ -44973,6 +44973,10 @@ export type Database = {
         Args: { p_coupon_id: string; p_customer_id: string };
         Returns: boolean;
       };
+      can_change_store_commerce_type: {
+        Args: { p_store_id: string };
+        Returns: boolean;
+      };
       cancel_future_recurring_bookings: {
         Args: { p_cancel_from_date?: string; p_pattern_id: string };
         Returns: number;
@@ -48406,6 +48410,14 @@ export type Database = {
       start_subscription_trial: {
         Args: { p_subscription_id: string; p_trial_days: number };
         Returns: undefined;
+      };
+      store_catalog_product_count: {
+        Args: { p_store_id: string };
+        Returns: number;
+      };
+      store_commerce_type_change_status: {
+        Args: { p_store_id: string };
+        Returns: Json;
       };
       store_has_physical_ecommerce_access: {
         Args: { p_store_id: string };
