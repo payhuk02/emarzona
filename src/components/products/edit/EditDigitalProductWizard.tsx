@@ -59,7 +59,7 @@ const PRODUCT_FIELDS =
 const DIGITAL_PRODUCT_FIELDS =
   'id, product_id, digital_type, license_type, license_duration_days, max_activations, allow_license_transfer, auto_generate_keys, main_file_url, main_file_version, download_limit, download_expiry_days, require_registration, watermark_enabled, watermark_text, version';
 const DIGITAL_PRODUCT_FILE_FIELDS =
-  'id, product_id, name, file_url, file_size_mb, file_type, category, version, is_main, order_index';
+  'id, digital_product_id, name, file_url, file_size_mb, file_type, category, version, is_main, order_index';
 const PRODUCT_AFFILIATE_FIELDS =
   'id, product_id, affiliate_enabled, commission_rate, commission_type, fixed_commission_amount, cookie_duration_days, min_order_amount, allow_self_referral, require_approval, terms_and_conditions';
 

@@ -203,7 +203,7 @@ BEGIN
     RAISE EXCEPTION 'Cours introuvable';
   END IF;
 
-  v_pricing_model := COALESCE(p_product->>'pricing_model', 'one-time');
+  v_pricing_model := COALESCE(p_product->>'pricing_model', 'one-time')::pricing_model;
 
   UPDATE public.products SET
     name = COALESCE(p_product->>'name', name),

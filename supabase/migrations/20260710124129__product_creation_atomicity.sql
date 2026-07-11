@@ -39,7 +39,7 @@ BEGIN
     COALESCE((p_product->>'price')::NUMERIC, 0),
     COALESCE(p_product->>'currency', 'XOF'),
     NULLIF(p_product->>'promotional_price', '')::NUMERIC,
-    COALESCE(p_product->>'pricing_model', 'one-time'),
+    COALESCE(p_product->>'pricing_model', 'one-time')::pricing_model,
     'service',
     NULLIF(p_product->>'category_id', '')::UUID,
     p_product->>'image_url',

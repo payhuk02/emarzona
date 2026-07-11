@@ -41,7 +41,7 @@ BEGIN
     price = COALESCE((p_product->>'price')::NUMERIC, price),
     promotional_price = CASE WHEN p_product ? 'promotional_price' THEN NULLIF(p_product->>'promotional_price', '')::NUMERIC ELSE promotional_price END,
     currency = COALESCE(p_product->>'currency', currency),
-    pricing_model = COALESCE(p_product->>'pricing_model', pricing_model),
+    pricing_model = COALESCE(p_product->>'pricing_model', pricing_model::text)::pricing_model,
     category_id = CASE WHEN p_product ? 'category_id' THEN NULLIF(p_product->>'category_id', '')::UUID ELSE category_id END,
     image_url = COALESCE(p_product->>'image_url', image_url),
     images = COALESCE(p_product->'images', images),
