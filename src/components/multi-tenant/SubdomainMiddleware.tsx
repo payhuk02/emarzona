@@ -34,36 +34,6 @@ export function SubdomainMiddleware({ children }: SubdomainMiddlewareProps) {
   // Charger la boutique UNIQUEMENT si on est sur myemarzona.shop (domaine des boutiques)
   const { data: store, isPending, isError, error } = useCurrentStoreBySubdomain();
 
-  // #region agent log
-  if (typeof window !== 'undefined') {
-    fetch('http://127.0.0.1:7740/ingest/c21af8ec-02ef-48c9-95f8-23aa8fa2c366', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '47357a' },
-      body: JSON.stringify({
-        sessionId: '47357a',
-        runId: 'pre-fix',
-        hypothesisId: 'A',
-        location: 'SubdomainMiddleware.tsx:render',
-        message: 'subdomain middleware query state',
-        data: {
-          host: window.location.hostname,
-          shouldResolveStore:
-            !subdomainInfo.isPlatformDomain &&
-            ((subdomainInfo.isStoreDomain &&
-              subdomainInfo.isSubdomain &&
-              !!subdomainInfo.subdomain) ||
-              (subdomainInfo.isCustomDomain && !!subdomainInfo.customDomain)),
-          isPending,
-          isError,
-          hasStore: !!store,
-          storeSlug: store?.slug ?? null,
-        },
-        timestamp: Date.now(),
-      }),
-    }).catch(() => {});
-  }
-  // #endregion
-
   useEffect(() => {
     const isStoreSubdomain =
       subdomainInfo.isStoreDomain && subdomainInfo.isSubdomain && subdomainInfo.subdomain;
