@@ -43,6 +43,7 @@ import {
   ZoomIn,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { VendorMessagingLink } from '@/components/vendor/VendorMessagingLink';
 import { generateProductUrl } from '@/lib/store-utils';
 import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
 import { initiateMarketplaceDirectBuy } from '@/lib/marketplace/initiate-direct-buy';
@@ -700,13 +701,14 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
               className="product-action-button flex-1 h-10 text-white bg-gradient-to-r from-purple-700 to-purple-900 hover:from-purple-800 hover:to-purple-950 border-purple-700 transition-all duration-200"
               asChild
             >
-              <Link
-                to={`/vendor/messaging/${product.store_id}?productId=${product.id}`}
+              <VendorMessagingLink
+                storeId={product.store_id}
+                productId={product.id}
                 className="flex items-center justify-center gap-1.5"
               >
                 <MessageSquare className="h-4 w-4 text-white" />
                 <span className="font-medium hidden sm:inline text-white">Contacter</span>
-              </Link>
+              </VendorMessagingLink>
             </Button>
           )}
 

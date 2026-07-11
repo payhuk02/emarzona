@@ -3,6 +3,7 @@
  * CTA principal pleine largeur + actions secondaires en grille 2 colonnes.
  */
 import { Link } from 'react-router-dom';
+import { VendorMessagingLink } from '@/components/vendor/VendorMessagingLink';
 import { Button } from '@/components/ui/button';
 import { Eye, MessageSquare, ShoppingCart, Calendar, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -38,8 +39,6 @@ export function MarketplaceProductCardActions({
   onView,
   className,
 }: MarketplaceProductCardActionsProps) {
-  const contactUrl = storeId ? `/vendor/messaging/${storeId}?productId=${productId}` : null;
-
   const BuyIcon = buyLoading ? Loader2 : buyIcon === 'calendar' ? Calendar : ShoppingCart;
 
   return (
@@ -91,7 +90,7 @@ export function MarketplaceProductCardActions({
           </Link>
         </Button>
 
-        {storeId && contactUrl && (
+        {storeId && (
           <Button
             variant="outline"
             size="sm"
@@ -105,14 +104,15 @@ export function MarketplaceProductCardActions({
             )}
             asChild
           >
-            <Link
-              to={contactUrl}
+            <VendorMessagingLink
+              storeId={storeId}
+              productId={productId}
               aria-label={`Contacter le vendeur pour ${productName}`}
               className="flex items-center justify-center gap-1.5 min-w-0"
             >
               <MessageSquare className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
               <span className="truncate">Contacter</span>
-            </Link>
+            </VendorMessagingLink>
           </Button>
         )}
       </div>

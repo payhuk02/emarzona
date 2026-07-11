@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { VendorMessagingLink } from '@/components/vendor/VendorMessagingLink';
 import {
   ShoppingCart,
   Star,
@@ -511,15 +512,17 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
           </Link>
 
           {product.store_id && (
-            <Link
-              to={`/vendor/messaging/${product.store_id}?productId=${product.id}`}
-              className="flex-1"
+            <Button
+              variant="outline"
+              size="sm"
+              className="product-button product-button-secondary flex-1 min-h-[44px] h-11 text-xs sm:text-sm px-2 sm:px-3"
+              asChild
             >
-              <Button
-                variant="outline"
-                size="sm"
-                className="product-button product-button-secondary min-h-[44px] h-11 text-xs sm:text-sm px-2 sm:px-3"
+              <VendorMessagingLink
+                storeId={product.store_id}
+                productId={product.id}
                 aria-label={`Contacter le vendeur pour ${product.name}`}
+                className="flex items-center justify-center"
               >
                 <MessageSquare
                   className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1 sm:mr-1.5 flex-shrink-0"
@@ -527,8 +530,8 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
                 />
                 <span className="hidden sm:inline whitespace-nowrap">Contacter</span>
                 <span className="sm:hidden whitespace-nowrap">Msg</span>
-              </Button>
-            </Link>
+              </VendorMessagingLink>
+            </Button>
           )}
 
           <Button

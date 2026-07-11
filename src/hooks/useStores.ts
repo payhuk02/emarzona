@@ -8,6 +8,7 @@ import type { StoreCommerceType } from '@/constants/store-commerce-types';
 import { STORE_COMMERCE_TYPES } from '@/constants/store-commerce-types';
 import { resolveStoreCommerceTypeFromStore } from '@/lib/commerce/store-capability-map';
 import { buildStoreCreateDefaults } from '@/lib/commerce/store-create-defaults';
+import { sanitizeStorePayload } from '@/lib/store-payload-utils';
 
 type StoreInsert = Database['public']['Tables']['stores']['Insert'];
 type StoreUpdate = Database['public']['Tables']['stores']['Update'];
@@ -359,9 +360,11 @@ export const useStores = () => {
         };
       }
 
+      const sanitized = sanitizeStorePayload(updates as Record<string, unknown>);
+
       const { data, error } = await supabase
         .from('stores')
-        .update(updates as unknown as StoreUpdate)
+        .update(sanitized as unknown as StoreUpdate)
         .eq('id', storeId)
         .select('id, name, slug, subdomain')
         .single();

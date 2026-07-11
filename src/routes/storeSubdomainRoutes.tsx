@@ -12,6 +12,7 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import { StoreSlugProvider } from '@/contexts/StoreSlugContext';
 import { StoreSubdomainNav } from '@/components/storefront/StoreSubdomainNav';
 import { RedirectToPlatformAuth } from '@/components/auth/RedirectToPlatformAuth';
+import { RedirectToPlatformVendorMessaging } from '@/components/auth/RedirectToPlatformVendorMessaging';
 import type { StoreCommerceType } from '@/constants/store-commerce-types';
 
 const Storefront = lazyPage(() => import('@/pages/Storefront'));
@@ -95,6 +96,10 @@ export function StoreSubdomainRoutes({
           <Route path="/auth" element={<RedirectToPlatformAuth />} />
           <Route path="/auth/login" element={<RedirectToPlatformAuth />} />
           <Route path="/auth/signup" element={<RedirectToPlatformAuth />} />
+
+          {/* Messagerie vendeur — plateforme uniquement */}
+          <Route path="/vendor/messaging" element={<RedirectToPlatformVendorMessaging />} />
+          <Route path="/vendor/messaging/*" element={<RedirectToPlatformVendorMessaging />} />
 
           {/* Panier et checkout */}
           <Route path="/cart" element={<Cart />} />

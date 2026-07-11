@@ -20,6 +20,18 @@ const pr = (path: string, Component: React.LazyExoticComponent<React.ComponentTy
   />
 );
 
+/** Route authentifiée sans garde vendeur (accessible aux acheteurs). */
+const prAuth = (path: string, Component: React.LazyExoticComponent<React.ComponentType>) => (
+  <Route
+    path={path}
+    element={
+      <ProtectedRoute>
+        <Component />
+      </ProtectedRoute>
+    }
+  />
+);
+
 // Pages Dashboard
 const Dashboard = lazyPage(() =>
   import('@/pages/Dashboard')
@@ -472,8 +484,8 @@ export const dashboardRoutes = (
     {pr('/dashboard/shipping-services', ShippingServices)}
     {pr('/dashboard/contact-shipping-service', ContactShippingService)}
     {pr('/dashboard/shipping-service-messages/:conversationId', ShippingServiceMessages)}
-    {pr('/vendor/messaging/:storeId/:productId?', VendorMessaging)}
-    {pr('/vendor/messaging', VendorMessaging)}
+    {prAuth('/vendor/messaging/:storeId/:productId?', VendorMessaging)}
+    {prAuth('/vendor/messaging', VendorMessaging)}
     {pr('/dashboard/inventory', InventoryDashboard)}
     <Route
       path="/dashboard/my-bookings"

@@ -1,10 +1,16 @@
 import { useState, useMemo, useCallback } from 'react';
 import type { Store } from '@/hooks/useStores';
 import type { StoreOpeningHours, StoreLegalPages, StoreMarketingContent } from '@/hooks/useStores';
-import type { ExtendedStore, StoreFormState, StoreThemeConfig } from '@/components/store/types/store-form';
+import type {
+  ExtendedStore,
+  StoreFormState,
+  StoreThemeConfig,
+} from '@/components/store/types/store-form';
 import { useStore } from '@/hooks/useStore';
+import { useStores } from '@/hooks/useStores';
 import { useStoreContext } from '@/contexts/StoreContext';
 import { useToast } from '@/hooks/use-toast';
+import { sanitizeStorePayload } from '@/lib/store-payload-utils';
 import { validateStoreForm } from '@/lib/validation-utils';
 import { validateStoreUpdate } from '@/lib/store-validation';
 
@@ -141,15 +147,29 @@ export function useStoreFormState(store: ExtendedStore) {
   const [accentColor, setAccentColor] = useState(store.accent_color || '#f59e0b');
   const [backgroundColor, setBackgroundColor] = useState(store.background_color || '#ffffff');
   const [textColor, setTextColor] = useState(store.text_color || '#1f2937');
-  const [textSecondaryColor, setTextSecondaryColor] = useState(store.text_secondary_color || '#6b7280');
-  const [buttonPrimaryColor, setButtonPrimaryColor] = useState(store.button_primary_color || '#3b82f6');
-  const [buttonPrimaryText, setButtonPrimaryText] = useState(store.button_primary_text || '#ffffff');
-  const [buttonSecondaryColor, setButtonSecondaryColor] = useState(store.button_secondary_color || '#e5e7eb');
-  const [buttonSecondaryText, setButtonSecondaryText] = useState(store.button_secondary_text || '#1f2937');
+  const [textSecondaryColor, setTextSecondaryColor] = useState(
+    store.text_secondary_color || '#6b7280'
+  );
+  const [buttonPrimaryColor, setButtonPrimaryColor] = useState(
+    store.button_primary_color || '#3b82f6'
+  );
+  const [buttonPrimaryText, setButtonPrimaryText] = useState(
+    store.button_primary_text || '#ffffff'
+  );
+  const [buttonSecondaryColor, setButtonSecondaryColor] = useState(
+    store.button_secondary_color || '#e5e7eb'
+  );
+  const [buttonSecondaryText, setButtonSecondaryText] = useState(
+    store.button_secondary_text || '#1f2937'
+  );
   const [linkColor, setLinkColor] = useState(store.link_color || '#3b82f6');
   const [linkHoverColor, setLinkHoverColor] = useState(store.link_hover_color || '#2563eb');
-  const [borderRadius, setBorderRadius] = useState<'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full'>(store.border_radius || 'md');
-  const [shadowIntensity, setShadowIntensity] = useState<'none' | 'sm' | 'md' | 'lg' | 'xl'>(store.shadow_intensity || 'md');
+  const [borderRadius, setBorderRadius] = useState<'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full'>(
+    store.border_radius || 'md'
+  );
+  const [shadowIntensity, setShadowIntensity] = useState<'none' | 'sm' | 'md' | 'lg' | 'xl'>(
+    store.shadow_intensity || 'md'
+  );
   const [headingFont, setHeadingFont] = useState(store.heading_font || 'Inter');
   const [bodyFont, setBodyFont] = useState(store.body_font || 'Inter');
   const [fontSizeBase, setFontSizeBase] = useState(store.font_size_base || '16px');
@@ -158,13 +178,23 @@ export function useStoreFormState(store: ExtendedStore) {
   const [headingSizeH3, setHeadingSizeH3] = useState(store.heading_size_h3 || '1.5rem');
   const [lineHeight, setLineHeight] = useState(store.line_height || '1.6');
   const [letterSpacing, setLetterSpacing] = useState(store.letter_spacing || 'normal');
-  const [headerStyle, setHeaderStyle] = useState<'minimal' | 'standard' | 'extended'>(store.header_style || 'standard');
-  const [footerStyle, setFooterStyle] = useState<'minimal' | 'standard' | 'extended'>(store.footer_style || 'standard');
+  const [headerStyle, setHeaderStyle] = useState<'minimal' | 'standard' | 'extended'>(
+    store.header_style || 'standard'
+  );
+  const [footerStyle, setFooterStyle] = useState<'minimal' | 'standard' | 'extended'>(
+    store.footer_style || 'standard'
+  );
   const [sidebarEnabled, setSidebarEnabled] = useState(store.sidebar_enabled || false);
-  const [sidebarPosition, setSidebarPosition] = useState<'left' | 'right'>(store.sidebar_position || 'left');
+  const [sidebarPosition, setSidebarPosition] = useState<'left' | 'right'>(
+    store.sidebar_position || 'left'
+  );
   const [productGridColumns, setProductGridColumns] = useState(store.product_grid_columns || 3);
-  const [productCardStyle, setProductCardStyle] = useState<'minimal' | 'standard' | 'detailed'>(store.product_card_style || 'standard');
-  const [navigationStyle, setNavigationStyle] = useState<'horizontal' | 'vertical' | 'mega'>(store.navigation_style || 'horizontal');
+  const [productCardStyle, setProductCardStyle] = useState<'minimal' | 'standard' | 'detailed'>(
+    store.product_card_style || 'standard'
+  );
+  const [navigationStyle, setNavigationStyle] = useState<'horizontal' | 'vertical' | 'mega'>(
+    store.navigation_style || 'horizontal'
+  );
   const [metaTitle, setMetaTitle] = useState(store.meta_title || '');
   const [metaDescription, setMetaDescription] = useState(store.meta_description || '');
   const [metaKeywords, setMetaKeywords] = useState(store.meta_keywords || '');
@@ -180,19 +210,33 @@ export function useStoreFormState(store: ExtendedStore) {
   const [latitude, setLatitude] = useState<number | null>(store.latitude || null);
   const [longitude, setLongitude] = useState<number | null>(store.longitude || null);
   const [timezone, setTimezone] = useState(store.timezone || 'Africa/Ouagadougou');
-  const [openingHours, setOpeningHours] = useState<StoreOpeningHours | null>(store.opening_hours || null);
+  const [openingHours, setOpeningHours] = useState<StoreOpeningHours | null>(
+    store.opening_hours || null
+  );
   const [legalPages, setLegalPages] = useState<StoreLegalPages | null>(store.legal_pages || null);
-  const [marketingContent, setMarketingContent] = useState<StoreMarketingContent | null>(store.marketing_content || null);
+  const [marketingContent, setMarketingContent] = useState<StoreMarketingContent | null>(
+    store.marketing_content || null
+  );
   const [googleAnalyticsId, setGoogleAnalyticsId] = useState(store.google_analytics_id || '');
-  const [googleAnalyticsEnabled, setGoogleAnalyticsEnabled] = useState(store.google_analytics_enabled || false);
+  const [googleAnalyticsEnabled, setGoogleAnalyticsEnabled] = useState(
+    store.google_analytics_enabled || false
+  );
   const [facebookPixelId, setFacebookPixelId] = useState(store.facebook_pixel_id || '');
-  const [facebookPixelEnabled, setFacebookPixelEnabled] = useState(store.facebook_pixel_enabled || false);
+  const [facebookPixelEnabled, setFacebookPixelEnabled] = useState(
+    store.facebook_pixel_enabled || false
+  );
   const [googleTagManagerId, setGoogleTagManagerId] = useState(store.google_tag_manager_id || '');
-  const [googleTagManagerEnabled, setGoogleTagManagerEnabled] = useState(store.google_tag_manager_enabled || false);
+  const [googleTagManagerEnabled, setGoogleTagManagerEnabled] = useState(
+    store.google_tag_manager_enabled || false
+  );
   const [tiktokPixelId, setTiktokPixelId] = useState(store.tiktok_pixel_id || '');
   const [tiktokPixelEnabled, setTiktokPixelEnabled] = useState(store.tiktok_pixel_enabled || false);
-  const [customTrackingScripts, setCustomTrackingScripts] = useState(store.custom_tracking_scripts || '');
-  const [customScriptsEnabled, setCustomScriptsEnabled] = useState(store.custom_scripts_enabled || false);
+  const [customTrackingScripts, setCustomTrackingScripts] = useState(
+    store.custom_tracking_scripts || ''
+  );
+  const [customScriptsEnabled, setCustomScriptsEnabled] = useState(
+    store.custom_scripts_enabled || false
+  );
 
   // --- UI state ---
   const [isEditing, setIsEditing] = useState(false);
@@ -202,7 +246,8 @@ export function useStoreFormState(store: ExtendedStore) {
   const [currentTab, setCurrentTab] = useState<string>('settings');
   const [fieldTouched, setFieldTouched] = useState<Record<string, boolean>>({});
 
-  const { updateStore, getStoreUrl, checkSlugAvailability } = useStore();
+  const { getStoreUrl, checkSlugAvailability } = useStore();
+  const { updateStore: updateStoreById } = useStores();
   const { refreshStores } = useStoreContext();
   const { toast } = useToast();
 
@@ -210,41 +255,187 @@ export function useStoreFormState(store: ExtendedStore) {
 
   // --- Collected form state ---
   const formState: StoreFormState = {
-    name, description, logoUrl, bannerUrl, faviconUrl, appleTouchIconUrl, watermarkUrl, placeholderImageUrl,
-    about, contactEmail, contactPhone,
-    facebookUrl, instagramUrl, twitterUrl, linkedinUrl, youtubeUrl, tiktokUrl, pinterestUrl, snapchatUrl, discordUrl, twitchUrl,
-    supportEmail, salesEmail, pressEmail, partnershipEmail, supportPhone, salesPhone, whatsappNumber, telegramUsername,
-    infoMessage, infoMessageColor, infoMessageFont,
-    primaryColor, secondaryColor, accentColor, backgroundColor, textColor, textSecondaryColor,
-    buttonPrimaryColor, buttonPrimaryText, buttonSecondaryColor, buttonSecondaryText,
-    linkColor, linkHoverColor, borderRadius, shadowIntensity,
-    headingFont, bodyFont, fontSizeBase, headingSizeH1, headingSizeH2, headingSizeH3, lineHeight, letterSpacing,
-    headerStyle, footerStyle, sidebarEnabled, sidebarPosition, productGridColumns, productCardStyle, navigationStyle,
-    metaTitle, metaDescription, metaKeywords, ogTitle, ogDescription, ogImageUrl,
-    addressLine1, addressLine2, city, stateProvince, postalCode, country, latitude, longitude, timezone, openingHours,
-    legalPages, marketingContent,
-    googleAnalyticsId, googleAnalyticsEnabled, facebookPixelId, facebookPixelEnabled,
-    googleTagManagerId, googleTagManagerEnabled, tiktokPixelId, tiktokPixelEnabled,
-    customTrackingScripts, customScriptsEnabled,
+    name,
+    description,
+    logoUrl,
+    bannerUrl,
+    faviconUrl,
+    appleTouchIconUrl,
+    watermarkUrl,
+    placeholderImageUrl,
+    about,
+    contactEmail,
+    contactPhone,
+    facebookUrl,
+    instagramUrl,
+    twitterUrl,
+    linkedinUrl,
+    youtubeUrl,
+    tiktokUrl,
+    pinterestUrl,
+    snapchatUrl,
+    discordUrl,
+    twitchUrl,
+    supportEmail,
+    salesEmail,
+    pressEmail,
+    partnershipEmail,
+    supportPhone,
+    salesPhone,
+    whatsappNumber,
+    telegramUsername,
+    infoMessage,
+    infoMessageColor,
+    infoMessageFont,
+    primaryColor,
+    secondaryColor,
+    accentColor,
+    backgroundColor,
+    textColor,
+    textSecondaryColor,
+    buttonPrimaryColor,
+    buttonPrimaryText,
+    buttonSecondaryColor,
+    buttonSecondaryText,
+    linkColor,
+    linkHoverColor,
+    borderRadius,
+    shadowIntensity,
+    headingFont,
+    bodyFont,
+    fontSizeBase,
+    headingSizeH1,
+    headingSizeH2,
+    headingSizeH3,
+    lineHeight,
+    letterSpacing,
+    headerStyle,
+    footerStyle,
+    sidebarEnabled,
+    sidebarPosition,
+    productGridColumns,
+    productCardStyle,
+    navigationStyle,
+    metaTitle,
+    metaDescription,
+    metaKeywords,
+    ogTitle,
+    ogDescription,
+    ogImageUrl,
+    addressLine1,
+    addressLine2,
+    city,
+    stateProvince,
+    postalCode,
+    country,
+    latitude,
+    longitude,
+    timezone,
+    openingHours,
+    legalPages,
+    marketingContent,
+    googleAnalyticsId,
+    googleAnalyticsEnabled,
+    facebookPixelId,
+    facebookPixelEnabled,
+    googleTagManagerId,
+    googleTagManagerEnabled,
+    tiktokPixelId,
+    tiktokPixelEnabled,
+    customTrackingScripts,
+    customScriptsEnabled,
   };
 
   const setters = {
-    setName, setDescription, setLogoUrl, setBannerUrl, setFaviconUrl, setAppleTouchIconUrl, setWatermarkUrl, setPlaceholderImageUrl,
-    setAbout, setContactEmail, setContactPhone,
-    setFacebookUrl, setInstagramUrl, setTwitterUrl, setLinkedinUrl, setYoutubeUrl, setTiktokUrl, setPinterestUrl, setSnapchatUrl, setDiscordUrl, setTwitchUrl,
-    setSupportEmail, setSalesEmail, setPressEmail, setPartnershipEmail, setSupportPhone, setSalesPhone, setWhatsappNumber, setTelegramUsername,
-    setInfoMessage, setInfoMessageColor, setInfoMessageFont,
-    setPrimaryColor, setSecondaryColor, setAccentColor, setBackgroundColor, setTextColor, setTextSecondaryColor,
-    setButtonPrimaryColor, setButtonPrimaryText, setButtonSecondaryColor, setButtonSecondaryText,
-    setLinkColor, setLinkHoverColor, setBorderRadius, setShadowIntensity,
-    setHeadingFont, setBodyFont, setFontSizeBase, setHeadingSizeH1, setHeadingSizeH2, setHeadingSizeH3, setLineHeight, setLetterSpacing,
-    setHeaderStyle, setFooterStyle, setSidebarEnabled, setSidebarPosition, setProductGridColumns, setProductCardStyle, setNavigationStyle,
-    setMetaTitle, setMetaDescription, setMetaKeywords, setOgTitle, setOgDescription, setOgImageUrl,
-    setAddressLine1, setAddressLine2, setCity, setStateProvince, setPostalCode, setCountry, setLatitude, setLongitude, setTimezone, setOpeningHours,
-    setLegalPages, setMarketingContent,
-    setGoogleAnalyticsId, setGoogleAnalyticsEnabled, setFacebookPixelId, setFacebookPixelEnabled,
-    setGoogleTagManagerId, setGoogleTagManagerEnabled, setTiktokPixelId, setTiktokPixelEnabled,
-    setCustomTrackingScripts, setCustomScriptsEnabled,
+    setName,
+    setDescription,
+    setLogoUrl,
+    setBannerUrl,
+    setFaviconUrl,
+    setAppleTouchIconUrl,
+    setWatermarkUrl,
+    setPlaceholderImageUrl,
+    setAbout,
+    setContactEmail,
+    setContactPhone,
+    setFacebookUrl,
+    setInstagramUrl,
+    setTwitterUrl,
+    setLinkedinUrl,
+    setYoutubeUrl,
+    setTiktokUrl,
+    setPinterestUrl,
+    setSnapchatUrl,
+    setDiscordUrl,
+    setTwitchUrl,
+    setSupportEmail,
+    setSalesEmail,
+    setPressEmail,
+    setPartnershipEmail,
+    setSupportPhone,
+    setSalesPhone,
+    setWhatsappNumber,
+    setTelegramUsername,
+    setInfoMessage,
+    setInfoMessageColor,
+    setInfoMessageFont,
+    setPrimaryColor,
+    setSecondaryColor,
+    setAccentColor,
+    setBackgroundColor,
+    setTextColor,
+    setTextSecondaryColor,
+    setButtonPrimaryColor,
+    setButtonPrimaryText,
+    setButtonSecondaryColor,
+    setButtonSecondaryText,
+    setLinkColor,
+    setLinkHoverColor,
+    setBorderRadius,
+    setShadowIntensity,
+    setHeadingFont,
+    setBodyFont,
+    setFontSizeBase,
+    setHeadingSizeH1,
+    setHeadingSizeH2,
+    setHeadingSizeH3,
+    setLineHeight,
+    setLetterSpacing,
+    setHeaderStyle,
+    setFooterStyle,
+    setSidebarEnabled,
+    setSidebarPosition,
+    setProductGridColumns,
+    setProductCardStyle,
+    setNavigationStyle,
+    setMetaTitle,
+    setMetaDescription,
+    setMetaKeywords,
+    setOgTitle,
+    setOgDescription,
+    setOgImageUrl,
+    setAddressLine1,
+    setAddressLine2,
+    setCity,
+    setStateProvince,
+    setPostalCode,
+    setCountry,
+    setLatitude,
+    setLongitude,
+    setTimezone,
+    setOpeningHours,
+    setLegalPages,
+    setMarketingContent,
+    setGoogleAnalyticsId,
+    setGoogleAnalyticsEnabled,
+    setFacebookPixelId,
+    setFacebookPixelEnabled,
+    setGoogleTagManagerId,
+    setGoogleTagManagerEnabled,
+    setTiktokPixelId,
+    setTiktokPixelEnabled,
+    setCustomTrackingScripts,
+    setCustomScriptsEnabled,
   };
 
   // --- Apply a theme config (from template or import) ---
@@ -261,8 +452,10 @@ export function useStoreFormState(store: ExtendedStore) {
     if (config.button_secondary_text) setButtonSecondaryText(config.button_secondary_text);
     if (config.link_color) setLinkColor(config.link_color);
     if (config.link_hover_color) setLinkHoverColor(config.link_hover_color);
-    if (config.border_radius) setBorderRadius(config.border_radius as 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full');
-    if (config.shadow_intensity) setShadowIntensity(config.shadow_intensity as 'none' | 'sm' | 'md' | 'lg' | 'xl');
+    if (config.border_radius)
+      setBorderRadius(config.border_radius as 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full');
+    if (config.shadow_intensity)
+      setShadowIntensity(config.shadow_intensity as 'none' | 'sm' | 'md' | 'lg' | 'xl');
     if (config.heading_font) setHeadingFont(config.heading_font);
     if (config.body_font) setBodyFont(config.body_font);
     if (config.font_size_base) setFontSizeBase(config.font_size_base);
@@ -284,114 +477,218 @@ export function useStoreFormState(store: ExtendedStore) {
     if (config.og_image) setOgImageUrl(config.og_image);
   }, []);
 
-  // --- Build the update payload ---
-  const buildUpdatePayload = useCallback((): Partial<Store> & Record<string, unknown> => ({
-    name: name.trim(),
-    description: description.trim() || null,
-    logo_url: logoUrl || null,
-    banner_url: bannerUrl || null,
-    favicon_url: faviconUrl || null,
-    apple_touch_icon_url: appleTouchIconUrl || null,
-    watermark_url: watermarkUrl || null,
-    placeholder_image_url: placeholderImageUrl || null,
-    about: about.trim() || null,
-    info_message: infoMessage.trim() || null,
-    info_message_color: infoMessageColor || '#3b82f6',
-    info_message_font: infoMessageFont || 'Inter',
-    contact_email: contactEmail.trim() || null,
-    contact_phone: contactPhone.trim() || null,
-    facebook_url: facebookUrl.trim() || null,
-    instagram_url: instagramUrl.trim() || null,
-    twitter_url: twitterUrl.trim() || null,
-    linkedin_url: linkedinUrl.trim() || null,
-    support_email: supportEmail.trim() || null,
-    sales_email: salesEmail.trim() || null,
-    press_email: pressEmail.trim() || null,
-    partnership_email: partnershipEmail.trim() || null,
-    support_phone: supportPhone.trim() || null,
-    sales_phone: salesPhone.trim() || null,
-    whatsapp_number: whatsappNumber.trim() || null,
-    telegram_username: telegramUsername.trim() || null,
-    youtube_url: youtubeUrl.trim() || null,
-    tiktok_url: tiktokUrl.trim() || null,
-    pinterest_url: pinterestUrl.trim() || null,
-    snapchat_url: snapchatUrl.trim() || null,
-    discord_url: discordUrl.trim() || null,
-    twitch_url: twitchUrl.trim() || null,
-    primary_color: primaryColor || null,
-    secondary_color: secondaryColor || null,
-    accent_color: accentColor || null,
-    background_color: backgroundColor || null,
-    text_color: textColor || null,
-    text_secondary_color: textSecondaryColor || null,
-    button_primary_color: buttonPrimaryColor || null,
-    button_primary_text: buttonPrimaryText || null,
-    button_secondary_color: buttonSecondaryColor || null,
-    button_secondary_text: buttonSecondaryText || null,
-    link_color: linkColor || null,
-    link_hover_color: linkHoverColor || null,
-    border_radius: borderRadius,
-    shadow_intensity: shadowIntensity,
-    heading_font: headingFont || null,
-    body_font: bodyFont || null,
-    font_size_base: fontSizeBase || null,
-    heading_size_h1: headingSizeH1 || null,
-    heading_size_h2: headingSizeH2 || null,
-    heading_size_h3: headingSizeH3 || null,
-    line_height: lineHeight || null,
-    letter_spacing: letterSpacing || null,
-    header_style: headerStyle,
-    footer_style: footerStyle,
-    sidebar_enabled: sidebarEnabled,
-    sidebar_position: sidebarPosition,
-    product_grid_columns: productGridColumns,
-    product_card_style: productCardStyle,
-    navigation_style: navigationStyle,
-    meta_title: metaTitle || null,
-    meta_description: metaDescription || null,
-    meta_keywords: metaKeywords || null,
-    og_title: ogTitle || null,
-    og_description: ogDescription || null,
-    og_image: ogImageUrl || null,
-    address_line1: addressLine1 || null,
-    address_line2: addressLine2 || null,
-    city: city || null,
-    state_province: stateProvince || null,
-    postal_code: postalCode || null,
-    country: country || null,
+  // --- Build the update payload (scoped to active tab to avoid PATCH 400) ---
+  const buildUpdatePayload = useCallback((): Partial<Store> & Record<string, unknown> => {
+    const settingsPayload = {
+      name: name.trim(),
+      description: description.trim() || null,
+      about: about.trim() || null,
+      info_message: infoMessage.trim() || null,
+      info_message_color: infoMessageColor || '#3b82f6',
+      info_message_font: infoMessageFont || 'Inter',
+      contact_email: contactEmail.trim() || null,
+      contact_phone: contactPhone.trim() || null,
+      facebook_url: facebookUrl.trim() || null,
+      instagram_url: instagramUrl.trim() || null,
+      twitter_url: twitterUrl.trim() || null,
+      linkedin_url: linkedinUrl.trim() || null,
+      support_email: supportEmail.trim() || null,
+      sales_email: salesEmail.trim() || null,
+      press_email: pressEmail.trim() || null,
+      partnership_email: partnershipEmail.trim() || null,
+      support_phone: supportPhone.trim() || null,
+      sales_phone: salesPhone.trim() || null,
+      whatsapp_number: whatsappNumber.trim() || null,
+      telegram_username: telegramUsername.trim() || null,
+      youtube_url: youtubeUrl.trim() || null,
+      tiktok_url: tiktokUrl.trim() || null,
+      pinterest_url: pinterestUrl.trim() || null,
+      snapchat_url: snapchatUrl.trim() || null,
+      discord_url: discordUrl.trim() || null,
+      twitch_url: twitchUrl.trim() || null,
+    };
+
+    const appearancePayload = {
+      logo_url: logoUrl || null,
+      banner_url: bannerUrl || null,
+      favicon_url: faviconUrl || null,
+      apple_touch_icon_url: appleTouchIconUrl || null,
+      watermark_url: watermarkUrl || null,
+      placeholder_image_url: placeholderImageUrl || null,
+      primary_color: primaryColor || null,
+      secondary_color: secondaryColor || null,
+      accent_color: accentColor || null,
+      background_color: backgroundColor || null,
+      text_color: textColor || null,
+      text_secondary_color: textSecondaryColor || null,
+      button_primary_color: buttonPrimaryColor || null,
+      button_primary_text: buttonPrimaryText || null,
+      button_secondary_color: buttonSecondaryColor || null,
+      button_secondary_text: buttonSecondaryText || null,
+      link_color: linkColor || null,
+      link_hover_color: linkHoverColor || null,
+      border_radius: borderRadius,
+      shadow_intensity: shadowIntensity,
+      heading_font: headingFont || null,
+      body_font: bodyFont || null,
+      font_size_base: fontSizeBase || null,
+      heading_size_h1: headingSizeH1 || null,
+      heading_size_h2: headingSizeH2 || null,
+      heading_size_h3: headingSizeH3 || null,
+      line_height: lineHeight || null,
+      letter_spacing: letterSpacing || null,
+      header_style: headerStyle,
+      footer_style: footerStyle,
+      sidebar_enabled: sidebarEnabled,
+      sidebar_position: sidebarPosition,
+      product_grid_columns: productGridColumns,
+      product_card_style: productCardStyle,
+      navigation_style: navigationStyle,
+    };
+
+    const locationPayload = {
+      address_line1: addressLine1 || null,
+      address_line2: addressLine2 || null,
+      city: city || null,
+      state_province: stateProvince || null,
+      postal_code: postalCode || null,
+      country: country || null,
+      latitude,
+      longitude,
+      timezone: timezone || null,
+      opening_hours: openingHours || null,
+    };
+
+    const seoPayload = {
+      meta_title: metaTitle || null,
+      meta_description: metaDescription || null,
+      meta_keywords: metaKeywords || null,
+      og_title: ogTitle || null,
+      og_description: ogDescription || null,
+      og_image: ogImageUrl || null,
+    };
+
+    const analyticsPayload = {
+      google_analytics_id: googleAnalyticsId.trim() || null,
+      google_analytics_enabled: googleAnalyticsEnabled,
+      facebook_pixel_id: facebookPixelId.trim() || null,
+      facebook_pixel_enabled: facebookPixelEnabled,
+      google_tag_manager_id: googleTagManagerId.trim() || null,
+      google_tag_manager_enabled: googleTagManagerEnabled,
+      tiktok_pixel_id: tiktokPixelId.trim() || null,
+      tiktok_pixel_enabled: tiktokPixelEnabled,
+      custom_tracking_scripts: customTrackingScripts.trim() || null,
+      custom_scripts_enabled: customScriptsEnabled,
+    };
+
+    switch (currentTab) {
+      case 'appearance':
+        return appearancePayload;
+      case 'location':
+        return locationPayload;
+      case 'seo':
+        return seoPayload;
+      case 'legal':
+        return { legal_pages: legalPages || null };
+      case 'marketing':
+        return { marketing_content: marketingContent || null };
+      case 'analytics':
+        return analyticsPayload;
+      case 'settings':
+      default:
+        return settingsPayload;
+    }
+  }, [
+    currentTab,
+    name,
+    description,
+    about,
+    infoMessage,
+    infoMessageColor,
+    infoMessageFont,
+    contactEmail,
+    contactPhone,
+    facebookUrl,
+    instagramUrl,
+    twitterUrl,
+    linkedinUrl,
+    supportEmail,
+    salesEmail,
+    pressEmail,
+    partnershipEmail,
+    supportPhone,
+    salesPhone,
+    whatsappNumber,
+    telegramUsername,
+    youtubeUrl,
+    tiktokUrl,
+    pinterestUrl,
+    snapchatUrl,
+    discordUrl,
+    twitchUrl,
+    logoUrl,
+    bannerUrl,
+    faviconUrl,
+    appleTouchIconUrl,
+    watermarkUrl,
+    placeholderImageUrl,
+    primaryColor,
+    secondaryColor,
+    accentColor,
+    backgroundColor,
+    textColor,
+    textSecondaryColor,
+    buttonPrimaryColor,
+    buttonPrimaryText,
+    buttonSecondaryColor,
+    buttonSecondaryText,
+    linkColor,
+    linkHoverColor,
+    borderRadius,
+    shadowIntensity,
+    headingFont,
+    bodyFont,
+    fontSizeBase,
+    headingSizeH1,
+    headingSizeH2,
+    headingSizeH3,
+    lineHeight,
+    letterSpacing,
+    headerStyle,
+    footerStyle,
+    sidebarEnabled,
+    sidebarPosition,
+    productGridColumns,
+    productCardStyle,
+    navigationStyle,
+    metaTitle,
+    metaDescription,
+    metaKeywords,
+    ogTitle,
+    ogDescription,
+    ogImageUrl,
+    addressLine1,
+    addressLine2,
+    city,
+    stateProvince,
+    postalCode,
+    country,
     latitude,
     longitude,
-    timezone: timezone || null,
-    opening_hours: openingHours || null,
-    legal_pages: legalPages || null,
-    marketing_content: marketingContent || null,
-    google_analytics_id: googleAnalyticsId.trim() || null,
-    google_analytics_enabled: googleAnalyticsEnabled,
-    facebook_pixel_id: facebookPixelId.trim() || null,
-    facebook_pixel_enabled: facebookPixelEnabled,
-    google_tag_manager_id: googleTagManagerId.trim() || null,
-    google_tag_manager_enabled: googleTagManagerEnabled,
-    tiktok_pixel_id: tiktokPixelId.trim() || null,
-    tiktok_pixel_enabled: tiktokPixelEnabled,
-    custom_tracking_scripts: customTrackingScripts.trim() || null,
-    custom_scripts_enabled: customScriptsEnabled,
-  }), [
-    name, description, logoUrl, bannerUrl, faviconUrl, appleTouchIconUrl, watermarkUrl, placeholderImageUrl,
-    about, infoMessage, infoMessageColor, infoMessageFont, contactEmail, contactPhone,
-    facebookUrl, instagramUrl, twitterUrl, linkedinUrl,
-    supportEmail, salesEmail, pressEmail, partnershipEmail, supportPhone, salesPhone, whatsappNumber, telegramUsername,
-    youtubeUrl, tiktokUrl, pinterestUrl, snapchatUrl, discordUrl, twitchUrl,
-    primaryColor, secondaryColor, accentColor, backgroundColor, textColor, textSecondaryColor,
-    buttonPrimaryColor, buttonPrimaryText, buttonSecondaryColor, buttonSecondaryText,
-    linkColor, linkHoverColor, borderRadius, shadowIntensity,
-    headingFont, bodyFont, fontSizeBase, headingSizeH1, headingSizeH2, headingSizeH3, lineHeight, letterSpacing,
-    headerStyle, footerStyle, sidebarEnabled, sidebarPosition, productGridColumns, productCardStyle, navigationStyle,
-    metaTitle, metaDescription, metaKeywords, ogTitle, ogDescription, ogImageUrl,
-    addressLine1, addressLine2, city, stateProvince, postalCode, country, latitude, longitude, timezone, openingHours,
-    legalPages, marketingContent,
-    googleAnalyticsId, googleAnalyticsEnabled, facebookPixelId, facebookPixelEnabled,
-    googleTagManagerId, googleTagManagerEnabled, tiktokPixelId, tiktokPixelEnabled,
-    customTrackingScripts, customScriptsEnabled,
+    timezone,
+    openingHours,
+    legalPages,
+    marketingContent,
+    googleAnalyticsId,
+    googleAnalyticsEnabled,
+    facebookPixelId,
+    facebookPixelEnabled,
+    googleTagManagerId,
+    googleTagManagerEnabled,
+    tiktokPixelId,
+    tiktokPixelEnabled,
+    customTrackingScripts,
+    customScriptsEnabled,
   ]);
 
   // --- Validation ---
@@ -419,10 +716,22 @@ export function useStoreFormState(store: ExtendedStore) {
     (fieldName: string, value: string) => {
       if (!fieldTouched[fieldName]) return null;
       switch (fieldName) {
-        case 'contact_email': case 'support_email': case 'sales_email': case 'press_email': case 'partnership_email':
+        case 'contact_email':
+        case 'support_email':
+        case 'sales_email':
+        case 'press_email':
+        case 'partnership_email':
           return validateEmail(value);
-        case 'facebook_url': case 'instagram_url': case 'twitter_url': case 'linkedin_url':
-        case 'youtube_url': case 'tiktok_url': case 'pinterest_url': case 'snapchat_url': case 'discord_url': case 'twitch_url':
+        case 'facebook_url':
+        case 'instagram_url':
+        case 'twitter_url':
+        case 'linkedin_url':
+        case 'youtube_url':
+        case 'tiktok_url':
+        case 'pinterest_url':
+        case 'snapchat_url':
+        case 'discord_url':
+        case 'twitch_url':
           return validateUrl(value);
         case 'name':
           if (!value.trim()) return 'Le nom de la boutique est requis';
@@ -436,53 +745,68 @@ export function useStoreFormState(store: ExtendedStore) {
   );
 
   // --- Submit ---
-  const handleSubmit = useCallback(async (e?: React.FormEvent) => {
-    e?.preventDefault();
+  const handleSubmit = useCallback(
+    async (e?: React.FormEvent) => {
+      e?.preventDefault();
 
-    const formData = {
-      name: name.trim(),
-      description: description.trim() || undefined,
-      contact_email: contactEmail.trim() || undefined,
-      contact_phone: contactPhone.trim() || undefined,
-      facebook_url: facebookUrl.trim() || undefined,
-      instagram_url: instagramUrl.trim() || undefined,
-      twitter_url: twitterUrl.trim() || undefined,
-      linkedin_url: linkedinUrl.trim() || undefined,
-    };
+      const formData = {
+        name: name.trim(),
+        description: description.trim() || undefined,
+        contact_email: contactEmail.trim() || undefined,
+        contact_phone: contactPhone.trim() || undefined,
+        facebook_url: facebookUrl.trim() || undefined,
+        instagram_url: instagramUrl.trim() || undefined,
+        twitter_url: twitterUrl.trim() || undefined,
+        linkedin_url: linkedinUrl.trim() || undefined,
+      };
 
-    const zodValidation = validateStoreUpdate(formData);
-    const manualValidation = validateStoreForm(formData);
+      const zodValidation = validateStoreUpdate(formData);
+      const manualValidation = validateStoreForm(formData);
 
-    const allErrors = {
-      ...(zodValidation.valid ? {} : zodValidation.errors),
-      ...(manualValidation.valid ? {} : manualValidation.errors),
-    };
+      const allErrors = {
+        ...(zodValidation.valid ? {} : zodValidation.errors),
+        ...(manualValidation.valid ? {} : manualValidation.errors),
+      };
 
-    if (Object.keys(allErrors).length > 0) {
-      toast({
-        title: 'Erreurs de validation',
-        description: 'Veuillez corriger les erreurs avant de continuer.',
-        variant: 'destructive',
-      });
-      return;
-    }
+      if (Object.keys(allErrors).length > 0) {
+        toast({
+          title: 'Erreurs de validation',
+          description: 'Veuillez corriger les erreurs avant de continuer.',
+          variant: 'destructive',
+        });
+        return;
+      }
 
-    setIsSubmitting(true);
-    const updates = buildUpdatePayload();
-    const success = await updateStore(updates);
-
-    if (success) {
-      await refreshStores().catch(() => {});
-      setIsEditing(false);
-      setFieldTouched({});
-      setLastSaved(new Date());
-      toast({ title: 'Boutique mise à jour', description: 'Toutes les modifications ont été enregistrées.', duration: 3000 });
-    } else {
-      toast({ title: 'Erreur', description: 'Impossible de sauvegarder les modifications. Veuillez réessayer.', variant: 'destructive', duration: 5000 });
-    }
-
-    setIsSubmitting(false);
-  }, [name, description, contactEmail, contactPhone, facebookUrl, instagramUrl, twitterUrl, linkedinUrl, buildUpdatePayload, updateStore, refreshStores, toast]);
+      setIsSubmitting(true);
+      try {
+        const updates = sanitizeStorePayload(buildUpdatePayload());
+        await updateStoreById({ storeId: store.id, updates });
+        await refreshStores().catch(() => {});
+        setIsEditing(false);
+        setFieldTouched({});
+        setLastSaved(new Date());
+      } catch {
+        // useStores.updateStore affiche déjà un toast d'erreur
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [
+      name,
+      description,
+      contactEmail,
+      contactPhone,
+      facebookUrl,
+      instagramUrl,
+      twitterUrl,
+      linkedinUrl,
+      buildUpdatePayload,
+      updateStoreById,
+      store.id,
+      refreshStores,
+      toast,
+    ]
+  );
 
   // --- Cancel ---
   const resetForm = useCallback(() => {
@@ -526,21 +850,36 @@ export function useStoreFormState(store: ExtendedStore) {
 
   const handleCopyUrl = useCallback(() => {
     navigator.clipboard.writeText(storeUrl);
-    toast({ title: 'Lien copié !', description: 'Le lien de votre boutique a été copié dans le presse-papiers.' });
+    toast({
+      title: 'Lien copié !',
+      description: 'Le lien de votre boutique a été copié dans le presse-papiers.',
+    });
   }, [storeUrl, toast]);
 
-  const handleSlugUpdate = useCallback(async (newSlug: string): Promise<boolean> => {
-    return await updateStore({ slug: newSlug });
-  }, [updateStore]);
+  const handleSlugUpdate = useCallback(
+    async (newSlug: string): Promise<boolean> => {
+      return await updateStoreById({ storeId: store.id, updates: { slug: newSlug } })
+        .then(() => true)
+        .catch(() => false);
+    },
+    [updateStoreById, store.id]
+  );
 
   // --- Color/Typography/Layout change handlers ---
   const handleColorChange = useCallback((field: string, value: string) => {
     const map: Record<string, (v: string) => void> = {
-      primary_color: setPrimaryColor, secondary_color: setSecondaryColor, accent_color: setAccentColor,
-      background_color: setBackgroundColor, text_color: setTextColor, text_secondary_color: setTextSecondaryColor,
-      button_primary_color: setButtonPrimaryColor, button_primary_text: setButtonPrimaryText,
-      button_secondary_color: setButtonSecondaryColor, button_secondary_text: setButtonSecondaryText,
-      link_color: setLinkColor, link_hover_color: setLinkHoverColor,
+      primary_color: setPrimaryColor,
+      secondary_color: setSecondaryColor,
+      accent_color: setAccentColor,
+      background_color: setBackgroundColor,
+      text_color: setTextColor,
+      text_secondary_color: setTextSecondaryColor,
+      button_primary_color: setButtonPrimaryColor,
+      button_primary_text: setButtonPrimaryText,
+      button_secondary_color: setButtonSecondaryColor,
+      button_secondary_text: setButtonSecondaryText,
+      link_color: setLinkColor,
+      link_hover_color: setLinkHoverColor,
       border_radius: v => setBorderRadius(v as 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full'),
       shadow_intensity: v => setShadowIntensity(v as 'none' | 'sm' | 'md' | 'lg' | 'xl'),
     };
@@ -549,9 +888,14 @@ export function useStoreFormState(store: ExtendedStore) {
 
   const handleTypographyChange = useCallback((field: string, value: string) => {
     const map: Record<string, (v: string) => void> = {
-      heading_font: setHeadingFont, body_font: setBodyFont, font_size_base: setFontSizeBase,
-      heading_size_h1: setHeadingSizeH1, heading_size_h2: setHeadingSizeH2, heading_size_h3: setHeadingSizeH3,
-      line_height: setLineHeight, letter_spacing: setLetterSpacing,
+      heading_font: setHeadingFont,
+      body_font: setBodyFont,
+      font_size_base: setFontSizeBase,
+      heading_size_h1: setHeadingSizeH1,
+      heading_size_h2: setHeadingSizeH2,
+      heading_size_h3: setHeadingSizeH3,
+      line_height: setLineHeight,
+      letter_spacing: setLetterSpacing,
     };
     map[field]?.(value);
   }, []);
@@ -571,16 +915,24 @@ export function useStoreFormState(store: ExtendedStore) {
 
   const handleSeoChange = useCallback((field: string, value: string) => {
     const map: Record<string, (v: string) => void> = {
-      meta_title: setMetaTitle, meta_description: setMetaDescription, meta_keywords: setMetaKeywords,
-      og_title: setOgTitle, og_description: setOgDescription, og_image_url: setOgImageUrl,
+      meta_title: setMetaTitle,
+      meta_description: setMetaDescription,
+      meta_keywords: setMetaKeywords,
+      og_title: setOgTitle,
+      og_description: setOgDescription,
+      og_image_url: setOgImageUrl,
     };
     map[field]?.(value);
   }, []);
 
   const handleAddressChange = useCallback((field: string, value: string) => {
     const map: Record<string, (v: string) => void> = {
-      address_line1: setAddressLine1, address_line2: setAddressLine2, city: setCity,
-      state_province: setStateProvince, postal_code: setPostalCode, country: setCountry,
+      address_line1: setAddressLine1,
+      address_line2: setAddressLine2,
+      city: setCity,
+      state_province: setStateProvince,
+      postal_code: setPostalCode,
+      country: setCountry,
     };
     map[field]?.(value);
   }, []);
@@ -590,15 +942,17 @@ export function useStoreFormState(store: ExtendedStore) {
     formState,
     setters,
     // UI state
-    isEditing, setIsEditing,
+    isEditing,
+    setIsEditing,
     isSubmitting,
-    showCancelConfirm, setShowCancelConfirm,
+    showCancelConfirm,
+    setShowCancelConfirm,
     lastSaved,
-    currentTab, setCurrentTab,
+    currentTab,
+    setCurrentTab,
     fieldTouched,
     // Store utilities
     storeUrl,
-    updateStore,
     checkSlugAvailability,
     toast,
     // Handlers

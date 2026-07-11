@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { VendorMessagingLink } from '@/components/vendor/VendorMessagingLink';
 import { supabase } from '@/integrations/supabase/client';
 import { useStoreSlug } from '@/contexts/StoreSlugContext';
 import { Button } from '@/components/ui/button';
@@ -1031,11 +1032,11 @@ const ProductDetails = () => {
                         className="flex-1 sm:flex-1 touch-manipulation min-h-[44px] text-sm sm:text-base border-2"
                         asChild
                       >
-                        <Link to={`/vendor/messaging/${product.store_id}?productId=${product.id}`}>
+                        <VendorMessagingLink storeId={product.store_id} productId={product.id}>
                           <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5 mr-2 flex-shrink-0" />
                           <span className="hidden sm:inline">Contacter le vendeur</span>
                           <span className="sm:hidden">Contacter</span>
-                        </Link>
+                        </VendorMessagingLink>
                       </Button>
                     )}
 

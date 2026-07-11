@@ -61,6 +61,12 @@ export function getPlatformRegisterUrl(): string {
   return getPlatformUrl(AUTH_REGISTER_PATH);
 }
 
+/** Chemin messagerie vendeur (plateforme emarzona.com). */
+export function getVendorMessagingPath(storeId: string, productId?: string | null): string {
+  const query = productId ? `?productId=${encodeURIComponent(productId)}` : '';
+  return `/vendor/messaging/${encodeURIComponent(storeId)}${query}`;
+}
+
 /** true hors domaine plateforme (boutique *.myemarzona.shop ou domaine personnalisé) */
 export function isOffPlatformHost(): boolean {
   if (typeof window === 'undefined') return false;
