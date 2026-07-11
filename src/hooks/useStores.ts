@@ -320,7 +320,7 @@ export const useStores = () => {
         .from('stores')
         .update(updates as unknown as StoreUpdate)
         .eq('id', storeId)
-        .select()
+        .select('id, name, slug, subdomain')
         .single();
 
       if (error) {
