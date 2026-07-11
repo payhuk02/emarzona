@@ -23,7 +23,10 @@ interface StoreBySubdomainResponse {
  * Récupère une boutique via l'Edge Function store-by-domain.
  * Supporte les 2 modes: sous-domaine et domaine personnalisé.
  */
-async function fetchStoreBySubdomain(subdomain?: string | null, customDomain?: string | null): Promise<Store> {
+async function fetchStoreBySubdomain(
+  subdomain?: string | null,
+  customDomain?: string | null
+): Promise<Store> {
   const normalizedSubdomain = subdomain?.trim().toLowerCase() || null;
   const normalizedCustomDomain = customDomain?.trim().toLowerCase() || null;
   const identifier = normalizedSubdomain || normalizedCustomDomain;
@@ -69,6 +72,27 @@ async function fetchStoreBySubdomain(subdomain?: string | null, customDomain?: s
       throw new Error("Réponse invalide de l'API");
     }
 
+    // #region agent log
+    fetch('http://127.0.0.1:7740/ingest/c21af8ec-02ef-48c9-95f8-23aa8fa2c366', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '47357a' },
+      body: JSON.stringify({
+        sessionId: '47357a',
+        runId: 'pre-fix',
+        hypothesisId: 'B',
+        location: 'useStoreBySubdomain.ts:edge-function',
+        message: 'store-by-domain edge response',
+        data: {
+          identifier,
+          hasStore: !!data.store,
+          storeSlug: data.store?.slug ?? null,
+          storeSubdomain: data.store?.subdomain ?? null,
+        },
+        timestamp: Date.now(),
+      }),
+    }).catch(() => {});
+    // #endregion
+
     return data.store;
   } catch (error) {
     logger.error('Error fetching store by subdomain via Edge Function', {
@@ -92,7 +116,30 @@ async function fetchStoreBySubdomain(subdomain?: string | null, customDomain?: s
         throw new Error(`Boutique non trouvée pour: ${identifier}`);
       }
 
-      return data[0] as Store;
+      const rpcStore = data[0] as Store;
+
+      // #region agent log
+      fetch('http://127.0.0.1:7740/ingest/c21af8ec-02ef-48c9-95f8-23aa8fa2c366', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '47357a' },
+        body: JSON.stringify({
+          sessionId: '47357a',
+          runId: 'pre-fix',
+          hypothesisId: 'C',
+          location: 'useStoreBySubdomain.ts:rpc-fallback',
+          message: 'get_store_by_subdomain rpc response',
+          data: {
+            identifier,
+            hasStore: !!rpcStore,
+            storeSlug: rpcStore?.slug ?? null,
+            storeSubdomain: rpcStore?.subdomain ?? null,
+          },
+          timestamp: Date.now(),
+        }),
+      }).catch(() => {});
+      // #endregion
+
+      return rpcStore;
     } catch (rpcError) {
       logger.error('Error fetching store by subdomain via RPC', {
         error: rpcError,
@@ -124,7 +171,8 @@ export function useStoreBySubdomain(
   const detectedSubdomain = subdomain ?? currentHostInfo.subdomain;
 
   const hasStoreIdentifier = !!detectedSubdomain || !!options?.customDomain;
-  const enabled = (options?.enabled ?? true) && hasStoreIdentifier && !currentHostInfo.isPlatformDomain;
+  const enabled =
+    (options?.enabled ?? true) && hasStoreIdentifier && !currentHostInfo.isPlatformDomain;
 
   return useQuery({
     queryKey: ['store-by-subdomain', detectedSubdomain, options?.customDomain || null],

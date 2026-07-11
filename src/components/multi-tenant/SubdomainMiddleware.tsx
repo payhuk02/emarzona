@@ -32,7 +32,37 @@ export function SubdomainMiddleware({ children }: SubdomainMiddlewareProps) {
   const { setSelectedStoreId } = useStoreContext();
 
   // Charger la boutique UNIQUEMENT si on est sur myemarzona.shop (domaine des boutiques)
-  const { data: store, isLoading, isError, error, isFetched } = useCurrentStoreBySubdomain();
+  const { data: store, isPending, isError, error } = useCurrentStoreBySubdomain();
+
+  // #region agent log
+  if (typeof window !== 'undefined') {
+    fetch('http://127.0.0.1:7740/ingest/c21af8ec-02ef-48c9-95f8-23aa8fa2c366', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '47357a' },
+      body: JSON.stringify({
+        sessionId: '47357a',
+        runId: 'pre-fix',
+        hypothesisId: 'A',
+        location: 'SubdomainMiddleware.tsx:render',
+        message: 'subdomain middleware query state',
+        data: {
+          host: window.location.hostname,
+          shouldResolveStore:
+            !subdomainInfo.isPlatformDomain &&
+            ((subdomainInfo.isStoreDomain &&
+              subdomainInfo.isSubdomain &&
+              !!subdomainInfo.subdomain) ||
+              (subdomainInfo.isCustomDomain && !!subdomainInfo.customDomain)),
+          isPending,
+          isError,
+          hasStore: !!store,
+          storeSlug: store?.slug ?? null,
+        },
+        timestamp: Date.now(),
+      }),
+    }).catch(() => {});
+  }
+  // #endregion
 
   useEffect(() => {
     const isStoreSubdomain =
@@ -90,8 +120,9 @@ export function SubdomainMiddleware({ children }: SubdomainMiddlewareProps) {
   }
 
   if (shouldResolveStore) {
-    // Loading
-    if (isLoading) {
+    // TanStack Query v5: isPending=true while no data yet (even before fetch starts).
+    // Using isLoading alone allowed a render frame with store=undefined → crash on store.slug.
+    if (isPending) {
       return (
         <div className="flex min-h-screen items-center justify-center">
           <div className="flex flex-col items-center space-y-4">
@@ -103,7 +134,7 @@ export function SubdomainMiddleware({ children }: SubdomainMiddlewareProps) {
     }
 
     // Store not found
-    if (isError || (isFetched && !store)) {
+    if (isError || !store) {
       return (
         <StoreNotFound
           subdomain={subdomainInfo.subdomain || subdomainInfo.customDomain || ''}
@@ -112,10 +143,20 @@ export function SubdomainMiddleware({ children }: SubdomainMiddlewareProps) {
       );
     }
 
+    const storeSlug = store.slug || subdomainInfo.subdomain || '';
+    if (!storeSlug) {
+      return (
+        <StoreNotFound
+          subdomain={subdomainInfo.subdomain || subdomainInfo.customDomain || ''}
+          error="Boutique sans identifiant (slug manquant)"
+        />
+      );
+    }
+
     // ✅ Store trouvée : afficher les routes de boutique au lieu des routes plateforme
     return (
       <StoreSubdomainRoutes
-        storeSlug={store.slug}
+        storeSlug={storeSlug}
         storeName={store.name}
         logoUrl={store.logo_url}
         commerceType={store.commerce_type as StoreCommerceType}
