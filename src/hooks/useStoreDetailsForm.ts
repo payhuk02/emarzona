@@ -119,7 +119,18 @@ export function useStoreDetailsForm(store: ExtendedStore) {
   const [openingHours, setOpeningHours] = useState<StoreOpeningHours | null>(store.opening_hours || null);
 
   // Legal & Marketing
-  const [legalPages, setLegalPages] = useState<StoreLegalPages | null>(store.legal_pages || null);
+  const [legalPages, setLegalPages] = useState<StoreLegalPages | null>(
+    store.legal_pages || {
+      terms_of_service: '',
+      privacy_policy: '',
+      return_policy: '',
+      shipping_policy: '',
+      refund_policy: '',
+      cookie_policy: '',
+      disclaimer: '',
+      faq_content: '',
+    }
+  );
   const [marketingContent, setMarketingContent] = useState<StoreMarketingContent | null>(store.marketing_content || null);
 
   // Analytics

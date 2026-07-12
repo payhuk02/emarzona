@@ -4,7 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CheckCircle2, Palette, Save } from 'lucide-react';
+import { CheckCircle2, Palette } from 'lucide-react';
 import { StoreFieldWithValidation } from '../StoreFieldWithValidation';
 import { StoreConfigManager } from '../StoreConfigManager';
 import type { Store } from '@/hooks/useStores';
@@ -200,12 +200,6 @@ export const StoreSettingsTab = ({
                 )}
               </div>
 
-              <div className="pt-4 border-t">
-                <Button onClick={() => handleSubmit()} disabled={isSubmitting} className="w-full sm:w-auto">
-                  <Save className="h-4 w-4 mr-2" />
-                  {isSubmitting ? 'Enregistrement...' : 'Enregistrer les modifications'}
-                </Button>
-              </div>
             </div>
           ) : (
             <div className="space-y-4">

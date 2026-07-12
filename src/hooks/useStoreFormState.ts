@@ -213,7 +213,18 @@ export function useStoreFormState(store: ExtendedStore) {
   const [openingHours, setOpeningHours] = useState<StoreOpeningHours | null>(
     store.opening_hours || null
   );
-  const [legalPages, setLegalPages] = useState<StoreLegalPages | null>(store.legal_pages || null);
+  const [legalPages, setLegalPages] = useState<StoreLegalPages | null>(
+    store.legal_pages || {
+      terms_of_service: '',
+      privacy_policy: '',
+      return_policy: '',
+      shipping_policy: '',
+      refund_policy: '',
+      cookie_policy: '',
+      disclaimer: '',
+      faq_content: '',
+    }
+  );
   const [marketingContent, setMarketingContent] = useState<StoreMarketingContent | null>(
     store.marketing_content || null
   );
@@ -782,6 +793,7 @@ export function useStoreFormState(store: ExtendedStore) {
         const updates = sanitizeStorePayload(buildUpdatePayload());
         await updateStoreById({ storeId: store.id, updates });
         await refreshStores().catch(() => {});
+        
         setIsEditing(false);
         setFieldTouched({});
         setLastSaved(new Date());

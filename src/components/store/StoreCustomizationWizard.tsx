@@ -9,7 +9,8 @@
 import React, { useMemo, useCallback, useRef, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { CheckCircle2, AlertCircle, Settings, Info } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { CheckCircle2, AlertCircle, Settings, Info, Save, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import type { Store } from '@/hooks/useStores';
@@ -20,6 +21,8 @@ import {
 } from '@/lib/commerce/store-customization-steps';
 import { resolveStoreCommerceTypeFromStore } from '@/lib/commerce/store-capability-map';
 
+const TABS_WITH_INTERNAL_SUBSTEPS = new Set(['legal', 'marketing']);
+
 interface StoreCustomizationWizardProps {
   store: Store;
   currentTab?: string;
@@ -27,6 +30,8 @@ interface StoreCustomizationWizardProps {
   children?: React.ReactNode;
   renderContent?: (tabKey: string) => React.ReactNode;
   className?: string;
+  onSave?: () => void | Promise<void>;
+  isSubmitting?: boolean;
 }
 
 export const StoreCustomizationWizard = ({
@@ -36,6 +41,8 @@ export const StoreCustomizationWizard = ({
   children,
   renderContent,
   className,
+  onSave,
+  isSubmitting = false,
 }: StoreCustomizationWizardProps) => {
   const headerRef = useScrollAnimation<HTMLDivElement>();
   const stepsRef = useRef<HTMLDivElement>(null);
@@ -92,6 +99,27 @@ export const StoreCustomizationWizard = ({
     },
     [onTabChange, currentStep, steps]
   );
+
+  const handleSaveAndContinue = useCallback(async () => {
+    if (onSave) {
+      await onSave();
+    }
+    if (onTabChange && currentStep < steps.length) {
+      const nextStep = steps.find(s => s.id === currentStep + 1);
+      if (nextStep) {
+        handleStepClick(nextStep.id);
+      }
+    }
+  }, [onSave, onTabChange, currentStep, steps, handleStepClick]);
+
+  const showSaveFooter =
+    !!onSave &&
+    !TABS_WITH_INTERNAL_SUBSTEPS.has(currentTab) &&
+    currentTab !== 'url' &&
+    currentTab !== 'commerce' &&
+    currentTab !== 'notifications';
+
+  const isLastStep = currentStep >= steps.length;
 
   const progress = useMemo(
     () => (steps.length > 0 ? (currentStep / steps.length) * 100 : 0),
@@ -269,6 +297,23 @@ export const StoreCustomizationWizard = ({
         </CardHeader>
         <CardContent className="p-3 sm:p-4 lg:p-6 pt-0">
           {renderContent ? renderContent(currentTab) : children}
+          {showSaveFooter && (
+            <div className="flex justify-end pt-4 mt-4 border-t">
+              <Button
+                onClick={() => void handleSaveAndContinue()}
+                className="gap-2"
+                disabled={isSubmitting}
+              >
+                <Save className="h-4 w-4" />
+                {isSubmitting
+                  ? 'Enregistrement...'
+                  : isLastStep
+                    ? 'Enregistrer'
+                    : 'Enregistrer et continuer'}
+                {!isLastStep && !isSubmitting && <ChevronRight className="h-4 w-4" />}
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

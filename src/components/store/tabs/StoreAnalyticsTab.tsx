@@ -52,12 +52,6 @@ export const StoreAnalyticsTab = ({ storeId, formState, setters, isEditing, isSu
               customScripts={formState.customTrackingScripts} customScriptsEnabled={formState.customScriptsEnabled}
               onCustomScriptsChange={(scripts, enabled) => { setters.setCustomTrackingScripts(scripts); setters.setCustomScriptsEnabled(enabled); }}
             />
-            <div className="pt-4 border-t mt-6">
-              <Button onClick={() => handleSubmit()} disabled={isSubmitting} className="w-full sm:w-auto">
-                <Save className="h-4 w-4 mr-2" />
-                {isSubmitting ? 'Enregistrement...' : 'Enregistrer les modifications'}
-              </Button>
-            </div>
           </CardContent>
         </Card>
       )}

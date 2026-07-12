@@ -38,12 +38,6 @@ export const StoreSeoTab = ({ store, formState, isSubmitting, handleSubmit, hand
             faviconUrl={store.favicon_url || undefined}
             onChange={handleSeoChange}
           />
-          <div className="pt-4 border-t mt-6">
-            <Button onClick={() => handleSubmit()} disabled={isSubmitting} className="w-full sm:w-auto">
-              <Save className="h-4 w-4 mr-2" />
-              {isSubmitting ? 'Enregistrement...' : 'Enregistrer les modifications'}
-            </Button>
-          </div>
         </CardContent>
       </Card>
     </div>

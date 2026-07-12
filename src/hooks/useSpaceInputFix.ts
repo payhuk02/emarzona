@@ -6,6 +6,16 @@ import { useRef } from 'react';
 
 export const useSpaceInputFix = () => {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    // Allow paste events (Ctrl+V or Cmd+V) to work normally
+    if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
+      return;
+    }
+    
+    // Allow other common shortcuts
+    if ((e.ctrlKey || e.metaKey) && ['c', 'x', 'a', 'z', 'y'].includes(e.key)) {
+      return;
+    }
+    
     if (e.key === ' ') {
       const target = e.target as HTMLInputElement | HTMLTextAreaElement;
       const currentValue = target.value;

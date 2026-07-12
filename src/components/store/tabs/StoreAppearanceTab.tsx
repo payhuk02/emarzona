@@ -258,12 +258,6 @@ export const StoreAppearanceTab = ({
         </CardContent>
       </Card>
 
-      <div className="pt-4 border-t">
-        <Button onClick={() => handleSubmit()} disabled={isSubmitting} className="w-full sm:w-auto">
-          <Save className="h-4 w-4 mr-2" />
-          {isSubmitting ? 'Enregistrement...' : 'Enregistrer les modifications'}
-        </Button>
-      </div>
     </div>
   );
 };

@@ -362,18 +362,23 @@ export const useStores = () => {
 
       const sanitized = sanitizeStorePayload(updates as Record<string, unknown>);
 
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('stores')
         .update(sanitized as unknown as StoreUpdate)
-        .eq('id', storeId)
-        .select('id, name, slug, subdomain')
-        .single();
+        .eq('id', storeId);
 
       if (error) {
         throw error;
       }
 
-      return data;
+      // Fetch the updated store data separately
+      const { data: updatedData } = await supabase
+        .from('stores')
+        .select('id, name, slug')
+        .eq('id', storeId)
+        .single();
+
+      return updatedData;
     },
     onSuccess: updatedStore => {
       queryClient.invalidateQueries({ queryKey: ['stores'] });

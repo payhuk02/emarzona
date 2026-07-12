@@ -24,6 +24,8 @@ import {
   X,
   Trash2,
   Edit2,
+  Save,
+  ChevronRight,
 } from 'lucide-react';
 import { useSpaceInputFix } from '@/hooks/useSpaceInputFix';
 import { StoreMarketingContent } from '@/hooks/useStores';
@@ -31,11 +33,33 @@ import { StoreMarketingContent } from '@/hooks/useStores';
 interface StoreMarketingContentProps {
   marketingContent: StoreMarketingContent | null;
   onChange: (content: StoreMarketingContent) => void;
+  onSave?: () => void | Promise<void>;
+  currentTab?: string;
+  onTabChange?: (tab: string) => void;
+  onCompleteSubSteps?: () => void;
+  isSubmitting?: boolean;
 }
+
+const MARKETING_TABS = [
+  { key: 'welcome', label: 'Bienvenue' },
+  { key: 'mission', label: 'Mission' },
+  { key: 'values', label: 'Valeurs' },
+  { key: 'story', label: 'Histoire' },
+  { key: 'team', label: 'Équipe' },
+  { key: 'testimonials', label: 'Témoignages' },
+  { key: 'certifications', label: 'Certifications' },
+] as const;
+
+export const DEFAULT_MARKETING_TAB = MARKETING_TABS[0].key;
 
 export const StoreMarketingContentComponent : React.FC<StoreMarketingContentProps> = ({
   marketingContent,
   onChange,
+  onSave,
+  currentTab = DEFAULT_MARKETING_TAB,
+  onTabChange,
+  onCompleteSubSteps,
+  isSubmitting = false,
 }) => {
   const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
   
@@ -80,8 +104,8 @@ export const StoreMarketingContentComponent : React.FC<StoreMarketingContentProp
   });
 
   // Sauvegarder les changements
-  const handleSave = () => {
-    const  updatedContent: StoreMarketingContent = {
+  const syncContentToParent = () => {
+    const updatedContent: StoreMarketingContent = {
       welcome_message: welcomeMessage || undefined,
       mission_statement: missionStatement || undefined,
       vision_statement: visionStatement || undefined,
@@ -92,7 +116,35 @@ export const StoreMarketingContentComponent : React.FC<StoreMarketingContentProp
       certifications: certifications.length > 0 ? certifications : undefined,
     };
     onChange(updatedContent);
+    return updatedContent;
   };
+
+  const handleSaveAndContinue = async () => {
+    syncContentToParent();
+    if (onSave) {
+      await onSave();
+    }
+    const currentIndex = MARKETING_TABS.findIndex(tab => tab.key === currentTab);
+    if (currentIndex < MARKETING_TABS.length - 1 && onTabChange) {
+      onTabChange(MARKETING_TABS[currentIndex + 1].key);
+    } else if (onCompleteSubSteps) {
+      onCompleteSubSteps();
+    }
+  };
+
+  const renderSaveFooter = () => (
+    <div className="flex justify-end pt-4 border-t">
+      <Button
+        onClick={() => void handleSaveAndContinue()}
+        className="gap-2"
+        disabled={isSubmitting}
+      >
+        <Save className="h-4 w-4" />
+        {isSubmitting ? 'Enregistrement...' : 'Enregistrer et continuer'}
+        {!isSubmitting && <ChevronRight className="h-4 w-4" />}
+      </Button>
+    </div>
+  );
 
   // Gestion des valeurs
   const handleAddValue = () => {
@@ -216,7 +268,7 @@ export const StoreMarketingContentComponent : React.FC<StoreMarketingContentProp
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="welcome" className="w-full">
+        <Tabs value={currentTab} onValueChange={onTabChange} className="w-full">
           <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1 sm:gap-2">
             <TabsTrigger value="welcome" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
               <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -271,6 +323,7 @@ export const StoreMarketingContentComponent : React.FC<StoreMarketingContentProp
                 Message qui s'affichera en haut de la page d'accueil de votre boutique
               </p>
             </div>
+            {renderSaveFooter()}
           </TabsContent>
 
           {/* Mission */}
@@ -306,6 +359,7 @@ export const StoreMarketingContentComponent : React.FC<StoreMarketingContentProp
                 </p>
               </div>
             </div>
+            {renderSaveFooter()}
           </TabsContent>
 
           {/* Valeurs */}
@@ -353,6 +407,7 @@ export const StoreMarketingContentComponent : React.FC<StoreMarketingContentProp
                 </div>
               </div>
             )}
+            {renderSaveFooter()}
           </TabsContent>
 
           {/* Histoire */}
@@ -371,6 +426,7 @@ export const StoreMarketingContentComponent : React.FC<StoreMarketingContentProp
                 Histoire complète de votre boutique (support Markdown)
               </p>
             </div>
+            {renderSaveFooter()}
           </TabsContent>
 
           {/* Équipe */}
@@ -486,6 +542,7 @@ export const StoreMarketingContentComponent : React.FC<StoreMarketingContentProp
                 </div>
               )}
             </div>
+            {renderSaveFooter()}
           </TabsContent>
 
           {/* Témoignages */}
@@ -630,6 +687,7 @@ export const StoreMarketingContentComponent : React.FC<StoreMarketingContentProp
                 </div>
               )}
             </div>
+            {renderSaveFooter()}
           </TabsContent>
 
           {/* Certifications */}
@@ -768,6 +826,7 @@ export const StoreMarketingContentComponent : React.FC<StoreMarketingContentProp
                 </div>
               )}
             </div>
+            {renderSaveFooter()}
           </TabsContent>
         </Tabs>
       </CardContent>

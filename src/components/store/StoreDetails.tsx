@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -13,14 +13,15 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Copy, ExternalLink, Save, X, Settings } from 'lucide-react';
 import type { Store } from '@/hooks/useStores';
+import type { StoreLegalPages } from '@/hooks/useStores';
 import { generateStoreUrl } from '@/lib/store-utils';
 import type { ExtendedStore } from './types/store-form';
 import { resolveStoreCommerceTypeFromStore } from '@/lib/commerce/store-capability-map';
-import { isStoreCustomizationTabVisible } from '@/lib/commerce/store-customization-steps';
+import { isStoreCustomizationTabVisible, getStoreCustomizationSteps } from '@/lib/commerce/store-customization-steps';
 import { useStoreFormState } from '@/hooks/useStoreFormState';
 import { StoreCustomizationWizard } from './StoreCustomizationWizard';
-import { StoreLegalPagesComponent } from './StoreLegalPages';
-import { StoreMarketingContentComponent } from './StoreMarketingContent';
+import { StoreLegalPagesComponent, DEFAULT_LEGAL_TAB } from './StoreLegalPages';
+import { StoreMarketingContentComponent, DEFAULT_MARKETING_TAB } from './StoreMarketingContent';
 import { StoreCommerceSettings } from './StoreCommerceSettings';
 import { StoreNotificationSettings } from './StoreNotificationSettings';
 import {
@@ -69,6 +70,18 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
     checkSlugAvailability,
     toast,
   } = form;
+
+  const [legalSubTab, setLegalSubTab] = useState<keyof StoreLegalPages>(DEFAULT_LEGAL_TAB);
+  const [marketingSubTab, setMarketingSubTab] = useState(DEFAULT_MARKETING_TAB);
+
+  const advanceWizardStep = useCallback(() => {
+    const commerceType = resolveStoreCommerceTypeFromStore(store);
+    const steps = getStoreCustomizationSteps(commerceType);
+    const currentIndex = steps.findIndex(step => step.key === currentTab);
+    if (currentIndex >= 0 && currentIndex < steps.length - 1) {
+      setCurrentTab(steps[currentIndex + 1].key);
+    }
+  }, [store, currentTab, setCurrentTab]);
 
   const renderTabContent = useCallback(
     (tabKey: string) => {
@@ -137,7 +150,20 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
           return (
             <StoreLegalPagesComponent
               legalPages={formState.legalPages}
-              onChange={setters.setLegalPages}
+              onChange={(field, value) => {
+                setters.setLegalPages(
+                  prev =>
+                    ({
+                      ...(prev || {}),
+                      [field]: value,
+                    }) as StoreLegalPages
+                );
+              }}
+              onSave={handleSubmit}
+              currentTab={legalSubTab}
+              onTabChange={setLegalSubTab}
+              onCompleteSubSteps={advanceWizardStep}
+              isSubmitting={isSubmitting}
             />
           );
 
@@ -159,6 +185,11 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
             <StoreMarketingContentComponent
               marketingContent={formState.marketingContent}
               onChange={setters.setMarketingContent}
+              onSave={handleSubmit}
+              currentTab={marketingSubTab}
+              onTabChange={setMarketingSubTab}
+              onCompleteSubSteps={advanceWizardStep}
+              isSubmitting={isSubmitting}
             />
           );
 
@@ -213,6 +244,9 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
       updateStore,
       checkSlugAvailability,
       toast,
+      legalSubTab,
+      marketingSubTab,
+      advanceWizardStep,
     ]
   );
 
@@ -327,6 +361,8 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
         currentTab={currentTab}
         onTabChange={setCurrentTab}
         renderContent={renderTabContent}
+        onSave={handleSubmit}
+        isSubmitting={isSubmitting}
       />
 
       {/* Social links (read-only card) */}

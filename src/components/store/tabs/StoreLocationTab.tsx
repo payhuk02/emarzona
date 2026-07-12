@@ -32,12 +32,6 @@ export const StoreLocationTab = ({ formState, setters, isSubmitting, handleSubmi
             onTimezoneChange={v => setters.setTimezone(v)}
             onOpeningHoursChange={v => setters.setOpeningHours(v)}
           />
-          <div className="pt-4 border-t mt-6">
-            <Button onClick={() => handleSubmit()} disabled={isSubmitting} className="w-full sm:w-auto">
-              <Save className="h-4 w-4 mr-2" />
-              {isSubmitting ? 'Enregistrement...' : 'Enregistrer les modifications'}
-            </Button>
-          </div>
         </CardContent>
       </Card>
     </div>

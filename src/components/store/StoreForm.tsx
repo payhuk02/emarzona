@@ -346,8 +346,18 @@ const StoreForm = ({
 
   // Pages légales
   const [legalPages, setLegalPages] = useState<StoreLegalPages | null>(
-    initialData?.legal_pages || null
+    initialData?.legal_pages || {
+      terms_of_service: '',
+      privacy_policy: '',
+      return_policy: '',
+      shipping_policy: '',
+      refund_policy: '',
+      cookie_policy: '',
+      disclaimer: '',
+      faq_content: '',
+    }
   );
+  const [currentLegalTab, setCurrentLegalTab] = useState('terms');
 
   const [isCheckingSlug, setIsCheckingSlug] = useState(false);
   const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null);
@@ -1989,6 +1999,8 @@ const StoreForm = ({
             <TabsContent value="legal" className="mt-4">
               <StoreLegalPagesComponent
                 legalPages={legalPages}
+                currentTab={currentLegalTab}
+                onTabChange={setCurrentLegalTab}
                 onChange={(field, value) => {
                   setLegalPages(
                     prev =>
@@ -1998,6 +2010,8 @@ const StoreForm = ({
                       }) as StoreLegalPages
                   );
                 }}
+                onSave={handleSubmit}
+                isSubmitting={isSubmitting}
               />
             </TabsContent>
 

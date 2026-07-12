@@ -309,31 +309,21 @@ export const useStore = () => {
         updateData.slug = newSlug;
       }
 
-      const { data, error } = await (
-        supabase as unknown as {
-          from: (table: 'stores') => {
-            update: (values: Record<string, unknown>) => {
-              eq: (
-                column: string,
-                value: string
-              ) => {
-                select: () => {
-                  limit: (count: number) => Promise<{ data: Store[] | null; error: unknown }>;
-                };
-              };
-            };
-          };
-        }
-      )
+      const { error } = await supabase
         .from('stores')
         .update(updateData)
-        .eq('id', store.id)
-        .select()
-        .limit(1);
+        .eq('id', store.id);
 
       if (error) throw error;
 
-      const updated = data?.[0];
+      // Fetch the updated store data separately
+      const { data: updatedData } = await supabase
+        .from('stores')
+        .select('id, name, slug')
+        .eq('id', store.id)
+        .single();
+
+      const updated = updatedData;
       setStore(
         updated ? (mapStoreRow(updated as unknown as Record<string, unknown>) ?? store) : store
       );
