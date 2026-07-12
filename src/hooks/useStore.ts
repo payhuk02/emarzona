@@ -311,7 +311,7 @@ export const useStore = () => {
 
       const { error } = await supabase
         .from('stores')
-        .update(updateData)
+        .update(updateData as any)
         .eq('id', store.id);
 
       if (error) throw error;

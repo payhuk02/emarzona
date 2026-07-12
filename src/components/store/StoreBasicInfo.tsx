@@ -9,7 +9,6 @@
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { StoreFieldWithValidation } from './StoreFieldWithValidation';
 
 interface StoreBasicInfoProps {
   name: string;
@@ -40,9 +39,9 @@ export const StoreBasicInfo = ({
   setAbout,
   setDefaultCurrency,
   isSubmitting = false,
-  fieldTouched = {},
-  handleFieldBlur,
-  validateField,
+  _fieldTouched = {},
+  _handleFieldBlur,
+  _validateField,
 }: StoreBasicInfoProps) => {
   return (
     <div className="space-y-4" role="group" aria-labelledby="basic-info-heading">

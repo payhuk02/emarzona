@@ -57,7 +57,7 @@ const mockUseStoreFormState = vi.fn(() => ({
   validateField: vi.fn(() => null as string | null),
   handleSubmit: vi.fn(),
   applyConfig: vi.fn(),
-} as any));
+}));
 
 vi.mock('@/hooks/useStoreFormState', () => ({
   useStoreFormState: mockUseStoreFormState,
@@ -183,7 +183,7 @@ describe('StoreCustomizationWizard', () => {
       validateField: vi.fn(() => 'Ce champ est requis' as string | null),
       handleSubmit: vi.fn(),
       applyConfig: vi.fn(),
-    } as any);
+    }));
 
     render(
       <StoreCustomizationWizard

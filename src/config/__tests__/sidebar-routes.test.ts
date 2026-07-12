@@ -30,6 +30,8 @@ function routeExists(url: string, patterns: string[]): boolean {
   const itemPath = url.split('?')[0];
   for (const pattern of patterns) {
     if (pattern === itemPath) return true;
+    // Skip empty or invalid patterns
+    if (!pattern || pattern === '*' || pattern === '') continue;
     const regex = new RegExp(`^${pattern.replace(/:[^/]+/g, '[^/]+')}$`);
     if (regex.test(itemPath)) return true;
   }
