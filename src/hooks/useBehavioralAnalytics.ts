@@ -7,7 +7,7 @@ interface UserBehaviorEvent {
   user_id?: string;
   session_id: string;
   event_type: 'page_view' | 'product_view' | 'cart_add' | 'cart_remove' | 'purchase_start' | 'purchase_complete' | 'search' | 'filter' | 'share' | 'wishlist_add' | 'review_view' | 'contact_form' | 'newsletter_signup';
-  event_data: Record<string, any>;
+  event_data: Record<string, unknown>;
   page_url: string;
   referrer?: string;
   device_info: {
@@ -243,7 +243,7 @@ export const useBehavioralAnalytics = (
   }, [trackCartActions, userId, trackEvent]);
 
   // Search and filter tracking
-  const trackSearch = useCallback((query: string, resultsCount: number, filters?: Record<string, any>) => {
+  const trackSearch = useCallback((query: string, resultsCount: number, filters?: Record<string, unknown>) => {
     if (!trackSearchAndFilter) return;
 
     trackEvent.mutate({
@@ -254,7 +254,7 @@ export const useBehavioralAnalytics = (
     });
   }, [trackSearchAndFilter, userId, trackEvent]);
 
-  const trackFilter = useCallback((filterType: string, filterValue: any, resultsCount: number) => {
+  const trackFilter = useCallback((filterType: string, filterValue: unknown, resultsCount: number) => {
     if (!trackSearchAndFilter) return;
 
     trackEvent.mutate({
@@ -278,7 +278,7 @@ export const useBehavioralAnalytics = (
   }, [trackSocialInteractions, userId, trackEvent]);
 
   // Form interactions tracking
-  const trackFormInteraction = useCallback((formType: string, action: 'start' | 'submit' | 'abandon', formData?: Record<string, any>) => {
+  const trackFormInteraction = useCallback((formType: string, action: 'start' | 'submit' | 'abandon', formData?: Record<string, unknown>) => {
     if (!trackFormInteractions) return;
 
     trackEvent.mutate({
@@ -290,7 +290,7 @@ export const useBehavioralAnalytics = (
   }, [trackFormInteractions, userId, trackEvent]);
 
   // Purchase tracking
-  const trackPurchaseStart = useCallback((cartItems: any[], totalAmount: number) => {
+  const trackPurchaseStart = useCallback((cartItems: unknown[], totalAmount: number) => {
     trackEvent.mutate({
       user_id: userId,
       event_type: 'purchase_start',
@@ -299,7 +299,7 @@ export const useBehavioralAnalytics = (
     });
   }, [userId, trackEvent]);
 
-  const trackPurchaseComplete = useCallback((orderId: string, totalAmount: number, items: any[]) => {
+  const trackPurchaseComplete = useCallback((orderId: string, totalAmount: number, items: unknown[]) => {
     trackEvent.mutate({
       user_id: userId,
       event_type: 'purchase_complete',

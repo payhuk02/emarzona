@@ -75,17 +75,10 @@ import {
   MoreVertical,
   Upload,
   Download as DownloadIcon,
-  FileCheck,
-  FileX,
   Play,
   Pause,
   ExternalLink,
   Settings as SettingsIcon,
-  Megaphone,
-  Bot,
-  Brain,
-  CircleHelp,
-  Newspaper,
 } from '@/components/icons';
 import type { RawNavSection } from '@/config/navigation.enrich';
 

@@ -2,9 +2,8 @@ import { AppPageShell } from '@/components/layout/AppPageShell';
 import { Activity, Package, ShoppingCart } from 'lucide-react';
 import { useDashboardStatsOptimized as useDashboardStats } from '@/hooks/useDashboardStats';
 import { useStore, type Store } from '@/hooks/useStore';
-import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigate } from 'react-router-dom';
-import { useState, useMemo, useCallback, lazy, Suspense, useEffect, useRef } from 'react';
+import { useState, useMemo, useCallback, lazy, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import { logger } from '@/lib/logger';
@@ -12,38 +11,12 @@ import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useSessionHealth } from '@/hooks/useSessionHealth';
 import { usePlatformLogo } from '@/hooks/usePlatformLogo';
 import type { Notification } from '@/types/notifications';
-// ✅ PHASE 2: Lazy load des composants analytics lourds (utilisent recharts)
-const ProductTypeCharts = lazy(() =>
-  import('@/components/dashboard/ProductTypeCharts').then(m => ({
-    default: m.ProductTypeCharts,
-  }))
-);
-const ProductTypePerformanceMetrics = lazy(() =>
-  import('@/components/dashboard/ProductTypePerformanceMetrics').then(m => ({
-    default: m.ProductTypePerformanceMetrics,
-  }))
-);
-const DashboardCharts = lazy(() =>
-  import('@/components/dashboard/DashboardCharts').then(m => ({ default: m.DashboardCharts }))
-);
-const CoreWebVitalsMonitor = lazy(() =>
-  import('@/components/dashboard/CoreWebVitalsMonitor').then(m => ({
-    default: m.CoreWebVitalsMonitor,
-  }))
-);
 // Composants non-lourds (pas de lazy loading nécessaire)
 import { RecentOrdersCard } from '@/components/dashboard/RecentOrdersCard';
 import { TopProductsCard } from '@/components/dashboard/TopProductsCard';
-import { ProductTypeBreakdown } from '@/components/dashboard/ProductTypeBreakdown';
-import {
-  ProductTypeQuickFilters,
-  type ProductTypeFilter,
-} from '@/components/dashboard/ProductTypeQuickFilters';
 import { PeriodType } from '@/components/dashboard/PeriodFilter';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { DashboardStats } from '@/components/dashboard/DashboardStats';
-import { DashboardNotifications } from '@/components/dashboard/DashboardNotifications';
-import { DashboardWidgetErrorBoundary } from '@/components/dashboard/DashboardWidgetErrorBoundary';
 import {
   useNotifications,
   useUnreadCount,
@@ -51,10 +24,8 @@ import {
 } from '@/hooks/useNotifications';
 import { DashboardFullSkeleton } from '@/components/dashboard/DashboardSkeleton';
 import { DashboardOnboarding } from '@/components/dashboard/DashboardOnboarding';
-// import { SessionExpiryWarning } from '@/components/auth/SessionExpiryWarning'; // ✅ Supprimé pour gestion silencieuse
 import { DashboardErrorHandler } from '@/components/dashboard/DashboardErrorHandler';
 import { DashboardCategorySales } from '@/components/dashboard/DashboardCategorySales';
-import { DashboardFooterMetrics } from '@/components/dashboard/DashboardFooterMetrics';
 import { DashboardSalesEvolution } from '@/components/dashboard/DashboardSalesEvolution';
 import { DashboardRecentActivity } from '@/components/dashboard/DashboardRecentActivity';
 import { DashboardActionCenter } from '@/components/dashboard/DashboardActionCenter';

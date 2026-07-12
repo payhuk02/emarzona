@@ -7,7 +7,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { subDays, startOfDay, endOfDay } from 'date-fns';
+import { subDays, startOfDay } from 'date-fns';
 
 const DIGITAL_DOWNLOAD_FIELDS = 'id, digital_product_id, file_id, user_id, download_date, download_country, file_size_mb, download_success, file_version';
 const DIGITAL_LICENSE_FIELDS = 'id, digital_product_id, user_id, status, created_at, expires_at';
@@ -336,7 +336,7 @@ export const useLicenseAnalytics = (digitalProductId: string) => {
         sum + (l.activations?.length || 0), 0
       );
       const activeActivations = licenses.reduce((sum, l) => 
-        sum + (l.activations?.filter((a: any) => a.is_active).length || 0), 0
+        sum + (l.activations?.filter((a: { is_active: boolean }) => a.is_active).length || 0), 0
       );
 
       return {
@@ -424,7 +424,7 @@ export const useDigitalRevenueAnalytics = (storeId?: string, dateRange?: { from:
 
       if (ordersError) {
         // Log error but return empty data instead of throwing
-        console.warn('Error fetching order items:', ordersError);
+        logger.warn('Error fetching order items:', ordersError);
         return {
           total_revenue: 0,
           total_orders: 0,

@@ -283,6 +283,7 @@ const SellerIntegrationsPage = lazyPage(
   () => import('@/pages/dashboard/seller/SellerIntegrationsPage')
 );
 const CustomDomainManagement = lazyPage(() => import('@/pages/dashboard/CustomDomainManagement'));
+const AdvancedDashboard = lazyPage(() => import('@/pages/AdvancedDashboard'));
 
 export const dashboardRoutes = (
   <>
@@ -321,6 +322,8 @@ export const dashboardRoutes = (
 
     {/* Analytics & Payments */}
     {pr('/dashboard/analytics', Analytics)}
+    {pr('/dashboard/analytics/dashboards', AnalyticsDashboardsManagement)}
+    {pr('/dashboard/advanced', AdvancedDashboard)}
     {pr('/dashboard/payments', Payments)}
     {pr('/dashboard/payments-customers', PaymentsCustomers)}
     {pr('/dashboard/settings', Settings)}
