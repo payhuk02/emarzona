@@ -84,15 +84,27 @@ export const useUnreadCount = (options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: ['notifications', 'unread-count'],
     enabled,
+    retry: false,
     queryFn: async (): Promise<number> => {
-      const { data, error } = await supabase.rpc('get_unread_count');
+      try {
+        const { data, error } = await supabase.rpc('get_unread_count');
 
-      if (error) {
-        logger.error('Error fetching unread count', { error });
+        if (error) {
+          // Fallback: count directly if RPC doesn't exist
+          logger.warn('RPC get_unread_count failed, using fallback', { error: error.message });
+          const { count } = await supabase
+            .from('notifications')
+            .select('id', { count: 'exact', head: true })
+            .eq('is_read', false)
+            .eq('is_archived', false);
+          return count || 0;
+        }
+
+        return data || 0;
+      } catch (err) {
+        logger.error('Error fetching unread count', { error: err });
         return 0;
       }
-
-      return data || 0;
     },
     refetchInterval: () =>
       typeof document !== 'undefined' && document.visibilityState === 'visible' ? 60_000 : false,

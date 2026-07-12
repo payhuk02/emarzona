@@ -83,7 +83,7 @@ function buildSubgroups(
 
   for (const def of defs) {
     const groupItems = items.filter(
-      i => def.paths.includes(i.path) || def.paths.some(p => i.path.startsWith(`${p}/`))
+      i => !assigned.has(i.path) && (def.paths.includes(i.path) || def.paths.some(p => i.path.startsWith(`${p}/`)))
     );
     groupItems.forEach(i => assigned.add(i.path));
     if (groupItems.length === 0) continue;

@@ -1,6 +1,7 @@
 /**
  * AppPageShell — shell dashboard unifié
  * AppSidebar compact + barre horizontale contextuelle (mega-menu) + UtilityBar + main
+ * Enterprise-grade avec CommandPalette intégrée
  */
 
 import { lazy, ReactNode, Suspense } from 'react';
@@ -13,6 +14,7 @@ import { shouldShowHorizontalNav } from '@/config/navigation.horizontal';
 import { detectLayoutType } from '@/config/layoutTypeDetection';
 import type { LayoutType } from '@/components/layout/layout.types';
 import { cn } from '@/lib/utils';
+import { CommandPalette, useCommandPalette } from '@/components/navigation/CommandPalette';
 
 const HorizontalContextNav = lazy(() =>
   import('@/components/layout/HorizontalContextNav').then(m => ({
@@ -49,9 +51,11 @@ export function AppPageShell({
   const location = useLocation();
   void (layoutType ?? detectLayoutType(location.pathname));
   const showHorizontalNav = shouldShowHorizontalNav(location.pathname);
+  const { open, setOpen } = useCommandPalette();
 
   return (
     <SidebarProvider>
+      <CommandPalette open={open} onOpenChange={setOpen} />
       <div
         className={cn('flex min-h-screen w-full bg-background overflow-x-hidden', shellClassName)}
       >

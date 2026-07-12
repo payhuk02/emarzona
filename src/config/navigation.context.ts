@@ -3,6 +3,16 @@ import { enrichNavSections, filterNavSections } from '@/config/navigation.enrich
 import { translateNavItemTitle, translateNavSections } from '@/config/navigation.i18n';
 import { PHASE6_CONTEXT_CONFIGS } from '@/config/navigation.context.phase6';
 import { SETTINGS_CONTEXT_CONFIG } from '@/config/navigation.context.settings';
+import {
+  PRODUCTS_CONTEXT_SIDEBAR,
+  LOGISTICS_CONTEXT_SIDEBAR,
+  MARKETING_CONTEXT_SIDEBAR,
+  ANALYTICS_CONTEXT_SIDEBAR,
+  PAYMENTS_CONTEXT_SIDEBAR,
+  SETTINGS_CONTEXT_SIDEBAR as EXTENDED_SETTINGS_CONTEXT_SIDEBAR,
+  AI_CONTEXT_SIDEBAR,
+  CONTEXT_SIDEBAR_MAPPING,
+} from '@/config/navigation.context.extended';
 import type {
   ContextSidebarConfig,
   ContextSidebarNavGroup,
@@ -21,6 +31,92 @@ export type {
 } from '@/config/navigation.context.types';
 
 export const CONTEXT_SIDEBAR_CONFIGS = {
+  // Extended context sidebars from navigation.context.extended
+  products_extended: {
+    id: 'products_extended',
+    sectionKey: 'produits_etendus',
+    rootPath: '/dashboard/products',
+    ariaLabel: 'Navigation produits étendue',
+    collapsibleGroups: true,
+    groups: PRODUCTS_CONTEXT_SIDEBAR.map(section => ({
+      groupKey: section.label.toLowerCase().replace(/\s+/g, '_'),
+      defaultLabel: section.label,
+      paths: section.items.map(item => item.url),
+    })),
+  },
+  logistics_extended: {
+    id: 'logistics_extended',
+    sectionKey: 'logistique_etendue',
+    rootPath: '/dashboard/orders',
+    ariaLabel: 'Navigation logistique étendue',
+    collapsibleGroups: true,
+    groups: LOGISTICS_CONTEXT_SIDEBAR.map(section => ({
+      groupKey: section.label.toLowerCase().replace(/\s+/g, '_'),
+      defaultLabel: section.label,
+      paths: section.items.map(item => item.url),
+    })),
+  },
+  marketing_extended: {
+    id: 'marketing_extended',
+    sectionKey: 'marketing_etendu',
+    rootPath: '/dashboard/customers',
+    ariaLabel: 'Navigation marketing étendue',
+    collapsibleGroups: true,
+    groups: MARKETING_CONTEXT_SIDEBAR.map(section => ({
+      groupKey: section.label.toLowerCase().replace(/\s+/g, '_'),
+      defaultLabel: section.label,
+      paths: section.items.map(item => item.url),
+    })),
+  },
+  analytics_extended: {
+    id: 'analytics_extended',
+    sectionKey: 'analytics_etendu',
+    rootPath: '/dashboard/analytics',
+    ariaLabel: 'Navigation analytics étendue',
+    collapsibleGroups: true,
+    groups: ANALYTICS_CONTEXT_SIDEBAR.map(section => ({
+      groupKey: section.label.toLowerCase().replace(/\s+/g, '_'),
+      defaultLabel: section.label,
+      paths: section.items.map(item => item.url),
+    })),
+  },
+  payments_extended: {
+    id: 'payments_extended',
+    sectionKey: 'paiements_etendus',
+    rootPath: '/dashboard/payments',
+    ariaLabel: 'Navigation paiements étendue',
+    collapsibleGroups: true,
+    groups: PAYMENTS_CONTEXT_SIDEBAR.map(section => ({
+      groupKey: section.label.toLowerCase().replace(/\s+/g, '_'),
+      defaultLabel: section.label,
+      paths: section.items.map(item => item.url),
+    })),
+  },
+  settings_extended: {
+    id: 'settings_extended',
+    sectionKey: 'parametres_etendus',
+    rootPath: '/dashboard/settings',
+    ariaLabel: 'Navigation paramètres étendue',
+    collapsibleGroups: true,
+    groups: EXTENDED_SETTINGS_CONTEXT_SIDEBAR.map(section => ({
+      groupKey: section.label.toLowerCase().replace(/\s+/g, '_'),
+      defaultLabel: section.label,
+      paths: section.items.map(item => item.url),
+    })),
+  },
+  ai_extended: {
+    id: 'ai_extended',
+    sectionKey: 'ia_etendue',
+    rootPath: '/recommendations',
+    ariaLabel: 'Navigation IA étendue',
+    collapsibleGroups: true,
+    groups: AI_CONTEXT_SIDEBAR.map(section => ({
+      groupKey: section.label.toLowerCase().replace(/\s+/g, '_'),
+      defaultLabel: section.label,
+      paths: section.items.map(item => item.url),
+    })),
+  },
+  // Existing context configs
   finance: {
     id: 'finance',
     sectionKey: 'finance_paiements',

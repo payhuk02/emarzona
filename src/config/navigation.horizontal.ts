@@ -186,11 +186,22 @@ export const HORIZONTAL_MEGA_SUBGROUPS: Partial<
       defaultLabel: 'Catalogue',
       paths: [
         '/dashboard/products',
-        '/dashboard/digital-products',
         '/dashboard/courses',
         '/dashboard/artist-products',
         '/dashboard/auctions',
         '/dashboard/portfolios',
+      ],
+    },
+    {
+      groupKey: 'digital',
+      defaultLabel: 'Produits Digitaux',
+      paths: [
+        '/dashboard/digital-products',
+        '/dashboard/my-licenses',
+        '/dashboard/license-management',
+        '/dashboard/digital-products/bundles',
+        '/dashboard/my-downloads',
+        '/dashboard/digital/updates',
       ],
     },
     {
@@ -201,17 +212,6 @@ export const HORIZONTAL_MEGA_SUBGROUPS: Partial<
         '/dashboard/courses/assignments',
         '/dashboard/cohorts',
         '/dashboard/reviews',
-      ],
-    },
-    {
-      groupKey: 'digital_ops',
-      defaultLabel: 'Digital',
-      paths: [
-        '/dashboard/my-licenses',
-        '/dashboard/license-management',
-        '/dashboard/digital-products/bundles',
-        '/dashboard/my-downloads',
-        '/dashboard/digital/updates',
       ],
     },
   ],

@@ -72,12 +72,25 @@ import {
 import { isSellerNavItemActive, resolveSellerNavUrl } from '@/lib/navigation/vendor-products-nav';
 import { logger } from '@/lib/logger';
 import { LogoImageWithFallback } from '@/components/sidebar/LogoImageWithFallback';
+import { ContextSidebar, useContextSidebar, ContextSidebarTrigger } from '@/components/navigation/ContextSidebar';
+import { MegaMenuDropdown, MegaMenuTrigger } from '@/components/navigation/MegaMenuDropdown';
+import { CONTEXT_SIDEBAR_MAPPING } from '@/config/navigation.context.extended';
 
 const isNavItemPlanLocked = (
   url: string,
   planSlug: string | null,
   commerceType?: StoreCommerceType | null
 ) => isNavPathPlanLocked(url, planSlug, commerceType);
+
+// Helper function to get context sections for a specific item URL
+const getContextSectionsForItem = (itemUrl: string) => {
+  for (const [pattern, sections] of Object.entries(CONTEXT_SIDEBAR_MAPPING)) {
+    if (itemUrl.startsWith(pattern)) {
+      return sections;
+    }
+  }
+  return [];
+};
 
 const buildDefaultCollapsedSections = (
   sections: NavSection[],
@@ -121,6 +134,8 @@ export function AppSidebar() {
   const isCollapsed = state === 'collapsed' && !isMobile;
   const { persona, setPersona } = useSidebarPersona(isAdmin);
   const [commandOpen, setCommandOpen] = useState(false);
+  const { isOpen: contextSidebarOpen, open: openContextSidebar, close: closeContextSidebar } = useContextSidebar();
+  const [megaMenuOpen, setMegaMenuOpen] = useState(false);
 
   const [collapsedSections, setCollapsedSections] = useState<string[]>([]);
   const [prefsHydrated, setPrefsHydrated] = useState(false);
@@ -529,28 +544,56 @@ export function AppSidebar() {
 
                       return (
                         <SidebarMenuItem key={`${section.label}-${item.title}-${item.url}`}>
-                          <SidebarMenuButton asChild tooltip={item.title}>
-                            <NavLink
-                              to={parseNavTo(resolveNavHref(item.url))}
-                              end
-                              onClick={() => recordNavClick(item.url)}
-                              className={
-                                isNavLinkActive(item.url)
-                                  ? `transition-all duration-200 group relative flex items-center ${NAV_LINK_ACTIVE}`
-                                  : `transition-all duration-200 group relative flex items-center ${NAV_LINK_INACTIVE}`
+                          {(item as any).hasContext ? (
+                            <MegaMenuDropdown
+                              trigger={
+                                <SidebarMenuButton
+                                  tooltip={item.title}
+                                  className={
+                                    isNavLinkActive(item.url)
+                                      ? `transition-all duration-200 group relative flex items-center ${NAV_LINK_ACTIVE}`
+                                      : `transition-all duration-200 group relative flex items-center ${NAV_LINK_INACTIVE}`
+                                  }
+                                >
+                                  <IconComponent
+                                    className="h-4 w-4 shrink-0 stroke-[2]"
+                                    aria-hidden="true"
+                                  />
+                                  {!isCollapsed ? (
+                                    <span className="flex-1 font-medium">{item.title}</span>
+                                  ) : (
+                                    <span className="sr-only">{item.title}</span>
+                                  )}
+                                </SidebarMenuButton>
                               }
-                            >
-                              <IconComponent
-                                className="h-4 w-4 shrink-0 stroke-[2]"
-                                aria-hidden="true"
-                              />
-                              {!isCollapsed ? (
-                                <span className="flex-1 font-medium">{item.title}</span>
-                              ) : (
-                                <span className="sr-only">{item.title}</span>
-                              )}
-                            </NavLink>
-                          </SidebarMenuButton>
+                              sections={getContextSectionsForItem(item.url)}
+                              isOpen={megaMenuOpen}
+                              onOpenChange={setMegaMenuOpen}
+                            />
+                          ) : (
+                            <SidebarMenuButton asChild tooltip={item.title}>
+                              <NavLink
+                                to={parseNavTo(resolveNavHref(item.url))}
+                                end
+                                onClick={() => recordNavClick(item.url)}
+                                className={
+                                  isNavLinkActive(item.url)
+                                    ? `transition-all duration-200 group relative flex items-center ${NAV_LINK_ACTIVE}`
+                                    : `transition-all duration-200 group relative flex items-center ${NAV_LINK_INACTIVE}`
+                                }
+                              >
+                                <IconComponent
+                                  className="h-4 w-4 shrink-0 stroke-[2]"
+                                  aria-hidden="true"
+                                />
+                                {!isCollapsed ? (
+                                  <span className="flex-1 font-medium">{item.title}</span>
+                                ) : (
+                                  <span className="sr-only">{item.title}</span>
+                                )}
+                              </NavLink>
+                            </SidebarMenuButton>
+                          )}
                         </SidebarMenuItem>
                       );
                     })}
@@ -641,6 +684,9 @@ export function AppSidebar() {
             </React.Fragment>
           ))}
       </SidebarContent>
+      
+      {/* Context Sidebar - Enterprise-grade domain-specific navigation */}
+      <ContextSidebar isOpen={contextSidebarOpen} onClose={closeContextSidebar} />
     </Sidebar>
   );
 }

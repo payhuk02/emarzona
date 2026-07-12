@@ -703,6 +703,11 @@ export const userMenuSections = [
         icon: GanttChart,
       },
       {
+        title: 'Analyses avancées',
+        url: '/dashboard/advanced',
+        icon: Activity,
+      },
+      {
         title: 'Mes Pixels',
         url: '/dashboard/pixels',
         icon: Target,

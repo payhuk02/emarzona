@@ -113,6 +113,20 @@ export default defineConfig(({ mode }) => {
     theme: ['next-themes'],
   };
 
+  // Domain-specific chunks for enterprise-grade code splitting
+  const DOMAIN_CHUNKS: Record<string, RegExp> = {
+    'domain-dashboard': /src\/pages\/dashboard\/|src\/components\/dashboard/,
+    'domain-products': /src\/pages\/dashboard\/products\/|src\/pages\/dashboard\/digital-products\/|src\/pages\/dashboard\/physical-products/,
+    'domain-courses': /src\/pages\/dashboard\/courses\/|src\/components\/courses/,
+    'domain-orders': /src\/pages\/dashboard\/orders\/|src\/pages\/dashboard\/shipping/,
+    'domain-marketing': /src\/pages\/dashboard\/emails\/|src\/pages\/dashboard\/promotions\/|src\/pages\/dashboard\/customers/,
+    'domain-finance': /src\/pages\/dashboard\/payments\/|src\/pages\/dashboard\/taxes/,
+    'domain-analytics': /src\/pages\/dashboard\/analytics\/|src\/pages\/dashboard\/seo/,
+    'domain-settings': /src\/pages\/dashboard\/settings\/|src\/pages\/dashboard\/integrations/,
+    'domain-physical': /src\/pages\/dashboard\/physical/,
+    'domain-admin': /src\/pages\/admin/,
+  };
+
   return {
     define: {
       'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(publicBackendUrl),
@@ -170,6 +184,12 @@ export default defineConfig(({ mode }) => {
         preserveEntrySignatures: 'strict',
         output: {
           manualChunks: id => {
+            // Domain-specific chunks (highest priority for enterprise-grade splitting)
+            for (const [chunkName, pattern] of Object.entries(DOMAIN_CHUNKS)) {
+              if (pattern.test(id)) return chunkName;
+            }
+
+            // Checkout-specific chunks
             if (id.includes('/src/components/checkout/cart/')) {
               return 'checkout-cart';
             }
@@ -213,7 +233,7 @@ export default defineConfig(({ mode }) => {
       },
       target: 'esnext',
       minify: 'esbuild',
-      chunkSizeWarningLimit: 200,
+      chunkSizeWarningLimit: 500,
       reportCompressedSize: !isProduction,
       sourcemap: isProduction && hasSentryToken,
       cssCodeSplit: true,

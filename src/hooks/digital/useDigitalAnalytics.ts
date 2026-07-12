@@ -377,8 +377,29 @@ export const useDigitalRevenueAnalytics = (storeId?: string, dateRange?: { from:
 
       if (productsError) throw productsError;
 
+      // Return empty if no products
+      if (!products || products.length === 0) {
+        return {
+          total_revenue: 0,
+          total_orders: 0,
+          total_products_sold: 0,
+          average_order_value: 0,
+        };
+      }
+
+      const productIds = products.map(p => p.product_id).filter(Boolean);
+      
+      if (productIds.length === 0) {
+        return {
+          total_revenue: 0,
+          total_orders: 0,
+          total_products_sold: 0,
+          average_order_value: 0,
+        };
+      }
+
       // Get orders for these products
-      let  query= supabase
+      let query = supabase
         .from('order_items')
         .select(`
           id,
@@ -390,7 +411,7 @@ export const useDigitalRevenueAnalytics = (storeId?: string, dateRange?: { from:
             created_at
           )
         `)
-        .in('product_id', products.map(p => p.product_id))
+        .in('product_id', productIds)
         .eq('orders.payment_status', 'paid');
 
       if (dateRange) {
@@ -401,7 +422,25 @@ export const useDigitalRevenueAnalytics = (storeId?: string, dateRange?: { from:
 
       const { data: orderItems, error: ordersError } = await query;
 
-      if (ordersError) throw ordersError;
+      if (ordersError) {
+        // Log error but return empty data instead of throwing
+        console.warn('Error fetching order items:', ordersError);
+        return {
+          total_revenue: 0,
+          total_orders: 0,
+          total_products_sold: 0,
+          average_order_value: 0,
+        };
+      }
+
+      if (!orderItems || orderItems.length === 0) {
+        return {
+          total_revenue: 0,
+          total_orders: 0,
+          total_products_sold: 0,
+          average_order_value: 0,
+        };
+      }
 
       const totalRevenue = orderItems.reduce((sum, item) => 
         sum + (item.price * item.quantity), 0
