@@ -31,6 +31,7 @@ import { DashboardRecentActivity } from '@/components/dashboard/DashboardRecentA
 import { DashboardActionCenter } from '@/components/dashboard/DashboardActionCenter';
 import { PhysicalSubscriptionAlert } from '@/components/billing/PhysicalSubscriptionAlert';
 import { DashboardNotificationsStrip } from '@/components/dashboard/DashboardNotificationsStrip';
+import { DashboardFooterMetrics } from '@/components/dashboard/DashboardFooterMetrics';
 import '@/styles/dashboard-premium.css';
 
 /**
@@ -394,23 +395,23 @@ const DashboardWithStore = ({ store, storeLoading }: DashboardWithStoreProps) =>
           <DashboardFullSkeleton />
         ) : stats ? (
           <div className="space-y-6 sm:space-y-8">
-              <DashboardActionCenter
-                operational={stats.operational}
-                periodLabel={stats.periodLabel}
-                storeName={store?.name}
-                storeSlug={store?.slug}
-                storeSubdomain={store?.subdomain}
-                customDomain={store?.custom_domain}
-                unreadNotifications={unreadCount}
-              />
+            <DashboardActionCenter
+              operational={stats.operational}
+              periodLabel={stats.periodLabel}
+              storeName={store?.name}
+              storeSlug={store?.slug}
+              storeSubdomain={store?.subdomain}
+              customDomain={store?.custom_domain}
+              unreadNotifications={unreadCount}
+            />
 
-              {notificationsEnabled && (
-                <DashboardNotificationsStrip
-                  notifications={notifications}
-                  unreadCount={unreadCount}
-                  enabled={notificationsEnabled}
-                />
-              )}
+            {notificationsEnabled && (
+              <DashboardNotificationsStrip
+                notifications={notifications}
+                unreadCount={unreadCount}
+                enabled={notificationsEnabled}
+              />
+            )}
 
             <div
               className={cn(
@@ -422,79 +423,79 @@ const DashboardWithStore = ({ store, storeLoading }: DashboardWithStoreProps) =>
               <DashboardStats stats={stats} />
             </div>
 
-              {stats.revenueByMonth.length > 0 && (
-                <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 sm:gap-6">
-                  <div className="xl:col-span-2">
-                    <DashboardSalesEvolution data={stats.revenueByMonth} />
-                  </div>
-                  <DashboardCategorySales
-                    revenueByType={stats.revenueByType}
-                    onViewAll={handleViewAnalytics}
-                  />
+            {stats.revenueByMonth.length > 0 && (
+              <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 sm:gap-6">
+                <div className="xl:col-span-2">
+                  <DashboardSalesEvolution data={stats.revenueByMonth} />
+                </div>
+                <DashboardCategorySales
+                  revenueByType={stats.revenueByType}
+                  onViewAll={handleViewAnalytics}
+                />
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
+              {stats.recentOrders.length > 0 ? (
+                <RecentOrdersCard orders={stats.recentOrders} variant="premium" />
+              ) : (
+                <div className="dashboard-premium-panel flex items-center justify-center min-h-[200px] text-muted-foreground text-sm">
+                  {t('dashboard.orders.empty', 'Aucune commande récente')}
                 </div>
               )}
-
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
-                {stats.recentOrders.length > 0 ? (
-                  <RecentOrdersCard orders={stats.recentOrders} variant="premium" />
-                ) : (
-                  <div className="dashboard-premium-panel flex items-center justify-center min-h-[200px] text-muted-foreground text-sm">
-                    {t('dashboard.orders.empty', 'Aucune commande récente')}
-                  </div>
-                )}
-                {stats.topProducts.length > 0 ? (
-                  <TopProductsCard products={stats.topProducts} variant="premium" />
-                ) : (
-                  <div className="dashboard-premium-panel flex items-center justify-center min-h-[200px] text-muted-foreground text-sm">
-                    {t('dashboard.products.empty', 'Aucun produit vendu')}
-                  </div>
-                )}
-                <DashboardRecentActivity activities={stats.recentActivity} />
-              </div>
-
-              <DashboardFooterMetrics stats={stats} />
-
-              <div
-                ref={actionsRef}
-                className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3"
-                role="list"
-                aria-label={t('dashboard.quickActions.ariaLabel', 'Actions rapides')}
-              >
-                {[
-                  {
-                    title: t('dashboard.quickActions.newProduct'),
-                    icon: Package,
-                    onClick: handleCreateProduct,
-                    theme: 'border-emerald-200/80 hover:bg-emerald-50/50',
-                  },
-                  {
-                    title: t('dashboard.quickActions.newOrder'),
-                    icon: ShoppingCart,
-                    onClick: handleCreateOrder,
-                    theme: 'border-blue-200/80 hover:bg-blue-50/50',
-                  },
-                  {
-                    title: t('dashboard.quickActions.analytics'),
-                    icon: Activity,
-                    onClick: handleViewAnalytics,
-                    theme: 'border-violet-200/80 hover:bg-violet-50/50',
-                  },
-                ].map(action => {
-                  const Icon = action.icon;
-                  return (
-                    <button
-                      key={action.title}
-                      type="button"
-                      onClick={action.onClick}
-                      className={`dashboard-premium-panel flex items-center justify-center gap-2 text-sm sm:text-base font-semibold transition-colors ${action.theme}`}
-                    >
-                      <Icon className="h-5 w-5 shrink-0" aria-hidden />
-                      {action.title}
-                    </button>
-                  );
-                })}
-              </div>
+              {stats.topProducts.length > 0 ? (
+                <TopProductsCard products={stats.topProducts} variant="premium" />
+              ) : (
+                <div className="dashboard-premium-panel flex items-center justify-center min-h-[200px] text-muted-foreground text-sm">
+                  {t('dashboard.products.empty', 'Aucun produit vendu')}
+                </div>
+              )}
+              <DashboardRecentActivity activities={stats.recentActivity} />
             </div>
+
+            <DashboardFooterMetrics stats={stats} />
+
+            <div
+              ref={actionsRef}
+              className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3"
+              role="list"
+              aria-label={t('dashboard.quickActions.ariaLabel', 'Actions rapides')}
+            >
+              {[
+                {
+                  title: t('dashboard.quickActions.newProduct'),
+                  icon: Package,
+                  onClick: handleCreateProduct,
+                  theme: 'border-emerald-200/80 hover:bg-emerald-50/50',
+                },
+                {
+                  title: t('dashboard.quickActions.newOrder'),
+                  icon: ShoppingCart,
+                  onClick: handleCreateOrder,
+                  theme: 'border-blue-200/80 hover:bg-blue-50/50',
+                },
+                {
+                  title: t('dashboard.quickActions.analytics'),
+                  icon: Activity,
+                  onClick: handleViewAnalytics,
+                  theme: 'border-violet-200/80 hover:bg-violet-50/50',
+                },
+              ].map(action => {
+                const Icon = action.icon;
+                return (
+                  <button
+                    key={action.title}
+                    type="button"
+                    onClick={action.onClick}
+                    className={`dashboard-premium-panel flex items-center justify-center gap-2 text-sm sm:text-base font-semibold transition-colors ${action.theme}`}
+                  >
+                    <Icon className="h-5 w-5 shrink-0" aria-hidden />
+                    {action.title}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         ) : null}
       </div>
     </AppPageShell>

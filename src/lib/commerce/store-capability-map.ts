@@ -171,6 +171,7 @@ const ROUTE_CAPABILITY_RULES: readonly RouteRule[] = [
     pathPrefixes: [
       '/dashboard/emails',
       '/dashboard/analytics',
+      '/dashboard/advanced',
       '/notifications',
       '/settings/notifications',
       '/dashboard/integrations',
