@@ -327,7 +327,7 @@ export function CreateShipmentDialog({
                   id="destPhone"
                   value={formData.destPhone}
                   onChange={(e) => updateField('destPhone', e.target.value)}
-                  placeholder="+225 12 34 56 78"
+                  placeholder="+226 12 34 56 78"
                 />
               </div>
             </div>

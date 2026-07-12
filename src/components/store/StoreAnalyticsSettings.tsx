@@ -2,16 +2,18 @@
  * Composant de configuration des Analytics et Tracking pour une boutique
  * Permet de configurer Google Analytics, Facebook Pixel, Google Tag Manager,
  * TikTok Pixel et des scripts personnalisés
+ * 
+ * SECURITY: Custom scripts are validated against whitelist patterns to prevent XSS attacks
  */
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { BarChart3, Code, AlertCircle, Info, CheckCircle2 } from 'lucide-react';
+import { BarChart3, Code, AlertCircle, Info, CheckCircle2, XCircle } from 'lucide-react';
 
 interface StoreAnalyticsSettingsProps {
   // Google Analytics
@@ -38,6 +40,116 @@ interface StoreAnalyticsSettingsProps {
   customScripts?: string | null;
   customScriptsEnabled?: boolean;
   onCustomScriptsChange?: (scripts: string, enabled: boolean) => void;
+}
+
+/**
+ * Security validation for custom tracking scripts
+ * Implements whitelist-based validation to prevent XSS attacks
+ */
+const SCRIPT_VALIDATION = {
+  // Whitelist: allowed patterns for legitimate tracking scripts
+  allowedPatterns: [
+    // Google Analytics
+    /<script[^>]*src=["']https:\/\/www\.googletagmanager\.com\/gtm\.js["'][^>]*>/,
+    /<script[^>]*src=["']https:\/\/www\.google-analytics\.com\/analytics\.js["'][^>]*>/,
+    /window\.dataLayer\s*=/,
+    /gtag\s*\(/,
+    /ga\s*\(/,
+    
+    // Facebook Pixel
+    /<script[^>]*src=["']https:\/\/connect\.facebook\.net\/[a-z_]+\/fbevents\.js["'][^>]*>/,
+    /fbq\s*\(/,
+    
+    // TikTok Pixel
+    /<script[^>]*src=["']https:\/\/analytics\.tiktok\.com\/[a-z0-9]+\/pixel\.js["'][^>]*>/,
+    /ttq\s*\(/,
+    
+    // Hotjar
+    /<script[^>]*src=["']https:\/\/static\.hotjar\.com\/c\/hotjar-[0-9]+\.js["'][^>]*>/,
+    /hj\s*\(/,
+    
+    // Mixpanel
+    /<script[^>]*src=["']https:\/\/cdn\.mxpnl\.com\/libs\/mixpanel-[0-9.]+\.min\.js["'][^>]*>/,
+    /mixpanel\s*\./,
+    
+    // Generic safe patterns
+    /window\._{0,2}[a-zA-Z0-9_]+\s*=/,
+    /\(function\s*\([^)]*\)\s*\{/,
+    /document\.addEventListener\s*\(/,
+  ] as const,
+
+  // Blacklist: dangerous patterns that are never allowed
+  dangerousPatterns: [
+    /eval\s*\(/,
+    /Function\s*\(/,
+    /document\.write\s*\(/,
+    /document\.writeln\s*\(/,
+    /innerHTML\s*=/,
+    /outerHTML\s*=/,
+    /insertAdjacentHTML\s*\(/,
+    /\.exec\s*\(/,
+    /setTimeout\s*\(\s*["']/,
+    /setInterval\s*\(\s*["']/,
+    /atob\s*\(/,
+    /btoa\s*\(/,
+    /fromCharCode\s*\(/,
+    /String\.fromCharCode/,
+    /unescape\s*\(/,
+    /escape\s*\(/,
+    /javascript:/i,
+    /on\w+\s*=/,
+    /<iframe[^>]*src=["']javascript:/i,
+    /<script[^>]*on\w+\s*=/i,
+    /location\s*=/,
+    /location\.href\s*=/,
+    /location\.replace\s*\(/,
+    /window\.location\s*=/,
+    /document\.cookie\s*=/,
+    /document\.domain\s*=/,
+    /navigator\s*\./,
+  ] as const,
+};
+
+/**
+ * Validates a custom script against security patterns
+ * Returns { valid: boolean, error?: string }
+ */
+function validateCustomScript(script: string): { valid: boolean; error?: string } {
+  if (!script || script.trim().length === 0) {
+    return { valid: true };
+  }
+
+  // Check for dangerous patterns first (blacklist)
+  for (const pattern of SCRIPT_VALIDATION.dangerousPatterns) {
+    if (pattern.test(script)) {
+      return {
+        valid: false,
+        error: 'Script contient des patterns dangereux non autorisés (eval, innerHTML, etc.)',
+      };
+    }
+  }
+
+  // Check if script contains at least one allowed pattern
+  const hasAllowedPattern = SCRIPT_VALIDATION.allowedPatterns.some(pattern =>
+    pattern.test(script)
+  );
+
+  if (!hasAllowedPattern) {
+    return {
+      valid: false,
+      error: 'Script ne contient aucun pattern de tracking reconnu. Utilisez les intégrations natives (GA, Facebook, TikTok) ou contactez le support.',
+    };
+  }
+
+  // Additional security: limit script length
+  if (script.length > 50000) {
+    return {
+      valid: false,
+      error: 'Script trop long (max 50 000 caractères)',
+    };
+  }
+
+  return { valid: true };
 }
 
 export const StoreAnalyticsSettings = ({
@@ -67,6 +179,12 @@ export const StoreAnalyticsSettings = ({
   const [localTiktokPixelEnabled, setLocalTiktokPixelEnabled] = useState(tiktokPixelEnabled);
   const [localCustomScripts, setLocalCustomScripts] = useState(customScripts || '');
   const [localCustomScriptsEnabled, setLocalCustomScriptsEnabled] = useState(customScriptsEnabled);
+  const [scriptValidationError, setScriptValidationError] = useState<string | null>(null);
+
+  // Validate script on change
+  const scriptValidationResult = useMemo(() => {
+    return validateCustomScript(localCustomScripts);
+  }, [localCustomScripts]);
 
   const handleGoogleAnalyticsIdChange = (value: string) => {
     setLocalGoogleAnalyticsId(value);
@@ -110,11 +228,31 @@ export const StoreAnalyticsSettings = ({
 
   const handleCustomScriptsChange = (value: string) => {
     setLocalCustomScripts(value);
+    
+    // Validate before allowing save
+    const validation = validateCustomScript(value);
+    if (!validation.valid) {
+      setScriptValidationError(validation.error || 'Script invalide');
+      // Don't call parent if invalid
+      return;
+    }
+    
+    setScriptValidationError(null);
     onCustomScriptsChange?.(value, localCustomScriptsEnabled);
   };
 
   const handleCustomScriptsEnabledChange = (enabled: boolean) => {
+    // Validate before enabling
+    if (enabled) {
+      const validation = validateCustomScript(localCustomScripts);
+      if (!validation.valid) {
+        setScriptValidationError(validation.error || 'Script invalide');
+        return;
+      }
+    }
+    
     setLocalCustomScriptsEnabled(enabled);
+    setScriptValidationError(null);
     onCustomScriptsChange?.(localCustomScripts, enabled);
   };
 
@@ -312,8 +450,30 @@ export const StoreAnalyticsSettings = ({
               <AlertDescription className="text-xs">
                 Assurez-vous que vos scripts sont sûrs et ne contiennent pas de code malveillant.
                 Les scripts seront injectés dans toutes les pages de votre storefront.
+                <br /><br />
+                <strong>Scripts autorisés:</strong> Google Analytics, Facebook Pixel, TikTok Pixel, Hotjar, Mixpanel, et autres outils de tracking standards.
               </AlertDescription>
             </Alert>
+
+            {/* Real-time validation status */}
+            {localCustomScripts && (
+              <Alert variant={scriptValidationResult.valid ? "default" : "destructive"}>
+                {scriptValidationResult.valid ? (
+                  <CheckCircle2 className="h-4 w-4" />
+                ) : (
+                  <XCircle className="h-4 w-4" />
+                )}
+                <AlertTitle>
+                  {scriptValidationResult.valid ? 'Script valide' : 'Script invalide'}
+                </AlertTitle>
+                <AlertDescription className="text-xs">
+                  {scriptValidationResult.valid
+                    ? 'Le script respecte les règles de sécurité et peut être activé.'
+                    : scriptValidationResult.error || 'Ce script contient des patterns non autorisés.'}
+                </AlertDescription>
+              </Alert>
+            )}
+
             <div className="space-y-2">
               <Label htmlFor="custom_scripts">Code HTML/JavaScript</Label>
               <Textarea
@@ -321,13 +481,23 @@ export const StoreAnalyticsSettings = ({
                 value={localCustomScripts}
                 onChange={(e) => handleCustomScriptsChange(e.target.value)}
                 placeholder={`<script>
-  // Votre code de tracking personnalisé
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
 </script>`}
-                className="font-mono text-xs min-h-[200px]"
+                className={`font-mono text-xs min-h-[200px] ${
+                  scriptValidationError ? 'border-red-500 focus-visible:ring-red-500' : ''
+                }`}
+                disabled={!localCustomScriptsEnabled}
               />
-              <p className="text-xs text-muted-foreground">
-                Insérez vos scripts de tracking personnalisés (ex: Hotjar, Mixpanel, etc.)
-              </p>
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-muted-foreground">
+                  Insérez vos scripts de tracking personnalisés (ex: Hotjar, Mixpanel, etc.)
+                </p>
+                <span className="text-xs text-muted-foreground">
+                  {localCustomScripts.length} / 50 000
+                </span>
+              </div>
             </div>
           </CardContent>
         )}

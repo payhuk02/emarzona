@@ -39,7 +39,7 @@ export interface URLValidationOptions {
 
 export interface PhoneValidationOptions {
   required?: boolean;
-  countryCodes?: string[]; // ex: ['+225', '+33']
+  countryCodes?: string[]; // ex: ['+226', '+33']
 }
 
 export interface SlugValidationOptions {
@@ -232,7 +232,7 @@ export const validatePhone = (
   if (!PHONE_REGEX.test(sanitized)) {
     return {
       valid: false,
-      error: 'Format de téléphone invalide (ex: +225XXXXXXXX)'
+      error: 'Format de téléphone invalide (ex: +226XXXXXXXX)'
     };
   }
 
@@ -411,7 +411,7 @@ export const validateStoreForm = (
   // Téléphone
   if (data.contact_phone) {
     const phoneResult = validatePhone(data.contact_phone, {
-      countryCodes: ['+225', '+33', '+1', '+221', '+237', '+226', '+223']
+      countryCodes: ['+226', '+33', '+1', '+221', '+237', '+226', '+223']
     });
     if (!phoneResult.valid) {
       errors.contact_phone = phoneResult.error || 'Téléphone invalide';

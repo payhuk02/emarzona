@@ -118,7 +118,7 @@ export default function CheckoutShippingSection({
           }}
           error={formErrors.phone}
           type="tel"
-          placeholder="+225 07 12 34 56 78"
+          placeholder="+226 07 12 34 56 78"
           required
           autoComplete="tel"
           validationRules={[

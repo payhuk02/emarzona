@@ -112,7 +112,7 @@ export const StoreSettingsTab = ({
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <StoreFieldWithValidation id="contact-email" label="Email de contact" type="email" value={contactEmail} onChange={setters.setContactEmail} onBlur={() => handleFieldBlur('contact_email')} placeholder="contact@votreboutique.com" disabled={isSubmitting} touched={fieldTouched.contact_email} validationFn={val => validateField('contact_email', val)} hint="Email principal pour les contacts clients" />
-                <StoreFieldWithValidation id="contact-phone" label="Téléphone de contact" type="tel" value={contactPhone} onChange={setters.setContactPhone} onBlur={() => handleFieldBlur('contact_phone')} placeholder="+225 XX XX XX XX" disabled={isSubmitting} touched={fieldTouched.contact_phone} hint="Format international recommandé" />
+                <StoreFieldWithValidation id="contact-phone" label="Téléphone de contact" type="tel" value={contactPhone} onChange={setters.setContactPhone} onBlur={() => handleFieldBlur('contact_phone')} placeholder="+226 XX XX XX XX" disabled={isSubmitting} touched={fieldTouched.contact_phone} hint="Format international recommandé" />
               </div>
 
               <div className="space-y-2">
@@ -131,15 +131,15 @@ export const StoreSettingsTab = ({
                   <StoreFieldWithValidation id="partnership-email" label="Email partenariats" type="email" value={partnershipEmail} onChange={setters.setPartnershipEmail} onBlur={() => handleFieldBlur('partnership_email')} placeholder="partenariats@votreboutique.com" disabled={isSubmitting} touched={fieldTouched.partnership_email} validationFn={val => validateField('partnership_email', val)} hint="Email pour les partenariats" />
                   <div className="space-y-2">
                     <Label htmlFor="support-phone">Téléphone support</Label>
-                    <Input id="support-phone" type="tel" value={supportPhone} onChange={e => setters.setSupportPhone(e.target.value)} placeholder="+225 XX XX XX XX" disabled={isSubmitting} />
+                    <Input id="support-phone" type="tel" value={supportPhone} onChange={e => setters.setSupportPhone(e.target.value)} placeholder="+226 XX XX XX XX" disabled={isSubmitting} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="sales-phone">Téléphone ventes</Label>
-                    <Input id="sales-phone" type="tel" value={salesPhone} onChange={e => setters.setSalesPhone(e.target.value)} placeholder="+225 XX XX XX XX" disabled={isSubmitting} />
+                    <Input id="sales-phone" type="tel" value={salesPhone} onChange={e => setters.setSalesPhone(e.target.value)} placeholder="+226 XX XX XX XX" disabled={isSubmitting} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="whatsapp-number">WhatsApp</Label>
-                    <Input id="whatsapp-number" type="tel" value={whatsappNumber} onChange={e => setters.setWhatsappNumber(e.target.value)} placeholder="+225 XX XX XX XX" disabled={isSubmitting} />
+                    <Input id="whatsapp-number" type="tel" value={whatsappNumber} onChange={e => setters.setWhatsappNumber(e.target.value)} placeholder="+226 XX XX XX XX" disabled={isSubmitting} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="telegram-username">Telegram</Label>
