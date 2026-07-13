@@ -33,12 +33,13 @@ export function exportCustomization(
     URL.revokeObjectURL(url);
 
     logger.debug('Personnalisations exportées', { filename, level: 'section' });
-  } catch ( _error: any) {
-    logger.error('Erreur lors de l\'export', {
-      error: error.message || String(error),
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    logger.error("Erreur lors de l'export", {
+      error: message,
       level: 'section',
     });
-    throw new Error('Impossible d\'exporter les personnalisations');
+    throw new Error("Impossible d'exporter les personnalisations");
   }
 }
 
@@ -79,9 +80,10 @@ export async function importCustomization(
       valid: true,
       data: validation.data || parsed.data,
     };
-  } catch ( _error: any) {
-    logger.error('Erreur lors de l\'import', {
-      error: error.message || String(error),
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    logger.error("Erreur lors de l'import", {
+      error: message,
       level: 'section',
     });
 
@@ -94,7 +96,7 @@ export async function importCustomization(
 
     return {
       valid: false,
-      errors: [error.message || 'Erreur inconnue lors de l\'import'],
+      errors: [message || "Erreur inconnue lors de l'import"],
     };
   }
 }
@@ -102,9 +104,11 @@ export async function importCustomization(
 /**
  * Importe depuis une chaîne JSON (pour coller directement)
  */
-export function importCustomizationFromString(
-  jsonString: string
-): { valid: boolean; data?: PlatformCustomizationData; errors?: string[] } {
+export function importCustomizationFromString(jsonString: string): {
+  valid: boolean;
+  data?: PlatformCustomizationData;
+  errors?: string[];
+} {
   try {
     const parsed = JSON.parse(jsonString);
 
@@ -124,7 +128,8 @@ export function importCustomizationFromString(
       valid: true,
       data: validation.data || data,
     };
-  } catch ( _error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
     if (error instanceof SyntaxError) {
       return {
         valid: false,
@@ -134,14 +139,7 @@ export function importCustomizationFromString(
 
     return {
       valid: false,
-      errors: [error.message || 'Erreur inconnue lors de l\'import'],
+      errors: [message || "Erreur inconnue lors de l'import"],
     };
   }
 }
-
-
-
-
-
-
-
