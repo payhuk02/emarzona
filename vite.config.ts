@@ -116,15 +116,28 @@ export default defineConfig(({ mode }) => {
   // Domain-specific chunks for enterprise-grade code splitting
   const DOMAIN_CHUNKS: Record<string, RegExp> = {
     'domain-dashboard': /src\/pages\/dashboard\/|src\/components\/dashboard/,
-    'domain-products': /src\/pages\/dashboard\/products\/|src\/pages\/dashboard\/digital-products\/|src\/pages\/dashboard\/physical-products/,
+    'domain-products':
+      /src\/pages\/dashboard\/products\/|src\/pages\/dashboard\/digital-products\/|src\/pages\/dashboard\/physical-products/,
     'domain-courses': /src\/pages\/dashboard\/courses\/|src\/components\/courses/,
     'domain-orders': /src\/pages\/dashboard\/orders\/|src\/pages\/dashboard\/shipping/,
-    'domain-marketing': /src\/pages\/dashboard\/emails\/|src\/pages\/dashboard\/promotions\/|src\/pages\/dashboard\/customers/,
+    'domain-marketing':
+      /src\/pages\/dashboard\/emails\/|src\/pages\/dashboard\/promotions\/|src\/pages\/dashboard\/customers/,
     'domain-finance': /src\/pages\/dashboard\/payments\/|src\/pages\/dashboard\/taxes/,
     'domain-analytics': /src\/pages\/dashboard\/analytics\/|src\/pages\/dashboard\/seo/,
     'domain-settings': /src\/pages\/dashboard\/settings\/|src\/pages\/dashboard\/integrations/,
     'domain-physical': /src\/pages\/dashboard\/physical/,
-    'domain-admin': /src\/pages\/admin/,
+    // Split admin into smaller chunks to avoid circular dependencies
+    'domain-admin-core': /src\/pages\/admin\/AdminDashboard\.tsx/,
+    'domain-admin-users': /src\/pages\/admin\/AdminUsers\.tsx/,
+    'domain-admin-stores': /src\/pages\/admin\/AdminStores\.tsx/,
+    'domain-admin-products': /src\/pages\/admin\/AdminProducts\.tsx/,
+    'domain-admin-sales': /src\/pages\/admin\/AdminSales\.tsx/,
+    'domain-admin-finance':
+      /src\/pages\/admin\/AdminPayments\.tsx|src\/pages\/admin\/PlatformRevenue\.tsx|src\/pages\/admin\/AdminTransactionReconciliation\.tsx/,
+    'domain-admin-settings':
+      /src\/pages\/admin\/AdminSettings\.tsx|src\/pages\/admin\/PlatformCustomization\.tsx/,
+    'domain-admin-domains': /src\/pages\/admin\/AdminDomains\.tsx/,
+    'domain-admin-other': /src\/pages\/admin\//,
   };
 
   return {
