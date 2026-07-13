@@ -69,8 +69,10 @@ const AdvancedDashboard = () => {
   }, [notificationsData]);
 
   // Objectifs dynamiques basés sur les statistiques actuelles (temporaire avant backend complet)
-  const goals = useMemo(
-    () => [
+  const goals = useMemo(() => {
+    if (!stats) return [];
+
+    return [
       {
         id: '1',
         title: t('dashboard.goals.monthlyRevenue'),
@@ -98,9 +100,8 @@ const AdvancedDashboard = () => {
         deadline: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString(),
         color: 'blue',
       },
-    ],
-    [stats.totalRevenue, stats.totalCustomers, stats.totalOrders, t]
-  );
+    ];
+  }, [stats, t]);
 
   const handleRefresh = async () => {
     await refetch();
@@ -165,7 +166,7 @@ const AdvancedDashboard = () => {
     );
   }
 
-  if (!store) {
+  if (!store || !stats) {
     return (
       <AppPageShell mainClassName="p-3 sm:p-4 md:p-6 lg:p-8 bg-gradient-hero overflow-x-hidden">
         <div className="max-w-3xl mx-auto text-center py-12">
