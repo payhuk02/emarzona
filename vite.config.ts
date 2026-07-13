@@ -114,9 +114,9 @@ export default defineConfig(({ mode }) => {
   };
 
   // Domain-specific chunks — page routes only (not shared components/hooks).
-  // Granular admin splits caused circular chunk deps → TDZ crash (domain-admin-settings).
+  // Order matters: specific dashboard sub-routes before the backoffice catch-all.
+  // Admin + dashboard must share one chunk (seller/* re-exports admin pages).
   const DOMAIN_CHUNKS: Record<string, RegExp> = {
-    'domain-dashboard': /\/src\/pages\/dashboard\//,
     'domain-products':
       /\/src\/pages\/dashboard\/products\/|\/src\/pages\/dashboard\/digital-products\/|\/src\/pages\/dashboard\/physical-products\//,
     'domain-courses': /\/src\/pages\/dashboard\/courses\//,
@@ -128,7 +128,7 @@ export default defineConfig(({ mode }) => {
     'domain-settings':
       /\/src\/pages\/dashboard\/settings\/|\/src\/pages\/dashboard\/integrations\//,
     'domain-physical': /\/src\/pages\/dashboard\/physical\//,
-    'domain-admin': /\/src\/pages\/admin\//,
+    'domain-backoffice': /\/src\/pages\/(admin|dashboard)\//,
   };
 
   return {
