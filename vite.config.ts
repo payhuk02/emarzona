@@ -113,24 +113,6 @@ export default defineConfig(({ mode }) => {
     theme: ['next-themes'],
   };
 
-  // Domain-specific chunks — page routes only (not shared components/hooks).
-  // Order matters: specific dashboard sub-routes before the backoffice catch-all.
-  // Admin + dashboard must share one chunk (seller/* re-exports admin pages).
-  const DOMAIN_CHUNKS: Record<string, RegExp> = {
-    'domain-products':
-      /\/src\/pages\/dashboard\/products\/|\/src\/pages\/dashboard\/digital-products\/|\/src\/pages\/dashboard\/physical-products\//,
-    'domain-courses': /\/src\/pages\/dashboard\/courses\//,
-    'domain-orders': /\/src\/pages\/dashboard\/orders\/|\/src\/pages\/dashboard\/shipping\//,
-    'domain-marketing':
-      /\/src\/pages\/dashboard\/emails\/|\/src\/pages\/dashboard\/promotions\/|\/src\/pages\/dashboard\/customers\//,
-    'domain-finance': /\/src\/pages\/dashboard\/payments\/|\/src\/pages\/dashboard\/taxes\//,
-    'domain-analytics': /\/src\/pages\/dashboard\/analytics\/|\/src\/pages\/dashboard\/seo\//,
-    'domain-settings':
-      /\/src\/pages\/dashboard\/settings\/|\/src\/pages\/dashboard\/integrations\//,
-    'domain-physical': /\/src\/pages\/dashboard\/physical\//,
-    'domain-backoffice': /\/src\/pages\/(admin|dashboard)\//,
-  };
-
   return {
     define: {
       'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(publicBackendUrl),
@@ -188,10 +170,8 @@ export default defineConfig(({ mode }) => {
         preserveEntrySignatures: 'strict',
         output: {
           manualChunks: id => {
-            // Domain-specific chunks (highest priority for enterprise-grade splitting)
-            for (const [chunkName, pattern] of Object.entries(DOMAIN_CHUNKS)) {
-              if (pattern.test(id)) return chunkName;
-            }
+            // Route-level domain chunks disabled: path-based splits caused circular chunk
+            // dependencies (admin ↔ dashboard re-exports) → TDZ crash on production load.
 
             // Checkout-specific chunks
             if (id.includes('/src/components/checkout/cart/')) {
