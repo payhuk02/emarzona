@@ -6,33 +6,16 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { cn } from '@/lib/utils';
 import {
-  Search,
-  FileText,
-  Package,
-  ShoppingCart,
-  Users,
-  Settings,
-  BarChart3,
-  Calendar,
-  Truck,
-  CreditCard,
-  Tag,
-  GraduationCap,
-  Download,
-  ShoppingBag,
-  Camera,
-  Store,
-  LayoutDashboard,
-  ChevronRight,
-  Clock,
-  ArrowRight,
-  X,
-} from 'lucide-react';
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+} from '@/components/ui/command';
+import { LayoutDashboard } from 'lucide-react';
 import { userMenuSections } from '@/config/navigation.menus';
 import {
   PRODUCTS_CONTEXT_SIDEBAR,
@@ -44,7 +27,7 @@ import {
   AI_CONTEXT_SIDEBAR,
 } from '@/config/navigation.context.extended';
 
-interface CommandItem {
+interface CommandItemData {
   id: string;
   title: string;
   url: string;
@@ -54,32 +37,8 @@ interface CommandItem {
 }
 
 // Flatten all navigation items into a searchable list
-const getAllCommands = (): CommandItem[] => {
-  const commands: CommandItem[] = [];
-
-  const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-    LayoutDashboard,
-    Store,
-    ShoppingCart,
-    User: Users,
-    Package,
-    GraduationCap,
-    Download,
-    ShoppingBag,
-    Camera,
-    Warehouse: Truck,
-    CreditCard,
-    Percent: Tag,
-    BarChart3,
-    Search,
-    Settings,
-    Shield: Settings,
-    Link2: Settings,
-    Calendar,
-    FileText,
-    Users,
-    DollarSign: CreditCard,
-  };
+const getAllCommands = (): CommandItemData[] => {
+  const commands: CommandItemData[] = [];
 
   // Add compact sidebar items
   userMenuSections.forEach(section => {
@@ -133,8 +92,6 @@ interface CommandPaletteProps {
 
 export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
   const navigate = useNavigate();
-  const [query, setQuery] = useState('');
-  const [selectedIndex, setSelectedIndex] = useState(0);
   const [recentPages, setRecentPages] = useState<string[]>([]);
 
   // Load recent pages from localStorage
@@ -149,154 +106,82 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
     }
   }, []);
 
-  // Filter commands based on query
-  const filteredCommands = useMemo(() => {
-    if (!query.trim()) {
-      // Show recent pages first, then all commands
-      const recent = ALL_COMMANDS.filter(cmd => recentPages.includes(cmd.url));
-      const others = ALL_COMMANDS.filter(cmd => !recentPages.includes(cmd.url));
-      return [...recent, ...others];
-    }
-
-    const search = query.toLowerCase();
-    return ALL_COMMANDS.filter(cmd => {
-      const titleMatch = cmd.title.toLowerCase().includes(search);
-      const categoryMatch = cmd.category.toLowerCase().includes(search);
-      const keywordMatch = cmd.keywords?.some(kw => kw.includes(search));
-      return titleMatch || categoryMatch || keywordMatch;
-    });
-  }, [query, recentPages]);
-
-  // Reset selected index when filtered commands change
-  useEffect(() => {
-    setSelectedIndex(0);
-  }, [filteredCommands]);
-
-  // Handle keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!open) return;
-
-      switch (e.key) {
-        case 'ArrowDown':
-          e.preventDefault();
-          setSelectedIndex(prev => (prev + 1) % filteredCommands.length);
-          break;
-        case 'ArrowUp':
-          e.preventDefault();
-          setSelectedIndex(prev => (prev - 1 + filteredCommands.length) % filteredCommands.length);
-          break;
-        case 'Enter':
-          e.preventDefault();
-          if (filteredCommands[selectedIndex]) {
-            handleSelect(filteredCommands[selectedIndex]);
-          }
-          break;
-        case 'Escape':
-          e.preventDefault();
-          onOpenChange(false);
-          break;
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [open, filteredCommands, selectedIndex, onOpenChange]);
-
   const handleSelect = useCallback(
-    (command: CommandItem) => {
+    (command: CommandItemData) => {
       // Add to recent pages
-      const updatedRecent = [command.url, ...recentPages.filter(url => url !== command.url)].slice(0, 10);
+      const updatedRecent = [command.url, ...recentPages.filter(url => url !== command.url)].slice(
+        0,
+        10
+      );
       setRecentPages(updatedRecent);
       localStorage.setItem('recent-pages', JSON.stringify(updatedRecent));
 
       navigate(command.url);
       onOpenChange(false);
-      setQuery('');
     },
     [navigate, onOpenChange, recentPages]
   );
 
-  const Icon = filteredCommands[selectedIndex]?.icon || Search;
+  // Group commands by category
+  const groupedCommands = useMemo(() => {
+    const groups: Record<string, CommandItemData[]> = {};
+    ALL_COMMANDS.forEach(cmd => {
+      if (!groups[cmd.category]) groups[cmd.category] = [];
+      groups[cmd.category].push(cmd);
+    });
+    return groups;
+  }, []);
+
+  const recentCommands = useMemo(() => {
+    return ALL_COMMANDS.filter(cmd => recentPages.includes(cmd.url));
+  }, [recentPages]);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="overflow-hidden p-0 shadow-2xl">
-        <div className="flex flex-col">
-          {/* Search Input */}
-          <div className="flex items-center border-b px-3">
-            <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-            <Input
-              placeholder="Rechercher une page, un paramètre..."
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-              className="flex h-12 w-full border-0 bg-transparent px-2 py-3 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
-              autoFocus
-            />
-            {query && (
-              <button
-                onClick={() => setQuery('')}
-                className="rounded-sm opacity-50 hover:opacity-100"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
-          </div>
+    <CommandDialog open={open} onOpenChange={onOpenChange}>
+      <CommandInput placeholder="Rechercher une page, un paramètre..." />
+      <CommandList>
+        <CommandEmpty>Aucun résultat trouvé.</CommandEmpty>
 
-          {/* Command List */}
-          <ScrollArea className="max-h-[400px] p-2">
-            <div className="space-y-1">
-              {filteredCommands.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <Search className="h-12 w-12 text-muted-foreground/50" />
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    Aucun résultat pour "{query}"
-                  </p>
-                </div>
-              ) : (
-                filteredCommands.map((command, index) => (
-                  <button
-                    key={command.id}
-                    onClick={() => handleSelect(command)}
-                    className={cn(
-                      'flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-left transition-colors',
-                      index === selectedIndex
-                        ? 'bg-accent text-accent-foreground'
-                        : 'hover:bg-accent/50 hover:text-accent-foreground'
-                    )}
-                  >
-                    <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
-                    <div className="flex flex-1 flex-col">
-                      <span className="font-medium">{command.title}</span>
-                      <span className="text-xs text-muted-foreground">{command.category}</span>
-                    </div>
-                    <ArrowRight className="h-4 w-4 shrink-0 opacity-0 group-hover:opacity-100" />
-                  </button>
-                ))
-              )}
-            </div>
-          </ScrollArea>
+        {recentCommands.length > 0 && (
+          <CommandGroup heading="Pages Récentes">
+            {recentCommands.map(command => {
+              const Icon = command.icon;
+              return (
+                <CommandItem
+                  key={`recent-${command.id}`}
+                  value={`recent ${command.title} ${command.category}`}
+                  onSelect={() => handleSelect(command)}
+                >
+                  <Icon className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <span>{command.title}</span>
+                  <span className="ml-auto text-xs text-muted-foreground">{command.category}</span>
+                </CommandItem>
+              );
+            })}
+          </CommandGroup>
+        )}
 
-          {/* Footer */}
-          <div className="flex items-center justify-between border-t px-3 py-2 text-xs text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <kbd className="rounded bg-muted px-1.5 py-0.5 font-mono">↑↓</kbd>
-              <span>pour naviguer</span>
-              <kbd className="rounded bg-muted px-1.5 py-0.5 font-mono">↵</kbd>
-              <span>pour sélectionner</span>
-              <kbd className="rounded bg-muted px-1.5 py-0.5 font-mono">esc</kbd>
-              <span>pour fermer</span>
-            </div>
-            {recentPages.length > 0 && (
-              <div className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                <span>{recentPages.length} pages récentes</span>
-              </div>
-            )}
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+        {recentCommands.length > 0 && <CommandSeparator />}
+
+        {Object.entries(groupedCommands).map(([category, commands]) => (
+          <CommandGroup key={category} heading={category}>
+            {commands.map(command => {
+              const Icon = command.icon;
+              return (
+                <CommandItem
+                  key={command.id}
+                  value={`${command.title} ${command.category} ${command.keywords?.join(' ')}`}
+                  onSelect={() => handleSelect(command)}
+                >
+                  <Icon className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <span>{command.title}</span>
+                </CommandItem>
+              );
+            })}
+          </CommandGroup>
+        ))}
+      </CommandList>
+    </CommandDialog>
   );
 }
 

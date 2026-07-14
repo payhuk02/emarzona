@@ -11,8 +11,9 @@
  */
 
 import { useState, useMemo } from 'react';
-import { AppPageShell } from '@/components/layout/AppPageShell';
+import { DashboardShellLayout } from '@/components/layout/DashboardShellLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { KpiCard } from '@/components/dashboard/core/KpiCard';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -209,6 +210,7 @@ export default function InventoryAnalytics() {
       return analyticsData;
     },
     enabled: !!store?.id,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   // Filtered analytics
@@ -303,8 +305,8 @@ export default function InventoryAnalytics() {
 
   if (storeLoading || analyticsLoading) {
     return (
-      <AppPageShell>
-        <div className="container mx-auto p-4 lg:p-6 space-y-6">
+      <DashboardShellLayout>
+        <div className="space-y-6">
           <Skeleton className="h-12 w-full" />
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {[1, 2, 3, 4].map(i => (
@@ -313,448 +315,405 @@ export default function InventoryAnalytics() {
           </div>
           <Skeleton className="h-96 w-full" />
         </div>
-      </AppPageShell>
+      </DashboardShellLayout>
     );
   }
 
   return (
-    <AppPageShell>
-      <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
-        {/* Header */}
-        <div
-          ref={headerRef}
-          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700"
-        >
-          <div className="flex-1 min-w-0">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold flex items-center gap-2 mb-1 sm:mb-2">
-              <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-indigo-500/10 to-blue-500/5 backdrop-blur-sm border border-indigo-500/20">
-                <BarChart3 className="h-5 w-5 sm:h-6 sm:w-6 text-indigo-500" />
-              </div>
-              <span className="bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">
-                Analytics Inventaire
-              </span>
-            </h1>
-            <p className="text-xs sm:text-sm text-muted-foreground">
-              Analysez la rotation, les coûts et la performance de votre inventaire
-            </p>
-          </div>
-          <Button
-            variant="outline"
-            onClick={() => {
-              try {
-                exportInventoryAnalyticsToCSV(filteredAnalytics);
-                toast({
-                  title: '✅ Export réussi',
-                  description: `${filteredAnalytics.length} produit(s) exporté(s) en CSV`,
-                });
-              } catch (_error: unknown) {
-                const errorMessage = error instanceof Error ? error.message : String(error);
-                toast({
-                  title: '❌ Erreur',
-                  description: errorMessage || "Impossible d'exporter les données",
-                  variant: 'destructive',
-                });
-              }
-            }}
-            disabled={filteredAnalytics.length === 0}
-          >
-            <Download className="h-4 w-4 mr-2" />
-            Exporter CSV
-          </Button>
-        </div>
-
-        {/* Stats */}
-        <div
-          ref={statsRef}
-          className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-9 gap-3 sm:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
-        >
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium">Total Produits</CardTitle>
-              <Package className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-lg sm:text-2xl font-bold">{stats.totalProducts}</div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium">Valeur Totale</CardTitle>
-              <DollarSign className="h-4 w-4 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-lg sm:text-2xl font-bold text-green-600">
-                {stats.totalValue.toLocaleString('fr-FR')} XOF
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium">Revenus</CardTitle>
-              <TrendingUp className="h-4 w-4 text-blue-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-lg sm:text-2xl font-bold text-blue-600">
-                {stats.totalRevenue.toLocaleString('fr-FR')} XOF
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium">Rotation Moy.</CardTitle>
-              <RefreshCw className="h-4 w-4 text-purple-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-lg sm:text-2xl font-bold text-purple-600">
-                {stats.avgTurnover.toFixed(2)}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium">Rapide</CardTitle>
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-lg sm:text-2xl font-bold text-green-600">{stats.fastMoving}</div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium">Lent</CardTitle>
-              <Clock className="h-4 w-4 text-orange-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-lg sm:text-2xl font-bold text-orange-600">
-                {stats.slowMoving}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium">Stock Mort</CardTitle>
-              <AlertTriangle className="h-4 w-4 text-red-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-lg sm:text-2xl font-bold text-red-600">{stats.deadStock}</div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium">Catégorie A</CardTitle>
-              <Badge className="bg-green-600 text-white">A</Badge>
-            </CardHeader>
-            <CardContent>
-              <div className="text-lg sm:text-2xl font-bold text-green-600">{stats.categoryA}</div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium">Catégorie B</CardTitle>
-              <Badge className="bg-yellow-600 text-white">B</Badge>
-            </CardHeader>
-            <CardContent>
-              <div className="text-lg sm:text-2xl font-bold text-yellow-600">{stats.categoryB}</div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Filtres */}
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Select value={periodFilter} onValueChange={v => setPeriodFilter(v as string)}>
-                <SelectTrigger className="w-full sm:w-[180px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="30">30 derniers jours</SelectItem>
-                  <SelectItem value="60">60 derniers jours</SelectItem>
-                  <SelectItem value="90">90 derniers jours</SelectItem>
-                  <SelectItem value="180">180 derniers jours</SelectItem>
-                  <SelectItem value="365">365 derniers jours</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="w-full sm:w-[180px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Toutes les catégories</SelectItem>
-                  <SelectItem value="A">Catégorie A</SelectItem>
-                  <SelectItem value="B">Catégorie B</SelectItem>
-                  <SelectItem value="C">Catégorie C</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={movementFilter} onValueChange={setMovementFilter}>
-                <SelectTrigger className="w-full sm:w-[180px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tous les mouvements</SelectItem>
-                  <SelectItem value="fast">Rapide</SelectItem>
-                  <SelectItem value="medium">Moyen</SelectItem>
-                  <SelectItem value="slow">Lent</SelectItem>
-                  <SelectItem value="dead">Mort</SelectItem>
-                </SelectContent>
-              </Select>
+    <DashboardShellLayout>
+      {/* Header */}
+      <div
+        ref={headerRef}
+        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700"
+      >
+        <div className="flex-1 min-w-0">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold flex items-center gap-2 mb-1 sm:mb-2">
+            <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-indigo-500/10 to-blue-500/5 backdrop-blur-sm border border-indigo-500/20">
+              <BarChart3 className="h-5 w-5 sm:h-6 sm:w-6 text-indigo-500" />
             </div>
-          </CardContent>
-        </Card>
+            <span className="bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">
+              Analytics Inventaire
+            </span>
+          </h1>
+          <p className="text-xs sm:text-sm text-muted-foreground">
+            Analysez la rotation, les coûts et la performance de votre inventaire
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          onClick={() => {
+            try {
+              exportInventoryAnalyticsToCSV(filteredAnalytics);
+              toast({
+                title: '✅ Export réussi',
+                description: `${filteredAnalytics.length} produit(s) exporté(s) en CSV`,
+              });
+            } catch (_error: unknown) {
+              const errorMessage = error instanceof Error ? error.message : String(error);
+              toast({
+                title: '❌ Erreur',
+                description: errorMessage || "Impossible d'exporter les données",
+                variant: 'destructive',
+              });
+            }
+          }}
+          disabled={filteredAnalytics.length === 0}
+        >
+          <Download className="h-4 w-4 mr-2" />
+          Exporter CSV
+        </Button>
+      </div>
 
-        {/* Tabs */}
-        <Tabs value={selectedTab} onValueChange={v => setSelectedTab(v as string)}>
-          <TabsList>
-            <TabsTrigger value="turnover">
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Rotation ({filteredAnalytics.length})
-            </TabsTrigger>
-            <TabsTrigger value="abc">
-              <BarChart3 className="h-4 w-4 mr-2" />
-              Analyse ABC
-            </TabsTrigger>
-            <TabsTrigger value="costs">
-              <DollarSign className="h-4 w-4 mr-2" />
-              Coûts
-            </TabsTrigger>
-            <TabsTrigger value="rotation">
-              <TrendingUp className="h-4 w-4 mr-2" />
-              Méthodes Rotation
-            </TabsTrigger>
-          </TabsList>
+      {/* Stats */}
+      <div
+        ref={statsRef}
+        className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-9 gap-3 sm:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
+      >
+        <KpiCard
+          title="Total Produits"
+          value={stats.totalProducts}
+          icon={<Package className="h-4 w-4" />}
+          index={0}
+        />
+        <KpiCard
+          title="Valeur Totale"
+          value={`${stats.totalValue.toLocaleString('fr-FR')} XOF`}
+          icon={<DollarSign className="h-4 w-4" />}
+          className="[&_.text-2xl]:text-green-600 dark:[&_.text-2xl]:text-green-500 [&_.bg-primary\\/5]:bg-green-500/10 [&_.text-primary]:text-green-600 dark:[&_.text-primary]:text-green-500"
+          index={1}
+        />
+        <KpiCard
+          title="Revenus"
+          value={`${stats.totalRevenue.toLocaleString('fr-FR')} XOF`}
+          icon={<TrendingUp className="h-4 w-4" />}
+          className="[&_.text-2xl]:text-blue-600 dark:[&_.text-2xl]:text-blue-500 [&_.bg-primary\\/5]:bg-blue-500/10 [&_.text-primary]:text-blue-600 dark:[&_.text-primary]:text-blue-500"
+          index={2}
+        />
+        <KpiCard
+          title="Rotation Moy."
+          value={stats.avgTurnover.toFixed(2)}
+          icon={<RefreshCw className="h-4 w-4" />}
+          className="[&_.text-2xl]:text-purple-600 dark:[&_.text-2xl]:text-purple-500 [&_.bg-primary\\/5]:bg-purple-500/10 [&_.text-primary]:text-purple-600 dark:[&_.text-primary]:text-purple-500"
+          index={3}
+        />
+        <KpiCard
+          title="Rapide"
+          value={stats.fastMoving}
+          icon={<CheckCircle2 className="h-4 w-4" />}
+          className="[&_.text-2xl]:text-emerald-600 dark:[&_.text-2xl]:text-emerald-500 [&_.bg-primary\\/5]:bg-emerald-500/10 [&_.text-primary]:text-emerald-600 dark:[&_.text-primary]:text-emerald-500"
+          index={4}
+        />
+        <KpiCard
+          title="Lent"
+          value={stats.slowMoving}
+          icon={<Clock className="h-4 w-4" />}
+          className="[&_.text-2xl]:text-orange-600 dark:[&_.text-2xl]:text-orange-500 [&_.bg-primary\\/5]:bg-orange-500/10 [&_.text-primary]:text-orange-600 dark:[&_.text-primary]:text-orange-500"
+          index={5}
+        />
+        <KpiCard
+          title="Stock Mort"
+          value={stats.deadStock}
+          icon={<AlertTriangle className="h-4 w-4" />}
+          className="[&_.text-2xl]:text-red-600 dark:[&_.text-2xl]:text-red-500 [&_.bg-primary\\/5]:bg-red-500/10 [&_.text-primary]:text-red-600 dark:[&_.text-primary]:text-red-500"
+          index={6}
+        />
+        <KpiCard
+          title="Catégorie A"
+          value={stats.categoryA}
+          icon={<span className="font-bold text-xs">A</span>}
+          className="[&_.text-2xl]:text-emerald-600 dark:[&_.text-2xl]:text-emerald-500 [&_.bg-primary\\/5]:bg-emerald-500/10 [&_.text-primary]:text-emerald-600 dark:[&_.text-primary]:text-emerald-500"
+          index={7}
+        />
+        <KpiCard
+          title="Catégorie B"
+          value={stats.categoryB}
+          icon={<span className="font-bold text-xs">B</span>}
+          className="[&_.text-2xl]:text-yellow-600 dark:[&_.text-2xl]:text-yellow-500 [&_.bg-primary\\/5]:bg-yellow-500/10 [&_.text-primary]:text-yellow-600 dark:[&_.text-primary]:text-yellow-500"
+          index={8}
+        />
+      </div>
 
-          <TabsContent value="turnover" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Rotation des Stocks</CardTitle>
-                <CardDescription>Analysez la vitesse de rotation de vos produits</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {filteredAnalytics.length === 0 ? (
-                  <div className="text-center py-12">
-                    <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground">Aucune donnée disponible</p>
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Produit</TableHead>
-                          <TableHead>Stock actuel</TableHead>
-                          <TableHead>Ventes ({periodFilter}j)</TableHead>
-                          <TableHead>Taux rotation</TableHead>
-                          <TableHead>Jours en stock</TableHead>
-                          <TableHead>Mouvement</TableHead>
-                          <TableHead>Revenus</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {filteredAnalytics
-                          .sort((a, b) => b.turnover_rate - a.turnover_rate)
-                          .map(item => (
+      {/* Filtres */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Select value={periodFilter} onValueChange={v => setPeriodFilter(v as string)}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="30">30 derniers jours</SelectItem>
+                <SelectItem value="60">60 derniers jours</SelectItem>
+                <SelectItem value="90">90 derniers jours</SelectItem>
+                <SelectItem value="180">180 derniers jours</SelectItem>
+                <SelectItem value="365">365 derniers jours</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Toutes les catégories</SelectItem>
+                <SelectItem value="A">Catégorie A</SelectItem>
+                <SelectItem value="B">Catégorie B</SelectItem>
+                <SelectItem value="C">Catégorie C</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={movementFilter} onValueChange={setMovementFilter}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous les mouvements</SelectItem>
+                <SelectItem value="fast">Rapide</SelectItem>
+                <SelectItem value="medium">Moyen</SelectItem>
+                <SelectItem value="slow">Lent</SelectItem>
+                <SelectItem value="dead">Mort</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Tabs */}
+      <Tabs value={selectedTab} onValueChange={v => setSelectedTab(v as string)}>
+        <TabsList>
+          <TabsTrigger value="turnover">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Rotation ({filteredAnalytics.length})
+          </TabsTrigger>
+          <TabsTrigger value="abc">
+            <BarChart3 className="h-4 w-4 mr-2" />
+            Analyse ABC
+          </TabsTrigger>
+          <TabsTrigger value="costs">
+            <DollarSign className="h-4 w-4 mr-2" />
+            Coûts
+          </TabsTrigger>
+          <TabsTrigger value="rotation">
+            <TrendingUp className="h-4 w-4 mr-2" />
+            Méthodes Rotation
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="turnover" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Rotation des Stocks</CardTitle>
+              <CardDescription>Analysez la vitesse de rotation de vos produits</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {filteredAnalytics.length === 0 ? (
+                <div className="text-center py-12">
+                  <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">Aucune donnée disponible</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Produit</TableHead>
+                        <TableHead>Stock actuel</TableHead>
+                        <TableHead>Ventes ({periodFilter}j)</TableHead>
+                        <TableHead>Taux rotation</TableHead>
+                        <TableHead>Jours en stock</TableHead>
+                        <TableHead>Mouvement</TableHead>
+                        <TableHead>Revenus</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredAnalytics
+                        .sort((a, b) => b.turnover_rate - a.turnover_rate)
+                        .map(item => (
+                          <TableRow key={item.product_id}>
+                            <TableCell className="font-medium">{item.product_name}</TableCell>
+                            <TableCell>{item.current_stock}</TableCell>
+                            <TableCell>{item.total_sold}</TableCell>
+                            <TableCell>
+                              <span
+                                className={cn(
+                                  item.turnover_rate > 0.5 && 'text-green-600 font-semibold',
+                                  item.turnover_rate > 0.2 &&
+                                    item.turnover_rate <= 0.5 &&
+                                    'text-yellow-600 font-semibold',
+                                  item.turnover_rate > 0 &&
+                                    item.turnover_rate <= 0.2 &&
+                                    'text-orange-600 font-semibold',
+                                  item.turnover_rate === 0 && 'text-red-600 font-semibold'
+                                )}
+                              >
+                                {item.turnover_rate.toFixed(2)}
+                              </span>
+                            </TableCell>
+                            <TableCell>{item.days_in_stock}j</TableCell>
+                            <TableCell>{getMovementBadge(item.movement_type)}</TableCell>
+                            <TableCell>{item.total_revenue.toLocaleString('fr-FR')} XOF</TableCell>
+                          </TableRow>
+                        ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="abc" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Analyse ABC</CardTitle>
+              <CardDescription>
+                Classification des produits par importance (A: 80% revenus, B: 15%, C: 5%)
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {filteredAnalytics.length === 0 ? (
+                <div className="text-center py-12">
+                  <BarChart3 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">Aucune donnée disponible</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Produit</TableHead>
+                        <TableHead>Catégorie</TableHead>
+                        <TableHead>Revenus</TableHead>
+                        <TableHead>% du total</TableHead>
+                        <TableHead>Ventes</TableHead>
+                        <TableHead>Stock</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredAnalytics
+                        .sort((a, b) => {
+                          const order = { A: 1, B: 2, C: 3 };
+                          return (order[a.abc_category] || 3) - (order[b.abc_category] || 3);
+                        })
+                        .map(item => {
+                          const totalRevenue = analytics.reduce(
+                            (sum, a) => sum + a.total_revenue,
+                            0
+                          );
+                          const percentage =
+                            totalRevenue > 0 ? (item.total_revenue / totalRevenue) * 100 : 0;
+
+                          return (
+                            <TableRow key={item.product_id}>
+                              <TableCell className="font-medium">{item.product_name}</TableCell>
+                              <TableCell>{getABCBadge(item.abc_category)}</TableCell>
+                              <TableCell className="font-semibold">
+                                {item.total_revenue.toLocaleString('fr-FR')} XOF
+                              </TableCell>
+                              <TableCell>{percentage.toFixed(1)}%</TableCell>
+                              <TableCell>{item.total_sold}</TableCell>
+                              <TableCell>{item.current_stock}</TableCell>
+                            </TableRow>
+                          );
+                        })}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="costs" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Coûts d'Inventaire</CardTitle>
+              <CardDescription>Analysez la valeur et les coûts de votre inventaire</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {filteredAnalytics.length === 0 ? (
+                <div className="text-center py-12">
+                  <DollarSign className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">Aucune donnée disponible</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Produit</TableHead>
+                        <TableHead>Stock</TableHead>
+                        <TableHead>Coût unitaire</TableHead>
+                        <TableHead>Valeur stock</TableHead>
+                        <TableHead>Revenus</TableHead>
+                        <TableHead>Marge</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredAnalytics
+                        .sort(
+                          (a, b) =>
+                            b.current_stock * b.average_cost - a.current_stock * a.average_cost
+                        )
+                        .map(item => {
+                          const stockValue = item.current_stock * item.average_cost;
+                          const margin = item.total_revenue - item.total_sold * item.average_cost;
+                          const marginPercent =
+                            item.total_revenue > 0 ? (margin / item.total_revenue) * 100 : 0;
+
+                          return (
                             <TableRow key={item.product_id}>
                               <TableCell className="font-medium">{item.product_name}</TableCell>
                               <TableCell>{item.current_stock}</TableCell>
-                              <TableCell>{item.total_sold}</TableCell>
-                              <TableCell>
-                                <span
-                                  className={cn(
-                                    item.turnover_rate > 0.5 && 'text-green-600 font-semibold',
-                                    item.turnover_rate > 0.2 &&
-                                      item.turnover_rate <= 0.5 &&
-                                      'text-yellow-600 font-semibold',
-                                    item.turnover_rate > 0 &&
-                                      item.turnover_rate <= 0.2 &&
-                                      'text-orange-600 font-semibold',
-                                    item.turnover_rate === 0 && 'text-red-600 font-semibold'
-                                  )}
-                                >
-                                  {item.turnover_rate.toFixed(2)}
-                                </span>
+                              <TableCell>{item.average_cost.toLocaleString('fr-FR')} XOF</TableCell>
+                              <TableCell className="font-semibold">
+                                {stockValue.toLocaleString('fr-FR')} XOF
                               </TableCell>
-                              <TableCell>{item.days_in_stock}j</TableCell>
-                              <TableCell>{getMovementBadge(item.movement_type)}</TableCell>
                               <TableCell>
                                 {item.total_revenue.toLocaleString('fr-FR')} XOF
                               </TableCell>
+                              <TableCell>
+                                <span
+                                  className={cn(
+                                    marginPercent > 30 && 'text-green-600 font-semibold',
+                                    marginPercent > 10 &&
+                                      marginPercent <= 30 &&
+                                      'text-yellow-600 font-semibold',
+                                    marginPercent <= 10 && 'text-red-600 font-semibold'
+                                  )}
+                                >
+                                  {margin.toLocaleString('fr-FR')} XOF ({marginPercent.toFixed(1)}
+                                  %)
+                                </span>
+                              </TableCell>
                             </TableRow>
-                          ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="abc" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Analyse ABC</CardTitle>
-                <CardDescription>
-                  Classification des produits par importance (A: 80% revenus, B: 15%, C: 5%)
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {filteredAnalytics.length === 0 ? (
-                  <div className="text-center py-12">
-                    <BarChart3 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground">Aucune donnée disponible</p>
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Produit</TableHead>
-                          <TableHead>Catégorie</TableHead>
-                          <TableHead>Revenus</TableHead>
-                          <TableHead>% du total</TableHead>
-                          <TableHead>Ventes</TableHead>
-                          <TableHead>Stock</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {filteredAnalytics
-                          .sort((a, b) => {
-                            const order = { A: 1, B: 2, C: 3 };
-                            return (order[a.abc_category] || 3) - (order[b.abc_category] || 3);
-                          })
-                          .map(item => {
-                            const totalRevenue = analytics.reduce(
-                              (sum, a) => sum + a.total_revenue,
-                              0
-                            );
-                            const percentage =
-                              totalRevenue > 0 ? (item.total_revenue / totalRevenue) * 100 : 0;
-
-                            return (
-                              <TableRow key={item.product_id}>
-                                <TableCell className="font-medium">{item.product_name}</TableCell>
-                                <TableCell>{getABCBadge(item.abc_category)}</TableCell>
-                                <TableCell className="font-semibold">
-                                  {item.total_revenue.toLocaleString('fr-FR')} XOF
-                                </TableCell>
-                                <TableCell>{percentage.toFixed(1)}%</TableCell>
-                                <TableCell>{item.total_sold}</TableCell>
-                                <TableCell>{item.current_stock}</TableCell>
-                              </TableRow>
-                            );
-                          })}
-                      </TableBody>
-                    </Table>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="costs" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Coûts d'Inventaire</CardTitle>
-                <CardDescription>
-                  Analysez la valeur et les coûts de votre inventaire
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {filteredAnalytics.length === 0 ? (
-                  <div className="text-center py-12">
-                    <DollarSign className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground">Aucune donnée disponible</p>
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Produit</TableHead>
-                          <TableHead>Stock</TableHead>
-                          <TableHead>Coût unitaire</TableHead>
-                          <TableHead>Valeur stock</TableHead>
-                          <TableHead>Revenus</TableHead>
-                          <TableHead>Marge</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {filteredAnalytics
-                          .sort(
-                            (a, b) =>
-                              b.current_stock * b.average_cost - a.current_stock * a.average_cost
-                          )
-                          .map(item => {
-                            const stockValue = item.current_stock * item.average_cost;
-                            const margin = item.total_revenue - item.total_sold * item.average_cost;
-                            const marginPercent =
-                              item.total_revenue > 0 ? (margin / item.total_revenue) * 100 : 0;
-
-                            return (
-                              <TableRow key={item.product_id}>
-                                <TableCell className="font-medium">{item.product_name}</TableCell>
-                                <TableCell>{item.current_stock}</TableCell>
-                                <TableCell>
-                                  {item.average_cost.toLocaleString('fr-FR')} XOF
-                                </TableCell>
-                                <TableCell className="font-semibold">
-                                  {stockValue.toLocaleString('fr-FR')} XOF
-                                </TableCell>
-                                <TableCell>
-                                  {item.total_revenue.toLocaleString('fr-FR')} XOF
-                                </TableCell>
-                                <TableCell>
-                                  <span
-                                    className={cn(
-                                      marginPercent > 30 && 'text-green-600 font-semibold',
-                                      marginPercent > 10 &&
-                                        marginPercent <= 30 &&
-                                        'text-yellow-600 font-semibold',
-                                      marginPercent <= 10 && 'text-red-600 font-semibold'
-                                    )}
-                                  >
-                                    {margin.toLocaleString('fr-FR')} XOF ({marginPercent.toFixed(1)}
-                                    %)
-                                  </span>
-                                </TableCell>
-                              </TableRow>
-                            );
-                          })}
-                      </TableBody>
-                    </Table>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="rotation" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Méthodes de Rotation</CardTitle>
-                <CardDescription>
-                  Analysez l'efficacité des méthodes de rotation (FIFO, LIFO, FEFO)
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-12">
-                  <TrendingUp className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground">
-                    L'analyse des méthodes de rotation sera disponible prochainement
-                  </p>
+                          );
+                        })}
+                    </TableBody>
+                  </Table>
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
-    </AppPageShell>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="rotation" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Méthodes de Rotation</CardTitle>
+              <CardDescription>
+                Analysez l'efficacité des méthodes de rotation (FIFO, LIFO, FEFO)
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-12">
+                <TrendingUp className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">
+                  L'analyse des méthodes de rotation sera disponible prochainement
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </DashboardShellLayout>
   );
 }

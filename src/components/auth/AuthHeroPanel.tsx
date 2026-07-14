@@ -30,7 +30,7 @@ export function AuthHeroPanel() {
           width={1024}
           height={1280}
           decoding="async"
-          fetchPriority="high"
+          fetchpriority="high"
           loading="eager"
           className="app-premium-auth-hero-img"
         />

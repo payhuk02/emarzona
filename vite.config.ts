@@ -246,6 +246,7 @@ export default defineConfig(({ mode }) => {
         '@hookform/resolvers',
         'embla-carousel-autoplay',
         'embla-carousel-react',
+        'qrcode',
         '@radix-ui/react-accordion',
         '@radix-ui/react-alert-dialog',
         '@radix-ui/react-aspect-ratio',

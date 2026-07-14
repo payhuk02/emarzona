@@ -1,19 +1,14 @@
 import { AppPageShell } from '@/components/layout/AppPageShell';
-import { Activity, Package, ShoppingCart } from 'lucide-react';
 import { useDashboardStatsOptimized as useDashboardStats } from '@/hooks/useDashboardStats';
 import { useStore, type Store } from '@/hooks/useStore';
 import { useNavigate } from 'react-router-dom';
-import { useState, useMemo, useCallback, lazy, useEffect, useRef } from 'react';
+import { useState, useMemo, useCallback, lazy, Suspense, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
-import { useTranslation } from 'react-i18next';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useSessionHealth } from '@/hooks/useSessionHealth';
-import { usePlatformLogo } from '@/hooks/usePlatformLogo';
+import { useDeferredMount } from '@/hooks/useDeferredMount';
 import type { Notification } from '@/types/notifications';
-// Composants non-lourds (pas de lazy loading nécessaire)
-import { RecentOrdersCard } from '@/components/dashboard/RecentOrdersCard';
-import { TopProductsCard } from '@/components/dashboard/TopProductsCard';
 import { PeriodType } from '@/components/dashboard/PeriodFilter';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { DashboardStats } from '@/components/dashboard/DashboardStats';
@@ -22,17 +17,22 @@ import {
   useUnreadCount,
   useRealtimeNotifications,
 } from '@/hooks/useNotifications';
-import { DashboardFullSkeleton } from '@/components/dashboard/DashboardSkeleton';
+import {
+  DashboardFullSkeleton,
+  DashboardSecondarySkeleton,
+} from '@/components/dashboard/DashboardSkeleton';
 import { DashboardOnboarding } from '@/components/dashboard/DashboardOnboarding';
 import { DashboardErrorHandler } from '@/components/dashboard/DashboardErrorHandler';
-import { DashboardCategorySales } from '@/components/dashboard/DashboardCategorySales';
-import { DashboardSalesEvolution } from '@/components/dashboard/DashboardSalesEvolution';
-import { DashboardRecentActivity } from '@/components/dashboard/DashboardRecentActivity';
 import { DashboardActionCenter } from '@/components/dashboard/DashboardActionCenter';
 import { PhysicalSubscriptionAlert } from '@/components/billing/PhysicalSubscriptionAlert';
 import { DashboardNotificationsStrip } from '@/components/dashboard/DashboardNotificationsStrip';
-import { DashboardFooterMetrics } from '@/components/dashboard/DashboardFooterMetrics';
 import '@/styles/dashboard-premium.css';
+
+const DashboardSecondaryPanels = lazy(() =>
+  import('@/components/dashboard/DashboardSecondaryPanels').then(m => ({
+    default: m.DashboardSecondaryPanels,
+  }))
+);
 
 /**
  * Page principale du Dashboard
@@ -49,8 +49,8 @@ import '@/styles/dashboard-premium.css';
  * @returns {JSX.Element} Le composant Dashboard
  *
  * @remarks
- * - Utilise lazy loading pour les composants analytics lourds
- * - Preload du logo platform pour améliorer LCP
+ * - Lazy loading des graphiques et listes (below-the-fold)
+ * - Prefetch du chunk secondaire dès réception des KPI
  * - Gestion d'erreurs robuste avec ErrorBoundary
  * - Optimisations de performance (useMemo, useCallback)
  * - Responsive design avec classes Tailwind
@@ -78,24 +78,6 @@ type DashboardWithStoreProps = {
 };
 
 const DashboardWithStore = ({ store, storeLoading }: DashboardWithStoreProps) => {
-  const platformLogo = usePlatformLogo();
-
-  useEffect(() => {
-    if (platformLogo) {
-      const link = document.createElement('link');
-      link.rel = 'preload';
-      link.as = 'image';
-      link.href = platformLogo;
-      link.setAttribute('fetchpriority', 'high');
-      document.head.appendChild(link);
-      return () => {
-        if (document.head.contains(link)) {
-          document.head.removeChild(link);
-        }
-      };
-    }
-  }, [platformLogo]);
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
 
@@ -135,10 +117,19 @@ const DashboardWithStore = ({ store, storeLoading }: DashboardWithStoreProps) =>
     storeId: store?.id,
   });
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [selectedProductType, setSelectedProductType] = useState<ProductTypeFilter>('all');
 
-  /** Skeleton jusqu’à la 1re réponse réelle — jamais en parallèle d’une erreur affichée */
+  /** Skeleton jusqu'à la 1re réponse réelle — jamais en parallèle d'une erreur affichée */
   const showStatsSkeleton = storeLoading || !store?.id || (!hasStatsData && !hookError);
+
+  /** Graphiques et listes : après KPI + idle browser */
+  const showSecondaryPanels = useDeferredMount(!showStatsSkeleton && !!stats);
+
+  // Prefetch du chunk secondaire dès que les stats sont prêtes
+  useEffect(() => {
+    if (!showStatsSkeleton && stats) {
+      void import('@/components/dashboard/DashboardSecondaryPanels');
+    }
+  }, [showStatsSkeleton, stats]);
 
   // ✅ PHASE 2: Déferrer les notifications (non-critique pour le premier render)
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
@@ -311,18 +302,6 @@ const DashboardWithStore = ({ store, storeLoading }: DashboardWithStoreProps) =>
     navigateRef.current('/dashboard/analytics');
   }, []);
 
-  const handleManageCustomers = useCallback(() => {
-    navigateRef.current('/dashboard/customers');
-  }, []);
-
-  const handleViewStore = useCallback(() => {
-    navigateRef.current('/dashboard/store');
-  }, []);
-
-  const handleSettings = useCallback(() => {
-    navigateRef.current('/dashboard/settings');
-  }, []);
-
   // Animations au scroll
   const actionsRef = useScrollAnimation<HTMLDivElement>();
 
@@ -350,25 +329,6 @@ const DashboardWithStore = ({ store, storeLoading }: DashboardWithStoreProps) =>
       isRefreshing,
       isUpdating,
       unreadCount,
-    ]
-  );
-
-  const dashboardNotificationsProps = useMemo(
-    () => ({
-      notifications,
-      notificationsEnabled,
-      stats,
-      onViewStore: handleViewStore,
-      onManageCustomers: handleManageCustomers,
-      onSettings: handleSettings,
-    }),
-    [
-      notifications,
-      notificationsEnabled,
-      stats,
-      handleViewStore,
-      handleManageCustomers,
-      handleSettings,
     ]
   );
 
@@ -423,78 +383,19 @@ const DashboardWithStore = ({ store, storeLoading }: DashboardWithStoreProps) =>
               <DashboardStats stats={stats} />
             </div>
 
-            {stats.revenueByMonth.length > 0 && (
-              <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 sm:gap-6">
-                <div className="xl:col-span-2">
-                  <DashboardSalesEvolution data={stats.revenueByMonth} />
-                </div>
-                <DashboardCategorySales
-                  revenueByType={stats.revenueByType}
-                  onViewAll={handleViewAnalytics}
+            {showSecondaryPanels ? (
+              <Suspense fallback={<DashboardSecondarySkeleton />}>
+                <DashboardSecondaryPanels
+                  stats={stats}
+                  onViewAnalytics={handleViewAnalytics}
+                  onCreateProduct={handleCreateProduct}
+                  onCreateOrder={handleCreateOrder}
+                  actionsRef={actionsRef}
                 />
-              </div>
+              </Suspense>
+            ) : (
+              <DashboardSecondarySkeleton />
             )}
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
-              {stats.recentOrders.length > 0 ? (
-                <RecentOrdersCard orders={stats.recentOrders} variant="premium" />
-              ) : (
-                <div className="dashboard-premium-panel flex items-center justify-center min-h-[200px] text-muted-foreground text-sm">
-                  {t('dashboard.orders.empty', 'Aucune commande récente')}
-                </div>
-              )}
-              {stats.topProducts.length > 0 ? (
-                <TopProductsCard products={stats.topProducts} variant="premium" />
-              ) : (
-                <div className="dashboard-premium-panel flex items-center justify-center min-h-[200px] text-muted-foreground text-sm">
-                  {t('dashboard.products.empty', 'Aucun produit vendu')}
-                </div>
-              )}
-              <DashboardRecentActivity activities={stats.recentActivity} />
-            </div>
-
-            <DashboardFooterMetrics stats={stats} />
-
-            <div
-              ref={actionsRef}
-              className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3"
-              role="list"
-              aria-label={t('dashboard.quickActions.ariaLabel', 'Actions rapides')}
-            >
-              {[
-                {
-                  title: t('dashboard.quickActions.newProduct'),
-                  icon: Package,
-                  onClick: handleCreateProduct,
-                  theme: 'border-emerald-200/80 hover:bg-emerald-50/50',
-                },
-                {
-                  title: t('dashboard.quickActions.newOrder'),
-                  icon: ShoppingCart,
-                  onClick: handleCreateOrder,
-                  theme: 'border-blue-200/80 hover:bg-blue-50/50',
-                },
-                {
-                  title: t('dashboard.quickActions.analytics'),
-                  icon: Activity,
-                  onClick: handleViewAnalytics,
-                  theme: 'border-violet-200/80 hover:bg-violet-50/50',
-                },
-              ].map(action => {
-                const Icon = action.icon;
-                return (
-                  <button
-                    key={action.title}
-                    type="button"
-                    onClick={action.onClick}
-                    className={`dashboard-premium-panel flex items-center justify-center gap-2 text-sm sm:text-base font-semibold transition-colors ${action.theme}`}
-                  >
-                    <Icon className="h-5 w-5 shrink-0" aria-hidden />
-                    {action.title}
-                  </button>
-                );
-              })}
-            </div>
           </div>
         ) : null}
       </div>

@@ -60,6 +60,19 @@ describe('resolveHorizontalNavDomains', () => {
     expect(produits?.isActive).toBe(true);
   });
 
+  it('déduplique le hub Produits et la liste verticale digitale', () => {
+    const domains = resolveHorizontalNavDomains({
+      isPlatformAdmin: false,
+      commerceType: 'digital',
+      pathname: '/dashboard/digital-products',
+      search: '',
+      t: mockT as never,
+    });
+    const produits = domains.find(d => d.sectionKey === 'produits_cours');
+    const digitalUrls = produits!.items.filter(i => i.url === '/dashboard/digital-products');
+    expect(digitalUrls).toHaveLength(1);
+  });
+
   it('structure Finance en sous-groupes mega-menu', () => {
     const domains = resolveHorizontalNavDomains({
       isPlatformAdmin: false,

@@ -67,6 +67,15 @@ function toLink(
   };
 }
 
+function deduplicateNavLinks(items: HorizontalNavLink[]): HorizontalNavLink[] {
+  const seen = new Set<string>();
+  return items.filter(item => {
+    if (seen.has(item.url)) return false;
+    seen.add(item.url);
+    return true;
+  });
+}
+
 function buildSubgroups(
   subgroupKey: string,
   items: HorizontalNavLink[],
@@ -83,7 +92,9 @@ function buildSubgroups(
 
   for (const def of defs) {
     const groupItems = items.filter(
-      i => !assigned.has(i.path) && (def.paths.includes(i.path) || def.paths.some(p => i.path.startsWith(`${p}/`)))
+      i =>
+        !assigned.has(i.path) &&
+        (def.paths.includes(i.path) || def.paths.some(p => i.path.startsWith(`${p}/`)))
     );
     groupItems.forEach(i => assigned.add(i.path));
     if (groupItems.length === 0) continue;
@@ -184,7 +195,9 @@ function resolveSellerHorizontalNavDomains(
     const section = byKey.get(spec.sectionKey);
     if (!section || section.items.length === 0) continue;
 
-    let items = section.items.map(item => toLink(item, input.physicalPlanSlug, input.commerceType));
+    let items = deduplicateNavLinks(
+      section.items.map(item => toLink(item, input.physicalPlanSlug, input.commerceType))
+    );
 
     // Si le domaine est partagé (comme ventes et logistique qui pointent vers ventes_logistique),
     // on filtre les items pour ne garder que ceux déclarés dans leurs sous-groupes respectifs.
@@ -246,13 +259,15 @@ function resolveBuyerHorizontalNavDomains(input: {
 
     if (spec.includePaths?.length) {
       const raw = collectBuyerItemsByPaths(sections, spec.includePaths, spec.sourceSectionKeys);
-      items = raw.map(item => toLink(item, null));
+      items = deduplicateNavLinks(raw.map(item => toLink(item, null)));
     } else {
       const group = accountConfig.groups.find(g => g.groupKey === spec.domainKey);
       const groupPaths = group?.paths ?? [];
-      items = accountItems
-        .filter(item => groupPaths.some(p => pathMatches(item.url, p)))
-        .map(item => toLink(item, null));
+      items = deduplicateNavLinks(
+        accountItems
+          .filter(item => groupPaths.some(p => pathMatches(item.url, p)))
+          .map(item => toLink(item, null))
+      );
     }
 
     if (spec.domainKey === 'achats') {

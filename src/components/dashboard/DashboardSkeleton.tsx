@@ -64,6 +64,23 @@ export const ChartsSkeleton = () => (
   </div>
 );
 
+/** Skeleton pour la zone graphiques + listes (below-the-fold) */
+export const DashboardSecondarySkeleton = () => (
+  <div className="space-y-5 sm:space-y-6">
+    <ChartsSkeleton />
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <Skeleton key={i} className="h-[220px] w-full rounded-xl" />
+      ))}
+    </div>
+    <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <Skeleton key={i} className="h-14 w-full rounded-xl" />
+      ))}
+    </div>
+  </div>
+);
+
 /** Skeleton complet du dashboard (store en cours de chargement) */
 export const DashboardFullSkeleton = () => (
   <div className="space-y-4 sm:space-y-6">

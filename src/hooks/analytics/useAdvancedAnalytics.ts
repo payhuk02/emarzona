@@ -1,7 +1,7 @@
 /**
  * Advanced Analytics Hook
  * Date: 30 Janvier 2025
- * 
+ *
  * Hook pour gérer les analytics avancés (dashboards, métriques, monitoring, alertes, goals)
  */
 
@@ -10,11 +10,16 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
-const ADVANCED_ANALYTICS_DASHBOARD_FIELDS = 'id, store_id, user_id, name, description, layout, is_default, is_shared, shared_with_users, widgets, refresh_interval, auto_refresh, date_range_type, date_range_start, date_range_end, is_active, created_at, updated_at';
-const ANALYTICS_METRIC_FIELDS = 'id, store_id, product_id, period_start, period_end, period_type, total_views, unique_views, total_clicks, unique_clicks, total_conversions, unique_conversions, total_revenue, average_order_value, bounce_rate, avg_session_duration, pages_per_session, returning_visitors, new_visitors, conversion_rate, click_through_rate, cart_abandonment_rate, avg_page_load_time, avg_time_to_first_byte, error_rate, desktop_views, mobile_views, tablet_views, organic_search, direct_traffic, referral_traffic, social_traffic, paid_search, email_traffic, country_breakdown, city_breakdown, calculated_at';
-const PERFORMANCE_METRIC_FIELDS = 'id, store_id, product_id, metric_name, metric_value, metric_unit, metric_type, page_url, api_endpoint, user_agent, device_type, browser, os, threshold_warning, threshold_critical, is_above_threshold, recorded_at, metadata';
-const ANALYTICS_ALERT_FIELDS = 'id, store_id, user_id, name, description, alert_type, metric_name, condition_type, threshold_value, comparison_period, email_enabled, push_enabled, webhook_url, is_active, last_triggered_at, trigger_count, created_at, updated_at';
-const ANALYTICS_GOAL_FIELDS = 'id, store_id, user_id, name, description, goal_type, target_value, current_value, progress_percentage, period_type, period_start, period_end, status, achieved_at, notify_on_achievement, notify_on_missed, created_at, updated_at';
+const ADVANCED_ANALYTICS_DASHBOARD_FIELDS =
+  'id, store_id, user_id, name, description, layout, is_default, is_shared, shared_with_users, widgets, refresh_interval, auto_refresh, date_range_type, date_range_start, date_range_end, is_active, created_at, updated_at';
+const ANALYTICS_METRIC_FIELDS =
+  'id, store_id, product_id, period_start, period_end, period_type, total_views, unique_views, total_clicks, unique_clicks, total_conversions, unique_conversions, total_revenue, average_order_value, bounce_rate, avg_session_duration, pages_per_session, returning_visitors, new_visitors, conversion_rate, click_through_rate, cart_abandonment_rate, avg_page_load_time, avg_time_to_first_byte, error_rate, desktop_views, mobile_views, tablet_views, organic_search, direct_traffic, referral_traffic, social_traffic, paid_search, email_traffic, country_breakdown, city_breakdown, calculated_at';
+const PERFORMANCE_METRIC_FIELDS =
+  'id, store_id, product_id, metric_name, metric_value, metric_unit, metric_type, page_url, api_endpoint, user_agent, device_type, browser, os, threshold_warning, threshold_critical, is_above_threshold, recorded_at, metadata';
+const ANALYTICS_ALERT_FIELDS =
+  'id, store_id, user_id, name, description, alert_type, metric_name, condition_type, threshold_value, comparison_period, email_enabled, push_enabled, webhook_url, is_active, last_triggered_at, trigger_count, created_at, updated_at';
+const ANALYTICS_GOAL_FIELDS =
+  'id, store_id, user_id, name, description, goal_type, target_value, current_value, progress_percentage, period_type, period_start, period_end, status, achieved_at, notify_on_achievement, notify_on_missed, created_at, updated_at';
 
 // =====================================================
 // TYPES
@@ -33,7 +38,16 @@ export interface AdvancedAnalyticsDashboard {
   widgets: Array<Record<string, unknown>>;
   refresh_interval: number;
   auto_refresh: boolean;
-  date_range_type: 'today' | 'yesterday' | 'last_7_days' | 'last_30_days' | 'last_90_days' | 'this_month' | 'last_month' | 'this_year' | 'custom';
+  date_range_type:
+    | 'today'
+    | 'yesterday'
+    | 'last_7_days'
+    | 'last_30_days'
+    | 'last_90_days'
+    | 'this_month'
+    | 'last_month'
+    | 'this_year'
+    | 'custom';
   date_range_start?: string;
   date_range_end?: string;
   is_active: boolean;
@@ -88,7 +102,14 @@ export interface PerformanceMetric {
   metric_name: string;
   metric_value: number;
   metric_unit?: string;
-  metric_type: 'page_load' | 'api_response' | 'database_query' | 'image_load' | 'script_execution' | 'network_request' | 'custom';
+  metric_type:
+    | 'page_load'
+    | 'api_response'
+    | 'database_query'
+    | 'image_load'
+    | 'script_execution'
+    | 'network_request'
+    | 'custom';
   page_url?: string;
   api_endpoint?: string;
   user_agent?: string;
@@ -99,7 +120,7 @@ export interface PerformanceMetric {
   threshold_critical?: number;
   is_above_threshold: boolean;
   recorded_at: string;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 export interface AnalyticsAlert {
@@ -108,7 +129,13 @@ export interface AnalyticsAlert {
   user_id: string;
   name: string;
   description?: string;
-  alert_type: 'metric_threshold' | 'anomaly_detection' | 'goal_achievement' | 'goal_missed' | 'performance_issue' | 'custom';
+  alert_type:
+    | 'metric_threshold'
+    | 'anomaly_detection'
+    | 'goal_achievement'
+    | 'goal_missed'
+    | 'performance_issue'
+    | 'custom';
   metric_name: string;
   condition_type: 'greater_than' | 'less_than' | 'equals' | 'not_equals' | 'percentage_change';
   threshold_value: number;
@@ -173,6 +200,7 @@ export const useAdvancedDashboards = (storeId?: string) => {
       return (data || []) as AdvancedAnalyticsDashboard[];
     },
     enabled: !!storeId,
+    staleTime: 5 * 60 * 1000,
   });
 };
 
@@ -191,7 +219,7 @@ export const useAnalyticsMetrics = (
     queryFn: async () => {
       if (!storeId) throw new Error('Store ID manquant');
 
-      let  query= supabase
+      let query = supabase
         .from('analytics_metrics')
         .select(ANALYTICS_METRIC_FIELDS)
         .eq('store_id', storeId)
@@ -220,6 +248,7 @@ export const useAnalyticsMetrics = (
       return (data || []) as AnalyticsMetric[];
     },
     enabled: !!storeId,
+    staleTime: 5 * 60 * 1000,
   });
 };
 
@@ -235,7 +264,7 @@ export const usePerformanceMonitoring = (
   return useQuery({
     queryKey: ['performance-monitoring', storeId, productId, metricName, limit],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('performance_monitoring')
         .select(PERFORMANCE_METRIC_FIELDS)
         .order('recorded_at', { ascending: false })
@@ -262,6 +291,7 @@ export const usePerformanceMonitoring = (
 
       return (data || []) as PerformanceMetric[];
     },
+    staleTime: 5 * 60 * 1000,
   });
 };
 
@@ -288,6 +318,7 @@ export const useAnalyticsAlerts = (storeId?: string) => {
       return (data || []) as AnalyticsAlert[];
     },
     enabled: !!storeId,
+    staleTime: 5 * 60 * 1000,
   });
 };
 
@@ -314,6 +345,7 @@ export const useAnalyticsGoals = (storeId?: string) => {
       return (data || []) as AnalyticsGoal[];
     },
     enabled: !!storeId,
+    staleTime: 5 * 60 * 1000,
   });
 };
 
@@ -350,7 +382,7 @@ export const useCreateAdvancedDashboard = () => {
         description: 'Le dashboard a été créé avec succès',
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       logger.error('Error in useCreateAdvancedDashboard', { error });
       toast({
         title: '❌ Erreur',
@@ -369,7 +401,10 @@ export const useUpdateAdvancedDashboard = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ id, ...dashboard }: Partial<AdvancedAnalyticsDashboard> & { id: string }) => {
+    mutationFn: async ({
+      id,
+      ...dashboard
+    }: Partial<AdvancedAnalyticsDashboard> & { id: string }) => {
       const { data, error } = await supabase
         .from('advanced_analytics_dashboards')
         .update(dashboard)
@@ -391,7 +426,7 @@ export const useUpdateAdvancedDashboard = () => {
         description: 'Le dashboard a été mis à jour avec succès',
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       logger.error('Error in useUpdateAdvancedDashboard', { error });
       toast({
         title: '❌ Erreur',
@@ -428,14 +463,14 @@ export const useCreateAnalyticsAlert = () => {
       queryClient.invalidateQueries({ queryKey: ['analytics-alerts'] });
       toast({
         title: '✅ Alerte créée',
-        description: 'L\'alerte a été créée avec succès',
+        description: "L'alerte a été créée avec succès",
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       logger.error('Error in useCreateAnalyticsAlert', { error });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de créer l\'alerte',
+        description: error.message || "Impossible de créer l'alerte",
         variant: 'destructive',
       });
     },
@@ -468,23 +503,16 @@ export const useCreateAnalyticsGoal = () => {
       queryClient.invalidateQueries({ queryKey: ['analytics-goals'] });
       toast({
         title: '✅ Objectif créé',
-        description: 'L\'objectif a été créé avec succès',
+        description: "L'objectif a été créé avec succès",
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       logger.error('Error in useCreateAnalyticsGoal', { error });
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de créer l\'objectif',
+        description: error.message || "Impossible de créer l'objectif",
         variant: 'destructive',
       });
     },
   });
 };
-
-
-
-
-
-
-

@@ -153,7 +153,7 @@ function MegaMenuPanel({
             <div className="space-y-0.5">
               {group.items.map(item => (
                 <MegaMenuLink
-                  key={item.url}
+                  key={`${group.groupKey}-${item.url}`}
                   item={item}
                   onNavigate={onNavigate}
                   onAfterNavigate={onAfterNavigate}
@@ -177,7 +177,7 @@ function MegaMenuPanel({
     >
       {domain.items.map(item => (
         <MegaMenuLink
-          key={item.url}
+          key={`${domain.domainKey}-${item.url}`}
           item={item}
           onNavigate={onNavigate}
           onAfterNavigate={onAfterNavigate}

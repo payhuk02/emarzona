@@ -3,7 +3,6 @@
  * Description: Page complète pour gérer les affiliés d'un store
  * Date: 31 Janvier 2025
  */
-import { useState } from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { AppPageShell } from '@/components/layout/AppPageShell';
 import { StoreAffiliateDashboard } from '@/components/affiliate/StoreAffiliateDashboard';
