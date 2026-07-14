@@ -5,6 +5,11 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
+import {
+  isRpcUnavailableError,
+  logRpcFallback,
+  type SupabaseRpcError,
+} from '@/lib/dashboard/rpc-error-utils';
 import type {
   DashboardOperational,
   OptimizedDashboardData,
@@ -20,20 +25,8 @@ export interface DashboardPeriodRange {
   label: string;
 }
 
-export function isDashboardRpcUnavailableError(error: {
-  code?: string;
-  message?: string;
-  details?: string;
-}): boolean {
-  const msg = `${error.message ?? ''} ${error.details ?? ''}`.toLowerCase();
-  return (
-    error.code === '42883' ||
-    error.code === 'PGRST202' ||
-    error.code === 'PGRST204' ||
-    msg.includes('could not find the function') ||
-    msg.includes('function public.get_store_dashboard_stats_aggregated') ||
-    msg.includes('does not exist')
-  );
+export function isDashboardRpcUnavailableError(error: SupabaseRpcError): boolean {
+  return isRpcUnavailableError(error);
 }
 
 function num(value: unknown, fallback = 0): number {
@@ -202,6 +195,7 @@ export async function fetchDashboardStatsFromRpc(
 
   if (error) {
     if (isDashboardRpcUnavailableError(error)) {
+      logRpcFallback('get_store_dashboard_stats_aggregated', error, { storeId });
       throw Object.assign(new Error('DASHBOARD_RPC_UNAVAILABLE'), { cause: error });
     }
     throw error;

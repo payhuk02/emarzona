@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
+  ChartSuspense,
   LazyLineChart,
   LazyBarChart,
   LazyResponsiveContainer,
@@ -119,78 +120,80 @@ export const ProductTypeCharts = React.memo<ProductTypeChartsProps>(
             </CardHeader>
             <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
               <div className="h-64 sm:h-80 md:h-96">
-                <LazyResponsiveContainer width="100%" height="100%">
-                  <LazyLineChart data={revenueChartData}>
-                    <LazyCartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <LazyXAxis
-                      dataKey="month"
-                      className="text-[10px] sm:text-xs"
-                      tick={{ fill: 'currentColor' }}
-                    />
-                    <LazyYAxis
-                      className="text-[10px] sm:text-xs"
-                      tick={{ fill: 'currentColor' }}
-                      tickFormatter={value => `${(value / 1000).toFixed(0)}k`}
-                    />
-                    <LazyTooltip
-                      contentStyle={{
-                        backgroundColor: 'hsl(var(--card))',
-                        border: '1px solid hsl(var(--border))',
-                        borderRadius: '8px',
-                        fontSize: '12px',
-                      }}
-                      formatter={(value: number) => `${value.toLocaleString()} FCFA`}
-                    />
-                    <LazyLegend />
-                    {selectedType === 'all' ? (
-                      <>
-                        <LazyLine
-                          type="monotone"
-                          dataKey="Digitaux"
-                          stroke={PRODUCT_TYPE_COLORS.digital}
-                          strokeWidth={2}
-                          dot={{ r: 4 }}
-                        />
-                        <LazyLine
-                          type="monotone"
-                          dataKey="Physiques"
-                          stroke={PRODUCT_TYPE_COLORS.physical}
-                          strokeWidth={2}
-                          dot={{ r: 4 }}
-                        />
-                        <LazyLine
-                          type="monotone"
-                          dataKey="Services"
-                          stroke={PRODUCT_TYPE_COLORS.service}
-                          strokeWidth={2}
-                          dot={{ r: 4 }}
-                        />
-                        <LazyLine
-                          type="monotone"
-                          dataKey="Cours"
-                          stroke={PRODUCT_TYPE_COLORS.course}
-                          strokeWidth={2}
-                          dot={{ r: 4 }}
-                        />
-                        <LazyLine
-                          type="monotone"
-                          dataKey="Artistes"
-                          stroke={PRODUCT_TYPE_COLORS.artist}
-                          strokeWidth={2}
-                          dot={{ r: 4 }}
-                        />
-                      </>
-                    ) : (
-                      <LazyLine
-                        type="monotone"
-                        dataKey={PRODUCT_TYPE_LABELS[selectedType]}
-                        stroke={PRODUCT_TYPE_COLORS[selectedType]}
-                        strokeWidth={2}
-                        dot={{ r: 4 }}
+                <ChartSuspense height={384}>
+                  <LazyResponsiveContainer width="100%" height="100%">
+                    <LazyLineChart data={revenueChartData}>
+                      <LazyCartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <LazyXAxis
+                        dataKey="month"
+                        className="text-[10px] sm:text-xs"
+                        tick={{ fill: 'currentColor' }}
                       />
-                    )}
-                  </LazyLineChart>
-                </LazyResponsiveContainer>
+                      <LazyYAxis
+                        className="text-[10px] sm:text-xs"
+                        tick={{ fill: 'currentColor' }}
+                        tickFormatter={value => `${(value / 1000).toFixed(0)}k`}
+                      />
+                      <LazyTooltip
+                        contentStyle={{
+                          backgroundColor: 'hsl(var(--card))',
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: '8px',
+                          fontSize: '12px',
+                        }}
+                        formatter={(value: number) => `${value.toLocaleString()} FCFA`}
+                      />
+                      <LazyLegend />
+                      {selectedType === 'all' ? (
+                        <>
+                          <LazyLine
+                            type="monotone"
+                            dataKey="Digitaux"
+                            stroke={PRODUCT_TYPE_COLORS.digital}
+                            strokeWidth={2}
+                            dot={{ r: 4 }}
+                          />
+                          <LazyLine
+                            type="monotone"
+                            dataKey="Physiques"
+                            stroke={PRODUCT_TYPE_COLORS.physical}
+                            strokeWidth={2}
+                            dot={{ r: 4 }}
+                          />
+                          <LazyLine
+                            type="monotone"
+                            dataKey="Services"
+                            stroke={PRODUCT_TYPE_COLORS.service}
+                            strokeWidth={2}
+                            dot={{ r: 4 }}
+                          />
+                          <LazyLine
+                            type="monotone"
+                            dataKey="Cours"
+                            stroke={PRODUCT_TYPE_COLORS.course}
+                            strokeWidth={2}
+                            dot={{ r: 4 }}
+                          />
+                          <LazyLine
+                            type="monotone"
+                            dataKey="Artistes"
+                            stroke={PRODUCT_TYPE_COLORS.artist}
+                            strokeWidth={2}
+                            dot={{ r: 4 }}
+                          />
+                        </>
+                      ) : (
+                        <LazyLine
+                          type="monotone"
+                          dataKey={PRODUCT_TYPE_LABELS[selectedType]}
+                          stroke={PRODUCT_TYPE_COLORS[selectedType]}
+                          strokeWidth={2}
+                          dot={{ r: 4 }}
+                        />
+                      )}
+                    </LazyLineChart>
+                  </LazyResponsiveContainer>
+                </ChartSuspense>
               </div>
             </CardContent>
           </Card>
@@ -210,30 +213,35 @@ export const ProductTypeCharts = React.memo<ProductTypeChartsProps>(
             </CardHeader>
             <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
               <div className="h-64 sm:h-80 md:h-96">
-                <LazyResponsiveContainer width="100%" height="100%">
-                  <LazyBarChart data={ordersChartData}>
-                    <LazyCartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <LazyXAxis
-                      dataKey="type"
-                      className="text-[10px] sm:text-xs"
-                      tick={{ fill: 'currentColor' }}
-                    />
-                    <LazyYAxis className="text-[10px] sm:text-xs" tick={{ fill: 'currentColor' }} />
-                    <LazyTooltip
-                      contentStyle={{
-                        backgroundColor: 'hsl(var(--card))',
-                        border: '1px solid hsl(var(--border))',
-                        borderRadius: '8px',
-                        fontSize: '12px',
-                      }}
-                    />
-                    <LazyBar dataKey="commandes" radius={[8, 8, 0, 0]}>
-                      {ordersChartData.map((entry, index) => (
-                        <LazyCell key={`cell-${index}`} fill={entry.couleur} />
-                      ))}
-                    </LazyBar>
-                  </LazyBarChart>
-                </LazyResponsiveContainer>
+                <ChartSuspense height={384}>
+                  <LazyResponsiveContainer width="100%" height="100%">
+                    <LazyBarChart data={ordersChartData}>
+                      <LazyCartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <LazyXAxis
+                        dataKey="type"
+                        className="text-[10px] sm:text-xs"
+                        tick={{ fill: 'currentColor' }}
+                      />
+                      <LazyYAxis
+                        className="text-[10px] sm:text-xs"
+                        tick={{ fill: 'currentColor' }}
+                      />
+                      <LazyTooltip
+                        contentStyle={{
+                          backgroundColor: 'hsl(var(--card))',
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: '8px',
+                          fontSize: '12px',
+                        }}
+                      />
+                      <LazyBar dataKey="commandes" radius={[8, 8, 0, 0]}>
+                        {ordersChartData.map((entry, index) => (
+                          <LazyCell key={`cell-${index}`} fill={entry.couleur} />
+                        ))}
+                      </LazyBar>
+                    </LazyBarChart>
+                  </LazyResponsiveContainer>
+                </ChartSuspense>
               </div>
             </CardContent>
           </Card>

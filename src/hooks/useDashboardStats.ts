@@ -6,9 +6,9 @@
 import { useMemo } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useStore } from './useStore';
 import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
+import { isRpcUnavailableError, logRpcFallback } from '@/lib/dashboard/rpc-error-utils';
 import {
   fetchDashboardStatsFromRpc,
   isDashboardRpcUnavailableError,
@@ -126,7 +126,8 @@ async function fetchOperationalCounts(storeId: string): Promise<DashboardOperati
     supabase
       .from('reviews')
       .select('id, products!inner(store_id)', { count: 'exact', head: true })
-      .eq('products.store_id', storeId),
+      .eq('products.store_id', storeId)
+      .eq('is_approved', false),
   ]);
 
   const pendingOrders = pendingRes.count ?? 0;
@@ -241,7 +242,9 @@ async function fetchTopProductsRpc(storeId: string, limit = 5): Promise<TopProdu
   });
 
   if (error) {
-    if (!tolerateQueryError('get_top_selling_products', error)) {
+    if (isRpcUnavailableError(error)) {
+      logRpcFallback('get_top_selling_products', error, { storeId });
+    } else if (!tolerateQueryError('get_top_selling_products', error)) {
       logger.warn('[Dashboard] RPC top products unavailable', { error: error.message });
     }
     return [];
@@ -462,9 +465,8 @@ async function fetchDashboardStats(storeId: string, range: PeriodRange): Promise
 }
 
 export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) => {
-  const { store } = useStore();
   const { user } = useAuth();
-  const storeId = options?.storeId ?? store?.id ?? null;
+  const storeId = options?.storeId ?? null;
   const range = useMemo(
     () => resolvePeriodRange(options),
     [options?.period, options?.customStartDate, options?.customEndDate]

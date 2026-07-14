@@ -42,7 +42,7 @@ export function EmarzonaBrandLogo({ variant, className }: EmarzonaBrandLogoProps
       height={44}
       loading="eager"
       decoding="async"
-      fetchPriority="high"
+      fetchpriority="high"
     />
   );
 }

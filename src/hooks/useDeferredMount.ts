@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react';
 /**
  * Retarde le montage d'une section non critique (graphiques, listes…) après le premier paint.
  */
-export function useDeferredMount(enabled = true, idleTimeoutMs = 1200) {
+/** @param idleTimeoutMs délai max idle avant montage (défaut 400 ms pour below-the-fold dashboard). */
+export function useDeferredMount(enabled = true, idleTimeoutMs = 400) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {

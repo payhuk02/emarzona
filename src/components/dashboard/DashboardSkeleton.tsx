@@ -6,6 +6,24 @@
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
+/** Skeleton d'une carte KPI premium (révélation progressive). */
+export function DashboardMetricCardSkeleton() {
+  return (
+    <article
+      className="dashboard-metric-card dashboard-metric-card--purple min-h-[8.5rem] animate-pulse"
+      aria-hidden
+    >
+      <div className="flex justify-between gap-3 mb-4">
+        <Skeleton className="h-10 w-10 rounded-xl" />
+        <Skeleton className="h-6 w-14 rounded-full" />
+      </div>
+      <Skeleton className="h-3 w-24 mb-3" />
+      <Skeleton className="h-7 w-32 mb-2" />
+      <Skeleton className="h-3 w-28" />
+    </article>
+  );
+}
+
 /** Skeleton pour les 4 cartes de statistiques */
 export const StatsSkeleton = () => (
   <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4">

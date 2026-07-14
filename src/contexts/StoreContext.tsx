@@ -58,15 +58,34 @@ export const useStoreContext = () => {
 export const StoreProvider = ({ children }: { children: ReactNode }) => {
   const { user, loading: authLoading } = useAuth();
   const [stores, setStores] = useState<Store[]>([]);
-  const [selectedStoreId, setSelectedStoreIdState] = useState<string | null>(null);
+  const [selectedStoreId, setSelectedStoreIdState] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (!stored) return null;
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      return uuidRegex.test(stored) ? stored : null;
+    } catch {
+      return null;
+    }
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // Ref to avoid stale closures in setTimeout and storage event handlers
   const storesRef = useRef<Store[]>(stores);
+  const selectedStoreIdRef = useRef<string | null>(selectedStoreId);
+  const loadingRef = useRef(loading);
+  const pendingSelectionRef = useRef<string | null>(null);
   useEffect(() => {
     storesRef.current = stores;
   }, [stores]);
+  useEffect(() => {
+    selectedStoreIdRef.current = selectedStoreId;
+  }, [selectedStoreId]);
+  useEffect(() => {
+    loadingRef.current = loading;
+  }, [loading]);
 
   // Récupérer la boutique sélectionnée depuis localStorage (avec validation)
   const getStoredStoreId = useCallback((): string | null => {
@@ -133,7 +152,10 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     }
 
     try {
-      setLoading(true);
+      const isInitialLoad = storesRef.current.length === 0;
+      if (isInitialLoad) {
+        setLoading(true);
+      }
       setError(null);
 
       const { data, error: fetchError } = await supabase
@@ -141,8 +163,6 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
         .select('id,name,slug,created_at,updated_at,metadata,commerce_type')
         .eq('user_id', user.id)
         .order('created_at', { ascending: true });
-
-      console.log('StoreContext fetchStores data:', data, 'error:', fetchError);
 
       if (fetchError) {
         throw fetchError;
@@ -156,13 +176,17 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       })) as Store[];
       setStores(storesData);
 
-      // Si aucune boutique n'est sélectionnée, essayer de récupérer depuis localStorage
       if (storesData.length > 0) {
+        const pendingId = pendingSelectionRef.current;
+        pendingSelectionRef.current = null;
+
         const storedStoreId = getStoredStoreId();
+        const currentId = selectedStoreIdRef.current;
+        const candidateIds = [currentId, pendingId, storedStoreId, storesData[0].id].filter(
+          Boolean
+        ) as string[];
         const validStoreId =
-          storedStoreId && storesData.some(s => s.id === storedStoreId)
-            ? storedStoreId
-            : storesData[0].id; // Utiliser la première boutique par défaut
+          candidateIds.find(id => storesData.some(s => s.id === id)) ?? storesData[0].id;
 
         setSelectedStoreIdState(validStoreId);
         saveStoreIdToStorage(validStoreId);
@@ -175,8 +199,11 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       const errorMessage =
         err instanceof Error ? err.message : 'Erreur lors du chargement des boutiques';
       setError(errorMessage);
-      setStores([]);
-      setSelectedStoreIdState(null);
+      // Conserver la sélection courante sur erreur transitoire (évite flash onboarding)
+      if (storesRef.current.length === 0) {
+        setStores([]);
+        setSelectedStoreIdState(null);
+      }
     } finally {
       setLoading(false);
     }
@@ -203,41 +230,36 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
   const setSelectedStoreId = useCallback(
     (storeId: string | null) => {
       if (storeId !== null || selectedStoreId !== null) {
-        logger.debug('🔄 [StoreContext] Changement de boutique', {
+        logger.debug('[StoreContext] Store selection change', {
           oldStoreId: selectedStoreId,
           newStoreId: storeId,
-          storesCount: stores.length,
+          storesCount: storesRef.current.length,
+          loading: loadingRef.current,
         });
       }
 
-      // Validation avec retry utilisant le ref pour éviter la stale closure
-      const validateAndSet = () => {
-        if (storeId && !storesRef.current.some(s => s.id === storeId)) {
-          logger.warn('Tentative de sélectionner une boutique inexistante, retry dans 100ms', {
-            storeId,
-            availableStores: storesRef.current.map(s => s.id),
-          });
+      if (storeId === null) {
+        pendingSelectionRef.current = null;
+        setSelectedStoreIdState(null);
+        saveStoreIdToStorage(null);
+        return;
+      }
 
-          // Retry après un court délai si les stores ne sont pas encore chargés
-          setTimeout(() => {
-            if (storesRef.current.some(s => s.id === storeId)) {
-              logger.info('✅ [StoreContext] Retry réussi, boutique trouvée');
-              setSelectedStoreIdState(storeId);
-              saveStoreIdToStorage(storeId);
-            } else {
-              logger.error('❌ [StoreContext] Retry échoué, boutique toujours introuvable');
-            }
-          }, 100);
-          return;
-        }
+      // Defer until fetchStores completes (e.g. React Query cache in useStore)
+      if (loadingRef.current && storesRef.current.length === 0) {
+        pendingSelectionRef.current = storeId;
+        return;
+      }
 
-        setSelectedStoreIdState(storeId);
-        saveStoreIdToStorage(storeId);
-      };
+      if (!storesRef.current.some(s => s.id === storeId)) {
+        logger.debug('[StoreContext] Ignored unknown store id', { storeId });
+        return;
+      }
 
-      validateAndSet();
+      setSelectedStoreIdState(storeId);
+      saveStoreIdToStorage(storeId);
     },
-    [selectedStoreId, stores, saveStoreIdToStorage]
+    [selectedStoreId, saveStoreIdToStorage]
   );
 
   // Fonction pour changer de boutique
@@ -268,21 +290,27 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     if (typeof window === 'undefined') return;
 
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === STORAGE_KEY) {
-        const newStoreId = e.newValue;
-        logger.info('🔄 [StoreContext] Changement détecté depuis autre onglet:', newStoreId);
+      if (e.key !== STORAGE_KEY) return;
 
-        if (newStoreId) {
-          // Utiliser le ref pour lire les stores actuels (évite la stale closure)
-          if (storesRef.current.some(s => s.id === newStoreId)) {
-            logger.info('✅ [StoreContext] Boutique validée, application du changement');
-            setSelectedStoreIdState(newStoreId);
-          } else {
-            logger.warn('⚠️ [StoreContext] Boutique invalide depuis autre onglet');
-          }
+      const newStoreId = e.newValue;
+      const currentStoreId = selectedStoreIdRef.current;
+
+      // Ignore spurious cross-tab events (same value or repeated null clears)
+      if (newStoreId === currentStoreId) return;
+
+      logger.debug('[StoreContext] Cross-tab store selection change:', newStoreId);
+
+      if (newStoreId) {
+        if (storesRef.current.some(s => s.id === newStoreId)) {
+          setSelectedStoreIdState(newStoreId);
         } else {
-          setSelectedStoreIdState(null);
+          logger.warn('[StoreContext] Ignored invalid store id from other tab');
         }
+        return;
+      }
+
+      if (currentStoreId !== null) {
+        setSelectedStoreIdState(null);
       }
     };
 

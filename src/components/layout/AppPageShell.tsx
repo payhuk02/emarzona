@@ -4,7 +4,7 @@
  * Enterprise-grade avec CommandPalette intégrée
  */
 
-import { lazy, ReactNode, Suspense } from 'react';
+import { lazy, ReactNode, Suspense, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { SidebarProvider } from '@/components/ui/sidebar';
@@ -14,13 +14,24 @@ import { shouldShowHorizontalNav } from '@/config/navigation.horizontal';
 import { detectLayoutType } from '@/config/layoutTypeDetection';
 import type { LayoutType } from '@/components/layout/layout.types';
 import { cn } from '@/lib/utils';
-import { CommandPalette, useCommandPalette } from '@/components/navigation/CommandPalette';
+import { useCommandPalette } from '@/hooks/useCommandPalette';
+import { useDeferHorizontalContextNav } from '@/hooks/useDeferHorizontalContextNav';
+
+const CommandPalette = lazy(() =>
+  import('@/components/navigation/CommandPalette').then(m => ({
+    default: m.CommandPalette,
+  }))
+);
 
 const HorizontalContextNav = lazy(() =>
   import('@/components/layout/HorizontalContextNav').then(m => ({
     default: m.HorizontalContextNav,
   }))
 );
+
+function HorizontalContextNavPlaceholder() {
+  return <div className="h-11 shrink-0 border-b border-border bg-muted/40" aria-hidden />;
+}
 
 export type AppPageShellProps = {
   children: ReactNode;
@@ -51,22 +62,47 @@ export function AppPageShell({
   const location = useLocation();
   void (layoutType ?? detectLayoutType(location.pathname));
   const showHorizontalNav = shouldShowHorizontalNav(location.pathname);
+  const showDeferredHorizontalNav = useDeferHorizontalContextNav(location.pathname);
   const { open, setOpen } = useCommandPalette();
+
+  // Prefetch chunks non critiques pendant l'idle
+  useEffect(() => {
+    const prefetch = () => {
+      void import('@/components/navigation/CommandPalette');
+      if (showHorizontalNav) {
+        void import('@/components/layout/HorizontalContextNav');
+      }
+    };
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      const id = requestIdleCallback(prefetch, { timeout: 4000 });
+      return () => cancelIdleCallback(id);
+    }
+    const timer = setTimeout(prefetch, 1500);
+    return () => clearTimeout(timer);
+  }, [showHorizontalNav]);
 
   return (
     <SidebarProvider>
-      <CommandPalette open={open} onOpenChange={setOpen} />
+      {open && (
+        <Suspense fallback={null}>
+          <CommandPalette open={open} onOpenChange={setOpen} />
+        </Suspense>
+      )}
       <div
         className={cn('flex min-h-screen w-full bg-background overflow-x-hidden', shellClassName)}
       >
         {!hideSidebar && <AppSidebar />}
         <div className={cn('flex flex-1 flex-col min-w-0 min-h-screen', className)}>
           {showUtilityBar && <UtilityBarHeader />}
-          {showHorizontalNav && !hideHorizontalNav && (
-            <Suspense fallback={null}>
-              <HorizontalContextNav />
-            </Suspense>
-          )}
+          {showHorizontalNav &&
+            !hideHorizontalNav &&
+            (showDeferredHorizontalNav ? (
+              <Suspense fallback={<HorizontalContextNavPlaceholder />}>
+                <HorizontalContextNav />
+              </Suspense>
+            ) : (
+              <HorizontalContextNavPlaceholder />
+            ))}
           <main
             id="main-content"
             role="main"

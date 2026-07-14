@@ -3,7 +3,7 @@
  * Version améliorée avec retry automatique et détection proactive
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
@@ -17,111 +17,118 @@ interface SessionHealth {
   isRetrying: boolean;
   gracePeriodActive: boolean;
   gracePeriodEnds: Date | null;
+  /** true après le premier contrôle auth terminé (évite faux positifs au mount). */
+  initialCheckComplete: boolean;
 }
 
 export const useSessionHealth = (options?: { enabled?: boolean }) => {
   const enabled = options?.enabled ?? true;
   const { user, signOut } = useAuth();
+  const lastCheckRef = useRef(new Date());
   const [health, setHealth] = useState<SessionHealth>({
-    isHealthy: false,
+    isHealthy: true,
     lastCheck: new Date(),
     timeSinceLastCheck: 0,
-    connectionStatus: navigator.onLine ? 'online' : 'offline',
+    connectionStatus: typeof navigator !== 'undefined' && navigator.onLine ? 'online' : 'unknown',
     retryCount: 0,
     isRetrying: false,
     gracePeriodActive: false,
     gracePeriodEnds: null,
+    initialCheckComplete: false,
   });
 
-  // Vérifier la santé de la session
   const checkSessionHealth = useCallback(async (): Promise<boolean> => {
     if (!user) return false;
 
     try {
       setHealth(prev => ({ ...prev, isRetrying: true }));
 
-      // Test simple : récupérer les informations utilisateur
       const { data, error } = await supabase.auth.getUser();
 
       if (error) {
-        logger.error('❌ Session health check failed:', error);
+        logger.warn('[SessionHealth] check failed', { message: error.message });
+        setHealth(prev => ({
+          ...prev,
+          isHealthy: false,
+          lastCheck: new Date(),
+          isRetrying: false,
+          initialCheckComplete: true,
+        }));
+        lastCheckRef.current = new Date();
         return false;
       }
 
-      if (data.user?.id === user.id) {
-        logger.info('✅ Session healthy');
-        setHealth(prev => ({
-          ...prev,
-          isHealthy: true,
-          lastCheck: new Date(),
-          retryCount: 0,
-          isRetrying: false,
-        }));
-        return true;
-      }
+      const ok = data.user?.id === user.id;
+      lastCheckRef.current = new Date();
+      setHealth(prev => ({
+        ...prev,
+        isHealthy: ok,
+        lastCheck: lastCheckRef.current,
+        retryCount: ok ? 0 : prev.retryCount + 1,
+        isRetrying: false,
+        initialCheckComplete: true,
+      }));
 
-      return false;
+      if (ok) {
+        logger.debug('[SessionHealth] session OK');
+      }
+      return ok;
     } catch (error) {
-      logger.error('💥 Session health check exception:', error);
+      logger.warn('[SessionHealth] check exception', { error });
+      lastCheckRef.current = new Date();
+      setHealth(prev => ({
+        ...prev,
+        isHealthy: false,
+        isRetrying: false,
+        initialCheckComplete: true,
+      }));
       return false;
-    } finally {
-      setHealth(prev => ({ ...prev, isRetrying: false }));
     }
   }, [user]);
 
-  // Rafraîchir la session si nécessaire
   const refreshSessionIfNeeded = useCallback(async () => {
     if (!user) return;
 
     const healthCheck = await checkSessionHealth();
 
     if (!healthCheck) {
-      // Essayer de rafraîchir la session
       try {
-        logger.info('🔄 Attempting session refresh');
+        logger.debug('[SessionHealth] attempting refresh');
         const { data, error } = await supabase.auth.refreshSession();
 
         if (error) {
-          logger.error('❌ Session refresh failed:', error);
+          logger.warn('[SessionHealth] refresh failed', { message: error.message });
           setHealth(prev => ({ ...prev, isHealthy: false }));
 
-          // Si le refresh échoue, déconnecter l'utilisateur
-          // ✅ SILENCIEUX: Délai très long (10 minutes) pour éviter les déconnexions surprises
           setTimeout(async () => {
-            logger.warn('🔐 Déconnexion silencieuse après long délai');
+            logger.warn('[SessionHealth] silent sign-out after prolonged failure');
             await signOut();
-          }, 600000); // 10 minutes
+          }, 600000);
 
           return;
         }
 
         if (data.session) {
-          logger.info('✅ Session refreshed successfully');
-          await checkSessionHealth(); // Re-vérifier la santé
+          logger.debug('[SessionHealth] refresh OK');
+          await checkSessionHealth();
         } else {
-          // Si le refresh échoue, déconnexion silencieuse
-          logger.warn('🔐 Refresh failed, silent sign out');
+          logger.warn('[SessionHealth] refresh returned no session');
           await signOut();
         }
       } catch (error) {
-        logger.error('💥 Session refresh exception:', error);
-        // En cas d'exception, déconnexion silencieuse
+        logger.warn('[SessionHealth] refresh exception', { error });
         await signOut();
       }
     }
   }, [user, checkSessionHealth, signOut]);
 
-  // Mettre à jour le statut de connexion
   useEffect(() => {
     const handleOnline = () => {
-      logger.info('🌐 Connection restored');
       setHealth(prev => ({ ...prev, connectionStatus: 'online' }));
-      // Retenter la vérification de santé quand la connexion revient
       setTimeout(() => refreshSessionIfNeeded(), 1000);
     };
 
     const handleOffline = () => {
-      logger.warn('📡 Connection lost');
       setHealth(prev => ({ ...prev, connectionStatus: 'offline' }));
     };
 
@@ -134,46 +141,37 @@ export const useSessionHealth = (options?: { enabled?: boolean }) => {
     };
   }, [refreshSessionIfNeeded]);
 
-  // ✅ SILENCIEUX: Vérification périodique de santé complètement automatique
   useEffect(() => {
-    if (!enabled || !user) return;
+    if (!enabled || !user) {
+      setHealth(prev => ({ ...prev, initialCheckComplete: false, isHealthy: !user }));
+      return;
+    }
 
-    // Vérifier la santé toutes les 45 secondes (moins fréquent pour éviter la surcharge)
-    const healthCheckInterval = setInterval(async () => {
-      const now = new Date();
-      const timeSinceLastCheck = now.getTime() - health.lastCheck.getTime();
+    void checkSessionHealth();
 
-      // Ne pas vérifier trop fréquemment
+    const healthCheckInterval = setInterval(() => {
+      const timeSinceLastCheck = Date.now() - lastCheckRef.current.getTime();
       if (timeSinceLastCheck > 45000) {
-        // 45 secondes
-        await checkSessionHealth();
+        void checkSessionHealth();
       }
     }, 45000);
 
-    // Vérification initiale silencieuse
-    checkSessionHealth();
-
     return () => clearInterval(healthCheckInterval);
-  }, [user, health.lastCheck, checkSessionHealth, enabled]);
+  }, [user, checkSessionHealth, enabled]);
 
-  // Vérification au focus de la fenêtre
   useEffect(() => {
     if (!enabled || !user) return;
 
     const handleFocus = () => {
-      const now = new Date();
-      const timeSinceLastCheck = now.getTime() - health.lastCheck.getTime();
-
-      // Si plus de 5 minutes depuis la dernière vérification
+      const timeSinceLastCheck = Date.now() - lastCheckRef.current.getTime();
       if (timeSinceLastCheck > 5 * 60 * 1000) {
-        logger.info('🎯 Window focused, checking session health');
-        refreshSessionIfNeeded();
+        void refreshSessionIfNeeded();
       }
     };
 
     window.addEventListener('focus', handleFocus);
     return () => window.removeEventListener('focus', handleFocus);
-  }, [user, health.lastCheck, refreshSessionIfNeeded, enabled]);
+  }, [user, refreshSessionIfNeeded, enabled]);
 
   return {
     ...health,

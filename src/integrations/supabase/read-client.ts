@@ -41,6 +41,7 @@ export const supabaseRead = createClient<Database>(READ_URL, SUPABASE_PUBLISHABL
   auth: {
     persistSession: false,
     autoRefreshToken: false,
+    storageKey: 'sb-emarzona-read-auth',
   },
 });
 

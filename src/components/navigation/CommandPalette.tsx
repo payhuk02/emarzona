@@ -186,22 +186,6 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
 }
 
 /**
- * useCommandPalette - Hook to manage command palette state
+ * useCommandPalette — réexport depuis le hook léger (chunk CommandPalette différé).
  */
-export function useCommandPalette() {
-  const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        setOpen(prev => !prev);
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
-  return { open, setOpen };
-}
+export { useCommandPalette } from '@/hooks/useCommandPalette';

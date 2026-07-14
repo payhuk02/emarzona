@@ -213,6 +213,11 @@ const ROUTE_CAPABILITY_RULES: readonly RouteRule[] = [
     pathPrefixes: [...COMMON_SELLER_PATHS.filter(p => p !== '/dashboard'), '/account'],
     exactPaths: ['/dashboard'],
   },
+  {
+    label: 'Statut plateforme',
+    allowedTypes: ALL_TYPES,
+    exactPaths: ['/status'],
+  },
 ];
 
 function normalizePath(pathname: string): string {

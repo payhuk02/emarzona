@@ -54,11 +54,28 @@ async function checkViaServiceRole(storeId) {
   });
 
   if (error) {
+    const code = error.code ?? 'unknown';
     if (/could not find the function|does not exist/i.test(error.message ?? '')) {
       fail('RPC get_store_dashboard_stats_aggregated absente — appliquer migration 20260703130000');
+      report.error_code = code;
       return;
     }
-    fail(`RPC error: ${error.message}`);
+    if (code === '42501' || /permission denied/i.test(error.message ?? '')) {
+      fail(
+        `RPC permissions: ${error.message} — appliquer migration 20260712000000 (GRANT EXECUTE)`
+      );
+      report.error_code = code;
+      return;
+    }
+    if (code === '42703' || /undefined column|column .* does not exist/i.test(error.message ?? '')) {
+      fail(
+        `RPC schema drift (${code}): ${error.message} — appliquer migration 20260714170000 (stock, reviews.is_approved, get_unread_count)`
+      );
+      report.error_code = code;
+      return;
+    }
+    fail(`RPC error (${code}): ${error.message}`);
+    report.error_code = code;
     return;
   }
 

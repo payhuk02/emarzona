@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useCallback } from 'react';
+import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -6,10 +7,12 @@ import { useStoreContext } from '@/contexts/StoreContext';
 import { logger } from '@/lib/logger';
 import { sanitizeStorePayload } from '@/lib/store-payload-utils';
 import type { StoreCommerceType } from '@/constants/store-commerce-types';
-import type { Json } from '@/integrations/supabase/types';
-import { resolveStoreCommerceTypeFromStore } from '@/lib/commerce/store-capability-map';
+import type { Database, Json } from '@/integrations/supabase/types';
+
+type StoreUpdate = Database['public']['Tables']['stores']['Update'];
 import { buildStoreCreateDefaults } from '@/lib/commerce/store-create-defaults';
 import { STORE_COMMERCE_TYPES } from '@/constants/store-commerce-types';
+import { fetchStoreById, mapStoreRow, storeQueryKeys } from '@/lib/store/store-query';
 
 export interface CreateStoreParams {
   name: string;
@@ -23,19 +26,6 @@ function assertValidCommerceType(value: unknown): StoreCommerceType {
     return value as StoreCommerceType;
   }
   throw new Error('Le type de boutique (commerce_type) est obligatoire.');
-}
-
-const STORE_FIELDS =
-  'id, user_id, name, slug, subdomain, description, default_currency, custom_domain, domain_status, domain_verification_token, domain_verified_at, domain_error_message, logo_url, banner_url, info_message, info_message_color, info_message_font, metadata, commerce_type, created_at, updated_at';
-
-function mapStoreRow(row: Record<string, unknown> | null | undefined): Store | null {
-  if (!row) return null;
-  return {
-    ...row,
-    commerce_type: resolveStoreCommerceTypeFromStore(
-      row as { commerce_type?: unknown; metadata?: Record<string, unknown> | null }
-    ),
-  } as Store;
 }
 
 export interface Store {
@@ -63,17 +53,39 @@ export interface Store {
 }
 
 export const useStore = () => {
-  const [store, setStore] = useState<Store | null>(null);
-  const [loading, setLoading] = useState(true);
-  const hydratedStoreIdRef = useRef<string | null>(null);
+  const queryClient = useQueryClient();
   const { user, loading: authLoading } = useAuth();
-  const {
-    selectedStoreId,
-    selectedStore: contextStore,
-    loading: contextLoading,
-    setSelectedStoreId,
-  } = useStoreContext();
+  const { stores, selectedStoreId, loading: contextLoading } = useStoreContext();
   const { toast } = useToast();
+
+  const hasKnownStore = !!selectedStoreId && stores.some(entry => entry.id === selectedStoreId);
+
+  const queryEnabled = !!user?.id && !authLoading && !contextLoading && hasKnownStore;
+
+  const {
+    data: store = null,
+    isLoading: queryLoading,
+    isFetching: queryFetching,
+    isError: queryError,
+    refetch,
+  } = useQuery({
+    queryKey: storeQueryKeys.detail(user?.id ?? '', selectedStoreId ?? ''),
+    queryFn: async () => {
+      if (!user?.id || !selectedStoreId?.trim()) return null;
+      return fetchStoreById(user.id, selectedStoreId);
+    },
+    enabled: queryEnabled,
+    staleTime: 2 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    retry: 1,
+    placeholderData: keepPreviousData,
+  });
+
+  const loading =
+    authLoading ||
+    contextLoading ||
+    (hasKnownStore && !store && (queryLoading || queryFetching) && !queryError);
 
   const generateSlug = (name: string): string => {
     return name
@@ -125,67 +137,9 @@ export const useStore = () => {
     return `https://${storeSubdomain}.myemarzona.shop/products/${productSlug}`;
   };
 
-  const fetchStore = useCallback(async () => {
-    // ✅ FIX: Vérifications de sécurité supplémentaires pour éviter les requêtes inutiles
-    if (!user || !user.id) {
-      logger.warn('❌ [useStore] fetchStore appelé sans utilisateur valide');
-      setStore(null);
-      setLoading(false);
-      return;
-    }
-
-    try {
-      logger.info('🔍 [useStore] fetchStore appelé', {
-        userId: user.id,
-        selectedStoreId,
-        contextStoreId: contextStore?.id,
-      });
-
-      const isNewSelection = !selectedStoreId || hydratedStoreIdRef.current !== selectedStoreId;
-      if (isNewSelection) {
-        setLoading(true);
-      }
-
-      // Le contextStore du StoreContext ne contient que id/name/slug/created_at/updated_at
-      // et manque les champs essentiels (description, logo_url, etc.)
-      // On doit toujours faire un fetch DB pour avoir toutes les données
-      // Si pas de boutique sélectionnée mais un ID valide
-      if (selectedStoreId && selectedStoreId.trim()) {
-        logger.info('📡 [useStore] Récupération depuis DB:', selectedStoreId);
-
-        const { data, error } = await supabase
-          .from('stores')
-          .select(STORE_FIELDS)
-          .eq('id', selectedStoreId)
-          .eq('user_id', user.id)
-          .single();
-
-        if (error) {
-          logger.error('❌ [useStore] Erreur DB:', error);
-          setStore(null);
-        } else {
-          logger.info('✅ [useStore] Boutique récupérée:', data.id);
-          setStore(mapStoreRow(data));
-          hydratedStoreIdRef.current = data.id;
-        }
-      } else {
-        logger.info('⚠️ [useStore] Aucune boutique sélectionnée');
-        setStore(null);
-        hydratedStoreIdRef.current = null;
-      }
-    } catch (error) {
-      logger.error('💥 [useStore] Exception:', error);
-      setStore(null);
-      hydratedStoreIdRef.current = null;
-      toast({
-        title: 'Erreur',
-        description: 'Impossible de charger votre boutique',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [user?.id, selectedStoreId, contextStore?.id, toast]);
+  const refreshStore = useCallback(async () => {
+    await refetch();
+  }, [refetch]);
 
   const createStore = async (params: CreateStoreParams) => {
     try {
@@ -252,7 +206,11 @@ export const useStore = () => {
 
       if (error) throw error;
 
-      setStore(mapStoreRow(data?.[0] ?? null));
+      const created = mapStoreRow(data?.[0] ?? null);
+      if (created && user?.id) {
+        queryClient.setQueryData(storeQueryKeys.detail(user.id, created.id), created);
+        queryClient.setQueryData(storeQueryKeys.firstForUser(user.id), created);
+      }
       toast({
         title: 'Boutique créée !',
         description: `Votre boutique "${name}" est maintenant en ligne.`,
@@ -311,22 +269,16 @@ export const useStore = () => {
 
       const { error } = await supabase
         .from('stores')
-        .update(updateData as any)
+        .update(updateData as StoreUpdate)
         .eq('id', store.id);
 
       if (error) throw error;
 
-      // Fetch the updated store data separately
-      const { data: updatedData } = await supabase
-        .from('stores')
-        .select('id, name, slug')
-        .eq('id', store.id)
-        .single();
-
-      const updated = updatedData;
-      setStore(
-        updated ? (mapStoreRow(updated as unknown as Record<string, unknown>) ?? store) : store
-      );
+      if (user?.id && store.id) {
+        await queryClient.invalidateQueries({
+          queryKey: storeQueryKeys.detail(user.id, store.id),
+        });
+      }
       toast({
         title: 'Boutique mise à jour',
         description: 'Les modifications ont été enregistrées.',
@@ -343,80 +295,13 @@ export const useStore = () => {
     }
   };
 
-  // ✅ FIX: Gestion améliorée - cherche automatiquement la première boutique si aucune n'est sélectionnée
-  useEffect(() => {
-    // Attendre que tout soit chargé
-    if (authLoading || contextLoading) {
-      logger.debug('⏳ [useStore] En attente du chargement complet...');
-      return;
-    }
-
-    // Pas d'utilisateur = pas de boutique
-    if (!user?.id) {
-      logger.debug('❌ [useStore] Aucun utilisateur authentifié');
-      setStore(null);
-      setLoading(false);
-      return;
-    }
-
-    // Le contextStore du StoreContext ne contient que 5 champs basiques,
-    // il faut toujours faire un fetch DB complet pour useStore
-    // Ne pas utiliser contextStore comme raccourci ici
-
-    // Charger depuis la DB si un ID est sélectionné
-    if (selectedStoreId) {
-      logger.info('🔄 [useStore] Chargement boutique DB:', selectedStoreId);
-      fetchStore();
-      return;
-    }
-
-    // ✅ FIX: Aucune boutique sélectionnée → chercher la première boutique de l'utilisateur
-    logger.info('🔍 [useStore] Aucune boutique sélectionnée, recherche automatique...');
-    setLoading(true);
-    (async () => {
-      try {
-        const { data, error: fetchError } = await supabase
-          .from('stores')
-          .select(STORE_FIELDS)
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: true })
-          .limit(1);
-
-        if (fetchError) {
-          logger.error('❌ [useStore] Erreur recherche auto:', fetchError);
-          setStore(null);
-        } else if (data && data.length > 0) {
-          logger.info('✅ [useStore] Boutique trouvée automatiquement:', data[0].id);
-          setStore(mapStoreRow(data[0]));
-          hydratedStoreIdRef.current = data[0].id;
-          // Mettre à jour le contexte via setSelectedStoreId (évite la désynchronisation)
-          try {
-            setSelectedStoreId(data[0].id);
-          } catch (e) {
-            // Context might not be ready yet
-            logger.debug('Context sync failed during auto-select', e);
-          }
-        } else {
-          logger.info('ℹ️ [useStore] Aucune boutique existante');
-          setStore(null);
-          hydratedStoreIdRef.current = null;
-        }
-      } catch (err) {
-        logger.error('💥 [useStore] Exception recherche auto:', err);
-        setStore(null);
-        hydratedStoreIdRef.current = null;
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [user?.id, selectedStoreId, authLoading, contextLoading, fetchStore]); // Dépendances complètes
-
   return {
     store,
-    loading: loading || authLoading || contextLoading, // Attendre que l'auth, le contexte ET le store soient chargés
+    loading,
+    hasStores: stores.length > 0,
     createStore,
     updateStore,
-    refreshStore: fetchStore,
+    refreshStore,
     getStoreUrl,
     getProductUrl,
     generateSlug,

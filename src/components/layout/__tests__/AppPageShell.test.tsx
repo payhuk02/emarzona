@@ -4,6 +4,10 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { AppPageShell } from '@/components/layout/AppPageShell';
 
+vi.mock('@/hooks/useDeferHorizontalContextNav', () => ({
+  useDeferHorizontalContextNav: () => true,
+}));
+
 vi.mock('@/components/AppSidebar', () => ({
   AppSidebar: () => <aside data-testid="app-sidebar">AppSidebar</aside>,
 }));

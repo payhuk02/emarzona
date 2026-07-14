@@ -44,7 +44,7 @@ import { useTranslation } from 'react-i18next';
 const AdvancedDashboard = () => {
   const { t } = useTranslation();
   const { store, loading: storeLoading } = useStore();
-  const { stats, loading, refetch } = useAdvancedDashboardStats();
+  const { stats, loading, refetch } = useAdvancedDashboardStats({ storeId: store?.id });
   const navigate = useNavigate();
   const [lastUpdated, setLastUpdated] = useState(new Date().toISOString());
 

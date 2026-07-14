@@ -9,7 +9,6 @@
  */
 
 import { useEffect, ReactNode } from 'react';
-import { useLocation } from 'react-router-dom';
 import { useCurrentStoreBySubdomain } from '@/hooks/useStoreBySubdomain';
 import type { StoreCommerceType } from '@/constants/store-commerce-types';
 import { detectSubdomain, RESERVED_SUBDOMAINS } from '@/lib/subdomain-detector';
@@ -27,7 +26,6 @@ interface SubdomainMiddlewareProps {
  * et charge automatiquement la boutique correspondante
  */
 export function SubdomainMiddleware({ children }: SubdomainMiddlewareProps) {
-  const location = useLocation();
   const subdomainInfo = detectSubdomain();
   const { setSelectedStoreId } = useStoreContext();
 
@@ -56,12 +54,8 @@ export function SubdomainMiddleware({ children }: SubdomainMiddlewareProps) {
           customDomain: subdomainInfo.customDomain,
         });
       }
-    } else {
-      if (!location.pathname.startsWith('/dashboard')) {
-        setSelectedStoreId(null);
-      }
     }
-  }, [store, subdomainInfo, setSelectedStoreId, location.pathname]);
+  }, [store, subdomainInfo, setSelectedStoreId]);
 
   // Rediriger l'apex myemarzona.shop vers emarzona.com
   useEffect(() => {

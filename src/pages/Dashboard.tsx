@@ -1,6 +1,7 @@
 import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useDashboardStatsOptimized as useDashboardStats } from '@/hooks/useDashboardStats';
 import { useStore, type Store } from '@/hooks/useStore';
+import { useStoreContext } from '@/contexts/StoreContext';
 import { useNavigate } from 'react-router-dom';
 import { useState, useMemo, useCallback, lazy, Suspense, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
@@ -63,13 +64,21 @@ const DashboardSecondaryPanels = lazy(() =>
  */
 /** Route /dashboard : oriente vers onboarding ou tableau de bord complet */
 const Dashboard = () => {
-  const { store, loading: storeLoading } = useStore();
+  const { loading: contextLoading, stores } = useStoreContext();
+  const { store, loading: storeLoading, hasStores } = useStore();
 
-  if (!storeLoading && !store) {
+  const awaitingStoreResolution =
+    contextLoading || storeLoading || ((hasStores || stores.length > 0) && !store);
+
+  if (!awaitingStoreResolution && !hasStores && stores.length === 0) {
     return <DashboardOnboarding />;
   }
 
-  return <DashboardWithStore store={store} storeLoading={storeLoading} />;
+  if (awaitingStoreResolution && !store) {
+    return <DashboardFullSkeleton />;
+  }
+
+  return <DashboardWithStore store={store} storeLoading={storeLoading || contextLoading} />;
 };
 
 type DashboardWithStoreProps = {
@@ -96,6 +105,8 @@ const DashboardWithStore = ({ store, storeLoading }: DashboardWithStoreProps) =>
     isHealthy: sessionHealthy,
     connectionStatus,
     refreshSessionIfNeeded,
+    initialCheckComplete: sessionCheckComplete,
+    isRetrying: sessionRetrying,
   } = useSessionHealth({ enabled: sessionHealthEnabled });
   const [period, setPeriod] = useState<PeriodType>('30d');
   const [customStartDate, setCustomStartDate] = useState<Date | undefined>();
@@ -121,13 +132,18 @@ const DashboardWithStore = ({ store, storeLoading }: DashboardWithStoreProps) =>
   /** Skeleton jusqu'à la 1re réponse réelle — jamais en parallèle d'une erreur affichée */
   const showStatsSkeleton = storeLoading || !store?.id || (!hasStatsData && !hookError);
 
-  /** Graphiques et listes : après KPI + idle browser */
-  const showSecondaryPanels = useDeferredMount(!showStatsSkeleton && !!stats);
+  /** Graphiques et listes : après KPI + idle browser (400 ms max) */
+  const showSecondaryPanels = useDeferredMount(!showStatsSkeleton && !!stats, 400);
+  const [secondaryChunkReady, setSecondaryChunkReady] = useState(false);
 
   // Prefetch du chunk secondaire dès que les stats sont prêtes
   useEffect(() => {
     if (!showStatsSkeleton && stats) {
-      void import('@/components/dashboard/DashboardSecondaryPanels');
+      void import('@/components/dashboard/DashboardSecondaryPanels').then(() => {
+        setSecondaryChunkReady(true);
+      });
+    } else {
+      setSecondaryChunkReady(false);
     }
   }, [showStatsSkeleton, stats]);
 
@@ -151,13 +167,27 @@ const DashboardWithStore = ({ store, storeLoading }: DashboardWithStoreProps) =>
     }
   }, []);
 
-  // ✅ SESSION HEALTH: Vérifier la santé de la session périodiquement
+  // Refresh session uniquement après le 1er contrôle auth (évite faux positif au mount)
   useEffect(() => {
-    if (!sessionHealthy && connectionStatus === 'online') {
-      logger.warn('⚠️ [Dashboard] Session potentially unhealthy, attempting refresh');
-      refreshSessionIfNeeded();
+    if (
+      !sessionHealthEnabled ||
+      !sessionCheckComplete ||
+      sessionRetrying ||
+      sessionHealthy ||
+      connectionStatus !== 'online'
+    ) {
+      return;
     }
-  }, [sessionHealthy, connectionStatus, refreshSessionIfNeeded]);
+    logger.debug('[Dashboard] Session unhealthy after check — refresh');
+    void refreshSessionIfNeeded();
+  }, [
+    sessionHealthEnabled,
+    sessionCheckComplete,
+    sessionRetrying,
+    sessionHealthy,
+    connectionStatus,
+    refreshSessionIfNeeded,
+  ]);
 
   // Récupérer les vraies notifications depuis Supabase (inclut les messages) - Déferré
   const { data: notificationsResult } = useNotifications({
@@ -384,7 +414,7 @@ const DashboardWithStore = ({ store, storeLoading }: DashboardWithStoreProps) =>
             </div>
 
             {showSecondaryPanels ? (
-              <Suspense fallback={<DashboardSecondarySkeleton />}>
+              <Suspense fallback={secondaryChunkReady ? null : <DashboardSecondarySkeleton />}>
                 <DashboardSecondaryPanels
                   stats={stats}
                   onViewAnalytics={handleViewAnalytics}
@@ -394,7 +424,7 @@ const DashboardWithStore = ({ store, storeLoading }: DashboardWithStoreProps) =>
                 />
               </Suspense>
             ) : (
-              <DashboardSecondarySkeleton />
+              !secondaryChunkReady && <DashboardSecondarySkeleton />
             )}
           </div>
         ) : null}

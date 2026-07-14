@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  ChartSuspense,
   LazyLineChart,
   LazyResponsiveContainer,
   LazyLine,
@@ -51,42 +52,44 @@ export const DashboardSalesEvolution = React.memo<DashboardSalesEvolutionProps>(
           </div>
         </div>
         <div className="h-[280px] sm:h-[320px] lg:h-[360px] flex-1 min-h-[240px]">
-          <LazyResponsiveContainer width="100%" height="100%">
-            <LazyLineChart data={chartData}>
-              <LazyCartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-              <LazyXAxis
-                dataKey="month"
-                tick={{ fontSize: 13, fill: '#6b7280' }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <LazyYAxis
-                tick={{ fontSize: 13, fill: '#6b7280' }}
-                axisLine={false}
-                tickLine={false}
-                tickFormatter={v => `${Number(v).toLocaleString('fr-FR')}`}
-              />
-              <LazyTooltip
-                formatter={(value: unknown) => [
-                  `${Number(value).toLocaleString('fr-FR')} FCFA`,
-                  'Revenus',
-                ]}
-                contentStyle={{
-                  borderRadius: 12,
-                  border: '1px solid #e5e7eb',
-                  fontSize: 14,
-                }}
-              />
-              <LazyLine
-                type="monotone"
-                dataKey="revenue"
-                stroke="#8b5cf6"
-                strokeWidth={3}
-                dot={{ fill: '#8b5cf6', strokeWidth: 2, r: 5 }}
-                activeDot={{ r: 7, fill: '#7c3aed', stroke: '#fff', strokeWidth: 2 }}
-              />
-            </LazyLineChart>
-          </LazyResponsiveContainer>
+          <ChartSuspense height={360}>
+            <LazyResponsiveContainer width="100%" height="100%">
+              <LazyLineChart data={chartData}>
+                <LazyCartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                <LazyXAxis
+                  dataKey="month"
+                  tick={{ fontSize: 13, fill: '#6b7280' }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <LazyYAxis
+                  tick={{ fontSize: 13, fill: '#6b7280' }}
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={v => `${Number(v).toLocaleString('fr-FR')}`}
+                />
+                <LazyTooltip
+                  formatter={(value: unknown) => [
+                    `${Number(value).toLocaleString('fr-FR')} FCFA`,
+                    'Revenus',
+                  ]}
+                  contentStyle={{
+                    borderRadius: 12,
+                    border: '1px solid #e5e7eb',
+                    fontSize: 14,
+                  }}
+                />
+                <LazyLine
+                  type="monotone"
+                  dataKey="revenue"
+                  stroke="#8b5cf6"
+                  strokeWidth={3}
+                  dot={{ fill: '#8b5cf6', strokeWidth: 2, r: 5 }}
+                  activeDot={{ r: 7, fill: '#7c3aed', stroke: '#fff', strokeWidth: 2 }}
+                />
+              </LazyLineChart>
+            </LazyResponsiveContainer>
+          </ChartSuspense>
         </div>
       </div>
     );
