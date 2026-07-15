@@ -83,16 +83,21 @@ export async function fetchAdminPaymentStats(): Promise<AdminPaymentStats> {
       .eq('payment_status', 'failed'),
     supabase
       .from('orders')
-      .select('total_amount.sum()')
+      .select('total_amount')
       .in('payment_status', ['completed', 'paid']),
   ]);
+
+  const totalAmount = ((paidSumRes.data as any[]) || []).reduce(
+    (acc, row) => acc + (Number(row.total_amount) || 0),
+    0
+  );
 
   return {
     totalCount: totalRes.count ?? 0,
     completed: completedRes.count ?? 0,
     pending: pendingRes.count ?? 0,
     failed: failedRes.count ?? 0,
-    totalAmount: Number((paidSumRes.data as { sum: number | null }[] | null)?.[0]?.sum ?? 0),
+    totalAmount,
   };
 }
 

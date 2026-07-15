@@ -89,12 +89,13 @@ export async function fetchAdminOrderStats(): Promise<AdminOrderStats> {
       .or('delivery_status.eq.delivered,status.eq.completed,status.eq.delivered'),
     supabase
       .from('orders')
-      .select('total_amount.sum()')
+      .select('total_amount')
       .in('payment_status', ['completed', 'paid']),
   ]);
 
-  const totalRevenue = Number(
-    (paidOrdersRes.data as { sum: number | null }[] | null)?.[0]?.sum ?? 0
+  const totalRevenue = ((paidOrdersRes.data as any[]) || []).reduce(
+    (acc, row) => acc + (Number(row.total_amount) || 0),
+    0
   );
 
   return {
