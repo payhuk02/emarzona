@@ -70,7 +70,7 @@ import { useCurrentAdminPermissions } from '@/hooks/useCurrentAdminPermissions';
 import { Admin2FABanner } from '@/components/admin/Admin2FABanner';
 import { useAdminMFA } from '@/hooks/useAdminMFA';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { RequireAAL2 } from '@/components/admin/RequireAAL2';
+
 import { useIsMobile } from '@/hooks/use-mobile';
 import { MobileTableCard } from '@/components/ui/mobile-table-card';
 
@@ -274,8 +274,7 @@ const AdminUsers = () => {
 
   return (
     <AdminLayout>
-      {/* RequireAAL2 permet maintenant à l'administrateur principal de contourner */}
-      <RequireAAL2>
+
         <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
           {/* Header avec animation - Style Inventory */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
@@ -1134,7 +1133,7 @@ const AdminUsers = () => {
             </AlertDialogContent>
           </AlertDialog>
         </div>
-      </RequireAAL2>
+
     </AdminLayout>
   );
 };

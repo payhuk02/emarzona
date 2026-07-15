@@ -17,7 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Download, Search, Shield, Loader2 } from 'lucide-react';
 import { ProtectedAction } from '@/components/admin/ProtectedAction';
 import { Admin2FABanner } from '@/components/admin/Admin2FABanner';
-import { RequireAAL2 } from '@/components/admin/RequireAAL2';
+
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import {
   useUnifiedAuditLogs,
@@ -122,7 +122,7 @@ export default function AdminAudit() {
           </Card>
         }
       >
-        <RequireAAL2>
+
           <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
             <Admin2FABanner />
 
@@ -417,7 +417,7 @@ export default function AdminAudit() {
               </CardContent>
             </Card>
           </div>
-        </RequireAAL2>
+
       </ProtectedAction>
     </AdminLayout>
   );

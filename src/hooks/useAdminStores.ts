@@ -70,20 +70,19 @@ export const useAdminStores = (options: UseAdminStoresOptions = {}) => {
         if (p.user_id && p.display_name) profileMap.set(p.user_id, p.display_name);
       });
 
-      // Fetch product counts using RPC if available, or just fetch all products for these stores
-      // Since we don't have RPC for this specifically, we'll fetch products grouping them manually
-      // We only select 'id, store_id' to minimize data
-      const { data: productsData } = await supabase
-        .from('products')
-        .select('id, store_id')
-        .in('store_id', storeIds);
-
+      // Fetch product counts using parallel count queries to avoid downloading all product rows
       const productCountMap = new Map<string, number>();
-      productsData?.forEach(p => {
-        if (p.store_id) {
-          productCountMap.set(p.store_id, (productCountMap.get(p.store_id) || 0) + 1);
-        }
-      });
+      if (storeIds.length > 0) {
+        await Promise.all(
+          storeIds.map(async (storeId) => {
+            const { count } = await supabase
+              .from('products')
+              .select('id', { count: 'exact', head: true })
+              .eq('store_id', storeId);
+            productCountMap.set(storeId, count || 0);
+          })
+        );
+      }
 
       const fullStores = storesData.map(store => ({
         ...store,

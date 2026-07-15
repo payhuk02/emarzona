@@ -67,7 +67,7 @@ import { Link } from 'react-router-dom';
 import { ProtectedAction } from '@/components/admin/ProtectedAction';
 import { Admin2FABanner } from '@/components/admin/Admin2FABanner';
 import { useAdminMFA } from '@/hooks/useAdminMFA';
-import { RequireAAL2 } from '@/components/admin/RequireAAL2';
+
 import { EmarzonaProtectDisputeBadge } from '@/components/trust/EmarzonaProtectDisputeBadge';
 import { ProtectDisputeResolvePanel } from '@/components/trust/ProtectDisputeResolvePanel';
 import { useBackfillEmarzonaProtect } from '@/hooks/trust/useEmarzonaProtect';
@@ -445,7 +445,7 @@ const AdminDisputes = () => {
 
   return (
     <AdminLayout>
-      <RequireAAL2>
+
         <div className="space-y-6">
           <Admin2FABanner />
           {/* Header */}
@@ -1486,7 +1486,7 @@ const AdminDisputes = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </RequireAAL2>
+
     </AdminLayout>
   );
 };

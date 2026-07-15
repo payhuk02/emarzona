@@ -16,7 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 export default function MonerooReconciliation() {
   const { toast } = useToast();
   const [transactionId, setTransactionId] = useState('');
-  const [reconciliationResult, setReconciliationResult] = useState<any>(null);
+  const [reconciliationResult, setReconciliationResult] = useState<Record<string, any> | null>(null);
 
   const reconcileTransactionMutation = useReconcileTransaction();
   const reconcileTransactionsMutation = useReconcileTransactions();

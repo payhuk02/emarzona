@@ -42,7 +42,7 @@ export default function TransactionMonitoring() {
   const [stats, setStats] = useState<TransactionStats | null>(null);
   const [consistencyIssues, setConsistencyIssues] = useState<ConsistencyIssue[]>([]);
   const [generatingReport, setGeneratingReport] = useState(false);
-  const [report, setReport] = useState<any>(null);
+  const [report, setReport] = useState<Record<string, any> | null>(null);
 
   // Charger les statistiques
   useEffect(() => {
@@ -376,7 +376,7 @@ export default function TransactionMonitoring() {
                   <div className="space-y-2">
                     <h4 className="font-medium">Détails des incohérences</h4>
                     <div className="max-h-96 overflow-y-auto space-y-2">
-                      {report.issues.map((issue: any, index: number) => (
+                      {report.issues.map((issue: Record<string, any>, index: number) => (
                         <div
                           key={index}
                           className="p-3 border rounded-lg text-sm"

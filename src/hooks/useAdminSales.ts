@@ -6,9 +6,9 @@ import type { Payment } from '@/hooks/usePayments';
 import type { PlatformCommission } from '@/hooks/usePlatformCommissions';
 
 const ADMIN_PAYMENT_FIELDS =
-  'id, store_id, order_id, amount, commission_amount, status, created_at, stores!inner(name), orders(order_number)';
+  'id, store_id, order_id, amount, percentage_amount, status, created_at, stores(name), orders(order_number)';
 const PLATFORM_COMMISSION_FIELDS =
-  'id, total_amount, commission_amount, seller_amount, status, created_at';
+  'id, commission_amount, commission_rate, status, created_at, orders(total_amount), stores(name)';
 
 interface UseAdminSalesOptions {
   page?: number;

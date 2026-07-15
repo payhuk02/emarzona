@@ -43,8 +43,7 @@ const rpc = supabase.rpc.bind(supabase) as unknown as RpcFunction;
 async function fetchTopStoresByEarnings(): Promise<AdminStats['topStores']> {
   const { data: earningsRows, error } = await supabase
     .from('store_earnings')
-    .select('store_id, net_amount, stores(name)')
-    .eq('status', 'completed');
+    .select('store_id, total_revenue');
 
   if (error) {
     logger.warn('store_earnings top stores fallback', { error });
@@ -54,12 +53,8 @@ async function fetchTopStoresByEarnings(): Promise<AdminStats['topStores']> {
   const totals = new Map<string, { name: string; total: number }>();
   for (const row of earningsRows ?? []) {
     const storeId = row.store_id as string;
-    const storeName =
-      row.stores && typeof row.stores === 'object' && 'name' in row.stores
-        ? String((row.stores as { name: string }).name)
-        : 'Boutique';
-    const current = totals.get(storeId) ?? { name: storeName, total: 0 };
-    current.total += Number(row.net_amount) || 0;
+    const current = totals.get(storeId) ?? { name: 'Boutique', total: 0 };
+    current.total += Number(row.total_revenue) || 0;
     totals.set(storeId, current);
   }
 
@@ -67,16 +62,34 @@ async function fetchTopStoresByEarnings(): Promise<AdminStats['topStores']> {
     return fetchTopStoresByOrders();
   }
 
-  return [...totals.entries()]
+  const topStoreIdsAndTotals = [...totals.entries()]
     .map(([id, v]) => ({ id, name: v.name, total_sales: v.total }))
     .sort((a, b) => b.total_sales - a.total_sales)
     .slice(0, 5);
+
+  const topIds = topStoreIdsAndTotals.map(s => s.id);
+  
+  if (topIds.length > 0) {
+    const { data: stores } = await supabase
+      .from('stores')
+      .select('id, name')
+      .in('id', topIds);
+      
+    if (stores) {
+      const storeNameMap = new Map(stores.map(s => [s.id, s.name]));
+      for (const item of topStoreIdsAndTotals) {
+        item.name = storeNameMap.get(item.id) || 'Boutique';
+      }
+    }
+  }
+
+  return topStoreIdsAndTotals;
 }
 
 async function fetchTopStoresByOrders(): Promise<AdminStats['topStores']> {
   const { data: orders, error } = await supabase
     .from('orders')
-    .select('store_id, total_amount, stores(name)')
+    .select('store_id, total_amount')
     .in('payment_status', ['paid', 'completed'])
     .limit(5000);
 
@@ -89,19 +102,33 @@ async function fetchTopStoresByOrders(): Promise<AdminStats['topStores']> {
   for (const row of orders ?? []) {
     const storeId = row.store_id as string;
     if (!storeId) continue;
-    const storeName =
-      row.stores && typeof row.stores === 'object' && 'name' in row.stores
-        ? String((row.stores as { name: string }).name)
-        : 'Boutique';
-    const current = totals.get(storeId) ?? { name: storeName, total: 0 };
+    const current = totals.get(storeId) ?? { name: 'Boutique', total: 0 };
     current.total += Number(row.total_amount) || 0;
     totals.set(storeId, current);
   }
 
-  return [...totals.entries()]
+  const topStoreIdsAndTotals = [...totals.entries()]
     .map(([id, v]) => ({ id, name: v.name, total_sales: v.total }))
     .sort((a, b) => b.total_sales - a.total_sales)
     .slice(0, 5);
+
+  const topIds = topStoreIdsAndTotals.map(s => s.id);
+  
+  if (topIds.length > 0) {
+    const { data: stores } = await supabase
+      .from('stores')
+      .select('id, name')
+      .in('id', topIds);
+      
+    if (stores) {
+      const storeNameMap = new Map(stores.map(s => [s.id, s.name]));
+      for (const item of topStoreIdsAndTotals) {
+        item.name = storeNameMap.get(item.id) || 'Boutique';
+      }
+    }
+  }
+
+  return topStoreIdsAndTotals;
 }
 
 export const useAdminStats = () => {

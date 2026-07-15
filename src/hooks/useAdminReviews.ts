@@ -31,7 +31,6 @@ export function useAdminReviews(filters?: {
         .from('reviews')
         .select(`
           *,
-          user:profiles(full_name, email),
           product:products(name, product_type)
         `, { count: 'exact' })
         .order('created_at', { ascending: false });
@@ -211,26 +210,19 @@ export function useAdminReviewStats() {
   return useQuery({
     queryKey: ['admin-review-stats'],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_admin_review_stats');
+      const [pending, flagged, approved, rejected] = await Promise.all([
+        supabase.from('reviews').select('id', { count: 'exact', head: true }).eq('is_approved', false).eq('is_flagged', false),
+        supabase.from('reviews').select('id', { count: 'exact', head: true }).eq('is_flagged', true),
+        supabase.from('reviews').select('id', { count: 'exact', head: true }).eq('is_approved', true),
+        supabase.from('reviews').select('id', { count: 'exact', head: true }).eq('is_approved', false),
+      ]);
 
-      if (error) {
-        // Fallback: count manually if RPC doesn't exist
-        const [pending, flagged, approved, rejected] = await Promise.all([
-          supabase.from('reviews').select('id', { count: 'exact', head: true }).eq('is_approved', false).eq('is_flagged', false),
-          supabase.from('reviews').select('id', { count: 'exact', head: true }).eq('is_flagged', true),
-          supabase.from('reviews').select('id', { count: 'exact', head: true }).eq('is_approved', true),
-          supabase.from('reviews').select('id', { count: 'exact', head: true }).eq('is_approved', false),
-        ]);
-
-        return {
-          pending: pending.count || 0,
-          flagged: flagged.count || 0,
-          approved: approved.count || 0,
-          rejected: rejected.count || 0,
-        };
-      }
-
-      return data;
+      return {
+        pending: pending.count || 0,
+        flagged: flagged.count || 0,
+        approved: approved.count || 0,
+        rejected: rejected.count || 0,
+      };
     },
   });
 }

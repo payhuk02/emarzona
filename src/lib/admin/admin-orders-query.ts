@@ -10,7 +10,6 @@ export const ADMIN_ORDER_FIELDS = `
   currency,
   created_at,
   store_id,
-  stores(name),
   customers:fk_orders_customer(email, full_name, name)
 `;
 

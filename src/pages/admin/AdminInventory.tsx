@@ -56,7 +56,7 @@ export default function AdminInventory() {
           *,
           variant:physical_product_variants(
             id,
-            variant_name,
+            option1_value,
             product:physical_products(
               id,
               name,
@@ -101,7 +101,7 @@ export default function AdminInventory() {
       inventoryItems?.filter(item => {
         const matchesSearch =
           item.variant?.product?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          item.variant?.variant_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          item.variant?.option1_value?.toLowerCase().includes(searchQuery.toLowerCase()) ||
           item.variant?.product?.store?.name?.toLowerCase().includes(searchQuery.toLowerCase());
 
         const matchesTab =
@@ -285,9 +285,9 @@ export default function AdminInventory() {
                       render: row => (
                         <div>
                           <p className="font-medium">{row.variant?.product?.name || 'N/A'}</p>
-                          {row.variant?.variant_name && (
+                          {row.variant?.option1_value && (
                             <p className="text-xs text-muted-foreground">
-                              {row.variant.variant_name}
+                              {row.variant.option1_value}
                             </p>
                           )}
                         </div>
@@ -368,7 +368,7 @@ export default function AdminInventory() {
                             {item.variant?.product?.name || 'N/A'}
                           </TableCell>
                           <TableCell className="text-xs sm:text-sm hidden sm:table-cell">
-                            {item.variant?.variant_name || '-'}
+                            {item.variant?.option1_value || '-'}
                           </TableCell>
                           <TableCell className="text-xs sm:text-sm hidden md:table-cell">
                             {item.variant?.product?.store?.name || 'N/A'}

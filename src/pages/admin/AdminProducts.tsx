@@ -53,7 +53,7 @@ import { ProtectedAction } from '@/components/admin/ProtectedAction';
 import { Admin2FABanner } from '@/components/admin/Admin2FABanner';
 import { useAdminMFA } from '@/hooks/useAdminMFA';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { RequireAAL2 } from '@/components/admin/RequireAAL2';
+
 import { useQueryClient } from '@tanstack/react-query';
 import {
   ADMIN_PRODUCT_PAGE_SIZES,
@@ -115,7 +115,7 @@ const AdminProducts = () => {
 
   return (
     <AdminLayout>
-      <RequireAAL2>
+
         <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
           <Admin2FABanner />
           <div
@@ -467,7 +467,7 @@ const AdminProducts = () => {
             </AlertDialogContent>
           </AlertDialog>
         </div>
-      </RequireAAL2>
+
     </AdminLayout>
   );
 };

@@ -36,7 +36,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -76,7 +75,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
-import { RequireAAL2 } from '@/components/admin/RequireAAL2';
 import { Admin2FABanner } from '@/components/admin/Admin2FABanner';
 import type { CommunityMemberStatus, CommunityPost } from '@/types/community';
 
@@ -165,7 +163,6 @@ export default function AdminCommunity() {
 
   return (
     <AdminLayout>
-      <RequireAAL2>
         <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
           <Admin2FABanner />
           
@@ -770,7 +767,6 @@ export default function AdminCommunity() {
             </AlertDialogContent>
           </AlertDialog>
         </div>
-      </RequireAAL2>
     </AdminLayout>
   );
 }

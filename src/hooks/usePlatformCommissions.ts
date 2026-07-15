@@ -4,20 +4,21 @@ import { useToast } from "@/hooks/use-toast";
 
 export interface PlatformCommission {
   id: string;
-  payment_id: string | null;
+  payment_id?: string | null;
   store_id: string;
   order_id: string | null;
-  product_id: string | null;
-  total_amount: number;
+  product_id?: string | null;
   commission_rate: number;
   commission_amount: number;
-  seller_amount: number;
   status: string;
   created_at: string;
-  updated_at: string;
+  updated_at?: string;
   stores?: {
     name: string;
-    slug: string;
+    slug?: string;
+  };
+  orders?: {
+    total_amount: number;
   };
 }
 
@@ -47,7 +48,8 @@ export const usePlatformCommissions = (startDate?: string, endDate?: string) => 
         .from("platform_commissions")
         .select(`
           *,
-          stores!fk_platform_commissions_store (name, slug)
+          stores(name),
+          orders(total_amount)
         `)
         .eq("status", "completed")
         .order("created_at", { ascending: false });
@@ -73,11 +75,11 @@ export const usePlatformCommissions = (startDate?: string, endDate?: string) => 
           0
         );
         const totalSales = data.reduce(
-          (sum, c) => sum + Number(c.total_amount),
+          (sum, c) => sum + Number(c.orders?.total_amount || (c.commission_amount / (c.commission_rate / 100)) || 0),
           0
         );
         const salesCount = data.length;
-        const averageCommission = totalCommissions / salesCount;
+        const averageCommission = totalSales > 0 ? totalCommissions / salesCount : 0;
 
         setStats({
           totalCommissions,
@@ -127,14 +129,18 @@ export const usePlatformCommissions = (startDate?: string, endDate?: string) => 
       "Statut",
     ];
 
-    const csvData = commissions.map((c) => [
-      new Date(c.created_at).toLocaleDateString("fr-FR"),
-      c.stores?.name || "N/A",
-      `${c.total_amount} XOF`,
-      `${c.commission_amount} XOF`,
-      `${c.seller_amount} XOF`,
-      c.status,
-    ]);
+    const csvData = commissions.map((c) => {
+      const totalAmount = c.orders?.total_amount || (c.commission_amount / (c.commission_rate / 100)) || 0;
+      const sellerAmount = totalAmount - c.commission_amount;
+      return [
+        new Date(c.created_at).toLocaleDateString("fr-FR"),
+        c.stores?.name || "N/A",
+        `${totalAmount} XOF`,
+        `${c.commission_amount} XOF`,
+        `${sellerAmount} XOF`,
+        c.status,
+      ];
+    });
 
     const csvContent = [
       headers.join(","),
