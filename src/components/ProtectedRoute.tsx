@@ -1,10 +1,11 @@
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import type { ReactNode } from 'react';
 
 export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Appel de useAuth avec gestion d'erreur
   // Si useAuth échoue (contexte non disponible), il retournera les valeurs par défaut
@@ -14,9 +15,9 @@ export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     // Si pas d'utilisateur après le chargement, rediriger vers l'authentification
     if (!loading && !user) {
-      navigate('/login', { replace: true });
+      navigate('/login', { replace: true, state: { from: location.pathname + location.search } });
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, navigate, location]);
 
   // Afficher un loader pendant le chargement
   if (loading) {

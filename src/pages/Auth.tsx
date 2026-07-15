@@ -342,7 +342,10 @@ const Auth = () => {
       logger.warn('Rate limit check failed for signup', { error: rateLimitError });
     }
 
-    const redirectUrl = `${window.location.origin}/dashboard`;
+    const redirectUrl =
+      returnTo && returnTo.startsWith('/')
+        ? `${window.location.origin}${returnTo}`
+        : `${window.location.origin}/dashboard`;
 
     try {
       const { data, error: signUpError } = await supabase.auth.signUp({
@@ -622,7 +625,7 @@ const Auth = () => {
                   value={authTab}
                   onValueChange={value => {
                     const tab = value === 'signup' ? 'signup' : 'login';
-                    navigate(getAuthPathForTab(tab), { replace: true });
+                    navigate(getAuthPathForTab(tab), { replace: true, state: location.state });
                     setError('');
                   }}
                   className="w-full app-premium-auth-tabs"
