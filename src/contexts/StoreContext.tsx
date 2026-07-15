@@ -158,10 +158,28 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       }
       setError(null);
 
-      const { data, error: fetchError } = await supabase
+      // 1. Récupérer les IDs des boutiques où l'utilisateur est membre actif
+      const { data: memberStores } = await supabase
+        .from('store_members')
+        .select('store_id')
+        .eq('user_id', user.id)
+        .eq('status', 'active');
+
+      const memberStoreIds = memberStores?.map(m => m.store_id) || [];
+
+      // 2. Construire la requête avec le filtre explicite pour ne pas afficher
+      // toutes les boutiques de la plateforme si l'utilisateur est admin
+      let query = supabase
         .from('stores')
-        .select('id,name,slug,created_at,updated_at,metadata,commerce_type')
-        .order('created_at', { ascending: true });
+        .select('id,name,slug,created_at,updated_at,metadata,commerce_type');
+
+      if (memberStoreIds.length > 0) {
+        query = query.or(`user_id.eq.${user.id},id.in.(${memberStoreIds.join(',')})`);
+      } else {
+        query = query.eq('user_id', user.id);
+      }
+
+      const { data, error: fetchError } = await query.order('created_at', { ascending: true });
 
       if (fetchError) {
         throw fetchError;
