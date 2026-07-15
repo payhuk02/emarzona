@@ -26,8 +26,6 @@ import { EnterpriseStatusPanel } from '@/components/enterprise/EnterpriseStatusP
 import { OrganizationPanel } from '@/components/enterprise/OrganizationPanel';
 import { useStoreMemberAcceptInvitation } from '@/hooks/useStoreMembers';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
 
 const StoreTeamManagement = () => {
   const { t } = useTranslation();
@@ -41,30 +39,14 @@ const StoreTeamManagement = () => {
   const [isAccepting, setIsAccepting] = useState(false);
   const [acceptError, setAcceptError] = useState<string | null>(null);
 
-  const { user } = useAuth();
-
   useEffect(() => {
     if (invitationToken && !isAccepting && !acceptError) {
       setIsAccepting(true);
       acceptInvitation
         .mutateAsync(invitationToken)
-        .then(async () => {
-          // Rechercher la boutique fraîchement rejointe
-          if (user?.id) {
-            try {
-              const { data: recentMember } = await supabase
-                .from('store_members')
-                .select('store_id')
-                .eq('user_id', user.id)
-                .order('joined_at', { ascending: false })
-                .limit(1);
-
-              if (recentMember?.[0]?.store_id) {
-                localStorage.setItem('selectedStoreId', recentMember[0].store_id);
-              }
-            } catch (err) {
-              console.error('Erreur lors de la récupération de la boutique rejointe', err);
-            }
+        .then(async joinedStoreId => {
+          if (joinedStoreId && typeof joinedStoreId === 'string') {
+            localStorage.setItem('selectedStoreId', joinedStoreId);
           }
 
           navigate('/dashboard/store/team', { replace: true });
@@ -75,7 +57,7 @@ const StoreTeamManagement = () => {
           setIsAccepting(false);
         });
     }
-  }, [invitationToken, acceptInvitation, navigate, isAccepting, acceptError, user?.id]);
+  }, [invitationToken, acceptInvitation, navigate, isAccepting, acceptError]);
 
   if (isAccepting || (invitationToken && !acceptError)) {
     return (

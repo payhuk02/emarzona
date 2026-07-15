@@ -425,7 +425,8 @@ export const useStoreMemberAcceptInvitation = () => {
         throw new Error('Invitation invalide ou expirée');
       }
 
-      return data;
+      // data contains the store_id now
+      return data as string;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['store-members'] });
