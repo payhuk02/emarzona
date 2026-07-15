@@ -65,7 +65,6 @@ import { fr } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 
 const  ORDER_STATUSES: {
   value: SupplierOrder['status'] | 'all';

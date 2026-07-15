@@ -33,13 +33,31 @@ export const AbandonedCartRecovery: React.FC<AbandonedCartRecoveryProps> = ({
 
   const [processingBatch, setProcessingBatch] = useState(false);
 
-  const handleSendRecoveryEmail = async (cartId: string) => {
-    // This would typically require fetching user details and cart items
-    // For now, we'll show a placeholder
-    toast({
-      title: 'Fonctionnalité en développement',
-      description: 'L\'envoi d\'emails de récupération sera bientôt disponible.',
-    });
+  const handleSendRecoveryEmail = async (cart: any) => {
+    if (!cart.profiles?.email) {
+      toast({
+        title: 'Erreur',
+        description: "Impossible d'envoyer l'email : adresse email manquante.",
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      await sendRecoveryEmail.mutateAsync({
+        cartId: cart.id,
+        userEmail: cart.profiles.email,
+        userName: cart.profiles.full_name,
+        items: cart.items,
+        totalAmount: cart.total_amount,
+        currency: cart.currency,
+        recoveryUrl: `${window.location.origin}/cart?recovery=${cart.id}`,
+        discountCode: 'RECOVERY10',
+        discountAmount: Math.round(cart.total_amount * 0.1),
+      });
+    } catch (error) {
+      // Erreur déjà gérée dans la mutation
+    }
   };
 
   const handleBatchProcess = async () => {
@@ -204,7 +222,7 @@ export const AbandonedCartRecovery: React.FC<AbandonedCartRecoveryProps> = ({
                         <div className="flex gap-2">
                           <Button
                             size="sm"
-                            onClick={() => handleSendRecoveryEmail(cart.id)}
+                            onClick={() => handleSendRecoveryEmail(cart)}
                             disabled={sendRecoveryEmail.isPending}
                           >
                             <Mail className="h-4 w-4 mr-2" />

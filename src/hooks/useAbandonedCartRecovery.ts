@@ -24,6 +24,10 @@ interface AbandonedCart {
   recovery_sent: boolean;
   recovered_at?: string;
   store_id: string;
+  profiles?: {
+    email: string;
+    full_name: string;
+  };
 }
 
 interface RecoveryEmailData {
@@ -54,6 +58,7 @@ export const useAbandonedCartRecovery = (userId?: string) => {
         .from('abandoned_carts')
         .select(`
           *,
+          profiles (email, full_name),
           abandoned_cart_items (
             id,
             product_id,
