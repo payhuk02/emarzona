@@ -5,12 +5,14 @@
  * Page principale pour gérer l'équipe d'une boutique (membres et tâches)
  */
 
+import { useEffect, useState } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AppPageShell } from '@/components/layout/AppPageShell';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StoreMembersList } from '@/components/team/StoreMembersList';
-import { Users, CheckSquare, BarChart3, Shield, ScrollText } from 'lucide-react';
+import { Users, CheckSquare, BarChart3, Shield, ScrollText, Loader2 } from 'lucide-react';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useStore } from '@/hooks/useStore';
 import { Card, CardContent } from '@/components/ui/card';
@@ -22,11 +24,66 @@ import { StoreSsoSettingsPanel } from '@/components/team/StoreSsoSettingsPanel';
 import { StoreAuditExportPanel } from '@/components/audit/StoreAuditExportPanel';
 import { EnterpriseStatusPanel } from '@/components/enterprise/EnterpriseStatusPanel';
 import { OrganizationPanel } from '@/components/enterprise/OrganizationPanel';
+import { useStoreMemberAcceptInvitation } from '@/hooks/useStoreMembers';
+import { Button } from '@/components/ui/button';
 
 const StoreTeamManagement = () => {
   const { t } = useTranslation();
   const { store, loading } = useStore();
   const headerRef = useScrollAnimation<HTMLDivElement>();
+
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const invitationToken = searchParams.get('invitation');
+  const acceptInvitation = useStoreMemberAcceptInvitation();
+  const [isAccepting, setIsAccepting] = useState(false);
+  const [acceptError, setAcceptError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (invitationToken && !isAccepting && !acceptError) {
+      setIsAccepting(true);
+      acceptInvitation
+        .mutateAsync(invitationToken)
+        .then(() => {
+          navigate('/dashboard/store/team', { replace: true });
+          window.location.reload(); // Reload to refresh stores list in the context
+        })
+        .catch(err => {
+          setAcceptError(err.message || "Erreur lors de l'acceptation de l'invitation");
+          setIsAccepting(false);
+        });
+    }
+  }, [invitationToken, acceptInvitation, navigate, isAccepting, acceptError]);
+
+  if (isAccepting || (invitationToken && !acceptError)) {
+    return (
+      <AppPageShell mainClassName="p-3 sm:p-4 lg:p-6 flex items-center justify-center min-h-[50vh]">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+          <h2 className="text-xl font-semibold">Acceptation de l'invitation en cours...</h2>
+        </div>
+      </AppPageShell>
+    );
+  }
+
+  if (acceptError) {
+    return (
+      <AppPageShell mainClassName="p-3 sm:p-4 lg:p-6 flex items-center justify-center min-h-[50vh]">
+        <Card className="max-w-md w-full border-destructive/20">
+          <CardContent className="py-8 text-center space-y-4">
+            <h2 className="text-xl font-semibold text-destructive">Lien invalide ou expiré</h2>
+            <p className="text-muted-foreground">{acceptError}</p>
+            <Button
+              onClick={() => navigate('/dashboard/store/team', { replace: true })}
+              className="mt-4"
+            >
+              Retour à l'équipe
+            </Button>
+          </CardContent>
+        </Card>
+      </AppPageShell>
+    );
+  }
 
   if (loading) {
     return (
