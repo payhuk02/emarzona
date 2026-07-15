@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { StableDropdownMenu } from '@/components/ui/stable-dropdown-menu';
+import { StableDropdownMenu, DropdownMenuItem } from '@/components/ui/stable-dropdown-menu';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -220,19 +220,18 @@ export const StoreMembersList = () => {
                           'aria-label': `Actions pour ${member.user?.email || member.id}`,
                         }}
                       >
-                        <SelectItem value="edit" onSelect={() => handleEditRole(member)}>
+                        <DropdownMenuItem onClick={() => handleEditRole(member)}>
                           <Edit className="h-4 w-4 mr-2" />
                           Modifier le rôle
-                        </SelectItem>
+                        </DropdownMenuItem>
                         {member.role !== 'owner' && (
-                          <SelectItem
-                            value="delete"
-                            onSelect={() => handleRemove(member)}
+                          <DropdownMenuItem
+                            onClick={() => handleRemove(member)}
                             className="text-destructive"
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
                             Retirer
-                          </SelectItem>
+                          </DropdownMenuItem>
                         )}
                       </StableDropdownMenu>
                     </div>
@@ -293,18 +292,17 @@ export const StoreMembersList = () => {
                           'aria-label': `Actions pour ${member.user?.email || member.id}`,
                         }}
                       >
-                        <SelectItem value="copy" onSelect={() => handleEditRole(member)}>
+                        <DropdownMenuItem onClick={() => handleEditRole(member)}>
                           <Edit className="h-4 w-4 mr-2" />
                           Modifier le rôle
-                        </SelectItem>
-                        <SelectItem
-                          value="view"
-                          onSelect={() => handleRemove(member)}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleRemove(member)}
                           className="text-destructive"
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
                           Annuler l'invitation
-                        </SelectItem>
+                        </DropdownMenuItem>
                       </StableDropdownMenu>
                     </div>
                   ))}

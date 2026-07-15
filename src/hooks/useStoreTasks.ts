@@ -1,7 +1,7 @@
 /**
  * Store Tasks Hooks
  * Date: 2 Février 2025
- * 
+ *
  * Hooks pour gérer les tâches assignées aux membres d'équipe
  */
 
@@ -14,7 +14,8 @@ import {
   sendTaskUpdateNotification,
 } from '@/lib/team/team-notifications';
 
-const STORE_TASK_FIELDS = 'id, store_id, created_by, assigned_to, assigned_by, title, description, category, priority, status, due_date, started_at, completed_at, tags, attachments, related_product_id, related_order_id, related_customer_id, metadata, created_at, updated_at';
+const STORE_TASK_FIELDS =
+  'id, store_id, created_by, assigned_to, assigned_by, title, description, category, priority, status, due_date, started_at, completed_at, tags, attachments, related_product_id, related_order_id, related_customer_id, metadata, created_at, updated_at';
 
 // =====================================================
 // TYPES
@@ -44,7 +45,7 @@ export interface StoreTask {
   related_product_id: string | null;
   related_order_id: string | null;
   related_customer_id: string | null;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   created_at: string;
   updated_at: string;
   // Relations
@@ -143,7 +144,7 @@ export const useStoreTasks = (storeId: string | null, filters?: TaskFilters) => 
         throw new Error('Store ID is required');
       }
 
-      let  query= supabase.from('store_tasks').select(STORE_TASK_FIELDS).eq('store_id', storeId);
+      let query = supabase.from('store_tasks').select(STORE_TASK_FIELDS).eq('store_id', storeId);
 
       // Appliquer les filtres
       if (filters?.status) {
@@ -179,9 +180,9 @@ export const useStoreTasks = (storeId: string | null, filters?: TaskFilters) => 
 
       // Récupérer les utilisateurs (créateurs et assignés)
       const userIds = new Set<string>();
-      tasks.forEach((task) => {
+      tasks.forEach(task => {
         userIds.add(task.created_by);
-        task.assigned_to?.forEach((id) => userIds.add(id));
+        task.assigned_to?.forEach(id => userIds.add(id));
       });
 
       if (userIds.size > 0) {
@@ -204,7 +205,7 @@ export const useStoreTasks = (storeId: string | null, filters?: TaskFilters) => 
         }
 
         const profileMap = new Map(
-          profiles?.map((p) => [
+          profiles?.map(p => [
             p.user_id,
             {
               id: p.user_id,
@@ -218,7 +219,7 @@ export const useStoreTasks = (storeId: string | null, filters?: TaskFilters) => 
         );
 
         // Enrichir les tâches avec les données utilisateur
-        tasks.forEach((task) => {
+        tasks.forEach(task => {
           // Créateur
           const creator = profileMap.get(task.created_by);
           if (creator) {
@@ -228,7 +229,7 @@ export const useStoreTasks = (storeId: string | null, filters?: TaskFilters) => 
           // Assignés
           if (task.assigned_to && task.assigned_to.length > 0) {
             task.assigned_to_users = task.assigned_to
-              .map((id) => {
+              .map(id => {
                 const user = profileMap.get(id);
                 if (user) return user;
                 // Si pas de profil, créer un objet minimal avec l'email
@@ -244,7 +245,7 @@ export const useStoreTasks = (storeId: string | null, filters?: TaskFilters) => 
       }
 
       // Compter les commentaires pour chaque tâche
-      const taskIds = tasks.map((t) => t.id);
+      const taskIds = tasks.map(t => t.id);
       if (taskIds.length > 0) {
         const { data: commentsCount } = await supabase
           .from('store_task_comments')
@@ -252,11 +253,11 @@ export const useStoreTasks = (storeId: string | null, filters?: TaskFilters) => 
           .in('task_id', taskIds);
 
         const countMap = new Map<string, number>();
-        commentsCount?.forEach((c) => {
+        commentsCount?.forEach(c => {
           countMap.set(c.task_id, (countMap.get(c.task_id) || 0) + 1);
         });
 
-        tasks.forEach((task) => {
+        tasks.forEach(task => {
           task.comments_count = countMap.get(task.id) || 0;
         });
       }
@@ -297,7 +298,7 @@ export const useStoreTask = (storeId: string | null, taskId: string | null) => {
       // Récupérer les utilisateurs (créateur et assignés)
       const userIds = new Set<string>([task.created_by]);
       if (task.assigned_to) {
-        task.assigned_to.forEach((id) => userIds.add(id));
+        task.assigned_to.forEach(id => userIds.add(id));
       }
 
       if (userIds.size > 0) {
@@ -320,7 +321,7 @@ export const useStoreTask = (storeId: string | null, taskId: string | null) => {
         }
 
         const profileMap = new Map(
-          profiles?.map((p) => [
+          profiles?.map(p => [
             p.user_id,
             {
               id: p.user_id,
@@ -342,7 +343,7 @@ export const useStoreTask = (storeId: string | null, taskId: string | null) => {
         // Assignés
         if (task.assigned_to && task.assigned_to.length > 0) {
           task.assigned_to_users = task.assigned_to
-            .map((id) => {
+            .map(id => {
               const user = profileMap.get(id);
               if (user) return user;
               return {
@@ -370,9 +371,15 @@ export const useStoreTaskCreate = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ storeId, taskData }: { storeId: string; taskData: StoreTaskCreateData }) => {
+    mutationFn: async ({
+      storeId,
+      taskData,
+    }: {
+      storeId: string;
+      taskData: StoreTaskCreateData;
+    }) => {
       const { data: currentUser } = await supabase.auth.getUser();
-      const userId = currentUser.data.user?.id;
+      const userId = currentUser.user?.id;
 
       if (!userId) {
         throw new Error('Non authentifié');
@@ -426,7 +433,7 @@ export const useStoreTaskCreate = () => {
           createdByName: creatorData.user?.user_metadata?.display_name,
           priority: taskData.priority || 'medium',
           dueDate: taskData.due_date,
-        }).catch((err) => {
+        }).catch(err => {
           logger.warn('Error sending task assigned notification', { error: err });
         });
       }
@@ -470,7 +477,7 @@ export const useStoreTaskUpdate = () => {
       updateData: StoreTaskUpdateData;
     }) => {
       const { data: currentUser } = await supabase.auth.getUser();
-      const userId = currentUser.data.user?.id;
+      const userId = currentUser.user?.id;
 
       if (!userId) {
         throw new Error('Non authentifié');
@@ -524,7 +531,7 @@ export const useStoreTaskUpdate = () => {
           updateData.assigned_to || data.assigned_to,
           'status_changed',
           { old_status: data.status, new_status: updateData.status }
-        ).catch((err) => {
+        ).catch(err => {
           logger.warn('Error sending task update notification', { error: err });
         });
       }
@@ -538,16 +545,17 @@ export const useStoreTaskUpdate = () => {
           updateData.assigned_to || data.assigned_to,
           'priority_changed',
           { old_priority: data.priority, new_priority: updateData.priority }
-        ).catch((err) => {
+        ).catch(err => {
           logger.warn('Error sending task update notification', { error: err });
         });
       }
 
-      if (updateData.assigned_to && JSON.stringify(updateData.assigned_to) !== JSON.stringify(data.assigned_to)) {
+      if (
+        updateData.assigned_to &&
+        JSON.stringify(updateData.assigned_to) !== JSON.stringify(data.assigned_to)
+      ) {
         // Notifier les nouveaux membres assignés
-        const newAssignees = updateData.assigned_to.filter(
-          (id) => !data.assigned_to.includes(id)
-        );
+        const newAssignees = updateData.assigned_to.filter(id => !data.assigned_to.includes(id));
         if (newAssignees.length > 0) {
           await sendTaskAssignedNotification({
             taskId,
@@ -558,7 +566,7 @@ export const useStoreTaskUpdate = () => {
             createdBy: userId,
             priority: updateData.priority || data.priority,
             dueDate: updateData.due_date || data.due_date || undefined,
-          }).catch((err) => {
+          }).catch(err => {
             logger.warn('Error sending task assigned notification', { error: err });
           });
         }
@@ -568,7 +576,9 @@ export const useStoreTaskUpdate = () => {
     },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['store-tasks', variables.storeId] });
-      queryClient.invalidateQueries({ queryKey: ['store-task', variables.storeId, variables.taskId] });
+      queryClient.invalidateQueries({
+        queryKey: ['store-task', variables.storeId, variables.taskId],
+      });
       toast({
         title: 'Tâche mise à jour',
         description: 'Les modifications ont été enregistrées',
@@ -595,7 +605,11 @@ export const useStoreTaskDelete = () => {
 
   return useMutation({
     mutationFn: async ({ storeId, taskId }: { storeId: string; taskId: string }) => {
-      const { error } = await supabase.from('store_tasks').delete().eq('id', taskId).eq('store_id', storeId);
+      const { error } = await supabase
+        .from('store_tasks')
+        .delete()
+        .eq('id', taskId)
+        .eq('store_id', storeId);
 
       if (error) {
         logger.error('Error deleting store task:', error);
@@ -637,10 +651,3 @@ export const useMyStoreTasks = (storeId: string | null) => {
     assigned_to: currentUser?.id,
   });
 };
-
-
-
-
-
-
-

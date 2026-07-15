@@ -1,7 +1,7 @@
 /**
  * Store Members Hooks
  * Date: 2 Février 2025
- * 
+ *
  * Hooks pour gérer les membres d'équipe d'une boutique
  */
 
@@ -11,7 +11,8 @@ import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 import { sendTeamInvitationNotification } from '@/lib/team/team-notifications';
 
-const STORE_MEMBER_FIELDS = 'id, store_id, user_id, role, permissions, invited_by, invited_at, invitation_token, invitation_expires_at, status, joined_at, removed_at, removed_by, metadata, created_at, updated_at';
+const STORE_MEMBER_FIELDS =
+  'id, store_id, user_id, role, permissions, invited_by, invited_at, invitation_token, invitation_expires_at, status, joined_at, removed_at, removed_by, metadata, created_at, updated_at';
 
 // =====================================================
 // TYPES
@@ -31,7 +32,7 @@ export interface StoreMember {
   joined_at: string | null;
   removed_at: string | null;
   removed_by: string | null;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   created_at: string;
   updated_at: string;
   // Relations
@@ -96,7 +97,7 @@ export const useStoreMembers = (storeId: string | null) => {
 
       // Récupérer les profils des membres
       const userIds = [
-        ...new Set(data.map((m) => m.user_id).concat(data.map((m) => m.invited_by).filter(Boolean))),
+        ...new Set(data.map(m => m.user_id).concat(data.map(m => m.invited_by).filter(Boolean))),
       ];
 
       const { data: profiles } = await supabase
@@ -117,9 +118,9 @@ export const useStoreMembers = (storeId: string | null) => {
       }
 
       // Combiner les données
-      const membersWithUsers = data.map((member) => {
-        const profile = profiles?.find((p) => p.user_id === member.user_id);
-        const inviterProfile = profiles?.find((p) => p.user_id === member.invited_by);
+      const membersWithUsers = data.map(member => {
+        const profile = profiles?.find(p => p.user_id === member.user_id);
+        const inviterProfile = profiles?.find(p => p.user_id === member.invited_by);
         const email = emailMap.get(member.user_id) || '';
         const inviterEmail = member.invited_by ? emailMap.get(member.invited_by) || '' : '';
 
@@ -139,21 +140,22 @@ export const useStoreMembers = (storeId: string | null) => {
                 email: email,
                 user_metadata: {},
               },
-          invited_by_user: inviterProfile && member.invited_by
-            ? {
-                id: member.invited_by,
-                email: inviterEmail,
-                user_metadata: {
-                  display_name: inviterProfile.display_name,
-                },
-              }
-            : member.invited_by
-            ? {
-                id: member.invited_by,
-                email: inviterEmail,
-                user_metadata: {},
-              }
-            : undefined,
+          invited_by_user:
+            inviterProfile && member.invited_by
+              ? {
+                  id: member.invited_by,
+                  email: inviterEmail,
+                  user_metadata: {
+                    display_name: inviterProfile.display_name,
+                  },
+                }
+              : member.invited_by
+                ? {
+                    id: member.invited_by,
+                    email: inviterEmail,
+                    user_metadata: {},
+                  }
+                : undefined,
         };
       });
 
@@ -173,54 +175,78 @@ export const useStoreMemberInvite = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ storeId, inviteData }: { storeId: string; inviteData: StoreMemberInviteData }) => {
+    mutationFn: async ({
+      storeId,
+      inviteData,
+    }: {
+      storeId: string;
+      inviteData: StoreMemberInviteData;
+    }) => {
       // Générer un token d'invitation unique
       const invitationToken = crypto.randomUUID();
 
       // Vérifier si l'utilisateur existe
-      const { data: existingUser, error: userError } = await supabase
-        .from('profiles')
-        .select('id, user_id')
-        .eq('email', inviteData.email)
-        .single();
+      const { data: userId, error: userError } = await supabase.rpc('get_user_id_by_email', {
+        email_address: inviteData.email,
+      });
 
-      let  userId: string | null = null;
-
-      if (existingUser) {
-        userId = existingUser.user_id;
-      } else {
+      if (!userId) {
         // Si l'utilisateur n'existe pas, on devra créer l'invitation différemment
         // Pour l'instant, on retourne une erreur
-        throw new Error('L\'utilisateur doit d\'abord créer un compte sur la plateforme');
+        throw new Error("L'utilisateur doit d'abord créer un compte sur la plateforme");
       }
 
       // Vérifier si l'utilisateur n'est pas déjà membre
       const { data: existingMember } = await supabase
         .from('store_members')
-        .select('id')
+        .select('id, status')
         .eq('store_id', storeId)
         .eq('user_id', userId)
-        .single();
+        .maybeSingle(); // Use maybeSingle to avoid errors if not found
 
-      if (existingMember) {
+      if (existingMember && existingMember.status !== 'removed') {
         throw new Error('Cet utilisateur est déjà membre de cette boutique');
       }
 
-      // Créer l'invitation
-      const { data, error } = await supabase
-        .from('store_members')
-        .insert({
-          store_id: storeId,
-          user_id: userId,
-          role: inviteData.role,
-          permissions: inviteData.permissions || {},
-          invited_by: (await supabase.auth.getUser()).data.user?.id,
-          invitation_token: invitationToken,
-          invitation_expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 jours
-          status: 'pending',
-        })
-        .select()
-        .single();
+      const inviterId = (await supabase.auth.getUser()).data.user?.id;
+
+      const commonData = {
+        role: inviteData.role,
+        permissions: inviteData.permissions || {},
+        invited_by: inviterId,
+        invitation_token: invitationToken,
+        invitation_expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 jours
+        status: 'pending',
+        removed_at: null,
+        removed_by: null,
+      };
+
+      let data, error;
+
+      if (existingMember) {
+        // Mettre à jour l'ancien membre retiré
+        const result = await supabase
+          .from('store_members')
+          .update(commonData)
+          .eq('id', existingMember.id)
+          .select()
+          .single();
+        data = result.data;
+        error = result.error;
+      } else {
+        // Créer une nouvelle invitation
+        const result = await supabase
+          .from('store_members')
+          .insert({
+            store_id: storeId,
+            user_id: userId,
+            ...commonData,
+          })
+          .select()
+          .single();
+        data = result.data;
+        error = result.error;
+      }
 
       if (error) {
         logger.error('Error inviting store member:', error);
@@ -246,7 +272,7 @@ export const useStoreMemberInvite = () => {
         role: inviteData.role,
         invitationToken: invitationToken,
         message: inviteData.message,
-      }).catch((err) => {
+      }).catch(err => {
         logger.warn('Error sending invitation notification', { error: err });
       });
 
@@ -263,7 +289,7 @@ export const useStoreMemberInvite = () => {
       logger.error('Error inviting store member:', error);
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible d\'envoyer l\'invitation',
+        description: error.message || "Impossible d'envoyer l'invitation",
         variant: 'destructive',
       });
     },
@@ -332,7 +358,7 @@ export const useStoreMemberRemove = () => {
   return useMutation({
     mutationFn: async ({ storeId, memberId }: { storeId: string; memberId: string }) => {
       const { data: currentUser } = await supabase.auth.getUser();
-      const userId = currentUser.data.user?.id;
+      const userId = currentUser.user?.id;
 
       if (!userId) {
         throw new Error('Non authentifié');
@@ -362,7 +388,7 @@ export const useStoreMemberRemove = () => {
       queryClient.invalidateQueries({ queryKey: ['store-members', variables.storeId] });
       toast({
         title: 'Membre retiré',
-        description: 'Le membre a été retiré de l\'équipe',
+        description: "Le membre a été retiré de l'équipe",
       });
     },
     onError: (error: Error) => {
@@ -405,14 +431,14 @@ export const useStoreMemberAcceptInvitation = () => {
       queryClient.invalidateQueries({ queryKey: ['store-members'] });
       toast({
         title: 'Invitation acceptée',
-        description: 'Vous avez rejoint l\'équipe avec succès',
+        description: "Vous avez rejoint l'équipe avec succès",
       });
     },
     onError: (error: Error) => {
       logger.error('Error accepting invitation:', error);
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible d\'accepter l\'invitation',
+        description: error.message || "Impossible d'accepter l'invitation",
         variant: 'destructive',
       });
     },
@@ -422,6 +448,9 @@ export const useStoreMemberAcceptInvitation = () => {
 // =====================================================
 // HOOK: useStoreMemberPermissions
 // =====================================================
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type StoreMemberPermissions = Record<string, any>;
 
 export const useStoreMemberPermissions = (storeId: string | null, userId?: string) => {
   return useQuery({
@@ -479,10 +508,3 @@ export const useHasStorePermission = (
     enabled: !!storeId && !!userId && !!permission,
   });
 };
-
-
-
-
-
-
-

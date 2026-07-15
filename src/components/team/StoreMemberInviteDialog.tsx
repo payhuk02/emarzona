@@ -1,11 +1,11 @@
 /**
  * Store Member Invite Dialog Component
  * Date: 2 Février 2025
- * 
+ *
  * Dialog pour inviter un nouveau membre à rejoindre l'équipe
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -42,7 +42,11 @@ import { Mail, UserPlus } from 'lucide-react';
 
 const inviteSchema = z.object({
   email: z.string().email('Email invalide'),
-  role: z.enum(['manager', 'staff', 'support', 'viewer']),
+  role: z
+    .union([z.enum(['manager', 'staff', 'support', 'viewer']), z.literal('')])
+    .transform(v => (v === '' ? 'staff' : v)) as z.ZodType<
+    'manager' | 'staff' | 'support' | 'viewer'
+  >,
   message: z.string().optional(),
 });
 
@@ -54,7 +58,11 @@ interface StoreMemberInviteDialogProps {
 }
 
 const ROLE_OPTIONS = [
-  { value: 'manager' as const, label: 'Gestionnaire', description: 'Accès complet sauf suppression' },
+  {
+    value: 'manager' as const,
+    label: 'Gestionnaire',
+    description: 'Accès complet sauf suppression',
+  },
   { value: 'staff' as const, label: 'Employé', description: 'Gestion produits et commandes' },
   { value: 'support' as const, label: 'Support', description: 'Commandes et clients uniquement' },
   { value: 'viewer' as const, label: 'Observateur', description: 'Lecture seule' },
@@ -74,6 +82,15 @@ export const StoreMemberInviteDialog = ({ open, onClose }: StoreMemberInviteDial
     },
   });
 
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      form.reset();
+      onClose();
+    } else {
+      onClose(); // This shouldn't happen via onOpenChange normally, but just in case
+    }
+  };
+
   const onSubmit = async (values: InviteFormValues) => {
     if (!store) return;
 
@@ -83,7 +100,7 @@ export const StoreMemberInviteDialog = ({ open, onClose }: StoreMemberInviteDial
         storeId: store.id,
         inviteData: {
           email: values.email,
-          role: values.role,
+          role: values.role || 'staff',
           message: values.message || undefined,
         },
       });
@@ -97,7 +114,7 @@ export const StoreMemberInviteDialog = ({ open, onClose }: StoreMemberInviteDial
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-[95vw] sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -140,7 +157,8 @@ export const StoreMemberInviteDialog = ({ open, onClose }: StoreMemberInviteDial
                   <FormLabel>Rôle</FormLabel>
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    defaultValue={field.value || 'staff'}
+                    value={field.value || 'staff'}
                     disabled={isSubmitting}
                   >
                     <FormControl>
@@ -149,11 +167,13 @@ export const StoreMemberInviteDialog = ({ open, onClose }: StoreMemberInviteDial
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {ROLE_OPTIONS.map((role) => (
+                      {ROLE_OPTIONS.map(role => (
                         <SelectItem key={role.value} value={role.value}>
-                          <div>
-                            <div className="font-medium">{role.label}</div>
-                            <div className="text-xs text-muted-foreground">{role.description}</div>
+                          <div className="flex flex-col">
+                            <span className="font-medium">{role.label}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {role.description}
+                            </span>
                           </div>
                         </SelectItem>
                       ))}
@@ -210,10 +230,3 @@ export const StoreMemberInviteDialog = ({ open, onClose }: StoreMemberInviteDial
     </Dialog>
   );
 };
-
-
-
-
-
-
-

@@ -1,7 +1,7 @@
 /**
  * Team Notifications Service
  * Date: 2 Février 2025
- * 
+ *
  * Service pour gérer les notifications liées à l'équipe (invitations, tâches)
  */
 
@@ -82,7 +82,7 @@ export async function sendTeamInvitationNotification(
           inviter_email: data.inviterEmail,
         },
         action_url: acceptUrl,
-        action_label: 'Voir l\'invitation',
+        action_label: "Voir l'invitation",
         priority: 'high',
       });
     }
@@ -95,6 +95,7 @@ export async function sendTeamInvitationNotification(
           to: data.memberEmail,
           subject: `Invitation à rejoindre l'équipe ${data.storeName}`,
           template: 'team-invitation',
+          storeId: data.storeId,
           data: {
             storeName: data.storeName,
             inviterName: data.inviterName || data.inviterEmail,
@@ -193,11 +194,11 @@ export async function sendTaskUpdateNotification(
     const updateMessages = {
       status_changed: 'Le statut de la tâche a été modifié',
       priority_changed: 'La priorité de la tâche a été modifiée',
-      due_date_changed: 'La date d\'échéance de la tâche a été modifiée',
+      due_date_changed: "La date d'échéance de la tâche a été modifiée",
       comment_added: 'Un nouveau commentaire a été ajouté',
     };
 
-    const notifications = assignedTo.map((userId) =>
+    const notifications = assignedTo.map(userId =>
       createNotification({
         user_id: userId,
         type: 'task_updated',
@@ -237,7 +238,7 @@ export async function sendTaskOverdueNotification(
   assignedTo: string[]
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const notifications = assignedTo.map((userId) =>
+    const notifications = assignedTo.map(userId =>
       createNotification({
         user_id: userId,
         type: 'task_overdue',
@@ -263,10 +264,3 @@ export async function sendTaskOverdueNotification(
     return { success: false, error: _error instanceof Error ? _error.message : String(_error) };
   }
 }
-
-
-
-
-
-
-

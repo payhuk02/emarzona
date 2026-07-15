@@ -186,18 +186,44 @@ function generatePaymentEmailHTML(template: string, data: Record<string, unknown
         <p>Votre paiement de ${formattedAmount} est en cours de traitement.</p>
         <p>Cordialement,<br>L'équipe Emarzona</p></body></html>`;
 
+    case 'team-invitation':
+      const storeName = String(data.storeName || 'une boutique');
+      const inviterName = String(data.inviterName || 'Un administrateur');
+      const role = String(data.role || 'membre');
+      const acceptUrl = String(data.acceptUrl || '#');
+      const message = data.message ? String(data.message) : '';
+      
+      return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Invitation à rejoindre ${storeName}</title></head>
+        <body style="font-family:Arial,sans-serif;line-height:1.6;color:#333;max-width:600px;margin:0 auto;padding:20px;">
+          <div style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:30px;text-align:center;border-radius:10px 10px 0 0;">
+            <h1 style="margin:0;">👋 Invitation d'équipe</h1>
+          </div>
+          <div style="background:#f9f9f9;padding:30px;border-radius:0 0 10px 10px;">
+            <p>Bonjour,</p>
+            <p><strong>${inviterName}</strong> vous a invité à rejoindre l'équipe de la boutique <strong>${storeName}</strong> en tant que <strong>${role}</strong>.</p>
+            ${message ? `<div style="background:white;padding:15px;border-left:4px solid #667eea;margin:20px 0;font-style:italic;">"${message}"</div>` : ''}
+            <div style="text-align:center;margin:30px 0;">
+              <a href="${acceptUrl}" style="background:#667eea;color:white;padding:12px 24px;text-decoration:none;border-radius:5px;font-weight:bold;display:inline-block;">Accepter l'invitation</a>
+            </div>
+            <p style="font-size:12px;color:#777;">Si le bouton ne fonctionne pas, copiez-collez ce lien dans votre navigateur :<br>${acceptUrl}</p>
+            <p style="margin-top:30px;">Cordialement,<br>L'équipe Emarzona</p>
+          </div>
+        </body></html>`;
+
     default:
       return `<!DOCTYPE html><html><body><p>Bonjour ${customerName},</p></body></html>`;
   }
 }
 
-function defaultPaymentSubject(template: string): string {
+function defaultPaymentSubject(template: string, data?: Record<string, unknown>): string {
+  const storeName = data?.storeName ? ` - ${data.storeName}` : '';
   const subjects: Record<string, string> = {
     payment_success: '✅ Paiement confirmé - Emarzona',
     payment_failed: '❌ Paiement échoué - Emarzona',
     payment_cancelled: 'Paiement annulé - Emarzona',
     payment_refunded: 'Remboursement effectué - Emarzona',
     payment_pending: 'Paiement en attente - Emarzona',
+    'team-invitation': `👋 Invitation à rejoindre l'équipe${storeName}`,
   };
   return subjects[template] || 'Notification Emarzona';
 }
@@ -383,7 +409,7 @@ serve(async req => {
           );
         }
       } else if (normalizedTemplate) {
-        if (!USER_ALLOWED_TEMPLATES.has(normalizedTemplate)) {
+        if (!USER_ALLOWED_TEMPLATES.has(normalizedTemplate) && normalizedTemplate !== 'team-invitation') {
           return jsonResponse(
             req,
             403,
@@ -392,7 +418,23 @@ serve(async req => {
             requestStart
           );
         }
-        if (!callerEmail || callerEmail !== normalizedTo) {
+        
+        // team-invitation check: User must have access to the store
+        if (normalizedTemplate === 'team-invitation') {
+          const storeAccess = callerUserId && storeId
+            ? await verifyStoreAccess(supabase, callerUserId, { storeId })
+            : { allowed: false };
+            
+          if (!storeAccess.allowed) {
+            return jsonResponse(
+              req,
+              403,
+              { error: 'User does not have permission to invite members to this store' },
+              requestId,
+              requestStart
+            );
+          }
+        } else if (!callerEmail || callerEmail !== normalizedTo) {
           return jsonResponse(
             req,
             403,
@@ -444,7 +486,7 @@ serve(async req => {
       if (rendered.fromName) fromName = rendered.fromName;
     } else if (!htmlContent && normalizedTemplate) {
       htmlContent = generatePaymentEmailHTML(normalizedTemplate, data || {});
-      finalSubject = finalSubject || defaultPaymentSubject(normalizedTemplate);
+      finalSubject = finalSubject || defaultPaymentSubject(normalizedTemplate, data || {});
       resolvedSlug = normalizedTemplate;
       emailCategory = 'transactional';
     }

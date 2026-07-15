@@ -1,7 +1,7 @@
 /**
  * Store Task Comments Hooks
  * Date: 2 Février 2025
- * 
+ *
  * Hooks pour gérer les commentaires sur les tâches
  */
 
@@ -11,7 +11,8 @@ import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 import { sendTaskUpdateNotification } from '@/lib/team/team-notifications';
 
-const STORE_TASK_COMMENT_FIELDS = 'id, task_id, user_id, content, attachments, is_internal, created_at, updated_at';
+const STORE_TASK_COMMENT_FIELDS =
+  'id, task_id, user_id, content, attachments, is_internal, created_at, updated_at';
 
 // =====================================================
 // TYPES
@@ -81,7 +82,7 @@ export const useStoreTaskComments = (taskId: string | null) => {
       }
 
       // Récupérer les profils et emails des utilisateurs
-      const userIds = [...new Set(data.map((c) => c.user_id))];
+      const userIds = [...new Set(data.map(c => c.user_id))];
 
       const { data: profiles } = await supabase
         .from('profiles')
@@ -100,7 +101,7 @@ export const useStoreTaskComments = (taskId: string | null) => {
       }
 
       const profileMap = new Map(
-        profiles?.map((p) => [
+        profiles?.map(p => [
           p.user_id,
           {
             id: p.user_id,
@@ -114,7 +115,7 @@ export const useStoreTaskComments = (taskId: string | null) => {
       );
 
       // Enrichir les commentaires avec les données utilisateur
-      const commentsWithUsers = data.map((comment) => {
+      const commentsWithUsers = data.map(comment => {
         const user = profileMap.get(comment.user_id);
         return {
           ...comment,
@@ -150,7 +151,7 @@ export const useStoreTaskCommentCreate = () => {
       commentData: StoreTaskCommentCreateData;
     }) => {
       const { data: currentUser } = await supabase.auth.getUser();
-      const userId = currentUser.data.user?.id;
+      const userId = currentUser.user?.id;
 
       if (!userId) {
         throw new Error('Non authentifié');
@@ -196,7 +197,7 @@ export const useStoreTaskCommentCreate = () => {
             storeData?.name || 'Boutique',
             taskData.assigned_to,
             'comment_added'
-          ).catch((err) => {
+          ).catch(err => {
             logger.warn('Error sending comment notification', { error: err });
           });
         }
@@ -213,7 +214,7 @@ export const useStoreTaskCommentCreate = () => {
       logger.error('Error creating task comment:', error);
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible d\'ajouter le commentaire',
+        description: error.message || "Impossible d'ajouter le commentaire",
         variant: 'destructive',
       });
     },
@@ -229,13 +230,7 @@ export const useStoreTaskCommentUpdate = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({
-      commentId,
-      content,
-    }: {
-      commentId: string;
-      content: string;
-    }) => {
+    mutationFn: async ({ commentId, content }: { commentId: string; content: string }) => {
       const { data, error } = await supabase
         .from('store_task_comments')
         .update({ content })
@@ -303,10 +298,3 @@ export const useStoreTaskCommentDelete = () => {
     },
   });
 };
-
-
-
-
-
-
-
