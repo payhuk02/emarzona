@@ -13,13 +13,8 @@ CREATE POLICY "stores_select_policy"
   USING (
     -- Le propriétaire peut voir
     user_id = auth.uid() OR
-    -- Les membres de l'équipe peuvent voir
-    EXISTS (
-      SELECT 1 FROM public.store_members sm
-      WHERE sm.store_id = stores.id
-      AND sm.user_id = auth.uid()
-      AND sm.status = 'active'
-    ) OR
+    -- Les membres de l'équipe peuvent voir (utilise la fonction SECURITY DEFINER pour éviter la récursion infinie)
+    public.is_store_member(id, auth.uid()) OR
     -- Les admins peuvent tout voir
     EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
   );
