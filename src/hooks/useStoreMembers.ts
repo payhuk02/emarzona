@@ -425,7 +425,10 @@ export const useStoreMemberAcceptInvitation = () => {
         throw new Error('Invitation invalide ou expirée');
       }
 
-      // data contains the store_id now
+      if (typeof data === 'string' && data.startsWith('ERROR:')) {
+        throw new Error(data.replace('ERROR: ', ''));
+      }
+
       return data as string;
     },
     onSuccess: () => {
