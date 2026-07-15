@@ -71,26 +71,21 @@ const AdminSales = () => {
   const { data: statsData, isLoading: statsLoading } = useQuery({
     queryKey: ['admin-sales-stats'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('payments')
-        .select('amount, commission_amount, status')
-        .eq('status', 'completed');
+      const { data, error } = await supabase.rpc('get_admin_sales_stats');
 
-      if (error) throw error;
-      return data || [];
+      if (error) {
+        logger.error('Failed to load admin sales stats', { error });
+        return { total_revenue: 0, total_commissions: 0, total_count: 0 };
+      }
+      return data as { total_revenue: number; total_commissions: number; total_count: number };
     },
   });
 
   const isLoading = salesLoading || commissionsLoading || statsLoading;
 
-  const totalRevenue = useMemo(
-    () => statsData?.reduce((sum, s) => sum + Number(s.amount), 0) || 0,
-    [statsData]
-  );
-  const totalCommissions = useMemo(
-    () => statsData?.reduce((sum, c) => sum + Number(c.commission_amount || 0), 0) || 0,
-    [statsData]
-  );
+  const totalRevenue = statsData?.total_revenue || 0;
+  const totalCommissions = statsData?.total_commissions || 0;
+  const totalSalesCountCompleted = statsData?.total_count || 0;
 
   useEffect(() => {
     if (!isLoading) {
@@ -156,7 +151,8 @@ const AdminSales = () => {
       const { data, error } = await supabase
         .from(table)
         .select(fields)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(50000); // Allow exporting up to 50k records instead of default 1000
         
       if (error) throw error;
       
@@ -229,7 +225,7 @@ const AdminSales = () => {
                 {formatCurrency(totalRevenue)}
               </div>
               <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
-                {statsData?.length || 0} ventes terminées
+                {totalSalesCountCompleted} ventes terminées
               </p>
             </CardContent>
           </Card>

@@ -6,9 +6,9 @@ import type { Payment } from '@/hooks/usePayments';
 import type { PlatformCommission } from '@/hooks/usePlatformCommissions';
 
 const ADMIN_PAYMENT_FIELDS =
-  'id, store_id, order_id, amount, percentage_amount, status, created_at, stores(name), orders(order_number)';
+  'id, store_id, order_id, amount, commission_amount:percentage_amount, status, created_at, stores!payments_store_id_fkey(name), orders!payments_order_id_fkey(order_number)';
 const PLATFORM_COMMISSION_FIELDS =
-  'id, commission_amount, commission_rate, status, created_at, orders(total_amount), stores(name)';
+  'id, commission_amount, commission_rate, status, created_at, orders!platform_commissions_order_id_fkey(total_amount), stores!platform_commissions_store_id_fkey(name)';
 
 interface UseAdminSalesOptions {
   page?: number;
@@ -24,20 +24,13 @@ export const useAdminSalesList = (options: UseAdminSalesOptions = {}) => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const fetchSales = async () => {
+  const fetchSales = useCallback(async () => {
     try {
       setLoading(true);
 
       let query = supabase
         .from('payments')
         .select(ADMIN_PAYMENT_FIELDS, { count: 'exact' });
-
-      if (search && search.trim()) {
-        // Unfortunately searching across relations (stores.name or orders.order_number) in standard select is limited in PostgREST.
-        // We will just fetch everything and do client search if we can't search relations easily. 
-        // Wait! We can do !inner() joins but complex ORs are tricky.
-        // Let's rely on standard filtering or ignore for now if not supported without RPC.
-      }
 
       query = query.order('created_at', { ascending: false });
 
@@ -55,8 +48,10 @@ export const useAdminSalesList = (options: UseAdminSalesOptions = {}) => {
       let finalData = (data as unknown as Payment[]) || [];
       if (search && search.trim()) {
         finalData = finalData.filter(sale => {
-           const storeName = sale.stores?.[0]?.name || (sale.stores as any)?.name || '';
-           const orderNumber = sale.orders?.[0]?.order_number || (sale.orders as any)?.order_number || '';
+           // @ts-expect-error - Supabase types might not perfectly map the joined relation array vs object
+           const storeName = sale.stores?.[0]?.name || sale.stores?.name || '';
+           // @ts-expect-error - same here
+           const orderNumber = sale.orders?.[0]?.order_number || sale.orders?.order_number || '';
            return (
              storeName.toLowerCase().includes(search.toLowerCase()) ||
              orderNumber.toLowerCase().includes(search.toLowerCase())
@@ -77,11 +72,11 @@ export const useAdminSalesList = (options: UseAdminSalesOptions = {}) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, pageSize, search, toast]);
 
   useEffect(() => {
     fetchSales();
-  }, [page, pageSize, search]);
+  }, [fetchSales]);
 
   return { sales, totalCount, loading, refetch: fetchSales };
 };
@@ -94,7 +89,7 @@ export const useAdminCommissionsList = (options: UseAdminSalesOptions = {}) => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const fetchCommissions = async () => {
+  const fetchCommissions = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -125,11 +120,11 @@ export const useAdminCommissionsList = (options: UseAdminSalesOptions = {}) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, pageSize, toast]);
 
   useEffect(() => {
     fetchCommissions();
-  }, [page, pageSize]);
+  }, [fetchCommissions]);
 
   return { commissions, totalCount, loading, refetch: fetchCommissions };
 };
