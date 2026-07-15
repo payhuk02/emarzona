@@ -33,7 +33,6 @@ export async function fetchStoreById(userId: string, storeId: string): Promise<S
     .from('stores')
     .select(STORE_FIELDS)
     .eq('id', storeId)
-    .eq('user_id', userId)
     .single();
 
   if (error) {
