@@ -161,7 +161,6 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       const { data, error: fetchError } = await supabase
         .from('stores')
         .select('id,name,slug,created_at,updated_at,metadata,commerce_type')
-        .eq('user_id', user.id)
         .order('created_at', { ascending: true });
 
       if (fetchError) {
