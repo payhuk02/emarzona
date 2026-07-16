@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS public.email_templates (
   click_rate numeric DEFAULT 0,
   created_by uuid,
   created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
 );
 
 ALTER TABLE public.email_templates ENABLE ROW LEVEL SECURITY;
