@@ -225,8 +225,8 @@ export const useCreateArtistOrder = () => {
       // 6. Créer la commande via RPC sécurisée
       const affiliateTrackingCookie = getAffiliateTrackingCookie();
 
-      // @ts-expect-error: RPC type not yet updated in supabase types
       const { data: rpcResult, error: orderError } = await supabase.rpc(
+        // @ts-expect-error: RPC type not yet updated in supabase types
         'create_public_artist_order',
         {
           p_product_id: productId,

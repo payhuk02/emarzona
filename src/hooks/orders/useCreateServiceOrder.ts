@@ -558,8 +558,8 @@ export const useCreateServiceOrder = () => {
         notes,
       };
 
-      // @ts-expect-error: RPC type not yet updated in supabase types
       const { data: rpcResult, error: orderError } = await supabase.rpc(
+        // @ts-expect-error: RPC type not yet updated in supabase types
         'create_public_service_order',
         {
           p_product_id: productId,

@@ -165,8 +165,8 @@ export const useCreateDigitalOrder = () => {
       // 6. Créer la commande via RPC sécurisée
       const affiliateTrackingCookie = getAffiliateTrackingCookie();
 
-      // @ts-expect-error: RPC type not yet updated in supabase types
       const { data: rpcResult, error: orderError } = await supabase.rpc(
+        // @ts-expect-error: RPC type not yet updated in supabase types
         'create_public_digital_order',
         {
           p_product_id: productId,
