@@ -466,13 +466,6 @@ export const useCreateServiceOrder = () => {
         }
       }
 
-      const customerId = await findOrCreateStoreCustomer({
-        storeId,
-        email: customerEmail,
-        name: customerName || customerEmail.split('@')[0],
-        phone: customerPhone,
-      });
-
       // 6. Créer le booking (réservation) de manière atomique via l'Edge Function
       // Note: actualDuration, bookingDate, bookingStartTime, bookingEndTime déjà calculés plus haut
 
