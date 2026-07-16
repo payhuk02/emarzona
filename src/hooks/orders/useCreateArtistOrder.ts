@@ -18,8 +18,6 @@ import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
 import { logger } from '@/lib/logger';
 import { retryWithExponentialBackoff } from '@/lib/retry-utils';
 import { reserveArtistLimitedEdition } from '@/lib/artist-edition-reservation';
-import { findOrCreateStoreCustomer } from '@/lib/orders/customers-data';
-import { generateOrderNumber } from '@/lib/orders/orders-data';
 
 const PRODUCT_FIELDS = 'id, name, price, promotional_price, currency, payment_options';
 const ARTIST_PRODUCT_FIELDS =
@@ -224,16 +222,10 @@ export const useCreateArtistOrder = () => {
         finalUserId = provisionData?.user_id;
       }
 
-      const customerId = await findOrCreateStoreCustomer({
-        storeId,
-        email: customerEmail,
-        name: customerName || customerEmail.split('@')[0],
-        phone: customerPhone,
-      });
-
       // 6. Créer la commande via RPC sécurisée
       const affiliateTrackingCookie = getAffiliateTrackingCookie();
 
+      // @ts-expect-error: RPC type not yet updated in supabase types
       const { data: rpcResult, error: orderError } = await supabase.rpc(
         'create_public_artist_order',
         {

@@ -201,22 +201,6 @@ export const initiateGeniusPayPayment = async (options: PaymentOptions) => {
       'Initiating GeniusPay checkout via Edge Function (transaction will be created server-side)...'
     );
 
-    // 2. Log de création de transaction temporaire (avant création serveur)
-    try {
-      await supabase.from('transaction_logs').insert([
-        {
-          event_type: 'payment_initiated_frontend',
-          status: 'pending',
-          request_data: sanitizePaymentOptionsForAudit(
-            options as unknown as Record<string, unknown>
-          ),
-        },
-      ]);
-    } catch (_logError: unknown) {
-      // Ne pas bloquer le processus si le log échoue
-      logger.warn('Failed to insert transaction log (non-critical):', { error: _logError });
-    }
-
     // 3. Initialiser le paiement GeniusPay
     // IMPORTANT: productId doit être passé directement dans data, pas seulement dans metadata
     // L'Edge Function l'extraira et l'ajoutera à metadata.product_id

@@ -235,7 +235,7 @@ export const initiatePayment = async (options: PaymentOptions): Promise<PaymentR
       transaction_id: geniuspayResult.transaction_id,
       checkout_url: geniuspayResult.checkout_url,
       provider: 'geniuspay',
-      provider_transaction_id: geniuspayResult.geniuspay_transaction_id,
+      provider_transaction_id: geniuspayResult.geniuspay_id,
       error: geniuspayResult.success ? undefined : 'Paiement GeniusPay non initialisé',
     };
   } catch (_error: unknown) {

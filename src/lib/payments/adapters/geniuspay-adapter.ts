@@ -36,7 +36,7 @@ export async function createGeniusPayPlatformPayment(
     transaction_id: result.transaction_id,
     checkout_url: result.checkout_url,
     provider: 'geniuspay_platform',
-    provider_transaction_id: result.geniuspay_transaction_id,
+    provider_transaction_id: result.geniuspay_id,
     connection_id: request.connections?.find(c => c.provider === 'geniuspay_platform')?.id ?? null,
   };
 }

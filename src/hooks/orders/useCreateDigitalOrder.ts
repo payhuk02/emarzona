@@ -165,6 +165,7 @@ export const useCreateDigitalOrder = () => {
       // 6. Créer la commande via RPC sécurisée
       const affiliateTrackingCookie = getAffiliateTrackingCookie();
 
+      // @ts-expect-error: RPC type not yet updated in supabase types
       const { data: rpcResult, error: orderError } = await supabase.rpc(
         'create_public_digital_order',
         {
@@ -281,7 +282,7 @@ export const useCreateDigitalOrder = () => {
             location: 'useCreateDigitalOrder.ts:paymentFailed',
             message: 'Digital payment initiation failed',
             data: {
-              orderId: order.id,
+              orderId,
               success: paymentResult.success,
               error: paymentResult.error ?? null,
               hasCheckoutUrl: !!paymentResult.checkout_url,
@@ -295,9 +296,9 @@ export const useCreateDigitalOrder = () => {
 
       // 12. Retourner le résultat
       return {
-        orderId: order.id,
-        orderItemId: orderItem.id,
-        licenseId,
+        orderId,
+        orderItemId,
+        licenseId: undefined,
         checkoutUrl: paymentResult.checkout_url,
         transactionId: paymentResult.transaction_id,
       };

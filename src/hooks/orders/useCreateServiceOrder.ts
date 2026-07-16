@@ -558,6 +558,7 @@ export const useCreateServiceOrder = () => {
         notes,
       };
 
+      // @ts-expect-error: RPC type not yet updated in supabase types
       const { data: rpcResult, error: orderError } = await supabase.rpc(
         'create_public_service_order',
         {
@@ -635,12 +636,16 @@ export const useCreateServiceOrder = () => {
         });
       });
 
+      const calcTotalPrice = product.price * numberOfParticipants;
+      const calcAmountToPay = finalAmountToPay;
+      const calcRemainingAmount = calcTotalPrice - calcAmountToPay;
+
       // 11. Créer un secured_payment si paiement escrow
       if (paymentType === 'delivery_secured') {
         await supabase.from('secured_payments').insert({
           order_id: orderId,
-          total_amount: totalPrice,
-          held_amount: amountToPay,
+          total_amount: calcTotalPrice,
+          held_amount: calcAmountToPay,
           status: 'held',
           hold_reason: 'service_completion',
           release_conditions: {
@@ -687,9 +692,9 @@ export const useCreateServiceOrder = () => {
           order_item_id: orderItemId,
           payment_type: paymentType,
           percentage_rate: paymentType === 'percentage' ? percentageRate : null,
-          total_price: totalPrice,
-          amount_paid: amountToPay,
-          remaining_amount: remainingAmount,
+          total_price: calcTotalPrice,
+          amount_paid: calcAmountToPay,
+          remaining_amount: calcRemainingAmount,
         },
       });
 
