@@ -200,7 +200,7 @@ export async function validateOrderPaymentAmount(
 ): Promise<{ valid: boolean; orderAmount?: number; difference?: number; reason?: string }> {
   const { data: orderData } = await supabase
     .from('orders')
-    .select('total_amount, currency')
+    .select('total_amount, currency, payment_type, percentage_paid')
     .eq('id', orderId)
     .single();
 
@@ -220,14 +220,25 @@ export async function validateOrderPaymentAmount(
       ? parseFloat(orderData.total_amount)
       : Number(orderData.total_amount);
 
-  const tolerance = await getMaxAmountTolerance(supabase);
-  const difference = Math.abs(paidAmount - orderAmount);
-
-  if (difference > tolerance) {
-    return { valid: false, orderAmount, difference, reason: 'amount_mismatch' };
+  let expectedAmount = orderAmount;
+  if (orderData.payment_type === 'percentage') {
+    const percentageAmount =
+      typeof orderData.percentage_paid === 'string'
+        ? parseFloat(orderData.percentage_paid)
+        : Number(orderData.percentage_paid || 0);
+    if (percentageAmount > 0) {
+      expectedAmount = percentageAmount;
+    }
   }
 
-  return { valid: true, orderAmount, difference };
+  const tolerance = await getMaxAmountTolerance(supabase);
+  const difference = Math.abs(paidAmount - expectedAmount);
+
+  if (difference > tolerance) {
+    return { valid: false, orderAmount: expectedAmount, difference, reason: 'amount_mismatch' };
+  }
+
+  return { valid: true, orderAmount: expectedAmount, difference };
 }
 
 /** Validates order amount before marking paid; throws on mismatch. */

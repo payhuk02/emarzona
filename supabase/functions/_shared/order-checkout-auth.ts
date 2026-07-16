@@ -47,17 +47,28 @@ export async function loadCheckoutOrder(
 ): Promise<CheckoutOrderContext | null> {
   const { data: order, error } = await supabase
     .from('orders')
-    .select('id, store_id, total_amount, currency, customer_id, payment_status, created_at, metadata')
+    .select('id, store_id, total_amount, currency, customer_id, payment_status, created_at, metadata, payment_type, percentage_paid')
     .eq('id', orderId)
     .eq('store_id', storeId)
     .maybeSingle();
 
   if (error || !order) return null;
 
-  const amount =
+  const totalAmount =
     typeof order.total_amount === 'string'
       ? parseFloat(order.total_amount)
       : Number(order.total_amount);
+
+  let amount = totalAmount;
+  if (order.payment_type === 'percentage') {
+    const percentageAmount =
+      typeof order.percentage_paid === 'string'
+        ? parseFloat(order.percentage_paid)
+        : Number(order.percentage_paid || 0);
+    if (percentageAmount > 0) {
+      amount = percentageAmount;
+    }
+  }
 
   const metadata =
     order.metadata && typeof order.metadata === 'object' && !Array.isArray(order.metadata)

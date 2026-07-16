@@ -131,29 +131,12 @@ export const useCreateCourseOrder = () => {
         throw new Error('Produit non trouvé');
       }
 
-      // Récupérer les options de paiement configurées
-      const paymentOptions = (product.payment_options as {
-        payment_type?: string;
-        percentage_rate?: number;
-      } | null) || { payment_type: 'full', percentage_rate: 30 };
-      const paymentType = paymentOptions.payment_type || 'full';
-      const percentageRate = paymentOptions.percentage_rate || 30;
-
-      // 2. Vérifier que le cours existe
-      const { data: course, error: courseError } = await supabase
-        .from('courses')
-        .select(COURSE_FIELDS)
-        .eq('id', courseId)
-        .single();
-
-      if (courseError || !course) {
-        throw new Error('Cours non trouvé');
-      }
-
       // 3. Vérifier si l'utilisateur est déjà inscrit (si connecté)
       const {
         data: { user },
       } = await supabase.auth.getUser();
+      const isGuestCheckout = !user;
+
       if (user) {
         const { data: existingEnrollment } = await supabase
           .from('course_enrollments')
@@ -167,156 +150,57 @@ export const useCreateCourseOrder = () => {
         }
       }
 
-      // 3.5 Auto-provisioning invité avant la création de commande
-      // Pour s'assurer que le trigger auto_enroll trouve bien un utilisateur auth.users
-      let finalUserId = user?.id;
-
-      if (!user) {
-        const { data: provisionData, error: provisionError } = await supabase.functions.invoke(
-          'course-checkout-provisioning',
-          {
-            body: {
-              email: customerEmail,
-              customerName: customerName,
-              userId: null,
-            },
-          }
-        );
-
-        if (provisionError) {
-          logger.error('Course checkout provisioning error', { error: provisionError });
-          throw new Error(provisionError.message || "Impossible de finaliser l'achat invité.");
-        }
-
-        if (provisionData?.error) {
-          throw new Error(provisionData.error);
-        }
-
-        finalUserId = provisionData?.user_id;
-      }
-
-      const customerId = await findOrCreateStoreCustomer({
-        storeId,
-        email: customerEmail,
-        name: customerName || customerEmail.split('@')[0],
-        phone: customerPhone,
-      });
-
-      // 5. Calculer le prix total
-      const basePrice = product.promotional_price || product.price;
-      const totalPrice = basePrice * quantity;
-
-      // Calculer le montant à payer selon le type de paiement
-      let amountToPay = totalPrice;
-      let percentagePaid = 0;
-      let remainingAmount = 0;
-
-      if (paymentType === 'percentage') {
-        // Paiement partiel : calculer l'acompte
-        amountToPay = Math.round((totalPrice * percentageRate) / 100);
-        percentagePaid = amountToPay;
-        remainingAmount = totalPrice - amountToPay;
-      } else if (paymentType === 'delivery_secured') {
-        // Paiement sécurisé : montant total mais retenu en escrow
-        amountToPay = totalPrice;
-      }
-      // Si 'full', amountToPay = totalPrice (déjà défini)
-
-      // Appliquer la carte cadeau si applicable
-      const finalAmountToPay = Math.max(0, amountToPay - (giftCardAmount || 0));
-
-      // 6. Générer un numéro de commande
-      const orderNumber = await generateOrderNumber();
-
-      // 7. Créer la commande (avec payment_type)
-      // Récupérer le cookie d'affiliation s'il existe
+      // 6. Créer la commande via RPC sécurisée
       const affiliateTrackingCookie = getAffiliateTrackingCookie();
 
-      const { data: order, error: orderError } = await supabase
-        .from('orders')
-        .insert({
-          store_id: storeId,
-          customer_id: customerId,
-          order_number: orderNumber,
-          total_amount: totalPrice - (giftCardAmount || 0), // Montant final après gift card
-          currency: product.currency,
-          payment_status: 'pending',
-          status: 'pending',
-          payment_type: paymentType,
-          percentage_paid: percentagePaid,
-          remaining_amount: remainingAmount,
-          affiliate_tracking_cookie: affiliateTrackingCookie,
-          metadata: {
-            course_id: courseId,
-            course_name: product.name,
-            auto_enroll: true,
-          },
-        })
-        .select(
-          'id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at'
-        )
-        .single();
+      const { data: rpcResult, error: orderError } = await supabase.rpc(
+        'create_public_course_order',
+        {
+          p_product_id: productId,
+          p_store_id: storeId,
+          p_customer_email: customerEmail,
+          p_customer_name: customerName || customerEmail.split('@')[0],
+          p_customer_phone: customerPhone,
+          p_gift_card_id: giftCardId,
+          p_gift_card_amount_requested: giftCardAmount || 0,
+          p_coupon_code: undefined, // no coupon code in options
+          p_affiliate_tracking_cookie: affiliateTrackingCookie,
+          p_guest_checkout: isGuestCheckout,
+        }
+      );
 
-      if (orderError || !order) {
+      if (orderError || !rpcResult) {
         throw new Error('Erreur lors de la création de la commande');
       }
 
-      // 8. Créer order_item avec métadonnées spécifiques
-      const { data: orderItem, error: orderItemError } = await supabase
-        .from('order_items')
-        .insert({
-          order_id: order.id,
-          product_id: productId,
-          product_type: 'course',
-          product_name: product.name,
-          quantity,
-          unit_price: basePrice,
-          total_price: totalPrice - (giftCardAmount || 0),
-        })
-        .select('id')
-        .single();
+      const orderData = rpcResult as unknown as {
+        order_id: string;
+        order_item_id: string;
+        order_number: string;
+        customer_id: string;
+        course_id: string;
+        total_amount: number;
+      };
 
-      if (orderItemError || !orderItem) {
-        // Rollback: supprimer la commande en cas d'erreur
-        await supabase.from('orders').delete().eq('id', order.id);
-        throw new Error(
-          `Erreur lors de la création de l'élément de commande${
-            orderItemError?.message ? `: ${orderItemError.message}` : ''
-          }`
-        );
-      }
-
-      // 9. Rédimer la carte cadeau si applicable (APRÈS création commande)
-      if (giftCardId && giftCardAmount && giftCardAmount > 0) {
-        try {
-          const { error: redeemError } = await supabase.rpc('redeem_gift_card', {
-            p_gift_card_id: giftCardId,
-            p_order_id: order.id,
-            p_amount: giftCardAmount,
-          });
-
-          if (redeemError) {
-            logger.error('Erreur lors du rachat de la carte cadeau', { error: redeemError });
-            // Ne pas bloquer la commande si le rachat échoue
-          }
-        } catch (giftCardErr) {
-          logger.error('Erreur lors du rachat de la carte cadeau', { error: giftCardErr });
-        }
-      }
+      const finalAmountToPay = orderData.total_amount;
+      const orderId = orderData.order_id;
+      const orderNumber = orderData.order_number;
+      const customerId = orderData.customer_id;
+      const orderItemId = orderData.order_item_id;
 
       // 9b. Déclencher webhook order.created (asynchrone, ne bloque pas)
       import('@/lib/webhooks').then(({ triggerOrderCreatedWebhook }) => {
-        triggerOrderCreatedWebhook(order.id, {
-          store_id: order.store_id || storeId,
-          customer_id: order.customer_id || customerId,
-          order_number: order.order_number || orderNumber,
-          status: order.status || 'pending',
-          total_amount: order.total_amount || totalPrice,
-          currency: order.currency || product.currency || 'XOF',
-          payment_status: order.payment_status || 'pending',
-          created_at: order.created_at || new Date().toISOString(),
+        triggerOrderCreatedWebhook(orderId, {
+          store_id: storeId,
+          customer_id: customerId,
+          order_number: orderNumber,
+          status: 'pending',
+          total_amount: finalAmountToPay,
+          currency: product.currency || 'XOF',
+          payment_status: 'pending',
+          created_at: new Date().toISOString(),
         }).catch(err => {
-          logger.error('Error triggering order created webhook', { error: err, orderId: order.id });
+          logger.error('Error triggering order created webhook', { error: err, orderId: orderId });
         });
       });
 
@@ -331,7 +215,7 @@ export const useCreateCourseOrder = () => {
       const paymentResult = await initiatePayment({
         storeId,
         productId,
-        orderId: order.id,
+        orderId: orderId,
         customerId,
         amount: finalAmountToPay,
         currency: paymentCurrency,
@@ -341,28 +225,26 @@ export const useCreateCourseOrder = () => {
         customerPhone,
         metadata: {
           product_type: 'course',
-          order_item_id: orderItem.id,
+          order_item_id: orderItemId,
           course_id: courseId,
           auto_enroll: true, // Flag pour webhook
         },
       });
 
       if (!paymentResult.success || !paymentResult.checkout_url) {
-        // Rollback: supprimer la commande et l'order_item en cas d'erreur
-        await supabase.from('order_items').delete().eq('id', orderItem.id);
-        await supabase.from('orders').delete().eq('id', order.id);
+        // Rollback is now handled by failing the transaction if possible, or manual cleanup
         throw new Error("Erreur lors de l'initialisation du paiement");
       }
 
       logger.info('Commande de cours créée avec succès', {
-        orderId: order.id,
+        orderId: orderId,
         courseId,
         productId,
       });
 
       return {
-        orderId: order.id,
-        orderItemId: orderItem.id,
+        orderId: orderId,
+        orderItemId: orderItemId,
         checkoutUrl: paymentResult.checkout_url,
         transactionId: paymentResult.transaction_id,
       };

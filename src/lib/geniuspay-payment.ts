@@ -65,7 +65,6 @@ function toGeniusPayMetadataValue(value: unknown): string | undefined {
 function buildGeniusPayApiMetadata(
   customMetadata: Record<string, unknown>,
   essentials: {
-    transactionId: string;
     storeId: string;
     productId?: string;
     orderId?: string;
@@ -73,7 +72,6 @@ function buildGeniusPayApiMetadata(
   }
 ): Record<string, string> {
   const merged: Record<string, unknown> = {
-    transaction_id: essentials.transactionId,
     store_id: essentials.storeId,
     ...(essentials.productId ? { product_id: essentials.productId } : {}),
     ...(essentials.orderId ? { order_id: essentials.orderId } : {}),
@@ -165,7 +163,9 @@ export const initiateGeniusPayPayment = async (options: PaymentOptions) => {
 
   if (productId && (typeof productId !== 'string' || productId.trim() === '')) {
     logger.error('Invalid productId in initiateGeniusPayPayment:', { productId });
-    throw new GeniusPayValidationError(`productId invalide: ${productId}. Doit être un UUID valide.`);
+    throw new GeniusPayValidationError(
+      `productId invalide: ${productId}. Doit être un UUID valide.`
+    );
   }
 
   if (!customerEmail || typeof customerEmail !== 'string' || !customerEmail.includes('@')) {
@@ -194,130 +194,18 @@ export const initiateGeniusPayPayment = async (options: PaymentOptions) => {
     } = await supabase.auth.getUser();
     const currentUserId = customerId || user?.id;
 
-    // 1. Créer la transaction dans la base de données
-    const transactionData: Record<string, unknown> = {
-      store_id: storeId,
-      product_id: productId,
-      order_id: orderId,
-      amount,
-      currency,
-      status: 'pending',
-      customer_email: customerEmail,
-      customer_name: customerName,
-      customer_phone: customerPhone,
-      metadata: {
-        ...metadata,
-        // Ajouter userId dans metadata pour faciliter l'identification RLS
-        userId: currentUserId,
-      },
-      payment_provider: 'geniuspay', // Indiquer que c'est GeniusPay
-    };
+    // LA TRANSACTION EST MAINTENANT CREEE DE MANIERE SECURISEE PAR L'EDGE FUNCTION
+    // Nous ne faisons plus d'INSERT côté client pour éviter la fraude et les problèmes de RLS.
 
-    // Ajouter customer_id seulement s'il est fourni (peut ne pas exister dans la table)
-    if (customerId) {
-      transactionData.customer_id = customerId;
-    }
+    logger.log(
+      'Initiating GeniusPay checkout via Edge Function (transaction will be created server-side)...'
+    );
 
-    const { data: transaction, error: transactionError } = await supabase
-      .from('transactions')
-      .insert([transactionData as never])
-      .select()
-      .single();
-
-    if (transactionError) {
-      logger.error('Error creating transaction:', {
-        error: transactionError,
-        code: transactionError.code,
-        message: transactionError.message,
-        details: transactionError.details,
-        hint: transactionError.hint,
-        storeId,
-        hasCustomerId: !!currentUserId,
-        productId,
-        amount,
-        currency,
-      });
-
-      // Afficher un message d'erreur plus détaillé
-      const errorMessage = transactionError.message || 'Erreur inconnue';
-      const errorHint = transactionError.hint || '';
-      const errorDetails = transactionError.details || '';
-
-      // Vérifier si l'erreur concerne une colonne manquante
-      const isColumnMissingError =
-        errorMessage.includes('column') &&
-        (errorMessage.includes('does not exist') || errorMessage.includes('schema cache'));
-
-      // Vérifier si l'erreur concerne des permissions RLS
-      const isPermissionError =
-        errorMessage.includes('permission denied') ||
-        errorMessage.includes('permission denied for table');
-
-      let userFriendlyMessage = `Impossible de créer la transaction: ${errorMessage}`;
-
-      if (isColumnMissingError) {
-        userFriendlyMessage += '\n\n💡 SOLUTION COMPLÈTE:\n';
-        userFriendlyMessage += '1. Ouvrez Supabase Dashboard → SQL Editor\n';
-        userFriendlyMessage += '2. Exécutez le script: FIX_ALL_TRANSACTIONS_COLUMNS.sql\n';
-        userFriendlyMessage += '   (Ce script ajoute TOUTES les colonnes manquantes)\n\n';
-        userFriendlyMessage += 'OU exécutez cette requête SQL directement:\n\n';
-        userFriendlyMessage +=
-          'ALTER TABLE public.transactions ADD COLUMN IF NOT EXISTS order_id UUID;\n';
-        userFriendlyMessage +=
-          'ALTER TABLE public.transactions ADD COLUMN IF NOT EXISTS store_id UUID;\n';
-        userFriendlyMessage +=
-          'ALTER TABLE public.transactions ADD COLUMN IF NOT EXISTS product_id UUID;\n';
-        userFriendlyMessage +=
-          "ALTER TABLE public.transactions ADD COLUMN IF NOT EXISTS currency TEXT DEFAULT 'XOF';\n\n";
-        userFriendlyMessage += '3. Rafraîchissez le cache: Settings → API → Refresh schema cache\n';
-        userFriendlyMessage += '4. Videz le cache du navigateur (Ctrl+Shift+R)\n\n';
-        userFriendlyMessage +=
-          '📁 Fichier complet: FIX_ALL_TRANSACTIONS_COLUMNS.sql dans le projet';
-      } else if (isPermissionError) {
-        userFriendlyMessage += '\n\n💡 SOLUTION PERMISSIONS RLS:\n';
-        userFriendlyMessage += '1. Ouvrez Supabase Dashboard → SQL Editor\n';
-        userFriendlyMessage += '2. Exécutez le script: FIX_RLS_PERMISSIONS.sql\n';
-        userFriendlyMessage += '   (Ce script corrige les permissions RLS)\n\n';
-        userFriendlyMessage += '3. Rafraîchissez le cache: Settings → API → Refresh schema cache\n';
-        userFriendlyMessage += '4. Videz le cache du navigateur (Ctrl+Shift+R)\n\n';
-        userFriendlyMessage += '📁 Fichier complet: FIX_RLS_PERMISSIONS.sql dans le projet';
-      }
-
-      if (errorHint) {
-        userFriendlyMessage += `\n\n💡 Indice: ${errorHint}`;
-      }
-
-      if (errorDetails) {
-        userFriendlyMessage += `\n\n📋 Détails: ${errorDetails}`;
-      }
-
-      logger.error('Transaction error details', {
-        error: transactionError,
-        code: transactionError.code,
-        message: transactionError.message,
-        storeId,
-        hasCustomerId: !!currentUserId,
-        productId,
-        isColumnMissingError,
-      });
-
-      // Utiliser GeniusPayValidationError au lieu de Error générique
-      throw new GeniusPayValidationError(userFriendlyMessage, {
-        transactionError,
-        storeId,
-        customerId: currentUserId,
-        productId,
-      });
-    }
-
-    logger.log('Transaction created:', transaction.id);
-
-    // 2. Log de création de transaction (non-bloquant)
+    // 2. Log de création de transaction temporaire (avant création serveur)
     try {
       await supabase.from('transaction_logs').insert([
         {
-          transaction_id: transaction.id,
-          event_type: 'created',
+          event_type: 'payment_initiated_frontend',
           status: 'pending',
           request_data: sanitizePaymentOptionsForAudit(
             options as unknown as Record<string, unknown>
@@ -335,7 +223,6 @@ export const initiateGeniusPayPayment = async (options: PaymentOptions) => {
 
     // GeniusPay limite metadata à 10 clés — le détail reste dans transactions.metadata
     const cleanMetadata = buildGeniusPayApiMetadata(metadata || {}, {
-      transactionId: transaction.id,
       storeId,
       productId,
       orderId,
@@ -356,10 +243,8 @@ export const initiateGeniusPayPayment = async (options: PaymentOptions) => {
       customer_email: customerEmail,
       customer_name: customerName,
       customer_phone: normalizedPhone,
-      return_url:
-        returnUrl || `${window.location.origin}/payment/success?transaction_id=${transaction.id}`,
-      cancel_url:
-        cancelUrl || `${window.location.origin}/checkout/cancel?transaction_id=${transaction.id}`,
+      return_url: returnUrl || `${window.location.origin}/payment/success`,
+      cancel_url: cancelUrl || `${window.location.origin}/checkout/cancel`,
       metadata: cleanMetadata,
     };
 
@@ -415,7 +300,10 @@ export const initiateGeniusPayPayment = async (options: PaymentOptions) => {
     }
 
     const checkoutUrl = geniuspayData.checkout_url;
-    const transactionId = geniuspayData.id || geniuspayData.transaction_id;
+    const geniuspayTransactionId = geniuspayData.id || geniuspayData.transaction_id;
+    // La transaction locale a été insérée par l'Edge Function et son ID est retourné ici
+    const localTransactionId = (geniuspayResponse as Record<string, unknown>)
+      ._local_transaction_id as string | undefined;
 
     if (!checkoutUrl) {
       logger.error('GeniusPay response missing checkout_url:', geniuspayResponse);
@@ -426,42 +314,38 @@ export const initiateGeniusPayPayment = async (options: PaymentOptions) => {
       );
     }
 
-    // 5. Mettre à jour la transaction avec les infos GeniusPay
-    const { error: updateError } = await supabase
-      .from('transactions')
-      .update({
-        geniuspay_transaction_id: transactionId,
-        geniuspay_checkout_url: checkoutUrl,
-        geniuspay_response: sanitizeGeniusPayApiResponse(geniuspayResponse) as Json,
-        status: 'processing',
-      })
-      .eq('id', transaction.id);
-
-    if (updateError) {
-      logger.error('Error updating transaction:', updateError);
+    if (!localTransactionId) {
+      logger.error('GeniusPay response missing _local_transaction_id:', geniuspayResponse);
+      // On continue quand même si localTransactionId manque, mais c'est anormal
     }
+
+    // 5. La mise à jour de la transaction est DÉJÀ FAITE côté Edge Function.
+    // L'Edge Function s'est occupée d'insérer le 'geniuspay_transaction_id' et 'geniuspay_checkout_url'.
 
     // 6. Log du paiement initié (non-bloquant)
     try {
-      await supabase.from('transaction_logs').insert([
-        {
-          transaction_id: transaction.id,
-          event_type: 'payment_initiated',
-          status: 'processing',
-          response_data: sanitizeGeniusPayApiResponse(geniuspayResponse) as Json,
-        },
-      ]);
+      if (localTransactionId) {
+        await supabase.from('transaction_logs').insert([
+          {
+            transaction_id: localTransactionId,
+            event_type: 'payment_initiated',
+            status: 'processing',
+            request_data: sanitizePaymentOptionsForAudit({
+              ...options,
+              geniuspay_transaction_id: geniuspayTransactionId,
+            }),
+          },
+        ]);
+      }
     } catch (_logError: unknown) {
-      // Ne pas bloquer le processus si le log échoue
-      logger.warn('Failed to insert payment initiated log (non-critical):', _logError);
+      logger.warn('Failed to insert transaction log (non-critical):', { error: _logError });
     }
 
-    // 7. Retourner les données pour redirection
     return {
       success: true,
-      transaction_id: transaction.id,
+      transaction_id: localTransactionId || null,
+      geniuspay_id: geniuspayTransactionId,
       checkout_url: checkoutUrl,
-      geniuspay_transaction_id: transactionId,
     };
   } catch (_error: unknown) {
     const geniuspayError = parseGeniusPayError(_error);
@@ -539,106 +423,26 @@ export const verifyTransactionStatus = async (transactionId: string) => {
     // Vérifier auprès de GeniusPay si on a un ID de transaction
     if (transaction.geniuspay_transaction_id) {
       try {
-        const geniuspayStatus = await geniuspayClient.verifyPayment(transaction.geniuspay_transaction_id);
+        // L'Edge Function va faire l'appel à GeniusPay ET mettre à jour la base de données
+        await geniuspayClient.verifyPayment(transaction.geniuspay_transaction_id);
 
-        // Mettre à jour selon le statut GeniusPay
-        const statusMap: Record<string, string> = {
-          completed: 'completed',
-          success: 'completed',
-          failed: 'failed',
-          pending: 'processing',
-          cancelled: 'cancelled',
-        };
-
-        const newStatus = statusMap[geniuspayStatus.status] || 'processing';
-
-        const updates: Record<string, unknown> = {
-          status: newStatus,
-          geniuspay_payment_method: geniuspayStatus.payment_method,
-          geniuspay_response: geniuspayStatus as unknown as Json,
-        };
-
-        if (newStatus === 'completed') {
-          updates.completed_at = new Date().toISOString();
-        } else if (newStatus === 'failed') {
-          updates.failed_at = new Date().toISOString();
-          updates.error_message = geniuspayStatus.error_message || 'Paiement échoué';
-        }
-
-        await supabase
+        // Refetch la transaction pour avoir les données à jour
+        const { data: updatedTransaction } = await supabase
           .from('transactions')
-          .update(updates as never)
-          .eq('id', transactionId);
+          .select('*')
+          .eq('id', transactionId)
+          .single();
 
-        // Mettre à jour la commande associée si elle existe
-        if (transaction.order_id) {
-          const orderUpdates: Record<string, unknown> = {
-            payment_status: newStatus,
-            updated_at: new Date().toISOString(),
-          };
-
-          if (newStatus === 'completed') {
-            orderUpdates.status = 'completed';
-          } else if (newStatus === 'failed') {
-            orderUpdates.status = 'pending';
-          } else if (newStatus === 'cancelled') {
-            orderUpdates.status = 'cancelled';
-          }
-
-          const { error: orderPaymentErr } = await supabase
-            .from('orders')
-            .update(orderUpdates as never)
-            .eq('id', transaction.order_id);
-          if (orderPaymentErr) {
-            logger.warn('Error updating order payment_status:', orderPaymentErr);
-          }
-        }
-
-        // Log de vérification
-        await supabase.from('transaction_logs').insert([
-          {
-            transaction_id: transactionId,
-            event_type: 'status_updated',
-            status: newStatus,
-            response_data: geniuspayStatus as unknown as Json,
-          },
-        ]);
-
-        // Envoyer des notifications si le statut a changé
-        if (newStatus === 'completed') {
-          const { notifyPaymentSuccess } = await import('./geniuspay-notifications');
-          await notifyPaymentSuccess({
-            transactionId,
-            storeId: transaction.store_id || undefined,
-            userId: transaction.customer_id || undefined,
-            customerEmail: transaction.customer_email || undefined,
-            customerName: transaction.customer_name || undefined,
-            amount: transaction.amount ?? 0,
-            currency: transaction.currency || 'XOF',
-            status: 'completed',
-            paymentMethod: transaction.geniuspay_payment_method || undefined,
-            orderId: transaction.order_id || undefined,
-          }).catch(err => logger.warn('Error sending payment success notification:', err));
-        } else if (newStatus === 'failed') {
-          const { notifyPaymentFailed } = await import('./geniuspay-notifications');
-          await notifyPaymentFailed({
-            transactionId,
-            storeId: transaction.store_id || undefined,
-            userId: transaction.customer_id || undefined,
-            customerEmail: transaction.customer_email || undefined,
-            customerName: transaction.customer_name || undefined,
-            amount: transaction.amount ?? 0,
-            currency: transaction.currency || 'XOF',
-            status: 'failed',
-            reason: typeof updates.error_message === 'string' ? updates.error_message : undefined,
-            orderId: transaction.order_id || undefined,
-          }).catch(err => logger.warn('Error sending payment failed notification:', err));
-        }
-
-        return { ...transaction, ...updates };
+        return updatedTransaction || transaction;
       } catch (verifyError) {
-        logger.error('Error verifying with GeniusPay:', { error: verifyError });
-        // Retourner la transaction actuelle si la vérification échoue
+        logger.error('Error verifying payment with GeniusPay:', verifyError);
+        // Si l'erreur vient de GeniusPay, on la remonte
+        if (
+          verifyError instanceof GeniusPayAPIError ||
+          verifyError instanceof GeniusPayNetworkError
+        ) {
+          throw verifyError;
+        }
         return transaction;
       }
     }
@@ -689,7 +493,9 @@ export const refundGeniusPayPayment = async (options: RefundOptions): Promise<Re
 
     const provider = transaction.payment_provider ?? 'geniuspay';
     const isGeniusPay =
-      provider === 'geniuspay' || provider === 'geniuspay_platform' || !transaction.payment_provider;
+      provider === 'geniuspay' ||
+      provider === 'geniuspay_platform' ||
+      !transaction.payment_provider;
     if (!isGeniusPay || !transaction.geniuspay_transaction_id) {
       throw new GeniusPayValidationError('Transaction is not a GeniusPay payment');
     }
@@ -702,7 +508,9 @@ export const refundGeniusPayPayment = async (options: RefundOptions): Promise<Re
     const remaining = txAmount - alreadyRefunded;
     const refundAmount = amount ?? remaining;
     if (refundAmount > remaining + 0.01) {
-      throw new GeniusPayValidationError('Refund amount cannot exceed remaining transaction amount');
+      throw new GeniusPayValidationError(
+        'Refund amount cannot exceed remaining transaction amount'
+      );
     }
 
     // Log de début de remboursement

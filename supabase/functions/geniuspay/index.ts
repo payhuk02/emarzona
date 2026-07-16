@@ -873,6 +873,7 @@ serve(async req => {
     let endpoint = '';
     let method = 'POST';
     let body = data;
+    let localTxId: string | undefined;
 
     // Route vers les différents endpoints GeniusPay
     switch (action) {
@@ -1060,9 +1061,63 @@ serve(async req => {
         // Construire metadata en incluant productId et storeId si présents
         // L'API GeniusPay n'accepte que des chaînes dans metadata
         const rawMetadata = validatedData.metadata || {};
+
+        // === CREATION DE LA TRANSACTION LOCALE SECURISEE ===
+        const supabaseUrlTx = Deno.env.get('SUPABASE_URL') ?? '';
+        const serviceKeyTx = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+        if (supabaseUrlTx && serviceKeyTx) {
+          const supabaseTx = createClient(supabaseUrlTx, serviceKeyTx);
+
+          const authHeader = req.headers.get('Authorization');
+          let userId = null;
+          if (authHeader) {
+            try {
+              const { data: { user } } = await supabaseTx.auth.getUser(authHeader.replace('Bearer ', ''));
+              userId = user?.id;
+            } catch (e) {
+              console.warn('[GeniusPay Edge Function] Failed to get user from token', e);
+            }
+          }
+
+          const txData = {
+            store_id: validatedData.storeId,
+            product_id: validatedData.productId || null,
+            order_id: validatedData.orderId || null,
+            user_id: userId || rawMetadata.userId || rawMetadata.customerId || null,
+            amount: validatedData.amount,
+            currency: validatedData.currency,
+            payment_provider: 'geniuspay',
+            status: 'pending',
+            customer_email: validatedData.customer_email,
+            customer_name: validatedData.customer_name || null,
+            customer_phone: validatedData.customer_phone || null,
+            metadata: rawMetadata
+          };
+
+          const { data: insertedTx, error: txError } = await supabaseTx
+            .from('transactions')
+            .insert([txData])
+            .select('id')
+            .single();
+
+          if (txError || !insertedTx) {
+            console.error('[GeniusPay Edge Function] Failed to create local transaction', txError);
+            return new Response(
+              JSON.stringify({ error: 'Erreur interne', message: 'Impossible de créer la transaction locale' }),
+              { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
+          localTxId = insertedTx.id;
+          console.log('[GeniusPay Edge Function] Local transaction created:', localTxId);
+        } else {
+          console.warn('[GeniusPay Edge Function] Missing Supabase credentials, skipping local transaction creation');
+        }
+        // ====================================================
+
         const metadata = limitGeniusPayMetadata(
           sanitizeGeniusPayMetadata({
             ...rawMetadata,
+            ...(localTxId ? { transaction_id: localTxId } : {}),
             ...(validatedData.productId ? { product_id: validatedData.productId } : {}),
             ...(validatedData.storeId ? { store_id: validatedData.storeId } : {}),
           })
@@ -1082,6 +1137,29 @@ serve(async req => {
             { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
           );
         }
+        
+        let returnUrlStr = validatedData.return_url;
+        let cancelUrlStr = validatedData.cancel_url;
+
+        if (localTxId) {
+          try {
+            const returnUrl = new URL(validatedData.return_url);
+            returnUrl.searchParams.set('transaction_id', localTxId);
+            returnUrlStr = returnUrl.toString();
+          } catch (e) {
+            returnUrlStr = validatedData.return_url + (validatedData.return_url.includes('?') ? '&' : '?') + `transaction_id=${localTxId}`;
+          }
+
+          if (cancelUrlStr) {
+            try {
+              const curl = new URL(cancelUrlStr);
+              curl.searchParams.set('transaction_id', localTxId);
+              cancelUrlStr = curl.toString();
+            } catch (e) {
+              cancelUrlStr = cancelUrlStr + (cancelUrlStr.includes('?') ? '&' : '?') + `transaction_id=${localTxId}`;
+            }
+          }
+        }
 
         const customerCountry =
           (validatedData.metadata?.customerCountry as string | undefined) ||
@@ -1100,8 +1178,8 @@ serve(async req => {
             last_name: lastName,
             ...(customerPhone && { phone: customerPhone }),
           },
-          return_url: validatedData.return_url,
-          ...(validatedData.cancel_url && { cancel_url: validatedData.cancel_url }),
+          return_url: returnUrlStr,
+          ...(cancelUrlStr && { cancel_url: cancelUrlStr }),
           metadata: metadata,
           // methods est optionnel
           ...(validatedData.methods && { methods: validatedData.methods }),
@@ -1330,6 +1408,15 @@ serve(async req => {
     }
 
     if (!geniuspayResponse.ok) {
+      if (localTxId && action === 'create_checkout') {
+        const supabaseUrlTx = Deno.env.get('SUPABASE_URL') ?? '';
+        const serviceKeyTx = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+        if (supabaseUrlTx && serviceKeyTx) {
+          const supabaseTx = createClient(supabaseUrlTx, serviceKeyTx);
+          await supabaseTx.from('transactions').update({ status: 'failed' }).eq('id', localTxId);
+        }
+      }
+
       const geniuspayErrorMessage =
         responseData?.message ||
         responseData?.error ||
@@ -1358,6 +1445,32 @@ serve(async req => {
     }
 
     console.log('GeniusPay response success:', { action, status: geniuspayResponse.status });
+
+    if (action === 'create_checkout' && localTxId && responseData) {
+      const gpId = responseData.data?.id || responseData.id || responseData.data?.transaction_id;
+      const gpUrl = responseData.data?.checkout_url || responseData.checkout_url || responseData.data?.url;
+      
+      const supabaseUrlTx = Deno.env.get('SUPABASE_URL') ?? '';
+      const serviceKeyTx = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+      if (supabaseUrlTx && serviceKeyTx && gpId) {
+        const supabaseTx = createClient(supabaseUrlTx, serviceKeyTx);
+        
+        const { error: updateErr } = await supabaseTx.from('transactions').update({
+          geniuspay_transaction_id: gpId,
+          geniuspay_checkout_url: gpUrl,
+          geniuspay_response: responseData,
+          status: 'processing'
+        }).eq('id', localTxId);
+        
+        if (updateErr) {
+          console.error('[GeniusPay Edge Function] Failed to update local transaction with GeniusPay details', updateErr);
+        }
+      }
+      
+      if (typeof responseData === 'object') {
+        responseData._local_transaction_id = localTxId;
+      }
+    }
 
     return new Response(JSON.stringify({ success: true, data: responseData }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

@@ -554,67 +554,35 @@ export const useCreateServiceOrder = () => {
         });
       });
 
-      // 7. Calculer le prix (peut dépendre du nombre de participants ou de la durée)
-      let totalPrice = product.promotional_price || product.price;
-
-      // Si pricing_type est 'per_participant', multiplier par le nombre de participants
-      if (serviceProduct.pricing_type === 'per_participant') {
-        totalPrice *= numberOfParticipants;
-      }
-
-      // Si pricing_type est 'per_hour', calculer selon la durée
-      if (serviceProduct.pricing_type === 'per_hour') {
-        const hours = actualDuration / 60;
-        totalPrice *= hours;
-      }
-
-      // Calculer le montant à payer selon le type de paiement
-      let amountToPay = totalPrice;
-      let percentagePaid = 0;
-      let remainingAmount = 0;
-
-      if (paymentType === 'percentage') {
-        // Paiement partiel : calculer l'acompte
-        amountToPay = Math.round((totalPrice * percentageRate) / 100);
-        percentagePaid = amountToPay;
-        remainingAmount = totalPrice - amountToPay;
-      } else if (paymentType === 'delivery_secured') {
-        // Paiement sécurisé : montant total mais retenu en escrow
-        amountToPay = totalPrice;
-      }
-      // Si 'full', amountToPay = totalPrice (déjà défini)
-
-      // Appliquer la carte cadeau si applicable
-      const finalAmountToPay = Math.max(0, amountToPay - (giftCardAmount || 0));
-
-      // 8. Générer un numéro de commande
-      const orderNumber = await generateOrderNumber();
-
-      // 9. Créer la commande (avec payment_type)
-      // Récupérer le cookie d'affiliation s'il existe
+      // 7. Créer la commande via RPC sécurisée
       const affiliateTrackingCookie = getAffiliateTrackingCookie();
 
-      const { data: order, error: orderError } = await supabase
-        .from('orders')
-        .insert({
-          store_id: storeId,
-          customer_id: customerId,
-          order_number: orderNumber,
-          total_amount: totalPrice - (giftCardAmount || 0), // Montant final après gift card
-          currency: product.currency,
-          payment_status: 'pending',
-          status: 'pending',
-          payment_type: paymentType,
-          percentage_paid: percentagePaid,
-          remaining_amount: remainingAmount,
-          affiliate_tracking_cookie: affiliateTrackingCookie,
-        })
-        .select(
-          'id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at'
-        )
-        .single();
+      const serviceMetadata = {
+        booking_date: bookingDateTime,
+        duration_minutes: actualDuration,
+        number_of_participants: numberOfParticipants,
+        staff_id: staffId,
+        notes,
+      };
 
-      if (orderError || !order) {
+      const { data: rpcResult, error: orderError } = await supabase.rpc(
+        'create_public_service_order',
+        {
+          p_product_id: productId,
+          p_store_id: storeId,
+          p_customer_email: customerEmail,
+          p_customer_name: customerName || customerEmail.split('@')[0],
+          p_customer_phone: customerPhone,
+          p_service_metadata: serviceMetadata,
+          p_gift_card_id: giftCardId,
+          p_gift_card_amount_requested: giftCardAmount || 0,
+          p_coupon_code: undefined, // Pas de support couponCode direct dans les options
+          p_affiliate_tracking_cookie: affiliateTrackingCookie,
+          p_guest_checkout: !authData?.user?.id,
+        }
+      );
+
+      if (orderError || !rpcResult) {
         // Annuler le booking en cas d'erreur
         await supabase
           .from('service_bookings')
@@ -624,37 +592,26 @@ export const useCreateServiceOrder = () => {
         throw new Error('Erreur lors de la création de la commande');
       }
 
-      // 9a. Rédimer la carte cadeau si applicable (APRÈS création commande)
-      if (giftCardId && giftCardAmount && giftCardAmount > 0) {
-        try {
-          const { data: redeemResult, error: redeemError } = await supabase.rpc(
-            'redeem_gift_card',
-            {
-              p_gift_card_id: giftCardId,
-              p_order_id: order.id,
-              p_amount: giftCardAmount,
-            }
-          );
+      const orderData = rpcResult as unknown as {
+        order_id: string;
+        order_item_id: string;
+        order_number: string;
+        customer_id: string;
+        total_amount: number;
+      };
 
-          if (redeemError) {
-            logger.error('Error redeeming gift card:', redeemError);
-            // Ne pas bloquer la commande
-          } else if (redeemResult && redeemResult.length > 0 && !redeemResult[0].success) {
-            logger.error('Gift card redemption failed:', redeemResult[0].message);
-            // Ne pas bloquer la commande
-          }
-        } catch (giftCardError) {
-          logger.error('Error in gift card redemption:', giftCardError);
-          // Ne pas bloquer la commande
-        }
-      }
+      const finalAmountToPay = orderData.total_amount;
+      const orderId = orderData.order_id;
+      const orderNumber = orderData.order_number;
+      const customerId = orderData.customer_id;
+      const orderItemId = orderData.order_item_id;
 
       // 9b. Créer automatiquement la facture
       try {
         const { data: invoiceId, error: invoiceError } = await supabase.rpc(
           'create_invoice_from_order',
           {
-            p_order_id: order.id,
+            p_order_id: orderId,
           }
         );
 
@@ -671,54 +628,24 @@ export const useCreateServiceOrder = () => {
 
       // 10. Déclencher webhook order.created (asynchrone, ne bloque pas)
       import('@/lib/webhooks').then(({ triggerOrderCreatedWebhook }) => {
-        triggerOrderCreatedWebhook(order.id, {
-          store_id: order.store_id,
-          customer_id: order.customer_id,
-          order_number: order.order_number,
-          status: order.status,
-          total_amount: order.total_amount,
-          currency: order.currency,
-          payment_status: order.payment_status,
-          created_at: order.created_at,
+        triggerOrderCreatedWebhook(orderId, {
+          store_id: storeId,
+          customer_id: customerId,
+          order_number: orderNumber,
+          status: 'pending',
+          total_amount: finalAmountToPay,
+          currency: product.currency,
+          payment_status: 'pending',
+          created_at: new Date().toISOString(),
         }).catch(err => {
-          logger.error('Error in analytics tracking for order', { error: err, orderId: order.id });
+          logger.error('Error in analytics tracking for order', { error: err, orderId: orderId });
         });
       });
-
-      // 11. Créer l'order_item avec les références spécialisées
-      const { data: orderItem, error: orderItemError } = await insertOrderItem({
-        order_id: order.id,
-        product_id: productId,
-        product_type: 'service',
-        service_product_id: serviceProductId,
-        booking_id: booking.id,
-        product_name: product.name,
-        quantity: 1,
-        unit_price: totalPrice,
-        total_price: totalPrice,
-        item_metadata: {
-          booking_date: bookingDateTime,
-          duration_minutes: actualDuration,
-          number_of_participants: numberOfParticipants,
-          staff_id: staffId,
-          notes,
-        },
-      });
-
-      if (orderItemError || !orderItem) {
-        // Annuler le booking
-        await supabase
-          .from('service_bookings')
-          .update({ status: 'cancelled' })
-          .eq('id', booking.id);
-
-        throw new Error("Erreur lors de la création de l'élément de commande");
-      }
 
       // 11. Créer un secured_payment si paiement escrow
       if (paymentType === 'delivery_secured') {
         await supabase.from('secured_payments').insert({
-          order_id: order.id,
+          order_id: orderId,
           total_amount: totalPrice,
           held_amount: amountToPay,
           status: 'held',
@@ -749,7 +676,7 @@ export const useCreateServiceOrder = () => {
       const paymentResult = await initiatePayment({
         storeId,
         productId,
-        orderId: order.id,
+        orderId: orderId,
         customerId,
         amount: finalAmountToPay,
         currency: product.currency,
@@ -764,7 +691,7 @@ export const useCreateServiceOrder = () => {
           booking_date: bookingDateTime,
           duration_minutes: actualDuration,
           number_of_participants: numberOfParticipants,
-          order_item_id: orderItem.id,
+          order_item_id: orderItemId,
           payment_type: paymentType,
           percentage_rate: paymentType === 'percentage' ? percentageRate : null,
           total_price: totalPrice,
@@ -785,8 +712,8 @@ export const useCreateServiceOrder = () => {
 
       // 13. Retourner le résultat
       return {
-        orderId: order.id,
-        orderItemId: orderItem.id,
+        orderId: orderId,
+        orderItemId: orderItemId,
         bookingId: booking.id,
         checkoutUrl: paymentResult.checkout_url,
         transactionId: paymentResult.transaction_id,

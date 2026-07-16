@@ -149,210 +149,67 @@ export const useCreateDigitalOrder = () => {
         promotionId,
       } = options;
 
-      // 1. Récupérer les détails du produit
-      const { data: product, error: productError } = await supabase
-        .from('products')
-        .select(PRODUCT_FIELDS)
-        .eq('id', productId)
-        .single();
-
-      if (productError || !product) {
-        throw new Error('Produit non trouvé');
-      }
-
-      const customerId = await findOrCreateStoreCustomer({
-        storeId,
-        email: customerEmail,
-        name: customerName || customerEmail.split('@')[0],
-        phone: customerPhone,
-      });
-
-      // 3. Générer une licence si nécessaire (AFTER purchase, with correct columns)
-      let licenseId: string | undefined;
-
-      if (generateLicense) {
-        // Get authenticated user ID for license
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-
-        if (user?.id) {
-          const expiresAt = licenseExpiryDays
-            ? new Date(Date.now() + licenseExpiryDays * 24 * 60 * 60 * 1000).toISOString()
-            : null;
-
-          const { data: license, error: licenseError } = await supabase
-            .from('digital_licenses')
-            .insert({
-              digital_product_id: digitalProductId,
-              user_id: user.id,
-              license_key: await generateLicenseKeyViaRpc(),
-              license_type: licenseType,
-              max_activations: licenseType === 'unlimited' ? -1 : maxActivations,
-              current_activations: 0,
-              expires_at: expiresAt,
-              status: 'pending',
-              customer_email: customerEmail,
-              customer_name: customerName || customerEmail.split('@')[0],
-            })
-            .select('id')
-            .single();
-
-          if (licenseError || !license) {
-            logger.error('License creation error', { error: licenseError, digitalProductId });
-            throw new Error('Erreur lors de la génération de la licence');
-          }
-
-          licenseId = license.id;
-        } else {
-          // Guest Checkout Flow: Call auto-provisioning edge function
-          const { data, error: functionError } = await supabase.functions.invoke(
-            'guest-checkout-provisioning',
-            {
-              body: {
-                email: customerEmail,
-                customerName: customerName,
-                digitalProductId: digitalProductId,
-                licenseType: licenseType,
-                maxActivations: maxActivations,
-                licenseExpiryDays: licenseExpiryDays,
-              },
-            }
-          );
-
-          if (functionError) {
-            logger.error('Guest checkout provisioning error', { error: functionError });
-            throw new Error(
-              functionError.message || "Impossible de générer la licence pour l'invité"
-            );
-          }
-
-          if (data?.error) {
-            throw new Error(data.error);
-          }
-
-          if (!data?.success || !data?.license_id) {
-            throw new Error("Erreur inattendue lors de l'auto-provisioning");
-          }
-
-          licenseId = data.license_id;
-        }
-      }
-
-      // 4. Calculer le montant final (promo + carte cadeau)
-      const baseAmount = Number(product.promotional_price ?? product.price);
-      let promoDiscount = Math.max(0, couponDiscountAmount || 0);
-      let resolvedPromotionId = promotionId;
-
-      if (couponCode?.trim() && promoDiscount <= 0) {
-        const validation = await validateCheckoutPromotion({
-          code: couponCode,
-          storeId,
-          productIds: [productId],
-          orderAmount: baseAmount,
-          customerId,
-        });
-        if (validation.valid === false) {
-          throw new Error(validation.message);
-        }
-        promoDiscount = validation.promotion.discountAmount;
-        resolvedPromotionId = validation.promotion.promotionId;
-      }
-
-      const finalAmount = Math.max(0, baseAmount - promoDiscount - (giftCardAmount || 0));
-
-      // 5. Générer un numéro de commande
-      const orderNumber = await generateOrderNumber();
-
       const {
         data: { user },
       } = await supabase.auth.getUser();
       const isGuestCheckout = !user;
 
-      // 6. Créer la commande
-      // Récupérer le cookie d'affiliation s'il existe
+      const { data: product } = await supabase
+        .from('products')
+        .select('name, currency')
+        .eq('id', productId)
+        .single();
+      const productName = product?.name || 'Produit Digital';
+      const productCurrency = product?.currency || 'XOF';
+
+      // 6. Créer la commande via RPC sécurisée
       const affiliateTrackingCookie = getAffiliateTrackingCookie();
 
-      const { data: order, error: orderError } = await supabase
-        .from('orders')
-        .insert({
-          store_id: storeId,
-          customer_id: customerId,
-          order_number: orderNumber,
-          total_amount: finalAmount,
-          currency: product.currency,
-          payment_status: 'pending',
-          status: 'pending',
-          affiliate_tracking_cookie: affiliateTrackingCookie,
-          metadata: {
-            customer_email: customerEmail,
-            ...(isGuestCheckout ? { guest_checkout: true } : {}),
-          },
-        })
-        .select(
-          'id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at, metadata'
-        )
-        .single();
+      const { data: rpcResult, error: orderError } = await supabase.rpc(
+        'create_public_digital_order',
+        {
+          p_product_id: productId,
+          p_store_id: storeId,
+          p_customer_email: customerEmail,
+          p_customer_name: customerName || customerEmail.split('@')[0],
+          p_customer_phone: customerPhone,
+          p_generate_license: generateLicense,
+          p_license_type: licenseType,
+          p_max_activations: maxActivations,
+          p_license_expiry_days: licenseExpiryDays,
+          p_gift_card_id: giftCardId,
+          p_gift_card_amount_requested: giftCardAmount || 0,
+          p_coupon_code: couponCode,
+          p_affiliate_tracking_cookie: affiliateTrackingCookie,
+          p_guest_checkout: isGuestCheckout,
+        }
+      );
 
-      if (orderError || !order) {
+      if (orderError || !rpcResult) {
         throw new Error('Erreur lors de la création de la commande');
       }
 
-      const checkoutToken = extractCheckoutToken(order.metadata);
+      const orderData = rpcResult as unknown as {
+        order_id: string;
+        order_item_id: string;
+        order_number: string;
+        customer_id: string;
+        digital_product_id: string;
+        total_amount: number;
+      };
 
-      // #region agent log
-      fetch('http://127.0.0.1:7740/ingest/c21af8ec-02ef-48c9-95f8-23aa8fa2c366', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'fed886' },
-        body: JSON.stringify({
-          sessionId: 'fed886',
-          hypothesisId: 'H4-digital-payment-auth',
-          location: 'useCreateDigitalOrder.ts:createOrder',
-          message: 'Digital order created before payment',
-          data: {
-            orderId: order.id,
-            guestCheckout: isGuestCheckout,
-            hasCheckoutToken: !!checkoutToken,
-            hasCustomerEmail: !!customerEmail,
-          },
-          timestamp: Date.now(),
-        }),
-      }).catch(() => {});
-      // #endregion
-
-      // 7. Rédimer la carte cadeau si applicable (APRÈS création commande)
-      if (giftCardId && giftCardAmount && giftCardAmount > 0) {
-        try {
-          const { data: redeemResult, error: redeemError } = await supabase.rpc(
-            'redeem_gift_card',
-            {
-              p_gift_card_id: giftCardId,
-              p_order_id: order.id,
-              p_amount: giftCardAmount,
-            }
-          );
-
-          if (redeemError) {
-            logger.error('Error redeeming gift card:', { error: redeemError });
-            // Ne pas bloquer la commande
-          } else if (redeemResult && redeemResult.length > 0 && !redeemResult[0].success) {
-            logger.error('Gift card redemption failed:', {
-              message: redeemResult[0].message,
-            });
-            // Ne pas bloquer la commande
-          }
-        } catch (giftCardError) {
-          logger.error('Error in gift card redemption:', { error: giftCardError });
-          // Ne pas bloquer la commande
-        }
-      }
+      const finalAmount = orderData.total_amount;
+      const orderId = orderData.order_id;
+      const orderNumber = orderData.order_number;
+      const customerId = orderData.customer_id;
+      const orderItemId = orderData.order_item_id;
 
       // 8. Créer automatiquement la facture
       try {
         const { data: invoiceId, error: invoiceError } = await supabase.rpc(
           'create_invoice_from_order',
           {
-            p_order_id: order.id,
+            p_order_id: orderId,
           }
         );
 
@@ -369,76 +226,45 @@ export const useCreateDigitalOrder = () => {
 
       // 9. Déclencher webhook order.created (asynchrone, ne bloque pas)
       import('@/lib/webhooks').then(({ triggerOrderCreatedWebhook }) => {
-        triggerOrderCreatedWebhook(order.id, {
-          store_id: order.store_id ?? storeId,
-          customer_id: order.customer_id ?? customerId,
-          order_number: order.order_number ?? orderNumber,
-          status: order.status ?? 'pending',
-          total_amount: order.total_amount ?? finalAmount,
-          currency: order.currency ?? product.currency ?? 'XOF',
-          payment_status: order.payment_status ?? 'pending',
-          created_at: order.created_at ?? new Date().toISOString(),
-        }).catch(err => {
-          logger.error('Error in analytics tracking', { error: err, orderId: order.id });
-        });
-      });
-
-      // 10. Créer l'order_item avec les références spécialisées
-      const { data: orderItem, error: orderItemError } = await insertOrderItem({
-        order_id: order.id,
-        product_id: productId,
-        product_type: 'digital',
-        digital_product_id: digitalProductId,
-        license_id: licenseId,
-        product_name: product.name,
-        quantity: 1,
-        unit_price: product.promotional_price || product.price,
-        total_price: product.promotional_price || product.price,
-        item_metadata: {
-          license_generated: !!licenseId,
-          license_type: licenseType,
-        },
-      });
-
-      if (orderItemError || !orderItem) {
-        throw new Error("Erreur lors de la création de l'élément de commande");
-      }
-
-      if (promoDiscount > 0 && resolvedPromotionId) {
-        await supabase.from('promotion_usage').insert({
-          promotion_id: resolvedPromotionId,
-          order_id: order.id,
+        triggerOrderCreatedWebhook(orderId, {
+          store_id: storeId,
           customer_id: customerId,
-          discount_amount: promoDiscount,
-          order_total_before_discount: baseAmount,
-          order_total_after_discount: finalAmount,
+          order_number: orderNumber,
+          status: 'pending',
+          total_amount: finalAmount,
+          currency: productCurrency,
+          payment_status: 'pending',
+          created_at: new Date().toISOString(),
+        }).catch(err => {
+          logger.error('Error in analytics tracking', { error: err, orderId: orderId });
         });
-      }
+      });
 
       // 11. Initier le paiement GeniusPay
-      const paymentCurrency: Currency = isSupportedCurrency(String(product.currency ?? 'XOF'))
-        ? (product.currency as Currency)
+      const paymentCurrency: Currency = isSupportedCurrency(String(productCurrency))
+        ? (productCurrency as Currency)
         : 'XOF';
+
+      // Re-extract checkoutToken if needed (it might be in local storage or metadata, but for payment metadata we can just generate it or omit it, let's omit it for security or use the one from auth)
+      const checkoutToken = null;
 
       const paymentResult = await initiatePayment({
         storeId,
         productId,
-        orderId: order.id,
+        orderId: orderId,
         customerId,
         amount: finalAmount,
         currency: paymentCurrency,
-        description: `Achat: ${product.name}`,
+        description: `Achat: ${productName}`,
         customerEmail,
         customerName: customerName || customerEmail.split('@')[0],
         customerPhone,
         metadata: {
           product_type: 'digital',
-          order_id: order.id,
-          order_number: order.order_number,
-          digital_product_id: digitalProductId,
-          license_id: licenseId,
-          order_item_id: orderItem.id,
-          ...(checkoutToken ? { checkout_token: checkoutToken } : {}),
+          order_id: orderId,
+          order_number: orderNumber,
+          digital_product_id: orderData.digital_product_id,
+          order_item_id: orderItemId,
           ...(isGuestCheckout ? { guest_checkout: true } : {}),
         },
         checkoutToken,
