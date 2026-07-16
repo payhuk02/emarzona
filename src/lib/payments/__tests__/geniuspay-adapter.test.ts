@@ -23,7 +23,7 @@ describe('createGeniusPayPlatformPayment', () => {
       success: true,
       transaction_id: 'tx-1',
       checkout_url: 'https://pay',
-      geniuspay_transaction_id: 'm-1',
+      geniuspay_id: 'm-1',
     });
 
     const result = await createGeniusPayPlatformPayment({
@@ -54,7 +54,7 @@ describe('createGeniusPayPlatformPayment', () => {
       success: true,
       transaction_id: 'tx-2',
       checkout_url: 'https://pay/2',
-      geniuspay_transaction_id: 'm-2',
+      geniuspay_id: 'm-2',
     });
 
     const result = await createGeniusPayPlatformPayment({
