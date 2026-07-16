@@ -26,17 +26,7 @@ CREATE TABLE IF NOT EXISTS public.email_templates (
   click_rate numeric DEFAULT 0,
   created_by uuid,
   created_at timestamptz NOT NULL DEFAULT now(),
-  updated_at timestamptz NOT NULL DEFAULT now()
 );
-
-ALTER TABLE public.email_templates ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
-ALTER TABLE public.email_campaigns ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
-ALTER TABLE public.email_sequences ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
-ALTER TABLE public.email_segments ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
-ALTER TABLE public.email_logs ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
-ALTER TABLE public.email_workflows ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
-ALTER TABLE public.email_ab_tests ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
-ALTER TABLE public.email_unsubscribes ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
 
 ALTER TABLE public.email_templates ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Store owners manage email templates" ON public.email_templates;
@@ -428,5 +418,15 @@ ALTER TABLE public.email_workflows ADD COLUMN IF NOT EXISTS error_count integer 
 ALTER TABLE public.email_workflows ADD COLUMN IF NOT EXISTS last_executed_at timestamptz;
 ALTER TABLE public.email_workflows ADD COLUMN IF NOT EXISTS created_by uuid;
 
--- 3. Reload the schema cache so the API recognizes the tables and new columns
+-- 3. Ensure store_id exists on all tables (if they were created in an older schema)
+ALTER TABLE public.email_templates ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
+ALTER TABLE public.email_campaigns ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
+ALTER TABLE public.email_sequences ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
+ALTER TABLE public.email_segments ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
+ALTER TABLE public.email_logs ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
+ALTER TABLE public.email_workflows ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
+ALTER TABLE public.email_ab_tests ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
+ALTER TABLE public.email_unsubscribes ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
+
+-- 4. Reload the schema cache so the API recognizes the tables and new columns
 NOTIFY pgrst, 'reload schema';
