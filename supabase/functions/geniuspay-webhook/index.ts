@@ -224,8 +224,11 @@ serve(async req => {
       .single();
 
     if (findError) {
-      console.error('Transaction not found:', findError);
-      throw new Error('Transaction not found');
+      console.warn('Transaction not found:', transaction_id, 'Ignoring to prevent retries (might be a test payload).');
+      return new Response(JSON.stringify({ success: true, message: 'Transaction not found (ignored)' }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     // Map GeniusPay status to our status
