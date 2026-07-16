@@ -1,0 +1,9 @@
+{
+  "action": "create_checkout",
+  "data": {
+    "storeId": "d82c1b86-3026-49ca-909c-19a02082f871",
+    "productId": "7f43f9e6-978b-4354-97da-78f0095be507",
+    "amount": 3500,
+    "currency": "XOF"
+  }
+}

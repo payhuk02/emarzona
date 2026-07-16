@@ -121,7 +121,7 @@ class GeniusPayClient {
             const checkoutToken =
               typeof metadata?.checkout_token === 'string' ? metadata.checkout_token : undefined;
 
-            const result = await supabase.functions.invoke('geniuspay', {
+            const result = await supabase.functions.invoke(`geniuspay?t=${Date.now()}`, {
               body: { action, data: payload },
               signal: controller.signal,
               headers: checkoutToken ? { 'x-checkout-token': checkoutToken } : undefined,
@@ -291,7 +291,11 @@ class GeniusPayClient {
           throw new GeniusPayValidationError(errorMessage);
         }
 
-        throw new GeniusPayAPIError(errorMessage, statusCode, typedResponse.details || typedResponse);
+        throw new GeniusPayAPIError(
+          errorMessage,
+          statusCode,
+          typedResponse.details || typedResponse
+        );
       }
 
       // Succès : retourner les données

@@ -14,13 +14,17 @@ export async function extractErrorBody(error: unknown): Promise<Record<string, u
   // Méthode 1: error.context peut être une Response
   if (supabaseError?.context instanceof Response) {
     try {
-      const responseText = await supabaseError.context.text();
-      try {
-        const parsed = JSON.parse(responseText);
-        logger.debug('[GeniusPayErrorExtractor] Extracted error body from context Response');
-        return parsed;
-      } catch {
-        return { raw: responseText };
+      const response = supabaseError.context;
+      if (!response.bodyUsed) {
+        const responseText = await response.clone().text();
+        try {
+          return JSON.parse(responseText);
+        } catch {
+          return { raw: responseText };
+        }
+      } else {
+        logger.warn('[GeniusPayErrorExtractor] Response body already consumed by supabase-js.');
+        return null;
       }
     } catch (e) {
       logger.warn('[GeniusPayErrorExtractor] Could not read context Response:', e);
@@ -145,6 +149,7 @@ export function extractDetailedMessage(
 ): string {
   if (
     errorDetails.message &&
+    typeof errorDetails.message === 'string' &&
     !errorDetails.message.includes('non-2xx') &&
     !errorDetails.message.includes('Edge Function returned')
   ) {
@@ -163,6 +168,19 @@ export function extractDetailedMessage(
     }
     if (typeof detailsObj.error === 'string' && detailsObj.error) {
       return detailsObj.error;
+    }
+    if (typeof detailsObj.error === 'object' && detailsObj.error !== null) {
+      const errObj = detailsObj.error as Record<string, unknown>;
+      if (typeof errObj.message === 'string' && errObj.message) {
+        return errObj.message;
+      }
+    }
+  }
+
+  if (errorDetails.message && typeof errorDetails.message === 'object') {
+    const msgObj = errorDetails.message as Record<string, unknown>;
+    if (typeof msgObj.message === 'string' && msgObj.message) {
+      return msgObj.message;
     }
   }
 

@@ -16,6 +16,7 @@ import { logger } from './logger';
  */
 const ALLOWED_PAYMENT_DOMAINS = [
   'geniuspay.io',
+  'geniuspay.ci',
   'emarzona.com',
   'myemarzona.shop', // Domaine dédié aux boutiques
   'emarzona.vercel.app',
@@ -73,7 +74,7 @@ export function validateRedirectUrl(url: string): ValidationResult {
   }
 
   // 2. Parser l'URL
-  let  parsedUrl: URL;
+  let parsedUrl: URL;
   try {
     parsedUrl = new URL(url);
   } catch (error) {
@@ -220,9 +221,3 @@ export function addAllowedDomain(domain: string): void {
 export function getAllowedDomains(): readonly string[] {
   return Object.freeze([...ALLOWED_PAYMENT_DOMAINS]);
 }
-
-
-
-
-
-

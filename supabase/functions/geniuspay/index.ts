@@ -1005,9 +1005,9 @@ serve(async req => {
           );
         }
 
-        // Endpoint correct selon la documentation GeniusPay : /payments/initialize
+        // Endpoint correct selon la documentation GeniusPay
         // Documentation : https://docs.geniuspay.io/
-        endpoint = '/payments/initialize';
+        endpoint = '/payments';
         method = 'POST';
         // Formater les données selon le format attendu par GeniusPay
         // Documentation GeniusPay : customer doit avoir first_name et last_name séparés
@@ -1185,6 +1185,7 @@ serve(async req => {
         method,
         headers: {
           Authorization: `Bearer ${geniuspayApiKey}`,
+          'X-API-Key': geniuspayApiKey,
           'Content-Type': 'application/json',
           Accept: 'application/json', // Requis selon la documentation GeniusPay
         },
