@@ -963,7 +963,7 @@ serve(async req => {
             validatedData.amount,
             checkoutToken
           );
-          if (!checkoutAuth.ok) {
+          if (checkoutAuth.ok === false) {
             return new Response(
               JSON.stringify({
                 error: 'Accès checkout refusé',
