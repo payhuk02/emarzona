@@ -77,8 +77,8 @@ vi.mock('@/hooks/orders/useCreateArtistOrder', () => ({
   })),
 }));
 
-vi.mock('@/lib/moneroo-payment', () => ({
-  initiateMonerooPayment: vi.fn().mockResolvedValue({
+vi.mock('@/lib/geniuspay-payment', () => ({
+  initiateGeniusPayPayment: vi.fn().mockResolvedValue({
     success: true,
     checkout_url: 'https://checkout.example.com/generic',
     transaction_id: 'tx-123',

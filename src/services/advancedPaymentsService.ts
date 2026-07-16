@@ -22,12 +22,12 @@ interface RawTransaction {
   customer_id?: string | null;
   customer_name?: string | null;
   customer_email?: string | null;
-  moneroo_payment_method?: string | null;
+  geniuspay_payment_method?: string | null;
   amount: number | null;
   currency?: string | null;
   status?: string | null;
   metadata?: Record<string, unknown> | null;
-  moneroo_transaction_id?: string | null;
+  geniuspay_transaction_id?: string | null;
   error_message?: string | null;
   created_at: string;
   updated_at: string;
@@ -117,12 +117,12 @@ export async function normalizeTransaction(transaction: RawTransaction, storeId:
     store_id: transaction.store_id,
     order_id: transaction.order_id || undefined,
     customer_id: transaction.customer_id || undefined,
-    payment_method: transaction.moneroo_payment_method || 'moneroo',
+    payment_method: transaction.geniuspay_payment_method || 'geniuspay',
     amount: Number(transaction.amount || 0),
     currency: transaction.currency || 'XOF',
     status,
     payment_type: paymentType,
-    transaction_id: transaction.moneroo_transaction_id || transaction.id,
+    transaction_id: transaction.geniuspay_transaction_id || transaction.id,
     notes: transaction.error_message || undefined,
     customers: customerData,
     orders: orderData || undefined,
@@ -170,7 +170,7 @@ export async function fetchAndMergePayments(
   let transactionsQuery = supabase
     .from('transactions')
     .select(
-      'id,store_id,order_id,customer_id,customer_name,customer_email,moneroo_payment_method,amount,currency,status,metadata,moneroo_transaction_id,error_message,created_at,updated_at'
+      'id,store_id,order_id,customer_id,customer_name,customer_email,geniuspay_payment_method,amount,currency,status,metadata,geniuspay_transaction_id,error_message,created_at,updated_at'
     )
     .eq('store_id', storeId)
     .order('created_at', { ascending: false });
@@ -183,7 +183,7 @@ export async function fetchAndMergePayments(
   if (filters?.date_to) transactionsQuery = transactionsQuery.lte('created_at', filters.date_to);
   if (filters?.search) {
     transactionsQuery = transactionsQuery.or(
-      `moneroo_transaction_id.ilike.%${filters.search}%,customer_email.ilike.%${filters.search}%,customer_name.ilike.%${filters.search}%,error_message.ilike.%${filters.search}%`
+      `geniuspay_transaction_id.ilike.%${filters.search}%,customer_email.ilike.%${filters.search}%,customer_name.ilike.%${filters.search}%,error_message.ilike.%${filters.search}%`
     );
   }
 

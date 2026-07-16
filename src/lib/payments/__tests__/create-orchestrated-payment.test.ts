@@ -11,8 +11,8 @@ vi.mock('../orchestrator/load-connections', () => ({
   loadStoreForcePlatformPayments: vi.fn(),
 }));
 
-vi.mock('../adapters/moneroo-adapter', () => ({
-  createMonerooPlatformPayment: vi.fn(),
+vi.mock('../adapters/geniuspay-adapter', () => ({
+  createGeniusPayPlatformPayment: vi.fn(),
 }));
 
 vi.mock('../adapters/stripe-connect-adapter', () => ({
@@ -27,14 +27,14 @@ import {
   loadStorePaymentConnections,
   loadStoreForcePlatformPayments,
 } from '../orchestrator/load-connections';
-import { createMonerooPlatformPayment } from '../adapters/moneroo-adapter';
+import { createGeniusPayPlatformPayment } from '../adapters/geniuspay-adapter';
 import { createStripeConnectPayment } from '../adapters/stripe-connect-adapter';
 import { createPayPalCommercePayment } from '../adapters/paypal-commerce-adapter';
 
 const baseConnection = (overrides: Partial<StorePaymentConnection>): StorePaymentConnection => ({
   id: 'conn-1',
   store_id: 'store-1',
-  provider: 'moneroo_platform',
+  provider: 'geniuspay_platform',
   connection_mode: 'platform_default',
   external_account_id: null,
   external_account_status: 'active',
@@ -52,7 +52,7 @@ describe('createOrchestratedPayment', () => {
 
   it('délègue à Stripe Connect quand EUR et connexion active', async () => {
     const connections = [
-      baseConnection({ id: 'c-m', provider: 'moneroo_platform' }),
+      baseConnection({ id: 'c-m', provider: 'geniuspay_platform' }),
       baseConnection({
         id: 'c-s',
         provider: 'stripe_connect',
@@ -80,26 +80,26 @@ describe('createOrchestratedPayment', () => {
     });
 
     expect(createStripeConnectPayment).toHaveBeenCalledOnce();
-    expect(createMonerooPlatformPayment).not.toHaveBeenCalled();
+    expect(createGeniusPayPlatformPayment).not.toHaveBeenCalled();
     expect(result.provider).toBe('stripe_connect');
     expect(result.checkout_url).toContain('stripe.com');
   });
 
-  it('respecte preferredProvider moneroo_platform', async () => {
+  it('respecte preferredProvider geniuspay_platform', async () => {
     const connections = [
       baseConnection({
         id: 'c-s',
         provider: 'stripe_connect',
         capabilities: { card_payments: true },
       }),
-      baseConnection({ id: 'c-m', provider: 'moneroo_platform' }),
+      baseConnection({ id: 'c-m', provider: 'geniuspay_platform' }),
     ];
     vi.mocked(loadStorePaymentConnections).mockResolvedValue(connections);
-    vi.mocked(createMonerooPlatformPayment).mockResolvedValue({
+    vi.mocked(createGeniusPayPlatformPayment).mockResolvedValue({
       success: true,
       transaction_id: 'tx-m',
-      checkout_url: 'https://pay.moneroo.io/x',
-      provider: 'moneroo_platform',
+      checkout_url: 'https://pay.geniuspay.io/x',
+      provider: 'geniuspay_platform',
     });
 
     const result = await createOrchestratedPayment({
@@ -111,18 +111,18 @@ describe('createOrchestratedPayment', () => {
       customerEmail: 'buyer@example.com',
       successUrl: 'https://example.com/success',
       cancelUrl: 'https://example.com/cancel',
-      preferredProvider: 'moneroo_platform',
+      preferredProvider: 'geniuspay_platform',
       connections,
     });
 
-    expect(createMonerooPlatformPayment).toHaveBeenCalledOnce();
+    expect(createGeniusPayPlatformPayment).toHaveBeenCalledOnce();
     expect(createStripeConnectPayment).not.toHaveBeenCalled();
-    expect(result.provider).toBe('moneroo_platform');
+    expect(result.provider).toBe('geniuspay_platform');
   });
 
   it('honore preferredProvider via resolve (PayPal si compatible)', async () => {
     const connections = [
-      baseConnection({ id: 'c-m', provider: 'moneroo_platform' }),
+      baseConnection({ id: 'c-m', provider: 'geniuspay_platform' }),
       baseConnection({
         id: 'c-p',
         provider: 'paypal_commerce',
@@ -159,9 +159,9 @@ describe('createOrchestratedPayment', () => {
     expect(result.provider).toBe('paypal_commerce');
   });
 
-  it('ajoute psp_fallback adapter_redirect quand un adapter retourne Moneroo', async () => {
+  it('ajoute psp_fallback adapter_redirect quand un adapter retourne GeniusPay', async () => {
     const connections = [
-      baseConnection({ id: 'c-m', provider: 'moneroo_platform' }),
+      baseConnection({ id: 'c-m', provider: 'geniuspay_platform' }),
       baseConnection({
         id: 'c-s',
         provider: 'stripe_connect',
@@ -173,8 +173,8 @@ describe('createOrchestratedPayment', () => {
     vi.mocked(createStripeConnectPayment).mockResolvedValue({
       success: true,
       transaction_id: 'tx-redirect',
-      checkout_url: 'https://pay.moneroo.io/fallback',
-      provider: 'moneroo_platform',
+      checkout_url: 'https://pay.geniuspay.io/fallback',
+      provider: 'geniuspay_platform',
     });
 
     const result = await createOrchestratedPayment({
@@ -186,14 +186,14 @@ describe('createOrchestratedPayment', () => {
       customerEmail: 'buyer@example.com',
     });
 
-    expect(result.provider).toBe('moneroo_platform');
+    expect(result.provider).toBe('geniuspay_platform');
     expect(result.psp_fallback?.from_provider).toBe('stripe_connect');
     expect(result.psp_fallback?.reason).toBe('adapter_redirect');
   });
 
-  it('fallback Moneroo sur erreur Stripe explicite', async () => {
+  it('fallback GeniusPay sur erreur Stripe explicite', async () => {
     const connections = [
-      baseConnection({ id: 'c-m', provider: 'moneroo_platform' }),
+      baseConnection({ id: 'c-m', provider: 'geniuspay_platform' }),
       baseConnection({
         id: 'c-s',
         provider: 'stripe_connect',
@@ -203,11 +203,11 @@ describe('createOrchestratedPayment', () => {
     ];
     vi.mocked(loadStorePaymentConnections).mockResolvedValue(connections);
     vi.mocked(createStripeConnectPayment).mockRejectedValue(new Error('Stripe API unavailable'));
-    vi.mocked(createMonerooPlatformPayment).mockResolvedValue({
+    vi.mocked(createGeniusPayPlatformPayment).mockResolvedValue({
       success: true,
       transaction_id: 'tx-fallback',
-      checkout_url: 'https://pay.moneroo.io/fallback',
-      provider: 'moneroo_platform',
+      checkout_url: 'https://pay.geniuspay.io/fallback',
+      provider: 'geniuspay_platform',
     });
 
     const result = await createOrchestratedPayment({
@@ -219,15 +219,15 @@ describe('createOrchestratedPayment', () => {
       customerEmail: 'buyer@example.com',
     });
 
-    expect(createMonerooPlatformPayment).toHaveBeenCalled();
-    expect(result.provider).toBe('moneroo_platform');
+    expect(createGeniusPayPlatformPayment).toHaveBeenCalled();
+    expect(result.provider).toBe('geniuspay_platform');
     expect(result.psp_fallback?.from_provider).toBe('stripe_connect');
     expect(result.psp_fallback?.reason).toBe('provider_error');
   });
 
-  it('fallback Moneroo sur erreur générique quand provider résolu non Moneroo', async () => {
+  it('fallback GeniusPay sur erreur générique quand provider résolu non GeniusPay', async () => {
     const connections = [
-      baseConnection({ id: 'c-m', provider: 'moneroo_platform' }),
+      baseConnection({ id: 'c-m', provider: 'geniuspay_platform' }),
       baseConnection({
         id: 'c-p',
         provider: 'paypal_commerce',
@@ -236,11 +236,11 @@ describe('createOrchestratedPayment', () => {
     ];
     vi.mocked(loadStorePaymentConnections).mockResolvedValue(connections);
     vi.mocked(createPayPalCommercePayment).mockRejectedValue(new Error('PayPal timeout'));
-    vi.mocked(createMonerooPlatformPayment).mockResolvedValue({
+    vi.mocked(createGeniusPayPlatformPayment).mockResolvedValue({
       success: true,
       transaction_id: 'tx-generic-fallback',
-      checkout_url: 'https://pay.moneroo.io/fallback-2',
-      provider: 'moneroo_platform',
+      checkout_url: 'https://pay.geniuspay.io/fallback-2',
+      provider: 'geniuspay_platform',
     });
 
     const result = await createOrchestratedPayment({
@@ -254,14 +254,14 @@ describe('createOrchestratedPayment', () => {
       connections,
     });
 
-    expect(createMonerooPlatformPayment).toHaveBeenCalled();
+    expect(createGeniusPayPlatformPayment).toHaveBeenCalled();
     expect(result.psp_fallback?.from_provider).toBe('paypal_commerce');
     expect(result.psp_fallback?.reason).toBe('provider_error');
   });
 
-  it('retourne un échec standard si fallback Moneroo échoue aussi', async () => {
+  it('retourne un échec standard si fallback GeniusPay échoue aussi', async () => {
     const connections = [
-      baseConnection({ id: 'c-m', provider: 'moneroo_platform' }),
+      baseConnection({ id: 'c-m', provider: 'geniuspay_platform' }),
       baseConnection({
         id: 'c-p',
         provider: 'paypal_commerce',
@@ -270,7 +270,7 @@ describe('createOrchestratedPayment', () => {
     ];
     vi.mocked(loadStorePaymentConnections).mockResolvedValue(connections);
     vi.mocked(createPayPalCommercePayment).mockRejectedValue(new Error('PayPal down'));
-    vi.mocked(createMonerooPlatformPayment).mockRejectedValue(new Error('Moneroo down'));
+    vi.mocked(createGeniusPayPlatformPayment).mockRejectedValue(new Error('GeniusPay down'));
 
     const result = await createOrchestratedPayment({
       storeId: 'store-1',
@@ -284,25 +284,25 @@ describe('createOrchestratedPayment', () => {
     });
 
     expect(result.success).toBe(false);
-    expect(result.provider).toBe('moneroo_platform');
+    expect(result.provider).toBe('geniuspay_platform');
     expect(result.error).toContain('PayPal down');
   });
 
-  it('fallback Moneroo explicite si provider non prêt (Flutterwave)', async () => {
+  it('fallback GeniusPay explicite si provider non prêt (Flutterwave)', async () => {
     const connections = [
       baseConnection({
         id: 'c-f',
         provider: 'flutterwave_connect',
         external_account_id: 'flw_1',
       }),
-      baseConnection({ id: 'c-m', provider: 'moneroo_platform' }),
+      baseConnection({ id: 'c-m', provider: 'geniuspay_platform' }),
     ];
     vi.mocked(loadStorePaymentConnections).mockResolvedValue(connections);
-    vi.mocked(createMonerooPlatformPayment).mockResolvedValue({
+    vi.mocked(createGeniusPayPlatformPayment).mockResolvedValue({
       success: true,
       transaction_id: 'tx-fallback',
-      checkout_url: 'https://pay.moneroo.io/fallback',
-      provider: 'moneroo_platform',
+      checkout_url: 'https://pay.geniuspay.io/fallback',
+      provider: 'geniuspay_platform',
     });
 
     const result = await createOrchestratedPayment({
@@ -316,8 +316,8 @@ describe('createOrchestratedPayment', () => {
       connections,
     });
 
-    expect(createMonerooPlatformPayment).toHaveBeenCalled();
-    expect(result.provider).toBe('moneroo_platform');
+    expect(createGeniusPayPlatformPayment).toHaveBeenCalled();
+    expect(result.provider).toBe('geniuspay_platform');
     expect(result.psp_fallback?.from_provider).toBe('flutterwave_connect');
     expect(result.psp_fallback?.reason).toBe('provider_not_ready');
   });

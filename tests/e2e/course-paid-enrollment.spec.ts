@@ -106,8 +106,8 @@ test.describe('Course paid enrollment (E2E)', () => {
       await expect(enrollButton.first()).toBeVisible({ timeout: 15_000 });
       await enrollButton.first().click();
 
-      await page.waitForURL(/\/(checkout|moneroo)/, { timeout: 30_000 });
-      expect(page.url()).toMatch(/\/checkout|moneroo/);
+      await page.waitForURL(/\/(checkout|geniuspay)/, { timeout: 30_000 });
+      expect(page.url()).toMatch(/\/checkout|geniuspay/);
 
       await admin.auth.admin.deleteUser(unpaidBuyer.id);
     } finally {

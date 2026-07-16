@@ -1,11 +1,11 @@
 /**
  * Service de paiement unifié
- * Moneroo (legacy) ou orchestrateur V2 (feature flag)
+ * GeniusPay (legacy) ou orchestrateur V2 (feature flag)
  */
 import {
-  initiateMonerooPayment,
-  verifyTransactionStatus as verifyMonerooTransaction,
-} from './moneroo-payment';
+  initiateGeniusPayPayment,
+  verifyTransactionStatus as verifyGeniusPayTransaction,
+} from './geniuspay-payment';
 import { logger } from './logger';
 import { isSupportedCurrency, type Currency } from './currency-converter';
 import { isPaymentOrchestrationV2EnabledForStore, createOrchestratedPayment } from './payments';
@@ -19,8 +19,8 @@ import {
   buildPaymentSuccessReturnUrl,
 } from './checkout/guest-payment-return';
 
-/** Type checkout — `moneroo` legacy UI ; codes orchestrateur après migration UI */
-export type PaymentProvider = 'moneroo' | PaymentProviderCode;
+/** Type checkout — `geniuspay` legacy UI ; codes orchestrateur après migration UI */
+export type PaymentProvider = 'geniuspay' | PaymentProviderCode;
 
 export interface PaymentOptions {
   storeId: string;
@@ -39,7 +39,7 @@ export interface PaymentOptions {
   /** URLs de retour après checkout PSP (billing, abonnements) */
   returnUrl?: string;
   cancelUrl?: string;
-  /** Facturation plateforme : rail Moneroo Emarzona uniquement */
+  /** Facturation plateforme : rail GeniusPay Emarzona uniquement */
   forcePlatformPayments?: boolean;
 }
 
@@ -53,21 +53,21 @@ export interface PaymentResult {
 }
 
 function toOrchestratorPreferred(provider?: PaymentProvider): PaymentProviderCode | undefined {
-  if (!provider || provider === 'moneroo') {
-    return 'moneroo_platform';
+  if (!provider || provider === 'geniuspay') {
+    return 'geniuspay_platform';
   }
-  if (provider === 'moneroo_platform') {
-    return 'moneroo_platform';
+  if (provider === 'geniuspay_platform') {
+    return 'geniuspay_platform';
   }
   return provider as PaymentProviderCode;
 }
 
 function toCheckoutProvider(provider: PaymentProviderCode): PaymentProvider {
-  return provider === 'moneroo_platform' ? 'moneroo' : provider;
+  return provider === 'geniuspay_platform' ? 'geniuspay' : provider;
 }
 
 /**
- * Initie un paiement avec le provider spécifié (ou Moneroo par défaut)
+ * Initie un paiement avec le provider spécifié (ou GeniusPay par défaut)
  */
 async function resolvePaymentContext(options: PaymentOptions): Promise<PaymentOptions> {
   const { supabase } = await import('@/integrations/supabase/client');
@@ -137,7 +137,7 @@ export const initiatePayment = async (options: PaymentOptions): Promise<PaymentR
       success: false,
       transaction_id: '',
       checkout_url: '',
-      provider: options.provider ?? 'moneroo',
+      provider: options.provider ?? 'geniuspay',
       error: rate.message || 'Trop de tentatives de paiement. Réessayez plus tard.',
     };
   }
@@ -151,7 +151,7 @@ export const initiatePayment = async (options: PaymentOptions): Promise<PaymentR
       success: true,
       transaction_id: `e2e-${Date.now()}`,
       checkout_url: `/checkout?e2e=1${orderId ? `&orderId=${encodeURIComponent(orderId)}` : ''}`,
-      provider: 'moneroo',
+      provider: 'geniuspay',
       provider_transaction_id: 'e2e-stub',
     };
   }
@@ -198,13 +198,13 @@ export const initiatePayment = async (options: PaymentOptions): Promise<PaymentR
         };
       }
 
-      logger.warn('Orchestrator returned failure, falling back to Moneroo', {
+      logger.warn('Orchestrator returned failure, falling back to GeniusPay', {
         error: orchestrated.error,
         orderId: resolvedOptions.orderId,
         storeId: resolvedOptions.storeId,
       });
     } catch (error: unknown) {
-      logger.error('CRITICAL: Orchestrator initiatePayment failed, falling back to Moneroo', {
+      logger.error('CRITICAL: Orchestrator initiatePayment failed, falling back to GeniusPay', {
         error,
         orderId: options.orderId,
         storeId: options.storeId,
@@ -219,11 +219,11 @@ export const initiatePayment = async (options: PaymentOptions): Promise<PaymentR
   }
 
   try {
-    logger.log('Initiating Moneroo payment', { orderId: options.orderId });
+    logger.log('Initiating GeniusPay payment', { orderId: options.orderId });
     const currency: Currency | undefined =
       options.currency && isSupportedCurrency(options.currency) ? options.currency : 'XOF';
 
-    const monerooResult = await initiateMonerooPayment({
+    const geniuspayResult = await initiateGeniusPayPayment({
       ...resolvedOptions,
       currency,
       returnUrl: resolvedOptions.returnUrl,
@@ -231,12 +231,12 @@ export const initiatePayment = async (options: PaymentOptions): Promise<PaymentR
     });
 
     return {
-      success: monerooResult.success,
-      transaction_id: monerooResult.transaction_id,
-      checkout_url: monerooResult.checkout_url,
-      provider: 'moneroo',
-      provider_transaction_id: monerooResult.moneroo_transaction_id,
-      error: monerooResult.success ? undefined : 'Paiement Moneroo non initialisé',
+      success: geniuspayResult.success,
+      transaction_id: geniuspayResult.transaction_id,
+      checkout_url: geniuspayResult.checkout_url,
+      provider: 'geniuspay',
+      provider_transaction_id: geniuspayResult.geniuspay_transaction_id,
+      error: geniuspayResult.success ? undefined : 'Paiement GeniusPay non initialisé',
     };
   } catch (_error: unknown) {
     const errorObj = _error instanceof Error ? _error : new Error(String(_error));
@@ -246,7 +246,7 @@ export const initiatePayment = async (options: PaymentOptions): Promise<PaymentR
       success: false,
       transaction_id: '',
       checkout_url: '',
-      provider: options.provider ?? 'moneroo',
+      provider: options.provider ?? 'geniuspay',
       error: errorMessage,
     };
   }
@@ -262,21 +262,21 @@ export const verifyTransactionStatus = async (
   const { supabase } = await import('@/integrations/supabase/client');
   const { data: transaction } = await supabase
     .from('transactions')
-    .select('id, status, payment_provider, moneroo_transaction_id')
+    .select('id, status, payment_provider, geniuspay_transaction_id')
     .eq('id', transactionId)
     .single();
 
   const resolvedProvider =
-    provider ?? (transaction?.payment_provider as PaymentProvider) ?? 'moneroo';
+    provider ?? (transaction?.payment_provider as PaymentProvider) ?? 'geniuspay';
 
   const connectProviders = ['stripe_connect', 'paypal_commerce', 'paypal'];
   if (connectProviders.includes(resolvedProvider)) {
     return transaction ?? { id: transactionId, status: 'unknown' };
   }
 
-  if (!transaction?.moneroo_transaction_id) {
+  if (!transaction?.geniuspay_transaction_id) {
     return transaction ?? { id: transactionId, status: 'unknown' };
   }
 
-  return verifyMonerooTransaction(transactionId);
+  return verifyGeniusPayTransaction(transactionId);
 };

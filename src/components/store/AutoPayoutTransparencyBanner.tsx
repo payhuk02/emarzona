@@ -23,7 +23,7 @@ export function AutoPayoutTransparencyBanner() {
         </p>
         <p>
           Chaque demande reste soumise à <strong>validation et paiement manuels</strong> par
-          l&apos;équipe (Mobile Money / virement). Aucun transfert Moneroo n&apos;est déclenché
+          l&apos;équipe (Mobile Money / virement). Aucun transfert GeniusPay n&apos;est déclenché
           automatiquement depuis cette fonctionnalité.
         </p>
       </AlertDescription>

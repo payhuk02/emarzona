@@ -18,11 +18,11 @@ type GuestAccessState = 'idle' | 'loading' | 'redirecting' | 'failed';
 
 function mapUrlProviderToPaymentProvider(
   provider: string | null
-): 'moneroo' | 'stripe_connect' | 'paypal_commerce' | undefined {
+): 'geniuspay' | 'stripe_connect' | 'paypal_commerce' | undefined {
   if (!provider) return undefined;
   if (provider === 'stripe' || provider === 'stripe_connect') return 'stripe_connect';
   if (provider === 'paypal' || provider === 'paypal_commerce') return 'paypal_commerce';
-  if (provider === 'moneroo' || provider === 'moneroo_platform') return 'moneroo';
+  if (provider === 'geniuspay' || provider === 'geniuspay_platform') return 'geniuspay';
   return undefined;
 }
 

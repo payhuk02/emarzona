@@ -325,7 +325,7 @@ export const CourseDay1Demo : React.FC = () => {
                 lastActivity={new Date('2024-10-28')}
                 expiryDate={new Date('2025-10-01')}
                 amountPaid={149}
-                paymentMethod="Moneroo"
+                paymentMethod="GeniusPay"
                 hasCertificate={false}
                 averageScore={85}
                 showActions={true}
@@ -417,7 +417,7 @@ export const CourseDay1Demo : React.FC = () => {
                 variant="detailed"
                 lastActivity={new Date('2024-08-30')}
                 amountPaid={179}
-                paymentMethod="Moneroo"
+                paymentMethod="GeniusPay"
                 hasCertificate={true}
                 averageScore={94}
                 showActions={true}

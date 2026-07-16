@@ -12,8 +12,8 @@ export async function syncStoreEnabledPaymentProviders(
     .eq('external_account_status', 'active');
 
   const providers = (connections ?? []).map(c => c.provider);
-  if (!providers.includes('moneroo_platform')) {
-    providers.push('moneroo_platform');
+  if (!providers.includes('geniuspay_platform')) {
+    providers.push('geniuspay_platform');
   }
 
   await supabase.from('stores').update({ enabled_payment_providers: providers }).eq('id', storeId);

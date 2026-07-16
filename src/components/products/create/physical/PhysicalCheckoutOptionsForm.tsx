@@ -78,7 +78,7 @@ export function PhysicalCheckoutOptionsForm({ data, onUpdate }: PhysicalCheckout
                   {PHYSICAL_CHECKOUT_METHOD_LABELS.online}
                 </div>
                 <p className="text-sm text-muted-foreground font-normal">
-                  Le client paie en ligne (Moneroo, carte, mobile money) avant ou à la commande.
+                  Le client paie en ligne (GeniusPay, carte, mobile money) avant ou à la commande.
                 </p>
               </Label>
             </div>

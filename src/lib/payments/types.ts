@@ -42,13 +42,13 @@ export interface OrchestratedPaymentRequest {
   /** Forcer un provider (tests / admin) */
   preferredProvider?: PaymentProviderCode;
   connections?: StorePaymentConnection[];
-  /** Abonnements plateforme : toujours Moneroo plateforme, jamais Stripe/PayPal vendeur */
+  /** Abonnements plateforme : toujours GeniusPay plateforme, jamais Stripe/PayPal vendeur */
   forcePlatformPayments?: boolean;
 }
 
 export interface PspFallbackInfo {
   from_provider: PaymentProviderCode;
-  to_provider: 'moneroo_platform';
+  to_provider: 'geniuspay_platform';
   reason: string;
 }
 
@@ -60,7 +60,7 @@ export interface OrchestratedPaymentResult {
   provider_transaction_id?: string;
   connection_id?: string | null;
   error?: string;
-  /** Présent si le PSP initial a été remplacé par Moneroo (Epic 2.2.7) */
+  /** Présent si le PSP initial a été remplacé par GeniusPay (Epic 2.2.7) */
   psp_fallback?: PspFallbackInfo;
 }
 

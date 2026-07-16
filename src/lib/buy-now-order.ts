@@ -1,5 +1,5 @@
 /**
- * Création commande + réservation stock avant paiement Moneroo (achat direct).
+ * Création commande + réservation stock avant paiement GeniusPay (achat direct).
  */
 
 import { supabase } from '@/integrations/supabase/client';

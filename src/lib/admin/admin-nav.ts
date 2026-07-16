@@ -242,14 +242,14 @@ export const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
       },
       {
         icon: BarChart3,
-        label: 'Statistiques Moneroo',
-        path: '/admin/moneroo-analytics',
+        label: 'Statistiques GeniusPay',
+        path: '/admin/geniuspay-analytics',
         permissions: ['payments.manage'],
       },
       {
         icon: RotateCcw,
-        label: 'Réconciliation Moneroo',
-        path: '/admin/moneroo-reconciliation',
+        label: 'Réconciliation GeniusPay',
+        path: '/admin/geniuspay-reconciliation',
         permissions: ['payments.manage'],
       },
       {

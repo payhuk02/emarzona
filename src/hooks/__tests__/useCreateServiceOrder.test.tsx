@@ -142,7 +142,7 @@ describe('useCreateServiceOrder', () => {
     // Testez la création de booking avec statut pending
   });
 
-  it('should initiate Moneroo payment', async () => {
-    // Testez l'initiation du paiement Moneroo
+  it('should initiate GeniusPay payment', async () => {
+    // Testez l'initiation du paiement GeniusPay
   });
 });

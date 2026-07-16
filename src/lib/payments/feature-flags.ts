@@ -34,9 +34,9 @@ export function getPaymentOrchestrationV2RolloutPercent(): number {
 }
 
 /**
- * Orchestration multi-PSP (Stripe Connect, PayPal Commerce, Moneroo plateforme).
+ * Orchestration multi-PSP (Stripe Connect, PayPal Commerce, GeniusPay plateforme).
  * - `VITE_PAYMENT_ORCHESTRATION_V2=true` : activé partout (sauf rollout < 100)
- * - `VITE_PAYMENT_ORCHESTRATION_V2=false` : désactivé (legacy Moneroo seul)
+ * - `VITE_PAYMENT_ORCHESTRATION_V2=false` : désactivé (legacy GeniusPay seul)
  * - Non défini + preview Vercel : activé pour QA staging
  */
 export function isPaymentOrchestrationV2Enabled(): boolean {

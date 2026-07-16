@@ -51,7 +51,7 @@ const AVAILABLE_CURRENCIES = [
   { code: 'GHS', name: 'Cedi Ghanéen', symbol: '₵' },
 ];
 
-const AVAILABLE_PAYMENT_PROVIDERS = [{ value: 'moneroo', label: 'Moneroo' }];
+const AVAILABLE_PAYMENT_PROVIDERS = [{ value: 'geniuspay', label: 'GeniusPay' }];
 
 export const StorePaymentSettings : React.FC<StorePaymentSettingsProps> = ({
   storeId,
@@ -83,7 +83,7 @@ export const StorePaymentSettings : React.FC<StorePaymentSettingsProps> = ({
     store.free_shipping_threshold?.toString() || ''
   );
   const [enabledProviders, setEnabledProviders] = useState<string[]>(
-    store.enabled_payment_providers || ['moneroo']
+    store.enabled_payment_providers || ['geniuspay']
   );
 
   const handleSave = async () => {
@@ -98,7 +98,7 @@ export const StorePaymentSettings : React.FC<StorePaymentSettingsProps> = ({
         invoice_prefix: invoicePrefix || 'INV-',
         invoice_numbering: invoiceNumbering,
         free_shipping_threshold: freeShippingThreshold ? parseFloat(freeShippingThreshold) : null,
-        enabled_payment_providers: enabledProviders.length > 0 ? enabledProviders : ['moneroo'],
+        enabled_payment_providers: enabledProviders.length > 0 ? enabledProviders : ['geniuspay'],
       };
 
       const { error } = await supabase.from('stores').update(updates).eq('id', storeId);

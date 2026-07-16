@@ -123,9 +123,9 @@ const ALL_FEATURES: Feature[] = [
 
   // Paiements
   {
-    id: 'moneroo',
-    name: 'Moneroo',
-    description: 'Intégration Moneroo pour les paiements',
+    id: 'geniuspay',
+    name: 'GeniusPay',
+    description: 'Intégration GeniusPay pour les paiements',
     category: 'Paiements',
     icon: CreditCard,
     enabled: true,

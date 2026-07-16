@@ -1,5 +1,5 @@
 /**
- * Checkout abonnement plateforme (produits physiques) — orchestrateur V2 ou Moneroo legacy.
+ * Checkout abonnement plateforme (produits physiques) — orchestrateur V2 ou GeniusPay legacy.
  * Toujours `forcePlatformPayments` : la boutique paie Emarzona, pas via son Stripe/PayPal vendeur.
  */
 import { initiatePayment } from '@/lib/payment-service';

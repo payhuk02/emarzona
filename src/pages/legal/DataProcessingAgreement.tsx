@@ -58,7 +58,7 @@ export default function DataProcessingAgreementPage() {
             </ul>
             <h2>3. Sous-traitants ultérieurs</h2>
             <p>
-              Supabase (hébergement EU), Vercel (CDN/Edge), Moneroo/Stripe/PayPal (paiements),
+              Supabase (hébergement EU), Vercel (CDN/Edge), GeniusPay/Stripe/PayPal (paiements),
               Resend (emails transactionnels). Liste disponible sur demande à{' '}
               <a href="mailto:privacy@emarzona.com">privacy@emarzona.com</a>.
             </p>

@@ -5,7 +5,7 @@ import type { StorePaymentConnection } from '@/types/store-payment-connection';
 const baseConnection = (overrides: Partial<StorePaymentConnection>): StorePaymentConnection => ({
   id: 'conn-1',
   store_id: 'store-1',
-  provider: 'moneroo_platform',
+  provider: 'geniuspay_platform',
   connection_mode: 'platform_default',
   external_account_id: null,
   external_account_status: 'active',
@@ -18,7 +18,7 @@ const baseConnection = (overrides: Partial<StorePaymentConnection>): StorePaymen
 describe('resolvePaymentProvider', () => {
   it('choisit stripe_connect pour EUR si connecté', () => {
     const connections = [
-      baseConnection({ id: 'c-m', provider: 'moneroo_platform' }),
+      baseConnection({ id: 'c-m', provider: 'geniuspay_platform' }),
       baseConnection({
         id: 'c-s',
         provider: 'stripe_connect',
@@ -38,7 +38,7 @@ describe('resolvePaymentProvider', () => {
     expect(result.connectionId).toBe('c-s');
   });
 
-  it('force moneroo_platform si forcePlatformPayments', () => {
+  it('force geniuspay_platform si forcePlatformPayments', () => {
     const connections = [
       baseConnection({
         id: 'c-s',
@@ -55,13 +55,13 @@ describe('resolvePaymentProvider', () => {
       forcePlatformPayments: true,
     });
 
-    expect(result.provider).toBe('moneroo_platform');
+    expect(result.provider).toBe('geniuspay_platform');
     expect(result.reason).toBe('store_force_platform_payments');
   });
 
-  it('retombe sur moneroo si stripe inactif', () => {
+  it('retombe sur geniuspay si stripe inactif', () => {
     const connections = [
-      baseConnection({ id: 'c-m', provider: 'moneroo_platform' }),
+      baseConnection({ id: 'c-m', provider: 'geniuspay_platform' }),
       baseConnection({
         id: 'c-s',
         provider: 'stripe_connect',
@@ -76,12 +76,12 @@ describe('resolvePaymentProvider', () => {
       connections,
     });
 
-    expect(result.provider).toBe('moneroo_platform');
+    expect(result.provider).toBe('geniuspay_platform');
   });
 
-  it('route XOF vers moneroo même si Stripe connecté (pas de carte XOF)', () => {
+  it('route XOF vers geniuspay même si Stripe connecté (pas de carte XOF)', () => {
     const connections = [
-      baseConnection({ id: 'c-m', provider: 'moneroo_platform' }),
+      baseConnection({ id: 'c-m', provider: 'geniuspay_platform' }),
       baseConnection({
         id: 'c-s',
         provider: 'stripe_connect',
@@ -97,12 +97,12 @@ describe('resolvePaymentProvider', () => {
       connections,
     });
 
-    expect(result.provider).toBe('moneroo_platform');
+    expect(result.provider).toBe('geniuspay_platform');
   });
 
   it('respecte la préférence acheteur si compatible', () => {
     const connections = [
-      baseConnection({ id: 'c-m', provider: 'moneroo_platform' }),
+      baseConnection({ id: 'c-m', provider: 'geniuspay_platform' }),
       baseConnection({
         id: 'c-p',
         provider: 'paypal_commerce',

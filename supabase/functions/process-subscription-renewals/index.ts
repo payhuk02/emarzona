@@ -1,10 +1,10 @@
 /**
  * Edge Function: process-subscription-renewals
  *
- * Cron job — initiates Moneroo checkout for due physical vendor subscriptions
+ * Cron job — initiates GeniusPay checkout for due physical vendor subscriptions
  * using stored billing mandate profiles (auto-renew).
  *
- * Moneroo has no native recurring API: we pre-create checkout URLs server-side
+ * GeniusPay has no native recurring API: we pre-create checkout URLs server-side
  * and notify store owners (one-tap mobile money confirmation).
  *
  * Cron: daily (configure in Supabase Dashboard with x-cron-secret header)
@@ -12,10 +12,10 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'npm:@supabase/supabase-js@2.58.0';
-import { initializeMonerooPayment } from '../_shared/moneroo-init-payment.ts';
+import { initializeGeniusPayPayment } from '../_shared/geniuspay-init-payment.ts';
 
 const SITE_URL = (Deno.env.get('SITE_URL') || 'https://www.emarzona.com').replace(/\/$/, '');
-const MONEROO_API_URL = Deno.env.get('MONEROO_API_URL') || 'https://api.moneroo.io/v1';
+const GENIUSPAY_API_URL = Deno.env.get('GENIUSPAY_API_URL') || 'https://geniuspay.ci/api/v1/merchant';
 
 interface AutoRenewalRow {
   subscription_id: string;
@@ -86,7 +86,7 @@ serve(async req => {
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
-    const monerooApiKey = Deno.env.get('MONEROO_API_KEY') ?? '';
+    const geniuspayApiKey = Deno.env.get('GENIUSPAY_API_KEY') ?? '';
 
     if (!supabaseUrl || !serviceKey) {
       return new Response(JSON.stringify({ error: 'Supabase configuration missing' }), {
@@ -95,8 +95,8 @@ serve(async req => {
       });
     }
 
-    if (!monerooApiKey) {
-      return new Response(JSON.stringify({ error: 'MONEROO_API_KEY is not configured' }), {
+    if (!geniuspayApiKey) {
+      return new Response(JSON.stringify({ error: 'GENIUSPAY_API_KEY is not configured' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -185,7 +185,7 @@ serve(async req => {
             customer_email: row.customer_email,
             customer_name: row.customer_name,
             customer_phone: row.customer_phone,
-            payment_provider: 'moneroo',
+            payment_provider: 'geniuspay',
             metadata: {
               purpose: 'physical_subscription_renewal',
               plan_slug: row.plan_slug,
@@ -201,7 +201,7 @@ serve(async req => {
           throw new Error(txError?.message ?? 'Failed to create transaction');
         }
 
-        const monerooResult = await initializeMonerooPayment(monerooApiKey, MONEROO_API_URL, {
+        const geniuspayResult = await initializeGeniusPayPayment(geniuspayApiKey, GENIUSPAY_API_URL, {
           amount,
           currency,
           description: 'Renouvellement automatique abonnement produits physiques',
@@ -224,8 +224,8 @@ serve(async req => {
         await supabase
           .from('transactions')
           .update({
-            moneroo_transaction_id: monerooResult.monerooPaymentId,
-            moneroo_checkout_url: monerooResult.checkoutUrl,
+            geniuspay_transaction_id: geniuspayResult.geniuspayPaymentId,
+            geniuspay_checkout_url: geniuspayResult.checkoutUrl,
             status: 'processing',
           })
           .eq('id', transaction.id);
@@ -235,10 +235,10 @@ serve(async req => {
           .insert({
             invoice_id: invoiceId,
             status: 'processing',
-            provider: 'moneroo_platform',
-            external_transaction_id: monerooResult.monerooPaymentId,
+            provider: 'geniuspay_platform',
+            external_transaction_id: geniuspayResult.geniuspayPaymentId,
             metadata: {
-              checkout_url: monerooResult.checkoutUrl,
+              checkout_url: geniuspayResult.checkoutUrl,
               transaction_id: transaction.id,
               auto_renew: true,
               initiated_at: new Date().toISOString(),
@@ -256,7 +256,7 @@ serve(async req => {
           .update({
             metadata: {
               ...((invoice.metadata as Record<string, unknown> | null) ?? {}),
-              auto_renew_checkout_url: monerooResult.checkoutUrl,
+              auto_renew_checkout_url: geniuspayResult.checkoutUrl,
               auto_renew_transaction_id: transaction.id,
               auto_renew_initiated_at: new Date().toISOString(),
             },
@@ -275,7 +275,7 @@ serve(async req => {
             metadata: {
               ...((subRow?.metadata as Record<string, unknown> | null) ?? {}),
               auto_renew_last_checkout_at: new Date().toISOString(),
-              auto_renew_last_checkout_url: monerooResult.checkoutUrl,
+              auto_renew_last_checkout_url: geniuspayResult.checkoutUrl,
             },
           })
           .eq('id', row.subscription_id);
@@ -285,11 +285,11 @@ serve(async req => {
           type: 'system',
           title: 'Renouvellement automatique — confirmez le paiement',
           message:
-            'Votre abonnement produits physiques est à renouveler. Cliquez pour confirmer le paiement Moneroo.',
+            'Votre abonnement produits physiques est à renouveler. Cliquez pour confirmer le paiement GeniusPay.',
           metadata: {
             store_id: row.store_id,
             category: 'subscription_auto_renew',
-            checkout_url: monerooResult.checkoutUrl,
+            checkout_url: geniuspayResult.checkoutUrl,
             invoice_id: invoiceId,
             attempt_id: attempt?.id ?? null,
           },
@@ -300,7 +300,7 @@ serve(async req => {
           subscription_id: row.subscription_id,
           invoice_id: invoiceId,
           status: 'checkout_initiated',
-          checkout_url: monerooResult.checkoutUrl,
+          checkout_url: geniuspayResult.checkoutUrl,
         });
       } catch (rowError: unknown) {
         const message = rowError instanceof Error ? rowError.message : String(rowError);
@@ -310,7 +310,7 @@ serve(async req => {
           await supabase.from('subscription_payment_attempts').insert({
             invoice_id: row.pending_invoice_id,
             status: 'failed',
-            provider: 'moneroo_platform',
+            provider: 'geniuspay_platform',
             failure_reason: message.slice(0, 500),
             metadata: { auto_renew: true },
           });

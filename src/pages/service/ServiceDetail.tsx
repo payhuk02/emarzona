@@ -514,7 +514,7 @@ export default function ServiceDetail() {
         return;
       }
 
-      // Rediriger vers Moneroo pour le paiement
+      // Rediriger vers GeniusPay pour le paiement
       if (result.checkoutUrl) {
         safeRedirect(result.checkoutUrl, error => {
           toast({

@@ -46,8 +46,8 @@ export async function seedPartialRefundFixture(
       amount,
       currency: 'XOF',
       status: 'completed',
-      payment_provider: 'moneroo',
-      moneroo_transaction_id: `e2e-test-${order.id}`,
+      payment_provider: 'geniuspay',
+      geniuspay_transaction_id: `e2e-test-${order.id}`,
       metadata: { [TEST_MARKER]: true },
     })
     .select('id')

@@ -89,7 +89,7 @@ export function isAuthorizedPlanCheckoutAmount(
   return Math.abs(clientInExpectedCurrency - normalizedExpected) <= tolerance;
 }
 
-/** Montant autorisé pour Moneroo après validation (aligné sur ce que le client a affiché). */
+/** Montant autorisé pour GeniusPay après validation (aligné sur ce que le client a affiché). */
 export function resolveAuthorizedCheckoutAmount(
   expectedAmount: number,
   expectedCurrency: string,

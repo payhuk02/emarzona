@@ -28,7 +28,7 @@ export function validateMultiStorePaymentProvider(params: {
     return {
       allowed: false,
       message:
-        'Le panier contient plusieurs boutiques : seul Moneroo est disponible pour payer en une fois. Choisissez Moneroo ou retirez des articles pour payer par carte/PayPal boutique par boutique.',
+        'Le panier contient plusieurs boutiques : seul GeniusPay est disponible pour payer en une fois. Choisissez GeniusPay ou retirez des articles pour payer par carte/PayPal boutique par boutique.',
     };
   }
 

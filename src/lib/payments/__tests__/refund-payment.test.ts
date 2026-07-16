@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const fromMock = vi.fn();
 const invokeMock = vi.fn();
-const refundMonerooPayment = vi.fn();
+const refundGeniusPayPayment = vi.fn();
 const loggerWarn = vi.fn();
 const loggerError = vi.fn();
 
@@ -13,8 +13,8 @@ vi.mock('@/integrations/supabase/client', () => ({
   },
 }));
 
-vi.mock('@/lib/moneroo-payment', () => ({
-  refundMonerooPayment: (...args: unknown[]) => refundMonerooPayment(...args),
+vi.mock('@/lib/geniuspay-payment', () => ({
+  refundGeniusPayPayment: (...args: unknown[]) => refundGeniusPayPayment(...args),
 }));
 
 vi.mock('@/lib/logger', () => ({
@@ -24,12 +24,12 @@ vi.mock('@/lib/logger', () => ({
   },
 }));
 
-vi.mock('@/lib/moneroo-notifications', () => ({
+vi.mock('@/lib/geniuspay-notifications', () => ({
   notifyPaymentRefunded: vi.fn().mockResolvedValue(undefined),
 }));
 
 import { refundPayment } from '../refund-payment';
-import { notifyPaymentRefunded } from '@/lib/moneroo-notifications';
+import { notifyPaymentRefunded } from '@/lib/geniuspay-notifications';
 
 function queryWith(data: unknown, error: unknown = null) {
   return {
@@ -117,32 +117,32 @@ describe('refundPayment', () => {
     expect(result).toEqual({ success: false, error: 'Stripe refund failed' });
   });
 
-  it('routes moneroo provider to refundMonerooPayment', async () => {
+  it('routes geniuspay provider to refundGeniusPayPayment', async () => {
     fromMock
-      .mockReturnValueOnce(queryWith({ id: 'tx-3', payment_provider: 'moneroo_platform' }))
+      .mockReturnValueOnce(queryWith({ id: 'tx-3', payment_provider: 'geniuspay_platform' }))
       .mockReturnValueOnce(queryWith({ store_id: 's1', amount: 100, currency: 'XOF' }));
-    refundMonerooPayment.mockResolvedValue({ success: true, amount: 100, currency: 'XOF' });
+    refundGeniusPayPayment.mockResolvedValue({ success: true, amount: 100, currency: 'XOF' });
 
     const result = await refundPayment({ transactionId: 'tx-3' });
 
     expect(result.success).toBe(true);
-    expect(refundMonerooPayment).toHaveBeenCalledWith({ transactionId: 'tx-3' });
+    expect(refundGeniusPayPayment).toHaveBeenCalledWith({ transactionId: 'tx-3' });
   });
 
-  it('defaults to moneroo when payment_provider is null', async () => {
+  it('defaults to geniuspay when payment_provider is null', async () => {
     fromMock
       .mockReturnValueOnce(queryWith({ id: 'tx-5', payment_provider: null }))
       .mockReturnValueOnce(queryWith({ store_id: 's1', amount: 100, currency: 'XOF' }));
-    refundMonerooPayment.mockResolvedValue({ success: true, amount: 100, currency: 'XOF' });
+    refundGeniusPayPayment.mockResolvedValue({ success: true, amount: 100, currency: 'XOF' });
 
     const result = await refundPayment({ transactionId: 'tx-5' });
     expect(result.success).toBe(true);
-    expect(refundMonerooPayment).toHaveBeenCalledWith({ transactionId: 'tx-5' });
+    expect(refundGeniusPayPayment).toHaveBeenCalledWith({ transactionId: 'tx-5' });
   });
 
   it('skips notification when refund result is unsuccessful', async () => {
-    fromMock.mockReturnValueOnce(queryWith({ id: 'tx-6', payment_provider: 'moneroo_platform' }));
-    refundMonerooPayment.mockResolvedValue({ success: false, error: 'rejected' });
+    fromMock.mockReturnValueOnce(queryWith({ id: 'tx-6', payment_provider: 'geniuspay_platform' }));
+    refundGeniusPayPayment.mockResolvedValue({ success: false, error: 'rejected' });
 
     const result = await refundPayment({ transactionId: 'tx-6' });
     expect(result.success).toBe(false);

@@ -93,9 +93,9 @@ export function setupResourceHints(): void {
     dnsPrefetch(url.origin);
   }
 
-  // API Moneroo
-  preconnect('https://api.moneroo.io', true);
-  dnsPrefetch('https://api.moneroo.io');
+  // API GeniusPay
+  preconnect('https://geniuspay.ci', true);
+  dnsPrefetch('https://geniuspay.ci');
 
   // CDN externes
   preconnect('https://cdn.jsdelivr.net');

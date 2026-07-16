@@ -8,7 +8,7 @@
  * - Calcul taxes automatique
  * - Calcul shipping automatique
  * - Validation formulaires
- * - Intégration Moneroo
+ * - Intégration GeniusPay
  * - Support 4 types produits
  */
 
@@ -112,7 +112,7 @@ export default function Checkout() {
 
   // State pour le provider de paiement sélectionné
   const [selectedPaymentProvider, setSelectedPaymentProvider] =
-    useState<PaymentProvider>('moneroo');
+    useState<PaymentProvider>('geniuspay');
 
   // State pour la gestion multi-stores
   const [isMultiStore, setIsMultiStore] = useState<boolean>(false);
@@ -782,7 +782,7 @@ export default function Checkout() {
         }
 
         // Initier le paiement
-        const paymentProvider = selectedPaymentProvider || 'moneroo';
+        const paymentProvider = selectedPaymentProvider || 'geniuspay';
         const paymentResult = await initiatePayment({
           storeId,
           orderId: order.id,
@@ -1290,7 +1290,7 @@ export default function Checkout() {
       const hasAffiliate = affiliateInfo.affiliate_link_id && affiliateInfo.product_id;
 
       // Initier le paiement avec le provider sélectionné
-      const paymentProvider = selectedPaymentProvider || 'moneroo';
+      const paymentProvider = selectedPaymentProvider || 'geniuspay';
       const paymentResult = await initiatePayment({
         storeId: product.store_id,
         orderId: order.id,

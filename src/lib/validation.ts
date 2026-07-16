@@ -36,7 +36,7 @@ const COUNTRY_DIAL_CODES: Record<string, string> = {
 };
 
 /**
- * Normalise un numéro local vers le format international attendu par Moneroo.
+ * Normalise un numéro local vers le format international attendu par GeniusPay.
  */
 export const normalizePhoneForPayment = (phone: string, country?: string): string => {
   const cleaned = phone.trim().replace(/\s/g, '');

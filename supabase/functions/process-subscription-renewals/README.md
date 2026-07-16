@@ -1,13 +1,13 @@
 # process-subscription-renewals
 
-Initie automatiquement les renouvellements d'abonnement produits physiques via Moneroo.
+Initie automatiquement les renouvellements d'abonnement produits physiques via GeniusPay.
 
-Moneroo ne propose pas de mandate récurrent natif : cette fonction crée un checkout pré-rempli avec le profil client enregistré (`subscription_billing_mandates`) et envoie une notification in-app avec le lien de paiement.
+GeniusPay ne propose pas de mandate récurrent natif : cette fonction crée un checkout pré-rempli avec le profil client enregistré (`subscription_billing_mandates`) et envoie une notification in-app avec le lien de paiement.
 
 ## Prérequis
 
-- Migration `20260611180000__e23_moneroo_automatic_subscription_renewal.sql` appliquée
-- Secrets Edge : `CRON_SECRET`, `MONEROO_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
+- Migration `20260611180000__e23_geniuspay_automatic_subscription_renewal.sql` appliquée
+- Secrets Edge : `CRON_SECRET`, `GENIUSPAY_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
 - Mandate enregistré après le premier paiement réussi (webhook)
 
 ## Cron (pg_cron)
@@ -37,6 +37,6 @@ curl -X POST "https://<PROJECT_REF>.supabase.co/functions/v1/process-subscriptio
 
 1. `list_subscriptions_for_auto_renewal()` — abonnements actifs J-3 ou `past_due`, mandate actif
 2. Crée ou réutilise une facture pending (`get_or_create_renewal_invoice`)
-3. Initialise Moneroo server-side avec email/téléphone du mandate
+3. Initialise GeniusPay server-side avec email/téléphone du mandate
 4. Enregistre la tentative + notification avec `checkout_url`
 5. Cooldown 24h entre deux tentatives avec checkout actif

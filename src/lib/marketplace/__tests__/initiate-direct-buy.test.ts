@@ -68,7 +68,7 @@ describe('initiateMarketplaceDirectBuy', () => {
       success: false,
       transaction_id: '',
       checkout_url: '',
-      provider: 'moneroo',
+      provider: 'geniuspay',
       error: 'PSP unavailable',
     });
 

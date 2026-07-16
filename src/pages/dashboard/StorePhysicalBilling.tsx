@@ -157,7 +157,7 @@ export default function StorePhysicalBilling() {
             <CardHeader className="pb-2">
               <CardTitle className="text-base">Renouvellement automatique</CardTitle>
               <CardDescription>
-                Profil Moneroo enregistré — un checkout pré-rempli sera généré avant chaque échéance
+                Profil GeniusPay enregistré — un checkout pré-rempli sera généré avant chaque échéance
                 (confirmation mobile money requise).
               </CardDescription>
             </CardHeader>
@@ -219,11 +219,11 @@ export default function StorePhysicalBilling() {
               <div className="rounded-md border border-primary/30 bg-primary/5 p-3 space-y-2">
                 <p className="text-sm font-medium">Paiement de renouvellement en attente</p>
                 <p className="text-xs text-muted-foreground">
-                  Un checkout Moneroo a été préparé automatiquement. Confirmez le paiement pour
+                  Un checkout GeniusPay a été préparé automatiquement. Confirmez le paiement pour
                   prolonger votre abonnement.
                 </p>
                 <Button asChild size="sm">
-                  <a href={pendingCheckoutUrl}>Confirmer le paiement Moneroo</a>
+                  <a href={pendingCheckoutUrl}>Confirmer le paiement GeniusPay</a>
                 </Button>
               </div>
             )}
@@ -303,7 +303,7 @@ export default function StorePhysicalBilling() {
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Tentatives de paiement</CardTitle>
-              <CardDescription>Historique des prélèvements Moneroo</CardDescription>
+              <CardDescription>Historique des prélèvements GeniusPay</CardDescription>
             </CardHeader>
             <CardContent>
               {attemptsLoading ? (

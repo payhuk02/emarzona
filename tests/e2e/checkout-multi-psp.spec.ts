@@ -1,8 +1,8 @@
 /**
- * E2E Checkout multi-PSP (orchestration V2 + legacy Moneroo)
+ * E2E Checkout multi-PSP (orchestration V2 + legacy GeniusPay)
  *
  * Smoke uniquement — pas de paiement sandbox réel.
- * - Legacy : Moneroo auto-sélectionné (pas de carte « Moyen de paiement » si un seul PSP)
+ * - Legacy : GeniusPay auto-sélectionné (pas de carte « Moyen de paiement » si un seul PSP)
  * - V2 : section moyens de paiement ou message d’erreur gracieux (pas de 500)
  *
  * Variables :
@@ -54,14 +54,14 @@ test.describe('Checkout multi-PSP — routage smoke', () => {
 });
 
 test.describe('Checkout multi-PSP — orchestration V2', () => {
-  test('affiche la section moyen de paiement ou Moneroo seul sans crash', async ({ page }) => {
+  test('affiche la section moyen de paiement ou GeniusPay seul sans crash', async ({ page }) => {
     test.skip(!orchestrationV2, 'Définir VITE_PAYMENT_ORCHESTRATION_V2=true');
 
     await gotoApp(page, '/checkout?productId=00000000-0000-0000-0000-000000000001');
     await expect(page.locator('body')).toBeVisible();
 
     const paymentSection = page.getByText(/moyen de paiement/i);
-    const monerooLabel = page.getByText(/^Moneroo$/i);
+    const geniuspayLabel = page.getByText(/^GeniusPay$/i);
     const stripeLabel = page.getByText(/carte bancaire|stripe/i);
     const paypalLabel = page.getByText(/^PayPal$/i);
     const noPayment = page.getByText(/aucun moyen de paiement disponible/i);
@@ -69,7 +69,7 @@ test.describe('Checkout multi-PSP — orchestration V2', () => {
 
     await Promise.race([
       paymentSection.waitFor({ timeout: 20_000 }),
-      monerooLabel.first().waitFor({ timeout: 20_000 }),
+      geniuspayLabel.first().waitFor({ timeout: 20_000 }),
       noPayment.waitFor({ timeout: 20_000 }),
       loadError.waitFor({ timeout: 20_000 }),
     ]).catch(() => undefined);
@@ -79,7 +79,7 @@ test.describe('Checkout multi-PSP — orchestration V2', () => {
 
     const hasPspUi =
       (await paymentSection.count()) > 0 ||
-      (await monerooLabel.count()) > 0 ||
+      (await geniuspayLabel.count()) > 0 ||
       (await stripeLabel.count()) > 0 ||
       (await paypalLabel.count()) > 0 ||
       (await noPayment.count()) > 0 ||
@@ -89,7 +89,7 @@ test.describe('Checkout multi-PSP — orchestration V2', () => {
   });
 });
 
-test.describe('Checkout multi-PSP — legacy Moneroo', () => {
+test.describe('Checkout multi-PSP — legacy GeniusPay', () => {
   test('sans V2 : pas de crash, pas de clés live exposées', async ({ page }) => {
     test.skip(orchestrationV2, 'Test legacy — ne pas exécuter quand V2 est activé');
 
@@ -109,7 +109,7 @@ test.describe('Checkout multi-PSP — acheteur authentifié', () => {
     await loginAs(page, E2E_TEST_CONFIG.buyerEmail, E2E_TEST_CONFIG.buyerPassword);
   });
 
-  test('orchestration V2 : sélection Moneroo visible si plusieurs PSP (smoke)', async ({
+  test('orchestration V2 : sélection GeniusPay visible si plusieurs PSP (smoke)', async ({
     page,
   }) => {
     test.skip(!orchestrationV2, 'Définir VITE_PAYMENT_ORCHESTRATION_V2=true');
@@ -117,10 +117,10 @@ test.describe('Checkout multi-PSP — acheteur authentifié', () => {
     await loginAs(page, E2E_TEST_CONFIG.buyerEmail, E2E_TEST_CONFIG.buyerPassword);
     await gotoApp(page, '/checkout?productId=00000000-0000-0000-0000-000000000001');
 
-    const monerooRadio = page.locator('#payment-moneroo, [id^="payment-"]').first();
+    const geniuspayRadio = page.locator('#payment-geniuspay, [id^="payment-"]').first();
     await Promise.race([
       page.getByText(/moyen de paiement/i).waitFor({ timeout: 25_000 }),
-      monerooRadio.waitFor({ timeout: 25_000 }),
+      geniuspayRadio.waitFor({ timeout: 25_000 }),
       page.getByText(/aucun moyen de paiement/i).waitFor({ timeout: 25_000 }),
     ]).catch(() => undefined);
 

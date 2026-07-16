@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
-const TRANSACTION_FIELDS = 'id, store_id, order_id, customer_id, amount, currency, status, customer_email, customer_name, customer_phone, metadata, moneroo_payment_method, moneroo_transaction_id, error_message, created_at, updated_at';
+const TRANSACTION_FIELDS = 'id, store_id, order_id, customer_id, amount, currency, status, customer_email, customer_name, customer_phone, metadata, geniuspay_payment_method, geniuspay_transaction_id, error_message, created_at, updated_at';
 const PAYMENT_FIELDS = 'id, store_id, order_id, customer_id, payment_method, amount, currency, status, transaction_id, notes, created_at, updated_at';
 
 type ShippingAddress = {
@@ -43,7 +43,7 @@ export interface Payment {
   orders?: {
     order_number: string;
   } | null;
-  // Informations depuis transactions (Moneroo)
+  // Informations depuis transactions (GeniusPay)
   transaction?: {
     customer_email: string | null;
     customer_name: string | null;
@@ -80,10 +80,10 @@ export const usePayments = (
     }
 
     try {
-      // 🔧 CORRECTION: Récupérer depuis transactions (Moneroo) ET payments
+      // 🔧 CORRECTION: Récupérer depuis transactions (GeniusPay) ET payments
       // Priorité aux transactions car elles contiennent plus d'informations
 
-      // 1. Récupérer les transactions (Moneroo)
+      // 1. Récupérer les transactions (GeniusPay)
       let  transactionsQuery= supabase
         .from('transactions')
         .select(TRANSACTION_FIELDS)
@@ -151,13 +151,13 @@ export const usePayments = (
             order_id: transaction.order_id,
             customer_id: transaction.customer_id,
             payment_method:
-              (transaction as { moneroo_payment_method?: string | null }).moneroo_payment_method ||
-              'moneroo',
+              (transaction as { geniuspay_payment_method?: string | null }).geniuspay_payment_method ||
+              'geniuspay',
             amount: Number(transaction.amount || 0),
             currency: transaction.currency || 'XOF',
             status: transaction.status || 'pending',
             transaction_id:
-              (transaction as { moneroo_transaction_id?: string | null }).moneroo_transaction_id ||
+              (transaction as { geniuspay_transaction_id?: string | null }).geniuspay_transaction_id ||
               transaction.id,
             notes: transaction.error_message || null,
             created_at: transaction.created_at || new Date().toISOString(),

@@ -15,17 +15,17 @@ const envSchema = z.object({
   VITE_SUPABASE_PUBLISHABLE_KEY: z.string().min(1).optional(),
   VITE_SUPABASE_ANON_KEY: z.string().min(1).optional(),
 
-  // Moneroo (Optionnel)
-  VITE_MONEROO_API_URL: z.string().url().optional().or(z.literal('')),
-  VITE_MONEROO_TIMEOUT_MS: z.string().regex(/^\d+$/).transform(Number).optional(),
-  VITE_MONEROO_MAX_RETRIES: z.string().regex(/^\d+$/).transform(Number).optional(),
-  VITE_MONEROO_RETRY_BACKOFF_MS: z.string().regex(/^\d+$/).transform(Number).optional(),
-  VITE_MONEROO_CACHE_TTL_MS: z.string().regex(/^\d+$/).transform(Number).optional(),
-  VITE_MONEROO_CACHE_MAX_SIZE: z.string().regex(/^\d+$/).transform(Number).optional(),
-  VITE_MONEROO_RATE_LIMIT_MAX: z.string().regex(/^\d+$/).transform(Number).optional(),
-  VITE_MONEROO_RATE_LIMIT_WINDOW_MS: z.string().regex(/^\d+$/).transform(Number).optional(),
-  VITE_MONEROO_RATE_LIMIT_USER_MAX: z.string().regex(/^\d+$/).transform(Number).optional(),
-  VITE_MONEROO_RATE_LIMIT_STORE_MAX: z.string().regex(/^\d+$/).transform(Number).optional(),
+  // GeniusPay (Optionnel)
+  VITE_GENIUSPAY_API_URL: z.string().url().optional().or(z.literal('')),
+  VITE_GENIUSPAY_TIMEOUT_MS: z.string().regex(/^\d+$/).transform(Number).optional(),
+  VITE_GENIUSPAY_MAX_RETRIES: z.string().regex(/^\d+$/).transform(Number).optional(),
+  VITE_GENIUSPAY_RETRY_BACKOFF_MS: z.string().regex(/^\d+$/).transform(Number).optional(),
+  VITE_GENIUSPAY_CACHE_TTL_MS: z.string().regex(/^\d+$/).transform(Number).optional(),
+  VITE_GENIUSPAY_CACHE_MAX_SIZE: z.string().regex(/^\d+$/).transform(Number).optional(),
+  VITE_GENIUSPAY_RATE_LIMIT_MAX: z.string().regex(/^\d+$/).transform(Number).optional(),
+  VITE_GENIUSPAY_RATE_LIMIT_WINDOW_MS: z.string().regex(/^\d+$/).transform(Number).optional(),
+  VITE_GENIUSPAY_RATE_LIMIT_USER_MAX: z.string().regex(/^\d+$/).transform(Number).optional(),
+  VITE_GENIUSPAY_RATE_LIMIT_STORE_MAX: z.string().regex(/^\d+$/).transform(Number).optional(),
 
   // Sentry (Optionnel)
   VITE_SENTRY_DSN: z.string().url().optional().or(z.literal('')),

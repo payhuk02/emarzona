@@ -200,7 +200,7 @@ export default function AdminTransactionReconciliation() {
       'Currency',
       'Status',
       'Payment Provider',
-      'Moneroo Transaction ID',
+      'GeniusPay Transaction ID',
       'Created At',
       'Updated At',
     ];
@@ -213,7 +213,7 @@ export default function AdminTransactionReconciliation() {
       t.currency,
       t.status,
       t.payment_provider,
-      t.moneroo_transaction_id || '',
+      t.geniuspay_transaction_id || '',
       t.created_at,
       t.updated_at,
     ]);

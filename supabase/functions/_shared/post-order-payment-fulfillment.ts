@@ -1,6 +1,6 @@
 /**
  * Fulfillment post-paiement unifié (Stripe, futur PayPal, etc.)
- * Aligné sur moneroo-webhook : bookings, certificats artiste, emails, webhooks store.
+ * Aligné sur geniuspay-webhook : bookings, certificats artiste, emails, webhooks store.
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
@@ -481,7 +481,7 @@ export async function runPostOrderPaymentFulfillment(
     order as Record<string, unknown>,
     transaction
   );
-  const paymentProvider = (transaction?.payment_provider as string) || 'moneroo_platform';
+  const paymentProvider = (transaction?.payment_provider as string) || 'geniuspay_platform';
   await processArtistOrderItems(
     supabase,
     order as Record<string, unknown>,

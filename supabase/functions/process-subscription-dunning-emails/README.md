@@ -9,7 +9,7 @@ Envoie les emails de relance (dunning) pour les abonnements produits physiques.
 | J-7        | `subscription_renewal_reminder`    | 7 jours avant échéance           |
 | J-1        | `subscription_renewal_j1`          | 24h avant échéance               |
 | past_due   | `subscription_past_due`            | >1 jour après échéance           |
-| auto_renew | `subscription_auto_renew_checkout` | Checkout Moneroo auto créé (E23) |
+| auto_renew | `subscription_auto_renew_checkout` | Checkout GeniusPay auto créé (E23) |
 
 ## Prérequis
 

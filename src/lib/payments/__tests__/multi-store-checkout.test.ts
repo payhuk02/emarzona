@@ -20,15 +20,15 @@ describe('validateMultiStorePaymentProvider', () => {
     });
     expect(result.allowed).toBe(false);
     if (!result.allowed) {
-      expect(result.message).toMatch(/Moneroo/i);
+      expect(result.message).toMatch(/GeniusPay/i);
     }
   });
 
-  it('allows Moneroo multi-store', () => {
+  it('allows GeniusPay multi-store', () => {
     expect(
       validateMultiStorePaymentProvider({
         storeCount: 3,
-        provider: 'moneroo',
+        provider: 'geniuspay',
         orchestrationEnabled: true,
       }).allowed
     ).toBe(true);

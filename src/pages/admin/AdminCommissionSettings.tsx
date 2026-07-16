@@ -483,7 +483,7 @@ export default function AdminCommissionSettings() {
                     <CardTitle className="text-lg">Suggestions de retrait vendeur (cron)</CardTitle>
                     <CardDescription>
                       Crée des demandes <strong>en attente</strong> lorsque le solde dépasse le
-                      seuil — <strong>pas de virement Moneroo automatique</strong>. Validation
+                      seuil — <strong>pas de virement GeniusPay automatique</strong>. Validation
                       manuelle sur la page Retraits vendeurs.
                     </CardDescription>
                   </CardHeader>

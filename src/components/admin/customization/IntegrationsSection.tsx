@@ -40,7 +40,7 @@ export const IntegrationsSection = ({ onChange }: IntegrationsSectionProps) => {
 
   const [integrations, setIntegrations] = useState({
     // Paiements
-    moneroo: {
+    geniuspay: {
       enabled: false,
       apiKey: '',
       mode: 'sandbox' as 'sandbox' | 'production',
@@ -191,51 +191,51 @@ export const IntegrationsSection = ({ onChange }: IntegrationsSectionProps) => {
 
         {/* Paiements */}
         <TabsContent value="payments" className="space-y-4">
-          {/* Moneroo */}
+          {/* GeniusPay */}
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-base flex items-center gap-2">
                     <CreditCard className="h-4 w-4" />
-                    Moneroo
+                    GeniusPay
                   </CardTitle>
                   <CardDescription className="text-xs">
-                    Passerelle de paiement Moneroo
+                    Passerelle de paiement GeniusPay
                   </CardDescription>
                 </div>
                 <Switch
-                  checked={integrations.moneroo.enabled}
+                  checked={integrations.geniuspay.enabled}
                   onCheckedChange={checked =>
-                    handleIntegrationChange('moneroo', 'enabled', checked)
+                    handleIntegrationChange('geniuspay', 'enabled', checked)
                   }
                 />
               </div>
             </CardHeader>
-            {integrations.moneroo.enabled && (
+            {integrations.geniuspay.enabled && (
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label>Clé API</Label>
                   <div className="flex gap-2">
                     <Input
-                      type={showSecrets.moneroo_apiKey ? 'text' : 'password'}
-                      value={integrations.moneroo.apiKey}
-                      onChange={e => handleIntegrationChange('moneroo', 'apiKey', e.target.value)}
+                      type={showSecrets.geniuspay_apiKey ? 'text' : 'password'}
+                      value={integrations.geniuspay.apiKey}
+                      onChange={e => handleIntegrationChange('geniuspay', 'apiKey', e.target.value)}
                       placeholder="sk_live_..."
                       className="flex-1 min-w-0"
                     />
                     <Button
                       variant="outline"
                       size="icon"
-                      onClick={() => toggleSecretVisibility('moneroo_apiKey')}
+                      onClick={() => toggleSecretVisibility('geniuspay_apiKey')}
                       className="shrink-0"
                       aria-label={
-                        showSecrets.moneroo_apiKey
-                          ? 'Masquer la clé API Moneroo'
-                          : 'Afficher la clé API Moneroo'
+                        showSecrets.geniuspay_apiKey
+                          ? 'Masquer la clé API GeniusPay'
+                          : 'Afficher la clé API GeniusPay'
                       }
                     >
-                      {showSecrets.moneroo_apiKey ? (
+                      {showSecrets.geniuspay_apiKey ? (
                         <EyeOff className="h-4 w-4" aria-hidden="true" />
                       ) : (
                         <Eye className="h-4 w-4" aria-hidden="true" />
@@ -247,16 +247,16 @@ export const IntegrationsSection = ({ onChange }: IntegrationsSectionProps) => {
                   <Label>Mode</Label>
                   <div className="flex gap-2">
                     <Button
-                      variant={integrations.moneroo.mode === 'sandbox' ? 'default' : 'outline'}
+                      variant={integrations.geniuspay.mode === 'sandbox' ? 'default' : 'outline'}
                       size="sm"
-                      onClick={() => handleIntegrationChange('moneroo', 'mode', 'sandbox')}
+                      onClick={() => handleIntegrationChange('geniuspay', 'mode', 'sandbox')}
                     >
                       Sandbox
                     </Button>
                     <Button
-                      variant={integrations.moneroo.mode === 'production' ? 'default' : 'outline'}
+                      variant={integrations.geniuspay.mode === 'production' ? 'default' : 'outline'}
                       size="sm"
-                      onClick={() => handleIntegrationChange('moneroo', 'mode', 'production')}
+                      onClick={() => handleIntegrationChange('geniuspay', 'mode', 'production')}
                     >
                       Production
                     </Button>
@@ -813,7 +813,7 @@ export const IntegrationsSection = ({ onChange }: IntegrationsSectionProps) => {
             <div className="space-y-1">
               <Label className="text-amber-500">Important</Label>
               <p className="text-sm text-muted-foreground">
-                Les clés API (Moneroo, Resend, Stripe, FedEx, OpenAI, etc.) doivent être configurées
+                Les clés API (GeniusPay, Resend, Stripe, FedEx, OpenAI, etc.) doivent être configurées
                 dans Supabase Edge Functions Secrets. Cette interface enregistre uniquement les
                 options non sensibles (activation, IDs publics, mode) — les secrets saisis ne sont
                 pas persistés.

@@ -175,7 +175,7 @@ export default function BuyNowOrderSummary({
             ) : (
               <>
                 <Shield className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                <p>Paiement sécurisé par Moneroo. Vos informations sont protégées.</p>
+                <p>Paiement sécurisé par GeniusPay. Vos informations sont protégées.</p>
               </>
             )}
           </div>

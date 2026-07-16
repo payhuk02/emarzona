@@ -770,7 +770,7 @@ export function useUpdateAuction() {
  * Terminer une enchère
  */
 /**
- * Paiement Moneroo pour l'enchérisseur gagnant (H-03).
+ * Paiement GeniusPay pour l'enchérisseur gagnant (H-03).
  */
 export function usePayAuctionWin() {
   const { toast } = useToast();

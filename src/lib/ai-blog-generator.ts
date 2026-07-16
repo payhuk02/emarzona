@@ -2,7 +2,7 @@
  * Client — génération IA d'articles blog plateforme
  */
 import { supabase } from '@/integrations/supabase/client';
-import { extractDetailedMessage, extractErrorDetails } from '@/lib/moneroo-error-extractor';
+import { extractDetailedMessage, extractErrorDetails } from '@/lib/geniuspay-error-extractor';
 
 export interface BlogAIGenerateRequest {
   topic: string;

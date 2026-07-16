@@ -70,7 +70,7 @@ export default function PayBalance() {
     enabled: !!orderId,
   });
 
-  // Mutation pour initier le paiement du solde (orchestrateur V2 ou Moneroo legacy)
+  // Mutation pour initier le paiement du solde (orchestrateur V2 ou GeniusPay legacy)
   const payBalanceMutation = useMutation({
     mutationFn: async () => {
       if (!order || !orderId) {

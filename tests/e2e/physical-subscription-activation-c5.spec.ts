@@ -1,5 +1,5 @@
 /**
- * E2E C5 — Activation abonnement vendeur physique (upsert webhook Moneroo)
+ * E2E C5 — Activation abonnement vendeur physique (upsert webhook GeniusPay)
  *
  * Staging :
  *   E2E_STAGING_SUPABASE_URL
@@ -68,14 +68,14 @@ test.describe('C5 — Contrat abonnement physique', () => {
     ).toEqual([]);
   });
 
-  test('abonnements activés via moneroo_webhook ont status active', async () => {
+  test('abonnements activés via geniuspay_webhook ont status active', async () => {
     test.skip(!hasStagingSupabaseCredentials(), 'E2E_STAGING_SUPABASE_* non configuré');
 
     const supabase = createStagingSupabaseClient();
     const { data: subs, error } = await supabase
       .from('store_platform_subscriptions')
       .select('id, store_id, status, payment_provider, metadata')
-      .contains('metadata', { activated_via: 'moneroo_webhook' })
+      .contains('metadata', { activated_via: 'geniuspay_webhook' })
       .limit(10);
 
     expect(error).toBeNull();
@@ -86,7 +86,7 @@ test.describe('C5 — Contrat abonnement physique', () => {
 
     for (const sub of subs ?? []) {
       expect(sub.status).toBe('active');
-      expect(sub.payment_provider).toBe('moneroo_platform');
+      expect(sub.payment_provider).toBe('geniuspay_platform');
     }
   });
 });

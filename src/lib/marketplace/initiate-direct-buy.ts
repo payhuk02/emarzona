@@ -1,6 +1,6 @@
 /**
- * Achat direct marketplace / storefront (sans panier) — orchestrateur V2 ou Moneroo legacy.
- * Routage PSP par boutique (Stripe Connect, PayPal, Moneroo plateforme).
+ * Achat direct marketplace / storefront (sans panier) — orchestrateur V2 ou GeniusPay legacy.
+ * Routage PSP par boutique (Stripe Connect, PayPal, GeniusPay plateforme).
  */
 import { initiatePayment, type PaymentResult } from '@/lib/payment-service';
 import { isSupportedCurrency, type Currency } from '@/lib/currency-converter';

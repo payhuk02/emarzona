@@ -4,7 +4,7 @@
  * Vérifie que le module order-status (aligné SQL + webhooks) accepte
  * paid + (completed | confirmed) pour revenus et accès acheteur.
  *
- * Les flux Moneroo complets restent dans digital-product-workflow.spec.ts.
+ * Les flux GeniusPay complets restent dans digital-product-workflow.spec.ts.
  */
 
 import { test, expect } from '@playwright/test';
@@ -26,7 +26,7 @@ test.describe('Order status — paid fulfillment contract', () => {
     expect(resolveOrderStatusAfterPayment(['digital', 'physical'])).toBe('confirmed');
   });
 
-  test('paid + confirmed counts as revenue-eligible (Moneroo legacy path)', () => {
+  test('paid + confirmed counts as revenue-eligible (GeniusPay legacy path)', () => {
     expect(isPaidRevenueEligibleOrder('confirmed', 'paid')).toBe(true);
     expect(isPaidRevenueEligibleOrder('completed', 'paid')).toBe(true);
     expect(isPaidRevenueEligibleOrder('confirmed', 'pending')).toBe(false);

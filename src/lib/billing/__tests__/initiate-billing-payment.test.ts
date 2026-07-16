@@ -14,7 +14,7 @@ describe('initiateBillingCheckout', () => {
       success: true,
       transaction_id: 'tx-1',
       checkout_url: 'https://checkout.example/session',
-      provider: 'moneroo',
+      provider: 'geniuspay',
     });
   });
 
@@ -77,7 +77,7 @@ describe('initiateBillingCheckout', () => {
       success: false,
       transaction_id: '',
       checkout_url: '',
-      provider: 'moneroo',
+      provider: 'geniuspay',
       error: 'Rate limited',
     });
 

@@ -608,7 +608,7 @@ export const MultiCurrencyMockup = () => {
 export const SecurityMockup = () => {
   const integrations = [
     {
-      name: 'Moneroo',
+      name: 'GeniusPay',
       status: 'connected',
       icon: '💰',
       color: 'bg-emerald-500',

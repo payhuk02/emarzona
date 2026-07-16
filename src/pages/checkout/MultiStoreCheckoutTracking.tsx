@@ -133,7 +133,7 @@ export default function MultiStoreCheckoutTracking() {
 
       const { data, error } = await supabase
         .from('transactions')
-        .select('order_id, moneroo_checkout_url')
+        .select('order_id, geniuspay_checkout_url')
         .in('order_id', orderIds)
         .order('created_at', { ascending: false });
 
@@ -145,11 +145,11 @@ export default function MultiStoreCheckoutTracking() {
       const urls: Record<string, string> = {};
       interface TransactionData {
         order_id: string;
-        moneroo_checkout_url?: string;
+        geniuspay_checkout_url?: string;
       }
       (data || []).forEach((tx: TransactionData) => {
-        if (tx.moneroo_checkout_url && !urls[tx.order_id]) {
-          urls[tx.order_id] = tx.moneroo_checkout_url;
+        if (tx.geniuspay_checkout_url && !urls[tx.order_id]) {
+          urls[tx.order_id] = tx.geniuspay_checkout_url;
         }
       });
 

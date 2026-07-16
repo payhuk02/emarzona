@@ -14,7 +14,7 @@
  * Prérequis:
  * - Base de données de test configurée
  * - Compte vendeur test existant
- * - Moneroo en mode sandbox
+ * - GeniusPay en mode sandbox
  */
 
 import { test, expect } from '@playwright/test';
@@ -303,7 +303,7 @@ test.describe('Workflow Service Complet', () => {
     // Cliquer sur "Réserver"
     await page.click('button:has-text("Réserver")');
 
-    // Attendre la redirection vers Moneroo
+    // Attendre la redirection vers GeniusPay
     await page.waitForURL('**/checkout/**', { timeout: TEST_CONFIG.paymentTimeout });
   });
 

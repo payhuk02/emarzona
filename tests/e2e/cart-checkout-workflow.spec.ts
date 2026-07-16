@@ -3,7 +3,7 @@
  *
  * Vérifie le routage /checkout (panier) vs /checkout?productId= (achat direct),
  * l’accessibilité des pages et les gardes UX (panier vide).
- * Les flux paiement Moneroo complets nécessitent auth + données de test (voir physical-product-workflow).
+ * Les flux paiement GeniusPay complets nécessitent auth + données de test (voir physical-product-workflow).
  */
 
 import { test, expect } from '@playwright/test';

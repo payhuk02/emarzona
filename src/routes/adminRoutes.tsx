@@ -51,8 +51,8 @@ const PlatformCustomization = lazyPage(() =>
     })
 );
 const AdminCommissionPayments = lazyPage(() => import('@/pages/admin/AdminCommissionPayments'));
-const MonerooAnalytics = lazyPage(() => import('@/pages/admin/MonerooAnalytics'));
-const MonerooReconciliation = lazyPage(() => import('@/pages/admin/MonerooReconciliation'));
+const GeniusPayAnalytics = lazyPage(() => import('@/pages/admin/GeniusPayAnalytics'));
+const GeniusPayReconciliation = lazyPage(() => import('@/pages/admin/GeniusPayReconciliation'));
 const TransactionMonitoring = lazyPage(() => import('@/pages/admin/TransactionMonitoring'));
 const AdminNotifications = lazyPage(() => import('@/pages/admin/AdminNotifications'));
 const AdminDisputes = lazyPage(() => import('@/pages/admin/AdminDisputes'));
@@ -135,8 +135,8 @@ export const adminRoutes = (
     {pr('/admin/platform-faq', AdminPlatformFaq)}
     {pr('/admin/platform-blog', AdminPlatformBlog)}
     {pr('/admin/newsletter-subscribers', AdminNewsletterSubscribers)}
-    {pr('/admin/moneroo-analytics', MonerooAnalytics)}
-    {pr('/admin/moneroo-reconciliation', MonerooReconciliation)}
+    {pr('/admin/geniuspay-analytics', GeniusPayAnalytics)}
+    {pr('/admin/geniuspay-reconciliation', GeniusPayReconciliation)}
     {pr('/admin/transaction-monitoring', TransactionMonitoring)}
     {pr('/admin/notifications', AdminNotifications)}
     {pr('/admin/revenue', PlatformRevenue)}

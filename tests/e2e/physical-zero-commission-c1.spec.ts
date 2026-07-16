@@ -109,7 +109,7 @@ test.describe('C1 — Staging SQL validation', () => {
     expect(error).toBeNull();
 
     if (!transactions?.length) {
-      test.skip(true, 'Pas de transaction Connect/Commerce pour cette commande (Moneroo wallet OK)');
+      test.skip(true, 'Pas de transaction Connect/Commerce pour cette commande (GeniusPay wallet OK)');
     }
 
     for (const tx of transactions ?? []) {

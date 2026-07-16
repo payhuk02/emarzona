@@ -11,7 +11,7 @@
  * Prérequis:
  * - Base de données de test configurée
  * - Compte vendeur test existant
- * - Moneroo en mode sandbox
+ * - GeniusPay en mode sandbox
  */
 
 import { test, expect } from '@playwright/test';
@@ -203,8 +203,8 @@ test.describe('Workflow Produit Digital Complet', () => {
     // Cliquer sur "Acheter"
     await page.click('button:has-text("Acheter")');
 
-    // Attendre la redirection vers Moneroo (ou page de paiement)
-    // Note: En environnement de test, Moneroo devrait être en mode sandbox
+    // Attendre la redirection vers GeniusPay (ou page de paiement)
+    // Note: En environnement de test, GeniusPay devrait être en mode sandbox
     await page.waitForURL('**/checkout/**', { timeout: TEST_CONFIG.paymentTimeout });
   });
 
@@ -213,7 +213,7 @@ test.describe('Workflow Produit Digital Complet', () => {
    */
   test('7. Vérifier licence générée après achat', async ({ page, context }) => {
     // Note: Ce test nécessite que le paiement soit complété
-    // En environnement de test, on pourrait simuler un webhook Moneroo
+    // En environnement de test, on pourrait simuler un webhook GeniusPay
 
     // Se connecter en tant qu'acheteur
     await page.goto('/login');

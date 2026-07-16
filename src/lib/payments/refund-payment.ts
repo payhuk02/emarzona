@@ -1,10 +1,10 @@
 /**
- * Remboursement unifié multi-PSP (Moneroo, Stripe Connect, PayPal Commerce)
+ * Remboursement unifié multi-PSP (GeniusPay, Stripe Connect, PayPal Commerce)
  */
 
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
-import { refundMonerooPayment, type RefundOptions, type RefundResult } from '@/lib/moneroo-payment';
+import { refundGeniusPayPayment, type RefundOptions, type RefundResult } from '@/lib/geniuspay-payment';
 
 async function refundPayPalCommerce(options: RefundOptions): Promise<RefundResult> {
   const { data, error } = await supabase.functions.invoke<RefundResult>('paypal-refund', {
@@ -52,7 +52,7 @@ async function notifyRefund(result: RefundResult, transactionId: string): Promis
 
     if (!transaction) return;
 
-    const { notifyPaymentRefunded } = await import('@/lib/moneroo-notifications');
+    const { notifyPaymentRefunded } = await import('@/lib/geniuspay-notifications');
     await notifyPaymentRefunded({
       transactionId,
       storeId: transaction.store_id ?? undefined,
@@ -83,7 +83,7 @@ export async function refundPayment(options: RefundOptions): Promise<RefundResul
     return { success: false, error: 'Transaction not found' };
   }
 
-  const provider = transaction.payment_provider ?? 'moneroo';
+  const provider = transaction.payment_provider ?? 'geniuspay';
 
   let result: RefundResult;
 
@@ -94,9 +94,9 @@ export async function refundPayment(options: RefundOptions): Promise<RefundResul
     case 'stripe_connect':
       result = await refundStripeConnect(options);
       break;
-    case 'moneroo':
-    case 'moneroo_platform':
-      result = await refundMonerooPayment(options);
+    case 'geniuspay':
+    case 'geniuspay_platform':
+      result = await refundGeniusPayPayment(options);
       break;
     default:
       return { success: false, error: `Refunds not supported for provider: ${provider}` };

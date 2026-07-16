@@ -4,7 +4,7 @@
  */
 
 export type PaymentProviderCode =
-  | 'moneroo_platform'
+  | 'geniuspay_platform'
   | 'stripe_connect'
   | 'paypal_commerce'
   | 'flutterwave_connect';
@@ -35,14 +35,14 @@ export interface StorePaymentOption {
   label: string;
 }
 
-/** Code court utilisé côté checkout legacy (moneroo) */
-export type CheckoutPaymentProviderLegacy = 'moneroo';
+/** Code court utilisé côté checkout legacy (geniuspay) */
+export type CheckoutPaymentProviderLegacy = 'geniuspay';
 
 export function toLegacyCheckoutProvider(
   provider: PaymentProviderCode
 ): CheckoutPaymentProviderLegacy {
-  if (provider === 'moneroo_platform') {
-    return 'moneroo';
+  if (provider === 'geniuspay_platform') {
+    return 'geniuspay';
   }
   throw new Error(`Provider ${provider} not mapped to legacy checkout yet`);
 }

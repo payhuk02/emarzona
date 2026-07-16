@@ -6,7 +6,7 @@
  * 1. Créer/récupérer customer
  * 2. Vérifier si l'utilisateur est déjà inscrit
  * 3. Créer order + order_item
- * 4. Initier paiement Moneroo
+ * 4. Initier paiement GeniusPay
  * 5. Créer enrollment automatique après paiement réussi (via webhook)
  */
 
@@ -64,10 +64,10 @@ export interface CreateCourseOrderResult {
   /** ID de l'order_item */
   orderItemId: string;
 
-  /** URL de checkout Moneroo */
+  /** URL de checkout GeniusPay */
   checkoutUrl: string;
 
-  /** ID de transaction Moneroo */
+  /** ID de transaction GeniusPay */
   transactionId: string;
 }
 
@@ -86,7 +86,7 @@ export interface CreateCourseOrderResult {
  *     customerEmail: 'user@example.com',
  *   });
  *
- *   // Rediriger vers Moneroo
+ *   // Rediriger vers GeniusPay
  *   window.location.href = result.checkoutUrl;
  * };
  * ```
@@ -320,7 +320,7 @@ export const useCreateCourseOrder = () => {
         });
       });
 
-      // 10. Initier paiement Moneroo
+      // 10. Initier paiement GeniusPay
       // Convertir currency en type Currency
       const { isSupportedCurrency } = await import('@/lib/currency-converter');
       type Currency = 'XOF' | 'EUR' | 'USD' | 'GBP' | 'NGN' | 'GHS' | 'KES' | 'ZAR';

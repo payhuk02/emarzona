@@ -1,6 +1,6 @@
 /**
  * Service de conversion de devises
- * Supporte la conversion entre différentes devises pour Moneroo
+ * Supporte la conversion entre différentes devises pour GeniusPay
  * Utilise une API de taux de change en temps réel avec fallback sur taux statiques
  */
 

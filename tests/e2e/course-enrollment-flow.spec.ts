@@ -80,7 +80,7 @@ test.describe('Flux inscription aux cours', () => {
     expect(page.url()).toMatch(/\/(login|auth|checkout)/);
   });
 
-  test('utilisateur connecté : CTA mène vers checkout ou Moneroo', async ({ page }) => {
+  test('utilisateur connecté : CTA mène vers checkout ou GeniusPay', async ({ page }) => {
     test.skip(
       !process.env.E2E_RUN_AUTH_TESTS,
       'Set E2E_RUN_AUTH_TESTS=1 avec compte acheteur valide'
@@ -115,8 +115,8 @@ test.describe('Flux inscription aux cours', () => {
     }
 
     await enrollButton.click();
-    await page.waitForURL(/\/(checkout|moneroo)/, { timeout: E2E_TEST_CONFIG.paymentTimeout });
-    expect(page.url()).toMatch(/\/checkout|moneroo/);
+    await page.waitForURL(/\/(checkout|geniuspay)/, { timeout: E2E_TEST_CONFIG.paymentTimeout });
+    expect(page.url()).toMatch(/\/checkout|geniuspay/);
   });
 
   test('page checkout répond sans erreur serveur', async ({ page }) => {

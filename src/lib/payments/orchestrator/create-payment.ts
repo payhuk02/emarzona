@@ -3,7 +3,7 @@
  */
 
 import { logger } from '@/lib/logger';
-import { createMonerooPlatformPayment } from '../adapters/moneroo-adapter';
+import { createGeniusPayPlatformPayment } from '../adapters/geniuspay-adapter';
 import { createStripeConnectPayment } from '../adapters/stripe-connect-adapter';
 import { createPayPalCommercePayment } from '../adapters/paypal-commerce-adapter';
 import type {
@@ -21,8 +21,8 @@ async function executeProviderPayment(
   request: OrchestratedPaymentRequest
 ): Promise<OrchestratedPaymentResult> {
   switch (provider) {
-    case 'moneroo_platform':
-      return createMonerooPlatformPayment({ ...request, connections: request.connections });
+    case 'geniuspay_platform':
+      return createGeniusPayPlatformPayment({ ...request, connections: request.connections });
 
     case 'stripe_connect':
       return createStripeConnectPayment(request);
@@ -43,24 +43,24 @@ async function executeProviderPayment(
   }
 }
 
-async function fallbackToMoneroo(
+async function fallbackToGeniusPay(
   request: OrchestratedPaymentRequest,
   fromProvider: PaymentProviderCode,
   reason: string
 ): Promise<OrchestratedPaymentResult> {
-  logger.warn('Orchestrator PSP fallback to Moneroo', {
+  logger.warn('Orchestrator PSP fallback to GeniusPay', {
     fromProvider,
     reason,
     storeId: request.storeId,
     orderId: request.orderId,
   });
 
-  const result = await createMonerooPlatformPayment(request);
+  const result = await createGeniusPayPlatformPayment(request);
   return {
     ...result,
     psp_fallback: {
       from_provider: fromProvider,
-      to_provider: 'moneroo_platform',
+      to_provider: 'geniuspay_platform',
       reason,
     },
   };
@@ -72,7 +72,7 @@ async function fallbackToMoneroo(
 export async function createOrchestratedPayment(
   request: OrchestratedPaymentRequest
 ): Promise<OrchestratedPaymentResult> {
-  let resolvedProvider: PaymentProviderCode = 'moneroo_platform';
+  let resolvedProvider: PaymentProviderCode = 'geniuspay_platform';
 
   try {
     const [connections, forcePlatform] = await Promise.all([
@@ -105,15 +105,15 @@ export async function createOrchestratedPayment(
     const result = await executeProviderPayment(resolved.provider, request);
 
     if (
-      resolved.provider !== 'moneroo_platform' &&
-      result.provider === 'moneroo_platform' &&
+      resolved.provider !== 'geniuspay_platform' &&
+      result.provider === 'geniuspay_platform' &&
       !result.psp_fallback
     ) {
       return {
         ...result,
         psp_fallback: {
           from_provider: resolved.provider,
-          to_provider: 'moneroo_platform',
+          to_provider: 'geniuspay_platform',
           reason: 'adapter_redirect',
         },
       };
@@ -122,21 +122,21 @@ export async function createOrchestratedPayment(
     return result;
   } catch (error: unknown) {
     if (error instanceof NotReadyError) {
-      return fallbackToMoneroo(request, error.provider, 'provider_not_ready');
+      return fallbackToGeniusPay(request, error.provider, 'provider_not_ready');
     }
 
     if (error instanceof Error && request.orderId && error.message.includes('Stripe')) {
-      return fallbackToMoneroo(request, 'stripe_connect', 'provider_error');
+      return fallbackToGeniusPay(request, 'stripe_connect', 'provider_error');
     }
 
     const message = error instanceof Error ? error.message : String(error);
     logger.error('createOrchestratedPayment failed', { error: message, storeId: request.storeId });
 
-    if (resolvedProvider !== 'moneroo_platform') {
+    if (resolvedProvider !== 'geniuspay_platform') {
       try {
-        return await fallbackToMoneroo(request, resolvedProvider, 'provider_error');
+        return await fallbackToGeniusPay(request, resolvedProvider, 'provider_error');
       } catch (fallbackError) {
-        logger.error('Moneroo fallback also failed', { fallbackError, storeId: request.storeId });
+        logger.error('GeniusPay fallback also failed', { fallbackError, storeId: request.storeId });
       }
     }
 
@@ -144,7 +144,7 @@ export async function createOrchestratedPayment(
       success: false,
       transaction_id: '',
       checkout_url: '',
-      provider: 'moneroo_platform',
+      provider: 'geniuspay_platform',
       error: message,
     };
   }

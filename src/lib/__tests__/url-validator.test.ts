@@ -22,8 +22,8 @@ describe('url-validator', () => {
   });
 
   describe('validateRedirectUrl', () => {
-    it('devrait valider une URL Moneroo valide', () => {
-      const result = validateRedirectUrl('https://moneroo.io/checkout/123');
+    it('devrait valider une URL GeniusPay valide', () => {
+      const result = validateRedirectUrl('https://geniuspay.io/checkout/123');
       
       expect(result.isValid).toBe(true);
       expect(result.url).toBeDefined();
@@ -57,7 +57,7 @@ describe('url-validator', () => {
     });
 
     it('devrait rejeter une URL avec un protocole non autorisé (ftp)', () => {
-      const result = validateRedirectUrl('ftp://moneroo.io/checkout');
+      const result = validateRedirectUrl('ftp://geniuspay.io/checkout');
       
       expect(result.isValid).toBe(false);
       expect(result.error).toContain('Protocole non autorisé');
@@ -72,7 +72,7 @@ describe('url-validator', () => {
 
   describe('isPaymentDomain', () => {
     it('devrait retourner true pour un domaine autorisé', () => {
-      const result = isPaymentDomain('https://moneroo.io/checkout');
+      const result = isPaymentDomain('https://geniuspay.io/checkout');
       expect(result).toBe(true);
     });
 
@@ -87,9 +87,9 @@ describe('url-validator', () => {
       const originalLocation = window.location;
       window.location = { href: '' } as any;
 
-      safeRedirect('https://moneroo.io/checkout/123');
+      safeRedirect('https://geniuspay.io/checkout/123');
       
-      expect(window.location.href).toBe('https://moneroo.io/checkout/123');
+      expect(window.location.href).toBe('https://geniuspay.io/checkout/123');
       
       window.location = originalLocation;
     });
@@ -123,12 +123,12 @@ describe('url-validator', () => {
   describe('extractAndValidateUrl', () => {
     it('devrait extraire et valider une URL depuis une réponse API', () => {
       const response = {
-        checkout_url: 'https://moneroo.io/checkout/123',
+        checkout_url: 'https://geniuspay.io/checkout/123',
       };
       
       const url = extractAndValidateUrl(response);
       
-      expect(url).toBe('https://moneroo.io/checkout/123');
+      expect(url).toBe('https://geniuspay.io/checkout/123');
     });
 
     it('devrait retourner null si l\'URL est invalide', () => {
@@ -151,12 +151,12 @@ describe('url-validator', () => {
 
     it('devrait utiliser un champ personnalisé', () => {
       const response = {
-        redirect_url: 'https://moneroo.io/checkout/123',
+        redirect_url: 'https://geniuspay.io/checkout/123',
       };
       
       const url = extractAndValidateUrl(response, 'redirect_url');
       
-      expect(url).toBe('https://moneroo.io/checkout/123');
+      expect(url).toBe('https://geniuspay.io/checkout/123');
     });
   });
 
@@ -164,7 +164,7 @@ describe('url-validator', () => {
     it('devrait retourner la liste des domaines autorisés', () => {
       const domains = getAllowedDomains();
       
-      expect(domains).toContain('moneroo.io');
+      expect(domains).toContain('geniuspay.io');
       expect(domains).toContain('emarzona.com');
       expect(domains.length).toBeGreaterThan(0);
     });

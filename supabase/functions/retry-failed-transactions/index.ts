@@ -53,10 +53,10 @@ async function verifyTransactionWithProvider(
   transaction: any
 ): Promise<{ success: boolean; newStatus?: string; error?: string }> {
   try {
-      if (transaction.payment_provider === 'moneroo' && transaction.moneroo_transaction_id) {
-        // Appeler l'Edge Function moneroo pour vérifier le statut
-        const monerooUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/moneroo`;
-        const response = await fetch(monerooUrl, {
+      if (transaction.payment_provider === 'geniuspay' && transaction.geniuspay_transaction_id) {
+        // Appeler l'Edge Function geniuspay pour vérifier le statut
+        const geniuspayUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/geniuspay`;
+        const response = await fetch(geniuspayUrl, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
@@ -65,22 +65,22 @@ async function verifyTransactionWithProvider(
           body: JSON.stringify({
             action: 'get_payment',
             data: {
-              paymentId: transaction.moneroo_transaction_id,
+              paymentId: transaction.geniuspay_transaction_id,
             },
           }),
         });
 
         if (!response.ok) {
           const errorText = await response.text();
-          return { success: false, error: `Moneroo API error: ${response.status} - ${errorText}` };
+          return { success: false, error: `GeniusPay API error: ${response.status} - ${errorText}` };
         }
 
         const responseData = await response.json();
         
-        // La réponse Moneroo peut être dans data.data ou directement dans data
+        // La réponse GeniusPay peut être dans data.data ou directement dans data
         const paymentData = responseData.data?.data || responseData.data || responseData;
         
-        // Mapper le statut Moneroo vers notre statut
+        // Mapper le statut GeniusPay vers notre statut
         const statusMap: Record<string, string> = {
           'completed': 'completed',
           'success': 'completed',
@@ -91,8 +91,8 @@ async function verifyTransactionWithProvider(
           'expired': 'cancelled',
         };
 
-        const monerooStatus = paymentData.status?.toLowerCase() || paymentData.payment_status?.toLowerCase() || 'processing';
-        const newStatus = statusMap[monerooStatus] || 'processing';
+        const geniuspayStatus = paymentData.status?.toLowerCase() || paymentData.payment_status?.toLowerCase() || 'processing';
+        const newStatus = statusMap[geniuspayStatus] || 'processing';
 
         return { 
           success: true, 
@@ -231,7 +231,7 @@ serve(async (req) => {
     const { data: transactions, error: transactionsError } = await supabase
       .from('transactions')
       .select(
-        'id,status,payment_provider,moneroo_transaction_id,order_id,payment_id,amount,currency,customer_id,payment_method,moneroo_payment_method,webhook_attempts'
+        'id,status,payment_provider,geniuspay_transaction_id,order_id,payment_id,amount,currency,customer_id,payment_method,geniuspay_payment_method,webhook_attempts'
       )
       .in('id', transactionIds);
 

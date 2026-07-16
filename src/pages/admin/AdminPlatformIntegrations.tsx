@@ -1,5 +1,5 @@
 /**
- * Intégrations plateforme (admin) — secrets globaux Moneroo, Resend, FedEx, etc.
+ * Intégrations plateforme (admin) — secrets globaux GeniusPay, Resend, FedEx, etc.
  * Distinct de /dashboard/integrations (intégrations par boutique vendeur).
  */
 

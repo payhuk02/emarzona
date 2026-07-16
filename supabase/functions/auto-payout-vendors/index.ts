@@ -156,7 +156,7 @@ async function createAutomaticWithdrawal(
         withdrawal_source: 'auto_payout_suggested',
         notes: `Demande suggérée par le système — solde éligible au seuil (${new Date().toISOString().split('T')[0]})`,
         admin_notes:
-          "Créée par le cron auto-payout-vendors. Validation et virement manuels par l'équipe (pas de transfert Moneroo automatique).",
+          "Créée par le cron auto-payout-vendors. Validation et virement manuels par l'équipe (pas de transfert GeniusPay automatique).",
       })
       .select('id')
       .single();

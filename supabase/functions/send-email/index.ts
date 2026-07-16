@@ -30,7 +30,7 @@ const USER_ALLOWED_TEMPLATES = new Set([
   'payment_pending',
 ]);
 
-/** Alias legacy (webhooks Moneroo, etc.) */
+/** Alias legacy (webhooks GeniusPay, etc.) */
 const PAYMENT_TEMPLATE_ALIASES: Record<string, string> = {
   'payment-received': 'payment_success',
   'payment-failed': 'payment_failed',

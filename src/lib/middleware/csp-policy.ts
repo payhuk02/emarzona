@@ -20,7 +20,7 @@ export function buildCspHeader(nonce: string): string {
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com data:",
     "img-src 'self' data: blob: https:",
-    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://www.google-analytics.com https://www.googletagmanager.com https://api.moneroo.com https://storage.googleapis.com https://api.exchangerate-api.com https://cloudflareinsights.com",
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://www.google-analytics.com https://www.googletagmanager.com https://api.geniuspay.com https://storage.googleapis.com https://api.exchangerate-api.com https://cloudflareinsights.com",
     "frame-src 'self' https://*.supabase.co",
     "object-src 'none'",
     "base-uri 'self'",

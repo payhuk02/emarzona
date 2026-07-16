@@ -19197,14 +19197,14 @@ export type Database = {
         };
         Relationships: [];
       };
-      moneroo_reconciliation_mismatches: {
+      geniuspay_reconciliation_mismatches: {
         Row: {
           created_at: string;
           db_value: Json | null;
           discrepancy_type: string;
           id: string;
-          moneroo_transaction_id: string | null;
-          moneroo_value: Json | null;
+          geniuspay_transaction_id: string | null;
+          geniuspay_value: Json | null;
           resolved: boolean;
           run_id: string | null;
           transaction_id: string | null;
@@ -19214,8 +19214,8 @@ export type Database = {
           db_value?: Json | null;
           discrepancy_type: string;
           id?: string;
-          moneroo_transaction_id?: string | null;
-          moneroo_value?: Json | null;
+          geniuspay_transaction_id?: string | null;
+          geniuspay_value?: Json | null;
           resolved?: boolean;
           run_id?: string | null;
           transaction_id?: string | null;
@@ -19225,22 +19225,22 @@ export type Database = {
           db_value?: Json | null;
           discrepancy_type?: string;
           id?: string;
-          moneroo_transaction_id?: string | null;
-          moneroo_value?: Json | null;
+          geniuspay_transaction_id?: string | null;
+          geniuspay_value?: Json | null;
           resolved?: boolean;
           run_id?: string | null;
           transaction_id?: string | null;
         };
         Relationships: [
           {
-            foreignKeyName: 'moneroo_reconciliation_mismatches_run_id_fkey';
+            foreignKeyName: 'geniuspay_reconciliation_mismatches_run_id_fkey';
             columns: ['run_id'];
             isOneToOne: false;
-            referencedRelation: 'moneroo_reconciliation_runs';
+            referencedRelation: 'geniuspay_reconciliation_runs';
             referencedColumns: ['id'];
           },
           {
-            foreignKeyName: 'moneroo_reconciliation_mismatches_transaction_id_fkey';
+            foreignKeyName: 'geniuspay_reconciliation_mismatches_transaction_id_fkey';
             columns: ['transaction_id'];
             isOneToOne: false;
             referencedRelation: 'transactions';
@@ -19248,7 +19248,7 @@ export type Database = {
           },
         ];
       };
-      moneroo_reconciliation_runs: {
+      geniuspay_reconciliation_runs: {
         Row: {
           completed_at: string | null;
           errors: number;
@@ -36543,7 +36543,7 @@ export type Database = {
           id: string;
           last_successful_at: string | null;
           metadata: Json;
-          moneroo_last_payment_id: string | null;
+          geniuspay_last_payment_id: string | null;
           store_id: string;
           subscription_id: string;
           updated_at: string;
@@ -36558,7 +36558,7 @@ export type Database = {
           id?: string;
           last_successful_at?: string | null;
           metadata?: Json;
-          moneroo_last_payment_id?: string | null;
+          geniuspay_last_payment_id?: string | null;
           store_id: string;
           subscription_id: string;
           updated_at?: string;
@@ -36573,7 +36573,7 @@ export type Database = {
           id?: string;
           last_successful_at?: string | null;
           metadata?: Json;
-          moneroo_last_payment_id?: string | null;
+          geniuspay_last_payment_id?: string | null;
           store_id?: string;
           subscription_id?: string;
           updated_at?: string;
@@ -38192,13 +38192,13 @@ export type Database = {
           id: string;
           last_webhook_payload: Json | null;
           metadata: Json | null;
-          moneroo_checkout_url: string | null;
-          moneroo_payment_method: string | null;
-          moneroo_refund_amount: number | null;
-          moneroo_refund_id: string | null;
-          moneroo_refund_reason: string | null;
-          moneroo_response: Json | null;
-          moneroo_transaction_id: string | null;
+          geniuspay_checkout_url: string | null;
+          geniuspay_payment_method: string | null;
+          geniuspay_refund_amount: number | null;
+          geniuspay_refund_id: string | null;
+          geniuspay_refund_reason: string | null;
+          geniuspay_response: Json | null;
+          geniuspay_transaction_id: string | null;
           order_id: string | null;
           paydunya_checkout_url: string | null;
           paydunya_invoice_token: string | null;
@@ -38239,13 +38239,13 @@ export type Database = {
           id?: string;
           last_webhook_payload?: Json | null;
           metadata?: Json | null;
-          moneroo_checkout_url?: string | null;
-          moneroo_payment_method?: string | null;
-          moneroo_refund_amount?: number | null;
-          moneroo_refund_id?: string | null;
-          moneroo_refund_reason?: string | null;
-          moneroo_response?: Json | null;
-          moneroo_transaction_id?: string | null;
+          geniuspay_checkout_url?: string | null;
+          geniuspay_payment_method?: string | null;
+          geniuspay_refund_amount?: number | null;
+          geniuspay_refund_id?: string | null;
+          geniuspay_refund_reason?: string | null;
+          geniuspay_response?: Json | null;
+          geniuspay_transaction_id?: string | null;
           order_id?: string | null;
           paydunya_checkout_url?: string | null;
           paydunya_invoice_token?: string | null;
@@ -38286,13 +38286,13 @@ export type Database = {
           id?: string;
           last_webhook_payload?: Json | null;
           metadata?: Json | null;
-          moneroo_checkout_url?: string | null;
-          moneroo_payment_method?: string | null;
-          moneroo_refund_amount?: number | null;
-          moneroo_refund_id?: string | null;
-          moneroo_refund_reason?: string | null;
-          moneroo_response?: Json | null;
-          moneroo_transaction_id?: string | null;
+          geniuspay_checkout_url?: string | null;
+          geniuspay_payment_method?: string | null;
+          geniuspay_refund_amount?: number | null;
+          geniuspay_refund_id?: string | null;
+          geniuspay_refund_reason?: string | null;
+          geniuspay_response?: Json | null;
+          geniuspay_transaction_id?: string | null;
           order_id?: string | null;
           paydunya_checkout_url?: string | null;
           paydunya_invoice_token?: string | null;
@@ -45946,7 +45946,7 @@ export type Database = {
           user_id: string;
         }[];
       };
-      finish_moneroo_reconciliation_run: {
+      finish_geniuspay_reconciliation_run: {
         Args: { p_errors?: number; p_metadata?: Json; p_run_id: string };
         Returns: undefined;
       };
@@ -47731,7 +47731,7 @@ export type Database = {
         Args: { p_provider: string; p_status: string; p_transaction_id: string };
         Returns: boolean;
       };
-      list_moneroo_transactions_for_reconciliation: {
+      list_geniuspay_transactions_for_reconciliation: {
         Args: { p_hours_back?: number; p_limit?: number };
         Returns: Json;
       };
@@ -48065,13 +48065,13 @@ export type Database = {
         };
         Returns: undefined;
       };
-      record_moneroo_reconciliation_result: {
+      record_geniuspay_reconciliation_result: {
         Args: {
           p_db_value?: Json;
           p_discrepancy_type?: string;
           p_matched: boolean;
-          p_moneroo_transaction_id: string;
-          p_moneroo_value?: Json;
+          p_geniuspay_transaction_id: string;
+          p_geniuspay_value?: Json;
           p_run_id: string;
           p_transaction_id: string;
         };
@@ -48244,7 +48244,7 @@ export type Database = {
           p_customer_email: string;
           p_customer_name?: string;
           p_customer_phone?: string;
-          p_moneroo_payment_id?: string;
+          p_geniuspay_payment_id?: string;
           p_store_id: string;
           p_subscription_id: string;
         };
@@ -48351,7 +48351,7 @@ export type Database = {
         Args: { p_cron_secret: string; p_project_ref: string };
         Returns: Json;
       };
-      setup_moneroo_reconciliation_cron_job: {
+      setup_geniuspay_reconciliation_cron_job: {
         Args: {
           p_anon_key?: string;
           p_cron_secret: string;
@@ -48403,7 +48403,7 @@ export type Database = {
       };
       show_limit: { Args: never; Returns: number };
       show_trgm: { Args: { '': string }; Returns: string[] };
-      start_moneroo_reconciliation_run: {
+      start_geniuspay_reconciliation_run: {
         Args: { p_hours_back?: number };
         Returns: string;
       };

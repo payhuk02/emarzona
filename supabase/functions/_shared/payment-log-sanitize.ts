@@ -8,7 +8,7 @@ export function maskEmail(email?: string | null): string | undefined {
   return `${trimmed.slice(0, 2)}***${trimmed.slice(at)}`;
 }
 
-export function sanitizeMonerooRequestLog(
+export function sanitizeGeniusPayRequestLog(
   data: Record<string, unknown> | undefined
 ): Record<string, unknown> {
   if (!data) return {};
@@ -30,7 +30,7 @@ export function sanitizeMonerooRequestLog(
   };
 }
 
-export function sanitizeMonerooApiResponseLog(
+export function sanitizeGeniusPayApiResponseLog(
   status: number,
   isJson: boolean
 ): Record<string, unknown> {

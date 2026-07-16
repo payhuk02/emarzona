@@ -6,12 +6,12 @@
 import { clearExchangeRateCache } from '@/lib/currency-exchange-api';
 import { logger } from '@/lib/logger';
 import { clearAllMarketplaceCache } from '@/lib/marketplace-cache';
-import { monerooStatsCache } from '@/lib/moneroo-cache';
+import { geniuspayStatsCache } from '@/lib/geniuspay-cache';
 
 export async function clearSessionBrowserCaches(): Promise<void> {
   try {
     await clearAllMarketplaceCache();
-    monerooStatsCache.clear();
+    geniuspayStatsCache.clear();
     clearExchangeRateCache();
     logger.debug('Session browser caches cleared');
   } catch (error) {

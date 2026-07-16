@@ -51,7 +51,7 @@ export interface OrderCreationResult {
   /** ID de l'order_item créé */
   orderItemId: string;
 
-  /** URL de checkout (Moneroo, etc.) */
+  /** URL de checkout (GeniusPay, etc.) */
   checkoutUrl?: string;
 
   /** ID de transaction de paiement */

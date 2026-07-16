@@ -73,7 +73,7 @@ const GENERIC_PRODUCT_VARIANT_FIELDS = 'id, price, promotional_price, option1_va
  * - Remplissant ses informations de livraison
  * - Appliquant un code promo éventuel
  * - Vérifiant le résumé de commande
- * - Procédant au paiement via Moneroo
+ * - Procédant au paiement via GeniusPay
  *
  * @component
  * @returns {JSX.Element} Le composant Checkout
@@ -82,7 +82,7 @@ const GENERIC_PRODUCT_VARIANT_FIELDS = 'id, price, promotional_price, option1_va
  * - Preload des images produit pour améliorer LCP
  * - Validation complète du formulaire
  * - Gestion des codes promo
- * - Intégration Moneroo avec lazy loading
+ * - Intégration GeniusPay avec lazy loading
  * - Gestion d'erreurs robuste
  * - Accessible avec ARIA labels complets
  *
@@ -91,7 +91,7 @@ const GENERIC_PRODUCT_VARIANT_FIELDS = 'id, price, promotional_price, option1_va
  * <Route path="/checkout" element={<Checkout />} />
  * ```
  *
- * @see {@link loadMonerooPayment} pour l'intégration Moneroo
+ * @see {@link loadGeniusPayPayment} pour l'intégration GeniusPay
  * @see {@link CouponInput} pour la gestion des codes promo
  */
 const Checkout = () => {

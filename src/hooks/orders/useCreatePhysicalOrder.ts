@@ -7,7 +7,7 @@
  * 2. Vérifier disponibilité stock
  * 3. Réserver stock (quantity_reserved)
  * 4. Créer order + order_item
- * 5. Initier paiement Moneroo
+ * 5. Initier paiement GeniusPay
  * 6. Déduire stock si paiement réussi (via webhook)
  */
 
@@ -98,10 +98,10 @@ export interface CreatePhysicalOrderResult {
   /** ID de l'inventaire réservé */
   inventoryId: string;
 
-  /** URL de checkout Moneroo (absent si paiement à la livraison) */
+  /** URL de checkout GeniusPay (absent si paiement à la livraison) */
   checkoutUrl?: string;
 
-  /** ID de transaction Moneroo */
+  /** ID de transaction GeniusPay */
   transactionId?: string;
 
   /** True si commande en paiement à la livraison */
@@ -146,7 +146,7 @@ type OrderRow = {
  *     quantity: 2,
  *   });
  *
- *   // Rediriger vers Moneroo
+ *   // Rediriger vers GeniusPay
  *   window.location.href = result.checkoutUrl;
  * };
  * ```

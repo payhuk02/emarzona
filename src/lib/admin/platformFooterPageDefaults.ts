@@ -124,7 +124,7 @@ Guides par thème
 - Boutique et vitrine : personnalisation, domaine, SEO
 - Produits : physiques, digitaux, services, cours, éditions artiste
 - Commandes et clients : suivi, notifications, facturation
-- Paiements : Moneroo, Stripe, PayPal et autres intégrations
+- Paiements : GeniusPay, Stripe, PayPal et autres intégrations
 - Marketing : codes promo, affiliation, e-mails
 
 Besoin d'aide ?
@@ -163,7 +163,7 @@ Délai moyen de réponse : 24 à 48 h ouvrées`,
 
 Paiements
 
-- Moneroo (mobile money et cartes en Afrique)
+- GeniusPay (mobile money et cartes en Afrique)
 - Stripe et PayPal (selon disponibilité et configuration)
 - Orchestration multi-prestataires depuis le tableau de bord
 

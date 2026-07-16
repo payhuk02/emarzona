@@ -90,7 +90,7 @@ Dans Supabase Dashboard :
    - Vérifie si le maximum de tentatives n'est pas atteint
 
 3. **Vérification auprès du provider** :
-   - Appelle l'API du provider (Moneroo/PayDunya)
+   - Appelle l'API du provider (GeniusPay/PayDunya)
    - Récupère le statut actuel
 
 4. **Mise à jour** :
@@ -114,7 +114,7 @@ Pour surveiller les retries :
 -- Transactions en attente de retry
 SELECT
   t.id,
-  t.moneroo_transaction_id,
+  t.geniuspay_transaction_id,
   t.amount,
   t.created_at,
   t.retry_count,

@@ -7,11 +7,11 @@ import { supabase } from '@/integrations/supabase/client';
 import type { PaymentProviderCode, StorePaymentOption } from '@/types/store-payment-connection';
 import { logger } from '@/lib/logger';
 
-/** Valeur utilisée par le checkout (legacy moneroo + codes orchestrateur) */
-export type CheckoutPaymentProvider = 'moneroo' | Exclude<PaymentProviderCode, 'moneroo_platform'>;
+/** Valeur utilisée par le checkout (legacy geniuspay + codes orchestrateur) */
+export type CheckoutPaymentProvider = 'geniuspay' | Exclude<PaymentProviderCode, 'geniuspay_platform'>;
 
 export function rpcProviderToCheckout(provider: string): CheckoutPaymentProvider {
-  if (provider === 'moneroo_platform') return 'moneroo';
+  if (provider === 'geniuspay_platform') return 'geniuspay';
   if (
     provider === 'stripe_connect' ||
     provider === 'paypal_commerce' ||
@@ -19,11 +19,11 @@ export function rpcProviderToCheckout(provider: string): CheckoutPaymentProvider
   ) {
     return provider;
   }
-  return 'moneroo';
+  return 'geniuspay';
 }
 
 export function checkoutProviderToRpc(provider: CheckoutPaymentProvider): PaymentProviderCode {
-  if (provider === 'moneroo') return 'moneroo_platform';
+  if (provider === 'geniuspay') return 'geniuspay_platform';
   return provider;
 }
 
@@ -76,9 +76,9 @@ export function useStorePaymentOptions(params: {
         logger.error('get_store_payment_options failed', { error, storeId });
         return [
           {
-            provider: 'moneroo_platform',
+            provider: 'geniuspay_platform',
             connection_id: null,
-            label: 'Moneroo',
+            label: 'GeniusPay',
           },
         ];
       }
@@ -86,7 +86,7 @@ export function useStorePaymentOptions(params: {
       const options = parsePaymentOptions(data);
       return options.length > 0
         ? options
-        : [{ provider: 'moneroo_platform', connection_id: null, label: 'Moneroo' }];
+        : [{ provider: 'geniuspay_platform', connection_id: null, label: 'GeniusPay' }];
     },
   });
 }

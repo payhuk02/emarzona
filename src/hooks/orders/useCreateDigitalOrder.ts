@@ -6,7 +6,7 @@
  * 1. Créer/récupérer customer
  * 2. Générer licence si nécessaire
  * 3. Créer order + order_item
- * 4. Initier paiement Moneroo
+ * 4. Initier paiement GeniusPay
  * 5. Retourner checkout URL
  */
 
@@ -88,10 +88,10 @@ export interface CreateDigitalOrderResult {
   /** ID de la licence générée (si applicable) */
   licenseId?: string;
 
-  /** URL de checkout Moneroo */
+  /** URL de checkout GeniusPay */
   checkoutUrl: string;
 
-  /** ID de transaction Moneroo */
+  /** ID de transaction GeniusPay */
   transactionId: string;
 }
 
@@ -121,7 +121,7 @@ async function generateLicenseKeyViaRpc(): Promise<string> {
  *     licenseType: 'single',
  *   });
  *
- *   // Rediriger vers Moneroo
+ *   // Rediriger vers GeniusPay
  *   window.location.href = result.checkoutUrl;
  * };
  * ```
@@ -415,7 +415,7 @@ export const useCreateDigitalOrder = () => {
         });
       }
 
-      // 11. Initier le paiement Moneroo
+      // 11. Initier le paiement GeniusPay
       const paymentCurrency: Currency = isSupportedCurrency(String(product.currency ?? 'XOF'))
         ? (product.currency as Currency)
         : 'XOF';

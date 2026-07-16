@@ -1029,13 +1029,13 @@ export const adminMenuSections = [
         icon: GitCompare,
       },
       {
-        title: 'Statistiques Moneroo',
-        url: '/admin/moneroo-analytics',
+        title: 'Statistiques GeniusPay',
+        url: '/admin/geniuspay-analytics',
         icon: BarChart3,
       },
       {
-        title: 'Réconciliation Moneroo',
-        url: '/admin/moneroo-reconciliation',
+        title: 'Réconciliation GeniusPay',
+        url: '/admin/geniuspay-reconciliation',
         icon: RotateCcw,
       },
     ],

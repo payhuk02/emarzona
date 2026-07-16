@@ -137,7 +137,7 @@ export function buildMarketplaceSEO(
 
   return {
     title: `Marketplace Emarzona${countLabel}`,
-    description: `Découvrez ${totalProducts} produits sur Emarzona : digitaux, physiques, services, cours en ligne et œuvres d'art. Paiement sécurisé Mobile Money & Moneroo.`,
+    description: `Découvrez ${totalProducts} produits sur Emarzona : digitaux, physiques, services, cours en ligne et œuvres d'art. Paiement sécurisé Mobile Money & GeniusPay.`,
     keywords:
       "marketplace afrique, produits digitaux, produits physiques, services, cours en ligne, œuvres d'art, ecommerce afrique, XOF, FCFA",
     url: canonical,

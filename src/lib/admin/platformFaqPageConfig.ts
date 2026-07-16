@@ -14,9 +14,9 @@ export const PLATFORM_FAQ_DEFAULTS = {
     'Réponses structurées pour vendeurs et acheteurs : boutique, paiements, livraison, cours et produits digitaux.',
   seoTitle: 'FAQ — Questions fréquentes | Emarzona',
   seoDescription:
-    'Toutes les réponses sur Emarzona : créer une boutique, vendre en ligne (digital, physique, services, cours, artiste), paiements Moneroo, livraison FedEx et compte acheteur.',
+    'Toutes les réponses sur Emarzona : créer une boutique, vendre en ligne (digital, physique, services, cours, artiste), paiements GeniusPay, livraison FedEx et compte acheteur.',
   seoKeywords:
-    'Emarzona FAQ, e-commerce Afrique, boutique en ligne, Moneroo, cours en ligne, produits digitaux, livraison FedEx, commission vendeur',
+    'Emarzona FAQ, e-commerce Afrique, boutique en ligne, GeniusPay, cours en ligne, produits digitaux, livraison FedEx, commission vendeur',
   heroCtaHelp: "Centre d'aide",
   heroCtaContact: 'Nous contacter',
 } as const;
@@ -27,9 +27,9 @@ export const PLATFORM_FAQ_DEFAULTS_EN = {
     'Structured answers for sellers and buyers: store setup, payments, shipping, courses and digital products.',
   seoTitle: 'FAQ — Frequently asked questions | Emarzona',
   seoDescription:
-    'Answers about Emarzona: launch a store, sell online (digital, physical, services, courses, artist), Moneroo payments, FedEx shipping and buyer accounts.',
+    'Answers about Emarzona: launch a store, sell online (digital, physical, services, courses, artist), GeniusPay payments, FedEx shipping and buyer accounts.',
   seoKeywords:
-    'Emarzona FAQ, e-commerce Africa, online store, Moneroo, online courses, digital products, FedEx shipping, seller commission',
+    'Emarzona FAQ, e-commerce Africa, online store, GeniusPay, online courses, digital products, FedEx shipping, seller commission',
 } as const;
 
 export function getPlatformFaqLocaleDefaults(locale: 'fr' | 'en') {

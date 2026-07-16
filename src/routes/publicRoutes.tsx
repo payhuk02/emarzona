@@ -108,7 +108,7 @@ const CookiePolicy = lazyPage(() => import('@/pages/legal/CookiePolicy'));
 const RefundPolicy = lazyPage(() => import('@/pages/legal/RefundPolicy'));
 const DataProcessingAgreement = lazyPage(() => import('@/pages/legal/DataProcessingAgreement'));
 
-// Pages Moneroo
+// Pages GeniusPay
 const PaymentSuccess = lazyPage(() => import('@/pages/payments/PaymentSuccess'));
 const PaymentCancel = lazyPage(() => import('@/pages/payments/PaymentCancel'));
 const GuestOrderConfirmation = lazyPage(() => import('@/pages/orders/GuestOrderConfirmation'));
@@ -258,7 +258,7 @@ export const publicRoutes = (
     {/* Email */}
     <Route path="/unsubscribe" element={<UnsubscribePage />} />
 
-    {/* Moneroo */}
+    {/* GeniusPay */}
     <Route path="/payment/success" element={<PaymentSuccess />} />
     <Route path="/payment/cancel" element={<PaymentCancel />} />
     <Route path="/orders/confirmed" element={<GuestOrderConfirmation />} />

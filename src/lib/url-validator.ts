@@ -2,7 +2,7 @@
  * 🔒 URL VALIDATOR - PRÉVENTION OPEN REDIRECT
  *
  * Valide les URLs de redirection pour éviter les attaques open redirect
- * Utilisé principalement pour les redirections de paiement (Moneroo)
+ * Utilisé principalement pour les redirections de paiement (GeniusPay)
  */
 
 import { logger } from './logger';
@@ -15,7 +15,7 @@ import { logger } from './logger';
  * Domaines autorisés pour les redirections
  */
 const ALLOWED_PAYMENT_DOMAINS = [
-  'moneroo.io',
+  'geniuspay.io',
   'emarzona.com',
   'myemarzona.shop', // Domaine dédié aux boutiques
   'emarzona.vercel.app',
@@ -55,7 +55,7 @@ export interface ValidationResult {
  *
  * @example
  * ```typescript
- * const result = validateRedirectUrl('https://moneroo.io/checkout/123');
+ * const result = validateRedirectUrl('https://geniuspay.io/checkout/123');
  * if (result.isValid) {
  *   window.location.href = url;
  * } else {

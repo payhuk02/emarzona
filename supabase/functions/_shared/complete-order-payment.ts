@@ -105,7 +105,7 @@ export async function completeTransactionAndOrder(
     rpcError = primary.error;
 
     if (rpcError?.message?.includes('process_payment_webhook_atomic')) {
-      const fallback = await supabase.rpc('process_moneroo_webhook_atomic', rpcArgs);
+      const fallback = await supabase.rpc('process_geniuspay_webhook_atomic', rpcArgs);
       result = fallback.data as typeof result;
       rpcError = fallback.error;
     }

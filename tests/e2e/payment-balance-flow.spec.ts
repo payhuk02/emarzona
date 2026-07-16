@@ -26,15 +26,15 @@ test.describe('Flux de Paiement Solde Restant', () => {
     await expect(payButton).toBeVisible();
   });
 
-  test('Devrait initier le paiement Moneroo pour le solde', async ({ page }) => {
+  test('Devrait initier le paiement GeniusPay pour le solde', async ({ page }) => {
     await page.goto('/payments/balance/test-order-id');
     await page.waitForLoadState('networkidle');
     const payButton = page.locator('button:has-text("Payer"), button:has-text("Pay")');
     if (await payButton.isVisible()) {
       await payButton.click();
-      await page.waitForURL(/moneroo\.com|\/checkout/, { timeout: 10000 });
+      await page.waitForURL(/geniuspay\.com|\/checkout/, { timeout: 10000 });
       const currentUrl = page.url();
-      expect(currentUrl).toMatch(/moneroo\.com|\/checkout/);
+      expect(currentUrl).toMatch(/geniuspay\.com|\/checkout/);
     }
   });
 

@@ -82,7 +82,7 @@ const OrderDetailDialogComponent = ({ open, onOpenChange, order }: OrderDetailDi
         const { data: transactionsData, error: transactionsError } = await supabase
           .from('transactions')
           .select(
-            'id, moneroo_transaction_id, amount, currency, status, payment_provider, moneroo_payment_method, created_at, completed_at'
+            'id, geniuspay_transaction_id, amount, currency, status, payment_provider, geniuspay_payment_method, created_at, completed_at'
           )
           .eq('order_id', order.id)
           .order('created_at', { ascending: false });
@@ -96,12 +96,12 @@ const OrderDetailDialogComponent = ({ open, onOpenChange, order }: OrderDetailDi
           setTransactions(
             (transactionsData || []).map(t => ({
               id: t.id,
-              moneroo_transaction_id: t.moneroo_transaction_id,
+              geniuspay_transaction_id: t.geniuspay_transaction_id,
               amount: Number(t.amount || 0),
               currency: t.currency || 'XOF',
               status: t.status || 'pending',
               payment_provider: t.payment_provider ?? null,
-              payment_method: t.moneroo_payment_method ?? t.payment_provider,
+              payment_method: t.geniuspay_payment_method ?? t.payment_provider,
               created_at: t.created_at,
               completed_at: t.completed_at,
             }))
@@ -567,7 +567,7 @@ const OrderDetailDialogComponent = ({ open, onOpenChange, order }: OrderDetailDi
                     void supabase
                       .from('transactions')
                       .select(
-                        'id, moneroo_transaction_id, amount, currency, status, payment_provider, moneroo_payment_method, created_at, completed_at'
+                        'id, geniuspay_transaction_id, amount, currency, status, payment_provider, geniuspay_payment_method, created_at, completed_at'
                       )
                       .eq('order_id', order.id)
                       .order('created_at', { ascending: false })
@@ -576,12 +576,12 @@ const OrderDetailDialogComponent = ({ open, onOpenChange, order }: OrderDetailDi
                           setTransactions(
                             data.map(t => ({
                               id: t.id,
-                              moneroo_transaction_id: t.moneroo_transaction_id,
+                              geniuspay_transaction_id: t.geniuspay_transaction_id,
                               amount: Number(t.amount || 0),
                               currency: t.currency || 'XOF',
                               status: t.status || 'pending',
                               payment_provider: t.payment_provider ?? null,
-                              payment_method: t.moneroo_payment_method ?? t.payment_provider,
+                              payment_method: t.geniuspay_payment_method ?? t.payment_provider,
                               created_at: t.created_at,
                               completed_at: t.completed_at,
                             }))
@@ -616,12 +616,12 @@ const OrderDetailDialogComponent = ({ open, onOpenChange, order }: OrderDetailDi
                           )}
                         </div>
                         <div className="text-xs text-muted-foreground mt-1">
-                          {transaction.moneroo_transaction_id && (
+                          {transaction.geniuspay_transaction_id && (
                             <span className="font-mono">
-                              ID: {transaction.moneroo_transaction_id.substring(0, 12)}...
+                              ID: {transaction.geniuspay_transaction_id.substring(0, 12)}...
                             </span>
                           )}
-                          {transaction.moneroo_transaction_id && transaction.completed_at && ' • '}
+                          {transaction.geniuspay_transaction_id && transaction.completed_at && ' • '}
                           {transaction.completed_at && (
                             <span>
                               {format(new Date(transaction.completed_at), 'dd MMM yyyy HH:mm', {

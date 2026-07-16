@@ -43,7 +43,7 @@ vi.mock('@/lib/marketplace/initiate-direct-buy', () => ({
     success: true,
     checkout_url: 'https://checkout.example.com',
     transaction_id: 'tx-1',
-    provider: 'moneroo',
+    provider: 'geniuspay',
   }),
 }));
 

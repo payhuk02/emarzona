@@ -2,7 +2,7 @@
  * E2E — Workflow œuvres d'artiste (Sprint 1 audit 2026)
  *
  * Couvre : collections, enchères, fiche artiste (si données), portail client, auth.
- * Parcours achat + certificat complet : voir digital/physical specs + env Moneroo sandbox.
+ * Parcours achat + certificat complet : voir digital/physical specs + env GeniusPay sandbox.
  *
  * Exécution : npx playwright test tests/e2e/artist-product-workflow.spec.ts
  */

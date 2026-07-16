@@ -318,7 +318,7 @@ export default function PaymentManagement() {
                           <div className="flex justify-between">
                             <span className="text-sm text-muted-foreground">Méthode</span>
                             <span className="font-medium">
-                              {payment.payment_method || 'Moneroo'}
+                              {payment.payment_method || 'GeniusPay'}
                             </span>
                           </div>
                           <div className="flex justify-between">
@@ -523,7 +523,7 @@ export default function PaymentManagement() {
                               <div className="flex justify-between">
                                 <span className="text-sm">Méthode</span>
                                 <span className="font-medium">
-                                  {payment.payment_method || 'Moneroo'}
+                                  {payment.payment_method || 'GeniusPay'}
                                 </span>
                               </div>
                               <div className="flex justify-between">

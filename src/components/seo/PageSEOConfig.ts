@@ -134,7 +134,7 @@ export const PAGE_SEO_CONFIG: Record<string, PageSEOEntry> = {
   '/blog': {
     title: 'Blog e-commerce | Emarzona',
     description:
-      'Articles Emarzona : lancer une boutique, SEO, panier multi-types, paiements Moneroo et croissance en Afrique.',
+      'Articles Emarzona : lancer une boutique, SEO, panier multi-types, paiements GeniusPay et croissance en Afrique.',
   },
   '/docs': {
     title: 'Documentation | Emarzona',
@@ -147,7 +147,7 @@ export const PAGE_SEO_CONFIG: Record<string, PageSEOEntry> = {
   '/faq': {
     title: 'FAQ — Questions fréquentes | Emarzona',
     description:
-      'Réponses sur Emarzona : boutique en ligne, paiements Moneroo, livraison FedEx, cours, produits digitaux et compte acheteur.',
+      'Réponses sur Emarzona : boutique en ligne, paiements GeniusPay, livraison FedEx, cours, produits digitaux et compte acheteur.',
   },
   '/integrations': {
     title: 'Intégrations | Emarzona',

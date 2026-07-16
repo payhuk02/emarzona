@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { CheckCircle, ArrowRight, Loader2, Shield, Star, Gift } from "lucide-react";
-import { loadMonerooPayment } from "@/lib/moneroo-lazy";
+import { loadGeniusPayPayment } from "@/lib/geniuspay-lazy";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,7 +30,7 @@ const CheckoutSuccess = () => {
     }
 
     try {
-      const { verifyTransactionStatus } = await loadMonerooPayment();
+      const { verifyTransactionStatus } = await loadGeniusPayPayment();
       const result = await verifyTransactionStatus(transactionId);
       setTransaction(result);
 

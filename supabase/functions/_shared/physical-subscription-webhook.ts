@@ -43,7 +43,7 @@ export interface ActivatePhysicalSubscriptionInput {
   storeId: string;
   plan: PhysicalVendorPlan;
   transactionId: string;
-  monerooTransactionId?: string | null;
+  geniuspayTransactionId?: string | null;
   billingCustomer?: BillingMandateCustomer | null;
 }
 
@@ -53,7 +53,7 @@ export interface ActivatePhysicalSubscriptionResult {
 }
 
 /**
- * C5 — Active ou met à jour l'abonnement vendeur physique après paiement Moneroo.
+ * C5 — Active ou met à jour l'abonnement vendeur physique après paiement GeniusPay.
  * Upsert sur store_id (évite l'échec silencieux si la row n'existe pas encore).
  */
 export async function activatePhysicalSubscriptionFromWebhook(
@@ -72,12 +72,12 @@ export async function activatePhysicalSubscriptionFromWebhook(
     current_period_start: now.toISOString(),
     current_period_end: periodEnd.toISOString(),
     trial_ends_at: null,
-    payment_provider: 'moneroo_platform',
-    external_subscription_id: input.monerooTransactionId ?? null,
+    payment_provider: 'geniuspay_platform',
+    external_subscription_id: input.geniuspayTransactionId ?? null,
     metadata: {
       last_transaction_id: input.transactionId,
-      last_moneroo_transaction_id: input.monerooTransactionId ?? null,
-      activated_via: 'moneroo_webhook',
+      last_geniuspay_transaction_id: input.geniuspayTransactionId ?? null,
+      activated_via: 'geniuspay_webhook',
       activated_at: now.toISOString(),
       auto_renew_enabled: true,
     },
@@ -110,7 +110,7 @@ export async function activatePhysicalSubscriptionFromWebhook(
       p_customer_name: input.billingCustomer.name ?? null,
       p_customer_phone: input.billingCustomer.phone ?? null,
       p_customer_country: input.billingCustomer.country ?? null,
-      p_moneroo_payment_id: input.monerooTransactionId ?? null,
+      p_geniuspay_payment_id: input.geniuspayTransactionId ?? null,
       p_auto_renew_enabled: true,
     });
 
@@ -128,7 +128,7 @@ export async function activatePhysicalSubscriptionFromWebhook(
 export interface ApplySubscriptionRenewalInput {
   invoiceId: string;
   transactionId: string;
-  monerooTransactionId?: string | null;
+  geniuspayTransactionId?: string | null;
   billingCustomer?: BillingMandateCustomer | null;
   storeId?: string | null;
 }
@@ -143,7 +143,7 @@ export async function applyPhysicalSubscriptionRenewalFromWebhook(
   const { data, error } = await supabase.rpc('mark_subscription_invoice_paid', {
     p_invoice_id: input.invoiceId,
     p_transaction_id: input.transactionId,
-    p_external_transaction_id: input.monerooTransactionId ?? null,
+    p_external_transaction_id: input.geniuspayTransactionId ?? null,
   });
 
   if (error) {
@@ -160,7 +160,7 @@ export async function applyPhysicalSubscriptionRenewalFromWebhook(
       p_customer_name: input.billingCustomer.name ?? null,
       p_customer_phone: input.billingCustomer.phone ?? null,
       p_customer_country: input.billingCustomer.country ?? null,
-      p_moneroo_payment_id: input.monerooTransactionId ?? null,
+      p_geniuspay_payment_id: input.geniuspayTransactionId ?? null,
       p_auto_renew_enabled: true,
     });
 
@@ -175,7 +175,7 @@ export async function applyPhysicalSubscriptionRenewalFromWebhook(
 export interface ApplyPlanChangeInput {
   invoiceId: string;
   transactionId: string;
-  monerooTransactionId?: string | null;
+  geniuspayTransactionId?: string | null;
 }
 
 export async function applyPhysicalPlanChangeFromWebhook(
@@ -185,7 +185,7 @@ export async function applyPhysicalPlanChangeFromWebhook(
   const { data, error } = await supabase.rpc('mark_subscription_plan_change_invoice_paid', {
     p_invoice_id: input.invoiceId,
     p_transaction_id: input.transactionId,
-    p_external_transaction_id: input.monerooTransactionId ?? null,
+    p_external_transaction_id: input.geniuspayTransactionId ?? null,
   });
 
   if (error) {

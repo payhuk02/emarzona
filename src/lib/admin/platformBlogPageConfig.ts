@@ -14,7 +14,7 @@ export const PLATFORM_BLOG_DEFAULTS = {
     'Conseils e-commerce, guides vendeurs, études de cas et nouveautés produit pour développer votre activité en ligne.',
   seoTitle: 'Blog e-commerce | Emarzona',
   seoDescription:
-    'Articles Emarzona : lancer une boutique, optimiser le SEO, panier multi-types, paiements Moneroo et croissance en Afrique.',
+    'Articles Emarzona : lancer une boutique, optimiser le SEO, panier multi-types, paiements GeniusPay et croissance en Afrique.',
   seoKeywords:
     'blog Emarzona, e-commerce Afrique, conseils vendeur, boutique en ligne, marketing digital',
 } as const;
@@ -25,7 +25,7 @@ export const PLATFORM_BLOG_DEFAULTS_EN = {
     'E-commerce tips, seller guides, case studies and product updates to grow your online business.',
   seoTitle: 'E-commerce blog | Emarzona',
   seoDescription:
-    'Emarzona articles: launch a store, SEO, multi-type cart, Moneroo payments and growth in Africa.',
+    'Emarzona articles: launch a store, SEO, multi-type cart, GeniusPay payments and growth in Africa.',
   seoKeywords: 'Emarzona blog, e-commerce Africa, seller tips, online store, digital marketing',
 } as const;
 

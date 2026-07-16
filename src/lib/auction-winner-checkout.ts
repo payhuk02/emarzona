@@ -1,5 +1,5 @@
 /**
- * Checkout Moneroo pour l'enchérisseur gagnant (H-03).
+ * Checkout GeniusPay pour l'enchérisseur gagnant (H-03).
  */
 
 import { supabase } from '@/integrations/supabase/client';

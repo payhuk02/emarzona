@@ -14,7 +14,7 @@ describe('initiateOrderBalancePayment', () => {
       success: true,
       transaction_id: 'tx-bal-1',
       checkout_url: 'https://checkout.example/balance',
-      provider: 'moneroo',
+      provider: 'geniuspay',
     });
   });
 
@@ -55,7 +55,7 @@ describe('initiateOrderBalancePayment', () => {
       success: false,
       transaction_id: '',
       checkout_url: '',
-      provider: 'moneroo',
+      provider: 'geniuspay',
       error: 'Order locked',
     });
 

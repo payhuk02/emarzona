@@ -13,7 +13,7 @@
  * 7. Créer/récupérer customer
  * 8. Créer booking (réservation) avec statut 'pending'
  * 9. Créer order + order_item
- * 10. Initier paiement Moneroo
+ * 10. Initier paiement GeniusPay
  * 11. Confirmer booking automatiquement si paiement réussi (via webhook payment.completed)
  *
  * Validations implémentées:
@@ -129,12 +129,12 @@ export interface CreateServiceOrderOptions {
  * @property {string} orderId - ID de la commande créée (table orders)
  * @property {string} orderItemId - ID de l'order_item créé (table order_items)
  * @property {string} bookingId - ID de la réservation créée (table service_bookings, statut 'pending')
- * @property {string} checkoutUrl - URL de checkout Moneroo pour effectuer le paiement
- * @property {string} transactionId - ID de transaction Moneroo (pour suivi)
+ * @property {string} checkoutUrl - URL de checkout GeniusPay pour effectuer le paiement
+ * @property {string} transactionId - ID de transaction GeniusPay (pour suivi)
  *
  * @remarks
  * Le booking sera automatiquement confirmé (statut 'confirmed') après paiement réussi
- * via le webhook payment.completed dans moneroo-webhook/index.ts
+ * via le webhook payment.completed dans geniuspay-webhook/index.ts
  */
 export interface CreateServiceOrderResult {
   /** ID de la commande créée */
@@ -146,10 +146,10 @@ export interface CreateServiceOrderResult {
   /** ID de la réservation */
   bookingId: string;
 
-  /** URL de checkout Moneroo */
+  /** URL de checkout GeniusPay */
   checkoutUrl: string;
 
-  /** ID de transaction Moneroo */
+  /** ID de transaction GeniusPay */
   transactionId: string;
 }
 
@@ -176,7 +176,7 @@ export interface CreateServiceOrderResult {
  *       notes: 'Consultation urgente',
  *     });
  *
- *     // Rediriger vers Moneroo pour paiement
+ *     // Rediriger vers GeniusPay pour paiement
  *     window.location.href = result.checkoutUrl;
  *   } catch (err) {
  *     // Gérer les erreurs de validation (max_bookings_per_day, buffer_time, etc.)
@@ -730,7 +730,7 @@ export const useCreateServiceOrder = () => {
         });
       }
 
-      // 12. Initier le paiement Moneroo (avec amountToPay adapté)
+      // 12. Initier le paiement GeniusPay (avec amountToPay adapté)
       const formattedBookingDate = new Date(bookingDateTime).toLocaleDateString('fr-FR', {
         day: '2-digit',
         month: 'long',

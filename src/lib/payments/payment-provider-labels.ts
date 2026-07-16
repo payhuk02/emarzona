@@ -4,9 +4,9 @@ export function getPaymentProviderLabel(provider: string | null | undefined): st
       return 'Stripe';
     case 'paypal_commerce':
       return 'PayPal';
-    case 'moneroo_platform':
-    case 'moneroo':
-      return 'Moneroo';
+    case 'geniuspay_platform':
+    case 'geniuspay':
+      return 'GeniusPay';
     case 'flutterwave_connect':
       return 'Flutterwave';
     default:

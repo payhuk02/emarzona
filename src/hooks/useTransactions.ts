@@ -5,7 +5,7 @@ import { useVisibilityAwarePolling } from '@/hooks/useVisibilityAwarePolling';
 import { logger } from '@/lib/logger';
 
 const TRANSACTION_FIELDS =
-  'id, store_id, customer_id, product_id, order_id, payment_id, moneroo_transaction_id, moneroo_checkout_url, moneroo_payment_method, amount, currency, status, customer_email, customer_name, customer_phone, metadata, moneroo_response, created_at, updated_at, completed_at, failed_at, error_message, retry_count';
+  'id, store_id, customer_id, product_id, order_id, payment_id, geniuspay_transaction_id, geniuspay_checkout_url, geniuspay_payment_method, amount, currency, status, customer_email, customer_name, customer_phone, metadata, geniuspay_response, created_at, updated_at, completed_at, failed_at, error_message, retry_count';
 
 export interface Transaction {
   id: string;
@@ -14,9 +14,9 @@ export interface Transaction {
   product_id: string | null;
   order_id: string | null;
   payment_id: string | null;
-  moneroo_transaction_id: string | null;
-  moneroo_checkout_url: string | null;
-  moneroo_payment_method: string | null;
+  geniuspay_transaction_id: string | null;
+  geniuspay_checkout_url: string | null;
+  geniuspay_payment_method: string | null;
   amount: number;
   currency: string;
   status: string;
@@ -24,7 +24,7 @@ export interface Transaction {
   customer_name: string | null;
   customer_phone: string | null;
   metadata: Record<string, unknown> | null;
-  moneroo_response: Record<string, unknown> | null;
+  geniuspay_response: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
   completed_at: string | null;

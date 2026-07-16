@@ -16,13 +16,13 @@ vi.mock('@/lib/payments/feature-flags', () => ({
 vi.mock('@/hooks/payments/useStorePaymentOptions', () => ({
   useStorePaymentOptions: vi.fn(() => ({
     data: [
-      { provider: 'moneroo_platform', connection_id: null, label: 'Moneroo' },
+      { provider: 'geniuspay_platform', connection_id: null, label: 'GeniusPay' },
       { provider: 'stripe_connect', connection_id: 'c1', label: 'Carte (Stripe)' },
     ],
     isLoading: false,
     isError: false,
   })),
-  rpcProviderToCheckout: (p: string) => (p === 'moneroo_platform' ? 'moneroo' : p),
+  rpcProviderToCheckout: (p: string) => (p === 'geniuspay_platform' ? 'geniuspay' : p),
 }));
 
 vi.mock('@/integrations/supabase/client', () => ({
@@ -55,16 +55,16 @@ describe('PaymentProviderSelector', () => {
     vi.mocked(isPaymentOrchestrationV2Enabled).mockReturnValue(false);
   });
 
-  it('auto-selects moneroo when V2 off and single provider (no visible card)', async () => {
+  it('auto-selects geniuspay when V2 off and single provider (no visible card)', async () => {
     render(<PaymentProviderSelector onChange={mockOnChange} />);
 
     await waitFor(() => {
-      expect(mockOnChange).toHaveBeenCalledWith('moneroo');
+      expect(mockOnChange).toHaveBeenCalledWith('geniuspay');
     });
     expect(screen.queryByText('Moyen de paiement')).not.toBeInTheDocument();
   });
 
-  it('calls onChange when user selects moneroo with multiple providers', async () => {
+  it('calls onChange when user selects geniuspay with multiple providers', async () => {
     vi.mocked(isPaymentOrchestrationV2Enabled).mockReturnValue(true);
     const user = userEvent.setup();
 
@@ -78,14 +78,14 @@ describe('PaymentProviderSelector', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Moneroo')).toBeInTheDocument();
+      expect(screen.getByText('GeniusPay')).toBeInTheDocument();
     });
 
-    const monerooOption = screen.getByLabelText(/moneroo/i);
-    await user.click(monerooOption);
+    const geniuspayOption = screen.getByLabelText(/geniuspay/i);
+    await user.click(geniuspayOption);
 
     await waitFor(() => {
-      expect(mockOnChange).toHaveBeenCalledWith('moneroo');
+      expect(mockOnChange).toHaveBeenCalledWith('geniuspay');
     });
   });
 
@@ -94,7 +94,7 @@ describe('PaymentProviderSelector', () => {
 
     render(
       <PaymentProviderSelector
-        value="moneroo"
+        value="geniuspay"
         onChange={mockOnChange}
         storeId="store-123"
         amount={50000}
@@ -112,7 +112,7 @@ describe('PaymentProviderSelector', () => {
 
     render(
       <PaymentProviderSelector
-        value="moneroo"
+        value="geniuspay"
         onChange={mockOnChange}
         storeId="store-123"
         currency="EUR"
@@ -121,7 +121,7 @@ describe('PaymentProviderSelector', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Carte (Stripe)')).toBeInTheDocument();
-      expect(screen.getByText('Moneroo')).toBeInTheDocument();
+      expect(screen.getByText('GeniusPay')).toBeInTheDocument();
     });
   });
 
@@ -129,7 +129,7 @@ describe('PaymentProviderSelector', () => {
     render(<PaymentProviderSelector onChange={mockOnChange} />);
 
     await waitFor(() => {
-      expect(mockOnChange).toHaveBeenCalledWith('moneroo');
+      expect(mockOnChange).toHaveBeenCalledWith('geniuspay');
     });
   });
 });

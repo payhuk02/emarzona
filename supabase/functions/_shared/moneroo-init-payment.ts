@@ -1,10 +1,10 @@
 /**
- * Shared Moneroo payment initialization for platform subscription renewals.
- * Moneroo has no native recurring/mandate API — we reuse stored customer profile.
+ * Shared GeniusPay payment initialization for platform subscription renewals.
+ * GeniusPay has no native recurring/mandate API — we reuse stored customer profile.
  */
 
-const MONEROO_METADATA_MAX_ITEMS = 10;
-const MONEROO_METADATA_PRIORITY = [
+const GENIUSPAY_METADATA_MAX_ITEMS = 10;
+const GENIUSPAY_METADATA_PRIORITY = [
   'transaction_id',
   'store_id',
   'purpose',
@@ -34,7 +34,7 @@ const COUNTRY_DIAL_CODES: Record<string, string> = {
   cameroon: '237',
 };
 
-export function normalizePhoneForMoneroo(phone: string, country?: string): string {
+export function normalizePhoneForGeniusPay(phone: string, country?: string): string {
   const cleaned = phone.trim().replace(/\s/g, '');
   if (!cleaned) return cleaned;
 
@@ -53,7 +53,7 @@ export function normalizePhoneForMoneroo(phone: string, country?: string): strin
   return cleaned.startsWith('+') ? cleaned : `+${dialCode}${localDigits}`;
 }
 
-export function sanitizeMonerooMetadata(raw: Record<string, unknown>): Record<string, string> {
+export function sanitizeGeniusPayMetadata(raw: Record<string, unknown>): Record<string, string> {
   const metadata: Record<string, string> = {};
 
   for (const [key, value] of Object.entries(raw)) {
@@ -75,14 +75,14 @@ export function sanitizeMonerooMetadata(raw: Record<string, unknown>): Record<st
   return metadata;
 }
 
-export function limitMonerooMetadata(metadata: Record<string, string>): Record<string, string> {
+export function limitGeniusPayMetadata(metadata: Record<string, string>): Record<string, string> {
   const limited: Record<string, string> = {};
 
-  for (const key of MONEROO_METADATA_PRIORITY) {
+  for (const key of GENIUSPAY_METADATA_PRIORITY) {
     if (metadata[key] !== undefined) {
       limited[key] = metadata[key];
     }
-    if (Object.keys(limited).length >= MONEROO_METADATA_MAX_ITEMS) {
+    if (Object.keys(limited).length >= GENIUSPAY_METADATA_MAX_ITEMS) {
       return limited;
     }
   }
@@ -90,7 +90,7 @@ export function limitMonerooMetadata(metadata: Record<string, string>): Record<s
   for (const [key, value] of Object.entries(metadata)) {
     if (limited[key] !== undefined) continue;
     limited[key] = value;
-    if (Object.keys(limited).length >= MONEROO_METADATA_MAX_ITEMS) break;
+    if (Object.keys(limited).length >= GENIUSPAY_METADATA_MAX_ITEMS) break;
   }
 
   return limited;
@@ -113,7 +113,7 @@ export function splitCustomerName(
   const parts = name.split(' ').filter(p => p.trim().length > 0);
 
   if (parts.length === 0) {
-    return { firstName: 'Client', lastName: 'Moneroo' };
+    return { firstName: 'Client', lastName: 'GeniusPay' };
   }
   if (parts.length === 1) {
     return { firstName: parts[0], lastName: 'Client' };
@@ -125,7 +125,7 @@ export function splitCustomerName(
   };
 }
 
-export interface InitializeMonerooPaymentInput {
+export interface InitializeGeniusPayPaymentInput {
   amount: number;
   currency: string;
   description: string;
@@ -138,23 +138,23 @@ export interface InitializeMonerooPaymentInput {
   metadata?: Record<string, unknown>;
 }
 
-export interface InitializeMonerooPaymentResult {
+export interface InitializeGeniusPayPaymentResult {
   checkoutUrl: string;
-  monerooPaymentId: string | null;
+  geniuspayPaymentId: string | null;
   rawResponse: Record<string, unknown>;
 }
 
-export async function initializeMonerooPayment(
+export async function initializeGeniusPayPayment(
   apiKey: string,
   apiUrl: string,
-  input: InitializeMonerooPaymentInput
-): Promise<InitializeMonerooPaymentResult> {
+  input: InitializeGeniusPayPaymentInput
+): Promise<InitializeGeniusPayPaymentResult> {
   const { firstName, lastName } = splitCustomerName(input.customerName ?? '', input.customerEmail);
 
-  const metadata = limitMonerooMetadata(sanitizeMonerooMetadata(input.metadata ?? {}));
+  const metadata = limitGeniusPayMetadata(sanitizeGeniusPayMetadata(input.metadata ?? {}));
 
   const customerPhone = input.customerPhone
-    ? normalizePhoneForMoneroo(input.customerPhone, input.customerCountry ?? undefined)
+    ? normalizePhoneForGeniusPay(input.customerPhone, input.customerCountry ?? undefined)
     : undefined;
 
   const body = {
@@ -188,14 +188,14 @@ export async function initializeMonerooPayment(
   try {
     responseData = responseText ? JSON.parse(responseText) : {};
   } catch {
-    throw new Error(`Moneroo API returned non-JSON response (${response.status})`);
+    throw new Error(`GeniusPay API returned non-JSON response (${response.status})`);
   }
 
   if (!response.ok) {
     const message =
       (responseData.message as string | undefined) ||
       (responseData.error as string | undefined) ||
-      `Moneroo API error ${response.status}`;
+      `GeniusPay API error ${response.status}`;
     throw new Error(message);
   }
 
@@ -204,16 +204,16 @@ export async function initializeMonerooPayment(
     (nested.checkout_url as string | undefined) ||
     (nested.checkoutUrl as string | undefined) ||
     null;
-  const monerooPaymentId =
+  const geniuspayPaymentId =
     (nested.id as string | undefined) || (nested.transaction_id as string | undefined) || null;
 
   if (!checkoutUrl) {
-    throw new Error('Moneroo response missing checkout_url');
+    throw new Error('GeniusPay response missing checkout_url');
   }
 
   return {
     checkoutUrl,
-    monerooPaymentId,
+    geniuspayPaymentId,
     rawResponse: responseData,
   };
 }

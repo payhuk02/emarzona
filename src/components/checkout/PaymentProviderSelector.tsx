@@ -35,8 +35,8 @@ const PROVIDER_META: Record<
   CheckoutPaymentProvider,
   Omit<PaymentProviderOption, 'value' | 'available'>
 > = {
-  moneroo: {
-    label: 'Moneroo',
+  geniuspay: {
+    label: 'GeniusPay',
     description: 'Mobile money et paiements locaux (XOF, Afrique)',
     icon: <Wallet className="h-5 w-5" />,
     features: ['Mobile Money', 'XOF / XAF', 'Paiement local'],
@@ -96,8 +96,8 @@ export function PaymentProviderSelector({
     if (!orchestrationV2 || !storeId) {
       return [
         {
-          value: 'moneroo',
-          ...PROVIDER_META.moneroo,
+          value: 'geniuspay',
+          ...PROVIDER_META.geniuspay,
           available: true,
         },
       ];
@@ -106,7 +106,7 @@ export function PaymentProviderSelector({
     const source = (rpcOptions ?? []).filter(opt => opt.provider !== 'flutterwave_connect');
     return source.map(opt => {
       const checkoutValue = rpcProviderToCheckout(opt.provider);
-      const meta = PROVIDER_META[checkoutValue] ?? PROVIDER_META.moneroo;
+      const meta = PROVIDER_META[checkoutValue] ?? PROVIDER_META.geniuspay;
       return {
         value: checkoutValue,
         label: opt.label || meta.label,
@@ -132,13 +132,13 @@ export function PaymentProviderSelector({
         if (!pref) return;
 
         const checkoutPref: CheckoutPaymentProvider =
-          pref === 'moneroo' || pref === 'moneroo_platform'
-            ? 'moneroo'
+          pref === 'geniuspay' || pref === 'geniuspay_platform'
+            ? 'geniuspay'
             : pref === 'stripe_connect' ||
                 pref === 'paypal_commerce' ||
                 pref === 'flutterwave_connect'
               ? pref
-              : 'moneroo';
+              : 'geniuspay';
 
         const match = providers.find(p => p.value === checkoutPref);
         if (match) onChange(match.value);

@@ -7,7 +7,7 @@
  * 2. Vérifier disponibilité (éditions limitées)
  * 3. Créer order + order_item avec métadonnées spécifiques
  * 4. Gérer shipping fragile et assurance si nécessaire
- * 5. Initier paiement Moneroo
+ * 5. Initier paiement GeniusPay
  */
 
 import { useMutation } from '@tanstack/react-query';
@@ -76,10 +76,10 @@ export interface CreateArtistOrderResult {
   /** ID de l'order_item */
   orderItemId: string;
 
-  /** URL de checkout Moneroo */
+  /** URL de checkout GeniusPay */
   checkoutUrl: string;
 
-  /** ID de transaction Moneroo */
+  /** ID de transaction GeniusPay */
   transactionId: string;
 }
 
@@ -105,7 +105,7 @@ export interface CreateArtistOrderResult {
  *     quantity: 1,
  *   });
  *
- *   // Rediriger vers Moneroo
+ *   // Rediriger vers GeniusPay
  *   window.location.href = result.checkoutUrl;
  * };
  * ```
@@ -362,7 +362,7 @@ export const useCreateArtistOrder = () => {
         }
       }
 
-      // 11. Initier paiement Moneroo - avec retry automatique
+      // 11. Initier paiement GeniusPay - avec retry automatique
       // Convertir currency en type Currency
       const { isSupportedCurrency } = await import('@/lib/currency-converter');
       type Currency = 'XOF' | 'EUR' | 'USD' | 'GBP' | 'NGN' | 'GHS' | 'KES' | 'ZAR';
@@ -410,7 +410,7 @@ export const useCreateArtistOrder = () => {
             return false;
           },
           onRetry: (attempt, delay, error) => {
-            logger.warn('Retry paiement Moneroo', {
+            logger.warn('Retry paiement GeniusPay', {
               attempt,
               delay,
               error: error instanceof Error ? error.message : String(error),

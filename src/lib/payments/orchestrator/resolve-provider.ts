@@ -4,7 +4,7 @@
 
 import {
   FLUTTERWAVE_CONNECT_CURRENCIES,
-  MONEROO_PLATFORM_CURRENCIES,
+  GENIUSPAY_PLATFORM_CURRENCIES,
   PAYPAL_COMMERCE_CURRENCIES,
   PROVIDER_PRIORITY,
   STRIPE_CONNECT_CURRENCIES,
@@ -38,8 +38,8 @@ function isProviderCompatible(
       return PAYPAL_COMMERCE_CURRENCIES.has(currency);
     case 'flutterwave_connect':
       return FLUTTERWAVE_CONNECT_CURRENCIES.has(currency);
-    case 'moneroo_platform':
-      return MONEROO_PLATFORM_CURRENCIES.has(currency) || currency.length > 0;
+    case 'geniuspay_platform':
+      return GENIUSPAY_PLATFORM_CURRENCIES.has(currency) || currency.length > 0;
     default:
       return false;
   }
@@ -54,10 +54,10 @@ export function resolvePaymentProvider(input: ResolveProviderInput): ResolvedPay
   const activeConnections = input.connections.filter(isConnectionActive);
 
   if (input.forcePlatformPayments) {
-    const moneroo = findConnection(activeConnections, 'moneroo_platform');
+    const geniuspay = findConnection(activeConnections, 'geniuspay_platform');
     return {
-      provider: 'moneroo_platform',
-      connectionId: moneroo?.id ?? null,
+      provider: 'geniuspay_platform',
+      connectionId: geniuspay?.id ?? null,
       reason: 'store_force_platform_payments',
     };
   }
@@ -85,10 +85,10 @@ export function resolvePaymentProvider(input: ResolveProviderInput): ResolvedPay
     };
   }
 
-  const monerooFallback = findConnection(activeConnections, 'moneroo_platform');
+  const geniuspayFallback = findConnection(activeConnections, 'geniuspay_platform');
   return {
-    provider: 'moneroo_platform',
-    connectionId: monerooFallback?.id ?? null,
-    reason: 'fallback_moneroo',
+    provider: 'geniuspay_platform',
+    connectionId: geniuspayFallback?.id ?? null,
+    reason: 'fallback_geniuspay',
   };
 }

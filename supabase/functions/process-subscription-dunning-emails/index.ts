@@ -60,12 +60,12 @@ function buildEmailPayload(target: DunningEmailTarget, billingUrl: string) {
     'j+3': '3 jours sans paiement',
     'j+7': 'Dernier jour de grâce',
     expired: 'Abonnement expiré — produits suspendus',
-    auto_renew: 'Confirmez votre renouvellement Moneroo',
+    auto_renew: 'Confirmez votre renouvellement GeniusPay',
   };
 
   const messages: Record<string, string> = {
     'j-7':
-      'Le renouvellement automatique sera initié si votre profil Moneroo est enregistré. Sinon, régularisez depuis votre espace facturation.',
+      'Le renouvellement automatique sera initié si votre profil GeniusPay est enregistré. Sinon, régularisez depuis votre espace facturation.',
     'j-1': 'Dernière chance avant suspension de vos produits physiques.',
     past_due: 'Vos produits physiques seront suspendus si le paiement n’est pas reçu sous 7 jours.',
     'j+3':
@@ -75,7 +75,7 @@ function buildEmailPayload(target: DunningEmailTarget, billingUrl: string) {
     expired:
       'Vos produits physiques sont suspendus. Réactivez votre abonnement pour reprendre les ventes.',
     auto_renew:
-      'Un checkout Moneroo a été préparé avec votre profil enregistré. Une confirmation mobile money suffit.',
+      'Un checkout GeniusPay a été préparé avec votre profil enregistré. Une confirmation mobile money suffit.',
   };
 
   const actionLabels: Record<string, string> = {
@@ -85,7 +85,7 @@ function buildEmailPayload(target: DunningEmailTarget, billingUrl: string) {
     'j+3': 'Régulariser le paiement',
     'j+7': 'Payer maintenant',
     expired: 'Réactiver mon abonnement',
-    auto_renew: 'Confirmer sur Moneroo',
+    auto_renew: 'Confirmer sur GeniusPay',
   };
 
   return {

@@ -1,7 +1,7 @@
 /**
  * Epic 3.4 — E2E contrat : paiement cours → enrollment → /learn/:slug
  *
- * Flux complet Moneroo : E2E_RUN_AUTH_TESTS=1 + E2E_COURSE_SLUG + staging.
+ * Flux complet GeniusPay : E2E_RUN_AUTH_TESTS=1 + E2E_COURSE_SLUG + staging.
  * Contrats SQL/RPC : toujours exécutés (skip si env vide).
  */
 
@@ -52,7 +52,7 @@ test.describe('Epic 3.4 — cours paiement → learn', () => {
     expect(html).not.toContain('internal server error');
   });
 
-  test('fiche cours → checkout ou Moneroo quand auth', async ({ page }) => {
+  test('fiche cours → checkout ou GeniusPay quand auth', async ({ page }) => {
     test.skip(!process.env.E2E_RUN_AUTH_TESTS, 'E2E_RUN_AUTH_TESTS=1 requis');
 
     const productId = process.env.E2E_COURSE_PRODUCT_ID;
@@ -70,7 +70,7 @@ test.describe('Epic 3.4 — cours paiement → learn', () => {
     }
 
     await enrollButton.click();
-    await page.waitForURL(/\/(checkout|moneroo)/, { timeout: E2E_TEST_CONFIG.paymentTimeout });
-    expect(page.url()).toMatch(/checkout|moneroo/);
+    await page.waitForURL(/\/(checkout|geniuspay)/, { timeout: E2E_TEST_CONFIG.paymentTimeout });
+    expect(page.url()).toMatch(/checkout|geniuspay/);
   });
 });
