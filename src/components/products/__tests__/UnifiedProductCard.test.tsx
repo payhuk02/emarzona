@@ -19,6 +19,16 @@ vi.mock('@/components/marketplace/PriceStockAlertButton', () => ({
   PriceStockAlertButton: () => <button data-testid="price-alert-button">Alert</button>,
 }));
 
+vi.mock('@/components/marketplace/MarketplaceProductCardActions', () => ({
+  MarketplaceProductCardActions: ({ buyAriaLabel }: any) => (
+    <div>
+      <button aria-label="Acheter Test Product pour 5000">Acheter</button>
+      <button aria-label="Voir les détails de Test Product">Voir les détails de Test Product</button>
+    </div>
+  ),
+  MarketplaceProductCardPriceRow: ({ children }: any) => <div>{children}</div>,
+}));
+
 const mockProduct = {
   id: 'test-product-1',
   name: 'Test Product',

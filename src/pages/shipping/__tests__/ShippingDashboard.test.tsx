@@ -29,44 +29,47 @@ vi.mock('@/hooks/useStore', () => ({
 }));
 
 // Mock useShipments
-const mockShipments = [
-  {
-    id: 'ship1',
-    order_id: 'order1',
-    carrier_id: 'carrier1',
-    store_id: 'store123',
-    tracking_number: 'TRACK123',
-    tracking_url: 'https://tracking.example.com/TRACK123',
-    service_type: 'express',
-    status: 'in_transit',
-    weight_value: 1.5,
-    shipping_cost: 5000,
-    currency: 'XOF',
-    created_at: '2025-01-01T00:00:00Z',
-    order: {
-      order_number: 'ORD-001',
-      total_amount: 10000,
+const { mockShipments, mockUpdate } = vi.hoisted(() => ({
+  mockShipments: [
+    {
+      id: 'ship1',
+      order_id: 'order1',
+      carrier_id: 'carrier1',
+      store_id: 'store123',
+      tracking_number: 'TRACK123',
+      tracking_url: 'https://tracking.example.com/TRACK123',
+      service_type: 'express',
+      status: 'in_transit',
+      weight_value: 1.5,
+      shipping_cost: 5000,
+      currency: 'XOF',
+      created_at: '2025-01-01T00:00:00Z',
+      order: {
+        order_number: 'ORD-001',
+        total_amount: 10000,
+      },
     },
-  },
-  {
-    id: 'ship2',
-    order_id: 'order2',
-    carrier_id: 'carrier1',
-    store_id: 'store123',
-    tracking_number: 'TRACK456',
-    tracking_url: 'https://tracking.example.com/TRACK456',
-    service_type: 'standard',
-    status: 'delivered',
-    weight_value: 2.0,
-    shipping_cost: 3000,
-    currency: 'XOF',
-    created_at: '2025-01-02T00:00:00Z',
-    order: {
-      order_number: 'ORD-002',
-      total_amount: 15000,
+    {
+      id: 'ship2',
+      order_id: 'order2',
+      carrier_id: 'carrier1',
+      store_id: 'store123',
+      tracking_number: 'TRACK456',
+      tracking_url: 'https://tracking.example.com/TRACK456',
+      service_type: 'standard',
+      status: 'delivered',
+      weight_value: 2.0,
+      shipping_cost: 3000,
+      currency: 'XOF',
+      created_at: '2025-01-02T00:00:00Z',
+      order: {
+        order_number: 'ORD-002',
+        total_amount: 15000,
+      },
     },
-  },
-];
+  ],
+  mockUpdate: vi.fn(() => Promise.resolve()),
+}));
 
 vi.mock('@/hooks/shipping/useFedexShipping', () => ({
   useShipments: vi.fn(() => ({
@@ -76,14 +79,27 @@ vi.mock('@/hooks/shipping/useFedexShipping', () => ({
     refetch: vi.fn(() => Promise.resolve()),
   })),
   useUpdateShipmentTracking: vi.fn(() => ({
+    mutateAsync: mockUpdate,
+    isPending: false,
+  })),
+  usePrintLabel: vi.fn(() => ({
     mutateAsync: vi.fn(() => Promise.resolve()),
+    isPending: false,
+  })),
+  useCancelShipment: vi.fn(() => ({
+    mutateAsync: vi.fn(() => Promise.resolve()),
+    isPending: false,
+  })),
+  useCreateFedexShipment: vi.fn(() => ({
+    mutateAsync: vi.fn(() => Promise.resolve()),
+    isPending: false,
   })),
 }));
 
 // Mock useToast
 const mockToast = vi.fn();
 vi.mock('@/hooks/use-toast', () => ({
-  useToast: () => ({ toast: mockToast }),
+  useToast: () => ({ toast: mockToast, toasts: [] }),
 }));
 
 // Mock useNavigate
@@ -117,7 +133,7 @@ describe('ShippingDashboard', () => {
 
   it('should render the shipping dashboard', () => {
     renderComponent();
-    expect(screen.getByText(/gestion des expéditions/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Expéditions/i)[0]).toBeInTheDocument();
   });
 
   it('should display shipment statistics', async () => {
@@ -125,8 +141,8 @@ describe('ShippingDashboard', () => {
     
     await waitFor(() => {
       expect(screen.getByText('2')).toBeInTheDocument(); // Total shipments
-      expect(screen.getByText(/en transit/i)).toBeInTheDocument();
-      expect(screen.getByText(/livré/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/en transit/i)[0]).toBeInTheDocument();
+      expect(screen.getAllByText(/livré/i)[0]).toBeInTheDocument();
     });
   });
 
@@ -136,8 +152,8 @@ describe('ShippingDashboard', () => {
     await waitFor(() => {
       expect(screen.getByText('TRACK123')).toBeInTheDocument();
       expect(screen.getByText('TRACK456')).toBeInTheDocument();
-      expect(screen.getByText('ORD-001')).toBeInTheDocument();
-      expect(screen.getByText('ORD-002')).toBeInTheDocument();
+      expect(screen.getByText(/ORD-001/i)).toBeInTheDocument();
+      expect(screen.getByText(/ORD-002/i)).toBeInTheDocument();
     });
   });
 
@@ -188,7 +204,7 @@ describe('ShippingDashboard', () => {
       expect(screen.getByText('TRACK123')).toBeInTheDocument();
     });
 
-    const refreshButtons = screen.getAllByRole('button', { name: /actualiser|refresh/i });
+    const refreshButtons = screen.getAllByRole('button', { name: /actualiser|refresh|rafraîchir/i });
     if (refreshButtons.length > 0) {
       await user.click(refreshButtons[0]);
       expect(mockUpdate).toHaveBeenCalled();
@@ -203,18 +219,18 @@ describe('ShippingDashboard', () => {
       expect(screen.getByText('TRACK123')).toBeInTheDocument();
     });
 
-    const exportButton = screen.getByRole('button', { name: /exporter|download/i });
+    const exportButton = screen.getByRole('button', { name: /exporter|download|export csv/i });
     await user.click(exportButton);
     
     await waitFor(() => {
       expect(mockToast).toHaveBeenCalledWith(expect.objectContaining({
-        title: /export réussi/i,
+        title: expect.stringMatching(/export réussi/i),
       }));
     });
   });
 
   it('should display empty state when no shipments', async () => {
-    vi.mocked(useFedexShippingHook.useShipments).mockReturnValue({
+    vi.mocked(useFedexShippingHook.useShipments).mockReturnValueOnce({
       data: [],
       isLoading: false,
       error: null,

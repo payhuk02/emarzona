@@ -272,6 +272,7 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
       role="article"
       aria-labelledby={`product-title-${product.id}`}
       aria-describedby={`product-price-${product.id}`}
+      tabIndex={0}
     >
       {/* Image Section */}
       <div
