@@ -202,10 +202,16 @@ serve(async req => {
     const safePayloadForLogs = sanitizeWebhookPayload(payload);
     console.log('GeniusPay webhook received', safePayloadForLogs);
 
-    const { transaction_id, status, amount, currency, metadata } = payload;
+    const transaction_id = payload.transaction_id || payload.id || payload.reference || payload.transactionId;
+    const { status, amount, currency, metadata } = payload;
 
     if (!transaction_id) {
-      throw new Error('Missing transaction_id in webhook payload');
+      console.log('Webhook payload missing transaction identifier. Payload:', payload);
+      // Return 200 OK for generic tests/pings to avoid dashboard errors
+      return new Response(JSON.stringify({ success: true, message: 'Webhook received but no transaction ID found (test event?)' }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     // Find transaction by GeniusPay transaction ID
