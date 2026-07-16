@@ -30,6 +30,13 @@ CREATE TABLE IF NOT EXISTS public.email_templates (
 );
 
 ALTER TABLE public.email_templates ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
+ALTER TABLE public.email_campaigns ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
+ALTER TABLE public.email_sequences ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
+ALTER TABLE public.email_segments ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
+ALTER TABLE public.email_logs ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
+ALTER TABLE public.email_workflows ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
+ALTER TABLE public.email_ab_tests ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
+ALTER TABLE public.email_unsubscribes ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
 
 ALTER TABLE public.email_templates ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Store owners manage email templates" ON public.email_templates;
