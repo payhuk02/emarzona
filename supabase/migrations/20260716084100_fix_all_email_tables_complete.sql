@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS public.email_templates (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
+ALTER TABLE public.email_templates ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
 ALTER TABLE public.email_templates ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Store owners manage email templates" ON public.email_templates;
 CREATE POLICY "Store owners manage email templates" ON public.email_templates FOR ALL USING (
@@ -63,6 +64,7 @@ CREATE TABLE IF NOT EXISTS public.email_campaigns (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
+ALTER TABLE public.email_campaigns ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
 ALTER TABLE public.email_campaigns ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Store owners manage campaigns" ON public.email_campaigns;
 CREATE POLICY "Store owners manage campaigns" ON public.email_campaigns FOR ALL USING (
@@ -88,6 +90,7 @@ CREATE TABLE IF NOT EXISTS public.email_sequences (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
+ALTER TABLE public.email_sequences ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
 ALTER TABLE public.email_sequences ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Store owners manage sequences" ON public.email_sequences;
 CREATE POLICY "Store owners manage sequences" ON public.email_sequences FOR ALL USING (
@@ -139,6 +142,7 @@ CREATE TABLE IF NOT EXISTS public.email_segments (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
+ALTER TABLE public.email_segments ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
 ALTER TABLE public.email_segments ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Store owners manage segments" ON public.email_segments;
 CREATE POLICY "Store owners manage segments" ON public.email_segments FOR ALL USING (
@@ -177,6 +181,7 @@ CREATE TABLE IF NOT EXISTS public.email_logs (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
+ALTER TABLE public.email_logs ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
 ALTER TABLE public.email_logs ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Store owners view email logs" ON public.email_logs;
 CREATE POLICY "Store owners view email logs" ON public.email_logs FOR SELECT USING (
@@ -202,6 +207,7 @@ CREATE TABLE IF NOT EXISTS public.email_workflows (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
+ALTER TABLE public.email_workflows ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
 ALTER TABLE public.email_workflows ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Store owners manage workflows" ON public.email_workflows;
 CREATE POLICY "Store owners manage workflows" ON public.email_workflows FOR ALL USING (
@@ -229,6 +235,7 @@ CREATE TABLE IF NOT EXISTS public.email_ab_tests (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
+ALTER TABLE public.email_ab_tests ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
 ALTER TABLE public.email_ab_tests ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Store owners manage ab tests" ON public.email_ab_tests;
 CREATE POLICY "Store owners manage ab tests" ON public.email_ab_tests FOR ALL USING (
@@ -273,6 +280,7 @@ CREATE TABLE IF NOT EXISTS public.email_unsubscribes (
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
+ALTER TABLE public.email_unsubscribes ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
 ALTER TABLE public.email_unsubscribes ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Store owners view unsubscribes" ON public.email_unsubscribes;
 CREATE POLICY "Store owners view unsubscribes" ON public.email_unsubscribes FOR SELECT USING (
@@ -398,6 +406,7 @@ DROP POLICY IF EXISTS "Members manage own reactions" ON public.community_reactio
 CREATE POLICY "Members manage own reactions" ON public.community_reactions FOR ALL USING (
   EXISTS (SELECT 1 FROM community_members cm WHERE cm.id = community_reactions.member_id AND cm.user_id = auth.uid())
 );
+
 -- 1. Ensure all email tables have the proper grants
 GRANT ALL ON public.email_templates TO authenticated, anon, service_role;
 GRANT ALL ON public.email_campaigns TO authenticated, anon, service_role;
@@ -419,15 +428,18 @@ ALTER TABLE public.email_workflows ADD COLUMN IF NOT EXISTS error_count integer 
 ALTER TABLE public.email_workflows ADD COLUMN IF NOT EXISTS last_executed_at timestamptz;
 ALTER TABLE public.email_workflows ADD COLUMN IF NOT EXISTS created_by uuid;
 
--- 3. Ensure store_id exists on all tables (if they were created in an older schema)
-ALTER TABLE public.email_templates ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
-ALTER TABLE public.email_campaigns ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
-ALTER TABLE public.email_sequences ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
-ALTER TABLE public.email_segments ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
-ALTER TABLE public.email_logs ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
-ALTER TABLE public.email_workflows ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
-ALTER TABLE public.email_ab_tests ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
-ALTER TABLE public.email_unsubscribes ADD COLUMN IF NOT EXISTS store_id uuid REFERENCES public.stores(id) ON DELETE CASCADE;
+-- 3. Reload the schema cache so the API recognizes the tables and new columns
+NOTIFY pgrst, 'reload schema';
+
+
+-- 3. Ensure the email_workflows table has the columns expected by the frontend
+ALTER TABLE public.email_workflows ADD COLUMN IF NOT EXISTS actions jsonb DEFAULT '[]'::jsonb;
+ALTER TABLE public.email_workflows ADD COLUMN IF NOT EXISTS conditions jsonb DEFAULT '{}'::jsonb;
+ALTER TABLE public.email_workflows ADD COLUMN IF NOT EXISTS execution_count integer DEFAULT 0;
+ALTER TABLE public.email_workflows ADD COLUMN IF NOT EXISTS success_count integer DEFAULT 0;
+ALTER TABLE public.email_workflows ADD COLUMN IF NOT EXISTS error_count integer DEFAULT 0;
+ALTER TABLE public.email_workflows ADD COLUMN IF NOT EXISTS last_executed_at timestamptz;
+ALTER TABLE public.email_workflows ADD COLUMN IF NOT EXISTS created_by uuid;
 
 -- 4. Reload the schema cache so the API recognizes the tables and new columns
 NOTIFY pgrst, 'reload schema';
