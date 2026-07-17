@@ -1,5 +1,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'npm:@supabase/supabase-js@2.58.0';
+import { isDuplicateAuthUserError } from '../_shared/auth-admin-utils.ts';
 
 const defaultAllowedOrigin = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
 const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || defaultAllowedOrigin)
@@ -140,42 +141,31 @@ serve(async (req: Request) => {
 
     let targetUserId: string | null = null;
 
-    const { data: userByEmail, error: lookupError } =
-      await supabaseAdmin.auth.admin.getUserByEmail(normalizedEmail);
+    const { data: created, error: createError } = await supabaseAdmin.auth.admin.createUser({
+      email: normalizedEmail,
+      password: crypto.randomUUID(),
+      email_confirm: true,
+      user_metadata: {
+        guest_checkout: true,
+        provisioned_via: 'guest-customer-access',
+      },
+    });
 
-    if (!lookupError && userByEmail?.user?.id) {
-      targetUserId = userByEmail.user.id;
-    }
-
-    if (!targetUserId) {
-      const { data: created, error: createError } = await supabaseAdmin.auth.admin.createUser({
-        email: normalizedEmail,
-        password: crypto.randomUUID(),
-        email_confirm: true,
-        user_metadata: {
-          guest_checkout: true,
-          provisioned_via: 'guest-customer-access',
-        },
-      });
-
-      if (createError) {
-        if (
-          createError.message.toLowerCase().includes('already') ||
-          createError.message.toLowerCase().includes('registered')
-        ) {
-          return new Response(
-            JSON.stringify({
-              success: false,
-              error: 'Un compte existe déjà. Connectez-vous avec cet email.',
-              code: 'USER_EXISTS_LOGIN_REQUIRED',
-            }),
-            { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
-        }
-        throw createError;
+    if (createError) {
+      if (isDuplicateAuthUserError(createError)) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: 'Un compte existe déjà. Connectez-vous avec cet email.',
+            code: 'USER_EXISTS_LOGIN_REQUIRED',
+          }),
+          { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
       }
-      targetUserId = created.user?.id ?? null;
+      throw createError;
     }
+
+    targetUserId = created.user?.id ?? null;
 
     if (!targetUserId) {
       throw new Error('Utilisateur introuvable');

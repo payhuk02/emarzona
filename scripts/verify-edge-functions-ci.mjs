@@ -65,6 +65,7 @@ const steps = [
       'supabase/functions/_shared/__tests__/sequence-enrollment-utils.test.ts',
       'supabase/functions/_shared/__tests__/sequence-enrollment-integration.test.ts',
       'supabase/functions/_shared/__tests__/seller-order-notification-email.test.ts',
+      'supabase/functions/_shared/__tests__/auth-admin-utils.test.ts',
     ],
   },
 ];

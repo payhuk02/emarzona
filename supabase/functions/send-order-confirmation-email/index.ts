@@ -1,5 +1,5 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createClient } from 'npm:@supabase/supabase-js@2.58.0';
+import { createClient, type SupabaseClient } from 'npm:@supabase/supabase-js@2.58.0';
 import { getProjectRefFromSupabaseUrl, isServiceRoleJwt } from '../_shared/edge-auth-utils.ts';
 import { mintOrderDownloadLink } from '../_shared/mint-download-token.ts';
 import { CHECKOUT_GUEST_WINDOW_MS } from '../_shared/order-checkout-auth.ts';
@@ -59,7 +59,7 @@ function parseOrderMetadata(metadata: unknown): Record<string, unknown> {
 const EDGE_INTERNAL_SECRET = Deno.env.get('EDGE_INTERNAL_SECRET');
 
 async function invokeSendEmail(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClient<any, 'public', any>,
   body: Record<string, unknown>
 ): Promise<{ ok: boolean; error?: string }> {
   const headers: Record<string, string> = {};

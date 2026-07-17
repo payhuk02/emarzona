@@ -221,4 +221,5 @@ jobs:
           deno test --allow-env --config supabase/functions/deno.json supabase/functions/_shared/__tests__/sequence-enrollment-utils.test.ts
           deno test --allow-env --config supabase/functions/deno.json supabase/functions/_shared/__tests__/sequence-enrollment-integration.test.ts
           deno test --allow-env --config supabase/functions/deno.json supabase/functions/_shared/__tests__/seller-order-notification-email.test.ts
+          deno test --allow-env --config supabase/functions/deno.json supabase/functions/_shared/__tests__/auth-admin-utils.test.ts
 

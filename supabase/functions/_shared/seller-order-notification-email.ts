@@ -2,6 +2,8 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { buildSellerOrderEmailVariables } from './seller-order-email-utils.ts';
 import { createSupabaseAdmin } from './supabase-admin.ts';
 
+type AdminSupabaseClient = SupabaseClient<any, 'public', any>;
+
 export type StoreNotificationSettingsRow = {
   email_enabled?: boolean | null;
   email_new_order?: boolean | null;
@@ -92,7 +94,7 @@ export function shouldSendSellerNewOrderEmail(
 }
 
 export async function fetchStoreNotificationSettings(
-  supabase: SupabaseClient,
+  supabase: AdminSupabaseClient,
   storeId: string
 ): Promise<StoreNotificationSettingsRow | null> {
   const { data } = await supabase
@@ -107,7 +109,7 @@ export async function fetchStoreNotificationSettings(
 }
 
 export async function resolveSellerOrderNotificationRecipient(
-  supabase: SupabaseClient,
+  supabase: AdminSupabaseClient,
   storeId: string,
   settings: StoreNotificationSettingsRow | null | undefined
 ): Promise<{ email: string; name: string; userId: string } | null> {
@@ -163,7 +165,7 @@ function summarizeProductNames(items: Array<Record<string, unknown>>): string {
 }
 
 export async function sendSellerOrderNotificationEmail(
-  supabase: SupabaseClient,
+  supabase: AdminSupabaseClient,
   options: {
     order: Record<string, unknown>;
     items: Array<Record<string, unknown>>;
