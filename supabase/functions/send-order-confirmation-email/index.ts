@@ -9,8 +9,7 @@ import {
   resolveCustomerPortalLink,
   resolvePhysicalWhatsAppLink,
 } from '../_shared/physical-order-email-utils.ts';
-import { buildSellerOrderEmailVariables } from '../_shared/seller-order-email-utils.ts';
-import { createSupabaseAdmin } from '../_shared/supabase-admin.ts';
+import { sendSellerOrderNotificationEmail } from '../_shared/seller-order-notification-email.ts';
 
 const ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGINS') || '')
   .split(',')
@@ -205,15 +204,18 @@ serve(async req => {
     }
 
     const orderMetadata = parseOrderMetadata(order.metadata);
-    if (orderMetadata.confirmation_email_sent_at) {
+    const customerEmailsAlreadySent = Boolean(orderMetadata.confirmation_email_sent_at);
+    const sellerEmailAlreadySent = Boolean(orderMetadata.seller_order_email_sent_at);
+
+    if (customerEmailsAlreadySent && sellerEmailAlreadySent) {
       console.log(
-        `Confirmation email already sent for order ${payload.order_id} at ${orderMetadata.confirmation_email_sent_at}`
+        `Order confirmation emails already sent for order ${payload.order_id} (customer + seller)`
       );
       return new Response(
         JSON.stringify({
           success: true,
           orderId: payload.order_id,
-          message: 'Confirmation email already sent',
+          message: 'Confirmation emails already sent',
           duplicate: true,
         }),
         {
@@ -223,90 +225,119 @@ serve(async req => {
       );
     }
 
-    // Grouper les items par type de produit
-    const itemsByType: Record<string, typeof order.order_items> = {};
+    const emailResults: Array<Record<string, unknown>> = [];
+    let emailsSentCount = 0;
 
-    (order.order_items || []).forEach((item: any) => {
-      const productType = item.product_type || 'generic';
-      if (!itemsByType[productType]) {
-        itemsByType[productType] = [];
-      }
-      itemsByType[productType].push(item);
-    });
+    if (!customerEmailsAlreadySent) {
+      // Grouper les items par type de produit
+      const itemsByType: Record<string, typeof order.order_items> = {};
 
-    const emailResults = [];
-
-    // Traiter chaque type de produit
-    for (const [productType, items] of Object.entries(itemsByType)) {
-      for (const item of items) {
-        try {
-          let emailSent = false;
-
-          switch (productType) {
-            case 'digital':
-              emailSent = await sendDigitalEmail(supabase, order, item, payload);
-              break;
-
-            case 'physical':
-              emailSent = await sendPhysicalEmail(supabase, order, item, payload);
-              break;
-
-            case 'service':
-              emailSent = await sendServiceEmail(supabase, order, item, payload);
-              break;
-
-            case 'course':
-              emailSent = await sendCourseEmail(supabase, order, item, payload);
-              break;
-
-            case 'artist':
-              emailSent = await sendArtistEmail(supabase, order, item, payload);
-              break;
-
-            default:
-              console.log(`Skipping email for product type: ${productType}`);
-          }
-
-          emailResults.push({
-            productType,
-            productId: item.product_id,
-            productName: item.product_name,
-            emailSent,
-          });
-        } catch (error) {
-          console.error(`Error sending email for item ${item.id}:`, error);
-          emailResults.push({
-            productType,
-            productId: item.product_id,
-            productName: item.product_name,
-            emailSent: false,
-            error: error instanceof Error ? error.message : String(error),
-          });
+      (order.order_items || []).forEach((item: any) => {
+        const productType = item.product_type || 'generic';
+        if (!itemsByType[productType]) {
+          itemsByType[productType] = [];
         }
+        itemsByType[productType].push(item);
+      });
+
+      // Traiter chaque type de produit
+      for (const [productType, items] of Object.entries(itemsByType)) {
+        for (const item of items) {
+          try {
+            let emailSent = false;
+
+            switch (productType) {
+              case 'digital':
+                emailSent = await sendDigitalEmail(supabase, order, item, payload);
+                break;
+
+              case 'physical':
+                emailSent = await sendPhysicalEmail(supabase, order, item, payload);
+                break;
+
+              case 'service':
+                emailSent = await sendServiceEmail(supabase, order, item, payload);
+                break;
+
+              case 'course':
+                emailSent = await sendCourseEmail(supabase, order, item, payload);
+                break;
+
+              case 'artist':
+                emailSent = await sendArtistEmail(supabase, order, item, payload);
+                break;
+
+              default:
+                console.log(`Using physical fallback email for product type: ${productType}`);
+                emailSent = await sendPhysicalEmail(supabase, order, item, payload);
+            }
+
+            emailResults.push({
+              productType,
+              productId: item.product_id,
+              productName: item.product_name,
+              emailSent,
+            });
+          } catch (error) {
+            console.error(`Error sending email for item ${item.id}:`, error);
+            emailResults.push({
+              productType,
+              productId: item.product_id,
+              productName: item.product_name,
+              emailSent: false,
+              error: error instanceof Error ? error.message : String(error),
+            });
+          }
+        }
+      }
+
+      emailsSentCount = emailResults.filter(r => r.emailSent).length;
+    } else {
+      console.log(
+        `Customer confirmation emails already sent for order ${payload.order_id} at ${orderMetadata.confirmation_email_sent_at}`
+      );
+    }
+
+    let sellerEmailSent = sellerEmailAlreadySent;
+    let sellerEmailSkipped: string | undefined;
+    let sellerEmailError: string | undefined;
+    const orderItems = (order.order_items || []) as Array<Record<string, unknown>>;
+
+    if (!sellerEmailAlreadySent && orderItems.length > 0) {
+      try {
+        const sellerResult = await sendSellerOrderNotificationEmail(supabase, {
+          order,
+          items: orderItems,
+          primaryItem: orderItems[0],
+          invokeSendEmail: body => invokeSendEmail(supabase, body),
+        });
+        sellerEmailSent = sellerResult.sent;
+        sellerEmailSkipped = sellerResult.skipped;
+        sellerEmailError = sellerResult.error;
+        if (sellerResult.error) {
+          console.warn('Seller order notification email failed:', sellerResult.error);
+        }
+      } catch (error) {
+        sellerEmailError = error instanceof Error ? error.message : String(error);
+        console.warn('Seller order notification email failed:', sellerEmailError);
       }
     }
 
-    const emailsSentCount = emailResults.filter(r => r.emailSent).length;
+    if (emailsSentCount > 0 || sellerEmailSent) {
+      const metadataPatch: Record<string, unknown> = { ...orderMetadata };
 
-    if (emailsSentCount > 0) {
-      const firstItem = (order.order_items || [])[0];
-      if (firstItem) {
-        try {
-          await sendSellerOrderNotificationEmail(supabase, order, firstItem);
-        } catch (sellerEmailError) {
-          console.warn('Seller order notification email failed:', sellerEmailError);
-        }
+      if (emailsSentCount > 0) {
+        metadataPatch.confirmation_email_sent_at = new Date().toISOString();
+        metadataPatch.confirmation_emails_sent = emailsSentCount;
+      }
+
+      if (sellerEmailSent) {
+        metadataPatch.seller_order_email_sent_at = new Date().toISOString();
       }
 
       await supabase
         .from('orders')
-        .update({
-          metadata: {
-            ...orderMetadata,
-            confirmation_email_sent_at: new Date().toISOString(),
-            confirmation_emails_sent: emailsSentCount,
-          },
-        })
+        .update({ metadata: metadataPatch })
         .eq('id', payload.order_id);
     }
 
@@ -315,6 +346,9 @@ serve(async req => {
         success: true,
         orderId: payload.order_id,
         emailsSent: emailsSentCount,
+        sellerEmailSent,
+        sellerEmailSkipped,
+        sellerEmailError,
         totalItems: emailResults.length,
         results: emailResults,
       }),
@@ -616,51 +650,4 @@ async function sendArtistEmail(
   });
 
   return result.ok;
-}
-
-async function sendSellerOrderNotificationEmail(
-  supabase: ReturnType<typeof createClient>,
-  order: Record<string, unknown>,
-  item: Record<string, unknown>
-): Promise<void> {
-  const storeId = order.store_id as string | undefined;
-  if (!storeId) return;
-
-  const { data: storeRow } = await supabase
-    .from('stores')
-    .select('user_id, name')
-    .eq('id', storeId)
-    .maybeSingle();
-
-  if (!storeRow?.user_id) return;
-
-  const admin = createSupabaseAdmin();
-  const { data: sellerUser, error: sellerError } = await admin.auth.admin.getUserById(
-    storeRow.user_id
-  );
-  if (sellerError || !sellerUser.user?.email) {
-    console.warn('Seller email not found for order notification');
-    return;
-  }
-
-  const siteUrl = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
-  const variables = await buildSellerOrderEmailVariables(supabase, {
-    order,
-    item,
-    storeName: storeRow.name ?? 'Boutique',
-    siteUrl,
-  });
-
-  await invokeSendEmail(supabase, {
-    templateSlug: 'seller-order-notification',
-    to: sellerUser.user.email,
-    toName: (sellerUser.user.user_metadata?.full_name as string) || storeRow.name || 'Vendeur',
-    userId: storeRow.user_id,
-    productType: (item.product_type as string) || 'generic',
-    productId: item.product_id as string | undefined,
-    productName: item.product_name as string | undefined,
-    orderId: order.id as string,
-    storeId,
-    variables,
-  });
 }

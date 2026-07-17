@@ -23,6 +23,7 @@ import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useToast } from '@/hooks/use-toast';
 import { usePageCustomization } from '@/hooks/usePageCustomization';
 import { StoreThemeProvider } from '@/components/storefront/StoreThemeProvider';
+import '@/styles/marketplace-premium.css';
 import { StoreAnalyticsScripts } from '@/components/storefront/StoreAnalyticsScripts';
 import type { Store } from '@/hooks/useStores';
 import { useLCPPreload } from '@/hooks/useLCPPreload';
@@ -510,7 +511,7 @@ const Storefront = () => {
                     />
 
                     {filteredProducts.length > 0 ? (
-                      <div ref={productsRef}>
+                      <div ref={productsRef} className="landing-premium mp-product-cards-band">
                         {/* Indicateur de chargement discret en haut si rechargement */}
                         {productsLoading && hasLoadedOnce && (
                           <div className="flex justify-center mb-4">

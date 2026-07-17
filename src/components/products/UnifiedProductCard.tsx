@@ -95,6 +95,10 @@ import {
   CourseModulesBadge,
 } from '@/components/products/CourseInfoBadges';
 
+function isPremiumProductCardVariant(variant: UnifiedProductCardProps['variant']): boolean {
+  return variant === 'marketplace' || variant === 'store';
+}
+
 const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
   product,
   variant = 'marketplace',
@@ -191,6 +195,7 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
   );
 
   const isCompact = variant === 'compact';
+  const isPremiumCard = isPremiumProductCardVariant(variant);
   const imageSizes =
     variant === 'compact'
       ? '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'
@@ -260,7 +265,7 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
     <Card
       className={cn(
         'group relative flex flex-col h-full',
-        variant === 'marketplace'
+        isPremiumCard
           ? 'mp-product-card border-0'
           : 'bg-transparent border border-gray-200 dark:border-gray-700',
         'rounded-xl overflow-hidden',
@@ -278,7 +283,7 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
       <div
         className={cn(
           'relative w-full overflow-hidden aspect-[3/2]',
-          variant === 'marketplace' ? 'mp-product-card__image' : 'bg-muted/30'
+          isPremiumCard ? 'mp-product-card__image' : 'bg-muted/30'
         )}
       >
         <Link to={productUrl} className="block w-full h-full">

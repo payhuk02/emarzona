@@ -35,6 +35,7 @@ npx supabase functions deploy fedex-rates fedex-track --project-ref hbdnzajbyjak
 
 ```powershell
 # 1. Poser secrets (fichier local gitignored)
+#    Copier scripts/.fedex-secrets.local.example → scripts/.fedex-secrets.local
 .\scripts\setup-fedex-prod-secrets.ps1 -ProductionApi
 
 # 2. Smoke OAuth

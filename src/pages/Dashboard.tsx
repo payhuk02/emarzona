@@ -15,11 +15,7 @@ import type { Notification } from '@/types/notifications';
 import { PeriodType } from '@/components/dashboard/PeriodFilter';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { DashboardStats } from '@/components/dashboard/DashboardStats';
-import {
-  useNotifications,
-  useUnreadCount,
-  useRealtimeNotifications,
-} from '@/hooks/useNotifications';
+import { useNotifications, useUnreadCount } from '@/hooks/useNotifications';
 import {
   DashboardFullSkeleton,
   DashboardSecondarySkeleton,
@@ -188,9 +184,6 @@ const DashboardWithStore = ({ store, storeLoading }: DashboardWithStoreProps) =>
     enabled: notificationsEnabled,
   });
   const { data: unreadCount = 0 } = useUnreadCount({ enabled: notificationsEnabled });
-
-  // S'abonner aux notifications en temps réel — seulement après defer (évite canal inutile au 1er paint)
-  useRealtimeNotifications({ enabled: notificationsEnabled });
 
   // ✅ VALIDATION: Type-safe transformation des notifications Supabase
   interface DashboardNotification {

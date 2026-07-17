@@ -53,6 +53,7 @@ const ReferralTracker = lazy(() =>
   import('@/components/referral/ReferralTracker').then(m => ({ default: m.ReferralTracker }))
 );
 import { DeferredCurrencyRatesInitializer } from '@/components/currency/DeferredCurrencyRatesInitializer';
+import { AuthenticatedRealtimeNotifications } from '@/components/notifications/AuthenticatedRealtimeNotifications';
 const PWAInstallPrompt = lazy(() =>
   import('@/components/mobile/PWAInstallPrompt').then(m => ({ default: m.PWAInstallPrompt }))
 );
@@ -283,6 +284,7 @@ const AppContent = () => {
         <Suspense fallback={null}>
           <PerformanceOptimizer />
           <DeferredCurrencyRatesInitializer />
+          <AuthenticatedRealtimeNotifications />
           <Require2FABanner position="top" />
           <AffiliateLinkTracker />
           <ReferralTracker />

@@ -31,6 +31,8 @@ const steps = [
       'supabase/functions/deno.json',
       'supabase/functions/_shared/workflow-executor.ts',
       'supabase/functions/_shared/post-order-payment-fulfillment.ts',
+      'supabase/functions/_shared/seller-order-notification-email.ts',
+      'supabase/functions/send-order-confirmation-email/index.ts',
       'supabase/functions/trigger-email-workflows/index.ts',
       'supabase/functions/execute-email-workflow/index.ts',
       'supabase/functions/_shared/sequence-enrollment-utils.ts',
@@ -62,6 +64,7 @@ const steps = [
       'supabase/functions/_shared/__tests__/resend-webhook-utils.test.ts',
       'supabase/functions/_shared/__tests__/sequence-enrollment-utils.test.ts',
       'supabase/functions/_shared/__tests__/sequence-enrollment-integration.test.ts',
+      'supabase/functions/_shared/__tests__/seller-order-notification-email.test.ts',
     ],
   },
 ];

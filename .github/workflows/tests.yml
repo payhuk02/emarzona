@@ -203,6 +203,8 @@ jobs:
           deno check --config supabase/functions/deno.json supabase/functions/_shared/resend-webhook-utils.ts
           deno check --config supabase/functions/deno.json supabase/functions/_shared/sequence-enrollment-utils.ts
           deno check --config supabase/functions/deno.json supabase/functions/_shared/post-order-payment-fulfillment.ts
+          deno check --config supabase/functions/deno.json supabase/functions/_shared/seller-order-notification-email.ts
+          deno check --config supabase/functions/deno.json supabase/functions/send-order-confirmation-email/index.ts
           deno check --config supabase/functions/deno.json supabase/functions/resend-webhook-handler/index.ts
 
       - name: Type check Payment V2 / Stripe Tax Edge Functions
@@ -218,4 +220,5 @@ jobs:
           deno test --allow-env --config supabase/functions/deno.json supabase/functions/_shared/__tests__/resend-webhook-utils.test.ts
           deno test --allow-env --config supabase/functions/deno.json supabase/functions/_shared/__tests__/sequence-enrollment-utils.test.ts
           deno test --allow-env --config supabase/functions/deno.json supabase/functions/_shared/__tests__/sequence-enrollment-integration.test.ts
+          deno test --allow-env --config supabase/functions/deno.json supabase/functions/_shared/__tests__/seller-order-notification-email.test.ts
 

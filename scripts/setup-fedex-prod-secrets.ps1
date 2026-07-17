@@ -60,8 +60,13 @@ try {
   if ($LASTEXITCODE -ne 0) { throw 'supabase secrets set a échoué' }
 
   Write-Host ''
-  Write-Host 'OK — secrets FedEx posés. Redéployer les fonctions FedEx si nécessaire.' -ForegroundColor Green
-  Write-Host 'Vérification : .\scripts\smoke-fedex-prod.ps1' -ForegroundColor Cyan
+  Write-Host 'Déploiement Edge Functions FedEx...' -ForegroundColor Cyan
+  npx supabase functions deploy fedex-rates fedex-ship fedex-track fedex-cancel --project-ref $ProjectRef
+  if ($LASTEXITCODE -ne 0) { throw 'supabase functions deploy FedEx a échoué' }
+
+  Write-Host ''
+  Write-Host 'OK — secrets FedEx posés + fonctions déployées.' -ForegroundColor Green
+  Write-Host 'Vérification : npm run verify:fedex-prod:strict' -ForegroundColor Cyan
 }
 finally {
   Pop-Location
