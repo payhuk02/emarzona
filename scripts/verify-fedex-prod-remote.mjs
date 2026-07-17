@@ -14,6 +14,7 @@ const report = {
   fedex: null,
   overall: null,
   blockers: [],
+  strict: process.argv.includes('--strict'),
 };
 
 function fail(msg) {
@@ -54,7 +55,11 @@ async function main() {
     fail(`FedEx outage: ${fedex.message ?? 'credentials ou OAuth'}`);
   } else if (fedex.status === 'degraded') {
     console.warn('WARN: FedEx degraded —', fedex.message);
-    report.ok = true;
+    if (report.strict) {
+      fail(`FedEx degraded (strict): ${fedex.message ?? 'credentials manquants'}`);
+    } else {
+      report.ok = true;
+    }
   } else if (fedex.status === 'operational') {
     report.ok = true;
   } else {

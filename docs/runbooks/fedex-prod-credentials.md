@@ -40,12 +40,16 @@ npx supabase functions deploy fedex-rates fedex-track --project-ref hbdnzajbyjak
 # 2. Smoke OAuth
 .\scripts\smoke-fedex-prod.ps1
 npm run verify:fedex-prod
+# Gate sign-off P0-2 (échoue si credentials absents) :
+npm run verify:fedex-prod:strict
 ```
 
 Statut actuel staging : **degraded** si secrets absents (mock hors prod). En production sans `FEDEX_*` → **outage** sur `/status`.
 
 ```bash
 npm run verify:fedex-prod
+# Gate sign-off P0-2 (échoue si credentials absents) :
+npm run verify:fedex-prod:strict
 ```
 
 La sonde **FedEx Shipping** apparaît sur `/status` (via `platform-health` → OAuth FedEx).

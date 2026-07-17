@@ -23,6 +23,7 @@ import {
   DashboardSecondarySkeleton,
 } from '@/components/dashboard/DashboardSkeleton';
 import { DashboardOnboarding } from '@/components/dashboard/DashboardOnboarding';
+import { resolveDashboardShellView } from '@/lib/dashboard/dashboard-onboarding-guard';
 import { DashboardErrorHandler } from '@/components/dashboard/DashboardErrorHandler';
 import { DashboardActionCenter } from '@/components/dashboard/DashboardActionCenter';
 import { PhysicalSubscriptionAlert } from '@/components/billing/PhysicalSubscriptionAlert';
@@ -67,14 +68,19 @@ const Dashboard = () => {
   const { loading: contextLoading, stores } = useStoreContext();
   const { store, loading: storeLoading, hasStores } = useStore();
 
-  const awaitingStoreResolution =
-    contextLoading || storeLoading || ((hasStores || stores.length > 0) && !store);
+  const shellView = resolveDashboardShellView({
+    contextLoading,
+    storeLoading,
+    hasStores,
+    storesCount: stores.length,
+    store,
+  });
 
-  if (!awaitingStoreResolution && !hasStores && stores.length === 0) {
+  if (shellView === 'onboarding') {
     return <DashboardOnboarding />;
   }
 
-  if (awaitingStoreResolution && !store) {
+  if (shellView === 'skeleton') {
     return <DashboardFullSkeleton />;
   }
 

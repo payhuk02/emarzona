@@ -44,6 +44,7 @@
     "verify:webhook-idempotency": "node scripts/verify-webhook-idempotency-remote.mjs",
     "verify:webhook-idempotency:replay": "node scripts/webhook-idempotency-replay-staging.mjs",
     "verify:fedex-prod": "node scripts/verify-fedex-prod-remote.mjs",
+    "verify:fedex-prod:strict": "node scripts/verify-fedex-prod-remote.mjs --strict",
     "verify:upstash-prod": "node scripts/verify-upstash-prod.mjs",
     "verify:fedex-prod:local": "node scripts/verify-fedex-prod.mjs",
     "verify:secure-deploy": "node scripts/verify-secure-deploy.mjs",

@@ -28,6 +28,12 @@ const steps = [
     args: ['run', 'test:multi-store-isolation'],
   },
   {
+    id: 'auth-rate-limit',
+    label: 'Auth rate limit contract (P0-4)',
+    cmd: 'npx',
+    args: ['vitest', 'run', 'src/lib/security/__tests__/auth-rate-limit-contract.test.ts'],
+  },
+  {
     id: 'shell',
     label: 'Shell heavy imports gate',
     cmd: 'npm',

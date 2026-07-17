@@ -23,6 +23,12 @@ import {
   generateCspNonce,
   injectScriptNonces,
 } from './src/lib/middleware/csp-policy';
+import {
+  AUTH_ROUTE_RATE_LIMIT_PER_MINUTE,
+  AUTH_ROUTE_RATE_WINDOW_SECONDS,
+  buildAuthRouteRateLimitKey,
+  isAuthRateLimitPath,
+} from './src/lib/middleware/auth-route-rate-limit';
 
 export const config = {
   matcher: '/((?!_next|assets|.*\\..*).*)',
@@ -419,6 +425,21 @@ async function checkBotRateLimit(req: Request): Promise<boolean> {
   return count <= BOT_RATE_LIMIT_PER_MINUTE;
 }
 
+async function checkAuthRouteRateLimit(req: Request): Promise<boolean> {
+  const redis = getUpstashConfig();
+  if (!redis) return true;
+
+  const ip = getClientIp(req);
+  const key = buildAuthRouteRateLimitKey(ip);
+  const count = await upstashIncrWithTtl(
+    redis.url,
+    redis.token,
+    key,
+    AUTH_ROUTE_RATE_WINDOW_SECONDS
+  );
+  return count <= AUTH_ROUTE_RATE_LIMIT_PER_MINUTE;
+}
+
 async function checkApiRateLimit(req: Request): Promise<boolean> {
   const redis = getUpstashConfig();
   if (!redis) return true;
@@ -560,6 +581,20 @@ export default async function middleware(req: Request): Promise<Response | undef
   }
 
   const url = new URL(req.url);
+
+  // P0-4 — Rate limit pages /auth (IP) ; SSO enterprise exclu
+  if (isAuthRateLimitPath(url.pathname)) {
+    const allowed = await checkAuthRouteRateLimit(req);
+    if (!allowed) {
+      return new Response(
+        JSON.stringify({ error: 'Too Many Requests', message: 'Trop de requêtes sur cette page.' }),
+        {
+          status: 429,
+          headers: { 'content-type': 'application/json', 'retry-after': '60' },
+        }
+      );
+    }
+  }
 
   // Rate Limiting sur les routes API
   if (url.pathname.startsWith('/api/')) {
