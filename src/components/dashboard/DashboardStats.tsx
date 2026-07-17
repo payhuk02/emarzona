@@ -6,6 +6,7 @@
 import React from 'react';
 import { DollarSign, ShoppingCart, Users, Wallet } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { formatLocaleNumber } from '@/lib/i18n/locale-format';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useDeferredMount } from '@/hooks/useDeferredMount';
 import { formatFcfa } from '@/lib/format-currency';
@@ -18,7 +19,8 @@ interface DashboardStatsProps {
 }
 
 export const DashboardStats = React.memo<DashboardStatsProps>(({ stats }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language;
   const statsRef = useScrollAnimation<HTMLDivElement>();
   const showSecondaryKpis = useDeferredMount(true, 200);
 
@@ -34,7 +36,7 @@ export const DashboardStats = React.memo<DashboardStatsProps>(({ stats }) => {
     },
     {
       label: t('dashboard.stats.orders.title', 'Commandes'),
-      value: stats.totalOrders.toLocaleString('fr-FR'),
+      value: formatLocaleNumber(stats.totalOrders, locale),
       trend: stats.trends.orderGrowth,
       icon: ShoppingCart,
       theme: 'blue' as const,
@@ -44,7 +46,7 @@ export const DashboardStats = React.memo<DashboardStatsProps>(({ stats }) => {
   const secondaryCards = [
     {
       label: t('dashboard.stats.customers.title', 'Clients'),
-      value: stats.totalCustomers.toLocaleString('fr-FR'),
+      value: formatLocaleNumber(stats.totalCustomers, locale),
       trend: stats.trends.customerGrowth,
       icon: Users,
       theme: 'green' as const,

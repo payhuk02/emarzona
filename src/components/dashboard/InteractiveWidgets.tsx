@@ -1,12 +1,14 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  Eye, 
-  ShoppingCart, 
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { useTranslation } from 'react-i18next';
+import { formatLocaleDate, formatLocaleDateTime } from '@/lib/i18n/locale-format';
+import {
+  TrendingUp,
+  TrendingDown,
+  Eye,
+  ShoppingCart,
   Star,
   Calendar,
   Clock,
@@ -26,29 +28,38 @@ import {
   Bell,
   MessageSquare,
   Heart,
-  Share2
+  Share2,
 } from '@/components/icons';
-import { useState } from "react";
-import { cn } from "@/lib/utils";
+import { useState } from 'react';
+import { cn } from '@/lib/utils';
 
 interface QuickActionProps {
   title: string;
   description: string;
-  icon: React.ComponentType<any>;
+  icon: React.ComponentType<{ className?: string }>;
   onClick: () => void;
   color?: string;
   badge?: string;
 }
 
-export const QuickAction = ({ title, description, icon: Icon, onClick, color = "primary", badge }: QuickActionProps) => {
+export const QuickAction = ({
+  title,
+  description,
+  icon: Icon,
+  onClick,
+  color = 'primary',
+  badge,
+}: QuickActionProps) => {
   return (
-    <Card 
+    <Card
       className="cursor-pointer shadow-soft hover:shadow-medium transition-smooth hover-scale group"
       onClick={onClick}
     >
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
-          <div className={`p-2 rounded-lg bg-${color}/10 group-hover:bg-${color}/20 transition-colors`}>
+          <div
+            className={`p-2 rounded-lg bg-${color}/10 group-hover:bg-${color}/20 transition-colors`}
+          >
             <Icon className={`h-5 w-5 text-${color}`} />
           </div>
           <div className="flex-1 min-w-0">
@@ -78,58 +89,58 @@ interface QuickActionsProps {
   onSettings?: () => void;
 }
 
-export const QuickActions = ({ 
-  onCreateProduct, 
-  onCreateOrder, 
-  onViewAnalytics, 
-  onManageCustomers, 
-  onViewStore, 
-  onSettings 
+export const QuickActions = ({
+  onCreateProduct,
+  onCreateOrder,
+  onViewAnalytics,
+  onManageCustomers,
+  onViewStore,
+  onSettings,
 }: QuickActionsProps) => {
   const actions = [
     {
-      title: "Nouveau Produit",
-      description: "Ajouter un produit à votre boutique",
+      title: 'Nouveau Produit',
+      description: 'Ajouter un produit à votre boutique',
       icon: Package,
       onClick: onCreateProduct || (() => {}),
-      color: "green",
-      badge: "Populaire"
+      color: 'green',
+      badge: 'Populaire',
     },
     {
-      title: "Nouvelle Commande",
-      description: "Créer une commande manuelle",
+      title: 'Nouvelle Commande',
+      description: 'Créer une commande manuelle',
       icon: ShoppingCart,
       onClick: onCreateOrder || (() => {}),
-      color: "blue"
+      color: 'blue',
     },
     {
-      title: "Analytics",
-      description: "Voir les statistiques détaillées",
+      title: 'Analytics',
+      description: 'Voir les statistiques détaillées',
       icon: Activity,
       onClick: onViewAnalytics || (() => {}),
-      color: "purple"
+      color: 'purple',
     },
     {
-      title: "Clients",
-      description: "Gérer vos clients",
+      title: 'Clients',
+      description: 'Gérer vos clients',
       icon: User,
       onClick: onManageCustomers || (() => {}),
-      color: "orange"
+      color: 'orange',
     },
     {
-      title: "Boutique",
-      description: "Paramètres de la boutique",
+      title: 'Boutique',
+      description: 'Paramètres de la boutique',
       icon: Settings,
       onClick: onViewStore || (() => {}),
-      color: "gray"
+      color: 'gray',
     },
     {
-      title: "Paramètres",
-      description: "Configuration générale",
+      title: 'Paramètres',
+      description: 'Configuration générale',
       icon: Settings,
       onClick: onSettings || (() => {}),
-      color: "indigo"
-    }
+      color: 'indigo',
+    },
   ];
 
   return (
@@ -172,15 +183,24 @@ interface NotificationCardProps {
   onViewAll?: () => void;
 }
 
-export const NotificationCard = ({ notifications, onMarkAsRead, onViewAll }: NotificationCardProps) => {
+export const NotificationCard = ({
+  notifications,
+  onMarkAsRead,
+  onViewAll,
+}: NotificationCardProps) => {
   const [expanded, setExpanded] = useState(false);
+  const { i18n } = useTranslation();
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
-      case 'success': return <TrendingUp className="h-4 w-4 text-green-500" />;
-      case 'warning': return <Bell className="h-4 w-4 text-yellow-500" />;
-      case 'error': return <TrendingDown className="h-4 w-4 text-red-500" />;
-      default: return <Bell className="h-4 w-4 text-blue-500" />;
+      case 'success':
+        return <TrendingUp className="h-4 w-4 text-green-500" />;
+      case 'warning':
+        return <Bell className="h-4 w-4 text-yellow-500" />;
+      case 'error':
+        return <TrendingDown className="h-4 w-4 text-red-500" />;
+      default:
+        return <Bell className="h-4 w-4 text-blue-500" />;
     }
   };
 
@@ -221,26 +241,24 @@ export const NotificationCard = ({ notifications, onMarkAsRead, onViewAll }: Not
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          {displayNotifications.map((notification) => (
+          {displayNotifications.map(notification => (
             <div
               key={notification.id}
               className={cn(
-                "flex items-start gap-3 p-3 rounded-lg transition-colors cursor-pointer",
-                notification.read ? "bg-muted/30" : "bg-primary/5 hover:bg-primary/10",
-                !notification.read && "border-l-2 border-primary"
+                'flex items-start gap-3 p-3 rounded-lg transition-colors cursor-pointer',
+                notification.read ? 'bg-muted/30' : 'bg-primary/5 hover:bg-primary/10',
+                !notification.read && 'border-l-2 border-primary'
               )}
               onClick={() => onMarkAsRead?.(notification.id)}
             >
-              <div className="flex-shrink-0 mt-0.5">
-                {getNotificationIcon(notification.type)}
-              </div>
+              <div className="flex-shrink-0 mt-0.5">{getNotificationIcon(notification.type)}</div>
               <div className="flex-1 min-w-0">
                 <h4 className="text-sm font-medium">{notification.title}</h4>
                 <p className="text-xs text-muted-foreground mt-1">{notification.message}</p>
                 <div className="flex items-center gap-2 mt-2">
                   <Clock className="h-3 w-3 text-muted-foreground" />
                   <span className="text-xs text-muted-foreground">
-                    {new Date(notification.timestamp).toLocaleString('fr-FR')}
+                    {formatLocaleDateTime(new Date(notification.timestamp), i18n.language)}
                   </span>
                   {!notification.read && (
                     <Badge variant="secondary" className="text-xs">
@@ -276,6 +294,7 @@ interface GoalProgressProps {
 }
 
 export const GoalProgress = ({ goals }: GoalProgressProps) => {
+  const { i18n } = useTranslation();
   return (
     <Card className="shadow-soft">
       <CardHeader className="pb-3">
@@ -286,7 +305,7 @@ export const GoalProgress = ({ goals }: GoalProgressProps) => {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {goals.map((goal) => {
+          {goals.map(goal => {
             const progress = Math.min((goal.current / goal.target) * 100, 100);
             const isCompleted = progress >= 100;
             const isOverdue = new Date(goal.deadline) < new Date() && !isCompleted;
@@ -299,23 +318,25 @@ export const GoalProgress = ({ goals }: GoalProgressProps) => {
                     <span className="text-xs text-muted-foreground">
                       {goal.current.toLocaleString()} / {goal.target.toLocaleString()} {goal.unit}
                     </span>
-                    <Badge 
-                      variant={isCompleted ? "default" : isOverdue ? "destructive" : "secondary"}
+                    <Badge
+                      variant={isCompleted ? 'default' : isOverdue ? 'destructive' : 'secondary'}
                       className="text-xs"
                     >
                       {Math.round(progress)}%
                     </Badge>
                   </div>
                 </div>
-                <Progress 
-                  value={progress} 
+                <Progress
+                  value={progress}
                   className="h-2"
-                  style={{ 
-                    '--progress-background': `hsl(var(--${goal.color}))` 
-                  } as React.CSSProperties & { '--progress-background'?: string }}
+                  style={
+                    {
+                      '--progress-background': `hsl(var(--${goal.color}))`,
+                    } as React.CSSProperties & { '--progress-background'?: string }
+                  }
                 />
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>Échéance: {new Date(goal.deadline).toLocaleDateString('fr-FR')}</span>
+                  <span>Échéance: {formatLocaleDate(new Date(goal.deadline), i18n.language)}</span>
                   {isCompleted && (
                     <Badge variant="default" className="text-xs">
                       <Star className="h-3 w-3 mr-1" />
@@ -351,14 +372,21 @@ interface RecentActivityProps {
 }
 
 export const RecentActivity = ({ activities, onViewAll }: RecentActivityProps) => {
+  const { i18n } = useTranslation();
   const getActivityIcon = (type: string) => {
     switch (type) {
-      case 'order': return <ShoppingCart className="h-4 w-4 text-blue-500" />;
-      case 'product': return <Package className="h-4 w-4 text-green-500" />;
-      case 'customer': return <User className="h-4 w-4 text-purple-500" />;
-      case 'payment': return <DollarSign className="h-4 w-4 text-yellow-500" />;
-      case 'review': return <Star className="h-4 w-4 text-orange-500" />;
-      default: return <Activity className="h-4 w-4 text-gray-500" />;
+      case 'order':
+        return <ShoppingCart className="h-4 w-4 text-blue-500" />;
+      case 'product':
+        return <Package className="h-4 w-4 text-green-500" />;
+      case 'customer':
+        return <User className="h-4 w-4 text-purple-500" />;
+      case 'payment':
+        return <DollarSign className="h-4 w-4 text-yellow-500" />;
+      case 'review':
+        return <Star className="h-4 w-4 text-orange-500" />;
+      default:
+        return <Activity className="h-4 w-4 text-gray-500" />;
     }
   };
 
@@ -379,11 +407,12 @@ export const RecentActivity = ({ activities, onViewAll }: RecentActivityProps) =
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {activities.map((activity) => (
-            <div key={activity.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors">
-              <div className="flex-shrink-0 mt-0.5">
-                {getActivityIcon(activity.type)}
-              </div>
+          {activities.map(activity => (
+            <div
+              key={activity.id}
+              className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"
+            >
+              <div className="flex-shrink-0 mt-0.5">{getActivityIcon(activity.type)}</div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <h4 className="text-sm font-medium">{activity.title}</h4>
@@ -402,7 +431,7 @@ export const RecentActivity = ({ activities, onViewAll }: RecentActivityProps) =
                 <div className="flex items-center gap-2 mt-2">
                   <Clock className="h-3 w-3 text-muted-foreground" />
                   <span className="text-xs text-muted-foreground">
-                    {new Date(activity.timestamp).toLocaleString('fr-FR')}
+                    {formatLocaleDateTime(new Date(activity.timestamp), i18n.language)}
                   </span>
                 </div>
               </div>
@@ -428,13 +457,14 @@ interface DashboardControlsProps {
   lastUpdated?: string;
 }
 
-export const DashboardControls = ({ 
-  onRefresh, 
-  onExport, 
-  onFilter, 
-  onSettings, 
-  lastUpdated 
+export const DashboardControls = ({
+  onRefresh,
+  onExport,
+  onFilter,
+  onSettings,
+  lastUpdated,
 }: DashboardControlsProps) => {
+  const { i18n } = useTranslation();
   return (
     <div className="flex items-center gap-2 p-4 bg-card rounded-lg shadow-soft">
       <div className="flex items-center gap-2">
@@ -458,15 +488,9 @@ export const DashboardControls = ({
       <div className="flex-1" />
       {lastUpdated && (
         <div className="text-xs text-muted-foreground">
-          Dernière mise à jour: {new Date(lastUpdated).toLocaleString('fr-FR')}
+          Dernière mise à jour: {formatLocaleDateTime(new Date(lastUpdated), i18n.language)}
         </div>
       )}
     </div>
   );
 };
-
-
-
-
-
-

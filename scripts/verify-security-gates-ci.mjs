@@ -39,6 +39,18 @@ const steps = [
     cmd: 'npm',
     args: ['run', 'check:shell-imports'],
   },
+  {
+    id: 'i18n-parity',
+    label: 'i18n parity (sidebar + checkout)',
+    cmd: 'npm',
+    args: ['run', 'audit:i18n-parity'],
+  },
+  {
+    id: 'customer-hub',
+    label: 'Customer hub RPC parser (offline)',
+    cmd: 'npx',
+    args: ['vitest', 'run', 'src/lib/customer/__tests__/fetch-customer-hub-rpc.test.ts'],
+  },
 ];
 
 const report = {

@@ -3,6 +3,8 @@ import { useDashboardStatsOptimized as useDashboardStats } from '@/hooks/useDash
 import { useStore, type Store } from '@/hooks/useStore';
 import { useStoreContext } from '@/contexts/StoreContext';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { formatLocaleDate } from '@/lib/i18n/locale-format';
 import { useState, useMemo, useCallback, lazy, Suspense, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { logger } from '@/lib/logger';
@@ -294,19 +296,21 @@ const DashboardWithStore = ({ store, storeLoading }: DashboardWithStoreProps) =>
     }
   }, [stats, period]);
 
+  const { i18n } = useTranslation();
+
   const handleCustomDateChange = useCallback(
     (startDate: Date | undefined, endDate: Date | undefined) => {
       setCustomStartDate(startDate);
       setCustomEndDate(endDate);
       // ✅ ACCESSIBILITÉ: Annoncer le changement de période
       if (startDate && endDate) {
-        const start = startDate.toLocaleDateString('fr-FR');
-        const end = endDate.toLocaleDateString('fr-FR');
+        const start = formatLocaleDate(startDate, i18n.language);
+        const end = formatLocaleDate(endDate, i18n.language);
         setStatusMessage(`Période modifiée : du ${start} au ${end}`);
         setTimeout(() => setStatusMessage(''), 3000);
       }
     },
-    []
+    [i18n.language]
   );
 
   const handleCreateProduct = useCallback(() => {

@@ -43,6 +43,8 @@ export interface ServicesDashboardStats {
   activeServices: number;
   totalBookings: number;
   totalRevenue: number;
+  /** Croissance revenus vs période précédente (%) — calculée côté appelant */
+  revenueGrowthPercent?: number;
   averageRating: number;
   capacityUtilization: number;
   topPerformingServices: ServicePerformance[];
@@ -60,19 +62,19 @@ export interface ServicesDashboardStats {
 export interface ServicesDashboardProps {
   /** Statistiques du dashboard */
   stats: ServicesDashboardStats;
-  
+
   /** Services pour affichage */
   services?: Service[];
-  
+
   /** Période sélectionnée */
   period?: '7days' | '30days' | '90days' | 'year';
-  
+
   /** Callback pour changer de période */
   onPeriodChange?: (period: '7days' | '30days' | '90days' | 'year') => void;
-  
+
   /** Loading state */
   isLoading?: boolean;
-  
+
   /** Classe CSS personnalisée */
   className?: string;
 }
@@ -80,7 +82,7 @@ export interface ServicesDashboardProps {
 /**
  * ServicesDashboard - Vue d'ensemble complète des services
  */
-export const ServicesDashboard : React.FC<ServicesDashboardProps> = ({
+export const ServicesDashboard: React.FC<ServicesDashboardProps> = ({
   stats,
   services = [],
   period = '30days',
@@ -91,17 +93,14 @@ export const ServicesDashboard : React.FC<ServicesDashboardProps> = ({
   // Calculer les insights
   const insights = useMemo(() => {
     const lowCapacityServices = services.filter(
-      (s) =>
-        s.totalSlots &&
-        s.availableSlots &&
-        (s.availableSlots / s.totalSlots) * 100 < 20
+      s => s.totalSlots && s.availableSlots && (s.availableSlots / s.totalSlots) * 100 < 20
     );
 
     const topRatedServices = services
-      .filter((s) => s.averageRating && s.averageRating >= 4.5)
+      .filter(s => s.averageRating && s.averageRating >= 4.5)
       .slice(0, 5);
 
-    const revenueGrowth = stats.totalRevenue > 0 ? 15 : 0; // Mocked, à calculer réellement
+    const revenueGrowth = stats.revenueGrowthPercent ?? 0;
 
     return {
       lowCapacityServices,
@@ -127,7 +126,7 @@ export const ServicesDashboard : React.FC<ServicesDashboardProps> = ({
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
 
-    if (minutes < 1) return 'À l\'instant';
+    if (minutes < 1) return "À l'instant";
     if (minutes < 60) return `Il y a ${minutes}min`;
     if (hours < 24) return `Il y a ${hours}h`;
     return `Il y a ${days}j`;
@@ -163,7 +162,19 @@ export const ServicesDashboard : React.FC<ServicesDashboardProps> = ({
 
         {/* Period selector */}
         {onPeriodChange && (
-          <Tabs value={period} onValueChange={onPeriodChange as any}>
+          <Tabs
+            value={period}
+            onValueChange={value => {
+              if (
+                value === '7days' ||
+                value === '30days' ||
+                value === '90days' ||
+                value === 'year'
+              ) {
+                onPeriodChange?.(value);
+              }
+            }}
+          >
             <TabsList>
               <TabsTrigger value="7days">7 jours</TabsTrigger>
               <TabsTrigger value="30days">30 jours</TabsTrigger>
@@ -184,9 +195,7 @@ export const ServicesDashboard : React.FC<ServicesDashboardProps> = ({
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.activeServices}</div>
-            <p className="text-xs text-muted-foreground">
-              sur {stats.totalServices} total
-            </p>
+            <p className="text-xs text-muted-foreground">sur {stats.totalServices} total</p>
           </CardContent>
         </Card>
 
@@ -214,8 +223,7 @@ export const ServicesDashboard : React.FC<ServicesDashboardProps> = ({
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(stats.totalRevenue)}</div>
             <div className="flex items-center text-xs text-green-600 mt-1">
-              <TrendingUp className="h-3 w-3 mr-1" />
-              +{insights.revenueGrowth}% ce mois
+              <TrendingUp className="h-3 w-3 mr-1" />+{insights.revenueGrowth}% ce mois
             </div>
           </CardContent>
         </Card>
@@ -247,9 +255,7 @@ export const ServicesDashboard : React.FC<ServicesDashboardProps> = ({
                 <TrendingUp className="h-5 w-5 text-green-600" />
                 Services les plus performants
               </CardTitle>
-              <CardDescription>
-                Classés par revenu généré
-              </CardDescription>
+              <CardDescription>Classés par revenu généré</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -301,7 +307,7 @@ export const ServicesDashboard : React.FC<ServicesDashboardProps> = ({
             <CardContent>
               <div className="space-y-4">
                 <Progress value={stats.capacityUtilization} className="h-3" />
-                
+
                 {/* Low capacity alerts */}
                 {insights.lowCapacityServices.length > 0 && (
                   <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
@@ -312,7 +318,7 @@ export const ServicesDashboard : React.FC<ServicesDashboardProps> = ({
                           {insights.lowCapacityServices.length} service(s) avec capacité faible
                         </p>
                         <ul className="mt-2 space-y-1">
-                          {insights.lowCapacityServices.slice(0, 3).map((s) => (
+                          {insights.lowCapacityServices.slice(0, 3).map(s => (
                             <li key={s.id} className="text-xs text-orange-700">
                               • {s.name} - {s.availableSlots}/{s.totalSlots} créneaux
                             </li>
@@ -339,7 +345,7 @@ export const ServicesDashboard : React.FC<ServicesDashboardProps> = ({
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {stats.recentActivity.slice(0, 8).map((activity) => (
+                {stats.recentActivity.slice(0, 8).map(activity => (
                   <div key={activity.id} className="flex gap-3">
                     <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted flex-shrink-0">
                       {activity.type === 'new_service' && <Package className="h-4 w-4" />}
@@ -394,7 +400,7 @@ export const ServicesDashboard : React.FC<ServicesDashboardProps> = ({
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {insights.topRatedServices.map((service) => (
+                  {insights.topRatedServices.map(service => (
                     <div key={service.id} className="flex items-center justify-between">
                       <div className="flex-1">
                         <p className="text-sm font-medium truncate">{service.name}</p>
@@ -430,11 +436,3 @@ export const ServicesDashboard : React.FC<ServicesDashboardProps> = ({
 ServicesDashboard.displayName = 'ServicesDashboard';
 
 export default ServicesDashboard;
-
-
-
-
-
-
-
-

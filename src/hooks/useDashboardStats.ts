@@ -158,7 +158,57 @@ type ProductRow = {
   price: number | null;
   is_active: boolean | null;
   is_draft?: boolean | null;
+  created_at?: string | null;
 };
+
+const EMPTY_ORDERS_BY_TYPE = {
+  digital: 0,
+  physical: 0,
+  service: 0,
+  course: 0,
+  artist: 0,
+};
+
+async function fetchOrderItemTypeAggregates(orderIds: string[]): Promise<{
+  ordersByType: Record<string, number>;
+  typesByOrderId: Map<string, string[]>;
+}> {
+  if (orderIds.length === 0) {
+    return { ordersByType: { ...EMPTY_ORDERS_BY_TYPE }, typesByOrderId: new Map() };
+  }
+
+  const { data: items, error } = await supabase
+    .from('order_items')
+    .select('order_id, product_type')
+    .in('order_id', orderIds);
+
+  if (error) {
+    if (!tolerateQueryError('order_items', error)) throw error;
+    return { ordersByType: { ...EMPTY_ORDERS_BY_TYPE }, typesByOrderId: new Map() };
+  }
+
+  const ordersByType = { ...EMPTY_ORDERS_BY_TYPE };
+  const typesByOrderId = new Map<string, Set<string>>();
+
+  for (const item of items ?? []) {
+    const type = item.product_type;
+    if (type && type in ordersByType) {
+      ordersByType[type as keyof typeof ordersByType] += 1;
+    }
+    if (item.order_id && type) {
+      const set = typesByOrderId.get(item.order_id) ?? new Set<string>();
+      set.add(type);
+      typesByOrderId.set(item.order_id, set);
+    }
+  }
+
+  return {
+    ordersByType,
+    typesByOrderId: new Map(
+      [...typesByOrderId.entries()].map(([orderId, types]) => [orderId, [...types]])
+    ),
+  };
+}
 
 type OrderItemRow = {
   order_id: string | null;
@@ -305,7 +355,7 @@ async function fetchDashboardStatsFromTables(
   const [productsResult, ordersResult, customersResult, operational] = await Promise.all([
     supabase
       .from('products')
-      .select('product_type, price, is_active, is_draft')
+      .select('product_type, price, is_active, is_draft, created_at')
       .eq('store_id', storeId),
     supabase
       .from('orders')
@@ -360,13 +410,18 @@ async function fetchDashboardStatsFromTables(
   const activeProducts = products.filter(p => p.is_active && !p.is_draft);
   const countType = (type: string) => activeProducts.filter(p => p.product_type === type).length;
 
-  const ordersByType: Record<string, number> = {
-    digital: 0,
-    physical: 0,
-    service: 0,
-    course: 0,
-    artist: 0,
-  };
+  const periodOrderIds = periodOrders.map(o => o.id);
+  const { ordersByType, typesByOrderId } = await fetchOrderItemTypeAggregates(periodOrderIds);
+
+  const newProductsInPeriod = products.filter(p =>
+    p.created_at ? isInRange(p.created_at, range.start, range.end) : false
+  ).length;
+  const previousNewProductsInPeriod = products.filter(
+    p =>
+      p.created_at &&
+      isInRange(p.created_at, compareStart, range.start) &&
+      !isInRange(p.created_at, range.start, range.end)
+  ).length;
 
   const completedOrderIds = completedInPeriod.map(o => o.id);
   let topProducts = await fetchTopProductsFromItems(storeId, completedOrderIds, 5);
@@ -385,7 +440,7 @@ async function fetchDashboardStatsFromTables(
       status: o.status,
       createdAt: o.created_at,
       customer: cust ? { id: o.customer_id || '', name: cust.name, email: cust.email } : null,
-      productTypes: [],
+      productTypes: typesByOrderId.get(o.id) ?? [],
     };
   });
 
@@ -402,6 +457,8 @@ async function fetchDashboardStatsFromTables(
         products.length > 0
           ? products.reduce((s, p) => s + (p.price || 0), 0) / products.length
           : 0,
+      newProductsInPeriod,
+      previousNewProductsInPeriod,
     },
     ordersStats: {
       totalOrders: periodOrders.length,

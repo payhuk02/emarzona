@@ -43,7 +43,7 @@ import { buildOrderItemRows } from '@/lib/checkout-order-items';
 import { resolveOrderNumber } from '@/lib/orders/resolve-order-number';
 import { resolveCheckoutShippingAmount } from '@/lib/checkout-shipping';
 import { calculateCheckoutTaxes } from '@/lib/checkout/taxes';
-import { validateCheckoutCart } from '@/lib/checkout/cart-validation';
+import { validateCheckoutCart, getCartItemStoreId } from '@/lib/checkout/cart-validation';
 import { showCheckoutBlockedToast, showPaymentErrorToast } from '@/lib/checkout/payment-toast';
 import { assessCheckoutFraudRisk } from '@/lib/checkout/fraud-assessment';
 import { isPaymentOrchestrationV2Enabled } from '@/lib/payments/feature-flags';
@@ -139,10 +139,16 @@ export default function Checkout() {
         return;
       }
 
+      if (checkoutCartValidation.hasMixedWithService) {
+        setIsMultiStore(false);
+        setStoreGroups(new Map());
+        setIsCheckingStores(false);
+        return;
+      }
+
       setIsCheckingStores(true);
 
       try {
-        // Récupérer tous les store_id des produits du panier
         const productIds = items.map(item => item.product_id);
         const { data: products, error } = await supabase
           .from('products')
@@ -156,30 +162,30 @@ export default function Checkout() {
         }
 
         if (products && products.length > 0) {
-          // Compter les stores uniques
+          const resolveStoreId = (item: (typeof items)[number]) =>
+            getCartItemStoreId(item) ??
+            products.find(p => p.id === item.product_id)?.store_id ??
+            null;
+
           const uniqueStoreIds = new Set(
-            products
-              .map(p => p.store_id)
-              .filter((id): id is string => id !== null && id !== undefined)
+            items.map(resolveStoreId).filter((id): id is string => id !== null && id !== undefined)
           );
 
           const hasMultipleStores = uniqueStoreIds.size > 1;
           setIsMultiStore(hasMultipleStores);
 
           if (hasMultipleStores) {
-            // Grouper les items par boutique (fonction simplifiée pour l'instant)
             const groups = new Map<string, CheckoutStoreGroup>();
             const skippedItems: CartItem[] = [];
 
             for (const item of items) {
-              const product = products.find(p => p.id === item.product_id);
-              if (product && product.store_id) {
-                if (!groups.has(product.store_id)) {
-                  groups.set(product.store_id, { items: [] });
+              const storeId = resolveStoreId(item);
+              if (storeId) {
+                if (!groups.has(storeId)) {
+                  groups.set(storeId, { items: [] });
                 }
-                const group = groups.get(product.store_id)!;
+                const group = groups.get(storeId)!;
                 group.items.push(item);
-                // Calculer le subtotal pour ce groupe
                 group.subtotal = (group.subtotal || 0) + item.unit_price * item.quantity;
               } else {
                 skippedItems.push(item);
@@ -219,7 +225,7 @@ export default function Checkout() {
     };
 
     checkMultiStore();
-  }, [items, toast]);
+  }, [items, toast, checkoutCartValidation.hasMixedWithService]);
 
   // Restaurer le code promo depuis localStorage au chargement
   // IMPORTANT: Ne charger que si le coupon n'est pas déjà chargé

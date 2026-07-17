@@ -41,8 +41,8 @@ vi.mock('@/lib/shipping/artist-shipping', () => ({
   ),
 }));
 
-vi.mock('@/lib/shipping/fedex-rates-client', () => ({
-  fetchCheapestFedexShippingCost: vi.fn(() => Promise.resolve(7500)),
+vi.mock('@/lib/shipping/shipping-provider', () => ({
+  fetchCheapestCarrierShippingCost: vi.fn(() => Promise.resolve(7500)),
 }));
 
 const artistItem = (): CartItem => ({

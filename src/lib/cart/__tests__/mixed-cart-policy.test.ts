@@ -22,7 +22,35 @@ const bookedService = (storeId: string): CartItem => ({
   },
 });
 
+const digital = (storeId: string): CartItem => ({
+  product_id: 'd1',
+  product_type: 'digital',
+  quantity: 1,
+  unit_price: 500,
+  metadata: { store_id: storeId },
+});
+
 describe('assertCompatibleCartAddition', () => {
+  it('autorise digital + service réservé même boutique', () => {
+    expect(() =>
+      assertCompatibleCartAddition([bookedService('store-a')], {
+        product_type: 'digital',
+        storeId: 'store-a',
+        metadata: { store_id: 'store-a' },
+      })
+    ).not.toThrow();
+  });
+
+  it('autorise panier mixte service + digital déjà présents', () => {
+    expect(() =>
+      assertCompatibleCartAddition([bookedService('store-a'), digital('store-a')], {
+        product_type: 'physical',
+        storeId: 'store-a',
+        metadata: { store_id: 'store-a' },
+      })
+    ).not.toThrow();
+  });
+
   it('autorise un produit physique de la même boutique après réservation service', () => {
     expect(() =>
       assertCompatibleCartAddition([bookedService('store-a')], {

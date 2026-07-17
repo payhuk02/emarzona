@@ -110,6 +110,8 @@ export interface DashboardBaseStats {
   courseProducts: number;
   artistProducts: number;
   avgProductPrice: number;
+  newProductsInPeriod?: number;
+  previousNewProductsInPeriod?: number;
 }
 
 export interface DashboardOrdersStats {

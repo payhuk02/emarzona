@@ -11,7 +11,7 @@ import { Bell, Activity, Settings, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
-import type { DashboardStats } from '@/hooks/useDashboardStats';
+import { formatLocaleDateTime } from '@/lib/i18n/locale-format';
 
 interface DashboardNotification {
   id: string;
@@ -33,7 +33,7 @@ interface DashboardNotificationsProps {
 
 export const DashboardNotifications = React.memo<DashboardNotificationsProps>(
   ({ notifications, notificationsEnabled, stats, onViewStore, onManageCustomers, onSettings }) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const bottomRef = useScrollAnimation<HTMLDivElement>();
 
@@ -71,7 +71,7 @@ export const DashboardNotifications = React.memo<DashboardNotificationsProps>(
                   <div className="text-center py-4 sm:py-6">
                     <Bell className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-1.5 sm:mb-2 text-muted-foreground opacity-50" />
                     <p className="text-sm sm:text-xs md:text-sm text-muted-foreground">
-                      Aucune notification
+                      {t('dashboard.notifications.empty', 'Aucune notification')}
                     </p>
                   </div>
                 ) : (
@@ -106,13 +106,7 @@ export const DashboardNotifications = React.memo<DashboardNotificationsProps>(
                         </p>
                         <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                           <span className="text-xs sm:text-xs md:text-xs text-muted-foreground">
-                            {new Date(notification.timestamp).toLocaleString('fr-FR', {
-                              day: '2-digit',
-                              month: '2-digit',
-                              year: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })}
+                            {formatLocaleDateTime(new Date(notification.timestamp), i18n.language)}
                           </span>
                           {!notification.read && (
                             <Badge
@@ -146,7 +140,7 @@ export const DashboardNotifications = React.memo<DashboardNotificationsProps>(
                 <div className="text-center py-4 sm:py-6">
                   <Activity className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-1.5 sm:mb-2 text-muted-foreground opacity-50" />
                   <p className="text-sm sm:text-xs md:text-sm text-muted-foreground">
-                    Aucune activité récente
+                    {t('dashboard.recentActivity.empty', 'Aucune activité récente')}
                   </p>
                 </div>
               ) : (
@@ -174,13 +168,7 @@ export const DashboardNotifications = React.memo<DashboardNotificationsProps>(
                       </h4>
                       <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                         <span className="text-xs sm:text-xs md:text-xs text-muted-foreground">
-                          {new Date(activity.timestamp).toLocaleString('fr-FR', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
+                          {formatLocaleDateTime(new Date(activity.timestamp), i18n.language)}
                         </span>
                         {activity.status && (
                           <Badge

@@ -10,7 +10,8 @@ import {
   LazyCartesianGrid,
   LazyTooltip,
 } from '@/components/charts/LazyCharts';
-import { cn } from '@/lib/utils';
+import { formatLocaleNumber } from '@/lib/i18n/locale-format';
+import { formatFcfa } from '@/lib/format-currency';
 
 interface DashboardSalesEvolutionProps {
   data: Array<{
@@ -24,7 +25,8 @@ interface DashboardSalesEvolutionProps {
 
 export const DashboardSalesEvolution = React.memo<DashboardSalesEvolutionProps>(
   ({ data, className }) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const locale = i18n.language;
 
     const chartData = useMemo(
       () =>
@@ -66,12 +68,12 @@ export const DashboardSalesEvolution = React.memo<DashboardSalesEvolutionProps>(
                   tick={{ fontSize: 13, fill: '#6b7280' }}
                   axisLine={false}
                   tickLine={false}
-                  tickFormatter={v => `${Number(v).toLocaleString('fr-FR')}`}
+                  tickFormatter={v => formatLocaleNumber(Number(v), locale)}
                 />
                 <LazyTooltip
                   formatter={(value: unknown) => [
-                    `${Number(value).toLocaleString('fr-FR')} FCFA`,
-                    'Revenus',
+                    formatFcfa(Number(value), { language: locale }),
+                    t('dashboard.salesEvolution.revenue', 'Revenus'),
                   ]}
                   contentStyle={{
                     borderRadius: 12,

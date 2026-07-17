@@ -99,6 +99,7 @@ export type ResolveNavSectionsInput = {
   commerceType?: StoreCommerceType | null;
   can?: (key: string) => boolean;
   isSuperAdmin?: boolean;
+  isExpertMode?: boolean;
   t?: TFunction;
 };
 
@@ -142,6 +143,7 @@ export function resolveNavSections(input: ResolveNavSectionsInput): NavSection[]
   sections = filterSellerNavSectionsByAccess(sections, {
     isPlatformAdmin: input.isPlatformAdmin,
     commerceType: input.commerceType,
+    isExpertMode: input.isExpertMode,
   });
   return t ? translateNavSections(sections, t) : sections;
 }
@@ -158,6 +160,7 @@ export function resolveNavItems(input: ResolveNavItemsInput): ResolvedNavItem[] 
     commerceType: input.commerceType,
     can: input.can,
     isSuperAdmin: input.isSuperAdmin,
+    isExpertMode: input.isExpertMode,
     t: input.t,
   });
 
@@ -180,6 +183,7 @@ export function resolveNavItems(input: ResolveNavItemsInput): ResolvedNavItem[] 
       commerceType: input.commerceType,
       can: input.can,
       isSuperAdmin: input.isSuperAdmin,
+      isExpertMode: input.isExpertMode,
       t: input.t,
     });
     const flat = flattenNavSections(commandSections);

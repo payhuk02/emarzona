@@ -4,6 +4,7 @@ export const SIDEBAR_PREF_KEYS = {
   collapsedSections: 'sidebarCollapsedSections',
   storesExpanded: 'sidebarStoresExpanded',
   navClickCounts: 'navClickCounts',
+  personaOnboarded: 'sidebarPersonaOnboarded',
 } as const;
 
 export type SidebarPrefKey = (typeof SIDEBAR_PREF_KEYS)[keyof typeof SIDEBAR_PREF_KEYS];

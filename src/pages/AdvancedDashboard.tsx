@@ -287,7 +287,7 @@ const AdvancedDashboard = () => {
         </div>
 
         {/* Performance Metrics */}
-        <PerformanceMetrics metrics={stats.performanceMetrics} />
+        <PerformanceMetrics metrics={stats.performanceMetrics} trends={stats.trends} />
 
         {/* Bottom Row */}
         <div className="grid gap-6 lg:grid-cols-3">

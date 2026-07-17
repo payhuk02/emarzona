@@ -15,6 +15,7 @@ import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { SidebarCollapsibleSection } from '@/components/sidebar/SidebarCollapsibleSection';
 import { SidebarNavCommandPalette } from '@/components/sidebar/SidebarNavCommandPalette';
 import { SidebarPersonaSwitch } from '@/components/sidebar/SidebarPersonaSwitch';
+import { PersonaOnboardingCoach } from '@/components/sidebar/PersonaOnboardingCoach';
 import { NAV_LINK_ACTIVE, NAV_LINK_INACTIVE } from '@/components/sidebar/sidebar-nav-shared';
 import {
   DEFAULT_OPEN_SECTION_KEYS,
@@ -33,7 +34,7 @@ import type { NavSection, SidebarPersona } from '@/config/navigation.types';
 import { useSidebarPersona } from '@/hooks/useSidebarPersona';
 import { useSidebarNavigation } from '@/hooks/useSidebarNavigation';
 import { recordNavClick, sortEntriesByNavFrequency } from '@/hooks/useNavigationAnalytics';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -72,7 +73,11 @@ import {
 import { isSellerNavItemActive, resolveSellerNavUrl } from '@/lib/navigation/vendor-products-nav';
 import { logger } from '@/lib/logger';
 import { LogoImageWithFallback } from '@/components/sidebar/LogoImageWithFallback';
-import { ContextSidebar, useContextSidebar, ContextSidebarTrigger } from '@/components/navigation/ContextSidebar';
+import {
+  ContextSidebar,
+  useContextSidebar,
+  ContextSidebarTrigger,
+} from '@/components/navigation/ContextSidebar';
 import { MegaMenuDropdown, MegaMenuTrigger } from '@/components/navigation/MegaMenuDropdown';
 import { CONTEXT_SIDEBAR_MAPPING } from '@/config/navigation.context.extended';
 
@@ -132,9 +137,13 @@ export function AppSidebar() {
   const handlePlanLockedNav = usePlanLockNavAction();
   /** Desktop rail only — mobile drawer always shows labels + icons */
   const isCollapsed = state === 'collapsed' && !isMobile;
-  const { persona, setPersona } = useSidebarPersona(isAdmin);
+  const { persona, setPersona, needsPersonaOnboarding } = useSidebarPersona(isAdmin);
   const [commandOpen, setCommandOpen] = useState(false);
-  const { isOpen: contextSidebarOpen, open: openContextSidebar, close: closeContextSidebar } = useContextSidebar();
+  const {
+    isOpen: contextSidebarOpen,
+    open: openContextSidebar,
+    close: closeContextSidebar,
+  } = useContextSidebar();
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
 
   const [collapsedSections, setCollapsedSections] = useState<string[]>([]);
@@ -145,10 +154,13 @@ export function AppSidebar() {
   const showUserMenu = !showAdminMenu;
   const resolveNavHref = (url: string) =>
     persona === 'seller' ? resolveSellerNavUrl(url, commerceType) : url;
-  const isNavLinkActive = (url: string, mode: 'exact' | 'prefix' = 'exact') =>
-    persona === 'seller'
-      ? isSellerNavItemActive(url, location.pathname, location.search, mode, commerceType)
-      : isNavItemActive(url, location.pathname, location.search, mode);
+  const isNavLinkActive = useCallback(
+    (url: string, mode: 'exact' | 'prefix' = 'exact') =>
+      persona === 'seller'
+        ? isSellerNavItemActive(url, location.pathname, location.search, mode, commerceType)
+        : isNavItemActive(url, location.pathname, location.search, mode),
+    [persona, location.pathname, location.search, commerceType]
+  );
   const logoHome = resolveSidebarLogoHome(persona);
   const logoAriaKey = resolveSidebarLogoAriaKey(persona);
 
@@ -220,14 +232,16 @@ export function AppSidebar() {
 
   const handlePersonaChange = (next: SidebarPersona) => {
     setPersona(next);
+    writeSidebarJsonPref(SIDEBAR_PREF_KEYS.personaOnboarded, true);
     if (next === 'admin' && isAdmin) navigate('/admin');
-    else if (next === 'buyer') navigate('/account');
+    else if (next === 'buyer') navigate('/account/hub');
     else navigate('/dashboard');
   };
 
-  const currentNavItem = useMemo(() => {
-    return allCurrentEntries.find(item => isNavLinkActive(item.url, 'exact'));
-  }, [allCurrentEntries, location.pathname, location.search]);
+  const currentNavItem = useMemo(
+    () => allCurrentEntries.find(item => isNavLinkActive(item.url, 'exact')),
+    [allCurrentEntries, isNavLinkActive]
+  );
 
   useEffect(() => {
     setSidebarPrefsUserId(userId);
@@ -376,12 +390,14 @@ export function AppSidebar() {
             </button>
           )}
         </div>
-        <SidebarPersonaSwitch
-          persona={persona === 'admin' && !isAdmin ? 'seller' : persona}
-          isAdmin={isAdmin}
-          isCollapsed={isCollapsed}
-          onPersonaChange={handlePersonaChange}
-        />
+        <PersonaOnboardingCoach isAdmin={isAdmin} enabled={!!userId && needsPersonaOnboarding}>
+          <SidebarPersonaSwitch
+            persona={persona === 'admin' && !isAdmin ? 'seller' : persona}
+            isAdmin={isAdmin}
+            isCollapsed={isCollapsed}
+            onPersonaChange={handlePersonaChange}
+          />
+        </PersonaOnboardingCoach>
       </div>
 
       <SidebarContent className="app-sidebar-scroll flex-1 min-h-0 overflow-y-auto scrollbar-thin">
@@ -544,7 +560,7 @@ export function AppSidebar() {
 
                       return (
                         <SidebarMenuItem key={`${section.label}-${item.title}-${item.url}`}>
-                          {(item as any).hasContext ? (
+                          {getContextSectionsForItem(item.url).length > 0 ? (
                             <MegaMenuDropdown
                               trigger={
                                 <SidebarMenuButton
@@ -684,7 +700,7 @@ export function AppSidebar() {
             </React.Fragment>
           ))}
       </SidebarContent>
-      
+
       {/* Context Sidebar - Enterprise-grade domain-specific navigation */}
       <ContextSidebar isOpen={contextSidebarOpen} onClose={closeContextSidebar} />
     </Sidebar>

@@ -35,6 +35,8 @@ import {
   Menu,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { formatLocaleNumber } from '@/lib/i18n/locale-format';
 import { ReturnsTab } from '@/components/customer/ReturnsTab';
 import CustomerMyGiftCards from './CustomerMyGiftCards';
 import { DownloadsTab } from '@/components/customer/DownloadsTab';
@@ -42,6 +44,7 @@ import { LicensesTab } from '@/components/customer/LicensesTab';
 import { UpdatesTab } from '@/components/customer/UpdatesTab';
 import { FavoritesTab } from '@/components/customer/FavoritesTab';
 import { RecentOrdersTimeline } from '@/components/customer/RecentOrdersTimeline';
+import { CustomerHubQuickActions } from '@/components/customer/CustomerHubQuickActions';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 interface CustomerStats {
@@ -92,6 +95,7 @@ function MobileHeader() {
 
 export default function CustomerPortal() {
   const navigate = useNavigate();
+  const { i18n } = useTranslation();
   const [user, setUser] = useState<User | null>(null);
   const headerRef = useScrollAnimation<HTMLDivElement>();
 
@@ -359,7 +363,7 @@ export default function CustomerPortal() {
               </CardHeader>
               <CardContent className="px-3 pb-3 sm:px-4 sm:pb-4">
                 <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-                  {stats?.totalOrders || 0}
+                  {formatLocaleNumber(stats?.totalOrders || 0, i18n.language)}
                 </div>
                 <p className="text-[10px] xs:text-xs text-muted-foreground mt-0.5 sm:mt-1 leading-tight">
                   Commandes passées
@@ -378,7 +382,7 @@ export default function CustomerPortal() {
               </CardHeader>
               <CardContent className="px-3 pb-3 sm:px-4 sm:pb-4">
                 <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent break-words">
-                  {(stats?.totalSpent || 0).toLocaleString('fr-FR')} XOF
+                  {formatLocaleNumber(stats?.totalSpent || 0, i18n.language)} XOF
                 </div>
                 <p className="text-[10px] xs:text-xs text-muted-foreground mt-0.5 sm:mt-1 leading-tight">
                   Depuis le début
@@ -533,6 +537,7 @@ export default function CustomerPortal() {
               value="overview"
               className="space-y-2.5 sm:space-y-3 md:space-y-4 mt-3 sm:mt-4 md:mt-6"
             >
+              <CustomerHubQuickActions />
               {user?.id && <RecentOrdersTimeline userId={user.id} onViewAll={navigateToOrders} />}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3 md:gap-4">

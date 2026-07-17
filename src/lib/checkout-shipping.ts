@@ -5,7 +5,7 @@
 
 import type { CartItem } from '@/types/cart';
 import { calculateArtistShipping } from '@/lib/shipping/artist-shipping';
-import { fetchCheapestFedexShippingCost } from '@/lib/shipping/fedex-rates-client';
+import { fetchCheapestCarrierShippingCost } from '@/lib/shipping/shipping-provider';
 import { resolveStoreZoneShippingAmount } from '@/lib/checkout/shipping-zones';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
@@ -134,7 +134,7 @@ async function resolvePhysicalShippingAmount(
         items.reduce((sum, item) => sum + item.quantity * 0.5, 0)
       );
 
-      return await fetchCheapestFedexShippingCost({
+      return await fetchCheapestCarrierShippingCost({
         ship_from: { country: 'BF', postal_code: '01', city: 'Ouagadougou' },
         ship_to: {
           country,

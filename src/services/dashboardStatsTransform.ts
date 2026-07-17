@@ -247,7 +247,10 @@ export function transformOptimizedData(data: OptimizedDashboardData): DashboardS
       revenueGrowth: calcGrowth(orders.totalRevenue, prevRevenue),
       orderGrowth: calcGrowth(orders.totalOrders, prevOrders),
       customerGrowth: calcGrowth(customers.newCustomers30d, prevCustomers),
-      productGrowth: base.activeProducts > 0 ? Math.min(base.activeProducts, 10) : 0,
+      productGrowth: calcGrowth(
+        base.newProductsInPeriod ?? 0,
+        base.previousNewProductsInPeriod ?? 0
+      ),
     },
     productsByType: {
       digital: base.digitalProducts,

@@ -2,6 +2,8 @@
  * Epic 3.6.2 — Timeline unifiée commande (5 types produits)
  */
 
+import { formatLocaleDateTime } from '@/lib/i18n/locale-format';
+
 export type OrderTimelineStepStatus = 'done' | 'current' | 'pending' | 'error';
 
 export interface OrderTimelineStep {
@@ -16,6 +18,7 @@ export interface OrderTimelineInput {
   paymentStatus: string;
   productTypes: string[];
   createdAt?: string;
+  locale?: string | null;
 }
 
 const FULFILLMENT_LABELS: Record<string, string> = {
@@ -48,7 +51,9 @@ export function buildOrderTimeline(input: OrderTimelineInput): OrderTimelineStep
     {
       id: 'placed',
       label: 'Commande passée',
-      description: input.createdAt ? new Date(input.createdAt).toLocaleString('fr-FR') : undefined,
+      description: input.createdAt
+        ? formatLocaleDateTime(new Date(input.createdAt), input.locale)
+        : undefined,
       status: 'done',
     },
     {

@@ -88,7 +88,7 @@ export const DashboardCharts = React.memo<DashboardChartsProps>(({ stats }) => {
       {/* Performance Metrics */}
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
         <Suspense fallback={<Skeleton className="h-[200px] w-full rounded-lg" />}>
-          <PerformanceMetrics metrics={stats.performanceMetrics} />
+          <PerformanceMetrics metrics={stats.performanceMetrics} trends={stats.trends} />
         </Suspense>
       </div>
     </>

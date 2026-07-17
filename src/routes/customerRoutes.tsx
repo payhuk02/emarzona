@@ -41,6 +41,7 @@ const protectedRoute = (
 export const customerRoutes = (
   <>
     {protectedRoute('/account', CustomerPortal)}
+    {protectedRoute('/account/hub', CustomerPortal)}
     {protectedRoute('/account/orders', CustomerMyOrders)}
     {protectedRoute('/account/downloads', CustomerMyDownloads)}
     {protectedRoute('/account/warranties', CustomerWarranties)}

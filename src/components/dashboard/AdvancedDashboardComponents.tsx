@@ -29,6 +29,8 @@ import {
   LazyCell,
 } from '@/components/charts/LazyCharts';
 import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { formatLocaleDateTime } from '@/lib/i18n/locale-format';
 
 interface AdvancedStatsCardProps {
   title: string;
@@ -278,6 +280,7 @@ interface ActivityFeedProps {
 }
 
 export const ActivityFeed = ({ activities }: ActivityFeedProps) => {
+  const { i18n } = useTranslation();
   const getActivityIcon = (type: string) => {
     switch (type) {
       case 'order':
@@ -331,7 +334,7 @@ export const ActivityFeed = ({ activities }: ActivityFeedProps) => {
                 <div className="flex items-center gap-2 mt-1">
                   <Clock className="h-3 w-3 text-muted-foreground" />
                   <span className="text-xs text-muted-foreground">
-                    {new Date(activity.timestamp).toLocaleString('fr-FR')}
+                    {formatLocaleDateTime(new Date(activity.timestamp), i18n.language)}
                   </span>
                   {activity.status && (
                     <Badge variant="outline" className="text-xs">
@@ -357,9 +360,16 @@ interface PerformanceMetricsProps {
     bounceRate: number;
     sessionDuration: number;
   };
+  trends?: {
+    revenueGrowth: number;
+    orderGrowth: number;
+    customerGrowth: number;
+  };
 }
 
-const PerformanceMetricsComponent = ({ metrics }: PerformanceMetricsProps) => {
+const PerformanceMetricsComponent = ({ metrics, trends }: PerformanceMetricsProps) => {
+  const showWebMetrics = metrics.pageViews > 0;
+
   const metricsData = useMemo(
     () => [
       {
@@ -368,7 +378,11 @@ const PerformanceMetricsComponent = ({ metrics }: PerformanceMetricsProps) => {
         description: 'Visiteurs qui achètent',
         icon: Target,
         color: 'green',
-        trend: { value: 12, label: 'vs mois dernier', period: '30j' },
+        trend: {
+          value: trends?.orderGrowth ?? 0,
+          label: 'vs mois dernier',
+          period: '30j',
+        },
       },
       {
         title: 'Panier Moyen',
@@ -376,7 +390,11 @@ const PerformanceMetricsComponent = ({ metrics }: PerformanceMetricsProps) => {
         description: 'Valeur moyenne par commande',
         icon: DollarSign,
         color: 'blue',
-        trend: { value: 8, label: 'vs mois dernier', period: '30j' },
+        trend: {
+          value: trends?.revenueGrowth ?? 0,
+          label: 'vs mois dernier',
+          period: '30j',
+        },
       },
       {
         title: 'Rétention Client',
@@ -384,34 +402,42 @@ const PerformanceMetricsComponent = ({ metrics }: PerformanceMetricsProps) => {
         description: 'Clients qui reviennent',
         icon: User,
         color: 'purple',
-        trend: { value: 15, label: 'vs mois dernier', period: '30j' },
+        trend: {
+          value: trends?.customerGrowth ?? 0,
+          label: 'vs mois dernier',
+          period: '30j',
+        },
       },
-      {
-        title: 'Pages Vues',
-        value: metrics.pageViews.toLocaleString(),
-        description: 'Visites totales',
-        icon: Eye,
-        color: 'orange',
-        trend: { value: 23, label: 'vs mois dernier', period: '30j' },
-      },
-      {
-        title: 'Taux de Rebond',
-        value: `${metrics.bounceRate}%`,
-        description: 'Visiteurs qui partent rapidement',
-        icon: TrendingDown,
-        color: 'red',
-        trend: { value: -5, label: 'vs mois dernier', period: '30j' },
-      },
-      {
-        title: 'Durée Session',
-        value: `${Math.round(metrics.sessionDuration / 60)}min`,
-        description: 'Temps moyen sur le site',
-        icon: Clock,
-        color: 'indigo',
-        trend: { value: 18, label: 'vs mois dernier', period: '30j' },
-      },
+      ...(showWebMetrics
+        ? [
+            {
+              title: 'Pages Vues',
+              value: metrics.pageViews.toLocaleString(),
+              description: 'Visites totales',
+              icon: Eye,
+              color: 'orange',
+              trend: { value: 0, label: 'vs mois dernier', period: '30j' },
+            },
+            {
+              title: 'Taux de Rebond',
+              value: `${metrics.bounceRate}%`,
+              description: 'Visiteurs qui partent rapidement',
+              icon: TrendingDown,
+              color: 'red',
+              trend: { value: 0, label: 'vs mois dernier', period: '30j' },
+            },
+            {
+              title: 'Durée Session',
+              value: `${Math.round(metrics.sessionDuration / 60)}min`,
+              description: 'Temps moyen sur le site',
+              icon: Clock,
+              color: 'indigo',
+              trend: { value: 0, label: 'vs mois dernier', period: '30j' },
+            },
+          ]
+        : []),
     ],
-    [metrics]
+    [metrics, trends, showWebMetrics]
   );
 
   return (

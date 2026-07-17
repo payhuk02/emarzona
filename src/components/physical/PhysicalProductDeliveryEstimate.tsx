@@ -58,7 +58,7 @@ export function PhysicalProductDeliveryEstimate({
       : `${data.estimated_days_min} à ${data.estimated_days_max} jours`;
 
   return (
-    <Card className={cn('border-dashed', className)}>
+    <Card className={cn('border-dashed', className)} data-testid="product-delivery-estimate">
       <CardContent className="pt-4 pb-4">
         <div className="flex items-start gap-3">
           <div className="rounded-full bg-primary/10 p-2">

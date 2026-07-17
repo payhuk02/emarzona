@@ -10,6 +10,8 @@ import { LayoutDashboard, ShoppingBag, Store, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { usePageCustomization } from '@/hooks/usePageCustomization';
+import { persistSidebarPersona } from '@/hooks/useSidebarPersona';
+import { SIDEBAR_PREF_KEYS, writeSidebarJsonPref } from '@/lib/navigation/sidebar-prefs-storage';
 
 export function DashboardOnboarding() {
   const { t } = useTranslation();
@@ -77,7 +79,11 @@ export function DashboardOnboarding() {
                   </p>
                   <Button
                     variant="outline"
-                    onClick={() => navigate('/account')}
+                    onClick={() => {
+                      persistSidebarPersona('buyer');
+                      writeSidebarJsonPref(SIDEBAR_PREF_KEYS.personaOnboarded, true);
+                      navigate('/account/hub');
+                    }}
                     className="w-full min-h-[44px] text-sm touch-manipulation gap-2"
                   >
                     <User className="h-4 w-4" aria-hidden />

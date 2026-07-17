@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { isBuyerDiscoveryPath } from '@/config/navigation.horizontal';
+import { SIDEBAR_PREF_KEYS, hasSidebarJsonPref } from '@/lib/navigation/sidebar-prefs-storage';
 import type { SidebarPersona } from '@/config/navigation.types';
 
 const SIDEBAR_PERSONA_KEY = 'sidebarPersona';
@@ -26,6 +27,14 @@ function readStoredPersona(): SidebarPersona | null {
     /* ignore */
   }
   return null;
+}
+
+export function persistSidebarPersona(next: SidebarPersona): void {
+  try {
+    localStorage.setItem(SIDEBAR_PERSONA_KEY, next);
+  } catch {
+    /* ignore */
+  }
 }
 
 export function useSidebarPersona(isAdmin: boolean) {
@@ -63,5 +72,11 @@ export function useSidebarPersona(isAdmin: boolean) {
     }
   }, []);
 
-  return { persona, setPersona, resetPersona, isManualPersona: manualPersona !== null };
+  return {
+    persona,
+    setPersona,
+    resetPersona,
+    isManualPersona: manualPersona !== null,
+    needsPersonaOnboarding: !hasSidebarJsonPref(SIDEBAR_PREF_KEYS.personaOnboarded),
+  };
 }

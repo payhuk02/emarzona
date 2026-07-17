@@ -14,7 +14,7 @@ const { values } = parseArgs({
   },
 });
 
-const CANARY_DEPLOYED_AT = '2026-07-01T00:00:00Z';
+const CANARY_DEPLOYED_AT = '2026-07-17T14:23:00Z';
 const MIN_HOURS_BEFORE_50 = 48;
 const targetRollout = Number(values.rollout);
 
@@ -38,7 +38,7 @@ for (const check of checks) {
   if (!ok) allOk = false;
 }
 
-async function readVercelRolloutPercent() {
+async function readVercelRolloutConfig() {
   const env = loadSupabaseEnv();
   const { token, projectId, orgId } = getVercelCredentials(env);
   if (!token || !projectId) return null;
@@ -48,18 +48,24 @@ async function readVercelRolloutPercent() {
   });
   if (!res.ok) return null;
   const data = await res.json();
-  const hasV2 = (data.envs ?? []).some(
+  const v2Env = (data.envs ?? []).find(
     e => e.key === 'VITE_PAYMENT_ORCHESTRATION_V2' && e.target?.includes('production')
   );
-  const hasRollout = (data.envs ?? []).some(
+  if (!v2Env) return null;
+  const rolloutEnv = (data.envs ?? []).find(
     e => e.key === 'VITE_PAYMENT_ORCHESTRATION_V2_ROLLOUT' && e.target?.includes('production')
   );
-  return hasV2 && hasRollout ? targetRollout : null;
+  const parsed = rolloutEnv?.value ? Number.parseInt(String(rolloutEnv.value), 10) : 10;
+  return {
+    enabled: String(v2Env.value).toLowerCase() !== 'false',
+    rolloutPercent: Number.isNaN(parsed) ? 10 : parsed,
+  };
 }
 
 const hoursSince = (Date.now() - Date.parse(CANARY_DEPLOYED_AT)) / (1000 * 60 * 60);
-const vercelRolloutConfigured = await readVercelRolloutPercent();
-const eligible50 = hoursSince >= MIN_HOURS_BEFORE_50 && allOk && targetRollout < 50;
+const vercelRollout = await readVercelRolloutConfig();
+const effectiveRollout = vercelRollout?.rolloutPercent ?? targetRollout;
+const eligible50 = hoursSince >= MIN_HOURS_BEFORE_50 && allOk && effectiveRollout < 50;
 
 console.log('\n=== Payment V2 canary monitor ===');
 console.log(
@@ -67,8 +73,9 @@ console.log(
     {
       ok: allOk,
       targetRolloutPercent: targetRollout,
-      vercelRolloutEnvPresent: vercelRolloutConfigured !== null,
-      hoursSinceDeploy: Math.round(hoursSince),
+      vercelRolloutPercent: vercelRollout?.rolloutPercent ?? null,
+      vercelV2Enabled: vercelRollout?.enabled ?? null,
+      hoursSinceDeploy: Math.round(hoursSince * 10) / 10,
       eligible50,
     },
     null,
@@ -76,14 +83,16 @@ console.log(
   )
 );
 
-if (targetRollout >= 100 && allOk) {
+if (effectiveRollout >= 100 && allOk) {
   console.log('\n✓ Payment V2 rollout 100 % — gates OK. Surveiller Sentry 24h post-déploiement.');
 } else if (eligible50) {
   console.log('\n→ Escalade 50 % autorisée (48h + gates OK):');
   console.log('  gh workflow run payment-v2-vercel-rollout.yml -f rollout_percent=50 -f redeploy=true');
-} else if (allOk && targetRollout < 50) {
+} else if (allOk && effectiveRollout < 50) {
   const remaining = Math.ceil(MIN_HOURS_BEFORE_50 - hoursSince);
-  console.log(`\n⏳ Canary ${targetRollout} % stable — ~${Math.max(0, remaining)}h avant escalade 50 %.`);
+  console.log(
+    `\n⏳ Canary ${effectiveRollout} % stable — ~${Math.max(0, remaining)}h avant escalade 50 %.`
+  );
 } else {
   console.log('\n❌ Corriger les gates avant escalade.');
   process.exit(1);

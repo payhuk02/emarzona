@@ -43,6 +43,35 @@ interface ProductTypeAccumulator {
 
 type ProductTypeMetrics = UnifiedAnalytics['byProductType'][ProductType];
 
+function calcGrowthPercent(current: number, previous: number): number {
+  if (previous <= 0) return current > 0 ? 100 : 0;
+  return Math.round(((current - previous) / previous) * 100);
+}
+
+function accumulateByProductType(orders: AnalyticsOrderRow[]) {
+  const acc: Record<ProductType, ProductTypeAccumulator> = {
+    digital: { revenue: 0, orders: 0, units: 0, products: new Set() },
+    physical: { revenue: 0, orders: 0, units: 0, products: new Set() },
+    service: { revenue: 0, orders: 0, units: 0, products: new Set() },
+    course: { revenue: 0, orders: 0, units: 0, products: new Set() },
+    artist: { revenue: 0, orders: 0, units: 0, products: new Set() },
+  };
+
+  orders.forEach(order => {
+    (order.order_items ?? []).forEach(item => {
+      const product = item.products;
+      const type = product?.product_type as ProductType | undefined;
+      if (!type || !acc[type]) return;
+      acc[type].revenue += parseFloat(String(item.price)) * (item.quantity || 1);
+      acc[type].orders += 1;
+      acc[type].units += item.quantity || 1;
+      if (product?.id) acc[type].products.add(product.id);
+    });
+  });
+
+  return acc;
+}
+
 export interface UnifiedAnalytics {
   // Vue d'ensemble
   overview: {
@@ -232,7 +261,18 @@ export const useUnifiedAnalytics = (timeRange: TimeRange = '30d') => {
       // Récupérer les commandes précédentes pour les tendances
       const { data: previousOrders } = await supabase
         .from('orders')
-        .select('total_amount, status, created_at')
+        .select(
+          `
+          total_amount,
+          status,
+          created_at,
+          order_items (
+            quantity,
+            price,
+            products ( id, product_type )
+          )
+        `
+        )
         .eq('store_id', store.id)
         .gte('created_at', previousStartDate.toISOString())
         .lt('created_at', startDate.toISOString());
@@ -280,6 +320,10 @@ export const useUnifiedAnalytics = (timeRange: TimeRange = '30d') => {
         });
       });
 
+      const completedPrevious = (previousOrders?.filter(o => o.status === 'completed') ??
+        []) as AnalyticsOrderRow[];
+      const previousByType = accumulateByProductType(completedPrevious);
+
       // Convertir en format final
       const byProductTypeFinal: Record<ProductType, ProductTypeMetrics> = {
         digital: {
@@ -290,7 +334,7 @@ export const useUnifiedAnalytics = (timeRange: TimeRange = '30d') => {
             byProductType.digital.units > 0
               ? byProductType.digital.revenue / byProductType.digital.units
               : 0,
-          growth: 0, // À calculer avec les données précédentes
+          growth: calcGrowthPercent(byProductType.digital.revenue, previousByType.digital.revenue),
         },
         physical: {
           revenue: byProductType.physical.revenue,
@@ -300,7 +344,10 @@ export const useUnifiedAnalytics = (timeRange: TimeRange = '30d') => {
             byProductType.physical.units > 0
               ? byProductType.physical.revenue / byProductType.physical.units
               : 0,
-          growth: 0,
+          growth: calcGrowthPercent(
+            byProductType.physical.revenue,
+            previousByType.physical.revenue
+          ),
         },
         service: {
           revenue: byProductType.service.revenue,
@@ -310,7 +357,7 @@ export const useUnifiedAnalytics = (timeRange: TimeRange = '30d') => {
             byProductType.service.units > 0
               ? byProductType.service.revenue / byProductType.service.units
               : 0,
-          growth: 0,
+          growth: calcGrowthPercent(byProductType.service.revenue, previousByType.service.revenue),
         },
         course: {
           revenue: byProductType.course.revenue,
@@ -320,7 +367,7 @@ export const useUnifiedAnalytics = (timeRange: TimeRange = '30d') => {
             byProductType.course.units > 0
               ? byProductType.course.revenue / byProductType.course.units
               : 0,
-          growth: 0,
+          growth: calcGrowthPercent(byProductType.course.revenue, previousByType.course.revenue),
         },
         artist: {
           revenue: byProductType.artist.revenue,
@@ -330,7 +377,7 @@ export const useUnifiedAnalytics = (timeRange: TimeRange = '30d') => {
             byProductType.artist.units > 0
               ? byProductType.artist.revenue / byProductType.artist.units
               : 0,
-          growth: 0,
+          growth: calcGrowthPercent(byProductType.artist.revenue, previousByType.artist.revenue),
         },
       };
 
@@ -415,7 +462,10 @@ export const useUnifiedAnalytics = (timeRange: TimeRange = '30d') => {
       const topProducts = Object.values(productRevenue)
         .sort((a, b) => b.revenue - a.revenue)
         .slice(0, 10)
-        .map(p => ({ ...p, growth: 0 }));
+        .map(p => ({
+          ...p,
+          growth: byProductTypeFinal[p.type as ProductType]?.growth ?? 0,
+        }));
 
       // Top clients
       interface CustomerStatsData {

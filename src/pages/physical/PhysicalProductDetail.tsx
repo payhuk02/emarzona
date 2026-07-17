@@ -7,6 +7,8 @@
  */
 
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { formatLocaleNumber } from '@/lib/i18n/locale-format';
 import { AppPageShell } from '@/components/layout/AppPageShell';
 import { SafeHTML } from '@/components/security/SafeHTML';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -37,6 +39,7 @@ import { InventoryStockIndicator } from '@/components/physical/InventoryStockInd
 import { PhysicalProductShippingDetails } from '@/components/physical/PhysicalProductShippingDetails';
 import { ProductReviewsHeroSummary } from '@/components/physical/ProductReviewsHeroSummary';
 import { PhysicalProductPreOrderCard } from '@/components/physical/PhysicalProductPreOrderCard';
+import { PhysicalProductDeliveryEstimate } from '@/components/physical/PhysicalProductDeliveryEstimate';
 import { SizeChartDisplay } from '@/components/physical/SizeChartDisplay';
 import { ProductReviewsSummary } from '@/components/reviews/ProductReviewsSummary';
 import { ReviewsList } from '@/components/reviews/ReviewsList';
@@ -86,6 +89,7 @@ interface WindowWithTtq extends Window {
 export default function PhysicalProductDetail() {
   const { productId } = useParams<{ productId: string }>();
   const navigate = useNavigate();
+  const { i18n } = useTranslation();
   const { toast } = useToast();
   const { user } = useAuth();
   const { addItem } = useCart();
@@ -415,11 +419,11 @@ export default function PhysicalProductDetail() {
           {/* Price */}
           <div className="flex items-baseline gap-3 flex-wrap">
             <span className="text-2xl sm:text-3xl font-bold tracking-tight">
-              {displayPrice.toLocaleString('fr-FR')} {product?.currency}
+              {formatLocaleNumber(displayPrice, i18n.language)} {product?.currency}
             </span>
             {compareAtPrice != null && (
               <span className="text-lg text-muted-foreground line-through">
-                {compareAtPrice.toLocaleString('fr-FR')} {product?.currency}
+                {formatLocaleNumber(compareAtPrice, i18n.language)} {product?.currency}
               </span>
             )}
           </div>
@@ -474,6 +478,8 @@ export default function PhysicalProductDetail() {
             variantId={selectedVariant?.id}
             currency={product?.currency}
           />
+
+          <PhysicalProductDeliveryEstimate productId={productId!} />
 
           {product?.store_id && (
             <PhysicalProductShippingDetails

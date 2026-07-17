@@ -3,7 +3,10 @@ import {
   BOTTOM_NAV_SPECS,
   TOP_NAV_PRIMARY_PATHS,
   resolveNavItems,
+  resolveNavSections,
 } from '@/lib/navigation/resolveNavItems';
+import { flattenNavSections } from '@/config/navigation.enrich';
+import { getNavItemPath } from '@/config/navigation.helpers';
 import { resolveSellerNavPath } from '@/lib/navigation/vendor-products-nav';
 import sidebarFR from '@/i18n/locales/sidebar-fr.json';
 
@@ -192,5 +195,27 @@ describe('resolveNavItems', () => {
     expect(paths).toContain('/dashboard/auctions');
     expect(paths).not.toContain('/dashboard/digital-products');
     expect(paths).not.toContain('/dashboard/services');
+  });
+
+  it('hides expert-only routes in essential mode (P1-2)', () => {
+    const flattenPaths = (expert: boolean) => {
+      const sections = resolveNavSections({
+        scope: 'command',
+        persona: 'seller',
+        isPlatformAdmin: false,
+        commerceType: 'digital',
+        isExpertMode: expert,
+        t: mockT,
+      });
+      return flattenNavSections(sections).map(entry => getNavItemPath(entry.url));
+    };
+
+    const expertPaths = flattenPaths(true);
+    const essentialPaths = flattenPaths(false);
+
+    expect(expertPaths).toContain('/dashboard/gamification');
+    expect(expertPaths).toContain('/dashboard/abandoned-carts');
+    expect(essentialPaths).not.toContain('/dashboard/gamification');
+    expect(essentialPaths).not.toContain('/dashboard/abandoned-carts');
   });
 });
