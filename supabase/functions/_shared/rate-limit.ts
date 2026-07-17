@@ -25,6 +25,28 @@ export const RATE_LIMIT_PRESETS: Record<string, RateLimitConfig> = {
   'product-creation': { maxRequests: 10, windowSeconds: 60 },
 };
 
+/** Limites par action auth — alignées sur le client `auth-rate-limiter.ts`. */
+export const AUTH_ACTION_PRESETS: Record<string, RateLimitConfig> = {
+  login: { maxRequests: 5, windowSeconds: 300 },
+  register: { maxRequests: 3, windowSeconds: 3600 },
+  'reset-password': { maxRequests: 3, windowSeconds: 3600 },
+  'verify-2fa': { maxRequests: 5, windowSeconds: 300 },
+  'resend-verification': { maxRequests: 3, windowSeconds: 600 },
+};
+
+export function hashAuthIdentifier(identifier: string): string {
+  const normalized = identifier.trim().toLowerCase();
+  let hash = 5381;
+  for (let i = 0; i < normalized.length; i++) {
+    hash = (hash * 33) ^ normalized.charCodeAt(i);
+  }
+  return (hash >>> 0).toString(36);
+}
+
+export function buildAuthRateLimitEndpoint(authAction: string, identifier: string): string {
+  return `auth:${authAction}:${hashAuthIdentifier(identifier)}`;
+}
+
 const FAIL_CLOSED_ENDPOINTS = new Set(['payment', 'checkout']);
 
 export function isFailClosedEndpoint(endpoint: string): boolean {
@@ -44,11 +66,13 @@ export async function enforceRateLimit(
   ip: string,
   endpoint: string,
   config: RateLimitConfig,
-  userId?: string
+  userId?: string,
+  options?: { scopeByEndpointOnly?: boolean }
 ): Promise<RateLimitResult> {
   const now = new Date();
   const windowStart = new Date(now.getTime() - config.windowSeconds * 1000);
   const failClosed = isFailClosedEndpoint(endpoint);
+  const scopeByEndpointOnly = options?.scopeByEndpointOnly ?? false;
 
   let query = supabase
     .from('rate_limit_log')
@@ -56,7 +80,9 @@ export async function enforceRateLimit(
     .eq('endpoint', endpoint)
     .gte('created_at', windowStart.toISOString());
 
-  query = userId ? query.eq('user_id', userId) : query.eq('ip_address', ip);
+  if (!scopeByEndpointOnly) {
+    query = userId ? query.eq('user_id', userId) : query.eq('ip_address', ip);
+  }
 
   const { count, error } = await query;
 

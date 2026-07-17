@@ -20,8 +20,8 @@ const REQUIRED = [
   'paypal-create-order',
   'paypal-webhook',
   'paypal-refund',
-  'moneroo-webhook',
-  'moneroo',
+  'geniuspay-webhook',
+  'geniuspay',
 ];
 
 const report = {

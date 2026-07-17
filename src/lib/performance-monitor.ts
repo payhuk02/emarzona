@@ -21,6 +21,20 @@ interface WebVitals {
   TTI?: PerformanceMetric; // Time to Interactive
 }
 
+interface LCPEntry extends PerformanceEntry {
+  renderTime?: number;
+  loadTime?: number;
+}
+
+interface FIDEntry extends PerformanceEntry {
+  processingStart: number;
+}
+
+interface LayoutShiftEntry extends PerformanceEntry {
+  hadRecentInput?: boolean;
+  value?: number;
+}
+
 class PerformanceMonitor {
   private metrics: PerformanceMetric[] = [];
   private webVitals: WebVitals = {};
@@ -39,7 +53,7 @@ class PerformanceMonitor {
   private initWebVitals() {
     // First Contentful Paint (FCP)
     try {
-      const fcpObserver = new PerformanceObserver((list) => {
+      const fcpObserver = new PerformanceObserver(list => {
         for (const entry of list.getEntries()) {
           if (entry.name === 'first-contentful-paint') {
             const value = entry.startTime;
@@ -57,9 +71,9 @@ class PerformanceMonitor {
 
     // Largest Contentful Paint (LCP)
     try {
-      const lcpObserver = new PerformanceObserver((list) => {
+      const lcpObserver = new PerformanceObserver(list => {
         const entries = list.getEntries();
-        const lastEntry = entries[entries.length - 1] as any;
+        const lastEntry = entries[entries.length - 1] as LCPEntry | undefined;
         if (lastEntry) {
           const value = lastEntry.renderTime || lastEntry.loadTime;
           const rating = this.getRating('LCP', value);
@@ -75,8 +89,8 @@ class PerformanceMonitor {
 
     // First Input Delay (FID)
     try {
-      const fidObserver = new PerformanceObserver((list) => {
-        for (const entry of list.getEntries() as any[]) {
+      const fidObserver = new PerformanceObserver(list => {
+        for (const entry of list.getEntries() as FIDEntry[]) {
           const value = entry.processingStart - entry.startTime;
           const rating = this.getRating('FID', value);
           this.webVitals.FID = { name: 'FID', value, rating, timestamp: Date.now() };
@@ -89,18 +103,22 @@ class PerformanceMonitor {
       logger.warn('Failed to observe FID', { error });
     }
 
-    // Cumulative Layout Shift (CLS)
+    // Cumulative Layout Shift (CLS) — score unitless, log debounced (évite faux "0ms")
     try {
-      let  clsValue= 0;
-      const clsObserver = new PerformanceObserver((list) => {
-        for (const entry of list.getEntries() as any[]) {
-          if (!entry.hadRecentInput) {
+      let clsValue = 0;
+      let clsLogTimer: ReturnType<typeof setTimeout> | null = null;
+      const clsObserver = new PerformanceObserver(list => {
+        for (const entry of list.getEntries() as LayoutShiftEntry[]) {
+          if (!entry.hadRecentInput && typeof entry.value === 'number') {
             clsValue += entry.value;
-            const rating = this.getRating('CLS', clsValue);
-            this.webVitals.CLS = { name: 'CLS', value: clsValue, rating, timestamp: Date.now() };
-            this.logMetric('CLS', clsValue, rating);
           }
         }
+        const rating = this.getRating('CLS', clsValue);
+        this.webVitals.CLS = { name: 'CLS', value: clsValue, rating, timestamp: Date.now() };
+        if (clsLogTimer) clearTimeout(clsLogTimer);
+        clsLogTimer = setTimeout(() => {
+          this.logMetric('CLS', clsValue, rating);
+        }, 1500);
       });
       clsObserver.observe({ entryTypes: ['layout-shift'] });
       this.observers.push(clsObserver);
@@ -110,7 +128,9 @@ class PerformanceMonitor {
 
     // Time to First Byte (TTFB)
     try {
-      const navigationEntry = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+      const navigationEntry = performance.getEntriesByType(
+        'navigation'
+      )[0] as PerformanceNavigationTiming;
       if (navigationEntry) {
         const value = navigationEntry.responseStart - navigationEntry.requestStart;
         const rating = this.getRating('TTFB', value);
@@ -129,7 +149,9 @@ class PerformanceMonitor {
     // Time to Interactive (TTI) - Approximation
     if ('requestIdleCallback' in window) {
       requestIdleCallback(() => {
-        const navigationEntry = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+        const navigationEntry = performance.getEntriesByType(
+          'navigation'
+        )[0] as PerformanceNavigationTiming;
         if (navigationEntry) {
           const value = navigationEntry.domInteractive - navigationEntry.fetchStart;
           const rating = this.getRating('TTI', value);
@@ -144,7 +166,7 @@ class PerformanceMonitor {
    * Obtenir le rating d'une métrique
    */
   private getRating(metric: string, value: number): 'good' | 'needs-improvement' | 'poor' {
-    const  thresholds: Record<string, { good: number; poor: number }> = {
+    const thresholds: Record<string, { good: number; poor: number }> = {
       FCP: { good: 1800, poor: 3000 },
       LCP: { good: 2500, poor: 4000 },
       FID: { good: 100, poor: 300 },
@@ -161,28 +183,42 @@ class PerformanceMonitor {
     return 'poor';
   }
 
+  private formatMetricValue(name: string, value: number): string {
+    if (name === 'CLS') {
+      return value.toFixed(3);
+    }
+    return `${Math.round(value)}ms`;
+  }
+
   /**
    * Logger une métrique
    */
   private logMetric(name: string, value: number, rating: string) {
-    const  metric: PerformanceMetric = {
+    const roundedValue = name === 'CLS' ? value : Math.round(value);
+    const metric: PerformanceMetric = {
       name,
-      value: Math.round(value),
+      value: roundedValue,
       rating: rating as 'good' | 'needs-improvement' | 'poor',
       timestamp: Date.now(),
     };
 
     this.metrics.push(metric);
 
-    // Logger seulement si pas bon
+    const formatted = this.formatMetricValue(name, value);
+
+    if (name === 'CLS' && value < 0.01) {
+      logger.debug(`Performance metric ${name}`, { value: formatted, rating });
+      return;
+    }
+
     if (rating !== 'good') {
       logger.warn(`Performance metric ${name}`, {
-        value: `${Math.round(value)}ms`,
+        value: formatted,
         rating,
       });
     } else {
       logger.debug(`Performance metric ${name}`, {
-        value: `${Math.round(value)}ms`,
+        value: formatted,
         rating,
       });
     }
@@ -193,16 +229,18 @@ class PerformanceMonitor {
    */
   measureAction(name: string, fn: () => void | Promise<void>): void {
     const start = performance.now();
-    
+
     try {
       const result = fn();
       if (result instanceof Promise) {
-        result.then(() => {
-          const duration = performance.now() - start;
-          this.logMetric(name, duration, 'good');
-        }).catch((error) => {
-          logger.error(`Action ${name} failed`, { error, duration: performance.now() - start });
-        });
+        result
+          .then(() => {
+            const duration = performance.now() - start;
+            this.logMetric(name, duration, 'good');
+          })
+          .catch(error => {
+            logger.error(`Action ${name} failed`, { error, duration: performance.now() - start });
+          });
       } else {
         const duration = performance.now() - start;
         this.logMetric(name, duration, 'good');
@@ -244,7 +282,7 @@ class PerformanceMonitor {
       poor: 0,
     };
 
-    this.metrics.forEach((metric) => {
+    this.metrics.forEach(metric => {
       summary[metric.rating]++;
     });
 
@@ -259,13 +297,13 @@ class PerformanceMonitor {
    * Nettoyer les observers
    */
   disconnect() {
-    this.observers.forEach((observer) => observer.disconnect());
+    this.observers.forEach(observer => observer.disconnect());
     this.observers = [];
   }
 }
 
 // Instance singleton
-let  performanceMonitorInstance: PerformanceMonitor | null = null;
+let performanceMonitorInstance: PerformanceMonitor | null = null;
 
 /**
  * Obtenir l'instance du monitor de performance
@@ -290,9 +328,3 @@ export function measurePerformance(name: string, fn: () => void | Promise<void>)
 export function getPerformanceReport() {
   return getPerformanceMonitor().getReport();
 }
-
-
-
-
-
-

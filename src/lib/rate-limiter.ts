@@ -18,6 +18,13 @@ export type RateLimitEndpoint =
   | 'upload'
   | 'search';
 
+export type ServerAuthAction =
+  | 'login'
+  | 'register'
+  | 'reset-password'
+  | 'verify-2fa'
+  | 'resend-verification';
+
 const FAIL_CLOSED_ENDPOINTS: ReadonlySet<RateLimitEndpoint> = new Set(['payment', 'checkout']);
 
 interface RateLimitResponse {
@@ -60,6 +67,99 @@ export function clearRateLimitCache(): void {
   Object.keys(rateLimitCache).forEach(key => {
     delete rateLimitCache[key];
   });
+}
+
+/**
+ * Rate limit auth côté serveur (Edge Function + rate_limit_log).
+ * Autoritaire ; retourne degraded=true si le service est indisponible.
+ */
+export async function checkServerAuthRateLimit(
+  authAction: ServerAuthAction,
+  identifier: string
+): Promise<RateLimitResponse & { degraded?: boolean }> {
+  try {
+    const { data, error } = await supabase.functions.invoke('rate-limiter', {
+      body: {
+        endpoint: 'auth',
+        authAction,
+        identifier: identifier.trim().toLowerCase(),
+        timestamp: Date.now(),
+      },
+    });
+
+    if (error) {
+      const errorStatus =
+        typeof error === 'object' &&
+        error !== null &&
+        'context' in error &&
+        typeof (error as { context?: { status?: number } }).context?.status === 'number'
+          ? (error as { context?: { status?: number } }).context!.status
+          : undefined;
+
+      if (errorStatus === 429) {
+        const errData = (error as { context?: { body?: unknown } }).context?.body;
+        const parsed =
+          errData && typeof errData === 'object'
+            ? (errData as { resetAt?: string; message?: string })
+            : {};
+        return {
+          allowed: false,
+          remaining: 0,
+          limit: 5,
+          resetAt:
+            typeof parsed.resetAt === 'string'
+              ? parsed.resetAt
+              : new Date(Date.now() + 300000).toISOString(),
+          message:
+            typeof parsed.message === 'string'
+              ? parsed.message
+              : 'Trop de tentatives. Réessayez plus tard.',
+          degraded: false,
+        };
+      }
+
+      logger.warn('[AuthRateLimit] Server check failed', { authAction, error: error.message });
+      return {
+        allowed: true,
+        remaining: 5,
+        limit: 5,
+        resetAt: new Date(Date.now() + 60000).toISOString(),
+        degraded: true,
+      };
+    }
+
+    if (data?.error && data?.allowed === false) {
+      return {
+        allowed: false,
+        remaining: typeof data.remaining === 'number' ? data.remaining : 0,
+        limit: typeof data.limit === 'number' ? data.limit : 0,
+        resetAt: typeof data.resetAt === 'string' ? data.resetAt : new Date().toISOString(),
+        message:
+          typeof data.message === 'string'
+            ? data.message
+            : 'Trop de tentatives. Réessayez plus tard.',
+        degraded: Boolean(data.degraded),
+      };
+    }
+
+    return {
+      allowed: Boolean(data?.allowed ?? true),
+      remaining: typeof data?.remaining === 'number' ? data.remaining : 0,
+      resetAt: typeof data?.resetAt === 'string' ? data.resetAt : new Date().toISOString(),
+      limit: typeof data?.limit === 'number' ? data.limit : 100,
+      message: typeof data?.message === 'string' ? data.message : undefined,
+      degraded: false,
+    };
+  } catch (err) {
+    logger.warn('[AuthRateLimit] Server exception', { authAction, err });
+    return {
+      allowed: true,
+      remaining: 5,
+      limit: 5,
+      resetAt: new Date(Date.now() + 60000).toISOString(),
+      degraded: true,
+    };
+  }
 }
 
 /**

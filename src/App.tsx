@@ -1,7 +1,6 @@
 import { HelmetProvider } from 'react-helmet-async';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { QueryClientProvider } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { createIDBPersister } from '@/lib/cache/persister';
 import { BrowserRouter, Routes, useLocation } from 'react-router-dom';
@@ -53,11 +52,7 @@ const AffiliateLinkTracker = lazy(() =>
 const ReferralTracker = lazy(() =>
   import('@/components/referral/ReferralTracker').then(m => ({ default: m.ReferralTracker }))
 );
-const CurrencyRatesInitializer = lazy(() =>
-  import('@/components/currency/CurrencyRatesInitializer').then(m => ({
-    default: m.CurrencyRatesInitializer,
-  }))
-);
+import { DeferredCurrencyRatesInitializer } from '@/components/currency/DeferredCurrencyRatesInitializer';
 const PWAInstallPrompt = lazy(() =>
   import('@/components/mobile/PWAInstallPrompt').then(m => ({ default: m.PWAInstallPrompt }))
 );
@@ -287,7 +282,7 @@ const AppContent = () => {
         <ScrollToTop />
         <Suspense fallback={null}>
           <PerformanceOptimizer />
-          <CurrencyRatesInitializer />
+          <DeferredCurrencyRatesInitializer />
           <Require2FABanner position="top" />
           <AffiliateLinkTracker />
           <ReferralTracker />

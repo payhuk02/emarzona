@@ -1,5 +1,10 @@
 /**
  * Feature flags — orchestration paiements V2
+ *
+ * Production canary (P0-1) :
+ * - `VITE_PAYMENT_ORCHESTRATION_V2=true` + `VITE_PAYMENT_ORCHESTRATION_V2_ROLLOUT=10`
+ * - Preview Vercel : V2 auto si non défini
+ * - Production sans env explicite : V2 activé, rollout 10 % (opt-out via `=false`)
  */
 
 const TRUE_VALUES = new Set(['true', '1', 'yes']);
@@ -26,7 +31,12 @@ function fnv1aHash(input: string): number {
 export function getPaymentOrchestrationV2RolloutPercent(): number {
   const raw = viteEnv('VITE_PAYMENT_ORCHESTRATION_V2_ROLLOUT');
   if (raw === undefined || raw === '') {
-    return isPaymentOrchestrationV2Enabled() ? 100 : 0;
+    if (!isPaymentOrchestrationV2Enabled()) return 0;
+    // Canary 10 % sur Vercel production si rollout non configuré
+    if (viteEnv('VITE_VERCEL_ENV') === 'production') {
+      return 10;
+    }
+    return 100;
   }
   const parsed = Number.parseInt(String(raw), 10);
   if (Number.isNaN(parsed)) return 100;
@@ -41,7 +51,7 @@ export function getPaymentOrchestrationV2RolloutPercent(): number {
  */
 export function isPaymentOrchestrationV2Enabled(): boolean {
   const env = viteEnv('VITE_PAYMENT_ORCHESTRATION_V2');
-  if (env !== undefined) {
+  if (env !== undefined && env !== '') {
     const normalized = String(env).toLowerCase();
     if (FALSE_VALUES.has(normalized)) return false;
     return TRUE_VALUES.has(normalized);
@@ -49,6 +59,11 @@ export function isPaymentOrchestrationV2Enabled(): boolean {
 
   const vercelEnv = viteEnv('VITE_VERCEL_ENV');
   if (vercelEnv === 'preview') return true;
+
+  // P0-1 canary prod : V2 on par défaut sur Vercel production (opt-out explicite)
+  if (vercelEnv === 'production') {
+    return true;
+  }
 
   return false;
 }

@@ -147,25 +147,8 @@ const DashboardWithStore = ({ store, storeLoading }: DashboardWithStoreProps) =>
     }
   }, [showStatsSkeleton, stats]);
 
-  // ✅ PHASE 2: Déferrer les notifications (non-critique pour le premier render)
-  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
-
-  // Activer les notifications après le premier render (déferré)
-  useEffect(() => {
-    // Utiliser requestIdleCallback ou setTimeout pour déferrer
-    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-      requestIdleCallback(
-        () => {
-          setNotificationsEnabled(true);
-        },
-        { timeout: 2000 }
-      );
-    } else {
-      setTimeout(() => {
-        setNotificationsEnabled(true);
-      }, 100);
-    }
-  }, []);
+  /** Notifications après KPI chargés + idle (évite requêtes/realtime au 1er paint). */
+  const notificationsEnabled = useDeferredMount(!showStatsSkeleton && hasStatsData, 2000);
 
   // Refresh session uniquement après le 1er contrôle auth (évite faux positif au mount)
   useEffect(() => {

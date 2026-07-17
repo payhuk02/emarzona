@@ -18,7 +18,8 @@ const report = {
   ok: false,
   timestamp: new Date().toISOString(),
   store_payment_connections_count: null,
-  moneroo_connections: null,
+  geniuspay_connections: null,
+  legacy_moneroo_connections: null,
   rpc_sample_eur: null,
   payment_orchestration_v2_flag: null,
   vite_orchestration_v2: env.VITE_PAYMENT_ORCHESTRATION_V2 ?? null,
@@ -65,12 +66,19 @@ async function verifyViaServiceRole() {
   if (countErr) throw new Error(countErr.message);
   report.store_payment_connections_count = count;
 
-  const { count: monerooCount, error: monerooErr } = await sb
+  const { count: geniuspayCount, error: geniuspayErr } = await sb
+    .from('store_payment_connections')
+    .select('id', { count: 'exact', head: true })
+    .eq('provider', 'geniuspay_platform');
+  if (geniuspayErr) throw new Error(geniuspayErr.message);
+  report.geniuspay_connections = geniuspayCount;
+
+  const { count: legacyMonerooCount, error: legacyErr } = await sb
     .from('store_payment_connections')
     .select('id', { count: 'exact', head: true })
     .eq('provider', 'moneroo_platform');
-  if (monerooErr) throw new Error(monerooErr.message);
-  report.moneroo_connections = monerooCount;
+  if (legacyErr) throw new Error(legacyErr.message);
+  report.legacy_moneroo_connections = legacyMonerooCount;
 
   const { data: stores, error: storeErr } = await sb.from('stores').select('id').limit(1);
   if (storeErr) throw new Error(storeErr.message);
@@ -103,11 +111,17 @@ function verifyViaLinkedSql() {
   const countMatch = countOut.match(/"c":\s*(\d+)/);
   report.store_payment_connections_count = countMatch ? Number(countMatch[1]) : null;
 
-  const monerooOut = runLinkedSql(
+  const geniuspayOut = runLinkedSql(
+    "SELECT count(*)::int AS c FROM public.store_payment_connections WHERE provider = 'geniuspay_platform';"
+  );
+  const geniuspayMatch = geniuspayOut.match(/"c":\s*(\d+)/);
+  report.geniuspay_connections = geniuspayMatch ? Number(geniuspayMatch[1]) : null;
+
+  const legacyOut = runLinkedSql(
     "SELECT count(*)::int AS c FROM public.store_payment_connections WHERE provider = 'moneroo_platform';"
   );
-  const monerooMatch = monerooOut.match(/"c":\s*(\d+)/);
-  report.moneroo_connections = monerooMatch ? Number(monerooMatch[1]) : null;
+  const legacyMatch = legacyOut.match(/"c":\s*(\d+)/);
+  report.legacy_moneroo_connections = legacyMatch ? Number(legacyMatch[1]) : null;
 
   const flagOut = runLinkedSql(
     "SELECT settings FROM public.platform_settings WHERE key = 'payment_orchestration_v2' LIMIT 1;"
@@ -123,7 +137,10 @@ function verifyViaLinkedSql() {
       NULL
     ) AS opts;
   `);
-  report.rpc_sample_eur = rpcOut.includes('moneroo') || rpcOut.includes('providers') ? 'ok' : null;
+  report.rpc_sample_eur =
+    rpcOut.includes('geniuspay') || rpcOut.includes('providers') || rpcOut.includes('stripe')
+      ? 'ok'
+      : null;
   report.via = 'supabase_db_query';
 }
 

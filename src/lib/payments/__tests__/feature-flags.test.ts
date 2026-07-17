@@ -52,8 +52,9 @@ describe('isPaymentOrchestrationV2Enabled', () => {
     expect(getPaymentOrchestrationV2RolloutPercent()).toBe(0);
   });
 
-  it('returns 100 rollout when V2 enabled and rollout unset', () => {
+  it('returns 100 rollout when V2 enabled and rollout unset (non-prod)', () => {
     vi.stubEnv('VITE_PAYMENT_ORCHESTRATION_V2', 'true');
+    vi.stubEnv('VITE_VERCEL_ENV', 'preview');
     expect(getPaymentOrchestrationV2RolloutPercent()).toBe(100);
   });
 
@@ -89,10 +90,17 @@ describe('isPaymentOrchestrationV2Enabled', () => {
     expect(isPaymentOrchestrationV2Enabled()).toBe(false);
   });
 
-  it('returns false when Vercel env is not preview and flag unset', () => {
+  it('returns true on Vercel production when V2 env unset (P0-1 canary default)', () => {
+    vi.unstubAllEnvs();
+    vi.stubEnv('VITE_VERCEL_ENV', 'production');
+    expect(isPaymentOrchestrationV2Enabled()).toBe(true);
+    expect(getPaymentOrchestrationV2RolloutPercent()).toBe(10);
+  });
+
+  it('returns false when Vercel env is not preview/production and flag unset', () => {
     vi.unstubAllEnvs();
     vi.stubEnv('VITE_PAYMENT_ORCHESTRATION_V2', '');
-    vi.stubEnv('VITE_VERCEL_ENV', 'production');
+    vi.stubEnv('VITE_VERCEL_ENV', 'development');
     expect(isPaymentOrchestrationV2Enabled()).toBe(false);
   });
 

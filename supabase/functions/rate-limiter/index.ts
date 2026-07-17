@@ -10,6 +10,8 @@ import {
   getClientIp,
   isFailClosedEndpoint,
   RATE_LIMIT_PRESETS,
+  AUTH_ACTION_PRESETS,
+  buildAuthRateLimitEndpoint,
 } from '../_shared/rate-limit.ts';
 import {
   getProjectRefFromSupabaseUrl,
@@ -97,11 +99,29 @@ serve(async req => {
 
     const body = await req.json();
     endpoint = body.endpoint ?? 'default';
+    const authAction = typeof body.authAction === 'string' ? body.authAction : undefined;
+    const authIdentifier = typeof body.identifier === 'string' ? body.identifier : undefined;
     const userId = body.userId as string | undefined;
     const ip = getClientIp(req);
-    const config = RATE_LIMIT_PRESETS[endpoint] || RATE_LIMIT_PRESETS.default;
 
-    const result = await enforceRateLimit(supabase, ip, endpoint, config, userId);
+    let config = RATE_LIMIT_PRESETS[endpoint] || RATE_LIMIT_PRESETS.default;
+    let rateLimitKey = endpoint;
+    let scopeByEndpointOnly = false;
+
+    if (authAction && authIdentifier) {
+      config = AUTH_ACTION_PRESETS[authAction] || RATE_LIMIT_PRESETS.auth;
+      rateLimitKey = buildAuthRateLimitEndpoint(authAction, authIdentifier);
+      scopeByEndpointOnly = true;
+    }
+
+    const result = await enforceRateLimit(
+      supabase,
+      ip,
+      rateLimitKey,
+      config,
+      userId,
+      { scopeByEndpointOnly }
+    );
 
     const headers = {
       ...corsHeaders,
