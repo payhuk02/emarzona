@@ -12,6 +12,7 @@ import {
 } from '@/components/charts/LazyCharts';
 import { formatLocaleNumber } from '@/lib/i18n/locale-format';
 import { formatFcfa } from '@/lib/format-currency';
+import { cn } from '@/lib/utils';
 
 interface DashboardSalesEvolutionProps {
   data: Array<{

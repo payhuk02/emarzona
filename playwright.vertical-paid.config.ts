@@ -14,7 +14,11 @@ const supabaseAnonKey =
 export default defineConfig({
   globalSetup: './tests/e2e/global-setup-e2e-guard.ts',
   testDir: './tests/e2e',
-  testMatch: ['**/course-paid-enrollment.spec.ts', '**/artist-paid-purchase.spec.ts'],
+  testMatch: [
+    '**/course-paid-enrollment.spec.ts',
+    '**/artist-paid-purchase.spec.ts',
+    '**/mixed-cart-book-pay-confirm.spec.ts',
+  ],
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,

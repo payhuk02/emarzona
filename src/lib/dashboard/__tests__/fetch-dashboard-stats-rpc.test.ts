@@ -54,6 +54,12 @@ describe('parseDashboardStatsRpcPayload', () => {
           pendingReviews: 1,
           ordersToFulfill: 1,
         },
+        webMetrics: {
+          pageViews: 120,
+          previousPeriodPageViews: 80,
+          bounceRate: 42.5,
+          sessionDuration: 95,
+        },
         generatedAt: '2026-06-30T12:00:00.000Z',
         periodDays: 30,
         periodLabel: '30 derniers jours',
@@ -67,6 +73,8 @@ describe('parseDashboardStatsRpcPayload', () => {
     expect(parsed.topProducts).toHaveLength(1);
     expect(parsed.recentOrders[0]?.productTypes).toEqual(['digital']);
     expect(parsed.operational.pendingReviews).toBe(1);
+    expect(parsed.webMetrics?.pageViews).toBe(120);
+    expect(parsed.webMetrics?.bounceRate).toBe(42.5);
     expect(parsed.periodLabel).toBe('30 derniers jours');
   });
 });

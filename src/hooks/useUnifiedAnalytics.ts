@@ -9,6 +9,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useStore } from './useStore';
 import { logger } from '@/lib/logger';
+import { fetchWebMetricsForPeriod } from '@/lib/dashboard/fetch-web-metrics';
 
 export type ProductType = 'digital' | 'physical' | 'service' | 'course' | 'artist';
 export type TimeRange = '7d' | '30d' | '90d' | '1y' | 'all';
@@ -517,44 +518,15 @@ export const useUnifiedAnalytics = (timeRange: TimeRange = '30d') => {
         ? ((totalOrders - previousOrders.length) / previousOrders.length) * 100
         : 0;
 
-      // Agrégation analytics produits (vues, rebond, etc.)
-      const { data: storeProductAnalytics } = await supabase
-        .from('product_analytics')
-        .select(
-          'total_views, total_clicks, total_conversions, bounce_rate, avg_session_duration, returning_visitors'
-        )
-        .eq('store_id', store.id);
+      // Métriques web (période courante — analytics_events + user_sessions)
+      const webMetrics = await fetchWebMetricsForPeriod(store.id, startDate);
+      const pageViews = webMetrics.pageViews;
+      const bounceRate = webMetrics.bounceRate;
+      const averageSessionDuration = webMetrics.sessionDuration;
 
-      let pageViews = 0;
-      let totalClicks = 0;
-      let totalConversions = 0;
-      let bounceWeightedSum = 0;
-      let bounceWeight = 0;
-      let sessionDurationWeightedSum = 0;
-      let sessionDurationWeight = 0;
-      let returningVisitors = 0;
-
-      storeProductAnalytics?.forEach(row => {
-        const views = row.total_views ?? 0;
-        pageViews += views;
-        totalClicks += row.total_clicks ?? 0;
-        totalConversions += row.total_conversions ?? 0;
-        returningVisitors += row.returning_visitors ?? 0;
-
-        if (views > 0 && row.bounce_rate != null) {
-          bounceWeightedSum += row.bounce_rate * views;
-          bounceWeight += views;
-        }
-        if (views > 0 && row.avg_session_duration != null) {
-          sessionDurationWeightedSum += row.avg_session_duration * views;
-          sessionDurationWeight += views;
-        }
-      });
+      const totalConversions = completedOrders.length;
 
       const conversionRate = pageViews > 0 ? (totalConversions / pageViews) * 100 : 0;
-      const bounceRate = bounceWeight > 0 ? bounceWeightedSum / bounceWeight : 0;
-      const averageSessionDuration =
-        sessionDurationWeight > 0 ? sessionDurationWeightedSum / sessionDurationWeight : 0;
 
       const customersWithMultipleOrders = Object.values(customerStats).filter(
         c => c.orders > 1

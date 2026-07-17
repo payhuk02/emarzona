@@ -89,6 +89,7 @@ async function checkViaServiceRole(storeId) {
     'topProducts',
     'recentOrders',
     'operational',
+    'webMetrics',
   ];
   const missing = required.filter(k => !(k in (data ?? {})));
   if (missing.length) {

@@ -172,6 +172,13 @@ export interface RecentOrder {
   productTypes: string[];
 }
 
+export interface DashboardWebMetrics {
+  pageViews: number;
+  previousPeriodPageViews: number;
+  bounceRate: number;
+  sessionDuration: number;
+}
+
 export interface OptimizedDashboardData {
   baseStats: DashboardBaseStats | null;
   ordersStats: DashboardOrdersStats | null;
@@ -180,6 +187,7 @@ export interface OptimizedDashboardData {
   topProducts: TopProduct[];
   recentOrders: RecentOrder[];
   operational: DashboardOperational;
+  webMetrics?: DashboardWebMetrics | null;
   generatedAt: string;
   periodDays: number;
   periodLabel: string;

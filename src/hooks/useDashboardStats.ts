@@ -13,6 +13,7 @@ import {
   fetchDashboardStatsFromRpc,
   isDashboardRpcUnavailableError,
 } from '@/lib/dashboard/fetch-dashboard-stats-rpc';
+import { fetchWebMetricsFromRpc, ZERO_WEB_METRICS } from '@/lib/dashboard/fetch-web-metrics';
 import { transformOptimizedData } from '@/services/dashboardStatsTransform';
 
 export type { DashboardStats, UseDashboardStatsOptions } from '@/types/dashboard-stats';
@@ -488,6 +489,7 @@ async function fetchDashboardStatsFromTables(
     topProducts,
     recentOrders,
     operational,
+    webMetrics: await fetchWebMetricsFromRpc(storeId, range),
     generatedAt: new Date().toISOString(),
     periodDays: range.days,
     periodLabel: range.label,
@@ -499,6 +501,9 @@ async function fetchDashboardStatsFromTables(
 async function fetchDashboardStats(storeId: string, range: PeriodRange): Promise<DashboardStats> {
   try {
     const optimizedData = await fetchDashboardStatsFromRpc(storeId, range);
+    if (!optimizedData.webMetrics) {
+      optimizedData.webMetrics = await fetchWebMetricsFromRpc(storeId, range);
+    }
     return transformOptimizedData(optimizedData);
   } catch (err) {
     const cause =

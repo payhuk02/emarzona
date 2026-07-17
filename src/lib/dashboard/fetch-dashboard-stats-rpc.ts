@@ -17,6 +17,7 @@ import type {
   RecentOrder,
   TopProduct,
 } from '@/types/dashboard-stats';
+import { parseWebMetricsPayload } from '@/lib/dashboard/fetch-web-metrics';
 
 export interface DashboardPeriodRange {
   start: Date;
@@ -171,6 +172,7 @@ export function parseDashboardStatsRpcPayload(
     topProducts: parseTopProducts(root.topProducts),
     recentOrders: parseRecentOrders(root.recentOrders),
     operational: parseOperational(root.operational),
+    webMetrics: root.webMetrics ? parseWebMetricsPayload(root.webMetrics) : null,
     generatedAt: (() => {
       const raw = root.generatedAt;
       if (typeof raw === 'string') return raw;

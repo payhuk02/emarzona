@@ -11,6 +11,7 @@ import type {
   DashboardCustomersStats,
   ProductTypeCount,
 } from '@/types/dashboard-stats';
+import { ZERO_WEB_METRICS } from '@/lib/dashboard/fetch-web-metrics';
 
 const ZERO_BASE: DashboardBaseStats = {
   totalProducts: 0,
@@ -153,6 +154,8 @@ export function transformOptimizedData(data: OptimizedDashboardData): DashboardS
   const completionRate =
     orders.totalOrders > 0 ? Math.round((orders.completedOrders / orders.totalOrders) * 100) : 0;
 
+  const web = data.webMetrics ?? ZERO_WEB_METRICS;
+
   return {
     totalProducts: base.totalProducts,
     activeProducts: base.activeProducts,
@@ -239,9 +242,9 @@ export function transformOptimizedData(data: OptimizedDashboardData): DashboardS
         customers.totalCustomers > 0
           ? Math.round((customers.customersWithOrders / customers.totalCustomers) * 100)
           : 0,
-      pageViews: 0,
-      bounceRate: 0,
-      sessionDuration: 0,
+      pageViews: web.pageViews,
+      bounceRate: web.bounceRate,
+      sessionDuration: web.sessionDuration,
     },
     trends: {
       revenueGrowth: calcGrowth(orders.totalRevenue, prevRevenue),
