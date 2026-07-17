@@ -11,6 +11,7 @@ type UseSidebarNavigationOptions = {
   isPlatformAdmin: boolean;
   showAdminMenu: boolean;
   commerceType?: StoreCommerceType | null;
+  storeMetadata?: Record<string, unknown> | null;
 };
 
 export function useSidebarNavigation({
@@ -18,6 +19,7 @@ export function useSidebarNavigation({
   isPlatformAdmin,
   showAdminMenu,
   commerceType,
+  storeMetadata,
 }: UseSidebarNavigationOptions) {
   const { t } = useTranslation();
   const { isExpertMode } = useProgressiveUX();
@@ -28,12 +30,13 @@ export function useSidebarNavigation({
       persona,
       isPlatformAdmin,
       commerceType,
+      storeMetadata,
       can,
       isSuperAdmin,
       isExpertMode,
       t,
     }),
-    [persona, isPlatformAdmin, commerceType, can, isSuperAdmin, isExpertMode, t]
+    [persona, isPlatformAdmin, commerceType, storeMetadata, can, isSuperAdmin, isExpertMode, t]
   );
 
   const sidebarUserSections = useMemo(

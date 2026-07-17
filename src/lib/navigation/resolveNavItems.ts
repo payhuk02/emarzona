@@ -97,6 +97,7 @@ export type ResolveNavSectionsInput = {
   persona: SidebarPersona;
   isPlatformAdmin: boolean;
   commerceType?: StoreCommerceType | null;
+  storeMetadata?: Record<string, unknown> | null;
   can?: (key: string) => boolean;
   isSuperAdmin?: boolean;
   isExpertMode?: boolean;
@@ -143,6 +144,7 @@ export function resolveNavSections(input: ResolveNavSectionsInput): NavSection[]
   sections = filterSellerNavSectionsByAccess(sections, {
     isPlatformAdmin: input.isPlatformAdmin,
     commerceType: input.commerceType,
+    storeMetadata: input.storeMetadata,
     isExpertMode: input.isExpertMode,
   });
   return t ? translateNavSections(sections, t) : sections;

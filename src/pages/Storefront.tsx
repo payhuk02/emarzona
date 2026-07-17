@@ -31,9 +31,16 @@ import { useStoreSlug } from '@/contexts/StoreSlugContext';
 import { generateStoreUrl, generateProductUrl } from '@/lib/store-utils';
 import { detectSubdomain } from '@/lib/subdomain-detector';
 import { redirectToPlatformLogin } from '@/lib/auth-routes';
+import {
+  resolveStorefrontCommerceType,
+  showStoreLocationInContact,
+} from '@/lib/commerce/store-header-config';
+import { filterStorefrontProducts } from '@/lib/commerce/storefront-catalog';
+import { useStorefrontReviews } from '@/hooks/useStorefrontReviews';
+import { useStoreTrustMetrics } from '@/hooks/useStoreTrustMetrics';
 
 const STOREFRONT_STORE_FIELDS =
-  'id, name, slug, subdomain, description, about, logo_url, banner_url, is_active, custom_domain, domain_status, contact_email, contact_phone, facebook_url, instagram_url, twitter_url, linkedin_url, youtube_url, tiktok_url, pinterest_url, snapchat_url, discord_url, twitch_url, created_at, updated_at, marketing_content, background_color, legal_pages, info_message, info_message_color, info_message_font, address_line1, address_line2, city, state_province, postal_code, country, latitude, longitude, opening_hours';
+  'id, name, slug, subdomain, description, about, logo_url, banner_url, is_active, custom_domain, domain_status, domain_verified_at, contact_email, contact_phone, facebook_url, instagram_url, twitter_url, linkedin_url, youtube_url, tiktok_url, pinterest_url, snapchat_url, discord_url, twitch_url, created_at, updated_at, marketing_content, background_color, legal_pages, info_message, info_message_color, info_message_font, address_line1, address_line2, city, state_province, postal_code, country, latitude, longitude, opening_hours, commerce_type, active_clients, metadata';
 
 const Storefront = () => {
   const { slug: paramSlug } = useParams<{ slug: string }>();
@@ -56,6 +63,8 @@ const Storefront = () => {
 
   // ✅ PERFORMANCE: Preload image hero du store ou logo (potentielle LCP)
   const storeHeroImage = getValue('heroImage') as string | undefined;
+  const storeHeaderTitle = getValue('title') as string | undefined;
+  const storeHeaderSubtitle = getValue('subtitle') as string | undefined;
   const storeLogo = store?.logo_url || undefined;
 
   useLCPPreload({
@@ -72,9 +81,21 @@ const Storefront = () => {
   // Storefront public : requête simple sur `products` (via useStorefrontProducts)
   // pour ne pas dépendre de la RPC d'admin `get_products_management`.
   const { products, isLoading: productsLoading } = useStorefrontProducts(storeId);
-  // Store-wide reviews not implemented yet; keep placeholders to avoid runtime errors
-  const reviews: unknown[] = [];
-  const reviewsLoading = false;
+  const storefrontCommerceType = useMemo(
+    () => resolveStorefrontCommerceType(store, products),
+    [store, products]
+  );
+  const storeMetadata =
+    store?.metadata && typeof store.metadata === 'object'
+      ? (store.metadata as Record<string, unknown>)
+      : null;
+  const catalogProducts = useMemo(
+    () => filterStorefrontProducts(products, storefrontCommerceType, storeMetadata),
+    [products, storefrontCommerceType, storeMetadata]
+  );
+  const showLocationSection = showStoreLocationInContact(storefrontCommerceType);
+  const { data: reviews = [], isLoading: reviewsLoading } = useStorefrontReviews(storeId);
+  const storeTrust = useStoreTrustMetrics(store);
 
   const fetchStore = useCallback(async () => {
     if (!slug) {
@@ -95,11 +116,12 @@ const Storefront = () => {
       let fetchError: unknown = null;
 
       if (isStoreSubdomainContext) {
-        // En contexte sous-domaine, passer par la RPC dédiée.
-        // La vue stores_public n'expose pas toujours `subdomain` selon la version DB.
-        const result = await supabase.rpc('get_store_by_subdomain', {
-          store_subdomain: subdomainInfo.subdomain,
-        });
+        const result = await supabase
+          .from('stores_public')
+          .select(STOREFRONT_STORE_FIELDS)
+          .eq('subdomain', subdomainInfo.subdomain)
+          .eq('is_active', true)
+          .limit(1);
         fetchError = result.error;
         data = (result.data?.[0] as Store | undefined) ?? null;
       } else {
@@ -184,7 +206,7 @@ const Storefront = () => {
 
   const filteredProducts = useMemo(
     () =>
-      products.filter(product => {
+      catalogProducts.filter(product => {
         const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesCategory = category === 'all' || product.category === category;
         const matchesType = productType === 'all' || product.product_type === productType;
@@ -194,17 +216,17 @@ const Storefront = () => {
 
         return matchesSearch && matchesCategory && matchesType && matchesLicense;
       }),
-    [products, searchQuery, category, productType, licensingType]
+    [catalogProducts, searchQuery, category, productType, licensingType]
   );
 
   const categories = useMemo(
-    () => Array.from(new Set(products.map(p => p.category).filter(Boolean))) as string[],
-    [products]
+    () => Array.from(new Set(catalogProducts.map(p => p.category).filter(Boolean))) as string[],
+    [catalogProducts]
   );
 
   const productTypes = useMemo(
-    () => Array.from(new Set(products.map(p => p.product_type).filter(Boolean))) as string[],
-    [products]
+    () => Array.from(new Set(catalogProducts.map(p => p.product_type).filter(Boolean))) as string[],
+    [catalogProducts]
   );
 
   const storeUrl = useMemo(
@@ -409,7 +431,7 @@ const Storefront = () => {
             tiktok_url: store.tiktok_url || undefined,
             pinterest_url: store.pinterest_url || undefined,
             created_at: store.created_at,
-            active_clients: (store as Store & { active_clients?: number }).active_clients,
+            active_clients: storeTrust.activeClients,
             address_line1: store.address_line1 || undefined,
             address_line2: store.address_line2 || undefined,
             city: store.city || undefined,
@@ -448,6 +470,8 @@ const Storefront = () => {
                 {
                   ...store,
                   description: store.description ?? null,
+                  active_clients: storeTrust.activeClients,
+                  is_verified: storeTrust.isVerified,
                 } as unknown as import('@/hooks/useStore').Store & {
                   logo_url?: string;
                   banner_url?: string;
@@ -458,6 +482,10 @@ const Storefront = () => {
                   info_message_font?: string | null;
                 }
               }
+              commerceType={storefrontCommerceType}
+              headerTitle={storeHeaderTitle}
+              headerSubtitle={storeHeaderSubtitle}
+              heroImageUrl={storeHeroImage}
             />
           )}
 
@@ -465,6 +493,7 @@ const Storefront = () => {
             <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
               <StoreTabs
                 store={store}
+                commerceType={storefrontCommerceType}
                 productsContent={
                   <>
                     <ProductFilters
@@ -650,10 +679,8 @@ const Storefront = () => {
                 contactContent={
                   store ? (
                     <div className="space-y-6">
-                      {/* Section Localisation et Horaires */}
-                      <StoreLocationSection store={store} />
+                      {showLocationSection && <StoreLocationSection store={store} />}
 
-                      {/* Formulaire de contact */}
                       <ContactForm
                         storeName={store.name}
                         contactEmail={store.contact_email || undefined}

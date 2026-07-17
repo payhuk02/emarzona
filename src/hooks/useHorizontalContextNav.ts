@@ -17,6 +17,7 @@ export function useHorizontalContextNav() {
   const { selectedStoreId, selectedStore } = useStoreContext();
   const { planSlug } = useStorePhysicalAccess(selectedStoreId);
   const commerceType = selectedStore?.commerce_type;
+  const storeMetadata = selectedStore?.metadata ?? null;
   const persona = resolveHorizontalNavPersona(location.pathname, sidebarPersona);
   const { isExpertMode } = useProgressiveUX();
 
@@ -27,11 +28,22 @@ export function useHorizontalContextNav() {
         isPlatformAdmin: isAdmin,
         physicalPlanSlug: planSlug,
         commerceType,
+        storeMetadata,
         isExpertMode,
         pathname: location.pathname,
         search: location.search,
         t,
       }),
-    [persona, isAdmin, planSlug, commerceType, isExpertMode, location.pathname, location.search, t]
+    [
+      persona,
+      isAdmin,
+      planSlug,
+      commerceType,
+      storeMetadata,
+      isExpertMode,
+      location.pathname,
+      location.search,
+      t,
+    ]
   );
 }

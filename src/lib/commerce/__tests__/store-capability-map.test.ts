@@ -152,4 +152,17 @@ describe('store-capability-map', () => {
     expect(canAccessCommercePath('/products/compare', 'physical')).toBe(true);
     expect(canAccessCommercePath('/products/compare', 'digital')).toBe(false);
   });
+
+  it('gates cross-type bundles to physical and digital (metadata opt-in for others)', () => {
+    expect(canAccessCommercePath('/dashboard/cross-type-bundles', 'physical')).toBe(true);
+    expect(canAccessCommercePath('/dashboard/cross-type-bundles', 'digital')).toBe(true);
+    expect(canAccessCommercePath('/dashboard/cross-type-bundles', 'service')).toBe(false);
+    expect(canAccessCommercePath('/dashboard/cross-type-bundles', 'artist')).toBe(false);
+    expect(
+      canAccessCommercePath('/dashboard/cross-type-bundles', 'course', {
+        storeMetadata: { cross_type_bundles_enabled: true },
+      })
+    ).toBe(true);
+    expect(getRouteCapabilityRule('/dashboard/cross-type-bundles')?.label).toContain('cross-type');
+  });
 });

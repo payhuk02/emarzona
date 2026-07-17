@@ -194,6 +194,7 @@ export interface Store {
   subdomain?: string | null;
   metadata?: Record<string, unknown> | null;
   commerce_type?: StoreCommerceType | null;
+  active_clients?: number | null;
 }
 
 const MAX_STORES_PER_USER = 3;

@@ -24,6 +24,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { SEOMeta } from '@/components/seo/SEOMeta';
 import { useToast } from '@/hooks/use-toast';
 import { CountdownTimer } from '@/components/artist/AuctionCountdownTimer';
+import { isStoreSubdomainContext } from '@/lib/subdomain-store-context';
 import MarketplaceHeader from '@/components/marketplace/MarketplaceHeader';
 import { BuyerDiscoveryPageLayout } from '@/components/layout/BuyerDiscoveryPageLayout';
 
@@ -35,6 +36,7 @@ export default function AuctionsListPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const useAuthenticatedShell = Boolean(user) && !authLoading;
+  const showPlatformHeader = !useAuthenticatedShell && !isStoreSubdomainContext();
   const mainAriaLabel = t('auctions.mainContent', 'Contenu principal des enchères');
 
   const { data: auctions, isLoading } = useActiveAuctions();
@@ -264,7 +266,7 @@ export default function AuctionsListPage() {
         canonical="https://www.emarzona.com/auctions"
       />
       <BuyerDiscoveryPageLayout authenticated={useAuthenticatedShell} mainAriaLabel={mainAriaLabel}>
-        {!useAuthenticatedShell && <MarketplaceHeader />}
+        {showPlatformHeader && <MarketplaceHeader />}
         {auctionsBody}
       </BuyerDiscoveryPageLayout>
     </>

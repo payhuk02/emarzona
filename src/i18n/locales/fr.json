@@ -424,6 +424,10 @@
     },
     "tabs": {
       "products": "Produits",
+      "productsDigital": "Formations",
+      "services": "Services",
+      "courses": "Cours",
+      "artworks": "Œuvres",
       "about": "À propos",
       "reviews": "Avis",
       "contact": "Contact",

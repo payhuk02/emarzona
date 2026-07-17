@@ -133,6 +133,7 @@ export function AppSidebar() {
   } = useStoreContext();
   const { planSlug } = useStorePhysicalAccess(selectedStoreId);
   const commerceType = selectedStore?.commerce_type;
+  const storeMetadata = selectedStore?.metadata ?? null;
   const platformLogo = usePlatformLogo();
   const handlePlanLockedNav = usePlanLockNavAction();
   /** Desktop rail only — mobile drawer always shows labels + icons */
@@ -169,6 +170,7 @@ export function AppSidebar() {
     isPlatformAdmin: isAdmin,
     showAdminMenu,
     commerceType,
+    storeMetadata,
   });
 
   const allCurrentEntries = useMemo(() => flattenNavSections(activeSections), [activeSections]);
@@ -227,8 +229,8 @@ export function AppSidebar() {
       },
     ];
 
-    return actions.filter(action => canAccessCommercePath(action.url, type));
-  }, [t, commerceType]);
+    return actions.filter(action => canAccessCommercePath(action.url, type, { storeMetadata }));
+  }, [t, commerceType, storeMetadata]);
 
   const handlePersonaChange = (next: SidebarPersona) => {
     setPersona(next);

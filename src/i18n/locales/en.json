@@ -391,6 +391,10 @@
     },
     "tabs": {
       "products": "Products",
+      "productsDigital": "Digital products",
+      "services": "Services",
+      "courses": "Courses",
+      "artworks": "Artworks",
       "about": "About",
       "reviews": "Reviews",
       "contact": "Contact",

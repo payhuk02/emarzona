@@ -4,6 +4,7 @@
 
 import type { ReactNode } from 'react';
 import MarketplaceHeader from '@/components/marketplace/MarketplaceHeader';
+import { isStoreSubdomainContext } from '@/lib/subdomain-store-context';
 import { cn } from '@/lib/utils';
 
 export interface ArtistPublicPageShellProps {
@@ -20,9 +21,11 @@ export function ArtistPublicPageShell({
   className,
   hideHeader = false,
 }: ArtistPublicPageShellProps) {
+  const showPlatformHeader = !hideHeader && !isStoreSubdomainContext();
+
   return (
     <div className="min-h-screen bg-background">
-      {!hideHeader && <MarketplaceHeader />}
+      {showPlatformHeader && <MarketplaceHeader />}
       <main
         className={cn(
           bleed ? 'w-full' : 'container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 sm:py-8',

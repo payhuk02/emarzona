@@ -43,12 +43,14 @@ export function filterSellerNavSectionsByAccess(
   options: {
     isPlatformAdmin: boolean;
     commerceType?: StoreCommerceType | null;
+    storeMetadata?: Record<string, unknown> | null;
     isExpertMode?: boolean;
   }
 ): NavSection[] {
   const hidePhysicalOnly =
     options.commerceType != null && !shouldApplyPhysicalPlanGating(options.commerceType);
   const isExpert = options.isExpertMode ?? true; // Par défaut on affiche tout si non fourni
+  const accessOptions = { storeMetadata: options.storeMetadata };
 
   return sections
     .map(section => ({
@@ -60,10 +62,13 @@ export function filterSellerNavSectionsByAccess(
         // 🔒 Filtrage UX Progressive : Masquer les routes complexes si mode "Essentiel"
         if (!isExpert && requiresExpertMode(item.url)) return false;
         const path = getNavItemPath(item.url);
-        if (item.createGroup && !canAccessProductCreateNavPath(path, options.commerceType)) {
+        if (
+          item.createGroup &&
+          !canAccessProductCreateNavPath(path, options.commerceType, accessOptions)
+        ) {
           return false;
         }
-        if (!canAccessCommercePath(path, options.commerceType)) return false;
+        if (!canAccessCommercePath(path, options.commerceType, accessOptions)) return false;
         return true;
       }),
     }))

@@ -113,4 +113,29 @@ describe('commerce sidebar integration', () => {
       expect(paths).not.toContain('/dashboard/physical-products');
     }
   });
+
+  it('excludes cross-type bundles from service, course and artist sidebars', () => {
+    for (const commerceType of ['service', 'course', 'artist'] as const) {
+      const paths = sidebarPathsForType(commerceType);
+      expect(paths).not.toContain('/dashboard/cross-type-bundles');
+    }
+  });
+
+  it('allows cross-type bundles in extended nav for physical and digital stores', () => {
+    const digitalPaths = resolveNavItems({
+      surface: 'command',
+      persona: 'seller',
+      isPlatformAdmin: false,
+      commerceType: 'digital',
+    }).map(item => item.path);
+    const physicalPaths = resolveNavItems({
+      surface: 'command',
+      persona: 'seller',
+      isPlatformAdmin: false,
+      commerceType: 'physical',
+    }).map(item => item.path);
+
+    expect(digitalPaths).toContain('/dashboard/cross-type-bundles');
+    expect(physicalPaths).toContain('/dashboard/cross-type-bundles');
+  });
 });

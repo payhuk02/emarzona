@@ -44,6 +44,7 @@ import {
   fetchCrossTypeBundleWithItems,
 } from '@/lib/bundles/cross-type-bundle-store';
 import { validateCrossTypeBundleLines } from '@/lib/checkout/cross-type-bundle';
+import { hasMultiTypeCatalog } from '@/lib/commerce/cross-type-bundle-access';
 import { getCartProductTypeLabel } from '@/lib/cart/cart-product-type';
 import type { CrossTypeBundleLine } from '@/lib/checkout/cross-type-bundle';
 import type { StoreProductForBundlePicker } from '@/lib/bundles/cross-type-bundle-store';
@@ -82,6 +83,8 @@ export function CrossTypeBundleManager() {
   const typeSummary = useMemo(() => new Set(selected.map(s => s.product_type)), [selected]);
 
   const validation = useMemo(() => validateCrossTypeBundleLines(selected), [selected]);
+
+  const catalogReady = useMemo(() => hasMultiTypeCatalog(products), [products]);
 
   const resetForm = () => {
     setName('');
@@ -157,11 +160,22 @@ export function CrossTypeBundleManager() {
             checkout, le pack se déplie en lignes distinctes pour le fulfillment.
           </p>
         </div>
-        <Button onClick={() => setDialogOpen(true)}>
+        <Button onClick={() => setDialogOpen(true)} disabled={!catalogReady && !productsLoading}>
           <Plus className="h-4 w-4 mr-2" />
           Nouveau pack
         </Button>
       </div>
+
+      {!productsLoading && products != null && !catalogReady && (
+        <Alert>
+          <AlertDescription>
+            Votre catalogue ne contient qu&apos;un seul type de produit. Les packs cross-type
+            exigent au moins deux types (ex. digital + physique). Ajoutez des produits d&apos;un
+            autre type ou contactez le support pour activer le mode multi-verticales sur votre
+            boutique.
+          </AlertDescription>
+        </Alert>
+      )}
 
       <Card>
         <CardHeader>

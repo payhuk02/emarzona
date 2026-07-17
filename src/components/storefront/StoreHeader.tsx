@@ -3,6 +3,13 @@ import { Users } from '@/components/icons';
 import { Check } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { useStoreTheme } from '@/hooks/useStoreTheme';
+import type { StoreCommerceType } from '@/constants/store-commerce-types';
+import {
+  getStoreHeaderProfile,
+  resolveStoreHeroSubtitle,
+} from '@/lib/commerce/store-header-config';
+import { getStoreVerticalProfile } from '@/lib/commerce/store-vertical-config';
+import { StoreHeaderTrustStrip } from '@/components/storefront/StoreHeaderTrustStrip';
 
 interface StoreHeaderProps {
   store: Store & {
@@ -14,12 +21,30 @@ interface StoreHeaderProps {
     info_message_color?: string | null;
     info_message_font?: string | null;
   };
+  commerceType?: StoreCommerceType | null;
+  headerTitle?: string | null;
+  headerSubtitle?: string | null;
+  heroImageUrl?: string | null;
   /** Message informatif optionnel à afficher au-dessus de la bannière (prioritaire sur store.info_message) */
   infoMessage?: React.ReactNode;
 }
 
-const StoreHeader = ({ store, infoMessage }: StoreHeaderProps) => {
+const StoreHeader = ({
+  store,
+  commerceType,
+  headerTitle,
+  headerSubtitle,
+  heroImageUrl,
+  infoMessage,
+}: StoreHeaderProps) => {
   const theme = useStoreTheme(store);
+  const headerProfile = getStoreHeaderProfile(commerceType);
+  const verticalProfile = getStoreVerticalProfile(commerceType);
+  const bannerUrl = heroImageUrl || store.banner_url;
+  const heroSubtitle = resolveStoreHeroSubtitle(commerceType, {
+    customSubtitle: headerSubtitle,
+    storeDescription: store.description,
+  });
 
   // Vérifier si le message existe et n'est pas vide
   const hasInfoMessage =
@@ -72,33 +97,74 @@ const StoreHeader = ({ store, infoMessage }: StoreHeaderProps) => {
       <div
         className="h-64 sm:h-80 md:h-96 lg:h-[28rem] w-full overflow-visible relative"
         style={{
-          background: store.banner_url
+          background: bannerUrl
             ? undefined
             : `linear-gradient(to bottom right, ${theme.primaryColor}33, ${theme.secondaryColor}33, ${theme.accentColor}33)`,
         }}
       >
-        {store.banner_url ? (
+        {bannerUrl ? (
           <>
             <img
-              src={store.banner_url}
+              src={bannerUrl}
               alt={`Bannière de ${store.name}`}
               className="h-full w-full object-cover object-bottom"
               loading="eager"
             />
             {/* Overlay gradient pour meilleure lisibilité */}
-            <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-black/20 to-black/10" />
+            <StoreHeaderTrustStrip
+              trustBadges={headerProfile.trustBadges}
+              valueProps={headerProfile.valueProps}
+            />
+            {(store.name || heroSubtitle) && (
+              <div className="absolute inset-x-0 top-1/3 z-10 -translate-y-1/2 px-4 text-center sm:px-8">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/80 sm:text-sm">
+                  {headerTitle?.trim() && headerTitle.trim() !== 'Boutique'
+                    ? headerTitle.trim()
+                    : verticalProfile.label}
+                </p>
+                <h2
+                  className="mt-1 text-xl font-bold text-white drop-shadow-md sm:text-2xl md:text-3xl lg:text-4xl"
+                  style={{ fontFamily: theme.headingFont }}
+                >
+                  {store.name}
+                </h2>
+                {heroSubtitle && (
+                  <p className="mx-auto mt-2 max-w-2xl text-sm text-white/90 drop-shadow sm:text-base">
+                    {heroSubtitle}
+                  </p>
+                )}
+              </div>
+            )}
           </>
         ) : (
-          <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10">
-            <div className="text-center">
-              <Users className="h-20 w-20 sm:h-24 sm:w-24 md:h-32 md:w-32 text-primary/30 mx-auto mb-3 animate-pulse" />
-              <p className="text-muted-foreground text-sm sm:text-base font-medium">
-                Bannière de la boutique
-              </p>
-              <p className="text-muted-foreground/70 text-xs mt-1">
-                Ajoutez une bannière personnalisée dans les paramètres
-              </p>
+          <div className="relative h-full w-full">
+            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10">
+              <div className="relative z-10 px-4 text-center">
+                <Users className="mx-auto mb-3 h-20 w-20 animate-pulse text-primary/30 sm:h-24 sm:w-24 md:h-32 md:w-32" />
+                <h2
+                  className="text-lg font-bold sm:text-xl md:text-2xl"
+                  style={{ color: theme.textColor, fontFamily: theme.headingFont }}
+                >
+                  {store.name}
+                </h2>
+                {heroSubtitle && (
+                  <p
+                    className="mx-auto mt-2 max-w-xl text-sm sm:text-base"
+                    style={{ color: theme.textSecondaryColor, fontFamily: theme.bodyFont }}
+                  >
+                    {heroSubtitle}
+                  </p>
+                )}
+                <p className="mt-3 text-xs text-muted-foreground sm:text-sm">
+                  Ajoutez une bannière personnalisée dans les paramètres
+                </p>
+              </div>
             </div>
+            <StoreHeaderTrustStrip
+              trustBadges={headerProfile.trustBadges}
+              valueProps={headerProfile.valueProps}
+            />
           </div>
         )}
 
@@ -187,9 +253,3 @@ const StoreHeader = ({ store, infoMessage }: StoreHeaderProps) => {
 };
 
 export default StoreHeader;
-
-
-
-
-
-

@@ -3,6 +3,12 @@ import {
   parseStoreCommerceType,
   PHYSICAL_ONLY_SELLER_PATHS,
 } from '@/lib/billing/store-commerce-access';
+import {
+  CROSS_TYPE_BUNDLE_COMMERCE_TYPES,
+  CROSS_TYPE_BUNDLES_PATH,
+  isCrossTypeBundlesEnabledForStore,
+  isCrossTypeBundlesPath,
+} from '@/lib/commerce/cross-type-bundle-access';
 
 type RouteRule = {
   allowedTypes: readonly StoreCommerceType[];
@@ -52,7 +58,6 @@ const COMMON_SELLER_PATHS = [
   '/dashboard/advanced-orders',
   '/dashboard/ai-chatbot',
   '/dashboard/coupons',
-  '/dashboard/cross-type-bundles',
   '/dashboard/customers',
   '/dashboard/domain',
   '/dashboard/image-studio',
@@ -193,6 +198,11 @@ const ROUTE_CAPABILITY_RULES: readonly RouteRule[] = [
     pathPrefixes: ['/dashboard/gamification'],
   },
   {
+    label: 'Packs cross-type (physical + digital, opt-in autres types)',
+    allowedTypes: [...CROSS_TYPE_BUNDLE_COMMERCE_TYPES],
+    pathPrefixes: [CROSS_TYPE_BUNDLES_PATH],
+  },
+  {
     label: 'Webhooks & automatisations',
     allowedTypes: ['physical', 'digital', 'service', 'course', 'artist'],
     pathPrefixes: ['/dashboard/webhooks'],
@@ -259,12 +269,23 @@ export function isGenericProductCreateChooser(pathname: string): boolean {
   return normalizePath(pathname.split('?')[0]) === '/dashboard/products/new';
 }
 
+export type CanAccessCommercePathOptions = {
+  storeMetadata?: Record<string, unknown> | null;
+};
+
 export function canAccessCommercePath(
   pathname: string,
-  commerceType?: StoreCommerceType | null
+  commerceType?: StoreCommerceType | null,
+  options?: CanAccessCommercePathOptions
 ): boolean {
   if (isGenericProductCreateChooser(pathname)) {
     return false;
+  }
+  if (isCrossTypeBundlesPath(pathname)) {
+    return isCrossTypeBundlesEnabledForStore({
+      commerceType,
+      storeMetadata: options?.storeMetadata,
+    });
   }
   const rule = getRouteCapabilityRule(pathname);
   if (!rule) {
@@ -284,11 +305,12 @@ export function getPrimaryProductCreatePath(commerceType?: StoreCommerceType | n
 /** Sidebar create links: one typed wizard per store; hide generic type chooser. */
 export function canAccessProductCreateNavPath(
   pathname: string,
-  commerceType?: StoreCommerceType | null
+  commerceType?: StoreCommerceType | null,
+  options?: CanAccessCommercePathOptions
 ): boolean {
   const path = normalizePath(pathname.split('?')[0]);
   if (path === '/dashboard/products/new') {
     return false;
   }
-  return canAccessCommercePath(pathname, commerceType);
+  return canAccessCommercePath(pathname, commerceType, options);
 }

@@ -50,7 +50,9 @@ export function SellerRoutePermissionGuard({ children }: SellerRoutePermissionGu
     commerceType !== 'physical' &&
     isPhysicalOnlySellerPath(location.pathname);
   const commerceRule = getRouteCapabilityRule(location.pathname);
-  const commerceTypeBlocked = !canAccessCommercePath(location.pathname, commerceType);
+  const commerceTypeBlocked = !canAccessCommercePath(location.pathname, commerceType, {
+    storeMetadata: store?.metadata ?? null,
+  });
 
   useEffect(() => {
     if (accountSettingsRoute) return;

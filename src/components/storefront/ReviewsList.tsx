@@ -1,13 +1,13 @@
-import { Review } from "@/hooks/useReviews";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import type { StorefrontReviewItem } from '@/hooks/useStorefrontReviews';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Star, User } from '@/components/icons';
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { Skeleton } from "@/components/ui/skeleton";
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface ReviewsListProps {
-  reviews: Review[];
+  reviews: StorefrontReviewItem[];
   loading: boolean;
   storeSlug?: string;
 }
@@ -16,13 +16,11 @@ const ReviewsList = ({ reviews, loading, storeSlug }: ReviewsListProps) => {
   const renderStars = (rating: number) => {
     return (
       <div className="flex items-center gap-0.5">
-        {[1, 2, 3, 4, 5].map((star) => (
+        {[1, 2, 3, 4, 5].map(star => (
           <Star
             key={star}
             className={`h-4 w-4 ${
-              star <= rating
-                ? "fill-primary text-primary"
-                : "fill-muted text-muted"
+              star <= rating ? 'fill-primary text-primary' : 'fill-muted text-muted'
             }`}
           />
         ))}
@@ -33,7 +31,7 @@ const ReviewsList = ({ reviews, loading, storeSlug }: ReviewsListProps) => {
   if (loading) {
     return (
       <div className="space-y-4">
-        {[1, 2, 3].map((i) => (
+        {[1, 2, 3].map(i => (
           <Card key={i} className="bg-card border-border">
             <CardHeader>
               <div className="flex items-start gap-3 sm:gap-4">
@@ -61,7 +59,9 @@ const ReviewsList = ({ reviews, loading, storeSlug }: ReviewsListProps) => {
             <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-muted mx-auto mb-4 flex items-center justify-center">
               <Star className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground" />
             </div>
-            <h3 className="text-lg sm:text-xl font-semibold mb-2 text-foreground">Aucun avis pour le moment</h3>
+            <h3 className="text-lg sm:text-xl font-semibold mb-2 text-foreground">
+              Aucun avis pour le moment
+            </h3>
             <p className="text-sm sm:text-base text-muted-foreground">
               Soyez le premier à laisser un avis sur cette boutique !
             </p>
@@ -73,8 +73,11 @@ const ReviewsList = ({ reviews, loading, storeSlug }: ReviewsListProps) => {
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      {reviews.map((review) => (
-        <Card key={review.id} className="bg-card border-border hover:shadow-medium transition-shadow animate-fade-in">
+      {reviews.map(review => (
+        <Card
+          key={review.id}
+          className="bg-card border-border hover:shadow-medium transition-shadow animate-fade-in"
+        >
           <CardHeader className="pb-3 sm:pb-4">
             <div className="flex items-start gap-3 sm:gap-4">
               <Avatar className="h-10 w-10 sm:h-12 sm:w-12 border-2 border-primary/20">
@@ -82,27 +85,26 @@ const ReviewsList = ({ reviews, loading, storeSlug }: ReviewsListProps) => {
                   <User className="h-5 w-5 sm:h-6 sm:w-6" />
                 </AvatarFallback>
               </Avatar>
-              
+
               <div className="flex-1 min-w-0">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      {renderStars(review.rating)}
-                    </div>
+                    <div className="flex items-center gap-2 mb-1">{renderStars(review.rating)}</div>
                     {review.product && (
                       <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1">
-                        Avis sur <span className="font-medium text-foreground">{review.product.name}</span>
+                        Avis sur{' '}
+                        <span className="font-medium text-foreground">{review.product.name}</span>
                       </p>
                     )}
                   </div>
                   <time className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
-                    {format(new Date(review.created_at), "d MMMM yyyy", { locale: fr })}
+                    {format(new Date(review.created_at), 'd MMMM yyyy', { locale: fr })}
                   </time>
                 </div>
               </div>
             </div>
           </CardHeader>
-          
+
           {review.comment && (
             <CardContent className="pt-0 pb-4 sm:pb-6">
               <p className="text-sm sm:text-base text-foreground whitespace-pre-wrap pl-0 sm:pl-16">
@@ -117,9 +119,3 @@ const ReviewsList = ({ reviews, loading, storeSlug }: ReviewsListProps) => {
 };
 
 export default ReviewsList;
-
-
-
-
-
-
