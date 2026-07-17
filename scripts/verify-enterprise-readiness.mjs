@@ -78,6 +78,24 @@ async function main() {
   }
 
   const shippingProvider = join(root, 'src/lib/shipping/shipping-provider.ts');
+  const enterpriseHotfixMigration = join(
+    root,
+    'supabase/migrations/20260717180000__hotfix_store_has_physical_feature_enterprise.sql'
+  );
+
+  if (existsSync(enterpriseHotfixMigration)) {
+    const sql = readFileSync(enterpriseHotfixMigration, 'utf8');
+    const requiredKeys = ['api.public', 'team.sso', 'audit.export', 'store_uses_physical_ecommerce'];
+    const missing = requiredKeys.filter(k => !sql.includes(k));
+    if (missing.length === 0) {
+      pass('enterprise_feature_keys_migration', 'Hotfix store_has_physical_feature inclut clés Enterprise');
+    } else {
+      fail('enterprise_feature_keys_migration', `Clés manquantes: ${missing.join(', ')}`);
+    }
+  } else {
+    fail('enterprise_feature_keys_migration', 'Migration hotfix 20260717180000 manquante');
+  }
+
   if (existsSync(shippingProvider)) {
     const src = readFileSync(shippingProvider, 'utf8');
     if (src.includes('dhl') && src.includes('fedex')) {
