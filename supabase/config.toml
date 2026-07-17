@@ -8,6 +8,13 @@ verify_jwt = false
 [functions.send-welcome-email]
 verify_jwt = true
 
+# Auth interne x-internal-secret (+ JWT utilisateur en mode restreint)
+[functions.send-email]
+verify_jwt = false
+
+[functions.webhook-delivery]
+verify_jwt = false
+
 [functions.trigger-email-workflows]
 verify_jwt = false
 

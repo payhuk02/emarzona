@@ -13,6 +13,10 @@ import {
 const env = loadSupabaseEnv();
 const url = getSupabaseUrl(env).replace(/\/$/, '');
 const internalSecret = getEdgeInternalSecret(env);
+const anonKey =
+  env.VITE_SUPABASE_ANON_KEY?.trim() ||
+  env.VITE_SUPABASE_PUBLISHABLE_KEY?.trim() ||
+  null;
 const buyerEmail = env.E2E_BUYER_EMAIL?.trim() || null;
 const buyerPassword = env.E2E_BUYER_PASSWORD?.trim() || null;
 
@@ -30,7 +34,11 @@ function setCheck(name, result) {
 async function postJson(path, { headers = {}, body = {} } = {}) {
   const res = await fetch(`${url}/functions/v1/${path}`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...headers },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(anonKey ? { apikey: anonKey, Authorization: `Bearer ${anonKey}` } : {}),
+      ...headers,
+    },
     body: JSON.stringify(body),
   });
   const text = await res.text();
@@ -206,6 +214,7 @@ if (internalSecret) {
     setCheck('send_email_internal_secret', {
       ok: res.status !== 401,
       status: res.status,
+      body: res.json?.error ?? res.json?.message ?? null,
       note: '403/422 Resend acceptable ; 401 interdit',
     });
   } catch (e) {
