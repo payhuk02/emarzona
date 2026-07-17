@@ -3,6 +3,7 @@ import { Users } from '@/components/icons';
 import { Check } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { useStoreTheme } from '@/hooks/useStoreTheme';
+import { cn } from '@/lib/utils';
 
 interface StoreHeaderProps {
   store: Store & {
@@ -14,56 +15,28 @@ interface StoreHeaderProps {
     info_message_color?: string | null;
     info_message_font?: string | null;
   };
-  /** Message informatif optionnel à afficher au-dessus de la bannière (prioritaire sur store.info_message) */
+  /** Conservé pour compatibilité — non affiché dans le header visuel */
   infoMessage?: React.ReactNode;
 }
 
-const StoreHeader = ({ store, infoMessage }: StoreHeaderProps) => {
+const LOGO_SIZE = 'h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 lg:h-28 lg:w-28 xl:h-32 xl:w-32';
+
+const LOGO_OVERLAP = 'h-8 sm:h-10 md:h-12 lg:h-14 xl:h-16';
+
+const StoreHeader = ({ store }: StoreHeaderProps) => {
   const theme = useStoreTheme(store);
 
-  const hasInfoMessage =
-    store?.info_message &&
-    typeof store.info_message === 'string' &&
-    store.info_message.trim().length > 0;
-
-  const headerStyleClass = `store-header-${theme.headerStyle}`;
-
-  const displayMessage =
-    infoMessage ||
-    (hasInfoMessage ? (
-      <div
-        className="border-b px-4 py-3 text-center text-sm"
-        style={{
-          backgroundColor: store.info_message_color
-            ? `${store.info_message_color}15`
-            : 'rgba(59, 130, 246, 0.1)',
-          borderColor: store.info_message_color
-            ? `${store.info_message_color}40`
-            : 'rgba(59, 130, 246, 0.2)',
-          color: store.info_message_color || '#3b82f6',
-          fontFamily: store.info_message_font || 'Inter, sans-serif',
-        }}
-      >
-        {store.info_message}
-      </div>
-    ) : null);
-
   return (
-    <div className="relative">
-      {displayMessage && (
-        <div className="w-full bg-transparent relative z-30">{displayMessage}</div>
-      )}
-
-      {!displayMessage && <div className="h-4 sm:h-6 w-full bg-transparent" aria-hidden="true" />}
-
+    <header className="relative w-full" aria-label={store.name}>
       <div
-        className={`absolute ${infoMessage ? 'top-20 sm:top-24 md:top-28' : 'top-4'} right-4 z-50`}
-      >
-        <LanguageSwitcher variant="outline" showLabel={false} />
-      </div>
-
-      <div
-        className="h-64 sm:h-80 md:h-96 lg:h-[28rem] w-full overflow-visible relative"
+        className={cn(
+          'relative w-full overflow-hidden',
+          'aspect-[2.15/1] min-h-[8.75rem] max-h-[12.5rem]',
+          'sm:aspect-[2.45/1] sm:min-h-[10rem] sm:max-h-[16rem]',
+          'md:aspect-[2.85/1] md:min-h-[11.5rem] md:max-h-[20rem]',
+          'lg:aspect-[3.1/1] lg:max-h-[24rem]',
+          'xl:max-h-[28rem]'
+        )}
         style={{
           background: store.banner_url
             ? undefined
@@ -74,100 +47,72 @@ const StoreHeader = ({ store, infoMessage }: StoreHeaderProps) => {
           <>
             <img
               src={store.banner_url}
-              alt={`Bannière de ${store.name}`}
-              className="h-full w-full object-cover object-bottom"
+              alt=""
+              role="presentation"
+              className="absolute inset-0 h-full w-full object-cover object-center"
               loading="eager"
+              decoding="async"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 1280px"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
+            <div
+              className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/50 via-transparent to-black/10"
+              aria-hidden
+            />
           </>
         ) : (
-          <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10">
-            <div className="text-center">
-              <Users className="h-20 w-20 sm:h-24 sm:w-24 md:h-32 md:w-32 text-primary/30 mx-auto mb-3 animate-pulse" />
-              <p className="text-muted-foreground text-sm sm:text-base font-medium">
-                Bannière de la boutique
-              </p>
-              <p className="text-muted-foreground/70 text-xs mt-1">
-                Ajoutez une bannière personnalisée dans les paramètres
-              </p>
-            </div>
+          <div
+            className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10"
+            aria-hidden
+          >
+            <Users className="h-12 w-12 sm:h-16 sm:w-16 md:h-20 md:w-20 text-primary/25 animate-pulse" />
           </div>
         )}
 
-        <div className="absolute bottom-0 left-3 sm:left-4 md:left-6 lg:left-8 transform translate-y-1/2 z-20">
+        <div className="absolute top-3 right-3 z-30 sm:top-4 sm:right-4">
+          <LanguageSwitcher variant="outline" showLabel={false} />
+        </div>
+
+        <div className="absolute bottom-0 left-3 z-20 translate-y-1/2 sm:left-4 md:left-6 lg:left-8">
           {store.logo_url ? (
             <div className="relative group">
-              <div className="absolute inset-0 rounded-full bg-primary/20 blur-xl scale-110 opacity-50 group-hover:opacity-75 transition-opacity" />
-              <div className="relative h-24 w-24 sm:h-28 sm:w-28 md:h-32 md:w-32 lg:h-36 lg:w-36 rounded-full overflow-hidden border-4 border-background shadow-2xl bg-card ring-4 ring-background/50">
+              <div className="absolute inset-0 scale-110 rounded-full bg-primary/20 opacity-50 blur-xl transition-opacity group-hover:opacity-75" />
+              <div
+                className={cn(
+                  'relative overflow-hidden rounded-full border-[3px] border-background bg-card shadow-xl ring-2 ring-background/60 sm:border-4 sm:ring-4',
+                  LOGO_SIZE
+                )}
+              >
                 <img
                   src={store.logo_url}
-                  alt={`Logo de ${store.name}`}
+                  alt={store.name}
                   className="h-full w-full object-cover"
                   loading="eager"
+                  decoding="async"
                 />
               </div>
               {store.is_verified && (
-                <div className="absolute -bottom-1 -right-1 bg-primary rounded-full p-1.5 border-2 border-background shadow-lg">
-                  <Check className="h-3 w-3 sm:h-4 sm:w-4 text-primary-foreground" />
+                <div className="absolute -bottom-0.5 -right-0.5 rounded-full border-2 border-background bg-primary p-1 shadow-lg sm:-bottom-1 sm:-right-1 sm:p-1.5">
+                  <Check className="h-2.5 w-2.5 text-primary-foreground sm:h-3.5 sm:w-3.5" />
                 </div>
               )}
             </div>
           ) : (
-            <div className="relative h-24 w-24 sm:h-28 sm:w-28 md:h-32 md:w-32 lg:h-36 lg:w-36 rounded-full border-4 border-background shadow-2xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center ring-4 ring-background/50">
-              <Users className="h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 lg:h-20 lg:w-20 text-primary/60" />
+            <div
+              className={cn(
+                'flex items-center justify-center rounded-full border-[3px] border-background bg-gradient-to-br from-primary/20 to-secondary/20 shadow-xl ring-2 ring-background/60 sm:border-4 sm:ring-4',
+                LOGO_SIZE
+              )}
+              aria-hidden
+            >
+              <Users className="h-7 w-7 text-primary/50 sm:h-9 sm:w-9 md:h-11 md:w-11 lg:h-12 lg:w-12" />
             </div>
           )}
         </div>
       </div>
 
-      <div className={`bg-card border-b shadow-soft overflow-hidden relative ${headerStyleClass}`}>
-        <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 py-6 sm:py-8 pt-16 sm:pt-20 md:pt-24 lg:pt-28">
-            <div className="flex-shrink-0 w-24 sm:w-28 md:w-32 lg:w-36" />
-
-            <div className="flex-1 min-w-0 w-full">
-              <h1
-                className="text-xl sm:text-2xl md:text-3xl font-bold mb-2 truncate"
-                style={{
-                  color: theme.textColor,
-                  fontFamily: theme.headingFont,
-                }}
-              >
-                {store.name}
-              </h1>
-              {store.description && (
-                <p
-                  className="text-xs sm:text-sm md:text-base mb-2 line-clamp-2 break-words"
-                  style={{
-                    color: theme.textSecondaryColor,
-                    fontFamily: theme.bodyFont,
-                  }}
-                >
-                  {store.description}
-                </p>
-              )}
-              {store.active_clients !== undefined && store.active_clients > 0 && (
-                <div
-                  className="flex items-center gap-2 text-xs sm:text-sm bg-muted/50 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full inline-flex max-w-fit"
-                  style={{
-                    color: theme.textSecondaryColor,
-                    borderRadius: theme.borderRadius === 'full' ? '9999px' : undefined,
-                  }}
-                >
-                  <Users
-                    className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0"
-                    style={{ color: theme.primaryColor }}
-                  />
-                  <span className="font-medium whitespace-nowrap">
-                    {store.active_clients} clients actifs
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+      {/* Espace pour la moitié inférieure du logo (mobile-first) */}
+      <div className={cn('w-full shrink-0', LOGO_OVERLAP)} aria-hidden />
+    </header>
   );
 };
 
