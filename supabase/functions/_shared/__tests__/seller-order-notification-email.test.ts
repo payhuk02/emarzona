@@ -1,8 +1,4 @@
-import {
-  assertEquals,
-  assertFalse,
-  assertTrue,
-} from 'https://deno.land/std@0.224.0/assert/mod.ts';
+import { assertEquals } from 'https://deno.land/std@0.168.0/testing/asserts.ts';
 import {
   isWithinStoreQuietHours,
   shouldSendSellerNewOrderEmail,
@@ -10,18 +6,18 @@ import {
 
 Deno.test('shouldSendSellerNewOrderEmail allows by default', () => {
   const result = shouldSendSellerNewOrderEmail(null);
-  assertTrue(result.allowed);
+  assertEquals(result.allowed, true);
 });
 
 Deno.test('shouldSendSellerNewOrderEmail respects email_new_order', () => {
   const result = shouldSendSellerNewOrderEmail({ email_new_order: false });
-  assertFalse(result.allowed);
+  assertEquals(result.allowed, false);
   assertEquals(result.reason, 'email_new_order_disabled');
 });
 
 Deno.test('shouldSendSellerNewOrderEmail respects email_enabled', () => {
   const result = shouldSendSellerNewOrderEmail({ email_enabled: false });
-  assertFalse(result.allowed);
+  assertEquals(result.allowed, false);
   assertEquals(result.reason, 'email_disabled');
 });
 
@@ -35,10 +31,10 @@ Deno.test('shouldSendSellerNewOrderEmail blocks non-critical alerts during quiet
     critical_alerts_enabled: false,
   };
 
-  assertTrue(isWithinStoreQuietHours(settings, now));
+  assertEquals(isWithinStoreQuietHours(settings, now), true);
 
-  const result = shouldSendSellerNewOrderEmail(settings, { isCritical: false });
-  assertFalse(result.allowed);
+  const result = shouldSendSellerNewOrderEmail(settings, { isCritical: false, now });
+  assertEquals(result.allowed, false);
   assertEquals(result.reason, 'quiet_hours');
 });
 
@@ -52,8 +48,8 @@ Deno.test('shouldSendSellerNewOrderEmail bypasses quiet hours for critical new o
     critical_alerts_enabled: true,
   };
 
-  assertTrue(isWithinStoreQuietHours(settings, now));
+  assertEquals(isWithinStoreQuietHours(settings, now), true);
 
-  const result = shouldSendSellerNewOrderEmail(settings, { isCritical: true });
-  assertTrue(result.allowed);
+  const result = shouldSendSellerNewOrderEmail(settings, { isCritical: true, now });
+  assertEquals(result.allowed, true);
 });

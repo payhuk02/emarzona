@@ -42,11 +42,11 @@ export function isWithinStoreQuietHours(
   const start = settings.quiet_hours_start || '22:00';
   const end = settings.quiet_hours_end || '08:00';
 
-  const formatter = new Intl.DateTimeFormat('en-GB', {
+  const formatter = new Intl.DateTimeFormat('en-US', {
     timeZone,
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
+    hour: 'numeric',
+    minute: 'numeric',
+    hourCycle: 'h23',
   });
   const parts = formatter.formatToParts(now);
   const hour = Number(parts.find(part => part.type === 'hour')?.value ?? 0);
@@ -65,7 +65,7 @@ export function isWithinStoreQuietHours(
 
 export function shouldSendSellerNewOrderEmail(
   settings: StoreNotificationSettingsRow | null | undefined,
-  options?: { isCritical?: boolean }
+  options?: { isCritical?: boolean; now?: Date }
 ): { allowed: boolean; reason?: string } {
   const merged: StoreNotificationSettingsRow = {
     email_enabled: true,
@@ -83,7 +83,7 @@ export function shouldSendSellerNewOrderEmail(
   }
 
   const isCritical = options?.isCritical ?? true;
-  if (isWithinStoreQuietHours(merged)) {
+  if (isWithinStoreQuietHours(merged, options?.now)) {
     const bypassQuietHours = isCritical && merged.critical_alerts_enabled !== false;
     if (!bypassQuietHours) {
       return { allowed: false, reason: 'quiet_hours' };
