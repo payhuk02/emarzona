@@ -503,7 +503,10 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
           <h3
             id={`product-title-${product.id}`}
             className={cn(
-              'font-semibold leading-tight line-clamp-2 text-white hover:text-primary transition-colors',
+              'font-semibold leading-tight line-clamp-2 transition-colors',
+              isPremiumCard
+                ? 'mp-product-title text-white hover:text-primary'
+                : 'text-white hover:text-primary',
               isCompact ? 'text-sm' : 'text-base sm:text-lg'
             )}
           >
@@ -662,7 +665,12 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
         )}
 
         {/* Info Icons Section */}
-        <div className="flex flex-wrap gap-2 mb-2 text-xs sm:text-sm">
+        <div
+          className={cn(
+            'flex flex-wrap gap-2 mb-2 text-xs sm:text-sm',
+            isPremiumCard && 'mp-product-meta'
+          )}
+        >
           {/* Instant vs Preparation */}
           {product.type === 'digital' ||
           (product.type === 'artist' &&

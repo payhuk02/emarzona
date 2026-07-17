@@ -324,15 +324,48 @@
 .marketplace-premium .mp-product-card .text-gray-600,
 .marketplace-premium .mp-product-card .text-gray-500,
 .marketplace-premium .mp-product-card .text-gray-400,
+.marketplace-premium .mp-product-card .text-gray-300,
 .mp-product-cards-band.landing-premium .mp-product-card .text-gray-600,
 .mp-product-cards-band.landing-premium .mp-product-card .text-gray-500,
-.mp-product-cards-band.landing-premium .mp-product-card .text-gray-400 {
+.mp-product-cards-band.landing-premium .mp-product-card .text-gray-400,
+.mp-product-cards-band.landing-premium .mp-product-card .text-gray-300 {
+  color: var(--lp-text-dim) !important;
+}
+
+.marketplace-premium .mp-product-card .text-muted-foreground,
+.mp-product-cards-band.landing-premium .mp-product-card .text-muted-foreground {
   color: var(--lp-text-dim) !important;
 }
 
 .marketplace-premium .mp-product-card .text-blue-600,
-.mp-product-cards-band.landing-premium .mp-product-card .text-blue-600 {
+.marketplace-premium .mp-product-card .text-blue-400,
+.mp-product-cards-band.landing-premium .mp-product-card .text-blue-600,
+.mp-product-cards-band.landing-premium .mp-product-card .text-blue-400 {
   color: var(--lp-blue-bright) !important;
+}
+
+.marketplace-premium .mp-product-card .text-green-600,
+.marketplace-premium .mp-product-card .text-green-400,
+.mp-product-cards-band.landing-premium .mp-product-card .text-green-600,
+.mp-product-cards-band.landing-premium .mp-product-card .text-green-400 {
+  color: #4ade80 !important;
+}
+
+.marketplace-premium .mp-product-card .text-orange-600,
+.marketplace-premium .mp-product-card .text-yellow-600,
+.mp-product-cards-band.landing-premium .mp-product-card .text-orange-600,
+.mp-product-cards-band.landing-premium .mp-product-card .text-yellow-600 {
+  color: #fb923c !important;
+}
+
+.marketplace-premium .mp-product-card .text-red-600,
+.mp-product-cards-band.landing-premium .mp-product-card .text-red-600 {
+  color: #f87171 !important;
+}
+
+.marketplace-premium .mp-product-card .text-white,
+.mp-product-cards-band.landing-premium .mp-product-card .text-white {
+  color: var(--lp-text-on-dark) !important;
 }
 
 .marketplace-premium .mp-product-card .bg-gray-200,

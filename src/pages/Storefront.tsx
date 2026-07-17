@@ -23,6 +23,7 @@ import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useToast } from '@/hooks/use-toast';
 import { usePageCustomization } from '@/hooks/usePageCustomization';
 import { StoreThemeProvider } from '@/components/storefront/StoreThemeProvider';
+import '@/styles/landing-premium.css';
 import '@/styles/marketplace-premium.css';
 import { StoreAnalyticsScripts } from '@/components/storefront/StoreAnalyticsScripts';
 import type { Store } from '@/hooks/useStores';
@@ -64,8 +65,6 @@ const Storefront = () => {
 
   // ✅ PERFORMANCE: Preload image hero du store ou logo (potentielle LCP)
   const storeHeroImage = getValue('heroImage') as string | undefined;
-  const storeHeaderTitle = getValue('title') as string | undefined;
-  const storeHeaderSubtitle = getValue('subtitle') as string | undefined;
   const storeLogo = store?.logo_url || undefined;
 
   useLCPPreload({
@@ -471,6 +470,7 @@ const Storefront = () => {
                 {
                   ...store,
                   description: store.description ?? null,
+                  banner_url: storeHeroImage || store.banner_url || undefined,
                   active_clients: storeTrust.activeClients,
                   is_verified: storeTrust.isVerified,
                 } as unknown as import('@/hooks/useStore').Store & {
@@ -483,10 +483,6 @@ const Storefront = () => {
                   info_message_font?: string | null;
                 }
               }
-              commerceType={storefrontCommerceType}
-              headerTitle={storeHeaderTitle}
-              headerSubtitle={storeHeaderSubtitle}
-              heroImageUrl={storeHeroImage}
             />
           )}
 
@@ -494,7 +490,6 @@ const Storefront = () => {
             <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
               <StoreTabs
                 store={store}
-                commerceType={storefrontCommerceType}
                 productsContent={
                   <>
                     <ProductFilters
