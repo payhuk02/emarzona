@@ -55,6 +55,7 @@ import {
 import { hasPhysicalFeatureAccess } from '@/lib/billing/physical-plan-capabilities';
 import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/hooks/useStore';
+import { useCatalogCacheInvalidation } from '@/hooks/useCatalogCacheInvalidation';
 import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
 import { createPhysicalProductTx } from '@/lib/products/product-create-rpc';
 import { useStorePhysicalAccess } from '@/hooks/billing/useStorePhysicalAccess';
@@ -183,6 +184,7 @@ export const CreatePhysicalProductWizard = ({
   const storeId = propsStoreId || store?.id;
   const physicalAccess = useStorePhysicalAccess(storeId);
   const { data: planLimits } = useStorePhysicalPlanLimits(storeId);
+  const invalidateCatalog = useCatalogCacheInvalidation();
 
   // Server validation hook
   const {
@@ -950,6 +952,8 @@ export const CreatePhysicalProductWizard = ({
         ),
       });
 
+      invalidateCatalog();
+
       if (onSuccess) {
         onSuccess();
       } else {
@@ -976,6 +980,7 @@ export const CreatePhysicalProductWizard = ({
     onSuccess,
     navigate,
     t,
+    invalidateCatalog,
   ]);
 
   /**

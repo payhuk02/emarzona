@@ -59,6 +59,7 @@ import type {
   ServiceStaffMember,
   ServiceAvailabilitySlot,
 } from '@/types/service-product';
+import { useCatalogCacheInvalidation } from '@/hooks/useCatalogCacheInvalidation';
 import { useQuery } from '@tanstack/react-query';
 
 const PRODUCT_FIELDS =
@@ -248,7 +249,7 @@ const convertToFormData = async (
     timezone: serviceProduct?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
 
     // Staff & Resources
-    requires_staff: serviceProduct?.requires_staff ?? true,
+    requires_staff: serviceProduct?.requires_staff ?? false,
     staff_members: (staffMembers || []).map((staff: Record<string, unknown>) => ({
       id: staff.id as string,
       name: (staff.name as string) || '',
@@ -278,6 +279,7 @@ const convertToFormData = async (
       buffer_time_before: serviceProduct?.buffer_time_before || 0,
       buffer_time_after: serviceProduct?.buffer_time_after || 0,
       advance_booking_days: serviceProduct?.advance_booking_days || 30,
+      max_bookings_per_day: serviceProduct?.max_bookings_per_day ?? undefined,
     },
 
     // Affiliation
@@ -350,6 +352,7 @@ export const EditServiceProductWizard = ({
   const { store: hookStore, loading: storeLoading } = useStore();
   const store = hookStore || (propsStoreId ? { id: propsStoreId } : null);
   const storeId = propsStoreId || store?.id;
+  const invalidateCatalog = useCatalogCacheInvalidation();
 
   // Load existing product with security validation and cache optimisé
   const {
@@ -633,7 +636,7 @@ export const EditServiceProductWizard = ({
         location_address: formData.location_address || null,
         meeting_url: formData.meeting_url || null,
         timezone: formData.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
-        requires_staff: formData.requires_staff ?? true,
+        requires_staff: formData.requires_staff ?? false,
         max_participants: formData.max_participants || 1,
         pricing_type: formData.pricing_type || 'fixed',
         deposit_required: formData.deposit_required || false,
@@ -703,6 +706,7 @@ export const EditServiceProductWizard = ({
         description: 'Le service a été modifié avec succès',
       });
 
+      invalidateCatalog();
       onSuccess?.();
     } catch (error) {
       logger.error('Error updating service product', { error, productId });
@@ -716,7 +720,7 @@ export const EditServiceProductWizard = ({
     } finally {
       setIsSaving(false);
     }
-  }, [formData, productId, store, onSuccess, toast]);
+  }, [formData, productId, store, onSuccess, toast, invalidateCatalog]);
 
   const handleNext = useCallback(async () => {
     const result = await validateStep(currentStep);

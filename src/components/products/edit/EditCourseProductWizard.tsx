@@ -49,6 +49,7 @@ import {
 } from '@/lib/course-wizard-step-validation';
 import { updateFullCourseTx } from '@/lib/products/product-update-rpc';
 import { logger } from '@/lib/logger';
+import { useCatalogCacheInvalidation } from '@/hooks/useCatalogCacheInvalidation';
 import { useQuery } from '@tanstack/react-query';
 import type { CourseSection, CourseLesson, CourseFormData } from '@/types/course-form';
 
@@ -344,6 +345,7 @@ export const EditCourseProductWizard = ({
   const { store: hookStore, loading: storeLoading } = useStore();
   const store = hookStore || (propsStoreId ? { id: propsStoreId } : null);
   const storeId = propsStoreId || store?.id;
+  const invalidateCatalog = useCatalogCacheInvalidation();
 
   // Load existing course with security validation and cache optimisé
   const {
@@ -588,6 +590,7 @@ export const EditCourseProductWizard = ({
         description: 'Le cours a été modifié avec succès',
       });
 
+      invalidateCatalog();
       onSuccess?.();
     } catch (error) {
       logger.error('Error updating course product', { error, productId });
@@ -612,6 +615,7 @@ export const EditCourseProductWizard = ({
     store,
     onSuccess,
     toast,
+    invalidateCatalog,
   ]);
 
   const handleNext = useCallback(async () => {

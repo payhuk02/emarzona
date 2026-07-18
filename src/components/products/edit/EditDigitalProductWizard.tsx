@@ -53,6 +53,7 @@ import type {
   DigitalProductDownloadableFile,
   DigitalProductFAQ,
 } from '@/types/digital-product-form';
+import { useCatalogCacheInvalidation } from '@/hooks/useCatalogCacheInvalidation';
 import { useQuery } from '@tanstack/react-query';
 
 const PRODUCT_FIELDS =
@@ -317,6 +318,7 @@ export const EditDigitalProductWizard = ({
   const { store: hookStore, loading: storeLoading } = useStore();
   const store = hookStore || (propsStoreId ? { id: propsStoreId } : null);
   const storeId = propsStoreId || store?.id;
+  const invalidateCatalog = useCatalogCacheInvalidation();
 
   // Load existing product with security validation and cache optimisé
   const {
@@ -750,6 +752,7 @@ export const EditDigitalProductWizard = ({
         description: 'Le produit a été modifié avec succès',
       });
 
+      invalidateCatalog();
       onSuccess?.();
     } catch (error) {
       logger.error('Error updating digital product', { error, productId });
@@ -763,7 +766,7 @@ export const EditDigitalProductWizard = ({
     } finally {
       setIsSaving(false);
     }
-  }, [formData, productId, store, onSuccess, toast]);
+  }, [formData, productId, store, onSuccess, toast, invalidateCatalog]);
 
   const handleNext = useCallback(async () => {
     const result = await validateStep(currentStep);

@@ -50,6 +50,7 @@ import {
 } from './service-wizard-steps';
 import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/hooks/useStore';
+import { useCatalogCacheInvalidation } from '@/hooks/useCatalogCacheInvalidation';
 import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
 import { createServiceProductTx } from '@/lib/products/product-create-rpc';
 import { createDefaultServiceBookingOptions } from '@/lib/service/default-booking-options';
@@ -188,6 +189,7 @@ export const CreateServiceWizard = ({
 
   // Use props or fallback to hook store
   const storeId = propsStoreId || store?.id;
+  const invalidateCatalog = useCatalogCacheInvalidation();
 
   // Server validation hook
   const {
@@ -980,6 +982,8 @@ export const CreateServiceWizard = ({
         ),
       });
 
+      invalidateCatalog();
+
       // Navigation/callback dans un try-catch séparé pour ne pas masquer le succès
       // Utiliser setTimeout pour s'assurer que le toast de succès est affiché en premier
       setTimeout(() => {
@@ -1062,6 +1066,7 @@ export const CreateServiceWizard = ({
     onSuccess,
     navigate,
     t,
+    invalidateCatalog,
   ]);
 
   /**

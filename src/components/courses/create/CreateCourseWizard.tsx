@@ -43,6 +43,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useCreateFullCourse } from '@/hooks/courses/useCreateFullCourse';
 import { useAuth } from '@/contexts/AuthContext';
 import { useStore } from '@/hooks/useStore';
+import { useCatalogCacheInvalidation } from '@/hooks/useCatalogCacheInvalidation';
 import { logger } from '@/lib/logger';
 import {
   validateCourseWizardPublishSteps,
@@ -140,6 +141,7 @@ export const CreateCourseWizard = ({
 
   // Use props or fallback to hook store
   const storeId = propsStoreId || store?.id;
+  const invalidateCatalog = useCatalogCacheInvalidation();
 
   // Refs for animations
   const headerRef = useScrollAnimation<HTMLDivElement>();
@@ -615,6 +617,8 @@ export const CreateCourseWizard = ({
         description: `"${formData.title}" est maintenant en ligne`,
       });
 
+      invalidateCatalog();
+
       if (onSuccess) {
         onSuccess();
       } else {
@@ -628,6 +632,7 @@ export const CreateCourseWizard = ({
     toast,
     onSuccess,
     navigate,
+    invalidateCatalog,
   ]);
 
   /**

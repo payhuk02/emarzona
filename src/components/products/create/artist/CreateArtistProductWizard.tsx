@@ -56,6 +56,7 @@ const PaymentOptionsForm = lazy(() =>
 );
 import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/hooks/useStore';
+import { useCatalogCacheInvalidation } from '@/hooks/useCatalogCacheInvalidation';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
@@ -129,6 +130,7 @@ const CreateArtistProductWizardComponent = ({
     [hookStore, propsStoreId]
   );
   const storeSlugValue = _storeSlug || hookStore?.slug;
+  const invalidateCatalog = useCatalogCacheInvalidation();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSaving, setIsSaving] = useState(false);
   const [isAutoSaving, setIsAutoSaving] = useState(false);
@@ -499,6 +501,10 @@ const CreateArtistProductWizardComponent = ({
         title: '✅ Succès',
         description: isDraft ? 'Brouillon sauvegardé' : 'Produit artiste créé avec succès',
       });
+
+      if (!isDraft) {
+        invalidateCatalog();
+      }
 
       if (onSuccess) {
         onSuccess();

@@ -53,7 +53,6 @@ import { useStore } from '@/hooks/useStore';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
 import { updatePhysicalProductTx } from '@/lib/products/product-update-rpc';
-import { validateRequiredSteps } from '@/lib/wizard-validation/edit-save-validation';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
@@ -64,10 +63,10 @@ import type {
   PhysicalProductVariant,
 } from '@/types/physical-product';
 import {
-  validateWithZod,
-  getFieldError,
-  physicalProductStep1Schema,
-} from '@/lib/wizard-validation';
+  validatePhysicalWizardPublishSteps,
+  validatePhysicalWizardStep,
+} from '@/lib/physical-wizard-step-validation';
+import { useCatalogCacheInvalidation } from '@/hooks/useCatalogCacheInvalidation';
 import { useQuery } from '@tanstack/react-query';
 
 const PRODUCT_FIELDS =
@@ -408,6 +407,7 @@ export const EditPhysicalProductWizard = ({
   const store = hookStore || (propsStoreId ? { id: propsStoreId } : null);
   const storeId = propsStoreId || store?.id;
   const { data: planLimits } = useStorePhysicalPlanLimits(storeId);
+  const invalidateCatalog = useCatalogCacheInvalidation();
 
   // Load existing product with security validation and cache optimisé
   const {
@@ -467,37 +467,10 @@ export const EditPhysicalProductWizard = ({
 
       switch (step) {
         case 1: {
-          const step1Data = {
-            name: formData.name,
-            slug: formData.slug?.trim() || undefined,
-            short_description: formData.short_description?.trim() || undefined,
-            description: formData.description?.trim() || undefined,
-            price: formData.price,
-          };
-
-          const result = validateWithZod(physicalProductStep1Schema, step1Data);
-
-          if (!result.valid) {
-            const nameError = getFieldError(result.errors, 'name');
-            const priceError = getFieldError(result.errors, 'price');
-            const slugError = getFieldError(result.errors, 'slug');
-            const shortDescriptionError = getFieldError(result.errors, 'short_description');
-            const descriptionError = getFieldError(result.errors, 'description');
-
-            if (nameError) errors.push(nameError);
-            if (priceError) errors.push(priceError);
-            if (slugError) errors.push(slugError);
-            if (shortDescriptionError) errors.push(shortDescriptionError);
-            if (descriptionError) errors.push(descriptionError);
-          }
-
-          if (!formData.images || formData.images.length === 0) {
-            errors.push('Au moins une image est requise');
-          }
-
-          if (errors.length > 0) {
-            setValidationErrors(prev => ({ ...prev, [step]: errors }));
-            return { valid: false, errors };
+          const clientResult = validatePhysicalWizardStep(1, formData);
+          if (!clientResult.valid) {
+            setValidationErrors(prev => ({ ...prev, [step]: clientResult.errors }));
+            return { valid: false, errors: clientResult.errors };
           }
 
           // Server validation
@@ -561,68 +534,13 @@ export const EditPhysicalProductWizard = ({
           return { valid: true, errors: [] };
         }
 
-        case 2: {
-          if (formData.has_variants) {
-            if (!formData.options || formData.options.length === 0) {
-              errors.push('Au moins une option de variante est requise');
-            }
-            if (!formData.variants || formData.variants.length === 0) {
-              errors.push('Au moins une variante est requise');
-            }
-          }
-
-          if (errors.length > 0) {
-            setValidationErrors(prev => ({ ...prev, [step]: errors }));
-            return { valid: false, errors };
-          }
-
-          setValidationErrors(prev => {
-            const newErrors = { ...prev };
-            delete newErrors[step];
-            return newErrors;
-          });
-          return { valid: true, errors: [] };
-        }
-
-        case 3: {
-          if (formData.track_inventory) {
-            if (!formData.sku?.trim()) {
-              errors.push('Le SKU est requis');
-            }
-            if (
-              !formData.has_variants &&
-              (formData.quantity === undefined || formData.quantity < 0)
-            ) {
-              errors.push('La quantité en stock est requise');
-            }
-            if (formData.has_variants && formData.variants?.some(v => v.quantity < 0)) {
-              errors.push('La quantité de chaque variante doit être valide');
-            }
-          }
-
-          if (errors.length > 0) {
-            setValidationErrors(prev => ({ ...prev, [step]: errors }));
-            return { valid: false, errors };
-          }
-
-          setValidationErrors(prev => {
-            const newErrors = { ...prev };
-            delete newErrors[step];
-            return newErrors;
-          });
-          return { valid: true, errors: [] };
-        }
-
+        case 2:
+        case 3:
         case 4: {
-          if (formData.requires_shipping) {
-            if (!formData.weight || formData.weight <= 0) {
-              errors.push('Le poids est requis pour les produits avec expédition');
-            }
-          }
-
-          if (errors.length > 0) {
-            setValidationErrors(prev => ({ ...prev, [step]: errors }));
-            return { valid: false, errors };
+          const clientResult = validatePhysicalWizardStep(step, formData);
+          if (!clientResult.valid) {
+            setValidationErrors(prev => ({ ...prev, [step]: clientResult.errors }));
+            return { valid: false, errors: clientResult.errors };
           }
 
           setValidationErrors(prev => {
@@ -839,6 +757,7 @@ export const EditPhysicalProductWizard = ({
         description: 'Le produit a été modifié avec succès',
       });
 
+      invalidateCatalog();
       onSuccess?.();
     } catch (error) {
       logger.error('Error updating physical product', { error, productId });
@@ -852,7 +771,7 @@ export const EditPhysicalProductWizard = ({
     } finally {
       setIsSaving(false);
     }
-  }, [formData, productId, store, onSuccess, toast, user]);
+  }, [formData, productId, store, onSuccess, toast, user, invalidateCatalog]);
 
   const handleNext = useCallback(async () => {
     const result = await validateStep(currentStep);
@@ -878,26 +797,35 @@ export const EditPhysicalProductWizard = ({
   }, []);
 
   const handleSave = useCallback(async () => {
-    const requiredSteps = [1, 2, 3];
-    if (formData.requires_shipping) {
-      requiredSteps.push(4);
-    }
-
-    const result = await validateRequiredSteps(requiredSteps, validateStep);
-    if (result.valid) {
-      await saveProduct();
-    } else {
-      const errorMessages =
-        result.errors.length > 0
-          ? result.errors.join(', ')
-          : 'Veuillez corriger les erreurs avant de sauvegarder';
+    const publishValidation = validatePhysicalWizardPublishSteps(formData);
+    if (!publishValidation.valid) {
+      if (publishValidation.failedStep) {
+        setCurrentStep(publishValidation.failedStep);
+      }
       toast({
-        title: 'Erreurs de validation',
-        description: errorMessages,
+        title: publishValidation.toastTitle ?? 'Erreurs de validation',
+        description:
+          publishValidation.toastDescription ??
+          publishValidation.errors.join(', ') ??
+          'Veuillez corriger les erreurs avant de sauvegarder',
         variant: 'destructive',
       });
+      return;
     }
-  }, [formData.requires_shipping, validateStep, saveProduct, toast]);
+
+    const serverStep = await validateStep(1);
+    if (!serverStep.valid) {
+      setCurrentStep(1);
+      toast({
+        title: 'Erreurs de validation',
+        description: serverStep.errors.join(', '),
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    await saveProduct();
+  }, [formData, validateStep, saveProduct, toast]);
 
   const getStepProps = useCallback(() => {
     const baseProps = {

@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/hooks/useStore';
+import { useCatalogCacheInvalidation } from '@/hooks/useCatalogCacheInvalidation';
 import { supabase } from '@/integrations/supabase/client';
 import { generateSlug } from '@/lib/store-utils';
 import { logger } from '@/lib/logger';
@@ -233,6 +234,7 @@ export const CreateDigitalProductWizard = ({
 
   // Use props or fallback to hook store
   const storeId = propsStoreId || store?.id;
+  const invalidateCatalog = useCatalogCacheInvalidation();
 
   // Server validation hook
   const {
@@ -1103,6 +1105,8 @@ export const CreateDigitalProductWizard = ({
         description: `"${product.name}" est maintenant en ligne${formData.affiliate?.enabled ? " avec programme d'affiliation activé" : ''}`,
       });
 
+      invalidateCatalog();
+
       if (onSuccess) {
         onSuccess();
       } else {
@@ -1128,6 +1132,7 @@ export const CreateDigitalProductWizard = ({
     navigate,
     storeSlug,
     t,
+    invalidateCatalog,
   ]);
 
   /**
