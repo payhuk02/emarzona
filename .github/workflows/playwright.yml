@@ -30,14 +30,14 @@ jobs:
     
     - name: Setup environment variables
       run: |
-        echo "VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_TEST_URL || secrets.VITE_SUPABASE_URL || 'https://mock.supabase.co' }}" >> $GITHUB_ENV
-        echo "VITE_SUPABASE_PUBLISHABLE_KEY=${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'mock-key' }}" >> $GITHUB_ENV
+        echo "VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL || 'https://mock.supabase.co' }}" >> $GITHUB_ENV
+        echo "VITE_SUPABASE_PUBLISHABLE_KEY=${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'mock-key' }}" >> $GITHUB_ENV
     
     - name: Verify Supabase publishable key format
       run: npm run verify:supabase-keys
       env:
-        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_ci_mock' }}
-        VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_ci_mock' }}
+        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_ci_mock' }}
+        VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_ci_mock' }}
 
     - name: Run Playwright tests
       run: npm run test:e2e:ci
@@ -45,9 +45,9 @@ jobs:
         CI: true
         VITE_PAYMENT_ORCHESTRATION_V2: 'true'
         VITE_PAYMENT_ORCHESTRATION_V2_ROLLOUT: '100'
-        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_TEST_URL || secrets.VITE_SUPABASE_URL || 'https://mock.supabase.co' }}
-        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_ci_mock' }}
-        VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_ci_mock' }}
+        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || 'https://mock.supabase.co' }}
+        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_ci_mock' }}
+        VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_ci_mock' }}
       # ✅ ACTIVÉ: Les tests bloquent maintenant les PR si ils échouent
       # Retirer continue-on-error pour activer les tests en CI/CD
     

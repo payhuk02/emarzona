@@ -23,6 +23,7 @@
  *   npm run setup:commerce-e2e-secret -- --list-projects
  *   E2E_SUPABASE_TEST_PROJECT_REF=<ref> npm run setup:commerce-e2e-secret
  *   npm run setup:commerce-e2e-secret -- --local-only   # skip gh, update .env.e2e.local only
+ *   npm run setup:commerce-e2e-secret -- --mirror-prod-secrets   # CI skip mode (prod URL → verify skips destructive E2E)
  */
 import { execSync, spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
@@ -38,6 +39,7 @@ const PRODUCTION_PROJECT_REF = DEFAULT_PRODUCTION_SUPABASE_PROJECT_REF;
 const args = new Set(process.argv.slice(2));
 const LOCAL_ONLY = args.has('--local-only');
 const LIST_PROJECTS = args.has('--list-projects');
+const MIRROR_PROD_SECRETS = args.has('--mirror-prod-secrets');
 const GH_REPO = process.env.GH_REPO?.trim() || 'payhuk02/emarzona';
 
 const SERVICE_ROLE_SECRET = 'SUPABASE_TEST_SERVICE_ROLE_KEY';
@@ -139,8 +141,16 @@ if (LIST_PROJECTS) {
   process.exit(0);
 }
 
-const PROJECT_REF = resolveE2ECommerceProjectRef();
-assertNonProductionRef(PROJECT_REF);
+const PROJECT_REF = MIRROR_PROD_SECRETS
+  ? PRODUCTION_PROJECT_REF
+  : resolveE2ECommerceProjectRef();
+if (MIRROR_PROD_SECRETS) {
+  console.warn(
+    'Mirror prod mode: TEST secrets will point to production (commerce/wizard E2E stay skipped until a dedicated migrated project is configured).'
+  );
+} else {
+  assertNonProductionRef(PROJECT_REF);
+}
 
 const PROJECT_URL = `https://${PROJECT_REF}.supabase.co`;
 
@@ -230,7 +240,11 @@ const localPath = writeEnvE2eLocal({
   SUPABASE_TEST_SERVICE_ROLE_KEY: serviceKey,
   VITE_SUPABASE_TEST_ANON_KEY: publishableKey,
 });
-console.log(`Local env synced: ${localPath}`);
+if (!MIRROR_PROD_SECRETS) {
+  console.log(`Local env synced: ${localPath}`);
+} else {
+  console.log('Skipped .env.e2e.local sync in mirror prod mode.');
+}
 
 const resolvedRef = extractSupabaseProjectRef(PROJECT_URL);
 if (resolvedRef !== PROJECT_REF) {

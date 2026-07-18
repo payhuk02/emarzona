@@ -119,6 +119,7 @@
     "verify:platform-blog": "node scripts/verify-platform-blog.mjs",
     "setup:commerce-e2e-secret": "node scripts/setup-commerce-e2e-github-secret.mjs",
     "setup:commerce-e2e-secret:list": "node scripts/setup-commerce-e2e-github-secret.mjs --list-projects",
+    "setup:commerce-e2e-secret:mirror-prod": "node scripts/setup-commerce-e2e-github-secret.mjs --mirror-prod-secrets",
     "cleanup:e2e-orphans": "node scripts/cleanup-e2e-orphans.mjs",
     "test:visual": "playwright test visual-regression",
     "test:a11y": "playwright test accessibility",

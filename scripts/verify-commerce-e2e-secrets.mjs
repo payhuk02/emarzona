@@ -162,6 +162,30 @@ if (error) {
   process.exit(1);
 }
 
+const { error: schemaError } = await admin.from('stores').select('id').limit(1);
+const missingEmarzonaSchema =
+  schemaError &&
+  (schemaError.code === 'PGRST205' ||
+    schemaError.code === '42P01' ||
+    /Could not find the table 'public\.stores'/i.test(schemaError.message ?? ''));
+
+if (missingEmarzonaSchema) {
+  const reason =
+    `Project « ${projectRef} » is missing Emarzona schema (public.stores). ` +
+    'Use a dedicated Supabase project with repo migrations applied. ' +
+    'Fix: E2E_SUPABASE_TEST_PROJECT_REF=<emarzona-test-ref> npm run setup:commerce-e2e-secret';
+  if (process.env.CI === 'true') {
+    skipOrFailInCi(reason);
+  }
+  console.error(reason);
+  process.exit(1);
+}
+
+if (schemaError && !['PGRST116', '42501'].includes(schemaError.code ?? '')) {
+  console.error(`Schema probe failed for project ${projectRef}: ${schemaError.message}`);
+  process.exit(1);
+}
+
 try {
   if (isProductionSupabaseUrl(url)) {
     assertSafeE2ESupabaseUrl(url, 'verify-commerce-e2e-secrets');
