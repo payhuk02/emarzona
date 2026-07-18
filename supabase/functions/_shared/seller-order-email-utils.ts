@@ -1,5 +1,8 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { buildCustomerWhatsAppLink } from './physical-order-email-utils.ts';
+import {
+  buildCustomerWhatsAppLink,
+  formatShippingAddress,
+} from './physical-order-email-utils.ts';
 
 export async function buildSellerOrderEmailVariables(
   supabase: SupabaseClient,
@@ -35,13 +38,7 @@ export async function buildSellerOrderEmailVariables(
     customerEmail = order.customer_email;
   }
 
-  const itemMeta = (item.item_metadata as Record<string, unknown> | null) ?? {};
-  const shipping = itemMeta.shipping_address as Record<string, unknown> | undefined;
-  const shippingParts = [
-    shipping?.address,
-    shipping?.city,
-    shipping?.country,
-  ].filter((p): p is string => typeof p === 'string' && p.trim().length > 0);
+  const shippingAddress = formatShippingAddress(order, item);
 
   const { data: config } = await supabase.rpc('get_public_whatsapp_config');
   const clickBase =
@@ -68,7 +65,7 @@ export async function buildSellerOrderEmailVariables(
     total_amount: order.total_amount,
     currency: order.currency ?? 'XOF',
     payment_status: order.payment_status ?? 'pending',
-    shipping_address: shippingParts.length > 0 ? shippingParts.join(', ') : '—',
+    shipping_address: shippingAddress || '—',
     dashboard_link: dashboardUrl,
     whatsapp_customer_link: whatsappCustomerLink ?? '',
   };

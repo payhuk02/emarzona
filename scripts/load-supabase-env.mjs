@@ -10,7 +10,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 export function loadSupabaseEnv() {
   const env = { ...process.env };
 
-  for (const file of ['.env.local', '.env', '.env.e2e.local']) {
+  for (const file of ['.env.local', '.env', '.env.production', '.env.e2e.local']) {
     if (!existsSync(file)) continue;
     const raw = readFileSync(file, 'utf8');
     for (const line of raw.split(/\r?\n/)) {

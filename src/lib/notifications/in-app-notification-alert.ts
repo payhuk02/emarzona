@@ -9,6 +9,8 @@ import { triggerDeviceVibration } from '@/lib/notifications/vibration-patterns';
 export type InAppAlertOptions = {
   /** Jouer le son même si l'onglet est au premier plan (sans notification OS) */
   forceInTabSound?: boolean;
+  /** Ne pas vibrer (ex. vibration déjà gérée par une notification OS) */
+  skipVibration?: boolean;
 };
 
 /**
@@ -33,7 +35,7 @@ export function playInAppNotificationAlert(
     playNotificationSound(soundType, { volumePercent: volume, highContrast });
   }
 
-  if (vibrateOn) {
+  if (vibrateOn && !options.skipVibration) {
     triggerDeviceVibration(preferences?.vibration_intensity, true);
   }
 

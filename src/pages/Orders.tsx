@@ -42,6 +42,7 @@ import { useToast } from '@/hooks/use-toast';
 import { DateRange } from 'react-day-picker';
 import { isWithinInterval, startOfDay, endOfDay } from 'date-fns';
 import { logger } from '@/lib/logger';
+import { SellerPushOptInBanner } from '@/components/notifications/SellerPushOptInBanner';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useDebounce } from '@/hooks/useDebounce';
 import {
@@ -368,6 +369,8 @@ const Orders = () => {
   return (
     <AppPageShell layoutType="orders" mainClassName="overflow-x-hidden">
       <div className={ORDERS_PAGE_CLASS}>
+        {store?.id && <SellerPushOptInBanner className="mb-4" variant="orders" />}
+
         {/* Header - Responsive & Animated */}
         <div
           ref={headerRef}

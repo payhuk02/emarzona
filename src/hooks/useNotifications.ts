@@ -394,6 +394,14 @@ export const useRealtimeNotifications = (options?: { enabled?: boolean }) => {
                 window.location.href = target;
                 notification.close();
               };
+
+              // Son Emarzona en plus du son OS (dual alert)
+              if (shouldPlaySound) {
+                playInAppNotificationAlert(preferences, {
+                  forceInTabSound: true,
+                  skipVibration: true,
+                });
+              }
             } else {
               playInAppNotificationAlert(preferences, { forceInTabSound: true });
             }

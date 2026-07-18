@@ -25,6 +25,7 @@ import { resolveDashboardShellView } from '@/lib/dashboard/dashboard-onboarding-
 import { DashboardErrorHandler } from '@/components/dashboard/DashboardErrorHandler';
 import { DashboardActionCenter } from '@/components/dashboard/DashboardActionCenter';
 import { PhysicalSubscriptionAlert } from '@/components/billing/PhysicalSubscriptionAlert';
+import { SellerPushOptInBanner } from '@/components/notifications/SellerPushOptInBanner';
 import { DashboardNotificationsStrip } from '@/components/dashboard/DashboardNotificationsStrip';
 import '@/styles/dashboard-premium.css';
 
@@ -366,6 +367,8 @@ const DashboardWithStore = ({ store, storeLoading }: DashboardWithStoreProps) =>
         />
 
         {store?.id && <PhysicalSubscriptionAlert storeId={store.id} />}
+
+        {store?.id && <SellerPushOptInBanner className="mb-6" variant="dashboard" />}
 
         {showStatsSkeleton ? (
           <DashboardFullSkeleton />
