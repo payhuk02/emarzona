@@ -548,6 +548,7 @@ const Storefront = () => {
                                 <UnifiedProductCard
                                   product={unifiedProduct}
                                   variant="store"
+                                  productCardStyle={store?.product_card_style ?? undefined}
                                   showAffiliate={true}
                                   showActions={true}
                                   onAction={handleBuyProduct}

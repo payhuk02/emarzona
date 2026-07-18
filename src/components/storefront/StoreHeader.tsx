@@ -27,7 +27,15 @@ const StoreHeader = ({ store }: StoreHeaderProps) => {
   const theme = useStoreTheme(store);
 
   return (
-    <header className="relative w-full" aria-label={store.name}>
+    <header
+      className={cn(
+        'relative w-full',
+        theme.headerStyle === 'minimal' && 'store-header-minimal',
+        theme.headerStyle === 'standard' && 'store-header-standard',
+        theme.headerStyle === 'extended' && 'store-header-extended'
+      )}
+      aria-label={store.name}
+    >
       <div
         className={cn(
           'relative w-full overflow-hidden',

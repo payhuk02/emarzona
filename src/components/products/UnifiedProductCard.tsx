@@ -106,6 +106,7 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
   showActions = true,
   onAction,
   className,
+  productCardStyle,
 }) => {
   const { favorites, toggleFavorite } = useMarketplaceFavorites();
   const isFavorite = favorites.has(product.id);
@@ -261,10 +262,18 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
     affiliateSettings?.affiliate_enabled &&
     (affiliateSettings?.commission_rate || 0) > 0;
 
+  const storeCardStyleClass =
+    variant === 'store' && productCardStyle
+      ? `store-product-card store-product-card-${productCardStyle}`
+      : variant === 'store'
+        ? 'store-product-card'
+        : undefined;
+
   return (
     <Card
       className={cn(
         'group relative flex flex-col h-full',
+        storeCardStyleClass,
         isPremiumCard
           ? 'mp-product-card border-0'
           : 'bg-transparent border border-gray-200 dark:border-gray-700',

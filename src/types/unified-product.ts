@@ -196,6 +196,8 @@ export interface UnifiedProductCardProps {
   showActions?: boolean;
   onAction?: (action: 'view' | 'buy' | 'favorite', product: UnifiedProduct) => void;
   className?: string;
+  /** Style carte produit boutique (minimal | standard | detailed) */
+  productCardStyle?: 'minimal' | 'standard' | 'detailed';
 }
 
 /**

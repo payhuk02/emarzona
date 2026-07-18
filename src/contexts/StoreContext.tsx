@@ -171,7 +171,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       // toutes les boutiques de la plateforme si l'utilisateur est admin
       let query = supabase
         .from('stores')
-        .select('id,name,slug,created_at,updated_at,metadata,commerce_type');
+        .select('id,user_id,name,slug,created_at,updated_at,metadata,commerce_type');
 
       if (memberStoreIds.length > 0) {
         query = query.or(`user_id.eq.${user.id},id.in.(${memberStoreIds.join(',')})`);
@@ -292,15 +292,19 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     await fetchStores();
   }, [fetchStores]);
 
-  // Fonction pour vérifier si l'utilisateur peut créer une boutique
-  const canCreateStore = useCallback(() => {
-    return stores.length < MAX_STORES_PER_USER;
-  }, [stores.length]);
+  // Limite de création : boutiques possédées uniquement (pas les membres invités)
+  const ownedStoreCount = stores.filter(store => store.user_id === user?.id).length;
 
-  // Fonction pour obtenir le nombre de boutiques restantes
+  const canCreateStore = useCallback(() => {
+    if (!user?.id) {
+      return false;
+    }
+    return ownedStoreCount < MAX_STORES_PER_USER;
+  }, [ownedStoreCount, user?.id]);
+
   const getRemainingStores = useCallback(() => {
-    return Math.max(0, MAX_STORES_PER_USER - stores.length);
-  }, [stores.length]);
+    return Math.max(0, MAX_STORES_PER_USER - ownedStoreCount);
+  }, [ownedStoreCount]);
 
   // ✅ FIX: Écouter les changements de localStorage sans dépendances problématiques
   useEffect(() => {

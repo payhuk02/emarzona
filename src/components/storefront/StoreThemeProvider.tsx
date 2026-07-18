@@ -5,8 +5,14 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { useStoreTheme, getBorderRadiusValue, getShadowValue, type StoreTheme } from '@/hooks/useStoreTheme';
+import {
+  useStoreTheme,
+  getBorderRadiusValue,
+  getShadowValue,
+  type StoreTheme,
+} from '@/hooks/useStoreTheme';
 import type { Store } from '@/hooks/useStores';
+import { applyStoreFavicon } from '@/lib/storefront/store-favicon';
 
 interface StoreThemeProviderProps {
   store: Store | null;
@@ -52,6 +58,16 @@ export const StoreThemeProvider = ({ store, children }: StoreThemeProviderProps)
       }
     });
   }, [theme.headingFont, theme.bodyFont]);
+
+  useEffect(() => {
+    document.body.classList.add('store-theme-active');
+    const restoreFavicon = applyStoreFavicon(store);
+
+    return () => {
+      document.body.classList.remove('store-theme-active');
+      restoreFavicon();
+    };
+  }, [store?.id, store?.favicon_url, store?.apple_touch_icon_url, store?.logo_url]);
 
   return <>{children}</>;
 };
@@ -298,10 +314,3 @@ const loadGoogleFont = (fontName: string): void => {
   link.href = `https://fonts.googleapis.com/css2?family=${fontName.replace(/\s+/g, '+')}:wght@400;500;600;700&display=swap`;
   document.head.appendChild(link);
 };
-
-
-
-
-
-
-

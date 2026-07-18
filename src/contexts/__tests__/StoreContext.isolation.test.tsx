@@ -317,5 +317,28 @@ describe('StoreContext Isolation', () => {
       expect(result.current.canCreateStore()).toBe(false);
       expect(result.current.getRemainingStores()).toBe(0);
     });
+
+    it('should allow creation when user only has member stores (not owner)', async () => {
+      const memberOnlyStores = [
+        { id: 'store-1', name: 'Member Store 1', user_id: 'other-user', slug: 'member-1' },
+        { id: 'store-2', name: 'Member Store 2', user_id: 'other-user', slug: 'member-2' },
+        { id: 'store-3', name: 'Member Store 3', user_id: 'other-user', slug: 'member-3' },
+      ];
+
+      mockQuery.order.mockResolvedValue({
+        data: memberOnlyStores,
+        error: null,
+      });
+
+      const { result } = renderHook(() => useStoreContext(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(result.current.stores).toHaveLength(3);
+      expect(result.current.canCreateStore()).toBe(true);
+      expect(result.current.getRemainingStores()).toBe(3);
+    });
   });
 });
