@@ -41,6 +41,7 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
+import { STORE_CREATE_PATH } from '@/lib/store/store-create-path';
 import {
   CreditCard,
   Search,
@@ -390,7 +391,7 @@ export default function Payments() {
               <CardContent className="text-center pt-6">
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                   <Button
-                    onClick={() => navigate('/dashboard/store')}
+                    onClick={() => navigate(STORE_CREATE_PATH)}
                     className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
                   >
                     <Plus className="h-4 w-4 mr-2" />

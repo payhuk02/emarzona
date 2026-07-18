@@ -13,6 +13,7 @@ import { SalesChart } from '@/components/analytics/SalesChart';
 import { TopProducts } from '@/components/analytics/TopProducts';
 import { RecentOrders } from '@/components/analytics/RecentOrders';
 import { UnifiedAnalyticsDashboard } from '@/components/analytics/UnifiedAnalyticsDashboard';
+import { STORE_CREATE_PATH } from '@/lib/store/store-create-path';
 import { FunnelAnalysis } from '@/components/analytics/FunnelAnalysis';
 import { CohortAnalysis } from '@/components/analytics/CohortAnalysis';
 import { logger } from '@/lib/logger';
@@ -95,7 +96,7 @@ const Analytics = () => {
             <CardContent className="pt-6">
               <div className="flex flex-col sm:flex-row gap-3">
                 <Button
-                  onClick={() => navigate('/dashboard/store')}
+                  onClick={() => navigate(STORE_CREATE_PATH)}
                   className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
                 >
                   <Plus className="h-4 w-4 mr-2" />

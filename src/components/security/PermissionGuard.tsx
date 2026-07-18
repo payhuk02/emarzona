@@ -7,6 +7,7 @@ import { Loader2 } from 'lucide-react';
 import { AppPageShell } from '@/components/layout/AppPageShell';
 import { supabase } from '@/integrations/supabase/client';
 import { isPrincipalAdminEmail } from '@/lib/principal-admin';
+import { STORE_CREATE_PATH } from '@/lib/store/store-create-path';
 
 export type RequiredPermission =
   | 'admin'
@@ -32,7 +33,7 @@ const STORE_PERMISSION_RPC: Record<Exclude<RequiredPermission, 'admin'>, string>
   'sales.view': 'orders.view',
 };
 
-const STORE_CREATE_REDIRECT = '/dashboard/settings?tab=store&action=create';
+const STORE_CREATE_REDIRECT = STORE_CREATE_PATH;
 
 async function checkPlatformAdmin(userId: string, email?: string | null): Promise<boolean> {
   if (email && isPrincipalAdminEmail(email)) {

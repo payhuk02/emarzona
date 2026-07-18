@@ -28,6 +28,7 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { useStore } from '@/hooks/useStore';
+import { STORE_CREATE_PATH } from '@/lib/store/store-create-path';
 import type { Store } from '@/hooks/useStore';
 import { useAdvancedPayments } from '@/hooks/useAdvancedPayments';
 import { useOrders } from '@/hooks/useOrders';
@@ -749,7 +750,7 @@ const AdvancedOrderManagement = () => {
             </CardHeader>
             <CardContent className="text-center p-6 sm:p-8 pt-0">
               <Button
-                onClick={() => navigate('/dashboard/store')}
+                onClick={() => navigate(STORE_CREATE_PATH)}
                 className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
               >
                 {t('advancedOrders.noStore.createStore', 'Créer ma boutique')}

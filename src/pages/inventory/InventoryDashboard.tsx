@@ -38,6 +38,7 @@ import {
   useInventoryValue,
 } from '@/hooks/physical/useInventory';
 import { useStore } from '@/hooks/useStore';
+import { STORE_CREATE_PATH } from '@/lib/store/store-create-path';
 import { InventoryTable } from '@/components/inventory/InventoryTable';
 import { InventoryChart } from '@/components/inventory/InventoryChart';
 import { StockAdjustmentDialog } from '@/components/inventory/StockAdjustmentDialog';
@@ -219,7 +220,10 @@ export default function InventoryDashboard() {
             <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground mb-4 sm:mb-6">
               Vous devez créer une boutique avant de gérer l'inventaire.
             </p>
-            <Button onClick={() => navigate('/store')} className="min-h-[44px] text-xs sm:text-sm">
+            <Button
+              onClick={() => navigate(STORE_CREATE_PATH)}
+              className="min-h-[44px] text-xs sm:text-sm"
+            >
               Créer ma boutique
             </Button>
           </CardContent>

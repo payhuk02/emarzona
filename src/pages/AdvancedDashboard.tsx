@@ -39,6 +39,7 @@ import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { logger } from '@/lib/logger';
+import { STORE_CREATE_PATH } from '@/lib/store/store-create-path';
 import { useTranslation } from 'react-i18next';
 
 const AdvancedDashboard = () => {
@@ -172,7 +173,7 @@ const AdvancedDashboard = () => {
         <div className="max-w-3xl mx-auto text-center py-12">
           <h2 className="text-2xl font-bold mb-4">{t('dashboard.welcome')}</h2>
           <p className="text-muted-foreground mb-6">{t('dashboard.createStorePrompt')}</p>
-          <Button onClick={() => navigate('/dashboard/store')} size="lg">
+          <Button onClick={() => navigate(STORE_CREATE_PATH)} size="lg">
             {t('dashboard.createStoreButton')}
           </Button>
         </div>

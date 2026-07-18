@@ -49,6 +49,7 @@ import { useStore } from '@/hooks/useStore';
 import { usePayments, Payment } from '@/hooks/usePayments';
 import { useCustomers, Customer } from '@/hooks/useCustomers';
 import { logger } from '@/lib/logger';
+import { STORE_CREATE_PATH } from '@/lib/store/store-create-path';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useToast } from '@/hooks/use-toast';
@@ -382,7 +383,7 @@ export default function PaymentsCustomers() {
             <Button
               size="sm"
               className="text-xs sm:text-sm"
-              onClick={() => navigate('/dashboard/store')}
+              onClick={() => navigate(STORE_CREATE_PATH)}
             >
               Créer une boutique
             </Button>

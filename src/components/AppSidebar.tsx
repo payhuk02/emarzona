@@ -50,6 +50,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { EmarzonaBrandName } from '@/components/brand/EmarzonaBrandName';
 import { cn } from '@/lib/utils';
+import { STORE_CREATE_PATH } from '@/lib/store/store-create-path';
 import { useToast } from '@/hooks/use-toast';
 import { useAdmin } from '@/hooks/useAdmin';
 import { useStoreContext } from '@/contexts/StoreContext';
@@ -512,7 +513,7 @@ export function AppSidebar() {
                                     <Button
                                       variant="ghost"
                                       size="sm"
-                                      onClick={() => navigate('/dashboard/store')}
+                                      onClick={() => navigate(STORE_CREATE_PATH)}
                                       className={`w-full justify-start ${NAV_LINK_INACTIVE} transition-all duration-200`}
                                     >
                                       <Plus className="h-3 w-3 mr-2" />

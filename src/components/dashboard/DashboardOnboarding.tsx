@@ -4,6 +4,7 @@
  */
 
 import { useNavigate } from 'react-router-dom';
+import { STORE_CREATE_PATH } from '@/lib/store/store-create-path';
 import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useTranslation } from 'react-i18next';
 import { LayoutDashboard, ShoppingBag, Store, User } from 'lucide-react';
@@ -50,7 +51,7 @@ export function DashboardOnboarding() {
                     )}
                   </p>
                   <Button
-                    onClick={() => navigate('/dashboard/settings?tab=store&action=create')}
+                    onClick={() => navigate(STORE_CREATE_PATH)}
                     className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white min-h-[44px] text-sm touch-manipulation gap-2"
                   >
                     <Store className="h-4 w-4" aria-hidden />

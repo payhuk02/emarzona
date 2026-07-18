@@ -37,6 +37,7 @@ import {
   type Shipment,
 } from '@/hooks/shipping/useFedexShipping';
 import { useStore } from '@/hooks/useStore';
+import { STORE_CREATE_PATH } from '@/lib/store/store-create-path';
 import { ShipmentCard } from '@/components/shipping/ShipmentCard';
 import { CreateShipmentDialog } from '@/components/shipping/CreateShipmentDialog';
 import { logger } from '@/lib/logger';
@@ -296,7 +297,7 @@ export default function ShippingDashboard() {
                 Vous devez créer une boutique avant de pouvoir gérer les expéditions.
               </p>
               <Button
-                onClick={() => navigate('/store')}
+                onClick={() => navigate(STORE_CREATE_PATH)}
                 className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
               >
                 Créer ma boutique

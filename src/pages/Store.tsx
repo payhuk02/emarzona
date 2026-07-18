@@ -19,6 +19,7 @@ import StoreDetails from '@/components/store/StoreDetails';
 import { useNavigate, Link } from 'react-router-dom';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { logger } from '@/lib/logger';
+import { STORE_CREATE_PATH } from '@/lib/store/store-create-path';
 
 // Error Boundary local pour capturer les erreurs de rendu du Store
 class StoreErrorBoundary extends Component<
@@ -86,7 +87,7 @@ const Store = () => {
   const headerRef = useScrollAnimation<HTMLDivElement>();
 
   const handleCreateStoreRedirect = useCallback(() => {
-    navigate('/dashboard/settings?tab=store&action=create');
+    navigate(STORE_CREATE_PATH);
   }, [navigate]);
 
   return (

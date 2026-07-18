@@ -50,13 +50,12 @@ import type { StoreCommerceTypeChangeStatus } from '@/hooks/useStoreCommerceType
 import { supabase } from '@/integrations/supabase/client';
 import { parseStoreCommerceType } from '@/lib/billing/store-commerce-access';
 import { getStoreOnboardingPath } from '@/lib/commerce/store-vertical-config';
-import { StoreCreateForm, type StoreCreateFormValues } from '@/components/store/StoreCreateForm';
+import StoreFormWizard from '@/components/store/StoreFormWizard';
 
 export const StoreSettings = ({ action }: { action?: string | null }) => {
   const {
     stores,
     loading: storesLoading,
-    createStore,
     updateStore,
     deleteStore: _deleteStore,
     refetch,
@@ -69,7 +68,6 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('list');
   const [selectedStore, setSelectedStore] = useState<string | null>(null);
-  const [_isCreating, setIsCreating] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [storeToDelete, setStoreToDelete] = useState<{ id: string; name: string } | null>(null);
   const [commerceTypeDraft, setCommerceTypeDraft] = useState<Record<string, StoreCommerceType>>({});
@@ -186,34 +184,6 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
     } finally {
       setSaving(false);
       setPendingCommerceChange(null);
-    }
-  };
-
-  const handleCreateStore = async (values: StoreCreateFormValues) => {
-    try {
-      setSaving(true);
-
-      const createdStore = await createStore({
-        name: values.name.trim(),
-        description: values.description.trim() || null,
-        slug: values.slug,
-        commerce_type: values.commerceType,
-        metadata: {
-          commerce_type: values.commerceType,
-        },
-      });
-
-      await refreshStores();
-
-      const targetPath = getStoreOnboardingPath(createdStore.id, values.commerceType);
-
-      setIsCreating(false);
-      setActiveTab('list');
-      navigate(targetPath);
-    } catch (error) {
-      logger.error('Erreur lors de la création', { error });
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -522,23 +492,12 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
               </AlertDescription>
             </Alert>
           ) : (
-            <Card>
-              <CardHeader>
-                <CardTitle>Créer votre boutique</CardTitle>
-                <CardDescription>
-                  {stores.length > 0
-                    ? `Vous avez ${stores.length} boutique${stores.length > 1 ? 's' : ''}. Vous pouvez créer jusqu'à ${getRemainingStores()} boutique${getRemainingStores() > 1 ? 's' : ''} supplémentaire${getRemainingStores() > 1 ? 's' : ''}.`
-                    : 'Configurez votre boutique pour commencer à vendre vos produits'}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <StoreCreateForm
-                  saving={saving}
-                  onSubmit={handleCreateStore}
-                  onCancel={() => setActiveTab('list')}
-                />
-              </CardContent>
-            </Card>
+            <StoreFormWizard
+              onSuccess={() => {
+                void refreshStores();
+                setActiveTab('list');
+              }}
+            />
           )}
         </TabsContent>
       </Tabs>

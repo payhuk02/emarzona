@@ -26,6 +26,7 @@ import { useStore } from '@/hooks/useStore';
 import { useProductsOptimized } from '@/hooks/useProducts';
 import { useProductManagement } from '@/hooks/useProductManagement';
 import { invalidateCatalogCaches } from '@/lib/cache-invalidation';
+import { STORE_CREATE_PATH } from '@/lib/store/store-create-path';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useIsMobile } from '@/hooks/use-mobile';
 import ProductListView from '@/components/products/ProductListView';
@@ -726,7 +727,7 @@ const Products = () => {
               <CardDescription>{t('products.createStoreDescription')}</CardDescription>
             </CardHeader>
             <CardContent className="text-center">
-              <Button onClick={() => navigate('/dashboard/store')}>
+              <Button onClick={() => navigate(STORE_CREATE_PATH)}>
                 {t('products.createMyStore')}
               </Button>
             </CardContent>

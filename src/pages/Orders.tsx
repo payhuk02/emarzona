@@ -34,6 +34,7 @@ import {
 import { useStore } from '@/hooks/useStore';
 import { useOrders, SortColumn, SortDirection } from '@/hooks/useOrders';
 import { CreateOrderDialog } from '@/components/orders/CreateOrderDialog';
+import { STORE_CREATE_PATH } from '@/lib/store/store-create-path';
 import { OrdersList } from '@/components/orders/OrdersList';
 import { OrderFilters } from '@/components/orders/OrderFilters';
 import { OrdersPagination } from '@/components/orders/OrdersPagination';
@@ -331,7 +332,7 @@ const Orders = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button onClick={() => navigate('/dashboard/store')}>
+              <Button onClick={() => navigate(STORE_CREATE_PATH)}>
                 {t('orders.noStore.createStore', 'Créer une boutique')}
               </Button>
             </CardContent>

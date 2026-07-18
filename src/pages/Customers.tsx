@@ -21,6 +21,7 @@ import { CustomerFilters } from '@/components/customers/CustomerFilters';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useVisibilityAwarePolling } from '@/hooks/useVisibilityAwarePolling';
+import { STORE_CREATE_PATH } from '@/lib/store/store-create-path';
 
 const Customers = () => {
   const navigate = useNavigate();
@@ -109,7 +110,7 @@ const Customers = () => {
             <CardContent className="pt-6">
               <div className="flex flex-col sm:flex-row gap-3">
                 <Button
-                  onClick={() => navigate('/dashboard/store')}
+                  onClick={() => navigate(STORE_CREATE_PATH)}
                   className="min-h-[44px] bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-xs sm:text-sm"
                 >
                   <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
