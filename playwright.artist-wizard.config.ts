@@ -9,12 +9,17 @@ const supabaseAnonKey =
   process.env.VITE_SUPABASE_ANON_KEY ?? process.env.VITE_SUPABASE_PUBLISHABLE_KEY ?? '';
 
 /**
- * E2E wizard artiste (draft RPC + publish) — requires SUPABASE_SERVICE_ROLE_KEY in CI.
+ * E2E wizards produit (artiste, digital, cours) — requires SUPABASE_SERVICE_ROLE_KEY in CI.
  */
 export default defineConfig({
   globalSetup: './tests/e2e/global-setup-e2e-guard.ts',
   testDir: './tests/e2e',
-  testMatch: ['**/artist-product-create-rpc.spec.ts', '**/artist-product-publish.spec.ts'],
+  testMatch: [
+    '**/artist-product-create-rpc.spec.ts',
+    '**/artist-product-publish.spec.ts',
+    '**/digital-product-publish.spec.ts',
+    '**/course-product-publish.spec.ts',
+  ],
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,

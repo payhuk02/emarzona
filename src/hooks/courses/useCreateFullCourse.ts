@@ -1,7 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
 import { logger } from '@/lib/logger';
 import { validateCourseData } from '@/lib/validation/courseSchemas';
 
@@ -118,7 +117,6 @@ interface CreateFullCourseData {
  */
 export const useCreateFullCourse = () => {
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   return useMutation({
     mutationFn: async (data: CreateFullCourseData) => {
@@ -335,10 +333,7 @@ export const useCreateFullCourse = () => {
         duration: 5000,
       });
 
-      // Rediriger vers la page des produits
-      setTimeout(() => {
-        navigate('/dashboard/products');
-      }, 1500);
+      // Redirection gérée par CreateCourseWizard (onSuccess) — pas de navigate ici pour éviter course → /products
     },
     onError: (error: unknown) => {
       const errorMessage = error instanceof Error ? error.message : String(error);

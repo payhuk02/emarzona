@@ -22,6 +22,7 @@ const scripts = {
   'commerce-gating': 'test:e2e:commerce-gating',
   'store-theme': 'test:e2e:store-theme',
   'artist-wizard': 'test:e2e:artist-wizard',
+  'product-wizards': 'test:e2e:product-wizards',
   'vertical-paid': 'test:e2e:vertical-paid',
 };
 

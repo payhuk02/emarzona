@@ -46,6 +46,10 @@ const CreateProduct = () => {
             navigate('/dashboard/artist-products');
           } else if (productType === 'course') {
             navigate('/dashboard/courses');
+          } else if (productType === 'service') {
+            navigate('/dashboard/services');
+          } else if (productType === 'physical') {
+            navigate('/dashboard/physical-products');
           } else {
             navigate('/dashboard/products');
           }

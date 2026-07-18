@@ -195,6 +195,14 @@ const EditProduct = () => {
       navigate('/dashboard/courses');
       return;
     }
+    if (product.product_type === 'service') {
+      navigate('/dashboard/services');
+      return;
+    }
+    if (product.product_type === 'physical') {
+      navigate('/dashboard/physical-products');
+      return;
+    }
     navigate('/dashboard/products');
   };
 
@@ -209,6 +217,14 @@ const EditProduct = () => {
     }
     if (product.product_type === 'course') {
       navigate('/dashboard/courses');
+      return;
+    }
+    if (product.product_type === 'service') {
+      navigate('/dashboard/services');
+      return;
+    }
+    if (product.product_type === 'physical') {
+      navigate('/dashboard/physical-products');
       return;
     }
     navigate('/dashboard/products');

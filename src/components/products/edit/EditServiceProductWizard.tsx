@@ -48,7 +48,10 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
 import { supabase } from '@/integrations/supabase/client';
 import { updateServiceProductTx } from '@/lib/products/product-update-rpc';
-import { validateRequiredSteps } from '@/lib/wizard-validation/edit-save-validation';
+import {
+  validateServiceWizardPublishSteps,
+  validateServiceWizardStep,
+} from '@/lib/service-wizard-step-validation';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import type {
@@ -438,16 +441,10 @@ export const EditServiceProductWizard = ({
 
       switch (step) {
         case 1: {
-          if (!formData.name || formData.name.trim().length < 2) {
-            errors.push('Le nom doit contenir au moins 2 caractères');
-          }
-          if (!formData.price || formData.price <= 0) {
-            errors.push('Le prix doit être supérieur à 0');
-          }
-
-          if (errors.length > 0) {
-            setValidationErrors(prev => ({ ...prev, [step]: errors }));
-            return { valid: false, errors };
+          const clientResult = validateServiceWizardStep(1, formData);
+          if (!clientResult.valid) {
+            setValidationErrors(prev => ({ ...prev, [step]: clientResult.errors }));
+            return { valid: false, errors: clientResult.errors };
           }
 
           // Server validation
@@ -509,25 +506,10 @@ export const EditServiceProductWizard = ({
         }
 
         case 2: {
-          const duration = formData.duration_minutes ?? formData.duration;
-          if (!duration || duration <= 0) {
-            errors.push('La durée du service est requise');
-          }
-          if (formData.location_type === 'on_site' && !formData.location_address?.trim()) {
-            errors.push("L'adresse est requise pour les services sur site");
-          }
-          if (formData.location_type === 'online' && !formData.meeting_url?.trim()) {
-            errors.push("L'URL de réunion est requise pour les services en ligne");
-          }
-          if (!formData.availability_slots || formData.availability_slots.length === 0) {
-            errors.push(
-              'Ajoutez au moins un créneau de disponibilité pour permettre les réservations'
-            );
-          }
-
-          if (errors.length > 0) {
-            setValidationErrors(prev => ({ ...prev, [step]: errors }));
-            return { valid: false, errors };
+          const clientResult = validateServiceWizardStep(2, formData);
+          if (!clientResult.valid) {
+            setValidationErrors(prev => ({ ...prev, [step]: clientResult.errors }));
+            return { valid: false, errors: clientResult.errors };
           }
 
           setValidationErrors(prev => {
@@ -760,21 +742,25 @@ export const EditServiceProductWizard = ({
   }, []);
 
   const handleSave = useCallback(async () => {
-    const result = await validateRequiredSteps([1, 2], validateStep);
-    if (result.valid) {
-      await saveProduct();
-    } else {
+    const publishValidation = validateServiceWizardPublishSteps(formData);
+    if (!publishValidation.valid) {
+      if (publishValidation.failedStep) {
+        setCurrentStep(publishValidation.failedStep);
+      }
       const errorMessages =
-        result.errors.length > 0
-          ? result.errors.join(', ')
+        publishValidation.errors.length > 0
+          ? publishValidation.errors.join(', ')
           : 'Veuillez corriger les erreurs avant de sauvegarder';
       toast({
-        title: 'Erreurs de validation',
-        description: errorMessages,
+        title: publishValidation.toastTitle ?? 'Erreurs de validation',
+        description: publishValidation.toastDescription ?? errorMessages,
         variant: 'destructive',
       });
+      return;
     }
-  }, [validateStep, saveProduct, toast]);
+
+    await saveProduct();
+  }, [formData, saveProduct, toast]);
 
   const getStepProps = useCallback(() => {
     const baseProps = {

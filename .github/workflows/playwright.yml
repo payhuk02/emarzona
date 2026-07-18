@@ -178,7 +178,7 @@ jobs:
         retention-days: 14
 
   test-artist-wizard:
-    name: Artist wizard publish E2E
+    name: Product wizards publish E2E
     timeout-minutes: 30
     runs-on: ubuntu-latest
 
@@ -210,9 +210,9 @@ jobs:
       if: steps.commerce_e2e_secrets.outputs.skipped != 'true'
       run: npx playwright install --with-deps chromium
 
-    - name: Run artist wizard E2E
+    - name: Run product wizards E2E
       if: steps.commerce_e2e_secrets.outputs.skipped != 'true'
-      run: npm run test:e2e:artist-wizard
+      run: npm run test:e2e:product-wizards
       env:
         CI: true
         VITE_SUPABASE_TEST_URL: ${{ secrets.VITE_SUPABASE_TEST_URL }}
@@ -225,7 +225,7 @@ jobs:
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: playwright-artist-wizard-report
+        name: playwright-product-wizards-report
         path: playwright-report/
         retention-days: 14
 

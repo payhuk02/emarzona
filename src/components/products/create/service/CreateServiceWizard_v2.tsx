@@ -911,7 +911,7 @@ export const CreateServiceWizard = ({
       if (onSuccess) {
         onSuccess();
       } else {
-        navigate('/dashboard/products');
+        navigate('/dashboard/services', { replace: true });
       }
     } catch (error) {
       logger.error('Erreur lors de la sauvegarde du brouillon', error);
@@ -987,7 +987,7 @@ export const CreateServiceWizard = ({
           if (onSuccess) {
             onSuccess();
           } else {
-            navigate('/dashboard/products');
+            navigate('/dashboard/services', { replace: true });
           }
         } catch (navigationError) {
           // Logger l'erreur de navigation mais ne PAS afficher d'erreur à l'utilisateur
@@ -999,7 +999,7 @@ export const CreateServiceWizard = ({
           // Navigation de fallback silencieuse après un court délai
           setTimeout(() => {
             try {
-              navigate('/dashboard/products');
+              navigate('/dashboard/services', { replace: true });
             } catch {
               // Ignorer complètement si la navigation échoue encore
             }

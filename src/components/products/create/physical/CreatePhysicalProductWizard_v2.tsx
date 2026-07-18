@@ -891,7 +891,7 @@ export const CreatePhysicalProductWizard = ({
       if (onSuccess) {
         onSuccess();
       } else {
-        navigate('/dashboard/products');
+        navigate('/dashboard/physical-products', { replace: true });
       }
     } catch (error) {
       logger.error('Erreur lors de la sauvegarde du brouillon', error);
@@ -953,7 +953,7 @@ export const CreatePhysicalProductWizard = ({
       if (onSuccess) {
         onSuccess();
       } else {
-        navigate('/dashboard/products');
+        navigate('/dashboard/physical-products', { replace: true });
       }
     } catch (error) {
       logger.error('Erreur lors de la publication', error);
