@@ -1105,10 +1105,7 @@ export const CreateDigitalProductWizard = ({
 
       if (onSuccess) {
         onSuccess();
-      } else if (storeSlug) {
-        navigate(`/${storeSlug}/products/${product.slug}`, { replace: true });
       } else {
-        // Fallback vers la liste des produits digitaux si storeSlug n'est pas disponible
         navigate('/dashboard/digital-products', { replace: true });
       }
     } catch (error: unknown) {

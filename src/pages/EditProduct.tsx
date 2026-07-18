@@ -191,12 +191,24 @@ const EditProduct = () => {
       navigate('/dashboard/digital-products');
       return;
     }
+    if (product.product_type === 'course') {
+      navigate('/dashboard/courses');
+      return;
+    }
     navigate('/dashboard/products');
   };
 
   const handleBack = () => {
     if (product.product_type === 'artist') {
       navigate('/dashboard/artist-products');
+      return;
+    }
+    if (product.product_type === 'digital') {
+      navigate('/dashboard/digital-products');
+      return;
+    }
+    if (product.product_type === 'course') {
+      navigate('/dashboard/courses');
       return;
     }
     navigate('/dashboard/products');

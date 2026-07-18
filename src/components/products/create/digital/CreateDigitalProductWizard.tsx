@@ -1,7 +1,7 @@
 /**
  * Create Digital Product Wizard
  * Date: 27 octobre 2025
- * 
+ *
  * Wizard guidé en 4 étapes pour créer un produit digital
  */
 
@@ -38,12 +38,12 @@ interface DigitalProductData {
   short_description: string;
   category: string;
   image_url: string;
-  
+
   // Pricing
   price: number;
   promotional_price?: number;
   currency: string;
-  
+
   // Files
   main_file_url: string;
   downloadable_files: Array<{
@@ -52,13 +52,13 @@ interface DigitalProductData {
     size: number;
     type: string;
   }>;
-  
+
   // License & Download
   license_type: 'single' | 'multi' | 'unlimited';
   download_limit: number;
   download_expiry_days: number;
   watermark_enabled: boolean;
-  
+
   // Affiliate
   affiliate?: {
     enabled: boolean;
@@ -72,7 +72,7 @@ interface DigitalProductData {
     require_approval: boolean;
     terms_and_conditions: string;
   };
-  
+
   // Metadata
   product_type: 'digital';
   is_active: boolean;
@@ -82,7 +82,7 @@ const STEPS = [
   { id: 1, name: 'Informations', description: 'Nom, description, prix' },
   { id: 2, name: 'Fichiers', description: 'Upload et gestion' },
   { id: 3, name: 'Configuration', description: 'Licensing et téléchargements' },
-  { id: 4, name: 'Affiliation', description: 'Programme d\'affiliation (optionnel)' },
+  { id: 4, name: 'Affiliation', description: "Programme d'affiliation (optionnel)" },
   { id: 5, name: 'Prévisualisation', description: 'Vérifier et publier' },
 ];
 
@@ -96,7 +96,7 @@ export const CreateDigitalProductWizard = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-  
+
   const [formData, setFormData] = useState<Partial<DigitalProductData>>({
     name: '',
     slug: '',
@@ -217,14 +217,15 @@ export const CreateDigitalProductWizard = ({
       if (productError) throw productError;
 
       // 2. Calculate total file size
-      const totalSizeMB = formData.downloadable_files?.reduce((sum, file) => {
-        return sum + (file.size / (1024 * 1024)); // Convert bytes to MB
-      }, 0) || 0;
+      const totalSizeMB =
+        formData.downloadable_files?.reduce((sum, file) => {
+          return sum + file.size / (1024 * 1024); // Convert bytes to MB
+        }, 0) || 0;
 
       // Get main file info
       const mainFile = formData.downloadable_files?.[0];
-      const mainFileFormat = mainFile?.type?.split('/')[1] || 
-                             mainFile?.name?.split('.').pop() || 'unknown';
+      const mainFileFormat =
+        mainFile?.type?.split('/')[1] || mainFile?.name?.split('.').pop() || 'unknown';
 
       // 3. Create digital_product (with CORRECT columns)
       const { data: digitalProduct, error: digitalError } = await supabase
@@ -234,10 +235,14 @@ export const CreateDigitalProductWizard = ({
           digital_type: 'other', // Can be configured based on product category
           license_type: formData.license_type || 'single',
           license_duration_days: formData.download_expiry_days || null,
-          max_activations: formData.license_type === 'unlimited' ? -1 : 
-                          formData.license_type === 'multi' ? formData.download_limit : 1,
+          max_activations:
+            formData.license_type === 'unlimited'
+              ? -1
+              : formData.license_type === 'multi'
+                ? formData.download_limit
+                : 1,
           main_file_url: formData.main_file_url || '',
-          main_file_size_mb: mainFile ? (mainFile.size / (1024 * 1024)) : 0,
+          main_file_size_mb: mainFile ? mainFile.size / (1024 * 1024) : 0,
           main_file_format: mainFileFormat,
           total_size_mb: totalSizeMB,
           download_limit: formData.download_limit || 5,
@@ -255,13 +260,13 @@ export const CreateDigitalProductWizard = ({
       if (formData.downloadable_files && formData.downloadable_files.length > 0 && digitalProduct) {
         const filesData = formData.downloadable_files.map((file, index) => ({
           digital_product_id: digitalProduct.id, // ✅ Use digital_product.id, NOT product.id
-          name: file.name,                        // ✅ Correct column name
+          name: file.name, // ✅ Correct column name
           file_url: file.url,
           file_type: file.type,
           file_size_mb: file.size / (1024 * 1024), // ✅ Convert to MB
-          order_index: index,                      // ✅ Correct column name  
-          is_main: index === 0,                    // First file as main
-          is_preview: index === 0,                 // First file as preview
+          order_index: index, // ✅ Correct column name
+          is_main: index === 0, // First file as main
+          is_preview: index === 0, // First file as preview
           requires_purchase: true,
           version: '1.0',
         }));
@@ -278,22 +283,20 @@ export const CreateDigitalProductWizard = ({
 
       // 5. Create affiliate settings if enabled
       if (formData.affiliate && formData.affiliate.enabled) {
-        const { error: affiliateError } = await supabase
-          .from('product_affiliate_settings')
-          .insert({
-            product_id: product.id,
-            store_id: storeId,
-            affiliate_enabled: formData.affiliate.enabled,
-            commission_rate: formData.affiliate.commission_rate,
-            commission_type: formData.affiliate.commission_type,
-            fixed_commission_amount: formData.affiliate.fixed_commission_amount,
-            cookie_duration_days: formData.affiliate.cookie_duration_days,
-            max_commission_per_sale: formData.affiliate.max_commission_per_sale,
-            min_order_amount: formData.affiliate.min_order_amount,
-            allow_self_referral: formData.affiliate.allow_self_referral,
-            require_approval: formData.affiliate.require_approval,
-            terms_and_conditions: formData.affiliate.terms_and_conditions,
-          });
+        const { error: affiliateError } = await supabase.from('product_affiliate_settings').insert({
+          product_id: product.id,
+          store_id: storeId,
+          affiliate_enabled: formData.affiliate.enabled,
+          commission_rate: formData.affiliate.commission_rate,
+          commission_type: formData.affiliate.commission_type,
+          fixed_commission_amount: formData.affiliate.fixed_commission_amount,
+          cookie_duration_days: formData.affiliate.cookie_duration_days,
+          max_commission_per_sale: formData.affiliate.max_commission_per_sale,
+          min_order_amount: formData.affiliate.min_order_amount,
+          allow_self_referral: formData.affiliate.allow_self_referral,
+          require_approval: formData.affiliate.require_approval,
+          terms_and_conditions: formData.affiliate.terms_and_conditions,
+        });
 
         if (affiliateError) {
           logger.error('Affiliate settings error', { error: affiliateError, productId });
@@ -303,15 +306,15 @@ export const CreateDigitalProductWizard = ({
 
       toast({
         title: '🎉 Succès !',
-        description: `Produit digital "${product.name}" créé avec succès${formData.affiliate?.enabled ? ' avec programme d\'affiliation activé' : ''}`,
+        description: `Produit digital "${product.name}" créé avec succès${formData.affiliate?.enabled ? " avec programme d'affiliation activé" : ''}`,
       });
 
       if (onSuccess) {
         onSuccess();
       } else {
-        navigate(`/${storeSlug}/products/${slug}`);
+        navigate('/dashboard/digital-products', { replace: true });
       }
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error creating digital product', { error: errorMessage });
       toast({
@@ -338,44 +341,32 @@ export const CreateDigitalProductWizard = ({
           />
         );
       case 2:
-        return (
-          <DigitalFilesUploader
-            formData={formData}
-            updateFormData={updateFormData}
-          />
-        );
+        return <DigitalFilesUploader formData={formData} updateFormData={updateFormData} />;
       case 3:
-        return (
-          <DigitalLicenseConfig
-            formData={formData}
-            updateFormData={updateFormData}
-          />
-        );
+        return <DigitalLicenseConfig formData={formData} updateFormData={updateFormData} />;
       case 4:
         return (
           <DigitalAffiliateSettings
             productPrice={formData.price || 0}
             productName={formData.name || 'Produit'}
-            data={formData.affiliate || {
-              enabled: false,
-              commission_rate: 20,
-              commission_type: 'percentage',
-              fixed_commission_amount: 0,
-              cookie_duration_days: 30,
-              min_order_amount: 0,
-              allow_self_referral: false,
-              require_approval: false,
-              terms_and_conditions: '',
-            }}
-            onUpdate={(affiliateData) => updateFormData({ affiliate: affiliateData })}
+            data={
+              formData.affiliate || {
+                enabled: false,
+                commission_rate: 20,
+                commission_type: 'percentage',
+                fixed_commission_amount: 0,
+                cookie_duration_days: 30,
+                min_order_amount: 0,
+                allow_self_referral: false,
+                require_approval: false,
+                terms_and_conditions: '',
+              }
+            }
+            onUpdate={affiliateData => updateFormData({ affiliate: affiliateData })}
           />
         );
       case 5:
-        return (
-          <DigitalPreview
-            formData={formData}
-          />
-        );
+        return <DigitalPreview formData={formData} />;
       default:
         return null;
     }
@@ -385,34 +376,28 @@ export const CreateDigitalProductWizard = ({
     <div className="container mx-auto px-4 py-8 max-w-5xl">
       {/* Header */}
       <div className="mb-8">
-        <Button
-          variant="ghost"
-          onClick={onBack}
-          className="mb-4"
-        >
+        <Button variant="ghost" onClick={onBack} className="mb-4">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Retour au choix du type
         </Button>
-        
+
         <h1 className="text-3xl font-bold mb-2">Créer un produit digital</h1>
-        <p className="text-muted-foreground">
-          Suivez les étapes pour créer votre produit
-        </p>
+        <p className="text-muted-foreground">Suivez les étapes pour créer votre produit</p>
       </div>
 
       {/* Progress bar */}
       <div className="mb-8">
         <Progress value={progress} className="h-2 mb-4" />
         <div className="flex justify-between">
-          {STEPS.map((step) => (
+          {STEPS.map(step => (
             <div
               key={step.id}
               className={`flex-1 text-center ${
                 step.id === currentStep
                   ? 'text-primary font-medium'
                   : step.id < currentStep
-                  ? 'text-muted-foreground'
-                  : 'text-muted-foreground/50'
+                    ? 'text-muted-foreground'
+                    : 'text-muted-foreground/50'
               }`}
             >
               <div className="flex items-center justify-center mb-2">
@@ -443,9 +428,7 @@ export const CreateDigitalProductWizard = ({
 
       {/* Step content */}
       <Card className="mb-8">
-        <CardContent className="pt-6">
-          {renderStepContent()}
-        </CardContent>
+        <CardContent className="pt-6">{renderStepContent()}</CardContent>
       </Card>
 
       {/* Navigation buttons */}
@@ -483,11 +466,3 @@ export const CreateDigitalProductWizard = ({
     </div>
   );
 };
-
-
-
-
-
-
-
-

@@ -43,7 +43,10 @@ import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/hooks/useStore';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { validateRequiredSteps } from '@/lib/wizard-validation/edit-save-validation';
+import {
+  validateCourseWizardPublishSteps,
+  validateCourseWizardStep,
+} from '@/lib/course-wizard-step-validation';
 import { updateFullCourseTx } from '@/lib/products/product-update-rpc';
 import { logger } from '@/lib/logger';
 import { useQuery } from '@tanstack/react-query';
@@ -422,41 +425,17 @@ export const EditCourseProductWizard = ({
    */
   const validateStep = useCallback(
     async (step: number): Promise<{ valid: boolean; errors: string[] }> => {
-      const newErrors: Record<string, string> = {};
-      const errors: string[] = [];
+      const result = validateCourseWizardStep(step, formData, sections);
 
-      switch (step) {
-        case 1: {
-          if (!formData.title || formData.title.trim().length < 2) {
-            const errorMsg = 'Le titre doit contenir au moins 2 caractères';
-            newErrors.title = errorMsg;
-            errors.push(errorMsg);
-          }
-          if (!formData.price || formData.price <= 0) {
-            const errorMsg = 'Le prix doit être supérieur à 0';
-            newErrors.price = errorMsg;
-            errors.push(errorMsg);
-          }
-
-          setErrors(newErrors);
-          return { valid: Object.keys(newErrors).length === 0, errors };
-        }
-
-        case 2: {
-          if (sections.length === 0) {
-            errors.push('Au moins une section est requise');
-          } else if (!sections.some(section => section.lessons.length > 0)) {
-            errors.push('Chaque section doit contenir au moins une leçon');
-          }
-
-          setErrors(newErrors);
-          return { valid: errors.length === 0, errors };
-        }
-
-        default:
-          setErrors({});
-          return { valid: true, errors: [] };
+      if (step === 1) {
+        setErrors(result.fieldErrors);
       }
+
+      if (!result.valid && result.toastTitle) {
+        return { valid: false, errors: result.errors };
+      }
+
+      return { valid: result.valid, errors: result.errors };
     },
     [formData, sections]
   );
@@ -659,21 +638,26 @@ export const EditCourseProductWizard = ({
   }, []);
 
   const handleSave = useCallback(async () => {
-    const result = await validateRequiredSteps([1, 2], validateStep);
-    if (result.valid) {
-      await saveCourse();
-    } else {
+    const publishValidation = validateCourseWizardPublishSteps(formData, sections);
+    if (!publishValidation.valid) {
+      if (publishValidation.failedStep) {
+        setCurrentStep(publishValidation.failedStep);
+      }
+      setErrors(publishValidation.fieldErrors);
       const errorMessages =
-        result.errors.length > 0
-          ? result.errors.join(', ')
+        publishValidation.errors.length > 0
+          ? publishValidation.errors.join(', ')
           : 'Veuillez corriger les erreurs avant de sauvegarder';
       toast({
-        title: 'Erreurs de validation',
-        description: errorMessages,
+        title: publishValidation.toastTitle ?? 'Erreurs de validation',
+        description: publishValidation.toastDescription ?? errorMessages,
         variant: 'destructive',
       });
+      return;
     }
-  }, [validateStep, saveCourse, toast]);
+
+    await saveCourse();
+  }, [formData, sections, saveCourse, toast]);
 
   const renderStepContent = useCallback(() => {
     switch (currentStep) {

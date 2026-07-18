@@ -314,29 +314,6 @@ export const EditArtistProductWizard = ({
             });
             return { valid: false, errors };
           }
-          if (formData.edition_type === 'limited_edition' || formData.edition_type === 'print') {
-            if (!formData.edition_number || !formData.total_editions) {
-              const errorMsg =
-                "Pour une édition limitée ou un tirage, le numéro d'édition et le total sont requis";
-              errors.push(errorMsg);
-              toast({
-                title: 'Erreur',
-                description: errorMsg,
-                variant: 'destructive',
-              });
-              return { valid: false, errors };
-            }
-            if (formData.edition_number > formData.total_editions) {
-              const errorMsg = "Le numéro d'édition ne peut pas être supérieur au total";
-              errors.push(errorMsg);
-              toast({
-                title: 'Erreur',
-                description: errorMsg,
-                variant: 'destructive',
-              });
-              return { valid: false, errors };
-            }
-          }
           return { valid: true, errors: [] };
         default:
           return { valid: true, errors: [] };

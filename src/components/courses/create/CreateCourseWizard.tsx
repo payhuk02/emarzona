@@ -44,13 +44,12 @@ import { useCreateFullCourse } from '@/hooks/courses/useCreateFullCourse';
 import { useAuth } from '@/contexts/AuthContext';
 import { useStore } from '@/hooks/useStore';
 import { logger } from '@/lib/logger';
+import {
+  validateCourseWizardPublishSteps,
+  validateCourseWizardStep,
+} from '@/lib/course-wizard-step-validation';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { cn } from '@/lib/utils';
-import {
-  PRODUCT_DESCRIPTION_MAX_WORDS,
-  PRODUCT_DESCRIPTION_WORD_LIMIT_MESSAGE,
-} from '@/constants/product-description';
-import { countPlainTextWords } from '@/lib/string-utils';
 
 import type {
   CourseSection,
@@ -320,66 +319,72 @@ export const CreateCourseWizard = ({
    */
   const validateStep = useCallback(
     (step: number): boolean => {
-      const newErrors: Record<string, string> = {};
+      const result = validateCourseWizardStep(step, formData, sections);
 
       if (step === 1) {
-        if (!formData.title)
-          newErrors.title = t('courses.errors.titleRequired', 'Le titre est requis');
-        if (!formData.slug) newErrors.slug = t('courses.errors.slugRequired', 'Le slug est requis');
-        if (!formData.short_description)
-          newErrors.short_description = t(
+        const translatedErrors: Record<string, string> = {};
+        if (result.fieldErrors.title) {
+          translatedErrors.title = t('courses.errors.titleRequired', result.fieldErrors.title);
+        }
+        if (result.fieldErrors.slug) {
+          translatedErrors.slug = t('courses.errors.slugRequired', result.fieldErrors.slug);
+        }
+        if (result.fieldErrors.short_description) {
+          translatedErrors.short_description = t(
             'courses.errors.shortDescRequired',
-            'La description courte est requise'
+            result.fieldErrors.short_description
           );
-        if (!formData.description)
-          newErrors.description = t('courses.errors.descRequired', 'La description est requise');
-        else if (countPlainTextWords(formData.description) > PRODUCT_DESCRIPTION_MAX_WORDS) {
-          newErrors.description = PRODUCT_DESCRIPTION_WORD_LIMIT_MESSAGE;
         }
-        if (!formData.level)
-          newErrors.level = t('courses.errors.levelRequired', 'Le niveau est requis');
-        if (!formData.language)
-          newErrors.language = t('courses.errors.languageRequired', 'La langue est requise');
-        if (!formData.category)
-          newErrors.category = t('courses.errors.categoryRequired', 'La catégorie est requise');
+        if (result.fieldErrors.description) {
+          translatedErrors.description = t(
+            'courses.errors.descRequired',
+            result.fieldErrors.description
+          );
+        }
+        if (result.fieldErrors.level) {
+          translatedErrors.level = t('courses.errors.levelRequired', result.fieldErrors.level);
+        }
+        if (result.fieldErrors.language) {
+          translatedErrors.language = t(
+            'courses.errors.languageRequired',
+            result.fieldErrors.language
+          );
+        }
+        if (result.fieldErrors.category) {
+          translatedErrors.category = t(
+            'courses.errors.categoryRequired',
+            result.fieldErrors.category
+          );
+        }
+        setErrors(translatedErrors);
+      } else {
+        setErrors(result.fieldErrors);
       }
 
-      if (step === 2) {
-        if (sections.length === 0) {
+      if (!result.valid) {
+        if (result.toastTitle) {
           toast({
-            title: t('courses.errors.emptyCurriculum', 'Curriculum vide'),
+            title: t(
+              result.toastTitle === 'Curriculum vide'
+                ? 'courses.errors.emptyCurriculum'
+                : 'courses.errors.noLessons',
+              result.toastTitle
+            ),
             description: t(
-              'courses.errors.emptyCurriculumDesc',
-              'Ajoutez au moins une section avec une leçon'
+              result.toastDescription === 'Ajoutez au moins une section avec une leçon'
+                ? 'courses.errors.emptyCurriculumDesc'
+                : 'courses.errors.noLessonsDesc',
+              result.toastDescription ?? ''
             ),
             variant: 'destructive',
           });
-          logger.warn('Validation échouée - Curriculum vide');
-          return false;
-        }
-        const hasLessons = sections.some(s => s.lessons.length > 0);
-        if (!hasLessons) {
-          toast({
-            title: t('courses.errors.noLessons', 'Aucune leçon'),
-            description: t(
-              'courses.errors.noLessonsDesc',
-              'Ajoutez au moins une leçon dans une section'
-            ),
-            variant: 'destructive',
-          });
-          logger.warn('Validation échouée - Aucune leçon');
-          return false;
+          logger.warn('Validation échouée', { step, errors: result.errors });
+        } else {
+          logger.warn('Validation échouée', { step, errors: result.fieldErrors });
         }
       }
 
-      setErrors(newErrors);
-      const isValid = Object.keys(newErrors).length === 0;
-
-      if (!isValid) {
-        logger.warn('Validation échouée', { step, errors: newErrors });
-      }
-
-      return isValid;
+      return result.valid;
     },
     [formData, sections, toast, t]
   );
@@ -482,20 +487,22 @@ export const CreateCourseWizard = ({
    * Publish handler
    */
   const handlePublish = useCallback(async () => {
-    for (let step = 1; step <= 2; step += 1) {
-      if (!validateStep(step)) {
-        setCurrentStep(step);
-        toast({
-          title: t('courses.errors.validationAllTitle', 'Validation incomplète'),
-          description: t(
-            'courses.errors.validationAllDesc',
-            'Complétez les informations requises avant de publier le cours'
-          ),
-          variant: 'destructive',
-        });
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        return;
+    const publishValidation = validateCourseWizardPublishSteps(formData, sections);
+    if (!publishValidation.valid) {
+      if (publishValidation.failedStep) {
+        setCurrentStep(publishValidation.failedStep);
       }
+      toast({
+        title: t('courses.errors.validationAllTitle', 'Validation incomplète'),
+        description: t(
+          'courses.errors.validationAllDesc',
+          'Complétez les informations requises avant de publier le cours'
+        ),
+        variant: 'destructive',
+      });
+      setErrors(publishValidation.fieldErrors);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
     }
 
     // Vérifier que le store existe
