@@ -46,7 +46,8 @@ import { StoreAnalyticsSettings } from './StoreAnalyticsSettings';
 import { RequireTermsConsent } from './RequireTermsConsent';
 import { StoreFieldHelper } from './StoreFieldHelper';
 import { StoreSuggestions } from './StoreSuggestions';
-import type { StoreOpeningHours, StoreLegalPages } from '@/hooks/useStores';
+import type { Store, StoreOpeningHours, StoreLegalPages } from '@/hooks/useStores';
+import { useStores } from '@/hooks/useStores';
 import { sanitizeStorePayload } from '@/lib/store-payload-utils';
 import {
   STORE_COMMERCE_TYPE_LABELS,
@@ -54,7 +55,6 @@ import {
 } from '@/constants/store-commerce-types';
 import { resolveStoreCommerceTypeFromStore } from '@/lib/commerce/store-capability-map';
 import { useStoreCommerceTypeGuard } from '@/hooks/useStoreCommerceTypeGuard';
-import { buildStoreCreateDefaults } from '@/lib/commerce/store-create-defaults';
 import { getStoreOnboardingPath } from '@/lib/commerce/store-vertical-config';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
@@ -369,6 +369,7 @@ const StoreForm = ({
   const { toast } = useToast();
   const navigate = useNavigate();
   const { refreshStores } = useStoreContext();
+  const { createStore, updateStore, canCreateStore } = useStores();
   const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
   const isEditing = Boolean(initialData?.id);
   const { data: commerceTypeGuard } = useStoreCommerceTypeGuard(initialData?.id);
@@ -451,6 +452,7 @@ const StoreForm = ({
         slug: slug.trim(),
         description: description.trim() || undefined,
         default_currency: defaultCurrency,
+        commerce_type: commerceType,
         contact_email: contactEmail.trim() || undefined,
         contact_phone: contactPhone.trim() || undefined,
         facebook_url: facebookUrl.trim() || undefined,
@@ -737,30 +739,12 @@ const StoreForm = ({
 
           const updateData = sanitizeStorePayload(rawUpdateData);
 
-          const { error } = await supabase
-            .from('stores')
-            .update(updateData)
-            .eq('id', initialData.id);
-
-          if (error) throw error;
-
-          toast({
-            title: 'Boutique mise à jour',
-            description: 'Votre boutique a été mise à jour avec succès',
+          await updateStore({
+            storeId: initialData.id,
+            updates: updateData as Partial<Store>,
           });
         } else {
-          // Create new store - Vérifier la limite de 3 boutiques
-          const { data: existingStores, error: checkError } = await supabase
-            .from('stores')
-            .select('id')
-            .eq('user_id', user.id);
-
-          if (checkError) {
-            throw checkError;
-          }
-
-          const storeCount = existingStores?.length || 0;
-          if (storeCount >= 3) {
+          if (!canCreateStore()) {
             toast({
               title: 'Limite atteinte',
               description:
@@ -770,97 +754,7 @@ const StoreForm = ({
             return;
           }
 
-          interface StoreInsertData {
-            user_id: string;
-            name: string;
-            slug: string;
-            description: string | null;
-            default_currency: string;
-            logo_url?: string | null;
-            banner_url?: string | null;
-            about?: string | null;
-            contact_email?: string | null;
-            contact_phone?: string | null;
-            facebook_url?: string | null;
-            instagram_url?: string | null;
-            twitter_url?: string | null;
-            linkedin_url?: string | null;
-            info_message?: string | null;
-            info_message_color?: string | null;
-            info_message_font?: string | null;
-            primary_color?: string | null;
-            secondary_color?: string | null;
-            accent_color?: string | null;
-            background_color?: string | null;
-            text_color?: string | null;
-            text_secondary_color?: string | null;
-            button_primary_color?: string | null;
-            button_primary_text?: string | null;
-            button_secondary_color?: string | null;
-            button_secondary_text?: string | null;
-            link_color?: string | null;
-            link_hover_color?: string | null;
-            border_radius?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full' | null;
-            shadow_intensity?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | null;
-            heading_font?: string | null;
-            body_font?: string | null;
-            font_size_base?: string | null;
-            heading_size_h1?: string | null;
-            heading_size_h2?: string | null;
-            heading_size_h3?: string | null;
-            line_height?: string | null;
-            letter_spacing?: string | null;
-            header_style?: 'minimal' | 'standard' | 'extended' | null;
-            footer_style?: 'minimal' | 'standard' | 'extended' | null;
-            sidebar_enabled?: boolean | null;
-            sidebar_position?: 'left' | 'right' | null;
-            product_grid_columns?: number | null;
-            product_card_style?: 'minimal' | 'standard' | 'detailed' | null;
-            navigation_style?: 'horizontal' | 'vertical' | 'mega' | null;
-            meta_title?: string | null;
-            meta_description?: string | null;
-            meta_keywords?: string | null;
-            og_title?: string | null;
-            og_description?: string | null;
-            og_image?: string | null;
-            address_line1?: string | null;
-            address_line2?: string | null;
-            city?: string | null;
-            state_province?: string | null;
-            postal_code?: string | null;
-            country?: string | null;
-            latitude?: number | null;
-            longitude?: number | null;
-            timezone?: string | null;
-            opening_hours?: StoreOpeningHours | null;
-            legal_pages?: StoreLegalPages | null;
-            // Phase 2 - Images supplémentaires
-            favicon_url?: string | null;
-            apple_touch_icon_url?: string | null;
-            watermark_url?: string | null;
-            placeholder_image_url?: string | null;
-            // Phase 2 - Contacts supplémentaires
-            support_email?: string | null;
-            sales_email?: string | null;
-            press_email?: string | null;
-            partnership_email?: string | null;
-            support_phone?: string | null;
-            sales_phone?: string | null;
-            whatsapp_number?: string | null;
-            telegram_username?: string | null;
-            // Phase 2 - Réseaux sociaux supplémentaires
-            youtube_url?: string | null;
-            tiktok_url?: string | null;
-            pinterest_url?: string | null;
-            snapchat_url?: string | null;
-            discord_url?: string | null;
-            twitch_url?: string | null;
-            commerce_type?: StoreCommerceType;
-            [key: string]: unknown;
-          }
-          const rawInsertData: StoreInsertData = {
-            ...buildStoreCreateDefaults(commerceType),
-            user_id: user.id,
+          const rawCreateData = {
             name,
             slug,
             description: description || null,
@@ -877,7 +771,6 @@ const StoreForm = ({
             info_message: infoMessage || null,
             info_message_color: infoMessageColor || '#3b82f6',
             info_message_font: infoMessageFont || 'Inter',
-            // Phase 1 - Thème et couleurs
             primary_color: primaryColor || null,
             secondary_color: secondaryColor || null,
             accent_color: accentColor || null,
@@ -892,7 +785,6 @@ const StoreForm = ({
             link_hover_color: linkHoverColor || null,
             border_radius: borderRadius,
             shadow_intensity: shadowIntensity,
-            // Typographie
             heading_font: headingFont || null,
             body_font: bodyFont || null,
             font_size_base: fontSizeBase || null,
@@ -901,7 +793,6 @@ const StoreForm = ({
             heading_size_h3: headingSizeH3 || null,
             line_height: lineHeight || null,
             letter_spacing: letterSpacing || null,
-            // Layout
             header_style: headerStyle,
             footer_style: footerStyle,
             sidebar_enabled: sidebarEnabled,
@@ -909,14 +800,12 @@ const StoreForm = ({
             product_grid_columns: productGridColumns,
             product_card_style: productCardStyle,
             navigation_style: navigationStyle,
-            // SEO
             meta_title: metaTitle || null,
             meta_description: metaDescription || null,
             meta_keywords: metaKeywords || null,
             og_title: ogTitle || null,
             og_description: ogDescription || null,
             og_image: ogImageUrl || null,
-            // Localisation
             address_line1: addressLine1 || null,
             address_line2: addressLine2 || null,
             city: city || null,
@@ -927,14 +816,11 @@ const StoreForm = ({
             longitude: longitude,
             timezone: timezone || null,
             opening_hours: openingHours || null,
-            // Pages légales
             legal_pages: legalPages || null,
-            // Phase 2 - Images supplémentaires
             favicon_url: faviconUrl || null,
             apple_touch_icon_url: appleTouchIconUrl || null,
             watermark_url: watermarkUrl || null,
             placeholder_image_url: placeholderImageUrl || null,
-            // Phase 2 - Contacts supplémentaires
             support_email: supportEmail || null,
             sales_email: salesEmail || null,
             press_email: pressEmail || null,
@@ -943,49 +829,33 @@ const StoreForm = ({
             sales_phone: salesPhone || null,
             whatsapp_number: whatsappNumber || null,
             telegram_username: telegramUsername || null,
-            // Phase 2 - Réseaux sociaux supplémentaires
             youtube_url: youtubeUrl || null,
             tiktok_url: tiktokUrl || null,
             pinterest_url: pinterestUrl || null,
             snapchat_url: snapchatUrl || null,
             discord_url: discordUrl || null,
             twitch_url: twitchUrl || null,
+            google_analytics_id: googleAnalyticsId.trim() || null,
+            google_analytics_enabled: googleAnalyticsEnabled,
+            facebook_pixel_id: facebookPixelId.trim() || null,
+            facebook_pixel_enabled: facebookPixelEnabled,
+            google_tag_manager_id: googleTagManagerId.trim() || null,
+            google_tag_manager_enabled: googleTagManagerEnabled,
+            tiktok_pixel_id: tiktokPixelId.trim() || null,
+            tiktok_pixel_enabled: tiktokPixelEnabled,
+            custom_tracking_scripts: customTrackingScripts.trim() || null,
+            custom_scripts_enabled: customScriptsEnabled,
             commerce_type: commerceType,
             metadata: {
               commerce_type: commerceType,
             },
           };
 
-          const insertData = sanitizeStorePayload(rawInsertData);
+          const createdStore = await createStore(
+            sanitizeStorePayload(rawCreateData) as Partial<Store>
+          );
 
-          const { data: createdStore, error } = await supabase
-            .from('stores')
-            .insert(insertData)
-            .select('id')
-            .single();
-
-          if (error) {
-            // Gérer l'erreur spécifique de limite de la base de données
-            if (error.message && error.message.includes('Limite de 3 boutiques')) {
-              toast({
-                title: 'Limite atteinte',
-                description:
-                  "Limite de 3 boutiques par utilisateur atteinte. Vous devez supprimer une boutique existante avant d'en créer une nouvelle.",
-                variant: 'destructive',
-              });
-              return;
-            }
-            throw error;
-          }
-
-          toast({
-            title: 'Boutique créée',
-            description: 'Votre boutique a été créée avec succès',
-          });
-
-          // Rafraîchir la liste des boutiques et sélectionner la nouvelle
           await refreshStores();
-          // La nouvelle boutique sera automatiquement sélectionnée par le contexte
           const redirectTarget = getStoreOnboardingPath(createdStore.id, commerceType);
           navigate(redirectTarget, { replace: true });
         }
@@ -1105,6 +975,9 @@ const StoreForm = ({
       initialData,
       onSuccess,
       refreshStores,
+      createStore,
+      updateStore,
+      canCreateStore,
       toast,
     ]
   );

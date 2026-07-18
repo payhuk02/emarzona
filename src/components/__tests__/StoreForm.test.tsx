@@ -44,6 +44,26 @@ vi.mock('@/hooks/use-toast', () => ({
   }),
 }));
 
+const mockCreateStore = vi.fn();
+const mockUpdateStore = vi.fn();
+const mockCanCreateStore = vi.fn(() => true);
+
+vi.mock('@/hooks/useStores', () => ({
+  useStores: () => ({
+    createStore: mockCreateStore,
+    updateStore: mockUpdateStore,
+    canCreateStore: mockCanCreateStore,
+  }),
+}));
+
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: () => vi.fn(),
+  };
+});
+
 vi.mock('../store/StoreSuggestions', () => ({
   StoreSuggestions: () => null,
 }));
@@ -66,6 +86,8 @@ function createWrapper() {
 describe('StoreForm', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockCanCreateStore.mockReturnValue(true);
+    mockCreateStore.mockResolvedValue({ id: 'new-store-id', name: 'Test Store' });
   });
 
   it('should render form fields', () => {
@@ -95,8 +117,6 @@ describe('StoreForm', () => {
     const user = userEvent.setup();
     const onSuccess = vi.fn();
 
-    const mockInsert = vi.fn().mockResolvedValue({ error: null });
-
     vi.mocked(supabase.auth.getUser).mockResolvedValue({
       data: { user: { id: 'user-1' } },
       error: null,
@@ -106,22 +126,6 @@ describe('StoreForm', () => {
       data: true,
       error: null,
     } as Awaited<ReturnType<typeof supabase.rpc>>);
-
-    vi.mocked(supabase.from).mockImplementation((table: string) => {
-      if (table === 'stores') {
-        return {
-          select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockResolvedValue({
-              data: [],
-              error: null,
-            }),
-          }),
-          insert: mockInsert,
-        } as ReturnType<typeof supabase.from>;
-      }
-
-      return {} as ReturnType<typeof supabase.from>;
-    });
 
     render(<StoreForm onSuccess={onSuccess} />, { wrapper: createWrapper() });
 
@@ -136,7 +140,7 @@ describe('StoreForm', () => {
     await user.click(submitButton);
 
     await waitFor(() => {
-      expect(mockInsert).toHaveBeenCalled();
+      expect(mockCreateStore).toHaveBeenCalled();
     });
   });
 });
