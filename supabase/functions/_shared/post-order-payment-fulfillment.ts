@@ -81,6 +81,9 @@ async function sendOrderConfirmationEmail(
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${supabaseServiceKey}`,
+        ...(Deno.env.get('EDGE_INTERNAL_SECRET')
+          ? { 'x-internal-secret': Deno.env.get('EDGE_INTERNAL_SECRET')! }
+          : {}),
       },
       body: JSON.stringify({
         order_id: orderId,

@@ -44,3 +44,23 @@ export async function resolveCheckoutTokenForOrder(orderId: string): Promise<str
 
   return extractCheckoutToken(data?.metadata);
 }
+
+/** Envoi client + vendeur après commande COD (ne pas compter sur useMutation.onSuccess — retiré en RQ v5). */
+export async function triggerOrderConfirmationEmailAfterCod(
+  params: RequestOrderConfirmationEmailParams
+): Promise<{ ok: boolean; duplicate?: boolean; error?: string }> {
+  try {
+    const checkoutToken =
+      params.checkoutToken ?? (await resolveCheckoutTokenForOrder(params.orderId));
+    return await requestOrderConfirmationEmail({ ...params, checkoutToken });
+  } catch (error) {
+    logger.error('triggerOrderConfirmationEmailAfterCod failed', {
+      error,
+      orderId: params.orderId,
+    });
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : String(error),
+    };
+  }
+}

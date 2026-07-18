@@ -377,13 +377,25 @@ export const useCreatePhysicalOrder = () => {
 
       // 11. Paiement en ligne ou confirmation COD
       if (isCashOnDelivery || rpcResult.cash_on_delivery) {
-        return {
+        const codResult = {
           orderId: typedOrder.id,
           orderItemId: orderItem.id,
           inventoryId,
           cashOnDelivery: true,
           orderNumber: typedOrder.order_number,
         };
+
+        // React Query v5 n'exécute plus onSuccess — envoi email ici (client + vendeur).
+        void import('@/lib/orders/request-order-confirmation-email').then(
+          ({ triggerOrderConfirmationEmailAfterCod }) =>
+            triggerOrderConfirmationEmailAfterCod({
+              orderId: typedOrder.id,
+              customerEmail,
+              customerName: customerName || customerEmail.split('@')[0],
+            })
+        );
+
+        return codResult;
       }
 
       const paymentDescription =
@@ -446,21 +458,6 @@ export const useCreatePhysicalOrder = () => {
           ? 'Paiement à la livraison — votre commande est enregistrée.'
           : 'Stock réservé. Redirection vers le paiement...',
       });
-
-      // Email récapitulatif COD (client connecté)
-      if (data.cashOnDelivery && data.orderId && variables.customerEmail) {
-        import('@/lib/orders/request-order-confirmation-email')
-          .then(async ({ requestOrderConfirmationEmail, resolveCheckoutTokenForOrder }) => {
-            const checkoutToken = await resolveCheckoutTokenForOrder(data.orderId);
-            await requestOrderConfirmationEmail({
-              orderId: data.orderId,
-              customerEmail: variables.customerEmail,
-              customerName: variables.customerName,
-              checkoutToken,
-            });
-          })
-          .catch(err => logger.error('COD confirmation email failed', { error: err }));
-      }
 
       // Déclencher webhook pour achat (en arrière-plan) - Système unifié
       if (data.orderId && variables.storeId) {
