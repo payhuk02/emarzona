@@ -44,10 +44,7 @@ import { notifyPhysicalOrderPlaced } from '@/lib/notifications/physical-order-no
 import { buildGuestOrderConfirmationPath } from '@/lib/physical/guest-order-confirmation';
 import { useCreateOrder } from '@/hooks/orders/useCreateOrder';
 import { StoreThemeProvider } from '@/components/storefront/StoreThemeProvider';
-import {
-  CHECKOUT_STORE_SELECT,
-  STOREFRONT_STORE_PUBLIC_SELECT,
-} from '@/lib/storefront/store-public-fields';
+import { STOREFRONT_STORE_PUBLIC_SELECT } from '@/lib/storefront/store-public-fields';
 import type { Store as ThemedStore } from '@/hooks/useStores';
 
 const BuyNowOrderSummary = lazy(() => import('@/components/checkout/buy-now/BuyNowOrderSummary'));
@@ -213,14 +210,7 @@ const Checkout = () => {
         // Charger le produit
         const { data: productData, error: productError } = await supabase
           .from('products')
-          .select(
-            `
-            ${CHECKOUT_PRODUCT_FIELDS},
-            stores!inner (
-              ${CHECKOUT_STORE_SELECT}
-            )
-          `
-          )
+          .select(CHECKOUT_PRODUCT_FIELDS)
           .eq('id', productId)
           .eq('store_id', storeId)
           .single();
@@ -240,29 +230,18 @@ const Checkout = () => {
 
         setProduct(productData as unknown as CheckoutProduct);
 
-        // Extraire la boutique depuis la relation
-        // Supabase retourne stores comme un tableau même avec !inner
-        if (
-          productData.stores &&
-          Array.isArray(productData.stores) &&
-          productData.stores.length > 0
-        ) {
-          setStore(productData.stores[0] as CheckoutStore);
-        } else {
-          // Fallback: charger la boutique séparément si la relation n'a pas fonctionné
-          const { data: storeData, error: storeError } = await supabase
-            .from('stores_public')
-            .select(STOREFRONT_STORE_PUBLIC_SELECT)
-            .eq('id', storeId)
-            .single();
+        const { data: storeData, error: storeError } = await supabase
+          .from('stores_public')
+          .select(STOREFRONT_STORE_PUBLIC_SELECT)
+          .eq('id', storeId)
+          .single();
 
-          if (storeError) {
-            logger.error('Error loading store:', storeError);
-          }
+        if (storeError) {
+          logger.error('Error loading store:', storeError);
+        }
 
-          if (storeData) {
-            setStore(storeData as unknown as CheckoutStore);
-          }
+        if (storeData) {
+          setStore(storeData as unknown as CheckoutStore);
         }
 
         // Charger la variante si spécifiée

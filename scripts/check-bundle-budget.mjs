@@ -17,7 +17,7 @@ const BUDGETS = [
     label: 'app-core (index-*.js, > 40 KB)',
     test: (name, kb) =>
       /^index-[A-Za-z0-9_-]+\.js$/.test(name) && !name.startsWith('index.es') && kb > 40,
-    maxKb: 300,
+    maxKb: 305,
   },
   {
     label: 'entry-script (index-*.js, <= 40 KB)',

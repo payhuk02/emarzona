@@ -193,6 +193,7 @@ export interface Store {
   custom_tracking_scripts?: string | null;
   custom_scripts_enabled?: boolean;
   subdomain?: string | null;
+  default_currency?: string | null;
   metadata?: Record<string, unknown> | null;
   commerce_type?: StoreCommerceType | null;
   active_clients?: number | null;
