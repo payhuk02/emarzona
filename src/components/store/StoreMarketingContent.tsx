@@ -5,6 +5,7 @@
  */
 
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -12,21 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { 
-  MessageSquare, 
-  Target, 
-  Heart, 
-  BookOpen, 
-  Users, 
-  Star, 
-  Award,
-  Plus,
-  X,
-  Trash2,
-  Edit2,
-  Save,
-  ChevronRight,
-} from 'lucide-react';
+import { MessageSquare, Star, Plus, X, Trash2, Edit2, Save, ChevronRight } from 'lucide-react';
 import { useSpaceInputFix } from '@/hooks/useSpaceInputFix';
 import { StoreMarketingContent } from '@/hooks/useStores';
 
@@ -41,18 +28,18 @@ interface StoreMarketingContentProps {
 }
 
 const MARKETING_TABS = [
-  { key: 'welcome', label: 'Bienvenue' },
-  { key: 'mission', label: 'Mission' },
-  { key: 'values', label: 'Valeurs' },
-  { key: 'story', label: 'Histoire' },
-  { key: 'team', label: 'Équipe' },
-  { key: 'testimonials', label: 'Témoignages' },
-  { key: 'certifications', label: 'Certifications' },
+  { key: 'welcome', labelKey: 'welcome', shortKey: 'welcomeShort' },
+  { key: 'mission', labelKey: 'mission', shortKey: 'mission' },
+  { key: 'values', labelKey: 'values', shortKey: 'values' },
+  { key: 'story', labelKey: 'story', shortKey: 'story' },
+  { key: 'team', labelKey: 'team', shortKey: 'team' },
+  { key: 'testimonials', labelKey: 'testimonials', shortKey: 'testimonialsShort' },
+  { key: 'certifications', labelKey: 'certifications', shortKey: 'certificationsShort' },
 ] as const;
 
 export const DEFAULT_MARKETING_TAB = MARKETING_TABS[0].key;
 
-export const StoreMarketingContentComponent : React.FC<StoreMarketingContentProps> = ({
+export const StoreMarketingContentComponent: React.FC<StoreMarketingContentProps> = ({
   marketingContent,
   onChange,
   onSave,
@@ -61,10 +48,13 @@ export const StoreMarketingContentComponent : React.FC<StoreMarketingContentProp
   onCompleteSubSteps,
   isSubmitting = false,
 }) => {
+  const { t, i18n } = useTranslation();
   const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
-  
+
   const [welcomeMessage, setWelcomeMessage] = useState(marketingContent?.welcome_message || '');
-  const [missionStatement, setMissionStatement] = useState(marketingContent?.mission_statement || '');
+  const [missionStatement, setMissionStatement] = useState(
+    marketingContent?.mission_statement || ''
+  );
   const [visionStatement, setVisionStatement] = useState(marketingContent?.vision_statement || '');
   const [values, setValues] = useState<string[]>(marketingContent?.values || []);
   const [newValue, setNewValue] = useState('');
@@ -140,7 +130,7 @@ export const StoreMarketingContentComponent : React.FC<StoreMarketingContentProp
         disabled={isSubmitting}
       >
         <Save className="h-4 w-4" />
-        {isSubmitting ? 'Enregistrement...' : 'Enregistrer et continuer'}
+        {isSubmitting ? t('store.form.common.saving') : t('store.form.common.saveAndContinue')}
         {!isSubmitting && <ChevronRight className="h-4 w-4" />}
       </Button>
     </div>
@@ -231,7 +221,13 @@ export const StoreMarketingContentComponent : React.FC<StoreMarketingContentProp
       } else {
         setCertifications([...certifications, { ...certificationForm }]);
       }
-      setCertificationForm({ name: '', issuer: '', image_url: '', verification_url: '', expiry_date: '' });
+      setCertificationForm({
+        name: '',
+        issuer: '',
+        image_url: '',
+        verification_url: '',
+        expiry_date: '',
+      });
     }
   };
 
@@ -254,73 +250,58 @@ export const StoreMarketingContentComponent : React.FC<StoreMarketingContentProp
   // Sauvegarder automatiquement à chaque changement
   React.useEffect(() => {
     handleSave();
-  }, [welcomeMessage, missionStatement, visionStatement, values, story, teamSection, testimonials, certifications]);
+  }, [
+    welcomeMessage,
+    missionStatement,
+    visionStatement,
+    values,
+    story,
+    teamSection,
+    testimonials,
+    certifications,
+  ]);
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <MessageSquare className="h-5 w-5" />
-          Contenu marketing
+          {t('store.form.marketing.title')}
         </CardTitle>
-        <CardDescription>
-          Personnalisez le contenu marketing de votre boutique (message de bienvenue, mission, vision, équipe, témoignages, certifications)
-        </CardDescription>
+        <CardDescription>{t('store.form.marketing.description')}</CardDescription>
       </CardHeader>
       <CardContent>
         <Tabs value={currentTab} onValueChange={onTabChange} className="w-full">
           <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1 sm:gap-2">
-            <TabsTrigger value="welcome" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-              <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Bienvenue</span>
-              <span className="sm:hidden">Accueil</span>
-            </TabsTrigger>
-            <TabsTrigger value="mission" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-              <Target className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Mission</span>
-              <span className="sm:hidden">Mission</span>
-            </TabsTrigger>
-            <TabsTrigger value="values" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-              <Heart className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Valeurs</span>
-              <span className="sm:hidden">Valeurs</span>
-            </TabsTrigger>
-            <TabsTrigger value="story" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-              <BookOpen className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Histoire</span>
-              <span className="sm:hidden">Histoire</span>
-            </TabsTrigger>
-            <TabsTrigger value="team" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-              <Users className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Équipe</span>
-              <span className="sm:hidden">Équipe</span>
-            </TabsTrigger>
-            <TabsTrigger value="testimonials" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-              <Star className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Témoignages</span>
-              <span className="sm:hidden">Avis</span>
-            </TabsTrigger>
-            <TabsTrigger value="certifications" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-              <Award className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Certifications</span>
-              <span className="sm:hidden">Certifs</span>
-            </TabsTrigger>
+            {MARKETING_TABS.map(tab => (
+              <TabsTrigger
+                key={tab.key}
+                value={tab.key}
+                className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
+              >
+                <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4 hidden" />
+                <span className="hidden sm:inline">
+                  {t(`store.form.marketing.tabs.${tab.labelKey}`)}
+                </span>
+                <span className="sm:hidden">{t(`store.form.marketing.tabs.${tab.shortKey}`)}</span>
+              </TabsTrigger>
+            ))}
           </TabsList>
 
           {/* Message de bienvenue */}
           <TabsContent value="welcome" className="space-y-4 mt-4">
             <div className="space-y-2">
-              <Label htmlFor="welcome_message">Message de bienvenue</Label>
+              <Label htmlFor="welcome_message">{t('store.form.marketing.welcomeMessage')}</Label>
               <Textarea
                 id="welcome_message"
                 value={welcomeMessage}
-                onChange={(e) => setWelcomeMessage(e.target.value)}
+                onChange={e => setWelcomeMessage(e.target.value)}
                 onKeyDown={handleSpaceKeyDown}
-                placeholder="Bienvenue dans notre boutique ! Découvrez nos produits de qualité..."
+                placeholder={t('store.form.marketing.welcomePlaceholder')}
                 rows={5}
               />
               <p className="text-xs text-muted-foreground">
-                Message qui s'affichera en haut de la page d'accueil de votre boutique
+                {t('store.form.marketing.welcomeHint')}
               </p>
             </div>
             {renderSaveFooter()}
@@ -330,32 +311,32 @@ export const StoreMarketingContentComponent : React.FC<StoreMarketingContentProp
           <TabsContent value="mission" className="space-y-4 mt-4">
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="mission_statement">Mission</Label>
+                <Label htmlFor="mission_statement">{t('store.form.marketing.mission')}</Label>
                 <Textarea
                   id="mission_statement"
                   value={missionStatement}
-                  onChange={(e) => setMissionStatement(e.target.value)}
+                  onChange={e => setMissionStatement(e.target.value)}
                   onKeyDown={handleSpaceKeyDown}
-                  placeholder="Notre mission est de fournir des produits de qualité exceptionnelle..."
+                  placeholder={t('store.form.marketing.missionPlaceholder')}
                   rows={4}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Déclaration de mission de votre boutique
+                  {t('store.form.marketing.missionHint')}
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="vision_statement">Vision</Label>
+                <Label htmlFor="vision_statement">{t('store.form.marketing.vision')}</Label>
                 <Textarea
                   id="vision_statement"
                   value={visionStatement}
-                  onChange={(e) => setVisionStatement(e.target.value)}
+                  onChange={e => setVisionStatement(e.target.value)}
                   onKeyDown={handleSpaceKeyDown}
-                  placeholder="Notre vision est de devenir le leader dans notre secteur..."
+                  placeholder={t('store.form.marketing.visionPlaceholder')}
                   rows={4}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Vision à long terme de votre boutique
+                  {t('store.form.marketing.visionHint')}
                 </p>
               </div>
             </div>
@@ -365,32 +346,32 @@ export const StoreMarketingContentComponent : React.FC<StoreMarketingContentProp
           {/* Valeurs */}
           <TabsContent value="values" className="space-y-4 mt-4">
             <div className="space-y-2">
-              <Label>Valeurs de votre boutique</Label>
+              <Label>{t('store.form.marketing.valuesTitle')}</Label>
               <div className="flex gap-2">
                 <Input
                   value={newValue}
-                  onChange={(e) => setNewValue(e.target.value)}
-                  onKeyDown={(e) => {
+                  onChange={e => setNewValue(e.target.value)}
+                  onKeyDown={e => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
                       handleAddValue();
                     }
                     handleSpaceKeyDown(e);
                   }}
-                  placeholder="Ex: Qualité, Innovation, Service client..."
+                  placeholder={t('store.form.marketing.valuesPlaceholder')}
                 />
                 <Button onClick={handleAddValue} size="sm">
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">
-                Ajoutez les valeurs importantes de votre boutique
+                {t('store.form.marketing.valuesHint')}
               </p>
             </div>
 
             {values.length > 0 && (
               <div className="space-y-2">
-                <Label>Valeurs ajoutées</Label>
+                <Label>{t('store.form.marketing.valuesAdded')}</Label>
                 <div className="flex flex-wrap gap-2">
                   {values.map((value, index) => (
                     <Badge key={index} variant="secondary" className="flex items-center gap-1">
@@ -398,7 +379,7 @@ export const StoreMarketingContentComponent : React.FC<StoreMarketingContentProp
                       <button
                         onClick={() => handleRemoveValue(index)}
                         className="ml-1 hover:bg-destructive/20 rounded-full p-0.5"
-                        aria-label={`Supprimer ${value}`}
+                        aria-label={t('store.form.marketing.removeValueAria', { value })}
                       >
                         <X className="h-3 w-3" />
                       </button>
@@ -413,18 +394,16 @@ export const StoreMarketingContentComponent : React.FC<StoreMarketingContentProp
           {/* Histoire */}
           <TabsContent value="story" className="space-y-4 mt-4">
             <div className="space-y-2">
-              <Label htmlFor="story">Histoire de votre boutique</Label>
+              <Label htmlFor="story">{t('store.form.marketing.storyTitle')}</Label>
               <Textarea
                 id="story"
                 value={story}
-                onChange={(e) => setStory(e.target.value)}
+                onChange={e => setStory(e.target.value)}
                 onKeyDown={handleSpaceKeyDown}
-                placeholder="Racontez l'histoire de votre boutique, comment elle a été créée, vos défis, vos succès..."
+                placeholder={t('store.form.marketing.storyPlaceholder')}
                 rows={10}
               />
-              <p className="text-xs text-muted-foreground">
-                Histoire complète de votre boutique (support Markdown)
-              </p>
+              <p className="text-xs text-muted-foreground">{t('store.form.marketing.storyHint')}</p>
             </div>
             {renderSaveFooter()}
           </TabsContent>
@@ -433,17 +412,23 @@ export const StoreMarketingContentComponent : React.FC<StoreMarketingContentProp
           <TabsContent value="team" className="space-y-4 mt-4">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <Label>Membres de l'équipe</Label>
+                <Label>{t('store.form.marketing.teamMembers')}</Label>
                 <Button
                   onClick={() => {
-                    setTeamMemberForm({ name: '', role: '', bio: '', photo_url: '', social_links: {} });
+                    setTeamMemberForm({
+                      name: '',
+                      role: '',
+                      bio: '',
+                      photo_url: '',
+                      social_links: {},
+                    });
                     setEditingTeamMember(null);
                   }}
                   size="sm"
                   variant="outline"
                 >
                   <Plus className="h-4 w-4 mr-1" />
-                  Ajouter
+                  {t('store.form.common.add')}
                 </Button>
               </div>
 
@@ -452,41 +437,47 @@ export const StoreMarketingContentComponent : React.FC<StoreMarketingContentProp
                 <CardContent className="pt-6 space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="team_name">Nom *</Label>
+                      <Label htmlFor="team_name">{t('store.form.marketing.teamName')}</Label>
                       <Input
                         id="team_name"
                         value={teamMemberForm.name}
-                        onChange={(e) => setTeamMemberForm({ ...teamMemberForm, name: e.target.value })}
-                        placeholder="Jean Dupont"
+                        onChange={e =>
+                          setTeamMemberForm({ ...teamMemberForm, name: e.target.value })
+                        }
+                        placeholder={t('store.form.marketing.teamNamePlaceholder')}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="team_role">Rôle *</Label>
+                      <Label htmlFor="team_role">{t('store.form.marketing.teamRole')}</Label>
                       <Input
                         id="team_role"
                         value={teamMemberForm.role}
-                        onChange={(e) => setTeamMemberForm({ ...teamMemberForm, role: e.target.value })}
-                        placeholder="Directeur Général"
+                        onChange={e =>
+                          setTeamMemberForm({ ...teamMemberForm, role: e.target.value })
+                        }
+                        placeholder={t('store.form.marketing.teamRolePlaceholder')}
                       />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="team_bio">Biographie</Label>
+                    <Label htmlFor="team_bio">{t('store.form.marketing.teamBio')}</Label>
                     <Textarea
                       id="team_bio"
                       value={teamMemberForm.bio}
-                      onChange={(e) => setTeamMemberForm({ ...teamMemberForm, bio: e.target.value })}
+                      onChange={e => setTeamMemberForm({ ...teamMemberForm, bio: e.target.value })}
                       onKeyDown={handleSpaceKeyDown}
-                      placeholder="Description du membre de l'équipe..."
+                      placeholder={t('store.form.marketing.teamBioPlaceholder')}
                       rows={3}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="team_photo">Photo (URL)</Label>
+                    <Label htmlFor="team_photo">{t('store.form.marketing.teamPhoto')}</Label>
                     <Input
                       id="team_photo"
                       value={teamMemberForm.photo_url}
-                      onChange={(e) => setTeamMemberForm({ ...teamMemberForm, photo_url: e.target.value })}
+                      onChange={e =>
+                        setTeamMemberForm({ ...teamMemberForm, photo_url: e.target.value })
+                      }
                       placeholder="https://example.com/photo.jpg"
                     />
                   </div>
@@ -495,7 +486,9 @@ export const StoreMarketingContentComponent : React.FC<StoreMarketingContentProp
                     disabled={!teamMemberForm.name || !teamMemberForm.role}
                     className="w-full"
                   >
-                    {editingTeamMember !== null ? 'Modifier' : 'Ajouter'} le membre
+                    {editingTeamMember !== null
+                      ? t('store.form.marketing.editMember')
+                      : t('store.form.marketing.addMember')}
                   </Button>
                 </CardContent>
               </Card>
@@ -549,17 +542,23 @@ export const StoreMarketingContentComponent : React.FC<StoreMarketingContentProp
           <TabsContent value="testimonials" className="space-y-4 mt-4">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <Label>Témoignages clients</Label>
+                <Label>{t('store.form.marketing.testimonialsTitle')}</Label>
                 <Button
                   onClick={() => {
-                    setTestimonialForm({ author: '', content: '', rating: 5, photo_url: '', company: '' });
+                    setTestimonialForm({
+                      author: '',
+                      content: '',
+                      rating: 5,
+                      photo_url: '',
+                      company: '',
+                    });
                     setEditingTestimonial(null);
                   }}
                   size="sm"
                   variant="outline"
                 >
                   <Plus className="h-4 w-4 mr-1" />
-                  Ajouter
+                  {t('store.form.common.add')}
                 </Button>
               </div>
 
@@ -568,53 +567,76 @@ export const StoreMarketingContentComponent : React.FC<StoreMarketingContentProp
                 <CardContent className="pt-6 space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="testimonial_author">Auteur *</Label>
+                      <Label htmlFor="testimonial_author">
+                        {t('store.form.marketing.testimonialAuthor')}
+                      </Label>
                       <Input
                         id="testimonial_author"
                         value={testimonialForm.author}
-                        onChange={(e) => setTestimonialForm({ ...testimonialForm, author: e.target.value })}
-                        placeholder="Jean Dupont"
+                        onChange={e =>
+                          setTestimonialForm({ ...testimonialForm, author: e.target.value })
+                        }
+                        placeholder={t('store.form.marketing.teamNamePlaceholder')}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="testimonial_company">Entreprise</Label>
+                      <Label htmlFor="testimonial_company">
+                        {t('store.form.marketing.testimonialCompany')}
+                      </Label>
                       <Input
                         id="testimonial_company"
                         value={testimonialForm.company}
-                        onChange={(e) => setTestimonialForm({ ...testimonialForm, company: e.target.value })}
-                        placeholder="Entreprise XYZ"
+                        onChange={e =>
+                          setTestimonialForm({ ...testimonialForm, company: e.target.value })
+                        }
+                        placeholder={t('store.form.marketing.testimonialCompanyPlaceholder')}
                       />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="testimonial_content">Témoignage *</Label>
+                    <Label htmlFor="testimonial_content">
+                      {t('store.form.marketing.testimonialContent')}
+                    </Label>
                     <Textarea
                       id="testimonial_content"
                       value={testimonialForm.content}
-                      onChange={(e) => setTestimonialForm({ ...testimonialForm, content: e.target.value })}
+                      onChange={e =>
+                        setTestimonialForm({ ...testimonialForm, content: e.target.value })
+                      }
                       onKeyDown={handleSpaceKeyDown}
-                      placeholder="Excellent service, produits de qualité..."
+                      placeholder={t('store.form.marketing.testimonialContentPlaceholder')}
                       rows={4}
                     />
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="testimonial_rating">Note (1-5)</Label>
+                      <Label htmlFor="testimonial_rating">
+                        {t('store.form.marketing.testimonialRating')}
+                      </Label>
                       <Input
                         id="testimonial_rating"
                         type="number"
                         min="1"
                         max="5"
                         value={testimonialForm.rating}
-                        onChange={(e) => setTestimonialForm({ ...testimonialForm, rating: parseInt(e.target.value) || 5 })}
+                        onChange={e =>
+                          setTestimonialForm({
+                            ...testimonialForm,
+                            rating: parseInt(e.target.value) || 5,
+                          })
+                        }
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="testimonial_photo">Photo (URL)</Label>
+                      <Label htmlFor="testimonial_photo">
+                        {t('store.form.marketing.testimonialPhoto')}
+                      </Label>
                       <Input
                         id="testimonial_photo"
                         value={testimonialForm.photo_url}
-                        onChange={(e) => setTestimonialForm({ ...testimonialForm, photo_url: e.target.value })}
+                        onChange={e =>
+                          setTestimonialForm({ ...testimonialForm, photo_url: e.target.value })
+                        }
                         placeholder="https://example.com/photo.jpg"
                       />
                     </div>
@@ -624,7 +646,9 @@ export const StoreMarketingContentComponent : React.FC<StoreMarketingContentProp
                     disabled={!testimonialForm.author || !testimonialForm.content}
                     className="w-full"
                   >
-                    {editingTestimonial !== null ? 'Modifier' : 'Ajouter'} le témoignage
+                    {editingTestimonial !== null
+                      ? t('store.form.marketing.editTestimonial')
+                      : t('store.form.marketing.addTestimonial')}
                   </Button>
                 </CardContent>
               </Card>
@@ -647,11 +671,13 @@ export const StoreMarketingContentComponent : React.FC<StoreMarketingContentProp
                             <div className="flex items-center gap-2 mb-2">
                               <h4 className="font-semibold">{testimonial.author}</h4>
                               {testimonial.company && (
-                                <span className="text-sm text-muted-foreground">- {testimonial.company}</span>
+                                <span className="text-sm text-muted-foreground">
+                                  - {testimonial.company}
+                                </span>
                               )}
                             </div>
                             <div className="flex items-center gap-2 mb-2">
-                              {[1, 2, 3, 4, 5].map((star) => (
+                              {[1, 2, 3, 4, 5].map(star => (
                                 <Star
                                   key={star}
                                   className={`h-4 w-4 ${
@@ -694,17 +720,23 @@ export const StoreMarketingContentComponent : React.FC<StoreMarketingContentProp
           <TabsContent value="certifications" className="space-y-4 mt-4">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <Label>Certifications</Label>
+                <Label>{t('store.form.marketing.certificationsTitle')}</Label>
                 <Button
                   onClick={() => {
-                    setCertificationForm({ name: '', issuer: '', image_url: '', verification_url: '', expiry_date: '' });
+                    setCertificationForm({
+                      name: '',
+                      issuer: '',
+                      image_url: '',
+                      verification_url: '',
+                      expiry_date: '',
+                    });
                     setEditingCertification(null);
                   }}
                   size="sm"
                   variant="outline"
                 >
                   <Plus className="h-4 w-4 mr-1" />
-                  Ajouter
+                  {t('store.form.common.add')}
                 </Button>
               </div>
 
@@ -713,51 +745,66 @@ export const StoreMarketingContentComponent : React.FC<StoreMarketingContentProp
                 <CardContent className="pt-6 space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="cert_name">Nom de la certification *</Label>
+                      <Label htmlFor="cert_name">{t('store.form.marketing.certName')}</Label>
                       <Input
                         id="cert_name"
                         value={certificationForm.name}
-                        onChange={(e) => setCertificationForm({ ...certificationForm, name: e.target.value })}
-                        placeholder="ISO 9001"
+                        onChange={e =>
+                          setCertificationForm({ ...certificationForm, name: e.target.value })
+                        }
+                        placeholder={t('store.form.marketing.certNamePlaceholder')}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="cert_issuer">Émetteur *</Label>
+                      <Label htmlFor="cert_issuer">{t('store.form.marketing.certIssuer')}</Label>
                       <Input
                         id="cert_issuer"
                         value={certificationForm.issuer}
-                        onChange={(e) => setCertificationForm({ ...certificationForm, issuer: e.target.value })}
-                        placeholder="Organisme de certification"
+                        onChange={e =>
+                          setCertificationForm({ ...certificationForm, issuer: e.target.value })
+                        }
+                        placeholder={t('store.form.marketing.certIssuerPlaceholder')}
                       />
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="cert_image">Image (URL)</Label>
+                      <Label htmlFor="cert_image">{t('store.form.marketing.certImage')}</Label>
                       <Input
                         id="cert_image"
                         value={certificationForm.image_url}
-                        onChange={(e) => setCertificationForm({ ...certificationForm, image_url: e.target.value })}
+                        onChange={e =>
+                          setCertificationForm({ ...certificationForm, image_url: e.target.value })
+                        }
                         placeholder="https://example.com/cert.jpg"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="cert_verification">URL de vérification</Label>
+                      <Label htmlFor="cert_verification">
+                        {t('store.form.marketing.certVerificationUrl')}
+                      </Label>
                       <Input
                         id="cert_verification"
                         value={certificationForm.verification_url}
-                        onChange={(e) => setCertificationForm({ ...certificationForm, verification_url: e.target.value })}
-                        placeholder="https://example.com/verify"
+                        onChange={e =>
+                          setCertificationForm({
+                            ...certificationForm,
+                            verification_url: e.target.value,
+                          })
+                        }
+                        placeholder={t('store.form.marketing.certVerificationPlaceholder')}
                       />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="cert_expiry">Date d'expiration</Label>
+                    <Label htmlFor="cert_expiry">{t('store.form.marketing.certExpiry')}</Label>
                     <Input
                       id="cert_expiry"
                       type="date"
                       value={certificationForm.expiry_date}
-                      onChange={(e) => setCertificationForm({ ...certificationForm, expiry_date: e.target.value })}
+                      onChange={e =>
+                        setCertificationForm({ ...certificationForm, expiry_date: e.target.value })
+                      }
                     />
                   </div>
                   <Button
@@ -765,7 +812,9 @@ export const StoreMarketingContentComponent : React.FC<StoreMarketingContentProp
                     disabled={!certificationForm.name || !certificationForm.issuer}
                     className="w-full"
                   >
-                    {editingCertification !== null ? 'Modifier' : 'Ajouter'} la certification
+                    {editingCertification !== null
+                      ? t('store.form.marketing.editCertification')
+                      : t('store.form.marketing.addCertification')}
                   </Button>
                 </CardContent>
               </Card>
@@ -789,7 +838,11 @@ export const StoreMarketingContentComponent : React.FC<StoreMarketingContentProp
                             <p className="text-sm text-muted-foreground">{cert.issuer}</p>
                             {cert.expiry_date && (
                               <p className="text-xs text-muted-foreground mt-1">
-                                Expire le: {new Date(cert.expiry_date).toLocaleDateString('fr-FR')}
+                                {t('store.form.marketing.expiresOn', {
+                                  date: new Date(cert.expiry_date).toLocaleDateString(
+                                    i18n.language
+                                  ),
+                                })}
                               </p>
                             )}
                           </div>
@@ -801,7 +854,7 @@ export const StoreMarketingContentComponent : React.FC<StoreMarketingContentProp
                                 onClick={() => window.open(cert.verification_url, '_blank')}
                                 className="flex-1"
                               >
-                                Vérifier
+                                {t('store.form.marketing.verify')}
                               </Button>
                             )}
                             <Button
@@ -833,11 +886,3 @@ export const StoreMarketingContentComponent : React.FC<StoreMarketingContentProp
     </Card>
   );
 };
-
-
-
-
-
-
-
-

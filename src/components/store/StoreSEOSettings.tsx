@@ -10,8 +10,8 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Search, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useSpaceInputFix } from '@/hooks/useSpaceInputFix';
-import { Badge } from '@/components/ui/badge';
 import { SEOSerpPreview } from '@/components/seo/SEOSerpPreview';
 
 interface StoreSEOSettingsProps {
@@ -26,7 +26,7 @@ interface StoreSEOSettingsProps {
   onChange: (field: string, value: string) => void;
 }
 
-export const StoreSEOSettings : React.FC<StoreSEOSettingsProps> = ({
+export const StoreSEOSettings: React.FC<StoreSEOSettingsProps> = ({
   metaTitle,
   metaDescription,
   metaKeywords,
@@ -37,6 +37,7 @@ export const StoreSEOSettings : React.FC<StoreSEOSettingsProps> = ({
   faviconUrl,
   onChange,
 }) => {
+  const { t } = useTranslation();
   const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
 
   const metaTitleLength = metaTitle.length;
@@ -49,21 +50,18 @@ export const StoreSEOSettings : React.FC<StoreSEOSettingsProps> = ({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Search className="h-5 w-5" />
-          Configuration SEO
+          {t('store.form.seo.title')}
         </CardTitle>
-        <CardDescription>
-          Optimisez le référencement de votre boutique pour les moteurs de recherche
-        </CardDescription>
+        <CardDescription>{t('store.form.seo.description')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Meta Title */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label htmlFor="meta_title">
-              Titre SEO (Meta Title) *
-            </Label>
+            <Label htmlFor="meta_title">{t('store.form.seo.metaTitle')}</Label>
             <div className="flex items-center gap-2">
-              <span className={`text-xs ${metaTitleOptimal ? 'text-green-600' : 'text-muted-foreground'}`}>
+              <span
+                className={`text-xs ${metaTitleOptimal ? 'text-green-600' : 'text-muted-foreground'}`}
+              >
                 {metaTitleLength}/60
               </span>
               {metaTitleOptimal ? (
@@ -76,38 +74,35 @@ export const StoreSEOSettings : React.FC<StoreSEOSettingsProps> = ({
           <Input
             id="meta_title"
             value={metaTitle}
-            onChange={(e) => onChange('meta_title', e.target.value)}
+            onChange={e => onChange('meta_title', e.target.value)}
             onKeyDown={handleSpaceKeyDown}
-            placeholder="Nom de votre boutique - Description courte"
+            placeholder={t('store.form.seo.metaTitlePlaceholder')}
             maxLength={60}
           />
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             {!metaTitleOptimal && (
               <>
                 <AlertCircle className="h-3 w-3" />
-                <span>Recommandé : entre 50 et 60 caractères</span>
+                <span>{t('store.form.seo.metaTitleRecommended')}</span>
               </>
             )}
             {metaTitleOptimal && (
               <>
                 <CheckCircle2 className="h-3 w-3 text-green-600" />
-                <span className="text-green-600">Longueur optimale</span>
+                <span className="text-green-600">{t('store.form.seo.metaTitleOptimal')}</span>
               </>
             )}
           </div>
-          <p className="text-xs text-muted-foreground">
-            Ce titre apparaîtra dans les résultats de recherche Google
-          </p>
+          <p className="text-xs text-muted-foreground">{t('store.form.seo.metaTitleHint')}</p>
         </div>
 
-        {/* Meta Description */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label htmlFor="meta_description">
-              Description SEO (Meta Description) *
-            </Label>
+            <Label htmlFor="meta_description">{t('store.form.seo.metaDescription')}</Label>
             <div className="flex items-center gap-2">
-              <span className={`text-xs ${metaDescriptionOptimal ? 'text-green-600' : 'text-muted-foreground'}`}>
+              <span
+                className={`text-xs ${metaDescriptionOptimal ? 'text-green-600' : 'text-muted-foreground'}`}
+              >
                 {metaDescriptionLength}/160
               </span>
               {metaDescriptionOptimal ? (
@@ -120,9 +115,9 @@ export const StoreSEOSettings : React.FC<StoreSEOSettingsProps> = ({
           <Textarea
             id="meta_description"
             value={metaDescription}
-            onChange={(e) => onChange('meta_description', e.target.value)}
+            onChange={e => onChange('meta_description', e.target.value)}
             onKeyDown={handleSpaceKeyDown}
-            placeholder="Décrivez votre boutique en 2-3 phrases. Incluez des mots-clés pertinents."
+            placeholder={t('store.form.seo.metaDescriptionPlaceholder')}
             rows={3}
             maxLength={160}
           />
@@ -130,86 +125,75 @@ export const StoreSEOSettings : React.FC<StoreSEOSettingsProps> = ({
             {!metaDescriptionOptimal && (
               <>
                 <AlertCircle className="h-3 w-3" />
-                <span>Recommandé : entre 120 et 160 caractères</span>
+                <span>{t('store.form.seo.metaDescriptionRecommended')}</span>
               </>
             )}
             {metaDescriptionOptimal && (
               <>
                 <CheckCircle2 className="h-3 w-3 text-green-600" />
-                <span className="text-green-600">Longueur optimale</span>
+                <span className="text-green-600">{t('store.form.seo.metaTitleOptimal')}</span>
               </>
             )}
           </div>
-          <p className="text-xs text-muted-foreground">
-            Cette description apparaîtra sous le titre dans les résultats de recherche
-          </p>
+          <p className="text-xs text-muted-foreground">{t('store.form.seo.metaDescriptionHint')}</p>
         </div>
 
-        {/* Meta Keywords */}
         <div className="space-y-2">
-          <Label htmlFor="meta_keywords">Mots-clés SEO</Label>
+          <Label htmlFor="meta_keywords">{t('store.form.seo.metaKeywords')}</Label>
           <Input
             id="meta_keywords"
             value={metaKeywords}
-            onChange={(e) => onChange('meta_keywords', e.target.value)}
+            onChange={e => onChange('meta_keywords', e.target.value)}
             onKeyDown={handleSpaceKeyDown}
-            placeholder="boutique, e-commerce, produits, vente en ligne"
+            placeholder={t('store.form.seo.metaKeywordsPlaceholder')}
           />
-          <p className="text-xs text-muted-foreground">
-            Séparez les mots-clés par des virgules. Exemple : "boutique, e-commerce, produits digitaux"
-          </p>
+          <p className="text-xs text-muted-foreground">{t('store.form.seo.metaKeywordsHint')}</p>
         </div>
 
-        {/* Open Graph */}
         <div className="border-t pt-4">
-          <h4 className="text-sm font-semibold mb-4">Open Graph (Réseaux sociaux)</h4>
+          <h4 className="text-sm font-semibold mb-4">{t('store.form.seo.ogTitle')}</h4>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="og_title">Titre Open Graph</Label>
+              <Label htmlFor="og_title">{t('store.form.seo.ogTitleLabel')}</Label>
               <Input
                 id="og_title"
                 value={ogTitle}
-                onChange={(e) => onChange('og_title', e.target.value)}
+                onChange={e => onChange('og_title', e.target.value)}
                 onKeyDown={handleSpaceKeyDown}
-                placeholder="Titre qui apparaîtra lors du partage sur Facebook, Twitter, etc."
+                placeholder={t('store.form.seo.ogTitlePlaceholder')}
               />
-              <p className="text-xs text-muted-foreground">
-                Si vide, le titre SEO sera utilisé
-              </p>
+              <p className="text-xs text-muted-foreground">{t('store.form.seo.ogTitleHint')}</p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="og_description">Description Open Graph</Label>
+              <Label htmlFor="og_description">{t('store.form.seo.ogDescriptionLabel')}</Label>
               <Textarea
                 id="og_description"
                 value={ogDescription}
-                onChange={(e) => onChange('og_description', e.target.value)}
+                onChange={e => onChange('og_description', e.target.value)}
                 onKeyDown={handleSpaceKeyDown}
-                placeholder="Description qui apparaîtra lors du partage sur les réseaux sociaux"
+                placeholder={t('store.form.seo.ogDescriptionPlaceholder')}
                 rows={3}
               />
               <p className="text-xs text-muted-foreground">
-                Si vide, la description SEO sera utilisée
+                {t('store.form.seo.ogDescriptionHint')}
               </p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="og_image_url">Image Open Graph</Label>
+              <Label htmlFor="og_image_url">{t('store.form.seo.ogImageLabel')}</Label>
               <Input
                 id="og_image_url"
                 type="url"
                 value={ogImageUrl}
-                onChange={(e) => onChange('og_image_url', e.target.value)}
-                placeholder="https://example.com/image.jpg"
+                onChange={e => onChange('og_image_url', e.target.value)}
+                placeholder={t('store.form.seo.ogImagePlaceholder')}
               />
-              <p className="text-xs text-muted-foreground">
-                URL de l'image qui apparaîtra lors du partage. Format recommandé : 1200×630px
-              </p>
+              <p className="text-xs text-muted-foreground">{t('store.form.seo.ogImageHint')}</p>
             </div>
           </div>
         </div>
 
-        {/* Prévisualisation SERP */}
         <div className="border-t pt-4">
           <SEOSerpPreview
             metaTitle={metaTitle}
@@ -222,11 +206,3 @@ export const StoreSEOSettings : React.FC<StoreSEOSettingsProps> = ({
     </Card>
   );
 };
-
-
-
-
-
-
-
-

@@ -4,11 +4,13 @@ import { Check } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { useStoreTheme } from '@/hooks/useStoreTheme';
 import { cn } from '@/lib/utils';
+import { resolveStoreProductPlaceholderUrl } from '@/lib/storefront/store-media-fallbacks';
 
 interface StoreHeaderProps {
   store: Store & {
     logo_url?: string;
     banner_url?: string;
+    placeholder_image_url?: string | null;
     active_clients?: number;
     is_verified?: boolean;
     info_message?: string | null;
@@ -25,6 +27,12 @@ const LOGO_OVERLAP = 'h-8 sm:h-10 md:h-12 lg:h-14 xl:h-16';
 
 const StoreHeader = ({ store }: StoreHeaderProps) => {
   const theme = useStoreTheme(store);
+  const bannerUrl = store.banner_url?.trim() || null;
+  const bannerFallbackUrl =
+    !bannerUrl && store.placeholder_image_url?.trim()
+      ? resolveStoreProductPlaceholderUrl(store)
+      : null;
+  const displayBannerUrl = bannerUrl || bannerFallbackUrl;
 
   return (
     <header
@@ -46,15 +54,15 @@ const StoreHeader = ({ store }: StoreHeaderProps) => {
           'xl:max-h-[28rem]'
         )}
         style={{
-          background: store.banner_url
+          background: displayBannerUrl
             ? undefined
             : `linear-gradient(to bottom right, ${theme.primaryColor}33, ${theme.secondaryColor}33, ${theme.accentColor}33)`,
         }}
       >
-        {store.banner_url ? (
+        {displayBannerUrl ? (
           <>
             <img
-              src={store.banner_url}
+              src={displayBannerUrl}
               alt=""
               role="presentation"
               className="absolute inset-0 h-full w-full object-cover object-center"

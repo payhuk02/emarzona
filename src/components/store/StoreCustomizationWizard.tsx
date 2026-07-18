@@ -7,6 +7,7 @@
  */
 
 import React, { useMemo, useCallback, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
@@ -15,11 +16,11 @@ import { cn } from '@/lib/utils';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import type { Store } from '@/hooks/useStores';
 import {
-  getStoreCustomizationSteps,
   isStoreCustomizationTabVisible,
   type StoreCustomizationStepKey,
 } from '@/lib/commerce/store-customization-steps';
 import { resolveStoreCommerceTypeFromStore } from '@/lib/commerce/store-capability-map';
+import { useStoreCustomizationSteps } from '@/hooks/store/useStoreCustomizationSteps';
 
 const TABS_WITH_INTERNAL_SUBSTEPS = new Set(['legal', 'marketing']);
 
@@ -44,12 +45,13 @@ export const StoreCustomizationWizard = ({
   onSave,
   isSubmitting = false,
 }: StoreCustomizationWizardProps) => {
+  const { t } = useTranslation();
   const headerRef = useScrollAnimation<HTMLDivElement>();
   const stepsRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const commerceType = resolveStoreCommerceTypeFromStore(store);
 
-  const steps = useMemo(() => getStoreCustomizationSteps(commerceType), [commerceType]);
+  const steps = useStoreCustomizationSteps(commerceType);
 
   const currentStep = useMemo(() => {
     if (currentTab) {
@@ -176,10 +178,10 @@ export const StoreCustomizationWizard = ({
             </div>
             <div>
               <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-1 sm:mb-2">
-                Personnalisation de la boutique
+                {t('store.customization.title')}
               </h2>
               <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">
-                Configurez les paramètres adaptés à votre type de boutique
+                {t('store.customization.subtitle')}
               </p>
             </div>
           </div>
@@ -188,9 +190,11 @@ export const StoreCustomizationWizard = ({
         <div className="space-y-2">
           <div className="flex items-center justify-between text-xs sm:text-sm">
             <span className="font-medium">
-              Étape {currentStep} sur {steps.length}
+              {t('store.customization.stepOf', { current: currentStep, total: steps.length })}
             </span>
-            <span className="text-muted-foreground">{Math.round(progress)}% complété</span>
+            <span className="text-muted-foreground">
+              {t('store.customization.progressComplete', { percent: Math.round(progress) })}
+            </span>
           </div>
           <Progress value={progress} className="h-1.5 sm:h-2 bg-muted" />
         </div>
@@ -214,7 +218,10 @@ export const StoreCustomizationWizard = ({
                   onClick={() => handleStepClick(step.id)}
                   role="tab"
                   aria-selected={isActive}
-                  aria-label={`Étape ${step.id}: ${step.title}`}
+                  aria-label={t('store.customization.stepAriaLabel', {
+                    id: step.id,
+                    title: step.title,
+                  })}
                   className={cn(
                     'relative p-2.5 sm:p-3 rounded-lg border-2 transition-all duration-200 text-left',
                     'hover:shadow-md hover:scale-[1.02] touch-manipulation active:scale-[0.98]',
@@ -289,10 +296,10 @@ export const StoreCustomizationWizard = ({
             {React.createElement(activeStep?.icon || Info, {
               className: 'h-4 w-4 sm:h-5 sm:w-5',
             })}
-            {activeStep?.title || 'Informations'}
+            {activeStep?.title || t('store.customization.defaultStepTitle')}
           </CardTitle>
           <CardDescription className="text-xs sm:text-sm flex items-center gap-2">
-            {activeStep?.description || 'Configurez les paramètres de base'}
+            {activeStep?.description || t('store.customization.defaultStepDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent className="p-3 sm:p-4 lg:p-6 pt-0">
@@ -306,10 +313,10 @@ export const StoreCustomizationWizard = ({
               >
                 <Save className="h-4 w-4" />
                 {isSubmitting
-                  ? 'Enregistrement...'
+                  ? t('store.customization.saving')
                   : isLastStep
-                    ? 'Enregistrer'
-                    : 'Enregistrer et continuer'}
+                    ? t('store.customization.save')
+                    : t('store.customization.saveAndContinue')}
                 {!isLastStep && !isSubmitting && <ChevronRight className="h-4 w-4" />}
               </Button>
             </div>

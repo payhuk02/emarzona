@@ -54,6 +54,26 @@ export async function fetchCartItems(
   return (data as CartItem[]) ?? [];
 }
 
+export async function fetchStoreCartMedia(
+  storeId: string,
+  client: DbClient = supabase
+): Promise<{ name: string; slug: string; placeholder_image_url: string | null } | null> {
+  const { data, error } = await client
+    .from('stores_public')
+    .select('name, slug, placeholder_image_url')
+    .eq('id', storeId)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) return null;
+
+  return {
+    name: data.name,
+    slug: data.slug,
+    placeholder_image_url: data.placeholder_image_url,
+  };
+}
+
 export async function fetchProductForCart(
   productId: string,
   client: DbClient = supabase

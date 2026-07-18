@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Copy, ExternalLink, Globe } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { generateStoreUrl } from '@/lib/store-utils';
 import { useNavigate } from 'react-router-dom';
 import StoreSlugEditor from '../StoreSlugEditor';
@@ -18,34 +19,70 @@ interface StoreUrlTabProps {
   updateStore: (updates: Partial<Store>) => Promise<boolean>;
 }
 
-export const StoreUrlTab = ({ store, storeUrl, isSubmitting, handleSlugUpdate, checkSlugAvailability, handleCopyUrl, updateStore }: StoreUrlTabProps) => {
+export const StoreUrlTab = ({
+  store,
+  storeUrl,
+  handleSlugUpdate,
+  checkSlugAvailability,
+  handleCopyUrl,
+}: StoreUrlTabProps) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   return (
     <div className="space-y-6">
-      <StoreSlugEditor currentSlug={store.slug} onSlugChange={handleSlugUpdate} onCheckAvailability={checkSlugAvailability} storeId={store.id} />
+      <StoreSlugEditor
+        currentSlug={store.slug}
+        onSlugChange={handleSlugUpdate}
+        onCheckAvailability={checkSlugAvailability}
+        storeId={store.id}
+      />
 
       <Card className="shadow-medium border-primary/20">
         <CardHeader>
-          <CardTitle className="text-lg sm:text-xl">Lien de votre boutique</CardTitle>
-          <CardDescription className="text-sm">Partagez ce lien pour que vos clients accèdent à votre boutique</CardDescription>
+          <CardTitle className="text-lg sm:text-xl">{t('store.tabs.url.linkTitle')}</CardTitle>
+          <CardDescription className="text-sm">
+            {t('store.tabs.url.linkDescription')}
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 px-4 sm:px-6">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-            <Input value={storeUrl} readOnly className="font-mono text-xs sm:text-sm flex-1 touch-manipulation" />
+            <Input
+              value={storeUrl}
+              readOnly
+              className="font-mono text-xs sm:text-sm flex-1 touch-manipulation"
+            />
             <div className="flex gap-2">
-              <Button variant="outline" size="icon" onClick={handleCopyUrl} title="Copier le lien" className="touch-manipulation flex-1 sm:flex-none" aria-label="Copier le lien de la boutique">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleCopyUrl}
+                title={t('store.tabs.url.copyLink')}
+                className="touch-manipulation flex-1 sm:flex-none"
+                aria-label={t('store.tabs.url.copyLinkAria')}
+              >
                 <Copy className="h-4 w-4" />
               </Button>
-              <Button variant="outline" size="icon" onClick={() => window.open(storeUrl, '_blank')} title="Ouvrir dans un nouvel onglet" className="touch-manipulation flex-1 sm:flex-none" aria-label="Ouvrir la boutique dans un nouvel onglet">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => window.open(storeUrl, '_blank')}
+                title={t('store.tabs.url.openNewTab')}
+                className="touch-manipulation flex-1 sm:flex-none"
+                aria-label={t('store.tabs.url.openStoreAria')}
+              >
                 <ExternalLink className="h-4 w-4" />
               </Button>
             </div>
           </div>
           <div className="p-3 sm:p-4 bg-muted rounded-lg">
-            <p className="text-xs sm:text-sm"><strong>Format du lien :</strong></p>
+            <p className="text-xs sm:text-sm">
+              <strong>{t('store.tabs.url.linkFormat')}</strong>
+            </p>
             <p className="text-xs text-muted-foreground mt-1 break-all">
-              {store.custom_domain ? `https://${store.custom_domain}` : generateStoreUrl(store.slug, store.subdomain)}
+              {store.custom_domain
+                ? `https://${store.custom_domain}`
+                : generateStoreUrl(store.slug, store.subdomain)}
             </p>
           </div>
         </CardContent>
@@ -55,16 +92,20 @@ export const StoreUrlTab = ({ store, storeUrl, isSubmitting, handleSlugUpdate, c
         <CardHeader>
           <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
             <Globe className="h-5 w-5" />
-            Domaine personnalisé
+            {t('store.tabs.url.customDomainTitle')}
           </CardTitle>
           <CardDescription className="text-sm">
-            Connectez votre propre domaine à votre boutique
+            {t('store.tabs.url.customDomainDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button onClick={() => navigate('/dashboard/domain')} variant="outline" className="w-full">
+          <Button
+            onClick={() => navigate('/dashboard/domain')}
+            variant="outline"
+            className="w-full"
+          >
             <Globe className="h-4 w-4 mr-2" />
-            Gérer mes domaines personnalisés
+            {t('store.tabs.url.manageDomains')}
           </Button>
         </CardContent>
       </Card>

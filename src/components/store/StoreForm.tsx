@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -178,6 +179,7 @@ const StoreForm = ({
   currentStep,
   totalSteps,
 }: StoreFormProps) => {
+  const { t } = useTranslation();
   const [name, setName] = useState(initialData?.name || '');
   const [slug, setSlug] = useState(initialData?.slug || '');
   const [description, setDescription] = useState(initialData?.description || '');
@@ -389,7 +391,7 @@ const StoreForm = ({
         setSlugAvailable(false);
         setValidationErrors(prev => ({
           ...prev,
-          slug: `Le nom "${slugToCheck}" est réservé et ne peut pas être utilisé comme sous-domaine de boutique`,
+          slug: t('store.form.common.slugReserved', { slug: slugToCheck }),
         }));
         return;
       } else {
@@ -411,7 +413,7 @@ const StoreForm = ({
         setIsCheckingSlug(false);
       }
     },
-    [initialData?.id]
+    [initialData?.id, t]
   ); // Note: toast est stable
 
   const handleNameChange = useCallback(
@@ -493,8 +495,8 @@ const StoreForm = ({
       if (!validation.valid) {
         setValidationErrors(validation.errors);
         toast({
-          title: 'Erreurs de validation',
-          description: 'Veuillez corriger les erreurs avant de continuer.',
+          title: t('store.form.common.validationErrorsTitle'),
+          description: t('store.form.common.validationErrorsDescription'),
           variant: 'destructive',
         });
         return;
@@ -502,8 +504,8 @@ const StoreForm = ({
 
       if (slugAvailable === false) {
         toast({
-          title: 'Erreur',
-          description: 'Ce nom de boutique est déjà utilisé',
+          title: t('store.form.common.error'),
+          description: t('store.form.common.slugTaken'),
           variant: 'destructive',
         });
         return;
@@ -517,7 +519,7 @@ const StoreForm = ({
         } = await supabase.auth.getUser();
 
         if (!user) {
-          throw new Error('Vous devez être connecté');
+          throw new Error(t('store.form.common.mustBeLoggedIn'));
         }
 
         if (initialData) {
@@ -743,9 +745,8 @@ const StoreForm = ({
         } else {
           if (!canCreateStore()) {
             toast({
-              title: 'Limite atteinte',
-              description:
-                "Limite de 3 boutiques par utilisateur atteinte. Vous devez supprimer une boutique existante avant d'en créer une nouvelle.",
+              title: t('store.form.common.limitReachedTitle'),
+              description: t('store.form.common.limitReachedDescription'),
               variant: 'destructive',
             });
             return;
@@ -859,9 +860,10 @@ const StoreForm = ({
 
         onSuccess();
       } catch (_error: unknown) {
-        const errorMessage = _error instanceof Error ? _error.message : 'Erreur inconnue';
+        const errorMessage =
+          _error instanceof Error ? _error.message : t('store.form.common.unknownError');
         toast({
-          title: 'Erreur',
+          title: t('store.form.common.error'),
           description: errorMessage,
           variant: 'destructive',
         });
@@ -966,6 +968,7 @@ const StoreForm = ({
       customTrackingScripts,
       customScriptsEnabled,
       commerceType,
+      commerceTypeLocked,
       navigate,
       // Autres
       legalPages,
@@ -976,17 +979,20 @@ const StoreForm = ({
       updateStore,
       canCreateStore,
       toast,
+      t,
     ]
   );
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{initialData ? 'Modifier la boutique' : 'Créer votre boutique'}</CardTitle>
+        <CardTitle>
+          {initialData ? t('store.form.card.editTitle') : t('store.form.card.createTitle')}
+        </CardTitle>
         <CardDescription>
           {initialData
-            ? 'Mettez à jour les informations de votre boutique'
-            : 'Configurez votre boutique en ligne'}
+            ? t('store.form.card.editDescription')
+            : t('store.form.card.createDescription')}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -1001,43 +1007,43 @@ const StoreForm = ({
             >
               <TabsTrigger value="basic" className="flex items-center gap-2">
                 <Info className="h-4 w-4" />
-                <span className="hidden sm:inline">Informations</span>
-                <span className="sm:hidden">Infos</span>
+                <span className="hidden sm:inline">{t('store.wizard.steps.basic.title')}</span>
+                <span className="sm:hidden">{t('store.form.wizardTabs.basicShort')}</span>
               </TabsTrigger>
               <TabsTrigger value="branding" className="flex items-center gap-2">
                 <ImageIcon className="h-4 w-4" />
-                <span className="hidden sm:inline">Image & Design</span>
-                <span className="sm:hidden">Design</span>
+                <span className="hidden sm:inline">{t('store.wizard.steps.branding.title')}</span>
+                <span className="sm:hidden">{t('store.form.wizardTabs.brandingShort')}</span>
               </TabsTrigger>
               <TabsTrigger value="contact" className="flex items-center gap-2">
                 <Globe className="h-4 w-4" />
-                <span className="hidden sm:inline">Contact & Réseaux</span>
-                <span className="sm:hidden">Contact</span>
+                <span className="hidden sm:inline">{t('store.wizard.steps.contact.title')}</span>
+                <span className="sm:hidden">{t('store.form.wizardTabs.contactShort')}</span>
               </TabsTrigger>
               <TabsTrigger value="theme" className="flex items-center gap-2">
                 <Palette className="h-4 w-4" />
-                <span className="hidden lg:inline">Thème</span>
-                <span className="lg:hidden">Thème</span>
+                <span className="hidden lg:inline">{t('store.wizard.steps.theme.title')}</span>
+                <span className="lg:hidden">{t('store.form.wizardTabs.themeShort')}</span>
               </TabsTrigger>
               <TabsTrigger value="seo" className="flex items-center gap-2">
                 <Search className="h-4 w-4" />
-                <span className="hidden lg:inline">SEO</span>
-                <span className="lg:hidden">SEO</span>
+                <span className="hidden lg:inline">{t('store.wizard.steps.seo.title')}</span>
+                <span className="lg:hidden">{t('store.form.wizardTabs.seoShort')}</span>
               </TabsTrigger>
               <TabsTrigger value="location" className="flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
-                <span className="hidden lg:inline">Localisation</span>
-                <span className="lg:hidden">Local.</span>
+                <span className="hidden lg:inline">{t('store.wizard.steps.location.title')}</span>
+                <span className="lg:hidden">{t('store.form.wizardTabs.locationShort')}</span>
               </TabsTrigger>
               <TabsTrigger value="legal" className="flex items-center gap-2">
                 <FileText className="h-4 w-4" />
-                <span className="hidden lg:inline">Pages Légales</span>
-                <span className="lg:hidden">Légal</span>
+                <span className="hidden lg:inline">{t('store.wizard.steps.legal.title')}</span>
+                <span className="lg:hidden">{t('store.form.wizardTabs.legalShort')}</span>
               </TabsTrigger>
               <TabsTrigger value="analytics" className="flex items-center gap-2">
                 <BarChart3 className="h-4 w-4" />
-                <span className="hidden lg:inline">Analytics</span>
-                <span className="lg:hidden">Stats</span>
+                <span className="hidden lg:inline">{t('store.wizard.steps.analytics.title')}</span>
+                <span className="lg:hidden">{t('store.form.wizardTabs.analyticsShort')}</span>
               </TabsTrigger>
             </TabsList>
 
@@ -1057,14 +1063,14 @@ const StoreForm = ({
                 onMetaDescriptionSuggestion={suggestion => setMetaDescription(suggestion)}
               />
               <div className="space-y-2">
-                <Label htmlFor="commerce_type">Type de boutique *</Label>
+                <Label htmlFor="commerce_type">{t('store.form.basicInfo.commerceType')}</Label>
                 <Select
                   value={commerceType}
                   onValueChange={value => setCommerceType(value as StoreCommerceType)}
                   disabled={commerceTypeLocked}
                 >
                   <SelectTrigger id="commerce_type">
-                    <SelectValue placeholder="Choisir un type de boutique" />
+                    <SelectValue placeholder={t('store.form.basicInfo.commerceTypePlaceholder')} />
                   </SelectTrigger>
                   <SelectContent>
                     {Object.entries(STORE_COMMERCE_TYPE_LABELS).map(([value, label]) => (
@@ -1077,29 +1083,26 @@ const StoreForm = ({
                 {commerceTypeLocked ? (
                   <Alert>
                     <AlertDescription>
-                      Le type de boutique est verrouillé car {catalogProductCount} produit
-                      {catalogProductCount > 1 ? 's sont' : ' est'} déjà publié
-                      {catalogProductCount > 1 ? 's' : ''}. Créez une nouvelle boutique pour changer
-                      de vertical.
+                      {t('store.form.basicInfo.commerceTypeLocked', { count: catalogProductCount })}
                     </AlertDescription>
                   </Alert>
                 ) : (
                   <p className="text-xs text-muted-foreground">
                     {isEditing
-                      ? 'Le type ne pourra plus être modifié après publication du premier produit.'
-                      : "L'abonnement est requis uniquement pour le type Produits physiques."}
+                      ? t('store.form.basicInfo.commerceTypeEditHint')
+                      : t('store.form.basicInfo.commerceTypeCreateHint')}
                   </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="name">Nom de la boutique *</Label>
+                <Label htmlFor="name">{t('store.form.basicInfo.storeName')} *</Label>
                 <Input
                   id="name"
                   value={name}
                   onChange={e => handleNameChange(e.target.value)}
                   onKeyDown={handleSpaceKeyDown}
-                  placeholder="Ma Boutique Pro"
+                  placeholder={t('store.form.basicInfo.namePlaceholder')}
                   required
                 />
               </div>
@@ -1107,7 +1110,7 @@ const StoreForm = ({
               <div className="space-y-2">
                 <StoreFieldHelper field="slug">
                   <Label htmlFor="slug">
-                    Nom d'URL (slug) *
+                    {t('store.form.basicInfo.urlSlug')}
                     {isCheckingSlug && (
                       <Loader2 className="inline-block ml-2 h-4 w-4 animate-spin" />
                     )}
@@ -1132,7 +1135,7 @@ const StoreForm = ({
                       });
                     }
                   }}
-                  placeholder="ma-boutique-pro"
+                  placeholder={t('store.form.basicInfo.urlSlugPlaceholder')}
                   required
                   className={validationErrors.slug ? 'border-destructive' : ''}
                 />
@@ -1144,68 +1147,67 @@ const StoreForm = ({
                 )}
                 {slug && (
                   <p className="text-sm text-muted-foreground">
-                    Votre boutique sera accessible à :
+                    {t('store.form.basicInfo.storeAccessibleAt')}
                     <span className="font-mono ml-1">
                       {generateStoreUrl(slug, null, undefined)}
                     </span>
                     <span className="text-xs text-muted-foreground ml-2">
-                      (Le sous-domaine sera généré automatiquement)
+                      {t('store.form.basicInfo.subdomainAuto')}
                     </span>
                   </p>
                 )}
                 {slugAvailable === false && (
                   <p className="text-sm text-destructive">
-                    Ce nom de boutique est déjà pris. Veuillez en choisir un autre.
+                    {t('store.form.common.slugTakenChooseOther')}
                   </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Description courte</Label>
+                <Label htmlFor="description">{t('store.form.basicInfo.shortDescription')}</Label>
                 <Textarea
                   id="description"
                   value={description}
                   onChange={e => setDescription(e.target.value)}
                   onKeyDown={handleSpaceKeyDown}
-                  placeholder="Décrivez votre boutique en quelques mots..."
+                  placeholder={t('store.form.basicInfo.descriptionPlaceholder')}
                   rows={3}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Cette description apparaîtra sur la page de votre boutique
+                  {t('store.form.basicInfo.descriptionHint')}
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="about">À propos (optionnel)</Label>
+                <Label htmlFor="about">{t('store.form.basicInfo.aboutOptional')}</Label>
                 <Textarea
                   id="about"
                   value={about}
                   onChange={e => setAbout(e.target.value)}
                   onKeyDown={handleSpaceKeyDown}
-                  placeholder="Racontez l'histoire de votre boutique, vos valeurs, votre mission..."
+                  placeholder={t('store.form.basicInfo.aboutPlaceholder')}
                   rows={5}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Texte détaillé qui apparaîtra dans l'onglet "À propos" de votre boutique
+                  {t('store.form.basicInfo.aboutTabHint')}
                 </p>
               </div>
 
               <div className="space-y-4 border-t pt-4">
                 <div className="space-y-2">
-                  <Label htmlFor="info_message">Message informatif (optionnel)</Label>
+                  <Label htmlFor="info_message">{t('store.form.infoMessage.label')}</Label>
                   <Textarea
                     id="info_message"
                     value={infoMessage}
                     onChange={e => setInfoMessage(e.target.value)}
                     onKeyDown={handleSpaceKeyDown}
-                    placeholder="Ex: 🎉 Promotion spéciale : -20% sur tous les produits jusqu'au 31 janvier !"
+                    placeholder={t('store.form.infoMessage.placeholder')}
                     rows={3}
                     maxLength={500}
                   />
                   <div className="flex items-center justify-between">
                     <p className="text-xs text-muted-foreground">
-                      Message qui s'affichera en haut de votre boutique (promotions, alertes,
-                      annonces, etc.)
+                      {t('store.form.infoMessage.hint')}
                     </p>
                     <span className="text-xs text-muted-foreground">{infoMessage.length}/500</span>
                   </div>
@@ -1217,7 +1219,7 @@ const StoreForm = ({
                       <div className="space-y-2">
                         <Label htmlFor="info_message_color" className="flex items-center gap-2">
                           <Palette className="h-4 w-4" />
-                          Couleur du message
+                          {t('store.form.infoMessage.color')}
                         </Label>
                         <div className="flex items-center gap-2">
                           <Input
@@ -1237,18 +1239,22 @@ const StoreForm = ({
                           />
                         </div>
                         <p className="text-xs text-muted-foreground">
-                          Format hexadécimal (ex: #3b82f6)
+                          {t('store.form.infoMessage.colorHint')}
                         </p>
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="info_message_font">Police du message</Label>
+                        <Label htmlFor="info_message_font">
+                          {t('store.form.infoMessage.font')}
+                        </Label>
                         <Select value={infoMessageFont} onValueChange={setInfoMessageFont}>
                           <SelectTrigger id="info_message_font">
-                            <SelectValue placeholder="Choisir une police" />
+                            <SelectValue placeholder={t('store.form.common.chooseFont')} />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="Inter">Inter (par défaut)</SelectItem>
+                            <SelectItem value="Inter">
+                              {t('store.form.common.fontDefaultInter')}
+                            </SelectItem>
                             <SelectItem value="Roboto">Roboto</SelectItem>
                             <SelectItem value="Open Sans">Open Sans</SelectItem>
                             <SelectItem value="Lato">Lato</SelectItem>
@@ -1261,13 +1267,13 @@ const StoreForm = ({
                           </SelectContent>
                         </Select>
                         <p className="text-xs text-muted-foreground">
-                          Police utilisée pour afficher le message
+                          {t('store.form.infoMessage.fontHint')}
                         </p>
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <Label>Aperçu du message</Label>
+                      <Label>{t('store.form.infoMessage.preview')}</Label>
                       <div
                         className="p-4 rounded-lg border-2 border-dashed"
                         style={{
@@ -1282,11 +1288,11 @@ const StoreForm = ({
                             fontFamily: infoMessageFont,
                           }}
                         >
-                          {infoMessage || 'Votre message apparaîtra ici...'}
+                          {infoMessage || t('store.form.infoMessage.previewPlaceholder')}
                         </p>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Aperçu de l'apparence du message sur votre boutique
+                        {t('store.form.infoMessage.previewHint')}
                       </p>
                     </div>
                   </>
@@ -1294,10 +1300,10 @@ const StoreForm = ({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="currency">Devise par défaut</Label>
+                <Label htmlFor="currency">{t('store.form.basicInfo.defaultCurrency')}</Label>
                 <CurrencySelect value={defaultCurrency} onValueChange={setDefaultCurrency} />
                 <p className="text-sm text-muted-foreground">
-                  Cette devise sera utilisée par défaut pour vos nouveaux produits
+                  {t('store.form.basicInfo.currencyDefaultHint')}
                 </p>
               </div>
             </TabsContent>
@@ -1308,75 +1314,75 @@ const StoreForm = ({
                 <div>
                   <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
                     <ImageIcon className="h-4 w-4" />
-                    Images de votre boutique
+                    {t('store.form.branding.imagesTitle')}
                   </h3>
                   <p className="text-xs text-muted-foreground mb-4">
-                    Personnalisez l'apparence de votre boutique avec un logo et une bannière
-                    professionnels
+                    {t('store.form.branding.imagesDescription')}
                   </p>
                 </div>
 
                 <div className="space-y-4">
                   <StoreImageUpload
-                    label="Logo de la boutique"
+                    label={t('store.form.branding.logoLabel')}
                     value={logoUrl}
                     onChange={setLogoUrl}
                     aspectRatio="square"
-                    description="Format recommandé: 500×500 (ratio 1:1) pour les logos. Le logo apparaîtra sur votre page boutique."
+                    description={t('store.form.branding.logoDescription')}
                     maxSize={5}
                     imageType="store-logo"
                   />
 
                   <StoreImageUpload
-                    label="Bannière de la boutique"
+                    label={t('store.form.branding.bannerLabel')}
                     value={bannerUrl}
                     onChange={setBannerUrl}
                     aspectRatio="banner"
-                    description="Format recommandé: 1920×600 (ratio 16:5) pour les bannières. La bannière apparaîtra en haut de votre page boutique."
+                    description={t('store.form.branding.bannerDescription')}
                     maxSize={10}
                     imageType="store-banner"
                   />
 
-                  {/* Phase 2 - Images supplémentaires */}
                   <div className="pt-4 border-t">
-                    <h4 className="text-sm font-semibold mb-3">Images supplémentaires</h4>
+                    <h4 className="text-sm font-semibold mb-3">
+                      {t('store.form.branding.extraImagesTitle')}
+                    </h4>
                     <div className="space-y-4">
                       <StoreImageUpload
-                        label="Favicon"
+                        label={t('store.form.branding.faviconLabel')}
                         value={faviconUrl}
                         onChange={setFaviconUrl}
                         aspectRatio="square"
-                        description="Format recommandé: 32×32 ou 64×64 pixels. Icône affichée dans l'onglet du navigateur."
+                        description={t('store.form.branding.faviconDescription')}
                         maxSize={1}
                         imageType="store-favicon"
                       />
 
                       <StoreImageUpload
-                        label="Apple Touch Icon"
+                        label={t('store.form.branding.appleTouchLabel')}
                         value={appleTouchIconUrl}
                         onChange={setAppleTouchIconUrl}
                         aspectRatio="square"
-                        description="Format recommandé: 180×180 pixels. Icône utilisée sur iOS lorsque la boutique est ajoutée à l'écran d'accueil."
+                        description={t('store.form.branding.appleTouchDescription')}
                         maxSize={2}
                         imageType="store-apple-touch-icon"
                       />
 
                       <StoreImageUpload
-                        label="Filigrane (Watermark)"
+                        label={t('store.form.branding.watermarkLabel')}
                         value={watermarkUrl}
                         onChange={setWatermarkUrl}
                         aspectRatio="square"
-                        description="Format recommandé: Image transparente. Filigrane appliqué sur les images de produits (optionnel)."
+                        description={t('store.form.branding.watermarkDescription')}
                         maxSize={5}
                         imageType="store-watermark"
                       />
 
                       <StoreImageUpload
-                        label="Image de remplacement (Placeholder)"
+                        label={t('store.form.branding.placeholderLabel')}
                         value={placeholderImageUrl}
                         onChange={setPlaceholderImageUrl}
                         aspectRatio="square"
-                        description="Format recommandé: 800×800 pixels. Image utilisée lorsqu'une image de produit n'est pas disponible."
+                        description={t('store.form.branding.placeholderDescription')}
                         maxSize={5}
                         imageType="store-placeholder"
                       />
@@ -1392,108 +1398,109 @@ const StoreForm = ({
                 <div>
                   <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
                     <Mail className="h-4 w-4" />
-                    Informations de contact
+                    {t('store.form.contact.sectionTitle')}
                   </h3>
                   <p className="text-xs text-muted-foreground mb-4">
-                    Permettez à vos clients de vous contacter facilement
+                    {t('store.form.contact.sectionDescription')}
                   </p>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="contact_email">
                     <Mail className="inline-block h-4 w-4 mr-2" />
-                    Email de contact
+                    {t('store.form.contact.email')}
                   </Label>
                   <Input
                     id="contact_email"
                     type="email"
                     value={contactEmail}
                     onChange={e => setContactEmail(e.target.value)}
-                    placeholder="contact@votreboutique.com"
+                    placeholder={t('store.form.contact.emailPlaceholder')}
                   />
                   <p className="text-xs text-muted-foreground">
-                    Cet email sera affiché sur votre page boutique pour les demandes de contact
+                    {t('store.form.contact.emailHint')}
                   </p>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="contact_phone">
                     <Phone className="inline-block h-4 w-4 mr-2" />
-                    Téléphone de contact
+                    {t('store.form.contact.phone')}
                   </Label>
                   <Input
                     id="contact_phone"
                     type="tel"
                     value={contactPhone}
                     onChange={e => setContactPhone(e.target.value)}
-                    placeholder="+226 XX XX XX XX"
+                    placeholder={t('store.form.contact.phonePlaceholder')}
                   />
                   <p className="text-xs text-muted-foreground">
-                    Numéro de téléphone pour contacter votre boutique
+                    {t('store.form.contact.phoneHint')}
                   </p>
                 </div>
 
-                {/* Phase 2 - Contacts supplémentaires */}
                 <div className="pt-4 border-t">
-                  <h4 className="text-sm font-semibold mb-3">Contacts spécialisés (optionnel)</h4>
+                  <h4 className="text-sm font-semibold mb-3">
+                    {t('store.form.contact.extraTitle')}
+                  </h4>
                   <p className="text-xs text-muted-foreground mb-4">
-                    Ajoutez des contacts dédiés pour différents services
+                    {t('store.form.contact.extraDescription')}
                   </p>
                   <div className="space-y-3">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="space-y-2">
                         <Label htmlFor="support_email">
                           <Mail className="inline-block h-4 w-4 mr-2" />
-                          Email Support
+                          {t('store.form.contact.supportEmail')}
                         </Label>
                         <Input
                           id="support_email"
                           type="email"
                           value={supportEmail}
                           onChange={e => setSupportEmail(e.target.value)}
-                          placeholder="support@votreboutique.com"
+                          placeholder={t('store.form.contact.supportEmailPlaceholder')}
                         />
                       </div>
 
                       <div className="space-y-2">
                         <Label htmlFor="sales_email">
                           <Mail className="inline-block h-4 w-4 mr-2" />
-                          Email Ventes
+                          {t('store.form.contact.salesEmail')}
                         </Label>
                         <Input
                           id="sales_email"
                           type="email"
                           value={salesEmail}
                           onChange={e => setSalesEmail(e.target.value)}
-                          placeholder="ventes@votreboutique.com"
+                          placeholder={t('store.form.contact.salesEmailPlaceholder')}
                         />
                       </div>
 
                       <div className="space-y-2">
                         <Label htmlFor="press_email">
                           <Mail className="inline-block h-4 w-4 mr-2" />
-                          Email Presse
+                          {t('store.form.contact.pressEmail')}
                         </Label>
                         <Input
                           id="press_email"
                           type="email"
                           value={pressEmail}
                           onChange={e => setPressEmail(e.target.value)}
-                          placeholder="presse@votreboutique.com"
+                          placeholder={t('store.form.contact.pressEmailPlaceholder')}
                         />
                       </div>
 
                       <div className="space-y-2">
                         <Label htmlFor="partnership_email">
                           <Mail className="inline-block h-4 w-4 mr-2" />
-                          Email Partenariats
+                          {t('store.form.contact.partnershipEmail')}
                         </Label>
                         <Input
                           id="partnership_email"
                           type="email"
                           value={partnershipEmail}
                           onChange={e => setPartnershipEmail(e.target.value)}
-                          placeholder="partenariats@votreboutique.com"
+                          placeholder={t('store.form.contact.partnershipEmailPlaceholder')}
                         />
                       </div>
                     </div>
@@ -1502,56 +1509,56 @@ const StoreForm = ({
                       <div className="space-y-2">
                         <Label htmlFor="support_phone">
                           <Phone className="inline-block h-4 w-4 mr-2" />
-                          Téléphone Support
+                          {t('store.form.contact.supportPhone')}
                         </Label>
                         <Input
                           id="support_phone"
                           type="tel"
                           value={supportPhone}
                           onChange={e => setSupportPhone(e.target.value)}
-                          placeholder="+226 XX XX XX XX"
+                          placeholder={t('store.form.contact.phonePlaceholder')}
                         />
                       </div>
 
                       <div className="space-y-2">
                         <Label htmlFor="sales_phone">
                           <Phone className="inline-block h-4 w-4 mr-2" />
-                          Téléphone Ventes
+                          {t('store.form.contact.salesPhone')}
                         </Label>
                         <Input
                           id="sales_phone"
                           type="tel"
                           value={salesPhone}
                           onChange={e => setSalesPhone(e.target.value)}
-                          placeholder="+226 XX XX XX XX"
+                          placeholder={t('store.form.contact.phonePlaceholder')}
                         />
                       </div>
 
                       <div className="space-y-2">
                         <Label htmlFor="whatsapp_number">
                           <Phone className="inline-block h-4 w-4 mr-2" />
-                          WhatsApp
+                          {t('store.form.contact.whatsapp')}
                         </Label>
                         <Input
                           id="whatsapp_number"
                           type="tel"
                           value={whatsappNumber}
                           onChange={e => setWhatsappNumber(e.target.value)}
-                          placeholder="+226 XX XX XX XX"
+                          placeholder={t('store.form.contact.phonePlaceholder')}
                         />
                       </div>
 
                       <div className="space-y-2">
                         <Label htmlFor="telegram_username">
                           <Globe className="inline-block h-4 w-4 mr-2" />
-                          Telegram
+                          {t('store.form.contact.telegram')}
                         </Label>
                         <Input
                           id="telegram_username"
                           type="text"
                           value={telegramUsername}
                           onChange={e => setTelegramUsername(e.target.value)}
-                          placeholder="@votre_username"
+                          placeholder={t('store.form.contact.telegramPlaceholder')}
                         />
                       </div>
                     </div>
@@ -1563,10 +1570,10 @@ const StoreForm = ({
                 <div>
                   <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
                     <Globe className="h-4 w-4" />
-                    Réseaux sociaux
+                    {t('store.form.social.title')}
                   </h3>
                   <p className="text-xs text-muted-foreground mb-4">
-                    Liez vos réseaux sociaux pour renforcer votre présence en ligne
+                    {t('store.form.social.description')}
                   </p>
                 </div>
 
@@ -1574,145 +1581,146 @@ const StoreForm = ({
                   <div className="space-y-2">
                     <Label htmlFor="facebook_url" className="flex items-center gap-2">
                       <Facebook className="h-4 w-4 text-blue-600" />
-                      Facebook
+                      {t('store.form.social.facebook')}
                     </Label>
                     <Input
                       id="facebook_url"
                       type="url"
                       value={facebookUrl}
                       onChange={e => setFacebookUrl(e.target.value)}
-                      placeholder="https://facebook.com/votreboutique"
+                      placeholder={t('store.form.social.facebookPlaceholder')}
                     />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="instagram_url" className="flex items-center gap-2">
                       <Instagram className="h-4 w-4 text-pink-600" />
-                      Instagram
+                      {t('store.form.social.instagram')}
                     </Label>
                     <Input
                       id="instagram_url"
                       type="url"
                       value={instagramUrl}
                       onChange={e => setInstagramUrl(e.target.value)}
-                      placeholder="https://instagram.com/votreboutique"
+                      placeholder={t('store.form.social.instagramPlaceholder')}
                     />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="twitter_url" className="flex items-center gap-2">
                       <Twitter className="h-4 w-4 text-blue-400" />
-                      Twitter / X
+                      {t('store.form.social.twitter')}
                     </Label>
                     <Input
                       id="twitter_url"
                       type="url"
                       value={twitterUrl}
                       onChange={e => setTwitterUrl(e.target.value)}
-                      placeholder="https://twitter.com/votreboutique"
+                      placeholder={t('store.form.social.twitterPlaceholder')}
                     />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="linkedin_url" className="flex items-center gap-2">
                       <Linkedin className="h-4 w-4 text-blue-700" />
-                      LinkedIn
+                      {t('store.form.social.linkedin')}
                     </Label>
                     <Input
                       id="linkedin_url"
                       type="url"
                       value={linkedinUrl}
                       onChange={e => setLinkedinUrl(e.target.value)}
-                      placeholder="https://linkedin.com/company/votreboutique"
+                      placeholder={t('store.form.social.linkedinPlaceholder')}
                     />
                   </div>
                 </div>
 
-                {/* Phase 2 - Réseaux sociaux supplémentaires */}
                 <div className="pt-4 border-t">
-                  <h4 className="text-sm font-semibold mb-3">Autres réseaux sociaux (optionnel)</h4>
+                  <h4 className="text-sm font-semibold mb-3">
+                    {t('store.form.social.extraTitle')}
+                  </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="space-y-2">
                       <Label htmlFor="youtube_url" className="flex items-center gap-2">
                         <Globe className="h-4 w-4 text-red-600" />
-                        YouTube
+                        {t('store.form.social.youtube')}
                       </Label>
                       <Input
                         id="youtube_url"
                         type="url"
                         value={youtubeUrl}
                         onChange={e => setYoutubeUrl(e.target.value)}
-                        placeholder="https://youtube.com/@votreboutique"
+                        placeholder={t('store.form.social.youtubePlaceholder')}
                       />
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="tiktok_url" className="flex items-center gap-2">
                         <Globe className="h-4 w-4 text-black" />
-                        TikTok
+                        {t('store.form.social.tiktok')}
                       </Label>
                       <Input
                         id="tiktok_url"
                         type="url"
                         value={tiktokUrl}
                         onChange={e => setTiktokUrl(e.target.value)}
-                        placeholder="https://tiktok.com/@votreboutique"
+                        placeholder={t('store.form.social.tiktokPlaceholder')}
                       />
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="pinterest_url" className="flex items-center gap-2">
                         <Globe className="h-4 w-4 text-red-700" />
-                        Pinterest
+                        {t('store.form.social.pinterest')}
                       </Label>
                       <Input
                         id="pinterest_url"
                         type="url"
                         value={pinterestUrl}
                         onChange={e => setPinterestUrl(e.target.value)}
-                        placeholder="https://pinterest.com/votreboutique"
+                        placeholder={t('store.form.social.pinterestPlaceholder')}
                       />
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="snapchat_url" className="flex items-center gap-2">
                         <Globe className="h-4 w-4 text-yellow-400" />
-                        Snapchat
+                        {t('store.form.social.snapchat')}
                       </Label>
                       <Input
                         id="snapchat_url"
                         type="url"
                         value={snapchatUrl}
                         onChange={e => setSnapchatUrl(e.target.value)}
-                        placeholder="https://snapchat.com/add/votreboutique"
+                        placeholder={t('store.form.social.snapchatPlaceholder')}
                       />
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="discord_url" className="flex items-center gap-2">
                         <Globe className="h-4 w-4 text-indigo-600" />
-                        Discord
+                        {t('store.form.social.discord')}
                       </Label>
                       <Input
                         id="discord_url"
                         type="url"
                         value={discordUrl}
                         onChange={e => setDiscordUrl(e.target.value)}
-                        placeholder="https://discord.gg/votreboutique"
+                        placeholder={t('store.form.social.discordPlaceholder')}
                       />
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="twitch_url" className="flex items-center gap-2">
                         <Globe className="h-4 w-4 text-purple-600" />
-                        Twitch
+                        {t('store.form.social.twitch')}
                       </Label>
                       <Input
                         id="twitch_url"
                         type="url"
                         value={twitchUrl}
                         onChange={e => setTwitchUrl(e.target.value)}
-                        placeholder="https://twitch.tv/votreboutique"
+                        placeholder={t('store.form.social.twitchPlaceholder')}
                       />
                     </div>
                   </div>
@@ -1934,14 +1942,14 @@ const StoreForm = ({
                     className="flex-1 sm:flex-none"
                   >
                     <ChevronLeft className="h-4 w-4 mr-2" />
-                    Précédent
+                    {t('store.form.common.previous')}
                   </Button>
                 )}
 
                 {currentStep === totalSteps ? (
                   !initialData ? (
                     <RequireTermsConsent
-                      actionLabel="créer ma boutique"
+                      actionLabel={t('store.form.common.createStoreAction')}
                       onAction={async () => {
                         const form = document.querySelector('form');
                         if (form) {
@@ -1958,10 +1966,10 @@ const StoreForm = ({
                         {isSubmitting ? (
                           <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Création...
+                            {t('store.form.common.creating')}
                           </>
                         ) : (
-                          <>Créer ma boutique</>
+                          <>{t('store.form.common.createStore')}</>
                         )}
                       </Button>
                     </RequireTermsConsent>
@@ -1975,10 +1983,10 @@ const StoreForm = ({
                       {isSubmitting ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Mise à jour...
+                          {t('store.form.common.updating')}
                         </>
                       ) : (
-                        <>Mettre à jour</>
+                        <>{t('store.form.common.update')}</>
                       )}
                     </Button>
                   )
@@ -1990,7 +1998,7 @@ const StoreForm = ({
                       className="flex-1 sm:flex-none ml-auto"
                       size="lg"
                     >
-                      Suivant
+                      {t('store.form.common.next')}
                       <ChevronRight className="h-4 w-4 ml-2" />
                     </Button>
                   )
@@ -2000,7 +2008,7 @@ const StoreForm = ({
               <>
                 {!initialData ? (
                   <RequireTermsConsent
-                    actionLabel="créer ma boutique"
+                    actionLabel={t('store.form.common.createStoreAction')}
                     onAction={async () => {
                       const form = document.querySelector('form');
                       if (form) {
@@ -2017,10 +2025,10 @@ const StoreForm = ({
                       {isSubmitting ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Création...
+                          {t('store.form.common.creating')}
                         </>
                       ) : (
-                        <>Créer ma boutique</>
+                        <>{t('store.form.common.createStore')}</>
                       )}
                     </Button>
                   </RequireTermsConsent>
@@ -2034,10 +2042,10 @@ const StoreForm = ({
                     {isSubmitting ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Mise à jour...
+                        {t('store.form.common.updating')}
                       </>
                     ) : (
-                      <>Mettre à jour la boutique</>
+                      <>{t('store.form.common.updateStore')}</>
                     )}
                   </Button>
                 )}

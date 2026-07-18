@@ -1,44 +1,43 @@
 /**
  * Page Cart - Panier utilisateur complet
- * Date: 26 Janvier 2025
- *
- * Fonctionnalités:
- * - Affichage tous les articles
- * - Modification quantités
- * - Suppression articles
- * - Récapitulatif avec code promo
- * - Responsive et professionnel
  */
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AppPageShell } from '@/components/layout/AppPageShell';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useCart } from '@/hooks/cart/useCart';
 import { useCartThemedStore } from '@/hooks/cart/useCartThemedStore';
 import { validateCheckoutCart } from '@/lib/checkout/cart-validation';
 import { summarizeCartProductTypes } from '@/lib/cart/cart-product-type';
+import { groupCartItemsByStore, isMultiStoreCart } from '@/lib/cart/cart-store-groups';
+import { useCartStoreMedia, resolveCartItemPlaceholder } from '@/hooks/cart/useCartStoreMedia';
 import { CartItem } from '@/components/cart/CartItem';
 import { CartSummary } from '@/components/cart/CartSummary';
 import { CartEmpty } from '@/components/cart/CartEmpty';
 import { StoreThemeProvider } from '@/components/storefront/StoreThemeProvider';
-import { ShoppingBag, Trash2 } from 'lucide-react';
+import { ShoppingBag, Trash2, Store } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePageCustomization } from '@/hooks/usePageCustomization';
 
 export default function Cart() {
+  const { t } = useTranslation();
   const { getValue } = usePageCustomization('cart');
   const { items, summary, isLoading, updateItem, removeItem, clearCart, isEmpty } = useCart();
   const { data: themedStore } = useCartThemedStore(items);
+  const { data: storeMediaMap } = useCartStoreMedia(items);
   const checkoutValidation = useMemo(() => validateCheckoutCart(items), [items]);
   const typeSummary = useMemo(() => summarizeCartProductTypes(items), [items]);
+  const storeGroups = useMemo(() => groupCartItemsByStore(items), [items]);
+  const multiStore = useMemo(() => isMultiStoreCart(items), [items]);
 
   const handleUpdateQuantity = async (itemId: string, quantity: number) => {
     try {
       await updateItem({ item_id: itemId, quantity });
-    } catch (error) {
+    } catch {
       // Error handled in hook
     }
   };
@@ -46,16 +45,16 @@ export default function Cart() {
   const handleRemove = async (itemId: string) => {
     try {
       await removeItem(itemId);
-    } catch (error) {
+    } catch {
       // Error handled in hook
     }
   };
 
   const handleClearCart = async () => {
-    if (window.confirm('Êtes-vous sûr de vouloir vider votre panier ?')) {
+    if (window.confirm(t('cart.multiStore.clearConfirm'))) {
       try {
         await clearCart();
-      } catch (error) {
+      } catch {
         // Error handled in hook
       }
     }
@@ -93,7 +92,6 @@ export default function Cart() {
     <StoreThemeProvider store={themedStore ?? null}>
       <AppPageShell mainClassName="p-3 sm:p-4 md:p-6 lg:p-8">
         <div className="max-w-7xl mx-auto space-y-4 sm:space-y-5 md:space-y-6 store-theme-active">
-          {/* Header */}
           <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
             <div>
               <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold flex items-center gap-1.5 sm:gap-2">
@@ -116,7 +114,7 @@ export default function Cart() {
                 variant="outline"
                 onClick={handleClearCart}
                 className="min-h-[44px] text-destructive hover:text-destructive w-full sm:w-auto"
-                aria-label="Vider le panier"
+                aria-label={t('cart.multiStore.clearAriaLabel')}
               >
                 <Trash2 className="h-4 w-4 sm:h-5 sm:w-5 mr-2" aria-hidden="true" />
                 <span className="text-xs sm:text-sm md:text-base">
@@ -126,9 +124,19 @@ export default function Cart() {
             )}
           </header>
 
+          {multiStore && (
+            <Alert>
+              <Store className="h-4 w-4" aria-hidden="true" />
+              <AlertTitle>{t('cart.multiStore.alertTitle')}</AlertTitle>
+              <AlertDescription>{t('cart.multiStore.alertDescription')}</AlertDescription>
+            </Alert>
+          )}
+
           {typeSummary.length > 1 && (
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-sm text-muted-foreground">Panier multi-type :</span>
+              <span className="text-sm text-muted-foreground">
+                {t('cart.multiStore.multiTypeLabel')}
+              </span>
               {typeSummary.map(entry => (
                 <Badge key={entry.type} variant="outline">
                   {entry.count} {entry.label}
@@ -140,10 +148,7 @@ export default function Cart() {
 
           {checkoutValidation.hasMixedWithService && checkoutValidation.canCheckout && (
             <Alert>
-              <AlertDescription>
-                Panier mixte : votre réservation de service sera payée avec les autres articles de
-                la même boutique.
-              </AlertDescription>
+              <AlertDescription>{t('cart.multiStore.mixedServiceHint')}</AlertDescription>
             </Alert>
           )}
 
@@ -153,22 +158,62 @@ export default function Cart() {
             </Alert>
           )}
 
-          {/* Content */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Liste articles */}
             <section className="lg:col-span-2 space-y-4" aria-label="Articles du panier">
-              {items.map(item => (
-                <CartItem
-                  key={item.id}
-                  item={item}
-                  onUpdateQuantity={handleUpdateQuantity}
-                  onRemove={handleRemove}
-                  isLoading={isLoading}
-                />
-              ))}
+              {storeGroups.map(group => {
+                const storeLabel =
+                  group.storeName ||
+                  t('cart.multiStore.unknownStore') +
+                    (group.storeId ? ` ${group.storeId.substring(0, 8)}` : '');
+
+                return (
+                  <div key={group.storeId ?? 'unknown'} className="space-y-3">
+                    {multiStore && (
+                      <Card className="border-dashed">
+                        <CardHeader className="py-3 px-4">
+                          <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                            <Store className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                            {t('cart.multiStore.sectionLabel', { storeName: storeLabel })}
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-0 pt-0">
+                          <div className="space-y-3 px-4 pb-4">
+                            {group.items.map(item => (
+                              <CartItem
+                                key={item.id}
+                                item={item}
+                                onUpdateQuantity={handleUpdateQuantity}
+                                onRemove={handleRemove}
+                                isLoading={isLoading}
+                                placeholderImageUrl={resolveCartItemPlaceholder(
+                                  item,
+                                  storeMediaMap
+                                )}
+                              />
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                    {!multiStore &&
+                      group.items.map(item => (
+                        <CartItem
+                          key={item.id}
+                          item={item}
+                          onUpdateQuantity={handleUpdateQuantity}
+                          onRemove={handleRemove}
+                          isLoading={isLoading}
+                          placeholderImageUrl={
+                            resolveCartItemPlaceholder(item, storeMediaMap) ??
+                            themedStore?.placeholder_image_url
+                          }
+                        />
+                      ))}
+                  </div>
+                );
+              })}
             </section>
 
-            {/* Récapitulatif */}
             <aside className="lg:col-span-1" aria-label="Récapitulatif du panier">
               <CartSummary summary={summary} />
             </aside>

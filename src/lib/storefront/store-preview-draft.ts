@@ -42,6 +42,8 @@ export type StorePreviewDraft = Partial<
     | 'product_grid_columns'
     | 'product_card_style'
     | 'navigation_style'
+    | 'watermark_url'
+    | 'placeholder_image_url'
   >
 >;
 
@@ -50,6 +52,8 @@ export type StoreAppearanceFormDraft = {
   bannerUrl?: string | null;
   faviconUrl?: string | null;
   appleTouchIconUrl?: string | null;
+  watermarkUrl?: string | null;
+  placeholderImageUrl?: string | null;
   primaryColor?: string;
   secondaryColor?: string;
   accentColor?: string;
@@ -118,7 +122,71 @@ export function appearanceFormToPreviewDraft(form: StoreAppearanceFormDraft): St
     product_grid_columns: form.productGridColumns ?? null,
     product_card_style: form.productCardStyle ?? null,
     navigation_style: form.navigationStyle ?? null,
+    watermark_url: form.watermarkUrl || null,
+    placeholder_image_url: form.placeholderImageUrl || null,
   };
+}
+
+const APPEARANCE_DRAFT_FIELDS: Array<keyof StorePreviewDraft> = [
+  'logo_url',
+  'banner_url',
+  'favicon_url',
+  'apple_touch_icon_url',
+  'watermark_url',
+  'placeholder_image_url',
+  'primary_color',
+  'secondary_color',
+  'accent_color',
+  'background_color',
+  'text_color',
+  'text_secondary_color',
+  'button_primary_color',
+  'button_primary_text',
+  'button_secondary_color',
+  'button_secondary_text',
+  'link_color',
+  'link_hover_color',
+  'border_radius',
+  'shadow_intensity',
+  'heading_font',
+  'body_font',
+  'font_size_base',
+  'heading_size_h1',
+  'heading_size_h2',
+  'heading_size_h3',
+  'line_height',
+  'letter_spacing',
+  'header_style',
+  'footer_style',
+  'sidebar_enabled',
+  'sidebar_position',
+  'product_grid_columns',
+  'product_card_style',
+  'navigation_style',
+];
+
+function normalizeDraftValue(value: unknown): string {
+  if (value === null || value === undefined) return '';
+  if (typeof value === 'boolean') return value ? '1' : '0';
+  return String(value);
+}
+
+/** True when appearance form differs from saved store (preview ≠ published). */
+export function hasAppearanceDraftChanges(store: Store, form: StoreAppearanceFormDraft): boolean {
+  const draft = appearanceFormToPreviewDraft(form);
+  return APPEARANCE_DRAFT_FIELDS.some(field => {
+    const saved = normalizeDraftValue(store[field as keyof Store]);
+    const pending = normalizeDraftValue(draft[field]);
+    return saved !== pending;
+  });
+}
+
+/** Brouillon local ou appearance_draft en base = non publié. */
+export function hasUnpublishedAppearance(store: Store, form: StoreAppearanceFormDraft): boolean {
+  if (store.appearance_draft && typeof store.appearance_draft === 'object') {
+    return true;
+  }
+  return hasAppearanceDraftChanges(store, form);
 }
 
 export function writeStorePreviewDraft(storeId: string, draft: StorePreviewDraft): void {

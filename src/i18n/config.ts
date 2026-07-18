@@ -21,17 +21,41 @@ import sidebarDE from './locales/sidebar-de.json';
 import sidebarPT from './locales/sidebar-pt.json';
 import landingPremiumFR from './locales/landing-premium/fr.json';
 import landingPremiumEN from './locales/landing-premium/en.json';
+import storeFormFR from './locales/store-form-fr.json';
+import storeFormEN from './locales/store-form-en.json';
 import { AVAILABLE_LANGUAGES, type LanguageCode } from './languages';
+
+const mergeStoreLocale = (
+  baseStore: (typeof translationFR)['store'],
+  storeForm: typeof storeFormFR
+) => ({
+  ...baseStore,
+  ...storeForm,
+  tabs: {
+    ...(baseStore?.tabs ?? {}),
+    ...storeForm.tabs,
+  },
+});
 
 export { AVAILABLE_LANGUAGES, type LanguageCode };
 
 // landingPremium FR/EN dans le bundle initial (pages publiques /blog sans passer par la landing)
 const resources = {
   fr: {
-    translation: { ...translationFR, ...sidebarFR, landingPremium: landingPremiumFR },
+    translation: {
+      ...translationFR,
+      ...sidebarFR,
+      landingPremium: landingPremiumFR,
+      store: mergeStoreLocale(translationFR.store, storeFormFR),
+    },
   },
   en: {
-    translation: { ...translationEN, ...sidebarEN, landingPremium: landingPremiumEN },
+    translation: {
+      ...translationEN,
+      ...sidebarEN,
+      landingPremium: landingPremiumEN,
+      store: mergeStoreLocale(translationEN.store, storeFormEN),
+    },
   },
   es: {
     translation: { ...translationES, ...sidebarES },

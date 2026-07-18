@@ -3,6 +3,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Eye, ExternalLink, RefreshCw, X } from 'lucide-react';
 import {
@@ -26,12 +27,13 @@ interface StorePreviewProps {
 }
 
 export const StorePreview: React.FC<StorePreviewProps> = ({ store, formDraft, onClose }) => {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [iframeKey, setIframeKey] = useState(0);
 
   const previewDraft = useMemo(() => appearanceFormToPreviewDraft(formDraft), [formDraft]);
 
-  const publishDraft = useCallback(() => {
+  const syncPreviewDraft = useCallback(() => {
     if (!store?.id) return;
     writeStorePreviewDraft(store.id, previewDraft);
   }, [store?.id, previewDraft]);
@@ -41,7 +43,7 @@ export const StorePreview: React.FC<StorePreviewProps> = ({ store, formDraft, on
     : '';
 
   const handleOpenPreview = () => {
-    publishDraft();
+    syncPreviewDraft();
     setIframeKey(key => key + 1);
     setIsOpen(true);
   };
@@ -52,15 +54,15 @@ export const StorePreview: React.FC<StorePreviewProps> = ({ store, formDraft, on
   };
 
   const handleRefreshPreview = () => {
-    publishDraft();
+    syncPreviewDraft();
     setIframeKey(key => key + 1);
   };
 
   useEffect(() => {
     if (!isOpen || !store?.id) return;
-    publishDraft();
+    syncPreviewDraft();
     setIframeKey(key => key + 1);
-  }, [isOpen, previewDraft, publishDraft, store?.id]);
+  }, [isOpen, previewDraft, syncPreviewDraft, store?.id]);
 
   if (!store?.id) {
     return null;
@@ -77,12 +79,12 @@ export const StorePreview: React.FC<StorePreviewProps> = ({ store, formDraft, on
           className="flex items-center gap-2"
         >
           <Eye className="h-4 w-4" />
-          Prévisualiser la boutique
+          {t('store.preview.openPreview')}
         </Button>
         <Button type="button" variant="ghost" size="sm" asChild>
-          <a href={previewUrl} target="_blank" rel="noopener noreferrer" onClick={publishDraft}>
+          <a href={previewUrl} target="_blank" rel="noopener noreferrer" onClick={syncPreviewDraft}>
             <ExternalLink className="h-4 w-4 mr-2" />
-            Ouvrir dans un nouvel onglet
+            {t('store.preview.openNewTab')}
           </a>
         </Button>
       </div>
@@ -94,11 +96,9 @@ export const StorePreview: React.FC<StorePreviewProps> = ({ store, formDraft, on
               <div>
                 <DialogTitle className="flex items-center gap-2">
                   <Eye className="h-5 w-5" />
-                  Prévisualisation — storefront réel
+                  {t('store.preview.dialogTitle')}
                 </DialogTitle>
-                <DialogDescription>
-                  Rendu identique à la boutique publique, avec vos modifications en cours.
-                </DialogDescription>
+                <DialogDescription>{t('store.preview.dialogDescription')}</DialogDescription>
               </div>
               <div className="flex items-center gap-1">
                 <Button
@@ -106,7 +106,7 @@ export const StorePreview: React.FC<StorePreviewProps> = ({ store, formDraft, on
                   variant="ghost"
                   size="icon"
                   onClick={handleRefreshPreview}
-                  aria-label="Actualiser la prévisualisation"
+                  aria-label={t('store.preview.refreshAriaLabel')}
                 >
                   <RefreshCw className="h-4 w-4" />
                 </Button>
@@ -121,7 +121,7 @@ export const StorePreview: React.FC<StorePreviewProps> = ({ store, formDraft, on
               key={iframeKey}
               src={previewUrl}
               className="h-full w-full border-0 bg-background"
-              title={`Prévisualisation de ${store.name}`}
+              title={t('store.preview.iframeTitle', { name: store.name })}
             />
           </div>
         </DialogContent>

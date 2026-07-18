@@ -546,7 +546,17 @@
     "removeItem": "Remove",
     "updateQuantity": "Update",
     "success": "Product added to cart",
-    "error": "Error adding to cart"
+    "error": "Error adding to cart",
+    "multiStore": {
+      "alertTitle": "Multi-store cart",
+      "alertDescription": "Your cart contains items from multiple stores. A neutral theme is applied; checkout will be processed store by store.",
+      "sectionLabel": "Items from {{storeName}}",
+      "unknownStore": "Store",
+      "mixedServiceHint": "Mixed cart: your service booking will be paid together with other items from the same store.",
+      "multiTypeLabel": "Multi-type cart:",
+      "clearConfirm": "Are you sure you want to empty your cart?",
+      "clearAriaLabel": "Clear cart"
+    }
   },
   "orders": {
     "title": "Orders",
@@ -1495,7 +1505,95 @@
       "feature3": "Accept payments in FCFA and other currencies",
       "feature4": "Manage everything from your dashboard"
     },
-    "goToSettings": "Go to settings"
+    "goToSettings": "Go to settings",
+    "wizard": {
+      "title": "Create your store",
+      "subtitle": "Set up your store by following the steps below",
+      "stepOf": "Step {{current}} of {{total}}",
+      "successTitle": "Store created successfully!",
+      "successDescription": "Your store has been created and configured successfully.",
+      "steps": {
+        "basic": { "title": "Basic information", "description": "Name, description and currency" },
+        "branding": { "title": "Images & design", "description": "Logo, banner and images" },
+        "contact": {
+          "title": "Contact & social",
+          "description": "Contact details and social links"
+        },
+        "theme": { "title": "Theme", "description": "Colors and appearance" },
+        "seo": { "title": "SEO", "description": "Search metadata" },
+        "location": { "title": "Location", "description": "Address and hours" },
+        "legal": { "title": "Legal pages", "description": "Terms, privacy and legal notices" },
+        "analytics": { "title": "Analytics", "description": "Tracking and statistics" }
+      }
+    },
+    "customization": {
+      "title": "Store customization",
+      "subtitle": "Configure settings tailored to your store type",
+      "stepOf": "Step {{current}} of {{total}}",
+      "progressComplete": "{{percent}}% complete",
+      "stepAriaLabel": "Step {{id}}: {{title}}",
+      "defaultStepTitle": "Information",
+      "defaultStepDescription": "Configure basic settings",
+      "save": "Save",
+      "saveAndContinue": "Save and continue",
+      "saving": "Saving...",
+      "steps": {
+        "settings": { "title": "Information", "description": "Name, description, contact" },
+        "appearance": { "title": "Appearance", "description": "Logo, banner, theme" },
+        "location": { "title": "Location", "description": "Address, hours" },
+        "seo": { "title": "SEO", "description": "Search optimization" },
+        "legal": { "title": "Legal pages", "description": "Terms, privacy" },
+        "url": { "title": "URL", "description": "Custom domain" },
+        "marketing": { "title": "Marketing", "description": "Marketing content" },
+        "analytics": { "title": "Analytics", "description": "Statistics" },
+        "commerce": { "title": "Commerce", "description": "Shipping, taxes, payments" },
+        "notifications": { "title": "Notifications", "description": "Alerts and notifications" }
+      }
+    },
+    "preview": {
+      "openPreview": "Preview store",
+      "openNewTab": "Open in new tab",
+      "dialogTitle": "Preview — live storefront",
+      "dialogDescription": "Same rendering as the public store, with your unsaved changes (not visible to visitors until you save).",
+      "refreshAriaLabel": "Refresh preview",
+      "iframeTitle": "Preview of {{name}}"
+    },
+    "appearance": {
+      "previewTitle": "Preview",
+      "previewDescription": "Real-time preview of your customizations",
+      "draftBadge": "Draft",
+      "publishedBadge": "Published",
+      "draftHint": "Visitors see the published version. Preview reflects unsaved changes.",
+      "saveDraft": "Save draft",
+      "publish": "Publish to storefront",
+      "publishing": "Publishing...",
+      "draftSavedTitle": "Draft saved",
+      "draftSavedDescription": "Your appearance changes are saved as a draft and are not yet visible on the public store.",
+      "draftSaveError": "Could not save the appearance draft.",
+      "publishedTitle": "Appearance published",
+      "publishedDescription": "Your public storefront now displays this appearance.",
+      "publishError": "Could not publish appearance.",
+      "publishedAt": "Last published: {{date}}",
+      "themeAppliedTitle": "Theme applied",
+      "themeAppliedDescription": "Theme \"{{name}}\" was applied successfully.",
+      "imagesTitle": "Store images",
+      "imagesDescription": "Your store logo and banner",
+      "logoLabel": "Store logo",
+      "logoHint": "Square format recommended (e.g. 500×500px)",
+      "bannerLabel": "Store banner",
+      "bannerHint": "Landscape format recommended (e.g. 1920×640px)",
+      "extraImagesTitle": "Additional images",
+      "faviconLabel": "Favicon",
+      "faviconHint": "Square format recommended (16×16, 32×32, 48×48px)",
+      "appleTouchLabel": "Apple Touch Icon",
+      "appleTouchHint": "180×180px square recommended",
+      "watermarkLabel": "Watermark",
+      "watermarkHint": "Watermark image to protect your product images",
+      "placeholderLabel": "Placeholder image",
+      "placeholderHint": "Default image for products without a photo",
+      "logoAlt": "Logo",
+      "bannerAlt": "Banner"
+    }
   },
   "affiliate": {
     "dashboard": {

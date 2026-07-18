@@ -579,6 +579,8 @@ const Storefront = ({ previewMode = false, storeOverride = null }: StorefrontPro
                                   product={unifiedProduct}
                                   variant="store"
                                   productCardStyle={store?.product_card_style ?? undefined}
+                                  storePlaceholderImageUrl={store?.placeholder_image_url}
+                                  storeWatermarkUrl={store?.watermark_url}
                                   showAffiliate={true}
                                   showActions={true}
                                   onAction={handleBuyProduct}

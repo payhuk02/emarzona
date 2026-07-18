@@ -198,6 +198,10 @@ export interface UnifiedProductCardProps {
   className?: string;
   /** Style carte produit boutique (minimal | standard | detailed) */
   productCardStyle?: 'minimal' | 'standard' | 'detailed';
+  /** Placeholder boutique pour produits sans image (variant store) */
+  storePlaceholderImageUrl?: string | null;
+  /** Filigrane boutique superposé sur l'image produit (variant store) */
+  storeWatermarkUrl?: string | null;
 }
 
 /**

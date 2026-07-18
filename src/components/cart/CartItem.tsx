@@ -13,15 +13,23 @@ import { Trash2, Plus, Minus } from '@/components/icons';
 import type { CartItem as CartItemType } from '@/types/cart';
 import { formatServiceCartSlotLabel } from '@/lib/cart/service-cart-policy';
 import { getCartProductTypeLabel } from '@/lib/cart/cart-product-type';
+import { resolveStoreProductImageUrl } from '@/lib/storefront/store-media-fallbacks';
 
 interface CartItemProps {
   item: CartItemType;
   onUpdateQuantity: (itemId: string, quantity: number) => void;
   onRemove: (itemId: string) => void;
   isLoading?: boolean;
+  placeholderImageUrl?: string | null;
 }
 
-const CartItemComponent = ({ item, onUpdateQuantity, onRemove, isLoading }: CartItemProps) => {
+const CartItemComponent = ({
+  item,
+  onUpdateQuantity,
+  onRemove,
+  isLoading,
+  placeholderImageUrl,
+}: CartItemProps) => {
   const handleQuantityChange = (newQuantity: number) => {
     if (newQuantity < 1) {
       onRemove(item.id!);
@@ -39,6 +47,9 @@ const CartItemComponent = ({ item, onUpdateQuantity, onRemove, isLoading }: Cart
     item.product_type === 'service' ? formatServiceCartSlotLabel(item.metadata) : null;
   const isServiceItem = item.product_type === 'service';
   const typeLabel = getCartProductTypeLabel(item.product_type);
+  const imageSrc = resolveStoreProductImageUrl(item.product_image_url, {
+    placeholder_image_url: placeholderImageUrl,
+  });
 
   return (
     <article
@@ -47,11 +58,7 @@ const CartItemComponent = ({ item, onUpdateQuantity, onRemove, isLoading }: Cart
     >
       {/* Image */}
       <div className="relative w-full sm:w-24 h-48 sm:h-24 rounded-lg overflow-hidden flex-shrink-0 border">
-        <LazyImage
-          src={item.product_image_url || '/placeholder-product.png'}
-          alt={item.product_name}
-          className="w-full h-full object-cover"
-        />
+        <LazyImage src={imageSrc} alt={item.product_name} className="w-full h-full object-cover" />
       </div>
 
       {/* Infos produit */}

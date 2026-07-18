@@ -4,13 +4,19 @@
  */
 
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { ShippingZonesManager } from '@/components/shipping/ShippingZonesManager';
 import { ShippingRatesManager } from '@/components/shipping/ShippingRatesManager';
 import { StorePaymentSettings } from '@/components/store/StorePaymentSettings';
-import { useTaxConfigurations, useCreateTaxConfiguration, useUpdateTaxConfiguration, useDeleteTaxConfiguration } from '@/hooks/admin/useTaxConfigurations';
+import {
+  useTaxConfigurations,
+  useCreateTaxConfiguration,
+  useUpdateTaxConfiguration,
+  useDeleteTaxConfiguration,
+} from '@/hooks/admin/useTaxConfigurations';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -24,7 +30,13 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Truck,
   Receipt,
@@ -45,30 +57,25 @@ interface StoreCommerceSettingsProps {
   storeId: string;
 }
 
-// Liste des pays d'Afrique de l'Ouest (peut être étendue)
-const COUNTRIES = [
-  { code: 'BF', name: 'Burkina Faso' },
-  { code: 'CI', name: 'Côte d\'Ivoire' },
-  { code: 'SN', name: 'Sénégal' },
-  { code: 'ML', name: 'Mali' },
-  { code: 'NE', name: 'Niger' },
-  { code: 'TG', name: 'Togo' },
-  { code: 'BJ', name: 'Bénin' },
-  { code: 'GH', name: 'Ghana' },
-  { code: 'NG', name: 'Nigeria' },
-  { code: 'GN', name: 'Guinée' },
-  { code: 'FR', name: 'France' },
-  { code: 'US', name: 'États-Unis' },
-];
+const COUNTRY_CODES = [
+  'BF',
+  'CI',
+  'SN',
+  'ML',
+  'NE',
+  'TG',
+  'BJ',
+  'GH',
+  'NG',
+  'GN',
+  'FR',
+  'US',
+] as const;
 
-const  TAX_TYPES: { value: TaxType; label: string }[] = [
-  { value: 'VAT', label: 'TVA (Value Added Tax)' },
-  { value: 'GST', label: 'GST (Goods and Services Tax)' },
-  { value: 'SALES_TAX', label: 'Taxe sur les ventes' },
-  { value: 'CUSTOM', label: 'Personnalisée' },
-];
+const TAX_TYPE_VALUES: TaxType[] = ['VAT', 'GST', 'SALES_TAX', 'CUSTOM'];
 
 export const StoreCommerceSettings = ({ storeId }: StoreCommerceSettingsProps) => {
+  const { t, i18n } = useTranslation();
   const [taxDialogOpen, setTaxDialogOpen] = useState(false);
   const [editingTax, setEditingTax] = useState<TaxConfiguration | null>(null);
   const [deletingTaxId, setDeletingTaxId] = useState<string | null>(null);
@@ -91,7 +98,7 @@ export const StoreCommerceSettings = ({ storeId }: StoreCommerceSettingsProps) =
   const createTax = useCreateTaxConfiguration();
   const updateTax = useUpdateTaxConfiguration();
   const deleteTax = useDeleteTaxConfiguration();
-  
+
   // Store data for payment settings
   const [storeData, setStoreData] = useState<{
     minimum_order_amount?: number | null;
@@ -111,13 +118,15 @@ export const StoreCommerceSettings = ({ storeId }: StoreCommerceSettingsProps) =
       try {
         const { data, error } = await supabase
           .from('stores')
-          .select('minimum_order_amount, maximum_order_amount, accepted_currencies, allow_partial_payment, payment_terms, invoice_prefix, invoice_numbering, free_shipping_threshold, enabled_payment_providers')
+          .select(
+            'minimum_order_amount, maximum_order_amount, accepted_currencies, allow_partial_payment, payment_terms, invoice_prefix, invoice_numbering, free_shipping_threshold, enabled_payment_providers'
+          )
           .eq('id', storeId)
           .single();
 
         if (error) throw error;
         setStoreData(data);
-      } catch (error) {
+      } catch (_error) {
         logger.error('Error loading store data', { error });
       } finally {
         setStoreLoading(false);
@@ -173,7 +182,9 @@ export const StoreCommerceSettings = ({ storeId }: StoreCommerceSettingsProps) =
       };
 
       if (editingTax) {
-        await updateTax.mutateAsync({ id: editingTax.id, ...taxData } as TaxConfiguration & { id: string });
+        await updateTax.mutateAsync({ id: editingTax.id, ...taxData } as TaxConfiguration & {
+          id: string;
+        });
       } else {
         await createTax.mutateAsync(taxData);
       }
@@ -187,7 +198,7 @@ export const StoreCommerceSettings = ({ storeId }: StoreCommerceSettingsProps) =
     try {
       await deleteTax.mutateAsync(taxId);
       setDeletingTaxId(null);
-    } catch (error) {
+    } catch (_error) {
       // Error handled by mutation
     }
   };
@@ -196,26 +207,23 @@ export const StoreCommerceSettings = ({ storeId }: StoreCommerceSettingsProps) =
     <div className="space-y-6">
       <Alert>
         <Info className="h-4 w-4" />
-        <AlertTitle>Paramètres Commerce</AlertTitle>
-        <AlertDescription>
-          Configurez les zones de livraison et les taxes pour votre boutique.
-          Ces paramètres seront utilisés lors du calcul des frais de livraison et des taxes sur les commandes.
-        </AlertDescription>
+        <AlertTitle>{t('store.form.commerce.alertTitle')}</AlertTitle>
+        <AlertDescription>{t('store.form.commerce.alertDescription')}</AlertDescription>
       </Alert>
 
       <Tabs defaultValue="shipping" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="shipping" className="flex items-center gap-2">
             <Truck className="h-4 w-4" />
-            Zones de livraison
+            {t('store.form.commerce.shippingZones')}
           </TabsTrigger>
           <TabsTrigger value="taxes" className="flex items-center gap-2">
             <Receipt className="h-4 w-4" />
-            Taxes
+            {t('store.form.commerce.taxes')}
           </TabsTrigger>
           <TabsTrigger value="payment" className="flex items-center gap-2">
             <CreditCard className="h-4 w-4" />
-            Paiement
+            {t('store.form.commerce.payment')}
           </TabsTrigger>
         </TabsList>
 
@@ -223,9 +231,11 @@ export const StoreCommerceSettings = ({ storeId }: StoreCommerceSettingsProps) =
         <TabsContent value="shipping" className="space-y-6 mt-6">
           <div className="space-y-4">
             <div>
-              <h3 className="text-lg font-semibold mb-2">Zones de livraison</h3>
+              <h3 className="text-lg font-semibold mb-2">
+                {t('store.form.commerce.shippingZones')}
+              </h3>
               <p className="text-sm text-muted-foreground mb-4">
-                Créez des zones géographiques pour définir où vous livrez vos produits
+                {t('store.form.commerce.shippingZonesDescription')}
               </p>
             </div>
             <ShippingZonesManager storeId={storeId} />
@@ -233,9 +243,11 @@ export const StoreCommerceSettings = ({ storeId }: StoreCommerceSettingsProps) =
 
           <div className="space-y-4">
             <div>
-              <h3 className="text-lg font-semibold mb-2">Tarifs de livraison</h3>
+              <h3 className="text-lg font-semibold mb-2">
+                {t('store.form.commerce.shippingRates')}
+              </h3>
               <p className="text-sm text-muted-foreground mb-4">
-                Configurez les tarifs de livraison pour chaque zone
+                {t('store.form.commerce.shippingRatesDescription')}
               </p>
             </div>
             <ShippingRatesManager storeId={storeId} />
@@ -248,14 +260,14 @@ export const StoreCommerceSettings = ({ storeId }: StoreCommerceSettingsProps) =
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Configurations de taxes</CardTitle>
+                  <CardTitle>{t('store.form.commerce.taxConfigurations')}</CardTitle>
                   <CardDescription>
-                    Configurez les taux de taxes par pays et région
+                    {t('store.form.commerce.taxConfigurationsDescription')}
                   </CardDescription>
                 </div>
                 <Button onClick={handleOpenCreateTax} size="sm">
                   <Plus className="h-4 w-4 mr-2" />
-                  Ajouter une taxe
+                  {t('store.form.commerce.addTax')}
                 </Button>
               </div>
             </CardHeader>
@@ -267,12 +279,12 @@ export const StoreCommerceSettings = ({ storeId }: StoreCommerceSettingsProps) =
               ) : taxConfigs.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <Receipt className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Aucune configuration de taxe</p>
-                  <p className="text-sm mt-2">Créez votre première configuration de taxe</p>
+                  <p>{t('store.form.commerce.noTaxConfig')}</p>
+                  <p className="text-sm mt-2">{t('store.form.commerce.createFirstTax')}</p>
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {taxConfigs.map((tax) => (
+                  {taxConfigs.map(tax => (
                     <div
                       key={tax.id}
                       className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
@@ -284,42 +296,39 @@ export const StoreCommerceSettings = ({ storeId }: StoreCommerceSettingsProps) =
                           {tax.is_active ? (
                             <Badge variant="default" className="bg-green-500">
                               <CheckCircle2 className="h-3 w-3 mr-1" />
-                              Actif
+                              {t('store.form.commerce.active')}
                             </Badge>
                           ) : (
                             <Badge variant="secondary">
                               <XCircle className="h-3 w-3 mr-1" />
-                              Inactif
+                              {t('store.form.commerce.inactive')}
                             </Badge>
                           )}
                         </div>
                         <div className="text-sm text-muted-foreground space-y-1">
                           <p>
-                            <strong>Pays:</strong> {COUNTRIES.find(c => c.code === tax.country_code)?.name || tax.country_code}
+                            <strong>{t('store.form.commerce.country')}:</strong>{' '}
+                            {t(`store.form.commerce.countries.${tax.country_code}`, {
+                              defaultValue: tax.country_code,
+                            })}
                             {tax.state_province && ` - ${tax.state_province}`}
                           </p>
                           <p>
-                            <strong>Taux:</strong> {tax.rate}%
+                            <strong>{t('store.form.commerce.rate')}:</strong> {tax.rate}%
                           </p>
                           <p>
-                            <strong>Date d'effet:</strong> {new Date(tax.effective_from).toLocaleDateString('fr-FR')}
-                            {tax.effective_to && ` → ${new Date(tax.effective_to).toLocaleDateString('fr-FR')}`}
+                            <strong>{t('store.form.commerce.effectiveDate')}:</strong>{' '}
+                            {new Date(tax.effective_from).toLocaleDateString(i18n.language)}
+                            {tax.effective_to &&
+                              ` → ${new Date(tax.effective_to).toLocaleDateString(i18n.language)}`}
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleOpenEditTax(tax)}
-                        >
+                        <Button variant="ghost" size="sm" onClick={() => handleOpenEditTax(tax)}>
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setDeletingTaxId(tax.id)}
-                        >
+                        <Button variant="ghost" size="sm" onClick={() => setDeletingTaxId(tax.id)}>
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
                       </div>
@@ -346,7 +355,9 @@ export const StoreCommerceSettings = ({ storeId }: StoreCommerceSettingsProps) =
                 const loadStoreData = async () => {
                   const { data, error } = await supabase
                     .from('stores')
-                    .select('minimum_order_amount, maximum_order_amount, accepted_currencies, allow_partial_payment, payment_terms, invoice_prefix, invoice_numbering, free_shipping_threshold, enabled_payment_providers')
+                    .select(
+                      'minimum_order_amount, maximum_order_amount, accepted_currencies, allow_partial_payment, payment_terms, invoice_prefix, invoice_numbering, free_shipping_threshold, enabled_payment_providers'
+                    )
                     .eq('id', storeId)
                     .single();
 
@@ -360,7 +371,7 @@ export const StoreCommerceSettings = ({ storeId }: StoreCommerceSettingsProps) =
           ) : (
             <div className="text-center py-8 text-muted-foreground">
               <AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>Impossible de charger les données de la boutique</p>
+              <p>{t('store.form.commerce.loadStoreError')}</p>
             </div>
           )}
         </TabsContent>
@@ -371,28 +382,28 @@ export const StoreCommerceSettings = ({ storeId }: StoreCommerceSettingsProps) =
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {editingTax ? 'Modifier la configuration de taxe' : 'Nouvelle configuration de taxe'}
+              {editingTax
+                ? t('store.form.commerce.editTaxTitle')
+                : t('store.form.commerce.newTaxTitle')}
             </DialogTitle>
-            <DialogDescription>
-              Configurez les paramètres de taxe pour un pays ou une région spécifique
-            </DialogDescription>
+            <DialogDescription>{t('store.form.commerce.taxDialogDescription')}</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="tax_country">Pays *</Label>
+                <Label htmlFor="tax_country">{t('store.form.commerce.taxCountry')}</Label>
                 <Select
                   value={formData.country_code}
-                  onValueChange={(value) => setFormData({ ...formData, country_code: value })}
+                  onValueChange={value => setFormData({ ...formData, country_code: value })}
                 >
                   <SelectTrigger id="tax_country">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {COUNTRIES.map((country) => (
-                      <SelectItem key={country.code} value={country.code}>
-                        {country.name}
+                    {COUNTRY_CODES.map(countryCode => (
+                      <SelectItem key={countryCode} value={countryCode}>
+                        {t(`store.form.commerce.countries.${countryCode}`)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -400,30 +411,30 @@ export const StoreCommerceSettings = ({ storeId }: StoreCommerceSettingsProps) =
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="tax_state">État/Province (optionnel)</Label>
+                <Label htmlFor="tax_state">{t('store.form.commerce.taxState')}</Label>
                 <Input
                   id="tax_state"
                   value={formData.state_province || ''}
-                  onChange={(e) => setFormData({ ...formData, state_province: e.target.value })}
-                  placeholder="Ex: Ouagadougou"
+                  onChange={e => setFormData({ ...formData, state_province: e.target.value })}
+                  placeholder={t('store.form.commerce.taxStatePlaceholder')}
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="tax_type">Type de taxe *</Label>
+                <Label htmlFor="tax_type">{t('store.form.commerce.taxType')}</Label>
                 <Select
                   value={formData.tax_type}
-                  onValueChange={(value) => setFormData({ ...formData, tax_type: value as TaxType })}
+                  onValueChange={value => setFormData({ ...formData, tax_type: value as TaxType })}
                 >
                   <SelectTrigger id="tax_type">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {TAX_TYPES.map((type) => (
-                      <SelectItem key={type.value} value={type.value}>
-                        {type.label}
+                    {TAX_TYPE_VALUES.map(type => (
+                      <SelectItem key={type} value={type}>
+                        {t(`store.form.commerce.taxTypes.${type}`)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -431,19 +442,19 @@ export const StoreCommerceSettings = ({ storeId }: StoreCommerceSettingsProps) =
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="tax_name">Nom de la taxe *</Label>
+                <Label htmlFor="tax_name">{t('store.form.commerce.taxName')}</Label>
                 <Input
                   id="tax_name"
                   value={formData.tax_name || ''}
-                  onChange={(e) => setFormData({ ...formData, tax_name: e.target.value })}
-                  placeholder="Ex: TVA"
+                  onChange={e => setFormData({ ...formData, tax_name: e.target.value })}
+                  placeholder={t('store.form.commerce.taxNamePlaceholder')}
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="tax_rate">Taux (%) *</Label>
+                <Label htmlFor="tax_rate">{t('store.form.commerce.taxRate')}</Label>
                 <Input
                   id="tax_rate"
                   type="number"
@@ -451,44 +462,52 @@ export const StoreCommerceSettings = ({ storeId }: StoreCommerceSettingsProps) =
                   min="0"
                   max="100"
                   value={formData.rate || 0}
-                  onChange={(e) => setFormData({ ...formData, rate: parseFloat(e.target.value) || 0 })}
-                  placeholder="18.00"
+                  onChange={e =>
+                    setFormData({ ...formData, rate: parseFloat(e.target.value) || 0 })
+                  }
+                  placeholder={t('store.form.commerce.taxRatePlaceholder')}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="tax_priority">Priorité</Label>
+                <Label htmlFor="tax_priority">{t('store.form.commerce.taxPriority')}</Label>
                 <Input
                   id="tax_priority"
                   type="number"
                   value={formData.priority || 0}
-                  onChange={(e) => setFormData({ ...formData, priority: parseInt(e.target.value) || 0 })}
+                  onChange={e =>
+                    setFormData({ ...formData, priority: parseInt(e.target.value) || 0 })
+                  }
                   placeholder="0"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Plus élevé = appliqué en premier
+                  {t('store.form.commerce.taxPriorityHint')}
                 </p>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="tax_effective_from">Date d'effet *</Label>
+                <Label htmlFor="tax_effective_from">
+                  {t('store.form.commerce.taxEffectiveFrom')}
+                </Label>
                 <Input
                   id="tax_effective_from"
                   type="date"
                   value={formData.effective_from || ''}
-                  onChange={(e) => setFormData({ ...formData, effective_from: e.target.value })}
+                  onChange={e => setFormData({ ...formData, effective_from: e.target.value })}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="tax_effective_to">Date de fin (optionnel)</Label>
+                <Label htmlFor="tax_effective_to">{t('store.form.commerce.taxEffectiveTo')}</Label>
                 <Input
                   id="tax_effective_to"
                   type="date"
                   value={formData.effective_to || ''}
-                  onChange={(e) => setFormData({ ...formData, effective_to: e.target.value || undefined })}
+                  onChange={e =>
+                    setFormData({ ...formData, effective_to: e.target.value || undefined })
+                  }
                 />
               </div>
             </div>
@@ -496,43 +515,47 @@ export const StoreCommerceSettings = ({ storeId }: StoreCommerceSettingsProps) =
             <div className="space-y-3 pt-4 border-t">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label htmlFor="tax_inclusive">Prix incluant la taxe</Label>
+                  <Label htmlFor="tax_inclusive">{t('store.form.commerce.taxInclusive')}</Label>
                   <p className="text-xs text-muted-foreground">
-                    Si activé, le prix affiché inclut déjà la taxe
+                    {t('store.form.commerce.taxInclusiveHint')}
                   </p>
                 </div>
                 <Switch
                   id="tax_inclusive"
                   checked={formData.tax_inclusive || false}
-                  onCheckedChange={(checked) => setFormData({ ...formData, tax_inclusive: checked })}
+                  onCheckedChange={checked => setFormData({ ...formData, tax_inclusive: checked })}
                 />
               </div>
 
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label htmlFor="tax_applies_shipping">Appliquer à la livraison</Label>
+                  <Label htmlFor="tax_applies_shipping">
+                    {t('store.form.commerce.taxAppliesShipping')}
+                  </Label>
                   <p className="text-xs text-muted-foreground">
-                    Si activé, la taxe s'applique aussi aux frais de livraison
+                    {t('store.form.commerce.taxAppliesShippingHint')}
                   </p>
                 </div>
                 <Switch
                   id="tax_applies_shipping"
                   checked={formData.applies_to_shipping || false}
-                  onCheckedChange={(checked) => setFormData({ ...formData, applies_to_shipping: checked })}
+                  onCheckedChange={checked =>
+                    setFormData({ ...formData, applies_to_shipping: checked })
+                  }
                 />
               </div>
 
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label htmlFor="tax_active">Activer cette configuration</Label>
+                  <Label htmlFor="tax_active">{t('store.form.commerce.taxActivate')}</Label>
                   <p className="text-xs text-muted-foreground">
-                    Les configurations inactives ne seront pas appliquées
+                    {t('store.form.commerce.taxActivateHint')}
                   </p>
                 </div>
                 <Switch
                   id="tax_active"
                   checked={formData.is_active !== false}
-                  onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                  onCheckedChange={checked => setFormData({ ...formData, is_active: checked })}
                 />
               </div>
             </div>
@@ -540,13 +563,13 @@ export const StoreCommerceSettings = ({ storeId }: StoreCommerceSettingsProps) =
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setTaxDialogOpen(false)}>
-              Annuler
+              {t('store.form.common.cancel')}
             </Button>
             <Button onClick={handleSaveTax} disabled={createTax.isPending || updateTax.isPending}>
               {createTax.isPending || updateTax.isPending ? (
-                <>Enregistrement...</>
+                <>{t('store.form.common.saving')}</>
               ) : (
-                <>Enregistrer</>
+                <>{t('store.form.common.save')}</>
               )}
             </Button>
           </DialogFooter>
@@ -554,24 +577,26 @@ export const StoreCommerceSettings = ({ storeId }: StoreCommerceSettingsProps) =
       </Dialog>
 
       {/* Dialog Confirmation Suppression */}
-      <Dialog open={!!deletingTaxId} onOpenChange={(open) => !open && setDeletingTaxId(null)}>
+      <Dialog open={!!deletingTaxId} onOpenChange={open => !open && setDeletingTaxId(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirmer la suppression</DialogTitle>
+            <DialogTitle>{t('store.form.commerce.confirmDeleteTitle')}</DialogTitle>
             <DialogDescription>
-              Êtes-vous sûr de vouloir supprimer cette configuration de taxe ? Cette action est irréversible.
+              {t('store.form.commerce.confirmDeleteDescription')}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeletingTaxId(null)}>
-              Annuler
+              {t('store.form.common.cancel')}
             </Button>
             <Button
               variant="destructive"
               onClick={() => deletingTaxId && handleDeleteTax(deletingTaxId)}
               disabled={deleteTax.isPending}
             >
-              {deleteTax.isPending ? 'Suppression...' : 'Supprimer'}
+              {deleteTax.isPending
+                ? t('store.form.commerce.deleting')
+                : t('store.form.commerce.delete')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -579,10 +604,3 @@ export const StoreCommerceSettings = ({ storeId }: StoreCommerceSettingsProps) =
     </div>
   );
 };
-
-
-
-
-
-
-

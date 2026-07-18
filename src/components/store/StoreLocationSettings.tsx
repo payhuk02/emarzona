@@ -5,6 +5,7 @@
  */
 
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -17,12 +18,11 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
-import { MapPin, Clock, Plus, Trash2, Calendar, Loader2 } from 'lucide-react';
+import { MapPin, Clock, Plus, Trash2, Calendar, Loader2, Navigation } from 'lucide-react';
 import { useSpaceInputFix } from '@/hooks/useSpaceInputFix';
 import { StoreOpeningHours } from '@/hooks/useStores';
 import { geocodeAddress, buildFullAddress } from '@/lib/geocoding';
 import { useToast } from '@/hooks/use-toast';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface StoreLocationSettingsProps {
   // Adresse
@@ -44,26 +44,26 @@ interface StoreLocationSettingsProps {
   onOpeningHoursChange: (hours: StoreOpeningHours) => void;
 }
 
-const DAYS = [
-  { key: 'monday', label: 'Lundi' },
-  { key: 'tuesday', label: 'Mardi' },
-  { key: 'wednesday', label: 'Mercredi' },
-  { key: 'thursday', label: 'Jeudi' },
-  { key: 'friday', label: 'Vendredi' },
-  { key: 'saturday', label: 'Samedi' },
-  { key: 'sunday', label: 'Dimanche' },
+const DAY_KEYS = [
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+  'sunday',
 ] as const;
 
-const TIMEZONES = [
-  { value: 'Africa/Ouagadougou', label: 'Ouagadougou (GMT+0)' },
-  { value: 'Africa/Abidjan', label: 'Abidjan (GMT+0)' },
-  { value: 'Africa/Dakar', label: 'Dakar (GMT+0)' },
-  { value: 'Europe/Paris', label: 'Paris (GMT+1)' },
-  { value: 'America/New_York', label: 'New York (GMT-5)' },
-  { value: 'America/Los_Angeles', label: 'Los Angeles (GMT-8)' },
-];
+const TIMEZONE_VALUES = [
+  'Africa/Ouagadougou',
+  'Africa/Abidjan',
+  'Africa/Dakar',
+  'Europe/Paris',
+  'America/New_York',
+  'America/Los_Angeles',
+] as const;
 
-export const StoreLocationSettings : React.FC<StoreLocationSettingsProps> = ({
+export const StoreLocationSettings: React.FC<StoreLocationSettingsProps> = ({
   addressLine1,
   addressLine2,
   city,
@@ -79,11 +79,12 @@ export const StoreLocationSettings : React.FC<StoreLocationSettingsProps> = ({
   onTimezoneChange,
   onOpeningHoursChange,
 }) => {
+  const { t } = useTranslation();
   const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
   const { toast } = useToast();
   const [geocoding, setGeocoding] = useState(false);
 
-  const  defaultHours: StoreOpeningHours = openingHours || {
+  const defaultHours: StoreOpeningHours = openingHours || {
     monday: { open: '09:00', close: '18:00', closed: false },
     tuesday: { open: '09:00', close: '18:00', closed: false },
     wednesday: { open: '09:00', close: '18:00', closed: false },
@@ -160,8 +161,8 @@ export const StoreLocationSettings : React.FC<StoreLocationSettingsProps> = ({
 
     if (!fullAddress || fullAddress.trim().length < 5) {
       toast({
-        title: 'Adresse incomplète',
-        description: 'Veuillez remplir au moins une adresse ligne 1 et une ville pour géocoder.',
+        title: t('store.form.location.toast.incompleteAddressTitle'),
+        description: t('store.form.location.toast.incompleteAddressDescription'),
         variant: 'destructive',
       });
       return;
@@ -176,20 +177,23 @@ export const StoreLocationSettings : React.FC<StoreLocationSettingsProps> = ({
         onLocationChange('longitude', result.data.longitude);
 
         toast({
-          title: 'Géocodage réussi',
-          description: `Coordonnées trouvées : ${result.data.latitude.toFixed(6)}, ${result.data.longitude.toFixed(6)}`,
+          title: t('store.form.location.toast.geocodeSuccessTitle'),
+          description: t('store.form.location.toast.geocodeSuccessDescription', {
+            lat: result.data.latitude.toFixed(6),
+            lng: result.data.longitude.toFixed(6),
+          }),
         });
       } else {
         toast({
-          title: 'Erreur de géocodage',
+          title: t('store.form.location.toast.geocodeErrorTitle'),
           description: result.error.message,
           variant: 'destructive',
         });
       }
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       toast({
-        title: 'Erreur',
-        description: 'Une erreur est survenue lors du géocodage',
+        title: t('store.form.common.error'),
+        description: t('store.form.location.toast.geocodeGenericError'),
         variant: 'destructive',
       });
     } finally {
@@ -204,90 +208,88 @@ export const StoreLocationSettings : React.FC<StoreLocationSettingsProps> = ({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <MapPin className="h-5 w-5" />
-          Localisation et horaires
+          {t('store.form.location.title')}
         </CardTitle>
-        <CardDescription>
-          Configurez l'adresse complète et les horaires d'ouverture de votre boutique
-        </CardDescription>
+        <CardDescription>{t('store.form.location.description')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Adresse complète */}
         <div className="space-y-4">
-          <h4 className="text-sm font-semibold">Adresse complète</h4>
+          <h4 className="text-sm font-semibold">{t('store.form.location.addressTitle')}</h4>
 
           <div className="space-y-2">
-            <Label htmlFor="address_line1">Adresse ligne 1 *</Label>
+            <Label htmlFor="address_line1">{t('store.form.location.addressLine1')}</Label>
             <Input
               id="address_line1"
               value={addressLine1}
               onChange={e => onAddressChange('address_line1', e.target.value)}
               onKeyDown={handleSpaceKeyDown}
-              placeholder="123 Rue de la Paix"
+              placeholder={t('store.form.location.addressLine1Placeholder')}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="address_line2">Adresse ligne 2</Label>
+            <Label htmlFor="address_line2">{t('store.form.location.addressLine2')}</Label>
             <Input
               id="address_line2"
               value={addressLine2}
               onChange={e => onAddressChange('address_line2', e.target.value)}
               onKeyDown={handleSpaceKeyDown}
-              placeholder="Appartement, bureau, etc."
+              placeholder={t('store.form.location.addressLine2Placeholder')}
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="city">Ville *</Label>
+              <Label htmlFor="city">{t('store.form.location.city')}</Label>
               <Input
                 id="city"
                 value={city}
                 onChange={e => onAddressChange('city', e.target.value)}
                 onKeyDown={handleSpaceKeyDown}
-                placeholder="Ouagadougou"
+                placeholder={t('store.form.location.cityPlaceholder')}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="state_province">État/Province</Label>
+              <Label htmlFor="state_province">{t('store.form.location.stateProvince')}</Label>
               <Input
                 id="state_province"
                 value={stateProvince}
                 onChange={e => onAddressChange('state_province', e.target.value)}
                 onKeyDown={handleSpaceKeyDown}
-                placeholder="Kadiogo"
+                placeholder={t('store.form.location.stateProvincePlaceholder')}
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="postal_code">Code postal</Label>
+              <Label htmlFor="postal_code">{t('store.form.location.postalCode')}</Label>
               <Input
                 id="postal_code"
                 value={postalCode}
                 onChange={e => onAddressChange('postal_code', e.target.value)}
                 onKeyDown={handleSpaceKeyDown}
-                placeholder="01 BP"
+                placeholder={t('store.form.location.postalCodePlaceholder')}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="country">Pays *</Label>
+              <Label htmlFor="country">{t('store.form.location.country')}</Label>
               <Input
                 id="country"
                 value={country}
                 onChange={e => onAddressChange('country', e.target.value)}
                 onKeyDown={handleSpaceKeyDown}
-                placeholder="Burkina Faso"
+                placeholder={t('store.form.location.countryPlaceholder')}
               />
             </div>
           </div>
 
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <Label>Coordonnées GPS</Label>
+              <Label>{t('store.form.location.gpsCoordinates')}</Label>
               {hasAddress && (
                 <Button
                   type="button"
@@ -300,12 +302,12 @@ export const StoreLocationSettings : React.FC<StoreLocationSettingsProps> = ({
                   {geocoding ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      Géocodage...
+                      {t('store.form.location.geocoding')}
                     </>
                   ) : (
                     <>
                       <Navigation className="h-4 w-4" />
-                      Géocoder automatiquement
+                      {t('store.form.location.geocodeAuto')}
                     </>
                   )}
                 </Button>
@@ -313,7 +315,7 @@ export const StoreLocationSettings : React.FC<StoreLocationSettingsProps> = ({
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="latitude">Latitude</Label>
+                <Label htmlFor="latitude">{t('store.form.location.latitude')}</Label>
                 <Input
                   id="latitude"
                   type="number"
@@ -322,12 +324,12 @@ export const StoreLocationSettings : React.FC<StoreLocationSettingsProps> = ({
                   onChange={e =>
                     onLocationChange('latitude', e.target.value ? parseFloat(e.target.value) : null)
                   }
-                  placeholder="12.3714"
+                  placeholder={t('store.form.location.latitudePlaceholder')}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="longitude">Longitude</Label>
+                <Label htmlFor="longitude">{t('store.form.location.longitude')}</Label>
                 <Input
                   id="longitude"
                   type="number"
@@ -339,36 +341,39 @@ export const StoreLocationSettings : React.FC<StoreLocationSettingsProps> = ({
                       e.target.value ? parseFloat(e.target.value) : null
                     )
                   }
-                  placeholder="-1.5197"
+                  placeholder={t('store.form.location.longitudePlaceholder')}
                 />
               </div>
             </div>
 
             {(latitude || longitude) && (
               <p className="text-xs text-muted-foreground">
-                📍 Coordonnées : {latitude?.toFixed(6)}, {longitude?.toFixed(6)}{' '}
+                {t('store.form.location.coordinatesDisplay', {
+                  lat: latitude?.toFixed(6),
+                  lng: longitude?.toFixed(6),
+                })}{' '}
                 <a
                   href={`https://www.google.com/maps?q=${latitude},${longitude}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-primary hover:underline"
                 >
-                  Voir sur Google Maps
+                  {t('store.form.location.viewOnGoogleMaps')}
                 </a>
               </p>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="timezone">Fuseau horaire</Label>
+            <Label htmlFor="timezone">{t('store.form.location.timezone')}</Label>
             <Select value={timezone} onValueChange={onTimezoneChange}>
               <SelectTrigger id="timezone">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {TIMEZONES.map(tz => (
-                  <SelectItem key={tz.value} value={tz.value}>
-                    {tz.label}
+                {TIMEZONE_VALUES.map(tz => (
+                  <SelectItem key={tz} value={tz}>
+                    {t(`store.form.location.timezones.${tz}`)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -376,59 +381,62 @@ export const StoreLocationSettings : React.FC<StoreLocationSettingsProps> = ({
           </div>
         </div>
 
-        {/* Horaires d'ouverture */}
         <div className="border-t pt-4">
           <div className="flex items-center gap-2 mb-4">
             <Clock className="h-4 w-4" />
-            <h4 className="text-sm font-semibold">Horaires d'ouverture</h4>
+            <h4 className="text-sm font-semibold">{t('store.form.location.openingHours')}</h4>
           </div>
 
           <div className="space-y-3">
-            {DAYS.map(day => {
-              const dayHours = defaultHours[day.key];
+            {DAY_KEYS.map(day => {
+              const dayHours = defaultHours[day];
               return (
                 <div
-                  key={day.key}
+                  key={day}
                   className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 border rounded-lg"
                 >
                   <div className="w-full sm:w-24 flex-shrink-0">
-                    <Label className="text-sm font-medium">{day.label}</Label>
+                    <Label className="text-sm font-medium">
+                      {t(`store.form.location.days.${day}`)}
+                    </Label>
                   </div>
 
                   <div className="flex items-center gap-2 flex-1 w-full sm:w-auto">
                     <Switch
                       checked={!dayHours.closed}
-                      onCheckedChange={checked => handleDayChange(day.key, 'closed', !checked)}
+                      onCheckedChange={checked => handleDayChange(day, 'closed', !checked)}
                     />
                     <span className="text-xs text-muted-foreground">
-                      {dayHours.closed ? 'Fermé' : 'Ouvert'}
+                      {dayHours.closed
+                        ? t('store.form.location.closed')
+                        : t('store.form.location.open')}
                     </span>
                   </div>
 
                   {!dayHours.closed && (
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
                       <div className="flex items-center gap-2">
-                        <Label htmlFor={`${day.key}_open`} className="text-xs whitespace-nowrap">
-                          Ouverture
+                        <Label htmlFor={`${day}_open`} className="text-xs whitespace-nowrap">
+                          {t('store.form.location.opening')}
                         </Label>
                         <Input
-                          id={`${day.key}_open`}
+                          id={`${day}_open`}
                           type="time"
                           value={dayHours.open}
-                          onChange={e => handleDayChange(day.key, 'open', e.target.value)}
+                          onChange={e => handleDayChange(day, 'open', e.target.value)}
                           className="w-28 sm:w-32"
                         />
                       </div>
                       <span className="text-muted-foreground hidden sm:inline">-</span>
                       <div className="flex items-center gap-2">
-                        <Label htmlFor={`${day.key}_close`} className="text-xs whitespace-nowrap">
-                          Fermeture
+                        <Label htmlFor={`${day}_close`} className="text-xs whitespace-nowrap">
+                          {t('store.form.location.closing')}
                         </Label>
                         <Input
-                          id={`${day.key}_close`}
+                          id={`${day}_close`}
                           type="time"
                           value={dayHours.close}
-                          onChange={e => handleDayChange(day.key, 'close', e.target.value)}
+                          onChange={e => handleDayChange(day, 'close', e.target.value)}
                           className="w-28 sm:w-32"
                         />
                       </div>
@@ -440,16 +448,15 @@ export const StoreLocationSettings : React.FC<StoreLocationSettingsProps> = ({
           </div>
 
           <p className="text-xs text-muted-foreground mt-4">
-            Les horaires sont définis dans le fuseau horaire : {timezone}
+            {t('store.form.location.hoursTimezoneHint', { timezone })}
           </p>
         </div>
 
-        {/* Horaires spéciaux */}
         <div className="border-t pt-4">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
-              <h4 className="text-sm font-semibold">Horaires spéciaux</h4>
+              <h4 className="text-sm font-semibold">{t('store.form.location.specialHours')}</h4>
             </div>
             <Button
               type="button"
@@ -459,13 +466,12 @@ export const StoreLocationSettings : React.FC<StoreLocationSettingsProps> = ({
               className="flex items-center gap-2"
             >
               <Plus className="h-4 w-4" />
-              Ajouter
+              {t('store.form.common.add')}
             </Button>
           </div>
 
           <p className="text-xs text-muted-foreground mb-4">
-            Définissez des horaires spéciaux pour les jours fériés, événements, ou périodes
-            exceptionnelles
+            {t('store.form.location.specialHoursHint')}
           </p>
 
           {defaultHours.special_hours && defaultHours.special_hours.length > 0 ? (
@@ -473,7 +479,9 @@ export const StoreLocationSettings : React.FC<StoreLocationSettingsProps> = ({
               {defaultHours.special_hours.map((specialHour, index) => (
                 <div key={index} className="p-4 border rounded-lg space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Horaire spécial #{index + 1}</span>
+                    <span className="text-sm font-medium">
+                      {t('store.form.location.specialHour', { index: index + 1 })}
+                    </span>
                     <Button
                       type="button"
                       variant="ghost"
@@ -487,7 +495,9 @@ export const StoreLocationSettings : React.FC<StoreLocationSettingsProps> = ({
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div className="space-y-2">
-                      <Label htmlFor={`special_date_${index}`}>Date *</Label>
+                      <Label htmlFor={`special_date_${index}`}>
+                        {t('store.form.location.date')}
+                      </Label>
                       <Input
                         id={`special_date_${index}`}
                         type="date"
@@ -498,12 +508,14 @@ export const StoreLocationSettings : React.FC<StoreLocationSettingsProps> = ({
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor={`special_reason_${index}`}>Raison</Label>
+                      <Label htmlFor={`special_reason_${index}`}>
+                        {t('store.form.location.reason')}
+                      </Label>
                       <Input
                         id={`special_reason_${index}`}
                         value={specialHour.reason}
                         onChange={e => handleUpdateSpecialHour(index, 'reason', e.target.value)}
-                        placeholder="Ex: Jour férié, Événement spécial..."
+                        placeholder={t('store.form.location.reasonPlaceholder')}
                       />
                     </div>
                   </div>
@@ -516,7 +528,9 @@ export const StoreLocationSettings : React.FC<StoreLocationSettingsProps> = ({
                       }
                     />
                     <span className="text-xs text-muted-foreground">
-                      {specialHour.closed ? 'Fermé ce jour' : 'Ouvert ce jour'}
+                      {specialHour.closed
+                        ? t('store.form.location.closedThisDay')
+                        : t('store.form.location.openThisDay')}
                     </span>
                   </div>
 
@@ -527,7 +541,7 @@ export const StoreLocationSettings : React.FC<StoreLocationSettingsProps> = ({
                           htmlFor={`special_open_${index}`}
                           className="text-xs whitespace-nowrap"
                         >
-                          Ouverture
+                          {t('store.form.location.opening')}
                         </Label>
                         <Input
                           id={`special_open_${index}`}
@@ -543,7 +557,7 @@ export const StoreLocationSettings : React.FC<StoreLocationSettingsProps> = ({
                           htmlFor={`special_close_${index}`}
                           className="text-xs whitespace-nowrap"
                         >
-                          Fermeture
+                          {t('store.form.location.closing')}
                         </Label>
                         <Input
                           id={`special_close_${index}`}
@@ -561,9 +575,11 @@ export const StoreLocationSettings : React.FC<StoreLocationSettingsProps> = ({
           ) : (
             <div className="text-center py-8 border-2 border-dashed rounded-lg">
               <Calendar className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">Aucun horaire spécial défini</p>
+              <p className="text-sm text-muted-foreground">
+                {t('store.form.location.noSpecialHours')}
+              </p>
               <p className="text-xs text-muted-foreground mt-1">
-                Cliquez sur "Ajouter" pour définir un horaire spécial
+                {t('store.form.location.noSpecialHoursHint')}
               </p>
             </div>
           )}
@@ -572,10 +588,3 @@ export const StoreLocationSettings : React.FC<StoreLocationSettingsProps> = ({
     </Card>
   );
 };
-
-
-
-
-
-
-

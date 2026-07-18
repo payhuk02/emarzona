@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -17,7 +18,10 @@ import type { StoreLegalPages } from '@/hooks/useStores';
 import { generateStoreUrl } from '@/lib/store-utils';
 import type { ExtendedStore } from './types/store-form';
 import { resolveStoreCommerceTypeFromStore } from '@/lib/commerce/store-capability-map';
-import { isStoreCustomizationTabVisible, getStoreCustomizationSteps } from '@/lib/commerce/store-customization-steps';
+import {
+  isStoreCustomizationTabVisible,
+  getStoreCustomizationSteps,
+} from '@/lib/commerce/store-customization-steps';
 import { useStoreFormState } from '@/hooks/useStoreFormState';
 import { StoreCustomizationWizard } from './StoreCustomizationWizard';
 import { StoreLegalPagesComponent, DEFAULT_LEGAL_TAB } from './StoreLegalPages';
@@ -38,6 +42,7 @@ interface StoreDetailsProps {
 }
 
 const StoreDetails = ({ store }: StoreDetailsProps) => {
+  const { t } = useTranslation();
   const form = useStoreFormState(store);
 
   const {
@@ -54,6 +59,7 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
     fieldTouched,
     storeUrl,
     handleSubmit,
+    handlePublishAppearance,
     handleCancel,
     resetForm,
     handleCopyUrl,
@@ -113,6 +119,7 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
               isEditing={isEditing}
               isSubmitting={isSubmitting}
               handleSubmit={handleSubmit}
+              onPublishAppearance={handlePublishAppearance}
               applyConfig={applyConfig}
               handleColorChange={handleColorChange}
               handleTypographyChange={handleTypographyChange}
@@ -230,7 +237,7 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
       fieldTouched,
       storeUrl,
       handleSubmit,
-      handleCancel,
+      handlePublishAppearance,
       handleCopyUrl,
       handleSlugUpdate,
       applyConfig,
@@ -415,21 +422,20 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
       <AlertDialog open={showCancelConfirm} onOpenChange={setShowCancelConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Annuler les modifications ?</AlertDialogTitle>
+            <AlertDialogTitle>{t('store.form.details.cancelDialogTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Vous avez des modifications non sauvegardées. Êtes-vous sûr de vouloir les annuler ?
-              Toutes vos modifications seront perdues.
+              {t('store.form.details.cancelDialogDescription')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setShowCancelConfirm(false)}>
-              Continuer l'édition
+              {t('store.form.details.continueEditing')}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={resetForm}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Annuler les modifications
+              {t('store.form.details.cancelChanges')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

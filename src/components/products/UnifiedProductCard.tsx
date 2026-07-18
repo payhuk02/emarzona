@@ -94,6 +94,10 @@ import {
   CourseDurationBadge,
   CourseModulesBadge,
 } from '@/components/products/CourseInfoBadges';
+import {
+  resolveStoreProductImageUrl,
+  resolveStoreWatermarkUrl,
+} from '@/lib/storefront/store-media-fallbacks';
 
 function isPremiumProductCardVariant(variant: UnifiedProductCardProps['variant']): boolean {
   return variant === 'marketplace' || variant === 'store';
@@ -107,6 +111,8 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
   onAction,
   className,
   productCardStyle,
+  storePlaceholderImageUrl,
+  storeWatermarkUrl,
 }) => {
   const { favorites, toggleFavorite } = useMarketplaceFavorites();
   const isFavorite = favorites.has(product.id);
@@ -124,7 +130,20 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
   const priceInfo = useMemo(() => getDisplayPrice(product), [product]);
 
   // Custom logic for different types
-  const productImage = useMemo(() => getProductImage(product), [product]);
+  const productImage = useMemo(() => {
+    const raw = getProductImage(product);
+    if (variant === 'store') {
+      return resolveStoreProductImageUrl(raw, {
+        placeholder_image_url: storePlaceholderImageUrl,
+      });
+    }
+    return raw;
+  }, [product, variant, storePlaceholderImageUrl]);
+
+  const watermarkOverlayUrl = useMemo(() => {
+    if (variant !== 'store') return null;
+    return resolveStoreWatermarkUrl({ watermark_url: storeWatermarkUrl });
+  }, [variant, storeWatermarkUrl]);
   const allArtistImages = useMemo(() => {
     if (product.type !== 'artist') return [];
     return product.images && product.images.length > 0
@@ -304,21 +323,31 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
               priority={false}
             />
           ) : productImage ? (
-            <ResponsiveProductImage
-              src={productImage}
-              alt={productName}
-              sizes={imageSizes}
-              context="grid"
-              fit={variant === 'marketplace' || variant === 'store' ? 'contain' : 'cover'}
-              fill={variant === 'marketplace' || variant === 'store' ? false : true}
-              className={cn(
-                'w-full transition-transform duration-300',
-                variant === 'marketplace' || variant === 'store'
-                  ? 'h-auto max-h-[320px] sm:max-h-[360px] group-hover:scale-110'
-                  : 'h-full group-hover:scale-110'
+            <div className="relative w-full h-full">
+              <ResponsiveProductImage
+                src={productImage}
+                alt={productName}
+                sizes={imageSizes}
+                context="grid"
+                fit={variant === 'marketplace' || variant === 'store' ? 'contain' : 'cover'}
+                fill={variant === 'marketplace' || variant === 'store' ? false : true}
+                className={cn(
+                  'w-full transition-transform duration-300',
+                  variant === 'marketplace' || variant === 'store'
+                    ? 'h-auto max-h-[320px] sm:max-h-[360px] group-hover:scale-110'
+                    : 'h-full group-hover:scale-110'
+                )}
+                fallbackIcon={<ShoppingCart className="h-16 w-16 text-gray-400 opacity-20" />}
+              />
+              {watermarkOverlayUrl && (
+                <img
+                  src={watermarkOverlayUrl}
+                  alt=""
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 m-auto max-h-[40%] max-w-[40%] object-contain opacity-30"
+                />
               )}
-              fallbackIcon={<ShoppingCart className="h-16 w-16 text-gray-400 opacity-20" />}
-            />
+            </div>
           ) : (
             <div
               className={cn(

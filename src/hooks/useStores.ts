@@ -144,6 +144,8 @@ export interface Store {
   apple_touch_icon_url?: string | null;
   watermark_url?: string | null;
   placeholder_image_url?: string | null;
+  appearance_draft?: Record<string, unknown> | null;
+  appearance_published_at?: string | null;
   // Localisation
   address_line1?: string | null;
   address_line2?: string | null;

@@ -23,6 +23,7 @@ import { getCartItemStoreId } from '@/lib/checkout/cart-validation';
 import {
   fetchCartItems,
   fetchProductForCart,
+  fetchStoreCartMedia,
   findExistingCartLine,
   updateCartItemQuantity,
   insertCartItem,
@@ -138,6 +139,19 @@ export function useCart() {
         } as CartItem)
       ) {
         metadataRecord.store_id = product.store_id;
+      }
+
+      try {
+        const storeMedia = await fetchStoreCartMedia(product.store_id);
+        if (storeMedia) {
+          metadataRecord.store_name = storeMedia.name;
+          metadataRecord.store_slug = storeMedia.slug;
+          if (storeMedia.placeholder_image_url) {
+            metadataRecord.store_placeholder_image_url = storeMedia.placeholder_image_url;
+          }
+        }
+      } catch {
+        // Non-blocking enrichment
       }
 
       const finalPrice = product.promotional_price || product.price;

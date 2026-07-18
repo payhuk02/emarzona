@@ -27,96 +27,107 @@ export type StoreCustomizationStepKey =
   | 'commerce'
   | 'notifications';
 
-export interface StoreCustomizationStep {
+export interface StoreCustomizationStepDef {
   id: number;
-  title: string;
-  description: string;
+  titleKey: string;
+  descriptionKey: string;
   icon: LucideIcon;
   key: StoreCustomizationStepKey;
   /** Visible only for these commerce types (omit = all types). */
   commerceTypes?: readonly StoreCommerceType[];
 }
 
-export const STORE_CUSTOMIZATION_STEPS: readonly StoreCustomizationStep[] = [
+export interface StoreCustomizationStep extends Omit<
+  StoreCustomizationStepDef,
+  'titleKey' | 'descriptionKey'
+> {
+  title: string;
+  description: string;
+}
+
+export const STORE_CUSTOMIZATION_STEP_DEFS: readonly StoreCustomizationStepDef[] = [
   {
     id: 1,
-    title: 'Informations',
-    description: 'Nom, description, contact',
+    titleKey: 'store.customization.steps.settings.title',
+    descriptionKey: 'store.customization.steps.settings.description',
     icon: Info,
     key: 'settings',
   },
   {
     id: 2,
-    title: 'Apparence',
-    description: 'Logo, bannière, thème',
+    titleKey: 'store.customization.steps.appearance.title',
+    descriptionKey: 'store.customization.steps.appearance.description',
     icon: Palette,
     key: 'appearance',
   },
   {
     id: 3,
-    title: 'Localisation',
-    description: 'Adresse, horaires',
+    titleKey: 'store.customization.steps.location.title',
+    descriptionKey: 'store.customization.steps.location.description',
     icon: MapPin,
     key: 'location',
   },
   {
     id: 4,
-    title: 'SEO',
-    description: 'Référencement',
+    titleKey: 'store.customization.steps.seo.title',
+    descriptionKey: 'store.customization.steps.seo.description',
     icon: Search,
     key: 'seo',
   },
   {
     id: 5,
-    title: 'Pages Légales',
-    description: 'CGV, confidentialité',
+    titleKey: 'store.customization.steps.legal.title',
+    descriptionKey: 'store.customization.steps.legal.description',
     icon: FileText,
     key: 'legal',
   },
   {
     id: 6,
-    title: 'URL',
-    description: 'Domaine personnalisé',
+    titleKey: 'store.customization.steps.url.title',
+    descriptionKey: 'store.customization.steps.url.description',
     icon: Globe,
     key: 'url',
   },
   {
     id: 7,
-    title: 'Marketing',
-    description: 'Contenu marketing',
+    titleKey: 'store.customization.steps.marketing.title',
+    descriptionKey: 'store.customization.steps.marketing.description',
     icon: MessageSquare,
     key: 'marketing',
   },
   {
     id: 8,
-    title: 'Analytics',
-    description: 'Statistiques',
+    titleKey: 'store.customization.steps.analytics.title',
+    descriptionKey: 'store.customization.steps.analytics.description',
     icon: BarChart3,
     key: 'analytics',
   },
   {
     id: 9,
-    title: 'Commerce',
-    description: 'Livraison, taxes, paiements',
+    titleKey: 'store.customization.steps.commerce.title',
+    descriptionKey: 'store.customization.steps.commerce.description',
     icon: Truck,
     key: 'commerce',
     commerceTypes: ['physical'],
   },
   {
     id: 10,
-    title: 'Notifications',
-    description: 'Alertes et notifications',
+    titleKey: 'store.customization.steps.notifications.title',
+    descriptionKey: 'store.customization.steps.notifications.description',
     icon: Bell,
     key: 'notifications',
   },
 ];
 
-export function getStoreCustomizationSteps(
+/** @deprecated Use getStoreCustomizationStepDefs + useStoreCustomizationSteps */
+export const STORE_CUSTOMIZATION_STEPS = STORE_CUSTOMIZATION_STEP_DEFS;
+
+export function getStoreCustomizationStepDefs(
   commerceType?: StoreCommerceType | null
-): StoreCustomizationStep[] {
+): StoreCustomizationStepDef[] {
   const effectiveType = parseStoreCommerceType(commerceType);
   const showLocation = getStoreVerticalProfile(effectiveType).showLocationTab;
-  return STORE_CUSTOMIZATION_STEPS.filter(step => {
+  return STORE_CUSTOMIZATION_STEP_DEFS.filter(step => {
     if (step.key === 'location' && !showLocation) return false;
     if (!step.commerceTypes) return true;
     return step.commerceTypes.includes(effectiveType);
@@ -126,9 +137,15 @@ export function getStoreCustomizationSteps(
   }));
 }
 
+export function getStoreCustomizationSteps(
+  commerceType?: StoreCommerceType | null
+): StoreCustomizationStepDef[] {
+  return getStoreCustomizationStepDefs(commerceType);
+}
+
 export function isStoreCustomizationTabVisible(
   tabKey: StoreCustomizationStepKey,
   commerceType?: StoreCommerceType | null
 ): boolean {
-  return getStoreCustomizationSteps(commerceType).some(step => step.key === tabKey);
+  return getStoreCustomizationStepDefs(commerceType).some(step => step.key === tabKey);
 }

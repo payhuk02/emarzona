@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Store } from '@/hooks/useStores';
 import type { StoreOpeningHours, StoreLegalPages, StoreMarketingContent } from '@/hooks/useStores';
 import type {
@@ -13,9 +14,16 @@ import { useToast } from '@/hooks/use-toast';
 import { sanitizeStorePayload } from '@/lib/store-payload-utils';
 import { validateStoreForm } from '@/lib/validation-utils';
 import { validateStoreUpdate } from '@/lib/store-validation';
+import {
+  draftRecordToAppearanceForm,
+  getStoreAppearanceDraft,
+  publishStoreAppearance,
+  saveStoreAppearanceDraft,
+} from '@/lib/storefront/store-appearance-publish';
+import type { StoreAppearanceFormDraft } from '@/lib/storefront/store-preview-draft';
 
 function initState(store: ExtendedStore): StoreFormState {
-  return {
+  const base: StoreFormState = {
     name: store.name,
     description: store.description || '',
     logoUrl: store.logo_url || '',
@@ -106,9 +114,53 @@ function initState(store: ExtendedStore): StoreFormState {
     customTrackingScripts: store.custom_tracking_scripts || '',
     customScriptsEnabled: store.custom_scripts_enabled || false,
   };
+
+  const draft = getStoreAppearanceDraft(store);
+  if (!draft) return base;
+
+  const form = draftRecordToAppearanceForm(draft);
+  return {
+    ...base,
+    logoUrl: form.logoUrl ?? base.logoUrl,
+    bannerUrl: form.bannerUrl ?? base.bannerUrl,
+    faviconUrl: form.faviconUrl ?? base.faviconUrl,
+    appleTouchIconUrl: form.appleTouchIconUrl ?? base.appleTouchIconUrl,
+    watermarkUrl: form.watermarkUrl ?? base.watermarkUrl,
+    placeholderImageUrl: form.placeholderImageUrl ?? base.placeholderImageUrl,
+    primaryColor: form.primaryColor ?? base.primaryColor,
+    secondaryColor: form.secondaryColor ?? base.secondaryColor,
+    accentColor: form.accentColor ?? base.accentColor,
+    backgroundColor: form.backgroundColor ?? base.backgroundColor,
+    textColor: form.textColor ?? base.textColor,
+    textSecondaryColor: form.textSecondaryColor ?? base.textSecondaryColor,
+    buttonPrimaryColor: form.buttonPrimaryColor ?? base.buttonPrimaryColor,
+    buttonPrimaryText: form.buttonPrimaryText ?? base.buttonPrimaryText,
+    buttonSecondaryColor: form.buttonSecondaryColor ?? base.buttonSecondaryColor,
+    buttonSecondaryText: form.buttonSecondaryText ?? base.buttonSecondaryText,
+    linkColor: form.linkColor ?? base.linkColor,
+    linkHoverColor: form.linkHoverColor ?? base.linkHoverColor,
+    borderRadius: form.borderRadius ?? base.borderRadius,
+    shadowIntensity: form.shadowIntensity ?? base.shadowIntensity,
+    headingFont: form.headingFont ?? base.headingFont,
+    bodyFont: form.bodyFont ?? base.bodyFont,
+    fontSizeBase: form.fontSizeBase ?? base.fontSizeBase,
+    headingSizeH1: form.headingSizeH1 ?? base.headingSizeH1,
+    headingSizeH2: form.headingSizeH2 ?? base.headingSizeH2,
+    headingSizeH3: form.headingSizeH3 ?? base.headingSizeH3,
+    lineHeight: form.lineHeight ?? base.lineHeight,
+    letterSpacing: form.letterSpacing ?? base.letterSpacing,
+    headerStyle: form.headerStyle ?? base.headerStyle,
+    footerStyle: form.footerStyle ?? base.footerStyle,
+    sidebarEnabled: form.sidebarEnabled ?? base.sidebarEnabled,
+    sidebarPosition: form.sidebarPosition ?? base.sidebarPosition,
+    productGridColumns: form.productGridColumns ?? base.productGridColumns,
+    productCardStyle: form.productCardStyle ?? base.productCardStyle,
+    navigationStyle: form.navigationStyle ?? base.navigationStyle,
+  };
 }
 
 export function useStoreFormState(store: ExtendedStore) {
+  const { t } = useTranslation();
   // --- All form fields as individual useState (for granular re-renders) ---
   const [name, setName] = useState(store.name);
   const [description, setDescription] = useState(store.description || '');
@@ -756,9 +808,132 @@ export function useStoreFormState(store: ExtendedStore) {
   );
 
   // --- Submit ---
+  const buildAppearanceFormDraft = useCallback(
+    (): StoreAppearanceFormDraft => ({
+      logoUrl,
+      bannerUrl,
+      faviconUrl,
+      appleTouchIconUrl,
+      watermarkUrl,
+      placeholderImageUrl,
+      primaryColor,
+      secondaryColor,
+      accentColor,
+      backgroundColor,
+      textColor,
+      textSecondaryColor,
+      buttonPrimaryColor,
+      buttonPrimaryText,
+      buttonSecondaryColor,
+      buttonSecondaryText,
+      linkColor,
+      linkHoverColor,
+      borderRadius,
+      shadowIntensity,
+      headingFont,
+      bodyFont,
+      fontSizeBase,
+      headingSizeH1,
+      headingSizeH2,
+      headingSizeH3,
+      lineHeight,
+      letterSpacing,
+      headerStyle,
+      footerStyle,
+      sidebarEnabled,
+      sidebarPosition,
+      productGridColumns,
+      productCardStyle,
+      navigationStyle,
+    }),
+    [
+      logoUrl,
+      bannerUrl,
+      faviconUrl,
+      appleTouchIconUrl,
+      watermarkUrl,
+      placeholderImageUrl,
+      primaryColor,
+      secondaryColor,
+      accentColor,
+      backgroundColor,
+      textColor,
+      textSecondaryColor,
+      buttonPrimaryColor,
+      buttonPrimaryText,
+      buttonSecondaryColor,
+      buttonSecondaryText,
+      linkColor,
+      linkHoverColor,
+      borderRadius,
+      shadowIntensity,
+      headingFont,
+      bodyFont,
+      fontSizeBase,
+      headingSizeH1,
+      headingSizeH2,
+      headingSizeH3,
+      lineHeight,
+      letterSpacing,
+      headerStyle,
+      footerStyle,
+      sidebarEnabled,
+      sidebarPosition,
+      productGridColumns,
+      productCardStyle,
+      navigationStyle,
+    ]
+  );
+
+  const handlePublishAppearance = useCallback(async () => {
+    setIsSubmitting(true);
+    try {
+      await saveStoreAppearanceDraft(store.id, buildAppearanceFormDraft());
+      await publishStoreAppearance(store.id);
+      await refreshStores().catch(() => {});
+      setLastSaved(new Date());
+      toast({
+        title: t('store.appearance.publishedTitle'),
+        description: t('store.appearance.publishedDescription'),
+        duration: 3000,
+      });
+    } catch {
+      toast({
+        title: t('store.form.common.error'),
+        description: t('store.appearance.publishError'),
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [store.id, buildAppearanceFormDraft, refreshStores, toast, t]);
+
   const handleSubmit = useCallback(
     async (e?: React.FormEvent) => {
       e?.preventDefault();
+
+      if (currentTab === 'appearance') {
+        setIsSubmitting(true);
+        try {
+          await saveStoreAppearanceDraft(store.id, buildAppearanceFormDraft());
+          await refreshStores().catch(() => {});
+          setLastSaved(new Date());
+          toast({
+            title: t('store.appearance.draftSavedTitle'),
+            description: t('store.appearance.draftSavedDescription'),
+            duration: 3000,
+          });
+        } catch {
+          toast({
+            title: t('store.form.common.error'),
+            description: t('store.appearance.draftSaveError'),
+            variant: 'destructive',
+          });
+        } finally {
+          setIsSubmitting(false);
+        }
+        return;
+      }
 
       const formData = {
         name: name.trim(),
@@ -781,8 +956,8 @@ export function useStoreFormState(store: ExtendedStore) {
 
       if (Object.keys(allErrors).length > 0) {
         toast({
-          title: 'Erreurs de validation',
-          description: 'Veuillez corriger les erreurs avant de continuer.',
+          title: t('store.form.toast.validationErrorsTitle'),
+          description: t('store.form.toast.validationErrorsDescription'),
           variant: 'destructive',
         });
         return;
@@ -793,7 +968,7 @@ export function useStoreFormState(store: ExtendedStore) {
         const updates = sanitizeStorePayload(buildUpdatePayload());
         await updateStoreById({ storeId: store.id, updates });
         await refreshStores().catch(() => {});
-        
+
         setIsEditing(false);
         setFieldTouched({});
         setLastSaved(new Date());
@@ -804,6 +979,8 @@ export function useStoreFormState(store: ExtendedStore) {
       }
     },
     [
+      currentTab,
+      buildAppearanceFormDraft,
       name,
       description,
       contactEmail,
@@ -817,6 +994,7 @@ export function useStoreFormState(store: ExtendedStore) {
       store.id,
       refreshStores,
       toast,
+      t,
     ]
   );
 
@@ -969,6 +1147,7 @@ export function useStoreFormState(store: ExtendedStore) {
     toast,
     // Handlers
     handleSubmit,
+    handlePublishAppearance,
     handleCancel,
     resetForm,
     handleCopyUrl,

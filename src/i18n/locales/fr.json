@@ -518,7 +518,17 @@
     "removeItem": "Retirer",
     "updateQuantity": "Mettre à jour",
     "success": "Produit ajouté au panier",
-    "error": "Erreur lors de l'ajout"
+    "error": "Erreur lors de l'ajout",
+    "multiStore": {
+      "alertTitle": "Panier multi-boutiques",
+      "alertDescription": "Votre panier contient des articles de plusieurs boutiques. Le thème neutre est appliqué ; le paiement se fera boutique par boutique au checkout.",
+      "sectionLabel": "Articles de {{storeName}}",
+      "unknownStore": "Boutique",
+      "mixedServiceHint": "Panier mixte : votre réservation de service sera payée avec les autres articles de la même boutique.",
+      "multiTypeLabel": "Panier multi-type :",
+      "clearConfirm": "Êtes-vous sûr de vouloir vider votre panier ?",
+      "clearAriaLabel": "Vider le panier"
+    }
   },
   "orders": {
     "title": "Mes Commandes",
@@ -1643,7 +1653,95 @@
       "feature3": "Acceptez les paiements en FCFA et autres devises",
       "feature4": "Gérez tout depuis votre tableau de bord"
     },
-    "goToSettings": "Aller aux paramètres"
+    "goToSettings": "Aller aux paramètres",
+    "wizard": {
+      "title": "Créer votre boutique",
+      "subtitle": "Configurez votre boutique en suivant les étapes ci-dessous",
+      "stepOf": "Étape {{current}} sur {{total}}",
+      "successTitle": "Boutique créée avec succès !",
+      "successDescription": "Votre boutique a été créée et configurée avec succès.",
+      "steps": {
+        "basic": { "title": "Informations de base", "description": "Nom, description et devise" },
+        "branding": { "title": "Image & Design", "description": "Logo, bannière et images" },
+        "contact": {
+          "title": "Contact & Réseaux",
+          "description": "Coordonnées et réseaux sociaux"
+        },
+        "theme": { "title": "Thème", "description": "Couleurs et apparence" },
+        "seo": { "title": "SEO", "description": "Référencement et métadonnées" },
+        "location": { "title": "Localisation", "description": "Adresse et horaires" },
+        "legal": { "title": "Pages légales", "description": "CGV, CGU et mentions légales" },
+        "analytics": { "title": "Analytics", "description": "Tracking et statistiques" }
+      }
+    },
+    "customization": {
+      "title": "Personnalisation de la boutique",
+      "subtitle": "Configurez les paramètres adaptés à votre type de boutique",
+      "stepOf": "Étape {{current}} sur {{total}}",
+      "progressComplete": "{{percent}}% complété",
+      "stepAriaLabel": "Étape {{id}} : {{title}}",
+      "defaultStepTitle": "Informations",
+      "defaultStepDescription": "Configurez les paramètres de base",
+      "save": "Enregistrer",
+      "saveAndContinue": "Enregistrer et continuer",
+      "saving": "Enregistrement...",
+      "steps": {
+        "settings": { "title": "Informations", "description": "Nom, description, contact" },
+        "appearance": { "title": "Apparence", "description": "Logo, bannière, thème" },
+        "location": { "title": "Localisation", "description": "Adresse, horaires" },
+        "seo": { "title": "SEO", "description": "Référencement" },
+        "legal": { "title": "Pages Légales", "description": "CGV, confidentialité" },
+        "url": { "title": "URL", "description": "Domaine personnalisé" },
+        "marketing": { "title": "Marketing", "description": "Contenu marketing" },
+        "analytics": { "title": "Analytics", "description": "Statistiques" },
+        "commerce": { "title": "Commerce", "description": "Livraison, taxes, paiements" },
+        "notifications": { "title": "Notifications", "description": "Alertes et notifications" }
+      }
+    },
+    "preview": {
+      "openPreview": "Prévisualiser la boutique",
+      "openNewTab": "Ouvrir dans un nouvel onglet",
+      "dialogTitle": "Prévisualisation — storefront réel",
+      "dialogDescription": "Rendu identique à la boutique publique, avec vos modifications en cours (non publiées tant que vous n'enregistrez pas).",
+      "refreshAriaLabel": "Actualiser la prévisualisation",
+      "iframeTitle": "Prévisualisation de {{name}}"
+    },
+    "appearance": {
+      "previewTitle": "Prévisualisation",
+      "previewDescription": "Aperçu en temps réel de vos personnalisations",
+      "draftBadge": "Brouillon",
+      "publishedBadge": "Publié",
+      "draftHint": "Les visiteurs voient la version publiée. La prévisualisation reflète vos changements non enregistrés.",
+      "saveDraft": "Enregistrer le brouillon",
+      "publish": "Publier sur la vitrine",
+      "publishing": "Publication...",
+      "draftSavedTitle": "Brouillon enregistré",
+      "draftSavedDescription": "Vos modifications d'apparence sont en brouillon et ne sont pas encore visibles sur la boutique publique.",
+      "draftSaveError": "Impossible d'enregistrer le brouillon d'apparence.",
+      "publishedTitle": "Apparence publiée",
+      "publishedDescription": "Votre vitrine publique affiche désormais cette apparence.",
+      "publishError": "Impossible de publier l'apparence.",
+      "publishedAt": "Dernière publication : {{date}}",
+      "themeAppliedTitle": "Thème appliqué",
+      "themeAppliedDescription": "Le thème \"{{name}}\" a été appliqué avec succès.",
+      "imagesTitle": "Images de la boutique",
+      "imagesDescription": "Logo et bannière de votre boutique",
+      "logoLabel": "Logo de la boutique",
+      "logoHint": "Format carré recommandé (ex: 500x500px)",
+      "bannerLabel": "Bannière de la boutique",
+      "bannerHint": "Format paysage recommandé (ex: 1920x640px)",
+      "extraImagesTitle": "Images supplémentaires",
+      "faviconLabel": "Favicon",
+      "faviconHint": "Format carré recommandé (16×16, 32×32, 48×48px)",
+      "appleTouchLabel": "Apple Touch Icon",
+      "appleTouchHint": "Format carré 180×180px recommandé",
+      "watermarkLabel": "Filigrane (Watermark)",
+      "watermarkHint": "Image de filigrane pour protéger vos images",
+      "placeholderLabel": "Image placeholder",
+      "placeholderHint": "Image par défaut pour les produits sans image",
+      "logoAlt": "Logo",
+      "bannerAlt": "Bannière"
+    }
   },
   "affiliate": {
     "dashboard": {
