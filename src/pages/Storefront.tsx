@@ -40,9 +40,7 @@ import {
 import { filterStorefrontProducts } from '@/lib/commerce/storefront-catalog';
 import { useStorefrontReviews } from '@/hooks/useStorefrontReviews';
 import { useStoreTrustMetrics } from '@/hooks/useStoreTrustMetrics';
-
-const STOREFRONT_STORE_FIELDS =
-  'id, name, slug, subdomain, description, about, logo_url, banner_url, is_active, custom_domain, domain_status, domain_verified_at, contact_email, contact_phone, facebook_url, instagram_url, twitter_url, linkedin_url, youtube_url, tiktok_url, pinterest_url, snapchat_url, discord_url, twitch_url, created_at, updated_at, marketing_content, background_color, legal_pages, info_message, info_message_color, info_message_font, address_line1, address_line2, city, state_province, postal_code, country, latitude, longitude, opening_hours, commerce_type, active_clients, metadata';
+import { STOREFRONT_STORE_PUBLIC_SELECT } from '@/lib/storefront/store-public-fields';
 
 const Storefront = () => {
   const { slug: paramSlug } = useParams<{ slug: string }>();
@@ -118,7 +116,7 @@ const Storefront = () => {
       if (isStoreSubdomainContext) {
         const result = await supabase
           .from('stores_public')
-          .select(STOREFRONT_STORE_FIELDS)
+          .select(STOREFRONT_STORE_PUBLIC_SELECT)
           .eq('subdomain', subdomainInfo.subdomain)
           .eq('is_active', true)
           .limit(1);
@@ -127,7 +125,7 @@ const Storefront = () => {
       } else {
         const result = await supabase
           .from('stores_public')
-          .select(STOREFRONT_STORE_FIELDS)
+          .select(STOREFRONT_STORE_PUBLIC_SELECT)
           .eq('slug', slug)
           .eq('is_active', true)
           .limit(1);

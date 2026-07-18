@@ -12,11 +12,40 @@ import { supabase } from '@/integrations/supabase/client';
 import { detectSubdomain } from '@/lib/subdomain-detector';
 import { logger } from '@/lib/logger';
 import type { Store } from '@/hooks/useStores';
+import { STOREFRONT_STORE_PUBLIC_SELECT } from '@/lib/storefront/store-public-fields';
 
 interface StoreBySubdomainResponse {
   success: boolean;
   store: Store;
   subdomain: string;
+}
+
+function storeHasThemeFields(store: Store): boolean {
+  return store.primary_color != null || store.heading_font != null || store.header_style != null;
+}
+
+/**
+ * Complète une boutique partielle (RPC / edge function) avec la projection `stores_public`.
+ */
+async function enrichStoreFromPublicView(store: Store): Promise<Store> {
+  if (storeHasThemeFields(store)) {
+    return store;
+  }
+
+  const { data, error } = await supabase
+    .from('stores_public')
+    .select(STOREFRONT_STORE_PUBLIC_SELECT)
+    .eq('id', store.id)
+    .maybeSingle();
+
+  if (error || !data) {
+    if (error) {
+      logger.warn('Could not enrich store from stores_public', { storeId: store.id, error });
+    }
+    return store;
+  }
+
+  return { ...store, ...data } as Store;
 }
 
 /**
@@ -72,7 +101,7 @@ async function fetchStoreBySubdomain(
       throw new Error("Réponse invalide de l'API");
     }
 
-    return data.store;
+    return enrichStoreFromPublicView(data.store);
   } catch (error) {
     logger.error('Error fetching store by subdomain via Edge Function', {
       error,
@@ -95,14 +124,43 @@ async function fetchStoreBySubdomain(
         throw new Error(`Boutique non trouvée pour: ${identifier}`);
       }
 
-      return data[0] as Store;
+      return enrichStoreFromPublicView(data[0] as Store);
     } catch (rpcError) {
       logger.error('Error fetching store by subdomain via RPC', {
         error: rpcError,
         subdomain: normalizedSubdomain,
         customDomain: normalizedCustomDomain,
       });
-      throw rpcError;
+
+      // Option 3: lecture directe stores_public (thème complet)
+      try {
+        let query = supabase.from('stores_public').select(STOREFRONT_STORE_PUBLIC_SELECT);
+
+        if (normalizedSubdomain) {
+          query = query.eq('subdomain', normalizedSubdomain);
+        } else if (normalizedCustomDomain) {
+          query = query.eq('custom_domain', normalizedCustomDomain).eq('domain_status', 'verified');
+        }
+
+        const { data: publicStore, error: publicError } = await query.maybeSingle();
+
+        if (publicError) {
+          throw publicError;
+        }
+
+        if (!publicStore) {
+          throw new Error(`Boutique non trouvée pour: ${identifier}`);
+        }
+
+        return publicStore as Store;
+      } catch (publicViewError) {
+        logger.error('Error fetching store from stores_public', {
+          error: publicViewError,
+          subdomain: normalizedSubdomain,
+          customDomain: normalizedCustomDomain,
+        });
+        throw rpcError;
+      }
     }
   }
 }

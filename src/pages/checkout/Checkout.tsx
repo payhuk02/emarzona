@@ -43,6 +43,12 @@ import { parsePhysicalCheckoutOptions } from '@/lib/physical/physical-checkout-d
 import { notifyPhysicalOrderPlaced } from '@/lib/notifications/physical-order-notification';
 import { buildGuestOrderConfirmationPath } from '@/lib/physical/guest-order-confirmation';
 import { useCreateOrder } from '@/hooks/orders/useCreateOrder';
+import { StoreThemeProvider } from '@/components/storefront/StoreThemeProvider';
+import {
+  CHECKOUT_STORE_SELECT,
+  STOREFRONT_STORE_PUBLIC_SELECT,
+} from '@/lib/storefront/store-public-fields';
+import type { Store as ThemedStore } from '@/hooks/useStores';
 
 const BuyNowOrderSummary = lazy(() => import('@/components/checkout/buy-now/BuyNowOrderSummary'));
 const BuyNowCustomerForm = lazy(() => import('@/components/checkout/buy-now/BuyNowCustomerForm'));
@@ -60,9 +66,6 @@ function BuyNowSectionFallback() {
 
 const CHECKOUT_PRODUCT_FIELDS =
   'id, store_id, slug, name, description, short_description, price, promotional_price, currency, image_url, product_type, payment_options';
-const CHECKOUT_STORE_FIELDS = 'id, name, slug, subdomain, default_currency, logo_url, created_at';
-const CHECKOUT_PUBLIC_STORE_FIELDS =
-  'id, name, slug, subdomain, default_currency, logo_url, created_at';
 const PHYSICAL_PRODUCT_VARIANT_FIELDS = 'id, price, promotional_price, option1_value, name';
 const GENERIC_PRODUCT_VARIANT_FIELDS = 'id, price, promotional_price, option1_value, name';
 
@@ -214,7 +217,7 @@ const Checkout = () => {
             `
             ${CHECKOUT_PRODUCT_FIELDS},
             stores!inner (
-              ${CHECKOUT_STORE_FIELDS}
+              ${CHECKOUT_STORE_SELECT}
             )
           `
           )
@@ -249,7 +252,7 @@ const Checkout = () => {
           // Fallback: charger la boutique séparément si la relation n'a pas fonctionné
           const { data: storeData, error: storeError } = await supabase
             .from('stores_public')
-            .select(CHECKOUT_PUBLIC_STORE_FIELDS)
+            .select(STOREFRONT_STORE_PUBLIC_SELECT)
             .eq('id', storeId)
             .single();
 
@@ -717,80 +720,82 @@ const Checkout = () => {
   }
 
   return (
-    <div
-      className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-8 px-4 sm:px-6 lg:px-8 pb-16 md:pb-0"
-      role="main"
-      aria-label="Page de finalisation de commande"
-    >
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <header className="mb-6 sm:mb-8">
-          <nav aria-label="Navigation de la page de paiement">
-            <Button asChild variant="ghost" className="mb-4 min-h-[44px]">
-              <Link
-                to={
-                  product && store
-                    ? generateProductUrl(store.slug, product.slug, store.subdomain)
-                    : '/marketplace'
-                }
-                aria-label="Retour à la page précédente"
-              >
-                <ArrowLeft className="mr-2 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
-                <span className="text-sm sm:text-base">Retour</span>
-              </Link>
-            </Button>
-          </nav>
-          <h1 className="text-2xl sm:text-3xl font-bold">Finaliser votre commande</h1>
-          <p className="text-muted-foreground mt-2">
-            {isPhysicalCod
-              ? 'Complétez vos informations pour confirmer votre commande (paiement à la livraison)'
-              : isGuestBuyer
-                ? 'Achetez en tant qu’invité — renseignez votre email pour accéder à votre espace client après paiement'
-                : 'Complétez vos informations pour procéder au paiement'}
-          </p>
-        </header>
+    <StoreThemeProvider store={store as ThemedStore}>
+      <div
+        className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-8 px-4 sm:px-6 lg:px-8 pb-16 md:pb-0 store-theme-active"
+        role="main"
+        aria-label="Page de finalisation de commande"
+      >
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <header className="mb-6 sm:mb-8">
+            <nav aria-label="Navigation de la page de paiement">
+              <Button asChild variant="ghost" className="mb-4 min-h-[44px]">
+                <Link
+                  to={
+                    product && store
+                      ? generateProductUrl(store.slug, product.slug, store.subdomain)
+                      : '/marketplace'
+                  }
+                  aria-label="Retour à la page précédente"
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
+                  <span className="text-sm sm:text-base">Retour</span>
+                </Link>
+              </Button>
+            </nav>
+            <h1 className="text-2xl sm:text-3xl font-bold">Finaliser votre commande</h1>
+            <p className="text-muted-foreground mt-2">
+              {isPhysicalCod
+                ? 'Complétez vos informations pour confirmer votre commande (paiement à la livraison)'
+                : isGuestBuyer
+                  ? 'Achetez en tant qu’invité — renseignez votre email pour accéder à votre espace client après paiement'
+                  : 'Complétez vos informations pour procéder au paiement'}
+            </p>
+          </header>
 
-        <div className="flex flex-col lg:grid lg:grid-cols-3 gap-6 lg:gap-8">
-          {/* Résumé de la commande - En haut sur mobile, à droite sur desktop */}
-          <aside
-            className="order-2 lg:order-2 lg:col-span-1"
-            role="complementary"
-            aria-label="Résumé de la commande"
-          >
-            <Suspense fallback={<BuyNowSectionFallback />}>
-              <BuyNowOrderSummary
-                product={product}
-                store={store}
-                selectedVariant={selectedVariant}
-                appliedCouponCode={appliedCouponCode}
-                displayPrice={displayPrice}
-                currency={currency}
-                storeId={storeId}
-                productId={productId}
-                user={user}
-                submitting={submitting}
-                submitButtonLabel={submitButtonLabel}
-                isCashOnDelivery={isPhysicalCod}
-                onCouponApply={handleCouponApply}
-                onCouponRemove={handleCouponRemove}
-              />
-            </Suspense>
-          </aside>
+          <div className="flex flex-col lg:grid lg:grid-cols-3 gap-6 lg:gap-8">
+            {/* Résumé de la commande - En haut sur mobile, à droite sur desktop */}
+            <aside
+              className="order-2 lg:order-2 lg:col-span-1"
+              role="complementary"
+              aria-label="Résumé de la commande"
+            >
+              <Suspense fallback={<BuyNowSectionFallback />}>
+                <BuyNowOrderSummary
+                  product={product}
+                  store={store}
+                  selectedVariant={selectedVariant}
+                  appliedCouponCode={appliedCouponCode}
+                  displayPrice={displayPrice}
+                  currency={currency}
+                  storeId={storeId}
+                  productId={productId}
+                  user={user}
+                  submitting={submitting}
+                  submitButtonLabel={submitButtonLabel}
+                  isCashOnDelivery={isPhysicalCod}
+                  onCouponApply={handleCouponApply}
+                  onCouponRemove={handleCouponRemove}
+                />
+              </Suspense>
+            </aside>
 
-          {/* Formulaire principal - En bas sur mobile, à gauche sur desktop */}
-          <div className="order-1 lg:order-1 lg:col-span-2 space-y-6">
-            <Suspense fallback={<BuyNowSectionFallback />}>
-              <BuyNowCustomerForm
-                formData={formData}
-                formErrors={formErrors}
-                onFieldChange={handleFieldChange}
-                onSubmit={handleSubmit}
-              />
-            </Suspense>
+            {/* Formulaire principal - En bas sur mobile, à gauche sur desktop */}
+            <div className="order-1 lg:order-1 lg:col-span-2 space-y-6">
+              <Suspense fallback={<BuyNowSectionFallback />}>
+                <BuyNowCustomerForm
+                  formData={formData}
+                  formErrors={formErrors}
+                  onFieldChange={handleFieldChange}
+                  onSubmit={handleSubmit}
+                />
+              </Suspense>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </StoreThemeProvider>
   );
 };
 
