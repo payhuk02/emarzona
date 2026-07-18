@@ -56,12 +56,31 @@ function validateServiceRoleKeyFormat(key) {
   return null;
 }
 
+function isCommerceE2eRequired() {
+  const flag = process.env.COMMERCE_E2E_REQUIRED?.trim().toLowerCase();
+  return flag === '1' || flag === 'true' || flag === 'yes';
+}
+
 function skipInCi(reason) {
   console.warn(`::warning title=Commerce E2E skipped::${reason}`);
   markGithubOutput('skipped', 'true');
   markGithubOutput('skip_reason', reason.replace(/\n/g, ' '));
   console.log(`Commerce E2E skipped in CI: ${reason}`);
   process.exit(0);
+}
+
+function failInCi(reason) {
+  console.error(`::error title=Commerce E2E required::${reason}`);
+  markGithubOutput('skipped', 'true');
+  markGithubOutput('skip_reason', reason.replace(/\n/g, ' '));
+  process.exit(1);
+}
+
+function skipOrFailInCi(reason) {
+  if (isCommerceE2eRequired()) {
+    failInCi(reason);
+  }
+  skipInCi(reason);
 }
 
 const missing = [];
@@ -77,7 +96,9 @@ if (missing.length > 0) {
   const message =
     'Missing commerce E2E secrets (SUPABASE_TEST_SERVICE_ROLE_KEY, VITE_SUPABASE_TEST_ANON_KEY, VITE_SUPABASE_TEST_URL).';
   if (process.env.CI === 'true') {
-    skipInCi(`${message} Running offline contract tests instead. Fix: E2E_SUPABASE_TEST_PROJECT_REF=<ref> npm run setup:commerce-e2e-secret`);
+    skipOrFailInCi(
+      `${message} Fix: E2E_SUPABASE_TEST_PROJECT_REF=<ref> npm run setup:commerce-e2e-secret`
+    );
   }
   console.error('Missing commerce E2E secrets:');
   for (const name of missing) console.error(`  - ${name}`);
@@ -99,10 +120,10 @@ if (!projectRef) {
 }
 
 if (process.env.CI === 'true' && isProductionSupabaseUrl(url)) {
-  skipInCi(
+  skipOrFailInCi(
     `Project « ${projectRef} » is production. ` +
       'Set GitHub secret VITE_SUPABASE_TEST_URL to a dedicated non-production Supabase project. ' +
-      'Running offline contract tests instead.'
+      'Fix: E2E_SUPABASE_TEST_PROJECT_REF=<ref> npm run setup:commerce-e2e-secret'
   );
 }
 
@@ -147,7 +168,7 @@ try {
   }
 } catch (guardError) {
   if (process.env.CI === 'true') {
-    skipInCi(String(guardError.message ?? guardError));
+    skipOrFailInCi(String(guardError.message ?? guardError));
   }
   console.error(String(guardError.message ?? guardError));
   console.error('');

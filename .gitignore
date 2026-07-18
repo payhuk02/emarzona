@@ -17,6 +17,7 @@ dist-ssr
 .env.local
 .env.*.local
 .env.k6
+.e2e-commerce-project-ref
 
 # Editor directories and files
 .vscode/*
