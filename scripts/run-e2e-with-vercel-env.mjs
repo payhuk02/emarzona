@@ -20,6 +20,7 @@ const target = process.argv[2] ?? 'vertical-paid';
 
 const scripts = {
   'commerce-gating': 'test:e2e:commerce-gating',
+  'store-theme': 'test:e2e:store-theme',
   'vertical-paid': 'test:e2e:vertical-paid',
 };
 
