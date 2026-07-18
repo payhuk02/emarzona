@@ -56,6 +56,7 @@ import {
 import { resolveStoreCommerceTypeFromStore } from '@/lib/commerce/store-capability-map';
 import { useStoreCommerceTypeGuard } from '@/hooks/useStoreCommerceTypeGuard';
 import { getStoreOnboardingPath } from '@/lib/commerce/store-vertical-config';
+import { isStoreSlugAvailable } from '@/lib/store/create-store-service';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface StoreFormProps {
@@ -400,13 +401,8 @@ const StoreForm = ({
 
       setIsCheckingSlug(true);
       try {
-        const { data, error } = await supabase.rpc('is_store_slug_available', {
-          check_slug: slugToCheck,
-          exclude_store_id: initialData?.id ?? undefined,
-        });
-
-        if (error) throw error;
-        setSlugAvailable(data);
+        const available = await isStoreSlugAvailable(slugToCheck, initialData?.id);
+        setSlugAvailable(available);
       } catch (_error: unknown) {
         const errorMessage = _error instanceof Error ? _error.message : 'Erreur inconnue';
         logger.error('Error checking slug', { error: errorMessage, slug: slugToCheck });

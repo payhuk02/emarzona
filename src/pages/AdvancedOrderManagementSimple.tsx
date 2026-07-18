@@ -3,11 +3,15 @@ import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useTranslation } from 'react-i18next';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Package, Shield } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useStore } from '@/hooks/useStore';
+import { STORE_CREATE_PATH } from '@/lib/store/store-create-path';
 
 const AdvancedOrderManagementSimple = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { store, loading: storeLoading } = useStore();
 
   if (storeLoading) {
@@ -35,13 +39,16 @@ const AdvancedOrderManagementSimple = () => {
               {t('dashboard.createStorePrompt', "Créez votre boutique d'abord")}
             </CardTitle>
           </CardHeader>
-          <CardContent className="text-center">
+          <CardContent className="text-center space-y-4">
             <p className="text-muted-foreground">
               {t(
                 'dashboard.createStoreDescription',
                 'Vous devez créer une boutique avant de pouvoir gérer les commandes avancées'
               )}
             </p>
+            <Button onClick={() => navigate(STORE_CREATE_PATH)}>
+              {t('dashboard.createStoreButton', 'Créer ma boutique')}
+            </Button>
           </CardContent>
         </Card>
       </AppPageShell>
