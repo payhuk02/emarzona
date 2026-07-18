@@ -436,4 +436,84 @@ test.describe('Product update RPC — Sprint 2', () => {
     await admin.from('stores').delete().eq('id', storeId);
     await admin.auth.admin.deleteUser(userId);
   });
+
+  test('update_service_product_tx updates name and duration atomically', async () => {
+    const admin = createNodeSupabaseClient(supabaseUrl!, supabaseServiceKey!);
+    const runId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    const email = `e2e-update-service-${runId}@example.com`;
+    const password = `E2E!${runId}aA1`;
+
+    const { data: createdUser } = await admin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+    });
+    const userId = createdUser.user!.id;
+
+    const { data: storeData } = await admin
+      .from('stores')
+      .insert({
+        user_id: userId,
+        name: `E2E Update Service ${runId}`,
+        slug: slugify(`e2e-update-service-${runId}`),
+        is_active: true,
+        commerce_type: 'service',
+      })
+      .select('id')
+      .single();
+    const storeId = (storeData as { id: string }).id;
+
+    const slug = slugify(`service-${runId}`);
+    const { data: createResult, error: createError } = await admin.rpc(
+      'create_service_product_tx',
+      {
+        p_store_id: storeId,
+        p_product: {
+          name: `Service initial ${runId}`,
+          slug,
+          description: 'Description initiale du service E2E avec plus de dix caractères.',
+          price: 25000,
+          is_draft: false,
+          is_active: true,
+        },
+        p_service: {
+          duration_minutes: 60,
+          location_type: 'on_site',
+          location_address: '12 avenue Test, Abidjan',
+          max_participants: 1,
+        },
+      }
+    );
+    expect(createError).toBeNull();
+
+    const productId = (createResult as { product_id: string }).product_id;
+    const updatedName = `Service mis à jour ${runId}`;
+
+    const { error: updateError } = await admin.rpc('update_service_product_tx', {
+      p_store_id: storeId,
+      p_product_id: productId,
+      p_product: { name: updatedName, price: 30000 },
+      p_service: { duration_minutes: 90 },
+    });
+    expect(updateError).toBeNull();
+
+    const { data: productRow } = await admin
+      .from('products')
+      .select('name, price')
+      .eq('id', productId)
+      .single();
+    expect(productRow?.name).toBe(updatedName);
+    expect(Number(productRow?.price)).toBe(30000);
+
+    const { data: serviceRow } = await admin
+      .from('service_products')
+      .select('duration_minutes')
+      .eq('product_id', productId)
+      .single();
+    expect(serviceRow?.duration_minutes).toBe(90);
+
+    await admin.from('products').delete().eq('id', productId);
+    await admin.from('stores').delete().eq('id', storeId);
+    await admin.auth.admin.deleteUser(userId);
+  });
 });

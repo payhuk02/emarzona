@@ -22,6 +22,8 @@ export default defineConfig({
     '**/physical-product-publish.spec.ts',
     '**/service-product-publish.spec.ts',
     '**/marketplace-product-visibility.spec.ts',
+    '**/marketplace-wizard-checkout.spec.ts',
+    '**/product-edit-wizard.spec.ts',
     '**/product-update-rpc.spec.ts',
   ],
   fullyParallel: false,

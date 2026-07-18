@@ -54,6 +54,7 @@ import { useCatalogCacheInvalidation } from '@/hooks/useCatalogCacheInvalidation
 import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
 import { createServiceProductTx } from '@/lib/products/product-create-rpc';
 import { createDefaultServiceBookingOptions } from '@/lib/service/default-booking-options';
+import { validateServiceWizardPublishSteps } from '@/lib/service-wizard-step-validation';
 import { supabase } from '@/integrations/supabase/client';
 import {
   validateWithZod,
@@ -934,15 +935,44 @@ export const CreateServiceWizard = ({
    * Publish service
    */
   const handlePublish = useCallback(async () => {
-    // Validate required steps (1-4 are required, 5-7 are optional)
-    let allValid = true;
-    for (let step = 1; step <= 4; step++) {
+    const publishValidation = validateServiceWizardPublishSteps(formData);
+    if (!publishValidation.valid) {
+      if (publishValidation.failedStep) {
+        setCurrentStep(publishValidation.failedStep);
+      }
+      toast({
+        title:
+          publishValidation.toastTitle ??
+          t('services.errors.validationAllTitle', '⚠️ Erreurs de validation'),
+        description:
+          publishValidation.toastDescription ??
+          publishValidation.errors.join(', ') ??
+          t(
+            'services.errors.validationAllDesc',
+            'Veuillez corriger toutes les erreurs avant de publier'
+          ),
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    for (const step of [3, 4] as const) {
       if (!(await validateStep(step))) {
-        allValid = false;
+        setCurrentStep(step);
+        toast({
+          title: t('services.errors.validationAllTitle', '⚠️ Erreurs de validation'),
+          description: t(
+            'services.errors.validationAllDesc',
+            'Veuillez corriger toutes les erreurs avant de publier'
+          ),
+          variant: 'destructive',
+        });
+        return;
       }
     }
 
-    if (!allValid) {
+    if (!(await validateStep(1))) {
+      setCurrentStep(1);
       toast({
         title: t('services.errors.validationAllTitle', '⚠️ Erreurs de validation'),
         description: t(
@@ -1059,6 +1089,7 @@ export const CreateServiceWizard = ({
       setIsSaving(false);
     }
   }, [
+    formData,
     validateStep,
     saveServiceProduct,
     formData.affiliate?.enabled,

@@ -41,6 +41,7 @@ import { cn } from '@/lib/utils';
 import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
 import { createDigitalProductTx } from '@/lib/products/product-create-rpc';
 import { buildDigitalProductFilesPayload } from '@/lib/digital/build-digital-product-files-payload';
+import { validateDigitalWizardPublishSteps } from '@/lib/digital-wizard-step-validation';
 import type {
   DigitalProductFormData,
   DigitalProductFormDataUpdate,
@@ -1074,14 +1075,27 @@ export const CreateDigitalProductWizard = ({
    * Handle submit (publish)
    */
   const handleSubmit = useCallback(async () => {
-    let allValid = true;
-    for (let step = 1; step <= 2; step++) {
-      if (!(await validateStep(step))) {
-        allValid = false;
+    const publishValidation = validateDigitalWizardPublishSteps(formData);
+    if (!publishValidation.valid) {
+      if (publishValidation.failedStep) {
+        setCurrentStep(publishValidation.failedStep);
       }
+      toast({
+        title: publishValidation.toastTitle ?? t('wizard.errors.title', 'Erreur'),
+        description:
+          publishValidation.toastDescription ??
+          publishValidation.errors.join(', ') ??
+          t(
+            'wizard.errors.requiredFields',
+            'Veuillez corriger toutes les erreurs avant de publier'
+          ),
+        variant: 'destructive',
+      });
+      return;
     }
 
-    if (!allValid) {
+    if (!(await validateStep(1))) {
+      setCurrentStep(1);
       toast({
         title: t('wizard.errors.title', 'Erreur'),
         description: t(
@@ -1124,6 +1138,7 @@ export const CreateDigitalProductWizard = ({
       setIsSubmitting(false);
     }
   }, [
+    formData,
     validateStep,
     saveProduct,
     formData.affiliate?.enabled,

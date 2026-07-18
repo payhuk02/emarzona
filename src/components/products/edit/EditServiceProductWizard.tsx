@@ -763,8 +763,19 @@ export const EditServiceProductWizard = ({
       return;
     }
 
+    const serverStep = await validateStep(1);
+    if (!serverStep.valid) {
+      setCurrentStep(1);
+      toast({
+        title: 'Erreurs de validation',
+        description: serverStep.errors.join(', '),
+        variant: 'destructive',
+      });
+      return;
+    }
+
     await saveProduct();
-  }, [formData, saveProduct, toast]);
+  }, [formData, validateStep, saveProduct, toast]);
 
   const getStepProps = useCallback(() => {
     const baseProps = {

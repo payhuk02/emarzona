@@ -64,6 +64,25 @@ export async function assertGuestMarketplaceProductVisible(
   await assertMarketplaceGuestBuyCta(page, productName, buyLabelPattern);
 }
 
+export async function completeMarketplaceGuestPurchaseFromCard(
+  page: Page,
+  productName: string,
+  options: { guestEmail: string; guestName?: string; expectedUrl: RegExp }
+): Promise<void> {
+  const root = appLocator(page);
+  const card = root.getByTestId('product-card').filter({ hasText: productName }).first();
+  await expect(card).toBeVisible({ timeout: 30_000 });
+  await card.locator('button[data-action="primary"]').click();
+
+  await expect(page.getByRole('dialog')).toBeVisible({ timeout: 15_000 });
+  await page.locator('#guest-email').fill(options.guestEmail);
+  if (options.guestName) {
+    await page.locator('#guest-name').fill(options.guestName);
+  }
+  await page.getByRole('button', { name: /Continuer vers le paiement/i }).click();
+  await expect(page).toHaveURL(options.expectedUrl, { timeout: 30_000 });
+}
+
 export async function openMarketplaceWithOptionalFilter(
   page: Page,
   productType?: MarketplaceProductType

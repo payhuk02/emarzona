@@ -77,6 +77,7 @@ import type {
   PhysicalProductAffiliateSettings,
   PhysicalProductPaymentOptions,
 } from '@/types/physical-product';
+import { validatePhysicalWizardPublishSteps } from '@/lib/physical-wizard-step-validation';
 import {
   validateWithZod,
   formatValidators,
@@ -914,15 +915,29 @@ export const CreatePhysicalProductWizard = ({
    * Publish product
    */
   const handlePublish = useCallback(async () => {
-    // Validate required steps (1-4 are required, 5-7 are optional)
-    let allValid = true;
-    for (let step = 1; step <= 4; step++) {
-      if (!(await validateStep(step))) {
-        allValid = false;
+    const publishValidation = validatePhysicalWizardPublishSteps(formData);
+    if (!publishValidation.valid) {
+      if (publishValidation.failedStep) {
+        setCurrentStep(publishValidation.failedStep);
       }
+      toast({
+        title:
+          publishValidation.toastTitle ??
+          t('products.errors.validationAllTitle', '⚠️ Erreurs de validation'),
+        description:
+          publishValidation.toastDescription ??
+          publishValidation.errors.join(', ') ??
+          t(
+            'products.errors.validationAllDesc',
+            'Veuillez corriger toutes les erreurs avant de publier'
+          ),
+        variant: 'destructive',
+      });
+      return;
     }
 
-    if (!allValid) {
+    if (!(await validateStep(1))) {
+      setCurrentStep(1);
       toast({
         title: t('products.errors.validationAllTitle', '⚠️ Erreurs de validation'),
         description: t(
@@ -973,6 +988,7 @@ export const CreatePhysicalProductWizard = ({
       setIsSaving(false);
     }
   }, [
+    formData,
     validateStep,
     savePhysicalProduct,
     formData.affiliate?.enabled,
