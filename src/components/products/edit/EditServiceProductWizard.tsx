@@ -519,6 +519,11 @@ export const EditServiceProductWizard = ({
           if (formData.location_type === 'online' && !formData.meeting_url?.trim()) {
             errors.push("L'URL de réunion est requise pour les services en ligne");
           }
+          if (!formData.availability_slots || formData.availability_slots.length === 0) {
+            errors.push(
+              'Ajoutez au moins un créneau de disponibilité pour permettre les réservations'
+            );
+          }
 
           if (errors.length > 0) {
             setValidationErrors(prev => ({ ...prev, [step]: errors }));

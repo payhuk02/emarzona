@@ -40,11 +40,11 @@ const CreateProduct = () => {
         storeSlug={store.slug}
         initialProductType={productType}
         onSuccess={() => {
-          // Rediriger vers la page appropriée selon le type de produit
           if (productType === 'digital') {
             navigate('/dashboard/digital-products');
+          } else if (productType === 'artist') {
+            navigate('/dashboard/artist-products');
           } else {
-            // Pour les produits physiques et services, rediriger vers la liste générale
             navigate('/dashboard/products');
           }
         }}

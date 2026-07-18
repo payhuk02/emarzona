@@ -39,6 +39,7 @@ import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { cn } from '@/lib/utils';
 import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
 import { createDigitalProductTx } from '@/lib/products/product-create-rpc';
+import { buildDigitalProductFilesPayload } from '@/lib/digital/build-digital-product-files-payload';
 import type {
   DigitalProductFormData,
   DigitalProductFormDataUpdate,
@@ -885,20 +886,16 @@ export const CreateDigitalProductWizard = ({
           version: formData.version || '1.0',
         };
 
-        const filesPayload =
-          formData.downloadable_files?.map(
-            (file: DigitalProductDownloadableFile, index: number) => ({
-              name: file.name,
-              file_url: file.url,
-              file_type: file.type,
-              file_size_mb: file.size / (1024 * 1024),
-              order_index: index,
-              is_main: index === 0,
-              is_preview: file.is_preview || false,
-              requires_purchase: file.requires_purchase !== false && !file.is_preview,
-              version: '1.0',
-            })
-          ) || [];
+        const filesPayload = buildDigitalProductFilesPayload({
+          main_file_url: formData.main_file_url || mainFile?.url || '',
+          main_file_version: formData.main_file_version,
+          downloadable_files: formData.downloadable_files,
+          mainFileMeta: mainFile
+            ? { name: mainFile.name, size: mainFile.size, type: mainFile.format }
+            : formData.main_file_url
+              ? { name: formData.name ? `${formData.name}-main` : undefined }
+              : null,
+        });
 
         const rpcResult = await createDigitalProductTx(
           storeId,

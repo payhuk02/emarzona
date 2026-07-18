@@ -26,12 +26,12 @@ interface PaymentOptionsData {
 
 interface PaymentOptionsFormProps {
   productPrice?: number | null;
-  productType: 'physical' | 'service' | 'generic';
+  productType: 'physical' | 'service' | 'generic' | 'artist';
   data: PaymentOptionsData;
   onUpdate: (data: PaymentOptionsData) => void;
 }
 
-export const PaymentOptionsForm : React.FC<PaymentOptionsFormProps> = ({
+export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
   productPrice,
   productType,
   data,
@@ -76,8 +76,8 @@ export const PaymentOptionsForm : React.FC<PaymentOptionsFormProps> = ({
         <Info className="h-4 w-4" />
         <AlertDescription>
           Choisissez comment vos clients paieront pour ce{' '}
-          {productType === 'service' ? 'service' : 'produit'}. Les options de paiement flexible
-          augmentent les conversions de +30% en moyenne.
+          {productType === 'service' ? 'service' : productType === 'artist' ? 'œuvre' : 'produit'}.
+          Les options de paiement flexible augmentent les conversions de +30% en moyenne.
         </AlertDescription>
       </Alert>
 
@@ -217,7 +217,9 @@ export const PaymentOptionsForm : React.FC<PaymentOptionsFormProps> = ({
                       <Shield className="h-5 w-5 text-yellow-600" />
                       <span className="font-semibold text-base">
                         Paiement Sécurisé{' '}
-                        {productType === 'physical' ? '(à la livraison)' : '(à la prestation)'}
+                        {productType === 'physical' || productType === 'artist'
+                          ? '(à la livraison)'
+                          : '(à la prestation)'}
                       </span>
                       <Badge variant="default" className="bg-yellow-600">
                         <Lock className="h-3 w-3 mr-1" />
@@ -285,10 +287,3 @@ export const PaymentOptionsForm : React.FC<PaymentOptionsFormProps> = ({
     </div>
   );
 };
-
-
-
-
-
-
-

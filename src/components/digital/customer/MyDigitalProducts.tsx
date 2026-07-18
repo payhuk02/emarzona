@@ -16,18 +16,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Download,
-  ExternalLink,
-  Search,
-  Filter,
-  Package,
-  Clock,
-  CheckCircle2,
-  XCircle,
-} from 'lucide-react';
+import { Download, ExternalLink, Search, Filter, Package, Clock, Key } from 'lucide-react';
 import { AlertCircleIcon } from '@/components/icons/AlertCircleIcon';
-import { useCustomerPurchasedProducts, PurchasedDigitalProduct } from '@/hooks/digital/useCustomerPurchasedProducts';
+import {
+  useCustomerPurchasedProducts,
+  PurchasedDigitalProduct,
+} from '@/hooks/digital/useCustomerPurchasedProducts';
 import { useGenerateDownloadLink } from '@/hooks/digital/useDownloads';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -44,31 +38,43 @@ export const MyDigitalProducts = () => {
   const generateLink = useGenerateDownloadLink();
   const { toast } = useToast();
 
-  const filteredProducts = products?.filter(product => {
-    const matchesSearch = product.product_name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || product.status === statusFilter;
-    const matchesType = typeFilter === 'all' || product.digital_type === typeFilter;
-    return matchesSearch && matchesStatus && matchesType;
-  }) || [];
+  const filteredProducts =
+    products?.filter(product => {
+      const matchesSearch = product.product_name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesStatus = statusFilter === 'all' || product.status === statusFilter;
+      const matchesType = typeFilter === 'all' || product.digital_type === typeFilter;
+      return matchesSearch && matchesStatus && matchesType;
+    }) || [];
 
   const handleDownload = async (product: PurchasedDigitalProduct) => {
+    if (!product.main_file_id) {
+      toast({
+        title: 'Fichier indisponible',
+        description:
+          'Le fichier principal de ce produit est introuvable. Contactez le vendeur ou réessayez plus tard.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     try {
       const result = await generateLink.mutateAsync({
-        digitalProductId: product.digital_product_id,
-        fileId: null, // Main file
+        fileId: product.main_file_id,
       });
 
-      if (result.downloadUrl) {
-        window.open(result.downloadUrl, '_blank');
+      if (result.url) {
+        window.open(result.url, '_blank');
         toast({
           title: 'Téléchargement démarré',
           description: 'Le téléchargement a été lancé dans un nouvel onglet',
         });
       }
-    } catch ( _error: any) {
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : 'Impossible de générer le lien de téléchargement';
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de générer le lien de téléchargement',
+        description: message,
         variant: 'destructive',
       });
     }
@@ -77,7 +83,11 @@ export const MyDigitalProducts = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
-        return <Badge variant="default" className="bg-green-500">Actif</Badge>;
+        return (
+          <Badge variant="default" className="bg-green-500">
+            Actif
+          </Badge>
+        );
       case 'expired':
         return <Badge variant="destructive">Expiré</Badge>;
       case 'suspended':
@@ -119,7 +129,8 @@ export const MyDigitalProducts = () => {
           <Package className="h-16 w-16 text-muted-foreground mb-4" />
           <h3 className="text-lg font-semibold mb-2">Aucun produit digital acheté</h3>
           <p className="text-muted-foreground text-center max-w-md">
-            Vous n'avez pas encore acheté de produits digitaux. Parcourez notre catalogue pour découvrir nos produits.
+            Vous n'avez pas encore acheté de produits digitaux. Parcourez notre catalogue pour
+            découvrir nos produits.
           </p>
         </CardContent>
       </Card>
@@ -132,9 +143,7 @@ export const MyDigitalProducts = () => {
       <Card>
         <CardHeader>
           <CardTitle>Recherche et Filtres</CardTitle>
-          <CardDescription>
-            Trouvez rapidement vos produits digitaux
-          </CardDescription>
+          <CardDescription>Trouvez rapidement vos produits digitaux</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -145,7 +154,7 @@ export const MyDigitalProducts = () => {
                 <Input
                   placeholder="Nom du produit..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={e => setSearchQuery(e.target.value)}
                   className="pl-10"
                 />
               </div>
@@ -211,9 +220,7 @@ export const MyDigitalProducts = () => {
         </Card>
         <Card>
           <CardContent className="p-4">
-            <div className="text-2xl font-bold">
-              {products.filter(p => p.license_key).length}
-            </div>
+            <div className="text-2xl font-bold">{products.filter(p => p.license_key).length}</div>
             <div className="text-sm text-muted-foreground">Licences</div>
           </CardContent>
         </Card>
@@ -232,7 +239,7 @@ export const MyDigitalProducts = () => {
             </CardContent>
           </Card>
         ) : (
-          filteredProducts.map((product) => (
+          filteredProducts.map(product => (
             <Card key={product.id} className="hover:shadow-md transition-shadow">
               <CardContent className="p-6">
                 <div className="flex flex-col md:flex-row gap-6">
@@ -289,19 +296,28 @@ export const MyDigitalProducts = () => {
 
                     {/* Expiration */}
                     {product.expiry_date && (
-                      <div className={cn(
-                        "flex items-center gap-2 text-sm",
-                        new Date(product.expiry_date) < new Date()
-                          ? "text-red-600"
-                          : new Date(product.expiry_date).getTime() - Date.now() < 7 * 24 * 60 * 60 * 1000
-                          ? "text-orange-600"
-                          : "text-muted-foreground"
-                      )}>
+                      <div
+                        className={cn(
+                          'flex items-center gap-2 text-sm',
+                          new Date(product.expiry_date) < new Date()
+                            ? 'text-red-600'
+                            : new Date(product.expiry_date).getTime() - Date.now() <
+                                7 * 24 * 60 * 60 * 1000
+                              ? 'text-orange-600'
+                              : 'text-muted-foreground'
+                        )}
+                      >
                         <Clock className="h-4 w-4" />
                         {product.status === 'expired' ? (
-                          <span>Expiré le {format(new Date(product.expiry_date), 'dd/MM/yyyy', { locale: fr })}</span>
+                          <span>
+                            Expiré le{' '}
+                            {format(new Date(product.expiry_date), 'dd/MM/yyyy', { locale: fr })}
+                          </span>
                         ) : (
-                          <span>Expire le {format(new Date(product.expiry_date), 'dd/MM/yyyy', { locale: fr })}</span>
+                          <span>
+                            Expire le{' '}
+                            {format(new Date(product.expiry_date), 'dd/MM/yyyy', { locale: fr })}
+                          </span>
                         )}
                       </div>
                     )}
@@ -352,10 +368,3 @@ export const MyDigitalProducts = () => {
     </div>
   );
 };
-
-
-
-
-
-
-

@@ -52,6 +52,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/hooks/useStore';
 import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
 import { createServiceProductTx } from '@/lib/products/product-create-rpc';
+import { createDefaultServiceBookingOptions } from '@/lib/service/default-booking-options';
 import { supabase } from '@/integrations/supabase/client';
 import {
   validateWithZod,
@@ -217,12 +218,13 @@ export const CreateServiceWizard = ({
 
     // Duration & Availability (Step 2)
     duration: 60,
+    duration_minutes: 60,
     location_type: 'on_site',
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     availability_slots: [],
 
     // Staff & Resources (Step 3)
-    requires_staff: true,
+    requires_staff: false,
     max_participants: 1,
     staff_members: [],
     resources: [],
@@ -236,6 +238,7 @@ export const CreateServiceWizard = ({
     buffer_time_before: 0,
     buffer_time_after: 0,
     advance_booking_days: 30,
+    booking_options: createDefaultServiceBookingOptions(),
 
     // Affiliation (Step 5)
     affiliate: {
@@ -471,6 +474,14 @@ export const CreateServiceWizard = ({
               t(
                 'services.errors.meetingUrlRequired',
                 "L'URL de réunion est requise pour les services en ligne"
+              )
+            );
+          }
+          if (!formData.availability_slots || formData.availability_slots.length === 0) {
+            errors.push(
+              t(
+                'services.errors.slotsRequired',
+                'Ajoutez au moins un créneau de disponibilité pour permettre les réservations'
               )
             );
           }

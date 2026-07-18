@@ -25,6 +25,7 @@ export interface PurchasedDigitalProduct {
   digital_type: string;
   license_type: string;
   main_file_url: string;
+  main_file_id: string | null;
   download_count: number;
   download_limit: number;
   last_download_date: string | null;
@@ -39,7 +40,9 @@ export const useCustomerPurchasedProducts = () => {
   return useQuery({
     queryKey: ['customerPurchasedDigitalProducts'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       // Récupérer le customer_id depuis l'email
@@ -54,11 +57,11 @@ export const useCustomerPurchasedProducts = () => {
         // Si erreur 406 (Not Acceptable), cela peut être dû à RLS ou à la syntaxe
         // Si erreur 400, cela peut être dû à une colonne manquante
         // Dans tous les cas, logger et retourner un tableau vide
-        logger.warn('Error fetching customer', { 
-          email: user.email, 
+        logger.warn('Error fetching customer', {
+          email: user.email,
           error: customerError,
           code: customerError.code,
-          message: customerError.message 
+          message: customerError.message,
         });
         return [];
       }
@@ -73,7 +76,8 @@ export const useCustomerPurchasedProducts = () => {
       // Récupérer les commandes avec produits digitaux
       const { data: orders, error: ordersError } = await supabase
         .from('orders')
-        .select(`
+        .select(
+          `
           id,
           order_number,
           created_at,
@@ -102,7 +106,8 @@ export const useCustomerPurchasedProducts = () => {
               )
             )
           )
-        `)
+        `
+        )
         .eq('customer_id', customer.id)
         .eq('payment_status', 'paid')
         .order('created_at', { ascending: false });
@@ -129,7 +134,7 @@ export const useCustomerPurchasedProducts = () => {
       };
       const productIds = orders
         .flatMap(o => (o.order_items || []) as OrderItem[])
-        .map((item) => item.product?.digital_product?.id)
+        .map(item => item.product?.digital_product?.id)
         .filter((id): id is string => Boolean(id));
 
       const { data: downloads } = await supabase
@@ -139,8 +144,14 @@ export const useCustomerPurchasedProducts = () => {
         .eq('user_id', user.id)
         .order('download_date', { ascending: false });
 
+      const { data: mainFiles } = await supabase
+        .from('digital_product_files')
+        .select('id, digital_product_id')
+        .in('digital_product_id', productIds)
+        .eq('is_main', true);
+
       // Organiser les données
-      const  purchasedProducts: PurchasedDigitalProduct[] = [];
+      const purchasedProducts: PurchasedDigitalProduct[] = [];
 
       type OrderWithItems = {
         id: string;
@@ -173,12 +184,12 @@ export const useCustomerPurchasedProducts = () => {
           if (!digitalProduct) continue;
 
           const license = licenses?.find(l => l.order_id === order.id);
-          const productDownloads = downloads?.filter(
-            d => d.digital_product_id === digitalProduct.id
-          ) || [];
+          const productDownloads =
+            downloads?.filter(d => d.digital_product_id === digitalProduct.id) || [];
+          const mainFileRow = mainFiles?.find(f => f.digital_product_id === digitalProduct.id);
 
           // Calculer la date d'expiration
-          let  expiryDate: string | null = null;
+          let expiryDate: string | null = null;
           if (digitalProduct.download_expiry_days && digitalProduct.download_expiry_days > 0) {
             const expiry = new Date(order.created_at);
             expiry.setDate(expiry.getDate() + digitalProduct.download_expiry_days);
@@ -188,7 +199,7 @@ export const useCustomerPurchasedProducts = () => {
           }
 
           // Déterminer le statut
-          let  status: 'active' | 'expired' | 'suspended' = 'active';
+          let status: 'active' | 'expired' | 'suspended' = 'active';
           if (expiryDate && new Date(expiryDate) < new Date()) {
             status = 'expired';
           } else if (license?.status === 'suspended' || license?.status === 'revoked') {
@@ -213,6 +224,7 @@ export const useCustomerPurchasedProducts = () => {
             digital_type: digitalProduct.digital_type,
             license_type: digitalProduct.license_type,
             main_file_url: digitalProduct.main_file_url,
+            main_file_id: mainFileRow?.id ?? null,
             download_count: productDownloads.length,
             download_limit: digitalProduct.download_limit || -1,
             last_download_date: productDownloads[0]?.download_date || null,
@@ -227,10 +239,3 @@ export const useCustomerPurchasedProducts = () => {
     enabled: true,
   });
 };
-
-
-
-
-
-
-

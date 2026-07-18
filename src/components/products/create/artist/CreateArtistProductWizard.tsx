@@ -64,6 +64,7 @@ import type { ArtistProductFormData, ArtistType } from '@/types/artist-product';
 import { generateSlug } from '@/lib/validation-utils';
 import { saveDraftHybrid, loadDraftHybrid, clearDraft } from '@/lib/artist-product-draft';
 import { validateAndSanitizeArtistProduct } from '@/lib/artist-product-sanitizer';
+import { validateArtistPublishFormData } from '@/lib/artist-product-publish-validation';
 import { validateArtistProduct } from '@/lib/validation/centralized-validation';
 import { createArtistProductTx } from '@/lib/products/product-create-rpc';
 import {
@@ -351,76 +352,18 @@ const CreateArtistProductWizardComponent = ({
 
   // ✅ NOUVEAU: Valider toutes les étapes avant publication
   const validateAllSteps = useCallback((): boolean => {
-    // Étape 1: Type d'artiste
-    if (!validateStep(1)) {
+    const result = validateArtistPublishFormData(formData);
+    if (!result.valid) {
       toast({
-        title: 'Étape 1 incomplète',
-        description: "Veuillez sélectionner un type d'artiste",
+        title: result.title || 'Validation incomplète',
+        description: result.description || 'Corrigez les erreurs avant publication',
         variant: 'destructive',
       });
-      return false;
-    }
-
-    // Étape 2: Informations de base
-    if (!validateStep(2)) {
-      toast({
-        title: 'Étape 2 incomplète',
-        description: 'Veuillez compléter toutes les informations de base',
-        variant: 'destructive',
-      });
-      return false;
-    }
-
-    // Étape 3: Spécificités (selon type) - Validation basique
-    // Les champs spécifiques sont optionnels, mais on vérifie la cohérence
-    if (formData.artist_type === 'writer' && formData.writer_specific) {
-      // Validation basique pour writer
-      // Les champs sont optionnels, pas de validation stricte
-    }
-
-    // Étape 4: Expédition - Validation basique
-    if (formData.requires_shipping) {
-      if (!formData.shipping_handling_time || formData.shipping_handling_time < 1) {
-        toast({
-          title: 'Délai de livraison requis',
-          description: 'Veuillez spécifier un délai de livraison valide (minimum 1 jour)',
-          variant: 'destructive',
-        });
-        return false;
+      if (result.failedStep) {
+        setCurrentStep(result.failedStep);
       }
-    }
-
-    // Étape 5: Authentification - Optionnel, pas de validation stricte
-
-    // Étape 6: SEO & FAQ - Optionnel, pas de validation stricte
-
-    // Étape 7: Options de paiement
-    if (!formData.payment) {
-      toast({
-        title: 'Options de paiement requises',
-        description: 'Veuillez configurer les options de paiement',
-        variant: 'destructive',
-      });
       return false;
     }
-
-    if (formData.payment.payment_type === 'percentage') {
-      if (
-        !formData.payment.percentage_rate ||
-        formData.payment.percentage_rate < 1 ||
-        formData.payment.percentage_rate > 100
-      ) {
-        toast({
-          title: 'Taux de paiement invalide',
-          description: 'Le taux de paiement doit être entre 1% et 100%',
-          variant: 'destructive',
-        });
-        return false;
-      }
-    }
-
-    // Étape 8: Aperçu - Pas de validation stricte, juste confirmation
-
     return true;
   }, [formData, toast]);
 
@@ -869,7 +812,7 @@ const CreateArtistProductWizardComponent = ({
               <Suspense fallback={<StepSkeleton />}>
                 <PaymentOptionsForm
                   productPrice={formData.price || 0}
-                  productType="physical"
+                  productType="artist"
                   data={{
                     payment_type: (formData.payment?.payment_type || 'full') as
                       | 'full'

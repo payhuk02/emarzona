@@ -5,8 +5,10 @@ import { useNavigate } from 'react-router-dom';
 import { logger } from '@/lib/logger';
 import { validateCourseData } from '@/lib/validation/courseSchemas';
 
-const PRODUCT_FIELDS = 'id, store_id, name, slug, description, image_url, price, currency, product_type, is_active, created_at, updated_at';
-const COURSE_FIELDS = 'id, product_id, title, description, level, language, certificate_enabled, certificate_passing_score, learning_objectives, prerequisites, target_audience, created_at, updated_at';
+const PRODUCT_FIELDS =
+  'id, store_id, name, slug, description, image_url, price, currency, product_type, is_active, created_at, updated_at';
+const COURSE_FIELDS =
+  'id, product_id, title, description, level, language, certificate_enabled, certificate_passing_score, learning_objectives, prerequisites, target_audience, created_at, updated_at';
 
 // Type pour le résultat de la fonction SQL create_full_course
 type CreateFullCourseResult = {
@@ -300,8 +302,9 @@ export const useCreateFullCourse = () => {
                 paidProductId: product.id,
               });
             }
-          } catch ( _error: unknown) {
-            const errorMessage = error instanceof Error ? error.message : String(error);
+          } catch (previewErr: unknown) {
+            const errorMessage =
+              previewErr instanceof Error ? previewErr.message : String(previewErr);
             logger.error('Exception creating free preview course', {
               error: errorMessage,
               paidProductId: product.id,
@@ -316,13 +319,13 @@ export const useCreateFullCourse = () => {
           sectionsCount: typedResult.sections_count || 0,
           lessonsCount: typedResult.lessons_count || 0,
         };
-      } catch ( _error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
+      } catch (createErr: unknown) {
+        const errorMessage = createErr instanceof Error ? createErr.message : String(createErr);
         logger.error('Global error creating course', {
           error: errorMessage,
           storeId: data.storeId,
         });
-        throw error;
+        throw createErr;
       }
     },
     onSuccess: result => {
@@ -349,9 +352,3 @@ export const useCreateFullCourse = () => {
     },
   });
 };
-
-
-
-
-
-

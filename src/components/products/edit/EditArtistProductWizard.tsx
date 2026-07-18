@@ -46,6 +46,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { updateArtistProductTx } from '@/lib/products/product-update-rpc';
 import { validateRequiredSteps } from '@/lib/wizard-validation/edit-save-validation';
+import { validateAndSanitizeArtistProduct } from '@/lib/artist-product-sanitizer';
+import { validateArtistProduct } from '@/lib/validation/centralized-validation';
+import { validateArtistPublishFormData } from '@/lib/artist-product-publish-validation';
 import { cn } from '@/lib/utils';
 import type { ArtistProductFormData, ArtistType } from '@/types/artist-product';
 import { generateSlug } from '@/lib/validation-utils';
@@ -311,10 +314,10 @@ export const EditArtistProductWizard = ({
             });
             return { valid: false, errors };
           }
-          if (formData.edition_type === 'limited_edition') {
+          if (formData.edition_type === 'limited_edition' || formData.edition_type === 'print') {
             if (!formData.edition_number || !formData.total_editions) {
               const errorMsg =
-                "Pour une édition limitée, le numéro d'édition et le total sont requis";
+                "Pour une édition limitée ou un tirage, le numéro d'édition et le total sont requis";
               errors.push(errorMsg);
               toast({
                 title: 'Erreur',
@@ -347,20 +350,37 @@ export const EditArtistProductWizard = ({
       throw new Error('Aucune boutique ou produit trouvé');
     }
 
-    const validation = await validateRequiredSteps([1, 2], async step => validateStep(step));
-    if (!validation.valid) {
-      toast({
-        title: 'Erreurs de validation',
-        description:
-          validation.errors.join(', ') || 'Veuillez corriger les erreurs avant de sauvegarder',
-        variant: 'destructive',
-      });
-      return;
+    if (!isDraft) {
+      const publishCheck = validateArtistPublishFormData(formData);
+      if (!publishCheck.valid) {
+        toast({
+          title: publishCheck.title || 'Erreurs de validation',
+          description: publishCheck.description || 'Veuillez corriger les erreurs avant de publier',
+          variant: 'destructive',
+        });
+        if (publishCheck.failedStep) {
+          setCurrentStep(publishCheck.failedStep);
+        }
+        return;
+      }
+    } else {
+      const validation = await validateRequiredSteps([1, 2], async step => validateStep(step));
+      if (!validation.valid) {
+        toast({
+          title: 'Erreurs de validation',
+          description:
+            validation.errors.join(', ') || 'Veuillez corriger les erreurs avant de sauvegarder',
+          variant: 'destructive',
+        });
+        return;
+      }
     }
 
     setIsSaving(true);
 
     try {
+      const sanitizedData = validateAndSanitizeArtistProduct(formData);
+
       // ✅ SÉCURITÉ: Vérifier propriété du produit avant modification
       if (user) {
         const { data: ownershipCheck, error: ownershipError } = await supabase
@@ -380,61 +400,97 @@ export const EditArtistProductWizard = ({
         }
       }
 
+      const productSlug =
+        (artistProductData.product as { slug?: string } | undefined)?.slug ||
+        generateSlug(sanitizedData.artwork_title || sanitizedData.name || 'artwork');
+
+      if (!isDraft) {
+        const validationResult = await validateArtistProduct(
+          {
+            name: sanitizedData.artwork_title || sanitizedData.name || '',
+            slug: productSlug,
+            description: sanitizedData.description || '',
+            price: sanitizedData.price || 0,
+            artist_name: sanitizedData.artist_name || '',
+            artwork_title: sanitizedData.artwork_title || '',
+            artist_type: sanitizedData.artist_type || '',
+            artwork_year: sanitizedData.artwork_year,
+            artwork_dimensions: sanitizedData.artwork_dimensions,
+            edition_type: sanitizedData.edition_type,
+            edition_number: sanitizedData.edition_number,
+            total_editions: sanitizedData.total_editions,
+            requires_shipping: sanitizedData.requires_shipping,
+            artwork_link_url: sanitizedData.artwork_link_url,
+            shipping_handling_time: sanitizedData.shipping_handling_time,
+            shipping_insurance_amount: sanitizedData.shipping_insurance_amount,
+          },
+          store.id
+        );
+
+        if (!validationResult.valid) {
+          const errorMessage =
+            validationResult.error ||
+            Object.values(validationResult.errors || {}).join(', ') ||
+            'Erreur de validation';
+          throw new Error(errorMessage);
+        }
+      }
+
       const productPayload: Record<string, unknown> = {
-        name: formData.artwork_title || formData.name,
-        description: formData.description,
-        short_description: formData.short_description || null,
-        price: formData.price || 0,
-        category_id: formData.category_id || null,
-        image_url: formData.images?.[0] || null,
-        images: formData.images || [],
-        tags: formData.tags || [],
-        meta_title: formData.seo?.meta_title,
-        meta_description: formData.seo?.meta_description,
-        og_image: formData.seo?.og_image,
-        faqs: formData.faqs || [],
-        payment_options: formData.payment || { payment_type: 'full', percentage_rate: 30 },
+        name: sanitizedData.artwork_title || sanitizedData.name,
+        description: sanitizedData.description,
+        short_description: sanitizedData.short_description || null,
+        price: sanitizedData.price || 0,
+        category_id: sanitizedData.category_id || null,
+        image_url: sanitizedData.images?.[0] || null,
+        images: sanitizedData.images || [],
+        tags: sanitizedData.tags || [],
+        meta_title: sanitizedData.seo?.meta_title,
+        meta_description: sanitizedData.seo?.meta_description,
+        og_image: sanitizedData.seo?.og_image,
+        faqs: sanitizedData.faqs || [],
+        payment_options: sanitizedData.payment || { payment_type: 'full', percentage_rate: 30 },
         is_draft: isDraft,
         is_active: !isDraft,
       };
 
-      if (formData.compare_at_price != null && formData.compare_at_price > 0) {
-        productPayload.compare_at_price = formData.compare_at_price;
+      if (sanitizedData.compare_at_price != null && sanitizedData.compare_at_price > 0) {
+        productPayload.compare_at_price = sanitizedData.compare_at_price;
       }
-      if (formData.cost_per_item != null && formData.cost_per_item > 0) {
-        productPayload.cost_per_item = formData.cost_per_item;
+      if (sanitizedData.cost_per_item != null && sanitizedData.cost_per_item > 0) {
+        productPayload.cost_per_item = sanitizedData.cost_per_item;
       }
 
       const artistPayload: Record<string, unknown> = {
-        artist_type: formData.artist_type,
-        artist_name: formData.artist_name,
-        artist_bio: formData.artist_bio,
-        artist_website: formData.artist_website,
-        artist_photo_url: formData.artist_photo_url || null,
-        artist_social_links: formData.artist_social_links || {},
-        artwork_title: formData.artwork_title,
-        artwork_year: formData.artwork_year,
-        artwork_medium: formData.artwork_medium,
-        artwork_dimensions: formData.artwork_dimensions,
-        artwork_link_url: formData.artwork_link_url || null,
-        artwork_edition_type: formData.edition_type,
-        edition_type: formData.edition_type,
-        edition_number: formData.edition_number,
-        total_editions: formData.total_editions,
-        writer_specific: formData.writer_specific || null,
-        musician_specific: formData.musician_specific || null,
-        visual_artist_specific: formData.visual_artist_specific || null,
-        designer_specific: formData.designer_specific || null,
-        multimedia_specific: formData.multimedia_specific || null,
-        requires_shipping: formData.requires_shipping,
-        shipping_handling_time: formData.shipping_handling_time,
-        shipping_fragile: formData.shipping_fragile,
-        shipping_insurance_required: formData.shipping_insurance_required,
-        shipping_insurance_amount: formData.shipping_insurance_amount,
-        certificate_of_authenticity: formData.certificate_of_authenticity,
-        certificate_file_url: formData.certificate_file_url,
-        signature_authenticated: formData.signature_authenticated,
-        signature_location: formData.signature_location,
+        artist_type: sanitizedData.artist_type,
+        artist_name: sanitizedData.artist_name,
+        artist_bio: sanitizedData.artist_bio,
+        artist_website: sanitizedData.artist_website,
+        artist_photo_url: sanitizedData.artist_photo_url || null,
+        artist_social_links: sanitizedData.artist_social_links || {},
+        artwork_title: sanitizedData.artwork_title,
+        artwork_year: sanitizedData.artwork_year,
+        artwork_medium: sanitizedData.artwork_medium,
+        artwork_dimensions: sanitizedData.artwork_dimensions,
+        artwork_link_url: sanitizedData.artwork_link_url || null,
+        artwork_edition_type: sanitizedData.edition_type,
+        edition_type: sanitizedData.edition_type,
+        edition_number: sanitizedData.edition_number,
+        total_editions: sanitizedData.total_editions,
+        writer_specific: sanitizedData.writer_specific || null,
+        musician_specific: sanitizedData.musician_specific || null,
+        visual_artist_specific: sanitizedData.visual_artist_specific || null,
+        designer_specific: sanitizedData.designer_specific || null,
+        multimedia_specific: sanitizedData.multimedia_specific || null,
+        requires_shipping: sanitizedData.requires_shipping,
+        shipping_handling_time: sanitizedData.shipping_handling_time,
+        shipping_fragile: sanitizedData.shipping_fragile,
+        shipping_insurance_required: sanitizedData.shipping_insurance_required,
+        shipping_insurance_amount: sanitizedData.shipping_insurance_amount,
+        certificate_of_authenticity: sanitizedData.certificate_of_authenticity,
+        certificate_file_url: sanitizedData.certificate_file_url,
+        signature_authenticated: sanitizedData.signature_authenticated,
+        signature_location: sanitizedData.signature_location,
       };
 
       await updateArtistProductTx(store.id, productId, productPayload, artistPayload);
@@ -449,7 +505,7 @@ export const EditArtistProductWizard = ({
       if (onSuccess) {
         onSuccess();
       } else {
-        navigate('/products');
+        navigate('/dashboard/artist-products');
       }
     } catch (error) {
       logger.error('Error updating artist product', { error });

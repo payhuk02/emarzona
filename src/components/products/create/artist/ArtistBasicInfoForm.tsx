@@ -11,6 +11,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   ImagePlus,
   X,
   Loader2,
@@ -25,7 +32,8 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useProductImageUpload } from '@/hooks/useProductImageUpload';
-import type { ArtistProductFormData, ArtistSocialLinks } from '@/types/artist-product';
+import type { ArtistProductFormData, ArtistSocialLinks, EditionType } from '@/types/artist-product';
+import { ARTIST_EDITION_TYPE_OPTIONS } from '@/lib/artist-product-publish-validation';
 import { useSpaceInputFix } from '@/hooks/useSpaceInputFix';
 import { logger } from '@/lib/logger';
 import { generateProductUrl } from '@/lib/store-utils';
@@ -610,6 +618,33 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate, storeSlug }: ArtistBasic
         }}
         onKeyDown={handleSpaceKeyDown}
       />
+
+      {/* Edition type */}
+      <div className="space-y-2">
+        <Label htmlFor="edition_type">Type d&apos;édition</Label>
+        <Select
+          value={data.edition_type || 'original'}
+          onValueChange={value => onUpdate({ edition_type: value as EditionType })}
+        >
+          <SelectTrigger id="edition_type" className="w-full">
+            <SelectValue placeholder="Sélectionnez le type d'édition" />
+          </SelectTrigger>
+          <SelectContent>
+            {ARTIST_EDITION_TYPE_OPTIONS.map(option => (
+              <SelectItem key={option.value} value={option.value}>
+                <span className="font-medium">{option.label}</span>
+                <span className="text-muted-foreground ml-2 text-xs hidden sm:inline">
+                  — {option.description}
+                </span>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <p className="text-xs text-muted-foreground">
+          Choisissez « Édition limitée » ou « Tirage » pour saisir le numérotage à l&apos;étape
+          Authentification.
+        </p>
+      </div>
 
       {/* Artwork Dimensions */}
       <div className="space-y-2">

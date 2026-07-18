@@ -43,6 +43,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
 import { supabase } from '@/integrations/supabase/client';
 import { updateDigitalProductTx } from '@/lib/products/product-update-rpc';
+import { buildDigitalProductFilesPayload } from '@/lib/digital/build-digital-product-files-payload';
 import { validateRequiredSteps } from '@/lib/wizard-validation/edit-save-validation';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
@@ -675,29 +676,33 @@ export const EditDigitalProductWizard = ({
         throw new Error('Enregistrement produit digital introuvable');
       }
 
-      // Update files
-      if (
-        digitalProductId &&
-        formData.downloadable_files &&
-        formData.downloadable_files.length > 0
-      ) {
+      // Sync digital_product_files (main-only uploads included)
+      const filesPayload = buildDigitalProductFilesPayload({
+        main_file_url: formData.main_file_url || mainFile?.url || '',
+        main_file_version: formData.main_file_version,
+        downloadable_files: formData.downloadable_files,
+        mainFileMeta: mainFile
+          ? { name: mainFile.name, size: mainFile.size, type: mainFile.format }
+          : null,
+      });
+
+      if (filesPayload.length > 0) {
         await supabase
           .from('digital_product_files')
           .delete()
           .eq('digital_product_id', digitalProductId);
 
-        // Insert new files
-        const filesData = formData.downloadable_files.map((file, index) => ({
+        const filesData = filesPayload.map(row => ({
           digital_product_id: digitalProductId,
-          name: file.name,
-          file_url: file.url,
-          file_type: file.format || file.name?.split('.').pop() || 'unknown',
-          file_size_mb: (file.size || 0) / (1024 * 1024),
-          order_index: index,
-          is_main: index === 0,
-          is_preview: false,
-          requires_purchase: true,
-          version: file.version || '1.0',
+          name: row.name,
+          file_url: row.file_url,
+          file_type: row.file_type,
+          file_size_mb: row.file_size_mb,
+          order_index: row.order_index,
+          is_main: row.is_main,
+          is_preview: row.is_preview,
+          requires_purchase: row.requires_purchase,
+          version: row.version,
         }));
 
         const { error: filesError } = await supabase

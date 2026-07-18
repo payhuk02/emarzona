@@ -409,12 +409,25 @@ export const CreateCourseWizard = ({
 
   const handleStepClick = useCallback(
     (stepId: number) => {
-      // Permettre de revenir en arrière, mais valider avant d'avancer
-      if (stepId < currentStep || validateStep(currentStep)) {
+      if (stepId <= currentStep) {
         setCurrentStep(stepId);
         logger.info('Navigation directe vers étape', { to: stepId });
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
       }
+
+      for (let step = currentStep; step < stepId; step += 1) {
+        if (!validateStep(step)) {
+          setCurrentStep(step);
+          logger.warn('Navigation bloquée — validation échouée', { step, target: stepId });
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
+      }
+
+      setCurrentStep(stepId);
+      logger.info('Navigation directe vers étape', { to: stepId });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     },
     [currentStep, validateStep]
   );
@@ -469,8 +482,20 @@ export const CreateCourseWizard = ({
    * Publish handler
    */
   const handlePublish = useCallback(async () => {
-    if (!validateStep(currentStep)) {
-      return;
+    for (let step = 1; step <= 2; step += 1) {
+      if (!validateStep(step)) {
+        setCurrentStep(step);
+        toast({
+          title: t('courses.errors.validationAllTitle', 'Validation incomplète'),
+          description: t(
+            'courses.errors.validationAllDesc',
+            'Complétez les informations requises avant de publier le cours'
+          ),
+          variant: 'destructive',
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
     }
 
     // Vérifier que le store existe

@@ -183,10 +183,22 @@ const EditProduct = () => {
   // Use the same wizards as Products.tsx for consistency
 
   const handleSuccess = () => {
+    if (product.product_type === 'artist') {
+      navigate('/dashboard/artist-products');
+      return;
+    }
+    if (product.product_type === 'digital') {
+      navigate('/dashboard/digital-products');
+      return;
+    }
     navigate('/dashboard/products');
   };
 
   const handleBack = () => {
+    if (product.product_type === 'artist') {
+      navigate('/dashboard/artist-products');
+      return;
+    }
     navigate('/dashboard/products');
   };
 
