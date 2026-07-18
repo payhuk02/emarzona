@@ -65,6 +65,8 @@ async function deliverWebPush(
       soundEnabled: payload.soundEnabled ?? !payload.silent,
       vibrationEnabled: payload.vibrationEnabled ?? true,
       vibrationIntensity: payload.vibrationIntensity ?? 'medium',
+      unreadCount:
+        typeof payload.data?.unreadCount === 'number' ? payload.data.unreadCount : undefined,
       data: {
         ...(payload.data || {}),
         url: payload.url || '/',
@@ -154,7 +156,7 @@ serve(async req => {
     const userId = body.user_id as string | undefined;
     const title = (body.title as string | undefined)?.trim();
     const messageBody = (body.body ?? body.message) as string | undefined;
-    const url = (body.url ?? body.data?.url) as string | undefined;
+    const url = (body.url ?? body.data?.url ?? body.data?.action_url) as string | undefined;
     const priority = body.priority as string | undefined;
 
     if (!userId || !title || !messageBody) {
@@ -170,7 +172,7 @@ serve(async req => {
       icon: body.icon,
       badge: body.badge,
       tag: body.tag ?? body.data?.type,
-      url,
+      url: url || '/dashboard',
       data: body.data,
       silent: body.silent,
       requireInteraction: body.requireInteraction,
@@ -201,6 +203,23 @@ serve(async req => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+
+    const { count: unreadCount, error: unreadError } = await supabase
+      .from('notifications')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('is_read', false)
+      .eq('is_archived', false);
+
+    if (unreadError) {
+      console.warn('Could not fetch unread count for push badge:', unreadError.message);
+    }
+
+    payload.url = url || '/dashboard';
+    payload.data = {
+      ...(body.data || {}),
+      unreadCount: unreadCount ?? 1,
+    };
 
     const results = [];
     for (const row of subscriptions as PushSubscriptionRow[]) {

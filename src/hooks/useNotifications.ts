@@ -107,7 +107,7 @@ export const useUnreadCount = (options?: { enabled?: boolean }) => {
       }
     },
     refetchInterval: () =>
-      typeof document !== 'undefined' && document.visibilityState === 'visible' ? 60_000 : false,
+      typeof document !== 'undefined' && document.visibilityState === 'visible' ? 30_000 : false,
   });
 };
 
@@ -128,8 +128,8 @@ export const useMarkAsRead = () => {
       }
     },
     onSuccess: () => {
-      // Invalider les requêtes pour rafraîchir
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications', 'unread-count'] });
     },
   });
 };
@@ -150,6 +150,7 @@ export const useMarkAllAsRead = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications', 'unread-count'] });
     },
   });
 };
@@ -356,8 +357,9 @@ export const useRealtimeNotifications = (options?: { enabled?: boolean }) => {
               notificationId: payload.new?.id,
               type: payload.new?.type,
             });
-            // Invalider le cache pour rafraîchir
+            // Invalider le cache pour rafraîchir liste + badge non-lus
             queryClient.invalidateQueries({ queryKey: ['notifications'] });
+            queryClient.invalidateQueries({ queryKey: ['notifications', 'unread-count'] });
 
             const notif = payload.new as Notification;
             const paused = isNotificationPaused(preferences?.pause_until);

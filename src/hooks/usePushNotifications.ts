@@ -20,7 +20,7 @@ export interface UsePushNotificationsReturn {
   isSubscribed: boolean;
   isLoading: boolean;
   requestPermission: () => Promise<void>;
-  subscribe: () => Promise<boolean>;
+  subscribe: (options?: { silent?: boolean }) => Promise<boolean>;
   unsubscribe: () => Promise<boolean>;
   showLocalNotification: (notification: PushNotification) => Promise<void>;
 }
@@ -109,54 +109,66 @@ export function usePushNotifications(): UsePushNotificationsReturn {
     }
   }, [toast, refreshPermission]);
 
-  const subscribe = useCallback(async (): Promise<boolean> => {
-    try {
-      setIsLoading(true);
+  const subscribe = useCallback(
+    async (options?: { silent?: boolean }): Promise<boolean> => {
+      const silent = options?.silent ?? false;
+      try {
+        setIsLoading(true);
 
-      if (!isVapidConfigured()) {
-        toast({
-          title: 'Configuration requise',
-          description:
-            'Les notifications push ne sont pas encore activées sur la plateforme (clé VAPID).',
-          variant: 'destructive',
-        });
+        if (!isVapidConfigured()) {
+          if (!silent) {
+            toast({
+              title: 'Configuration requise',
+              description:
+                'Les notifications push ne sont pas encore activées sur la plateforme (clé VAPID).',
+              variant: 'destructive',
+            });
+          }
+          return false;
+        }
+
+        let perm = pushNotificationService.getPermissionStatus().permission;
+        if (perm !== 'granted') {
+          perm = await pushNotificationService.requestPermission();
+          refreshPermission();
+        }
+
+        if (perm !== 'granted') {
+          if (!silent) {
+            toast({
+              title: 'Permission requise',
+              description: 'Autorisez les notifications pour continuer.',
+              variant: 'destructive',
+            });
+          }
+          return false;
+        }
+
+        await pushNotificationService.subscribe();
+        setIsSubscribed(true);
+        if (!silent) {
+          toast({
+            title: 'Abonnement réussi',
+            description: 'Vous recevrez maintenant les notifications push.',
+          });
+        }
+        return true;
+      } catch (error) {
+        logger.error('Error subscribing to push notifications', { error });
+        if (!silent) {
+          toast({
+            title: "Échec de l'abonnement",
+            description: mapSubscribeError(error),
+            variant: 'destructive',
+          });
+        }
         return false;
+      } finally {
+        setIsLoading(false);
       }
-
-      let perm = pushNotificationService.getPermissionStatus().permission;
-      if (perm !== 'granted') {
-        perm = await pushNotificationService.requestPermission();
-        refreshPermission();
-      }
-
-      if (perm !== 'granted') {
-        toast({
-          title: 'Permission requise',
-          description: 'Autorisez les notifications pour continuer.',
-          variant: 'destructive',
-        });
-        return false;
-      }
-
-      await pushNotificationService.subscribe();
-      setIsSubscribed(true);
-      toast({
-        title: 'Abonnement réussi',
-        description: 'Vous recevrez maintenant les notifications push.',
-      });
-      return true;
-    } catch (error) {
-      logger.error('Error subscribing to push notifications', { error });
-      toast({
-        title: "Échec de l'abonnement",
-        description: mapSubscribeError(error),
-        variant: 'destructive',
-      });
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [toast, refreshPermission]);
+    },
+    [toast, refreshPermission]
+  );
 
   const unsubscribe = useCallback(async (): Promise<boolean> => {
     try {

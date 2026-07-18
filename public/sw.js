@@ -295,7 +295,8 @@ self.addEventListener('push', event => {
         requireInteraction: data.requireInteraction || false,
         silent: data.silent !== undefined ? data.silent : !notificationData.soundEnabled,
         vibrate: Array.isArray(data.vibrate) ? data.vibrate : undefined,
-        url: data.url || data.action_url || '/',
+        url: data.url || data.data?.url || data.data?.action_url || '/',
+        unreadCount: data.unreadCount ?? data.data?.unreadCount,
         soundEnabled:
           data.soundEnabled !== undefined ? data.soundEnabled : notificationData.soundEnabled,
         vibrationEnabled:
@@ -334,23 +335,57 @@ self.addEventListener('push', event => {
         : !notificationData.soundEnabled,
     vibrate: notificationData.vibrate ?? getVibrationPattern(),
     timestamp: Date.now(),
+    renotify: true,
     actions: notificationData.data.actions || [],
   };
 
   event.waitUntil(
-    self.registration.showNotification(notificationData.title, notificationOptions)
+    (async () => {
+      await self.registration.showNotification(notificationData.title, notificationOptions);
+
+      const unreadCount =
+        notificationData.unreadCount ?? notificationData.data?.unreadCount ?? null;
+
+      if (typeof unreadCount === 'number' && 'setAppBadge' in self.navigator) {
+        try {
+          if (unreadCount > 0) {
+            await self.navigator.setAppBadge(Math.min(unreadCount, 99));
+          } else if (typeof self.navigator.clearAppBadge === 'function') {
+            await self.navigator.clearAppBadge();
+          }
+        } catch {
+          // Badging API indisponible
+        }
+      }
+
+      const clientList = await clients.matchAll({ type: 'window', includeUncontrolled: true });
+      for (const client of clientList) {
+        client.postMessage({
+          type: 'EMARZONA_UNREAD_COUNT',
+          unreadCount: typeof unreadCount === 'number' ? unreadCount : undefined,
+        });
+      }
+    })()
   );
 });
 
 self.addEventListener('notificationclick', event => {
   event.notification.close();
-  const urlToOpen = event.notification.data?.url || '/';
+  const urlToOpen = event.notification.data?.url || event.notification.data?.action_url || '/';
 
   event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async clientList => {
       for (const client of clientList) {
-        if (client.url === urlToOpen && 'focus' in client) {
-          return client.focus();
+        if ('focus' in client) {
+          await client.focus();
+          if ('navigate' in client && urlToOpen) {
+            try {
+              await client.navigate(urlToOpen);
+            } catch {
+              // navigate non supporté — focus seulement
+            }
+          }
+          return;
         }
       }
       if (clients.openWindow) {

@@ -70,10 +70,23 @@ export const NotificationSettings = () => {
   };
 
   const handleSave = async () => {
+    const prevPush = preferences?.push_notifications ?? true;
+    const nextPush = localPrefs.push_notifications ?? true;
+
     await updatePreferences.mutateAsync(localPrefs);
+
+    if (nextPush && !isPushSubscribed) {
+      await subscribePush({ silent: true });
+    } else if (!nextPush && isPushSubscribed) {
+      await unsubscribePush();
+    }
+
     toast({
       title: 'Préférences sauvegardées',
-      description: 'Vos préférences de notifications ont été mises à jour',
+      description:
+        nextPush && !prevPush
+          ? 'Vos préférences ont été mises à jour. Les alertes push sont activées sur cet appareil.'
+          : 'Vos préférences de notifications ont été mises à jour',
     });
   };
 
@@ -334,7 +347,7 @@ export const NotificationSettings = () => {
             </div>
             <Switch
               id="app_course_enrollment"
-              checked={localPrefs.app_course_enrollment ?? false}
+              checked={localPrefs.app_course_enrollment ?? true}
               onCheckedChange={checked => handleToggle('app_course_enrollment', checked)}
             />
           </div>
@@ -345,7 +358,7 @@ export const NotificationSettings = () => {
             </div>
             <Switch
               id="app_lesson_complete"
-              checked={localPrefs.app_lesson_complete ?? false}
+              checked={localPrefs.app_lesson_complete ?? true}
               onCheckedChange={checked => handleToggle('app_lesson_complete', checked)}
             />
           </div>
@@ -356,7 +369,7 @@ export const NotificationSettings = () => {
             </div>
             <Switch
               id="app_course_complete"
-              checked={localPrefs.app_course_complete ?? false}
+              checked={localPrefs.app_course_complete ?? true}
               onCheckedChange={checked => handleToggle('app_course_complete', checked)}
             />
           </div>
@@ -367,7 +380,7 @@ export const NotificationSettings = () => {
             </div>
             <Switch
               id="app_certificate_ready"
-              checked={localPrefs.app_certificate_ready ?? false}
+              checked={localPrefs.app_certificate_ready ?? true}
               onCheckedChange={checked => handleToggle('app_certificate_ready', checked)}
             />
           </div>
@@ -378,7 +391,7 @@ export const NotificationSettings = () => {
             </div>
             <Switch
               id="app_new_course"
-              checked={localPrefs.app_new_course ?? false}
+              checked={localPrefs.app_new_course ?? true}
               onCheckedChange={checked => handleToggle('app_new_course', checked)}
             />
           </div>
@@ -389,7 +402,7 @@ export const NotificationSettings = () => {
             </div>
             <Switch
               id="app_course_update"
-              checked={localPrefs.app_course_update ?? false}
+              checked={localPrefs.app_course_update ?? true}
               onCheckedChange={checked => handleToggle('app_course_update', checked)}
             />
           </div>
@@ -400,7 +413,7 @@ export const NotificationSettings = () => {
             </div>
             <Switch
               id="app_quiz_result"
-              checked={localPrefs.app_quiz_result ?? false}
+              checked={localPrefs.app_quiz_result ?? true}
               onCheckedChange={checked => handleToggle('app_quiz_result', checked)}
             />
           </div>
@@ -411,7 +424,7 @@ export const NotificationSettings = () => {
             </div>
             <Switch
               id="app_affiliate_sale"
-              checked={localPrefs.app_affiliate_sale ?? false}
+              checked={localPrefs.app_affiliate_sale ?? true}
               onCheckedChange={checked => handleToggle('app_affiliate_sale', checked)}
             />
           </div>
@@ -422,7 +435,7 @@ export const NotificationSettings = () => {
             </div>
             <Switch
               id="app_comment_reply"
-              checked={localPrefs.app_comment_reply ?? false}
+              checked={localPrefs.app_comment_reply ?? true}
               onCheckedChange={checked => handleToggle('app_comment_reply', checked)}
             />
           </div>
@@ -433,7 +446,7 @@ export const NotificationSettings = () => {
             </div>
             <Switch
               id="app_instructor_message"
-              checked={localPrefs.app_instructor_message ?? false}
+              checked={localPrefs.app_instructor_message ?? true}
               onCheckedChange={checked => handleToggle('app_instructor_message', checked)}
             />
           </div>
