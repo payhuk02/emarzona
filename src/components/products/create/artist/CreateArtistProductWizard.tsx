@@ -73,7 +73,6 @@ import {
   getDescriptionError,
   getImagesError,
   getNonPhysicalArtworkError,
-  getEditionError,
   getFieldDisplayName,
 } from '@/lib/artist-product-error-messages';
 
@@ -317,30 +316,6 @@ const CreateArtistProductWizardComponent = ({
               variant: 'destructive',
             });
             return false;
-          }
-          // Validation édition limitée avec suggestion
-          if (formData.edition_type === 'limited_edition') {
-            if (!formData.edition_number || !formData.total_editions) {
-              const errorData = getEditionError(formData.edition_number, formData.total_editions);
-              toast({
-                title: errorData.error,
-                description:
-                  errorData.suggestion ||
-                  "Pour une édition limitée, le numéro d'édition et le total sont requis",
-                variant: 'destructive',
-              });
-              return false;
-            }
-            if (formData.edition_number > formData.total_editions) {
-              const errorData = getEditionError(formData.edition_number, formData.total_editions);
-              toast({
-                title: errorData.error,
-                description:
-                  errorData.suggestion || "Le numéro d'édition ne peut pas être supérieur au total",
-                variant: 'destructive',
-              });
-              return false;
-            }
           }
           return true;
         default:

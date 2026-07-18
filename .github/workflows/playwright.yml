@@ -177,6 +177,58 @@ jobs:
         path: playwright-report/
         retention-days: 14
 
+  test-artist-wizard:
+    name: Artist wizard publish E2E
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Validate commerce E2E secrets
+      id: commerce_e2e_secrets
+      run: node scripts/verify-commerce-e2e-secrets.mjs
+      env:
+        CI: true
+        VITE_SUPABASE_TEST_URL: ${{ secrets.VITE_SUPABASE_TEST_URL }}
+        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_TEST_URL || secrets.VITE_SUPABASE_URL }}
+        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+        VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+        SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_TEST_SERVICE_ROLE_KEY }}
+
+    - name: Install Playwright Browsers
+      if: steps.commerce_e2e_secrets.outputs.skipped != 'true'
+      run: npx playwright install --with-deps chromium
+
+    - name: Run artist wizard E2E
+      if: steps.commerce_e2e_secrets.outputs.skipped != 'true'
+      run: npm run test:e2e:artist-wizard
+      env:
+        CI: true
+        VITE_SUPABASE_TEST_URL: ${{ secrets.VITE_SUPABASE_TEST_URL }}
+        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_TEST_URL || secrets.VITE_SUPABASE_URL }}
+        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+        VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+        SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_TEST_SERVICE_ROLE_KEY }}
+
+    - name: Upload artist wizard report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: playwright-artist-wizard-report
+        path: playwright-report/
+        retention-days: 14
+
   test-vertical-paid:
     name: Vertical paid E2E (course + artist)
     timeout-minutes: 30
