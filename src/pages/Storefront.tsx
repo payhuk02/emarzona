@@ -42,7 +42,14 @@ import { useStorefrontReviews } from '@/hooks/useStorefrontReviews';
 import { useStoreTrustMetrics } from '@/hooks/useStoreTrustMetrics';
 import { STOREFRONT_STORE_PUBLIC_SELECT } from '@/lib/storefront/store-public-fields';
 
-const Storefront = () => {
+export type StorefrontProps = {
+  /** Mode prévisualisation vendeur (pas d’analytics / SEO indexable). */
+  previewMode?: boolean;
+  /** Boutique fusionnée (saved + brouillon wizard). */
+  storeOverride?: Store | null;
+};
+
+const Storefront = ({ previewMode = false, storeOverride = null }: StorefrontProps = {}) => {
   const { slug: paramSlug } = useParams<{ slug: string }>();
   const contextSlug = useStoreSlug();
   const slug = paramSlug || contextSlug;
@@ -96,6 +103,14 @@ const Storefront = () => {
   const storeTrust = useStoreTrustMetrics(store);
 
   const fetchStore = useCallback(async () => {
+    if (storeOverride) {
+      setStore(storeOverride);
+      setLoading(false);
+      setError(null);
+      setHasLoadedOnce(true);
+      return;
+    }
+
     if (!slug) {
       setError('Slug de boutique manquant');
       setLoading(false);
@@ -196,11 +211,18 @@ const Storefront = () => {
     } finally {
       setLoading(false);
     }
-  }, [slug]);
+  }, [slug, storeOverride]);
 
   useEffect(() => {
+    if (storeOverride) {
+      setStore(storeOverride);
+      setLoading(false);
+      setError(null);
+      setHasLoadedOnce(true);
+      return;
+    }
     fetchStore();
-  }, [fetchStore]);
+  }, [fetchStore, storeOverride]);
 
   const filteredProducts = useMemo(
     () =>
@@ -394,7 +416,7 @@ const Storefront = () => {
   return (
     <>
       {/* SEO Meta Tags */}
-      {seoData && (
+      {!previewMode && seoData && (
         <SEOMeta
           title={seoData.title}
           description={seoData.description}
@@ -408,10 +430,10 @@ const Storefront = () => {
       )}
 
       {/* Analytics Scripts */}
-      {store && <StoreAnalyticsScripts store={store} />}
+      {store && !previewMode && <StoreAnalyticsScripts store={store} />}
 
       {/* Schema.org Store */}
-      {store && (
+      {store && !previewMode && (
         <StoreSchema
           store={{
             name: store.name,
@@ -444,10 +466,10 @@ const Storefront = () => {
       )}
 
       {/* Breadcrumb Schema */}
-      {breadcrumbItems.length > 0 && <BreadcrumbSchema items={breadcrumbItems} />}
+      {!previewMode && breadcrumbItems.length > 0 && <BreadcrumbSchema items={breadcrumbItems} />}
 
       {/* Schema.org ItemList pour les produits de la boutique */}
-      {itemListItems.length > 0 && store && (
+      {!previewMode && itemListItems.length > 0 && store && (
         <ItemListSchema
           items={itemListItems}
           name={`Produits de ${store.name}`}
@@ -458,6 +480,14 @@ const Storefront = () => {
       )}
 
       <StoreThemeProvider store={store}>
+        {previewMode && (
+          <div
+            className="sticky top-0 z-50 border-b border-amber-300/40 bg-amber-50 px-4 py-2 text-center text-sm text-amber-950 dark:border-amber-500/30 dark:bg-amber-950/80 dark:text-amber-100"
+            role="status"
+          >
+            Mode prévisualisation — les modifications non enregistrées peuvent apparaître ici.
+          </div>
+        )}
         <div
           className="min-h-screen flex flex-col overflow-x-hidden store-theme-active"
           style={{ backgroundColor: store?.background_color || undefined }}

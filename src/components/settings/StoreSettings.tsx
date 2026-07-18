@@ -6,7 +6,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -31,7 +30,6 @@ import {
 import { DeleteStoreDialog } from '@/components/store/DeleteStoreDialog';
 import { deleteStoreWithDependencies, archiveStore } from '@/lib/store-delete-protection';
 import { logger } from '@/lib/logger';
-import { useSpaceInputFix } from '@/hooks/useSpaceInputFix';
 import {
   Store,
   Loader2,
@@ -40,7 +38,6 @@ import {
   Trash2,
   ExternalLink,
   Copy,
-  CheckCircle2,
   Palette,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -53,6 +50,7 @@ import type { StoreCommerceTypeChangeStatus } from '@/hooks/useStoreCommerceType
 import { supabase } from '@/integrations/supabase/client';
 import { parseStoreCommerceType } from '@/lib/billing/store-commerce-access';
 import { getStoreOnboardingPath } from '@/lib/commerce/store-vertical-config';
+import { StoreCreateForm, type StoreCreateFormValues } from '@/components/store/StoreCreateForm';
 
 export const StoreSettings = ({ action }: { action?: string | null }) => {
   const {
@@ -74,12 +72,6 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
   const [_isCreating, setIsCreating] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [storeToDelete, setStoreToDelete] = useState<{ id: string; name: string } | null>(null);
-  const [newStoreData, setNewStoreData] = useState({
-    name: '',
-    description: '',
-    slug: '',
-    commerceType: 'physical' as StoreCommerceType,
-  });
   const [commerceTypeDraft, setCommerceTypeDraft] = useState<Record<string, StoreCommerceType>>({});
   const [pendingCommerceChange, setPendingCommerceChange] = useState<{
     storeId: string;
@@ -87,7 +79,6 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
     from: StoreCommerceType;
     to: StoreCommerceType;
   } | null>(null);
-  const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
 
   const commerceTypeGuardQueries = useQueries({
     queries: stores.map(store => ({
@@ -198,36 +189,24 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
     }
   };
 
-  const handleCreateStore = async () => {
-    if (!newStoreData.name.trim()) {
-      toast({
-        title: 'Erreur',
-        description: 'Le nom de la boutique est requis',
-        variant: 'destructive',
-      });
-      return;
-    }
-
+  const handleCreateStore = async (values: StoreCreateFormValues) => {
     try {
       setSaving(true);
-      const slug = newStoreData.slug.trim() || generateSlug(newStoreData.name);
 
       const createdStore = await createStore({
-        name: newStoreData.name.trim(),
-        description: newStoreData.description.trim() || null,
-        slug: slug,
-        commerce_type: newStoreData.commerceType,
+        name: values.name.trim(),
+        description: values.description.trim() || null,
+        slug: values.slug,
+        commerce_type: values.commerceType,
         metadata: {
-          commerce_type: newStoreData.commerceType,
+          commerce_type: values.commerceType,
         },
       });
 
-      // Rafraîchir le contexte pour mettre à jour la liste
       await refreshStores();
 
-      const targetPath = getStoreOnboardingPath(createdStore.id, newStoreData.commerceType);
+      const targetPath = getStoreOnboardingPath(createdStore.id, values.commerceType);
 
-      setNewStoreData({ name: '', description: '', slug: '', commerceType: 'physical' });
       setIsCreating(false);
       setActiveTab('list');
       navigate(targetPath);
@@ -317,17 +296,6 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
         variant: 'destructive',
       });
     }
-  };
-
-  const generateSlug = (name: string) => {
-    return name
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .trim();
   };
 
   const copyStoreUrl = (slug: string) => {
@@ -563,105 +531,12 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
                     : 'Configurez votre boutique pour commencer à vendre vos produits'}
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="commerce_type">Type de boutique *</Label>
-                  <Select
-                    value={newStoreData.commerceType}
-                    onValueChange={value =>
-                      setNewStoreData(prev => ({
-                        ...prev,
-                        commerceType: value as StoreCommerceType,
-                      }))
-                    }
-                  >
-                    <SelectTrigger id="commerce_type">
-                      <SelectValue placeholder="Choisir un type de boutique" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.entries(STORE_COMMERCE_TYPE_LABELS).map(([value, label]) => (
-                        <SelectItem key={value} value={value}>
-                          {label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground">
-                    L&apos;abonnement est requis uniquement pour le type Produits physiques.
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="name">Nom de la boutique *</Label>
-                  <Input
-                    id="name"
-                    value={newStoreData.name}
-                    onChange={e => {
-                      setNewStoreData(prev => ({
-                        ...prev,
-                        name: e.target.value,
-                        slug: prev.slug || generateSlug(e.target.value),
-                      }));
-                    }}
-                    onKeyDown={handleSpaceKeyDown}
-                    placeholder="Ex: Ma Boutique Digitale"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="slug">URL de la boutique</Label>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground">.myemarzona.shop</span>
-                    <Input
-                      id="slug"
-                      value={newStoreData.slug}
-                      onChange={e => setNewStoreData(prev => ({ ...prev, slug: e.target.value }))}
-                      placeholder="ma-boutique-digitale"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={newStoreData.description}
-                    onChange={e =>
-                      setNewStoreData(prev => ({ ...prev, description: e.target.value }))
-                    }
-                    onKeyDown={handleSpaceKeyDown}
-                    placeholder="Décrivez votre boutique..."
-                    rows={3}
-                  />
-                </div>
-
-                <div className="flex gap-2">
-                  <Button
-                    onClick={handleCreateStore}
-                    disabled={saving || !newStoreData.name.trim()}
-                  >
-                    {saving ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <CheckCircle2 className="h-4 w-4 mr-2" />
-                    )}
-                    Créer la boutique
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setActiveTab('list');
-                      setNewStoreData({
-                        name: '',
-                        description: '',
-                        slug: '',
-                        commerceType: 'physical',
-                      });
-                    }}
-                  >
-                    Annuler
-                  </Button>
-                </div>
+              <CardContent>
+                <StoreCreateForm
+                  saving={saving}
+                  onSubmit={handleCreateStore}
+                  onCancel={() => setActiveTab('list')}
+                />
               </CardContent>
             </Card>
           )}

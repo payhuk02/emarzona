@@ -77,6 +77,7 @@ const VendorProductsListGate = lazyPage(() =>
   })
 );
 const Store = lazyPage(() => import('@/pages/Store'));
+const StorefrontPreviewPage = lazyPage(() => import('@/pages/dashboard/StorefrontPreviewPage'));
 const StoreTeamManagement = lazyPage(() => import('@/pages/store/StoreTeamManagement'));
 const MyTasks = lazyPage(() => import('@/pages/MyTasks'));
 const AIChatbotPage = lazyPage(() => import('@/pages/AIChatbotPage'));
@@ -290,6 +291,7 @@ export const dashboardRoutes = (
     {/* Core Dashboard */}
     {pr('/dashboard', Dashboard)}
     {pr('/dashboard/store', Store)}
+    {pr('/dashboard/store/preview', StorefrontPreviewPage)}
     {pr('/dashboard/store/team', StoreTeamManagement)}
     {pr('/dashboard/tasks', MyTasks)}
     {pr('/dashboard/products', VendorProductsListGate)}

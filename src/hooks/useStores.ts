@@ -9,6 +9,7 @@ import { STORE_COMMERCE_TYPES } from '@/constants/store-commerce-types';
 import { resolveStoreCommerceTypeFromStore } from '@/lib/commerce/store-capability-map';
 import { buildStoreCreateDefaults } from '@/lib/commerce/store-create-defaults';
 import { sanitizeStorePayload } from '@/lib/store-payload-utils';
+import { assertReadyToCreateStore } from '@/lib/store/create-store-service';
 
 type StoreInsert = Database['public']['Tables']['stores']['Insert'];
 type StoreUpdate = Database['public']['Tables']['stores']['Update'];
@@ -289,7 +290,15 @@ export const useStores = () => {
         throw new Error(`Limite de ${MAX_STORES_PER_USER} boutiques atteinte.`);
       }
 
-      const commerceType = assertCreateStoreCommerceType(storeData.commerce_type);
+      const validated = await assertReadyToCreateStore({
+        name: storeData.name ?? '',
+        slug: storeData.slug,
+        description: storeData.description ?? undefined,
+        commerce_type: storeData.commerce_type as StoreCommerceType,
+        default_currency: storeData.default_currency,
+      });
+
+      const commerceType = assertCreateStoreCommerceType(validated.commerce_type);
       const verticalDefaults = buildStoreCreateDefaults(commerceType);
       const metadata =
         storeData.metadata && typeof storeData.metadata === 'object'
@@ -301,6 +310,10 @@ export const useStores = () => {
         .insert([
           {
             ...verticalDefaults,
+            name: validated.name,
+            slug: validated.slug,
+            description: validated.description || null,
+            default_currency: validated.default_currency,
             ...storeData,
             commerce_type: commerceType,
             metadata,

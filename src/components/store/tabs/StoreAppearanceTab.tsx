@@ -105,18 +105,40 @@ export const StoreAppearanceTab = ({
           <CardContent>
             <StorePreview
               store={{ ...store, is_active: store.is_active ?? true } as Store}
-              previewData={{
+              formDraft={{
+                logoUrl,
+                bannerUrl,
+                faviconUrl,
+                appleTouchIconUrl,
                 primaryColor,
                 secondaryColor,
                 accentColor,
                 backgroundColor,
                 textColor,
+                textSecondaryColor,
+                buttonPrimaryColor,
+                buttonPrimaryText,
+                buttonSecondaryColor,
+                buttonSecondaryText,
+                linkColor,
+                linkHoverColor,
+                borderRadius,
+                shadowIntensity,
                 headingFont,
                 bodyFont,
+                fontSizeBase,
+                headingSizeH1,
+                headingSizeH2,
+                headingSizeH3,
+                lineHeight,
+                letterSpacing,
                 headerStyle,
                 footerStyle,
+                sidebarEnabled,
+                sidebarPosition,
                 productGridColumns,
                 productCardStyle,
+                navigationStyle,
               }}
             />
           </CardContent>
@@ -257,7 +279,6 @@ export const StoreAppearanceTab = ({
           )}
         </CardContent>
       </Card>
-
     </div>
   );
 };
