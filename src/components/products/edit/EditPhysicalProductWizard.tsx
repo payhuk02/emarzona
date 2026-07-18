@@ -44,10 +44,23 @@ import { PhysicalAffiliateSettings } from '../create/physical/PhysicalAffiliateS
 import { PhysicalSEOAndFAQs } from '../create/physical/PhysicalSEOAndFAQs';
 import { PhysicalPreview } from '../create/physical/PhysicalPreview';
 import { PhysicalCheckoutOptionsForm } from '../create/physical/PhysicalCheckoutOptionsForm';
+import { ProductReturnPolicyConfig } from '../create/physical/ProductReturnPolicyConfig';
 import { ProductStatisticsDisplaySettings } from '../create/shared/ProductStatisticsDisplaySettings';
 import { PhysicalWhatsAppContactConfig } from '@/components/physical/PhysicalWhatsAppContactConfig';
+import { PhysicalSubscriptionRequired } from '@/components/billing/PhysicalSubscriptionRequired';
 import { useStorePhysicalPlanLimits } from '@/hooks/billing/useStorePhysicalPlanLimits';
+import { useStorePhysicalAccess } from '@/hooks/billing/useStorePhysicalAccess';
 import { hasPhysicalFeatureAccess } from '@/lib/billing/physical-plan-capabilities';
+import {
+  isWithinProductLimit,
+  isWithinVariantLimit,
+  productLimitMessage,
+  variantLimitMessage,
+} from '@/lib/billing/physical-plan-limits';
+import {
+  loadProductReturnPolicyId,
+  syncProductReturnPolicy,
+} from '@/lib/physical/sync-product-return-policy';
 import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/hooks/useStore';
 import { useAuth } from '@/contexts/AuthContext';
@@ -289,13 +302,7 @@ const convertToFormData = async (
     .limit(1)
     .maybeSingle();
 
-  // Load return policy
-  const { data: returnPolicy } = await supabase
-    .from('product_return_policies')
-    .select('return_policy_id')
-    .eq('product_id', productId)
-    .limit(1)
-    .maybeSingle();
+  const returnPolicyId = await loadProductReturnPolicyId(product.store_id, productId);
 
   return {
     // Basic Info
@@ -374,6 +381,7 @@ const convertToFormData = async (
 
     // Size Chart
     size_chart_id: sizeChart?.size_chart_id || null,
+    return_policy_id: returnPolicyId,
 
     // WhatsApp
     whatsapp_number: physicalProduct?.whatsapp_number || '',
@@ -406,6 +414,7 @@ export const EditPhysicalProductWizard = ({
   const { store: hookStore, loading: storeLoading } = useStore();
   const store = hookStore || (propsStoreId ? { id: propsStoreId } : null);
   const storeId = propsStoreId || store?.id;
+  const physicalAccess = useStorePhysicalAccess(storeId);
   const { data: planLimits } = useStorePhysicalPlanLimits(storeId);
   const invalidateCatalog = useCatalogCacheInvalidation();
 
@@ -534,7 +543,33 @@ export const EditPhysicalProductWizard = ({
           return { valid: true, errors: [] };
         }
 
-        case 2:
+        case 2: {
+          const clientResult = validatePhysicalWizardStep(step, formData);
+          if (!clientResult.valid) {
+            setValidationErrors(prev => ({ ...prev, [step]: clientResult.errors }));
+            return { valid: false, errors: clientResult.errors };
+          }
+
+          if (
+            formData.has_variants &&
+            planLimits &&
+            formData.variants?.length &&
+            !isWithinVariantLimit(planLimits, formData.variants.length)
+          ) {
+            const max = planLimits.max_variants_per_product ?? 0;
+            const errors = [variantLimitMessage(max)];
+            setValidationErrors(prev => ({ ...prev, [step]: errors }));
+            return { valid: false, errors };
+          }
+
+          setValidationErrors(prev => {
+            const newErrors = { ...prev };
+            delete newErrors[step];
+            return newErrors;
+          });
+          return { valid: true, errors: [] };
+        }
+
         case 3:
         case 4: {
           const clientResult = validatePhysicalWizardStep(step, formData);
@@ -560,7 +595,7 @@ export const EditPhysicalProductWizard = ({
           return { valid: true, errors: [] };
       }
     },
-    [formData, storeId, validatePhysicalProductServer, clearServerErrors]
+    [formData, storeId, validatePhysicalProductServer, clearServerErrors, planLimits]
   );
 
   /**
@@ -591,6 +626,24 @@ export const EditPhysicalProductWizard = ({
           throw new Error("Vous n'avez pas les permissions pour modifier ce produit");
         }
       }
+      if (
+        formData.is_active &&
+        !formDataInitial?.is_active &&
+        planLimits &&
+        !isWithinProductLimit(planLimits)
+      ) {
+        throw new Error(productLimitMessage(planLimits));
+      }
+
+      if (
+        formData.has_variants &&
+        planLimits &&
+        formData.variants?.length &&
+        !isWithinVariantLimit(planLimits, formData.variants.length)
+      ) {
+        throw new Error(variantLimitMessage(planLimits.max_variants_per_product ?? 0));
+      }
+
       // Generate slug if not provided
       let slug =
         formData.slug?.trim() ||
@@ -752,6 +805,8 @@ export const EditPhysicalProductWizard = ({
         throw new Error('Enregistrement produit physique introuvable');
       }
 
+      await syncProductReturnPolicy(store.id, productId, formData.return_policy_id ?? null);
+
       toast({
         title: '✅ Produit mis à jour',
         description: 'Le produit a été modifié avec succès',
@@ -771,7 +826,17 @@ export const EditPhysicalProductWizard = ({
     } finally {
       setIsSaving(false);
     }
-  }, [formData, productId, store, onSuccess, toast, user, invalidateCatalog]);
+  }, [
+    formData,
+    formDataInitial,
+    productId,
+    store,
+    onSuccess,
+    toast,
+    user,
+    invalidateCatalog,
+    planLimits,
+  ]);
 
   const handleNext = useCallback(async () => {
     const result = await validateStep(currentStep);
@@ -887,10 +952,18 @@ export const EditPhysicalProductWizard = ({
     [currentStep]
   );
 
-  if (storeLoading || loadingProduct) {
+  if (storeLoading || loadingProduct || physicalAccess.loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (storeId && !physicalAccess.allowed) {
+    return (
+      <div className="min-h-screen bg-background py-6">
+        <PhysicalSubscriptionRequired storeId={storeId} onBack={onBack} />
       </div>
     );
   }
@@ -1048,6 +1121,15 @@ export const EditPhysicalProductWizard = ({
                   handleUpdateFormData({ size_chart_id: sizeChartId });
                 }}
               />
+            ) : currentStep === 4 ? (
+              <div className="space-y-6">
+                {CurrentStepComponent && <CurrentStepComponent {...getStepProps()} />}
+                <ProductReturnPolicyConfig
+                  productId={productId}
+                  initialPolicyId={formData.return_policy_id || undefined}
+                  onPolicyChange={policyId => handleUpdateFormData({ return_policy_id: policyId })}
+                />
+              </div>
             ) : currentStep === 7 ? (
               <div className="space-y-6">
                 {CurrentStepComponent && <CurrentStepComponent {...getStepProps()} />}

@@ -47,6 +47,14 @@ export function productLimitMessage(limits: PhysicalPlanLimitsSnapshot): string 
   return `Limite du plan atteinte : ${limits.active_physical_products}/${max} produits physiques actifs. Passez au plan supérieur pour en publier davantage.`;
 }
 
+export function isWithinVariantLimit(
+  limits: PhysicalPlanLimitsSnapshot,
+  variantCount: number
+): boolean {
+  if (limits.max_variants_per_product == null) return true;
+  return variantCount <= limits.max_variants_per_product;
+}
+
 export function variantLimitMessage(max: number): string {
   return `Limite du plan atteinte : ${max} variante(s) maximum par produit sur votre plan actuel.`;
 }

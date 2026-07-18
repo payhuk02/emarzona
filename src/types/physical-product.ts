@@ -114,6 +114,7 @@ export interface PhysicalProductFormData {
   customs_value?: number | null;
   country_of_origin?: string;
   size_chart_id?: string | null;
+  return_policy_id?: string | null;
 
   // Statistics Display Settings
   hide_purchase_count?: boolean;

@@ -21,6 +21,7 @@ export default defineConfig({
     '**/course-product-publish.spec.ts',
     '**/physical-product-publish.spec.ts',
     '**/service-product-publish.spec.ts',
+    '**/marketplace-product-visibility.spec.ts',
   ],
   fullyParallel: false,
   forbidOnly: !!process.env.CI,

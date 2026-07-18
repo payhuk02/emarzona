@@ -54,7 +54,7 @@ import { useQuery } from '@tanstack/react-query';
 import type { CourseSection, CourseLesson, CourseFormData } from '@/types/course-form';
 
 const PRODUCT_FIELDS =
-  'id, store_id, name, slug, description, short_description, category_id, image_url, images, price, currency, promotional_price, pricing_model, free_product_id, licensing_type, license_terms, meta_title, meta_description, og_image, faqs';
+  'id, store_id, name, slug, description, short_description, category, category_id, image_url, images, price, currency, promotional_price, pricing_model, free_product_id, licensing_type, license_terms, meta_title, meta_description, og_image, faqs';
 const COURSE_FIELDS =
   'id, product_id, level, language, certificate_enabled, certificate_passing_score, learning_objectives, prerequisites, target_audience';
 const PRODUCT_AFFILIATE_FIELDS =
@@ -234,13 +234,17 @@ const convertToFormData = async (
 
   // Affiliate settings déjà chargés via jointure
 
-  // Load pixels/tracking settings
-  const { data: pixelsSettings } = await supabase
-    .from('course_tracking_settings')
-    .select(COURSE_TRACKING_FIELDS)
-    .eq('course_id', course?.id || productId)
-    .limit(1)
-    .maybeSingle();
+  // Load pixels/tracking settings (course_id = courses.id, not products.id)
+  let pixelsSettings: Record<string, unknown> | null = null;
+  if (course?.id) {
+    const { data } = await supabase
+      .from('course_tracking_settings')
+      .select(COURSE_TRACKING_FIELDS)
+      .eq('course_id', course.id)
+      .limit(1)
+      .maybeSingle();
+    pixelsSettings = data;
+  }
 
   return {
     formData: {
@@ -250,7 +254,7 @@ const convertToFormData = async (
       description: product.description || '',
       level: course?.level || '',
       language: course?.language || 'fr',
-      category: product.category_id || '',
+      category: product.category || '',
       image_url: product.image_url || '',
       images: product.images || [],
       price: product.price || 0,
@@ -307,15 +311,17 @@ const convertToFormData = async (
         },
     pixelsData: pixelsSettings
       ? {
-          tracking_enabled: pixelsSettings.tracking_enabled ?? true,
-          google_analytics_id: pixelsSettings.google_analytics_id || '',
-          facebook_pixel_id: pixelsSettings.facebook_pixel_id || '',
-          google_tag_manager_id: pixelsSettings.google_tag_manager_id || '',
-          tiktok_pixel_id: pixelsSettings.tiktok_pixel_id || '',
-          track_video_events: pixelsSettings.track_video_events ?? true,
-          track_lesson_completion: pixelsSettings.track_lesson_completion ?? true,
-          track_quiz_attempts: pixelsSettings.track_quiz_attempts ?? true,
-          track_certificate_downloads: pixelsSettings.track_certificate_downloads ?? true,
+          tracking_enabled: (pixelsSettings.tracking_enabled as boolean | null) ?? true,
+          google_analytics_id: (pixelsSettings.google_analytics_id as string | null) || '',
+          facebook_pixel_id: (pixelsSettings.facebook_pixel_id as string | null) || '',
+          google_tag_manager_id: (pixelsSettings.google_tag_manager_id as string | null) || '',
+          tiktok_pixel_id: (pixelsSettings.tiktok_pixel_id as string | null) || '',
+          track_video_events: (pixelsSettings.track_video_events as boolean | null) ?? true,
+          track_lesson_completion:
+            (pixelsSettings.track_lesson_completion as boolean | null) ?? true,
+          track_quiz_attempts: (pixelsSettings.track_quiz_attempts as boolean | null) ?? true,
+          track_certificate_downloads:
+            (pixelsSettings.track_certificate_downloads as boolean | null) ?? true,
         }
       : {
           tracking_enabled: true,
@@ -538,7 +544,7 @@ export const EditCourseProductWizard = ({
           price: formData.price || 0,
           promotional_price: formData.promotional_price,
           currency: formData.currency || 'XOF',
-          category_id: formData.category || null,
+          category: formData.category || null,
           image_url: formData.image_url || '',
           images: formData.images || [],
           meta_title: seoData.meta_title,
@@ -717,6 +723,15 @@ export const EditCourseProductWizard = ({
                   </p>
                   <p>
                     <strong>Niveau:</strong> {formData.level}
+                  </p>
+                  <p>
+                    <strong>Catégorie:</strong> {formData.category || '-'}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-2">Tracking</h3>
+                  <p>
+                    <strong>Pixels actifs:</strong> {pixelsData.tracking_enabled ? 'Oui' : 'Non'}
                   </p>
                 </div>
                 <div>

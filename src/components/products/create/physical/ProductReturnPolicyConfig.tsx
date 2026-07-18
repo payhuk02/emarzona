@@ -109,7 +109,8 @@ export function ProductReturnPolicyConfig({
     },
   });
 
-  const handlePolicySelect = (policyId: string) => {
+  const handlePolicySelect = (value: string) => {
+    const policyId = value === '__none__' ? null : value;
     setSelectedPolicyId(policyId);
     onPolicyChange?.(policyId);
   };
@@ -344,9 +345,3 @@ export function ProductReturnPolicyConfig({
     </div>
   );
 }
-
-
-
-
-
-

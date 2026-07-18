@@ -3,9 +3,38 @@
  */
 
 import type { Page } from '@playwright/test';
+import { expect } from '@playwright/test';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { appLocator } from './e2e-test-config';
 
 export type MarketplaceProductType = 'course' | 'artist' | 'digital' | 'physical' | 'service';
+
+export async function assertProductListedInMarketplaceQuery(
+  admin: SupabaseClient,
+  productId: string,
+  productName: string
+): Promise<void> {
+  const { data, error } = await admin
+    .from('products')
+    .select('id, name, is_active, is_draft, hide_from_store')
+    .eq('id', productId)
+    .eq('is_active', true)
+    .eq('is_draft', false)
+    .maybeSingle();
+
+  expect(error).toBeNull();
+  expect(data?.id).toBe(productId);
+  expect(data?.name).toBe(productName);
+  expect(data?.hide_from_store).not.toBe(true);
+}
+
+export async function searchMarketplaceForProduct(page: Page, query: string): Promise<void> {
+  const root = appLocator(page);
+  const searchInput = root.locator('input[type="search"]').first();
+  await expect(searchInput).toBeVisible({ timeout: 20_000 });
+  await searchInput.fill(query);
+  await searchInput.press('Enter');
+}
 
 export async function openMarketplaceWithOptionalFilter(
   page: Page,
