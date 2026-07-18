@@ -1,8 +1,13 @@
+import { useMemo } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { useTranslation } from 'react-i18next';
 import { useStoreTheme } from '@/hooks/useStoreTheme';
 import type { Store } from '@/hooks/useStores';
+import {
+  resolveStorefrontCommerceType,
+  resolveStoreHeaderTabs,
+} from '@/lib/commerce/store-header-config';
 
 interface StoreTabsProps {
   productsContent: React.ReactNode;
@@ -21,6 +26,11 @@ const StoreTabs = ({
 }: StoreTabsProps) => {
   const { t } = useTranslation();
   const theme = useStoreTheme(store);
+
+  const tabConfig = useMemo(() => {
+    const commerceType = resolveStorefrontCommerceType(store, undefined);
+    return resolveStoreHeaderTabs(commerceType, store ?? null);
+  }, [store]);
 
   const navigationStyleClass = `store-navigation-${theme.navigationStyle}`;
 
@@ -43,38 +53,44 @@ const StoreTabs = ({
                 borderBottomColor: 'transparent',
               }}
             >
-              {t('storefront.tabs.products')}
+              {t(tabConfig.productsLabelKey)}
             </TabsTrigger>
-            <TabsTrigger
-              value="about"
-              className="rounded-none border-b-2 border-transparent px-4 sm:px-6 py-3 text-sm sm:text-base whitespace-nowrap transition-colors store-tab-trigger"
-              style={{
-                color: theme.textColor,
-                borderBottomColor: 'transparent',
-              }}
-            >
-              {t('storefront.tabs.about')}
-            </TabsTrigger>
-            <TabsTrigger
-              value="reviews"
-              className="rounded-none border-b-2 border-transparent px-4 sm:px-6 py-3 text-sm sm:text-base whitespace-nowrap transition-colors store-tab-trigger"
-              style={{
-                color: theme.textColor,
-                borderBottomColor: 'transparent',
-              }}
-            >
-              {t('storefront.tabs.reviews')}
-            </TabsTrigger>
-            <TabsTrigger
-              value="contact"
-              className="rounded-none border-b-2 border-transparent px-4 sm:px-6 py-3 text-sm sm:text-base whitespace-nowrap transition-colors store-tab-trigger"
-              style={{
-                color: theme.textColor,
-                borderBottomColor: 'transparent',
-              }}
-            >
-              {t('storefront.tabs.contact')}
-            </TabsTrigger>
+            {tabConfig.showAbout && (
+              <TabsTrigger
+                value="about"
+                className="rounded-none border-b-2 border-transparent px-4 sm:px-6 py-3 text-sm sm:text-base whitespace-nowrap transition-colors store-tab-trigger"
+                style={{
+                  color: theme.textColor,
+                  borderBottomColor: 'transparent',
+                }}
+              >
+                {t('storefront.tabs.about')}
+              </TabsTrigger>
+            )}
+            {tabConfig.showReviews && (
+              <TabsTrigger
+                value="reviews"
+                className="rounded-none border-b-2 border-transparent px-4 sm:px-6 py-3 text-sm sm:text-base whitespace-nowrap transition-colors store-tab-trigger"
+                style={{
+                  color: theme.textColor,
+                  borderBottomColor: 'transparent',
+                }}
+              >
+                {t('storefront.tabs.reviews')}
+              </TabsTrigger>
+            )}
+            {tabConfig.showContact && (
+              <TabsTrigger
+                value="contact"
+                className="rounded-none border-b-2 border-transparent px-4 sm:px-6 py-3 text-sm sm:text-base whitespace-nowrap transition-colors store-tab-trigger"
+                style={{
+                  color: theme.textColor,
+                  borderBottomColor: 'transparent',
+                }}
+              >
+                {t('storefront.tabs.contact')}
+              </TabsTrigger>
+            )}
           </TabsList>
           <ScrollBar orientation="horizontal" className="invisible" />
         </ScrollArea>
@@ -84,29 +100,35 @@ const StoreTabs = ({
         {productsContent}
       </TabsContent>
 
-      <TabsContent value="about" className="mt-4 sm:mt-6">
-        {aboutContent || (
-          <div className="text-center py-12 px-4 text-muted-foreground">
-            {t('storefront.tabs.noAbout')}
-          </div>
-        )}
-      </TabsContent>
+      {tabConfig.showAbout && (
+        <TabsContent value="about" className="mt-4 sm:mt-6">
+          {aboutContent || (
+            <div className="text-center py-12 px-4 text-muted-foreground">
+              {t('storefront.tabs.noAbout')}
+            </div>
+          )}
+        </TabsContent>
+      )}
 
-      <TabsContent value="reviews" className="mt-4 sm:mt-6">
-        {reviewsContent || (
-          <div className="text-center py-12 px-4 text-muted-foreground">
-            {t('storefront.tabs.noReviews')}
-          </div>
-        )}
-      </TabsContent>
+      {tabConfig.showReviews && (
+        <TabsContent value="reviews" className="mt-4 sm:mt-6">
+          {reviewsContent || (
+            <div className="text-center py-12 px-4 text-muted-foreground">
+              {t('storefront.tabs.noReviews')}
+            </div>
+          )}
+        </TabsContent>
+      )}
 
-      <TabsContent value="contact" className="mt-4 sm:mt-6">
-        {contactContent || (
-          <div className="text-center py-12 px-4 text-muted-foreground">
-            {t('storefront.tabs.noContact')}
-          </div>
-        )}
-      </TabsContent>
+      {tabConfig.showContact && (
+        <TabsContent value="contact" className="mt-4 sm:mt-6">
+          {contactContent || (
+            <div className="text-center py-12 px-4 text-muted-foreground">
+              {t('storefront.tabs.noContact')}
+            </div>
+          )}
+        </TabsContent>
+      )}
     </Tabs>
   );
 };
