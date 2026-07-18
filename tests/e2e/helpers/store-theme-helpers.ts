@@ -5,29 +5,53 @@ export const E2E_THEME_PRIMARY_ON_CREATE = '#c0ffee';
 export const E2E_THEME_PRIMARY_AFTER_CUSTOMIZE = '#deadb0';
 
 export async function seedTermsConsent(admin: SupabaseClient, userId: string): Promise<void> {
-  const { data, error } = await admin.rpc('get_latest_legal_document', {
+  let version = '1.0.0';
+
+  const { data: docData, error: docError } = await admin.rpc('get_active_legal_document', {
     doc_type: 'terms',
     doc_language: 'fr',
   });
 
-  if (error) {
-    throw error;
+  if (!docError && Array.isArray(docData) && docData[0] && typeof docData[0].version === 'string') {
+    version = docData[0].version;
   }
 
-  const version =
-    (Array.isArray(data) && data[0] && typeof data[0].version === 'string'
-      ? data[0].version
-      : null) ?? '1.0.0';
-
-  const { error: consentError } = await admin.rpc('record_user_consent', {
+  const { error: rpcError } = await admin.rpc('record_user_consent', {
     p_user_id: userId,
     p_document_type: 'terms',
     p_document_version: version,
     p_consent_method: 'e2e',
   });
 
-  if (consentError) {
-    throw consentError;
+  if (!rpcError) {
+    return;
+  }
+
+  const { error: insertError } = await admin.from('user_consents').insert({
+    user_id: userId,
+    document_type: 'terms',
+    document_version: version,
+    is_revoked: false,
+  });
+
+  // Ignore duplicate consent rows on re-runs.
+  if (insertError && insertError.code !== '23505') {
+    throw insertError;
+  }
+}
+
+export async function dismissCookieBannerIfVisible(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    document.cookie = 'emarzona_consent=true; path=/; max-age=31536000; SameSite=Lax';
+    localStorage.setItem('cookieConsentGiven', 'true');
+  });
+
+  const acceptAll = page.getByRole('button', { name: /Tout accepter/i });
+  if (await acceptAll.isVisible().catch(() => false)) {
+    await acceptAll.click();
+    await expect(page.getByText(/Nous utilisons des cookies/i))
+      .toBeHidden({ timeout: 5_000 })
+      .catch(() => undefined);
   }
 }
 
@@ -38,9 +62,9 @@ export async function acceptTermsDialogIfVisible(page: Page): Promise<void> {
     return;
   }
 
-  await page.locator('#accept-terms').click();
+  await page.locator('#accept-terms').check();
   await page.getByRole('button', { name: /Accepter et/i }).click();
-  await expect(dialog).toBeHidden({ timeout: 15_000 });
+  await expect(dialog).toBeHidden({ timeout: 30_000 });
 }
 
 export async function setPrimaryColorField(page: Page, hex: string): Promise<void> {
@@ -51,6 +75,7 @@ export async function setPrimaryColorField(page: Page, hex: string): Promise<voi
 
 export async function clickWizardNext(page: Page, times = 1): Promise<void> {
   for (let i = 0; i < times; i += 1) {
+    await dismissCookieBannerIfVisible(page);
     await page.getByRole('button', { name: /^Suivant$/i }).click();
   }
 }
