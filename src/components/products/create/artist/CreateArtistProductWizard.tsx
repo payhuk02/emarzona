@@ -509,7 +509,7 @@ const CreateArtistProductWizardComponent = ({
       if (onSuccess) {
         onSuccess();
       } else {
-        navigate('/products');
+        navigate('/dashboard/artist-products');
       }
     } catch (error) {
       logger.error('Error saving artist product', { error });

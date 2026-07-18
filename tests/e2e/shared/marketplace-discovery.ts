@@ -5,7 +5,7 @@
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { appLocator } from './e2e-test-config';
+import { appLocator, gotoApp } from './e2e-test-config';
 
 export type MarketplaceProductType = 'course' | 'artist' | 'digital' | 'physical' | 'service';
 
@@ -34,6 +34,34 @@ export async function searchMarketplaceForProduct(page: Page, query: string): Pr
   await expect(searchInput).toBeVisible({ timeout: 20_000 });
   await searchInput.fill(query);
   await searchInput.press('Enter');
+}
+
+export async function assertMarketplaceGuestBuyCta(
+  page: Page,
+  productName: string,
+  buyLabelPattern: RegExp
+): Promise<void> {
+  const root = appLocator(page);
+  const card = root.getByTestId('product-card').filter({ hasText: productName }).first();
+  await expect(card).toBeVisible({ timeout: 30_000 });
+
+  const buyButton = card.locator('button[data-action="primary"]');
+  await expect(buyButton).toBeVisible({ timeout: 15_000 });
+  await expect(buyButton).toHaveText(buyLabelPattern);
+}
+
+export async function assertGuestMarketplaceProductVisible(
+  page: Page,
+  admin: SupabaseClient,
+  productId: string,
+  productName: string,
+  buyLabelPattern: RegExp
+): Promise<void> {
+  await assertProductListedInMarketplaceQuery(admin, productId, productName);
+  await page.context().clearCookies();
+  await gotoApp(page, '/marketplace');
+  await searchMarketplaceForProduct(page, productName);
+  await assertMarketplaceGuestBuyCta(page, productName, buyLabelPattern);
 }
 
 export async function openMarketplaceWithOptionalFilter(

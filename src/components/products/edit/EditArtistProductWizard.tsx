@@ -40,6 +40,7 @@ import { ProductSEOForm } from '../create/shared/ProductSEOForm';
 import { ProductFAQForm } from '../create/shared/ProductFAQForm';
 import { PaymentOptionsForm } from '../create/shared/PaymentOptionsForm';
 import { useToast } from '@/hooks/use-toast';
+import { useCatalogCacheInvalidation } from '@/hooks/useCatalogCacheInvalidation';
 import { useStore } from '@/hooks/useStore';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -144,6 +145,7 @@ export const EditArtistProductWizard = ({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const invalidateCatalog = useCatalogCacheInvalidation();
   const { user } = useAuth();
   const { store: hookStore, loading: storeLoading } = useStore();
   const store = hookStore || (propsStoreId ? { id: propsStoreId } : null);
@@ -478,6 +480,10 @@ export const EditArtistProductWizard = ({
         title: '✅ Succès',
         description: isDraft ? 'Brouillon sauvegardé' : 'Produit artiste mis à jour avec succès',
       });
+
+      if (!isDraft) {
+        invalidateCatalog();
+      }
 
       if (onSuccess) {
         onSuccess();
