@@ -61,7 +61,6 @@ const COMMON_SELLER_PATHS = [
   '/dashboard/customers',
   '/dashboard/domain',
   '/dashboard/image-studio',
-  '/dashboard/inventory',
   '/dashboard/kyc',
   '/dashboard/marketing',
   '/dashboard/orders',

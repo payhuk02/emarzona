@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { StoreCreateCtaLink } from '@/components/store/StoreCreateCtaLink';
 import { Check, Package, Layers } from 'lucide-react';
 import { formatCurrencyCode } from '@/lib/currency-converter';
 import {
@@ -97,14 +98,13 @@ function PricingCard({
           ))}
         </ul>
 
-        <Link
-          to="/register"
+        <StoreCreateCtaLink
           className={`relative mt-8 inline-flex justify-center rounded-full py-3 text-sm font-semibold transition-transform active:scale-[0.98] ${
             highlight ? 'lp-btn-primary text-white' : 'lp-btn-outline-dark'
           }`}
         >
           {t(`pricing.${planKey}.cta`)}
-        </Link>
+        </StoreCreateCtaLink>
       </article>
     </div>
   );
@@ -178,12 +178,9 @@ export function PricingSection() {
                         {t('pricing.periodSale')}
                       </span>
                     </p>
-                    <Link
-                      to="/register"
-                      className="lp-btn-primary inline-flex w-full justify-center rounded-full px-8 py-3 text-sm font-semibold lg:w-auto"
-                    >
+                    <StoreCreateCtaLink className="lp-btn-primary inline-flex w-full justify-center rounded-full px-8 py-3 text-sm font-semibold lg:w-auto">
                       {t('pricing.commission.cta')}
-                    </Link>
+                    </StoreCreateCtaLink>
                   </div>
                 </div>
               </article>

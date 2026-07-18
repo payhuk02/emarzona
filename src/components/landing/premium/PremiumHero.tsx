@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { Link } from 'react-router-dom';
+import { StoreCreateCtaLink } from '@/components/store/StoreCreateCtaLink';
 import { CreditCard, Zap, Headphones } from 'lucide-react';
 import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
 import { PremiumHeroTypewriterBadge } from './PremiumHeroTypewriterBadge';
@@ -49,12 +49,9 @@ export function PremiumHero() {
           </p>
 
           <div className="lp-hero-animate lp-hero-animate--delay-3 mt-8 flex flex-wrap items-center justify-center gap-3 sm:mt-10 sm:gap-4 lg:justify-start">
-            <Link
-              to="/register"
-              className="lp-btn-primary inline-flex rounded-full px-6 py-3 text-sm font-semibold sm:px-7 sm:py-3.5"
-            >
+            <StoreCreateCtaLink className="lp-btn-primary inline-flex rounded-full px-6 py-3 text-sm font-semibold sm:px-7 sm:py-3.5">
               {t('hero.ctaPrimary')}
-            </Link>
+            </StoreCreateCtaLink>
             <a
               href="#solutions"
               className="lp-btn-outline inline-flex rounded-full px-6 py-3 text-sm sm:px-7 sm:py-3.5"

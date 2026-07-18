@@ -26,6 +26,12 @@ describe('store-capability-map', () => {
     expect(resolveStoreCommerceTypeFromStore({ metadata: {} })).toBe('physical');
   });
 
+  it('gates inventory routes to physical stores only', () => {
+    expect(canAccessCommercePath('/dashboard/inventory', 'physical')).toBe(true);
+    expect(canAccessCommercePath('/dashboard/inventory', 'digital')).toBe(false);
+    expect(canAccessCommercePath('/dashboard/inventory', 'service')).toBe(false);
+  });
+
   it('maps shared routes as common capabilities', () => {
     const rule = getRouteCapabilityRule('/dashboard/emails/campaigns');
     expect(rule?.label).toBe('Fonctionnalites communes');

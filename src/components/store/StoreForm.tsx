@@ -739,6 +739,7 @@ const StoreForm = ({
             storeId: initialData.id,
             updates: updateData as Partial<Store>,
           });
+          await refreshStores();
         } else {
           if (!canCreateStore()) {
             toast({

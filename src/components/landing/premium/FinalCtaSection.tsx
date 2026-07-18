@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { StoreCreateCtaLink } from '@/components/store/StoreCreateCtaLink';
 import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
 import { EmarzonaInText } from '@/components/brand/EmarzonaInText';
 import { usePremiumReveal } from './usePremiumReveal';
@@ -31,12 +31,9 @@ export function FinalCtaSection() {
                 <EmarzonaInText>{t('cta.subtitle')}</EmarzonaInText>
               </p>
               <div className="mt-8 flex flex-wrap justify-center gap-4 lg:justify-start">
-                <Link
-                  to="/register"
-                  className="lp-btn-primary inline-flex rounded-full px-7 py-3.5 text-sm font-semibold"
-                >
+                <StoreCreateCtaLink className="lp-btn-primary inline-flex rounded-full px-7 py-3.5 text-sm font-semibold">
                   {t('cta.ctaPrimary')}
-                </Link>
+                </StoreCreateCtaLink>
                 <a
                   href="mailto:contact@emarzona.com"
                   className="lp-btn-primary inline-flex rounded-full border border-white/20 px-7 py-3.5 text-sm font-semibold"

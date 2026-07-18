@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { StoreCreateCtaLink } from '@/components/store/StoreCreateCtaLink';
 import { Check } from 'lucide-react';
 import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
 import { usePremiumReveal } from './usePremiumReveal';
@@ -56,12 +57,9 @@ export function AdaptSection() {
             ))}
           </ul>
           <div className="mt-10 flex flex-wrap gap-4">
-            <Link
-              to="/register"
-              className="lp-btn-primary inline-flex rounded-full px-7 py-3.5 text-sm font-semibold"
-            >
+            <StoreCreateCtaLink className="lp-btn-primary inline-flex rounded-full px-7 py-3.5 text-sm font-semibold">
               {t('adapt.ctaPrimary')}
-            </Link>
+            </StoreCreateCtaLink>
             <Link
               to="/marketplace"
               className="lp-btn-outline-light inline-flex rounded-full px-7 py-3.5 text-sm"

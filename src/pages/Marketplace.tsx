@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { ArrowRight, Users, Sparkles } from '@/components/icons';
 import { Link } from 'react-router-dom';
+import { StoreCreateCtaLink } from '@/components/store/StoreCreateCtaLink';
 import { useToast } from '@/hooks/use-toast';
 import { PremiumNav } from '@/components/landing/premium/PremiumNav';
 import { PremiumFooter } from '@/components/landing/premium/PremiumFooter';
@@ -956,7 +957,7 @@ const Marketplace = () => {
               {getValue('marketplace.cta.subtitle')}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-2">
-              <Link to="/register" className="w-full sm:w-auto">
+              <StoreCreateCtaLink className="w-full sm:w-auto">
                 <Button
                   size="lg"
                   className="lp-btn-primary rounded-full h-11 sm:h-12 px-8 w-full sm:w-auto"
@@ -964,7 +965,7 @@ const Marketplace = () => {
                   {getValue('marketplace.cta.startFree')}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
-              </Link>
+              </StoreCreateCtaLink>
               <Link to="/community" className="w-full sm:w-auto">
                 <Button
                   size="lg"

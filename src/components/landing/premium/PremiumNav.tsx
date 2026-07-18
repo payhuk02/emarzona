@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { StoreCreateCtaLink } from '@/components/store/StoreCreateCtaLink';
 import { Menu, X } from 'lucide-react';
 import { EmarzonaBrandLogo } from './EmarzonaBrandLogo';
 import { PremiumLangSwitcher } from './PremiumLangSwitcher';
@@ -99,13 +100,10 @@ export function PremiumNav() {
               >
                 {t('nav.login')}
               </Link>
-              <Link
-                to="/register"
-                className="lp-btn-primary lp-nav-cta inline-flex h-10 items-center whitespace-nowrap rounded-full px-4 text-sm font-semibold xl:px-5"
-              >
+              <StoreCreateCtaLink className="lp-btn-primary lp-nav-cta inline-flex h-10 items-center whitespace-nowrap rounded-full px-4 text-sm font-semibold xl:px-5">
                 <span className="hidden xl:inline">{t('nav.getStarted')}</span>
                 <span className="xl:hidden">{t('nav.getStartedShort')}</span>
-              </Link>
+              </StoreCreateCtaLink>
             </div>
             <div className="flex items-center gap-2 lg:hidden">
               <PremiumLangSwitcher className="lp-nav-control" />
@@ -152,13 +150,12 @@ export function PremiumNav() {
               >
                 {t('nav.login')}
               </Link>
-              <Link
-                to="/register"
+              <StoreCreateCtaLink
                 className="lp-btn-primary rounded-full py-3.5 text-center text-sm font-semibold"
                 onClick={() => setOpen(false)}
               >
                 {t('nav.getStarted')}
-              </Link>
+              </StoreCreateCtaLink>
             </div>
           </div>
         </>

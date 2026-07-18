@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { StoreCreateCtaLink } from '@/components/store/StoreCreateCtaLink';
 import { Facebook, Instagram, Twitter, Linkedin, Mail, Phone } from 'lucide-react';
 import { usePlatformLogo } from '@/hooks/usePlatformLogo';
 import { EmarzonaBrandName } from '@/components/brand/EmarzonaBrandName';
@@ -88,12 +89,9 @@ const MarketplaceFooter = () => {
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/register"
-                  className="text-muted-foreground hover:text-primary transition-colors touch-manipulation block py-1"
-                >
+                <StoreCreateCtaLink className="text-muted-foreground hover:text-primary transition-colors touch-manipulation block py-1">
                   Créer ma boutique
-                </Link>
+                </StoreCreateCtaLink>
               </li>
               <li>
                 <Link
