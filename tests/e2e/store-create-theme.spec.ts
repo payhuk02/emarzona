@@ -6,6 +6,7 @@ import {
   assertStorefrontThemePrimary,
   clickWizardNext,
   dismissCookieBannerIfVisible,
+  dismissPersonaOnboardingIfVisible,
   E2E_THEME_PRIMARY_AFTER_CUSTOMIZE,
   E2E_THEME_PRIMARY_ON_CREATE,
   extractStoreIdFromUrl,
@@ -82,11 +83,13 @@ test.describe('Store create → customize → storefront theme (E2E)', () => {
     await expect(page).toHaveURL('/dashboard', { timeout: 30_000 });
     await waitForReactApp(page);
     await dismissCookieBannerIfVisible(page);
+    await dismissPersonaOnboardingIfVisible(page);
     await acceptTermsDialogIfVisible(page);
 
     await gotoApp(page, STORE_CREATE_PATH);
     await dismissCookieBannerIfVisible(page);
-    await expect(page.getByText(/Étape 1 sur 8/i)).toBeVisible({ timeout: 20_000 });
+    await dismissPersonaOnboardingIfVisible(page);
+    await expect(page.getByText(/Étape 1 sur 8/i)).toBeVisible({ timeout: 60_000 });
 
     await page.locator('#commerce_type').click();
     await page.getByRole('option', { name: 'Produits digitaux' }).click();

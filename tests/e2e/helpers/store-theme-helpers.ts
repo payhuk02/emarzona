@@ -5,9 +5,9 @@ export const E2E_THEME_PRIMARY_ON_CREATE = '#c0ffee';
 export const E2E_THEME_PRIMARY_AFTER_CUSTOMIZE = '#deadb0';
 
 export async function seedTermsConsent(admin: SupabaseClient, userId: string): Promise<void> {
-  let version = '1.0.0';
+  let version = '1.0';
 
-  const { data: docData, error: docError } = await admin.rpc('get_active_legal_document', {
+  const { data: docData, error: docError } = await admin.rpc('get_latest_legal_document', {
     doc_type: 'terms',
     doc_language: 'fr',
   });
@@ -40,6 +40,16 @@ export async function seedTermsConsent(admin: SupabaseClient, userId: string): P
   }
 }
 
+export async function dismissPersonaOnboardingIfVisible(page: Page): Promise<void> {
+  const dismiss = page.getByRole('button', { name: /^Compris$/i });
+  if (await dismiss.isVisible().catch(() => false)) {
+    await dismiss.click();
+    await expect(dismiss)
+      .toBeHidden({ timeout: 10_000 })
+      .catch(() => undefined);
+  }
+}
+
 export async function dismissCookieBannerIfVisible(page: Page): Promise<void> {
   await page.evaluate(() => {
     document.cookie = 'emarzona_consent=true; path=/; max-age=31536000; SameSite=Lax';
@@ -57,8 +67,9 @@ export async function dismissCookieBannerIfVisible(page: Page): Promise<void> {
 
 export async function acceptTermsDialogIfVisible(page: Page): Promise<void> {
   const dialog = page.getByRole('alertdialog');
-  const visible = await dialog.isVisible().catch(() => false);
-  if (!visible) {
+  try {
+    await dialog.waitFor({ state: 'visible', timeout: 8_000 });
+  } catch {
     return;
   }
 
