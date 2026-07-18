@@ -13,6 +13,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
 import {
   Download,
   Info,
@@ -44,7 +47,10 @@ import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
 import { supabase } from '@/integrations/supabase/client';
 import { updateDigitalProductTx } from '@/lib/products/product-update-rpc';
 import { buildDigitalProductFilesPayload } from '@/lib/digital/build-digital-product-files-payload';
-import { validateRequiredSteps } from '@/lib/wizard-validation/edit-save-validation';
+import {
+  validateDigitalWizardSaveSteps,
+  validateDigitalWizardStep,
+} from '@/lib/digital-wizard-step-validation';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import type {
@@ -397,19 +403,10 @@ export const EditDigitalProductWizard = ({
 
       switch (step) {
         case 1: {
-          if (!formData.name || formData.name.trim().length < 2) {
-            errors.push('Le nom doit contenir au moins 2 caractères');
-          }
-
-          // Ne pas exiger le prix si le modèle de tarification est "free"
-          const pricingModel = formData.pricing_model || 'one-time';
-          if (pricingModel !== 'free' && (!formData.price || formData.price <= 0)) {
-            errors.push('Le prix doit être supérieur à 0');
-          }
-
-          if (errors.length > 0) {
-            setValidationErrors(prev => ({ ...prev, [step]: errors }));
-            return { valid: false, errors };
+          const clientResult = validateDigitalWizardStep(1, formData);
+          if (!clientResult.valid) {
+            setValidationErrors(prev => ({ ...prev, [step]: clientResult.errors }));
+            return { valid: false, errors: clientResult.errors };
           }
 
           // Server validation
@@ -426,7 +423,7 @@ export const EditDigitalProductWizard = ({
             const serverResult = await validateDigitalProductServer({
               name: formData.name || '',
               slug: slugForValidation,
-              price: pricingModel === 'free' ? 0 : formData.price || 0,
+              price: (formData.pricing_model || 'one-time') === 'free' ? 0 : formData.price || 0,
             });
 
             if (!serverResult.valid) {
@@ -511,16 +508,10 @@ export const EditDigitalProductWizard = ({
         }
 
         case 2: {
-          if (
-            !formData.main_file_url &&
-            (!formData.downloadable_files || formData.downloadable_files.length === 0)
-          ) {
-            errors.push('Au moins un fichier est requis');
-          }
-
-          if (errors.length > 0) {
-            setValidationErrors(prev => ({ ...prev, [step]: errors }));
-            return { valid: false, errors };
+          const clientResult = validateDigitalWizardStep(2, formData);
+          if (!clientResult.valid) {
+            setValidationErrors(prev => ({ ...prev, [step]: clientResult.errors }));
+            return { valid: false, errors: clientResult.errors };
           }
 
           setValidationErrors(prev => {
@@ -714,42 +705,46 @@ export const EditDigitalProductWizard = ({
         if (filesError) throw filesError;
       }
 
-      // Update affiliate settings
-      if (formData.affiliate?.enabled) {
-        const { data: existingAffiliate } = await supabase
+      // Sync affiliate settings (enable or disable)
+      const { data: existingAffiliate } = await supabase
+        .from('product_affiliate_settings')
+        .select('id')
+        .eq('product_id', productId)
+        .limit(1)
+        .maybeSingle();
+
+      const affiliateData = {
+        product_id: productId,
+        store_id: store.id,
+        affiliate_enabled: formData.affiliate?.enabled ?? false,
+        commission_rate: formData.affiliate?.commission_rate ?? 20,
+        commission_type: formData.affiliate?.commission_type ?? 'percentage',
+        fixed_commission_amount: formData.affiliate?.fixed_commission_amount ?? 0,
+        cookie_duration_days: formData.affiliate?.cookie_duration_days ?? 30,
+        min_order_amount: formData.affiliate?.min_order_amount ?? 0,
+        allow_self_referral: formData.affiliate?.allow_self_referral ?? false,
+        require_approval: formData.affiliate?.require_approval ?? false,
+        terms_and_conditions: formData.affiliate?.terms_and_conditions ?? '',
+      };
+
+      if (existingAffiliate) {
+        const { error: affiliateError } = await supabase
           .from('product_affiliate_settings')
-          .select('id')
-          .eq('product_id', productId)
-          .limit(1)
-          .maybeSingle();
-
-        const affiliateData = {
-          product_id: productId,
-          store_id: store.id,
-          affiliate_enabled: formData.affiliate.enabled,
-          commission_rate: formData.affiliate.commission_rate,
-          commission_type: formData.affiliate.commission_type,
-          fixed_commission_amount: formData.affiliate.fixed_commission_amount,
-          cookie_duration_days: formData.affiliate.cookie_duration_days,
-          min_order_amount: formData.affiliate.min_order_amount,
-          allow_self_referral: formData.affiliate.allow_self_referral,
-          require_approval: formData.affiliate.require_approval,
-          terms_and_conditions: formData.affiliate.terms_and_conditions,
-        };
-
-        if (existingAffiliate) {
-          await supabase
-            .from('product_affiliate_settings')
-            .update(affiliateData)
-            .eq('id', existingAffiliate.id);
-        } else {
-          await supabase.from('product_affiliate_settings').insert(affiliateData);
-        }
+          .update(affiliateData)
+          .eq('id', existingAffiliate.id);
+        if (affiliateError) throw affiliateError;
+      } else if (formData.affiliate?.enabled) {
+        const { error: affiliateError } = await supabase
+          .from('product_affiliate_settings')
+          .insert(affiliateData);
+        if (affiliateError) throw affiliateError;
       }
 
       toast({
         title: '✅ Produit mis à jour',
-        description: 'Le produit a été modifié avec succès',
+        description: formData.is_active
+          ? 'Le produit est publié et visible sur le marketplace'
+          : 'Le produit a été désactivé (non visible sur le marketplace)',
       });
 
       invalidateCatalog();
@@ -792,33 +787,37 @@ export const EditDigitalProductWizard = ({
   }, []);
 
   const handleSave = useCallback(async () => {
-    const result = await validateRequiredSteps([1, 2], validateStep);
-    logger.info('[EditDigitalProductWizard] handleSave - Résultat validation', {
-      isValid: result.valid,
-      errors: result.errors,
-      errorsCount: result.errors.length,
-    });
-    if (result.valid) {
-      await saveProduct();
-    } else {
-      const errorMessages =
-        result.errors.length > 0
-          ? result.errors.join(', ')
-          : 'Veuillez corriger les erreurs avant de sauvegarder';
-
-      logger.warn('[EditDigitalProductWizard] handleSave - Validation échouée', {
-        currentStep,
-        errorMessages,
-        errors: result.errors,
-      });
-
+    const saveValidation = validateDigitalWizardSaveSteps(formData);
+    if (!saveValidation.valid) {
+      if (saveValidation.failedStep) {
+        setCurrentStep(saveValidation.failedStep);
+      }
       toast({
-        title: 'Erreurs de validation',
-        description: errorMessages,
+        title: saveValidation.toastTitle ?? 'Erreurs de validation',
+        description:
+          saveValidation.toastDescription ??
+          saveValidation.errors.join(', ') ??
+          'Veuillez corriger les erreurs avant de sauvegarder',
         variant: 'destructive',
       });
+      return;
     }
-  }, [validateStep, saveProduct, toast]);
+
+    if (formData.is_active !== false) {
+      const serverStep = await validateStep(1);
+      if (!serverStep.valid) {
+        setCurrentStep(1);
+        toast({
+          title: 'Erreurs de validation',
+          description: serverStep.errors.join(', '),
+          variant: 'destructive',
+        });
+        return;
+      }
+    }
+
+    await saveProduct();
+  }, [formData, validateStep, saveProduct, toast]);
 
   const renderStepContent = useCallback(() => {
     switch (currentStep) {
@@ -924,7 +923,29 @@ export const EditDigitalProductWizard = ({
           </div>
         );
       case 6:
-        return <DigitalPreview formData={formData as DigitalProductFormData} />;
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between p-4 border rounded-lg">
+              <div className="space-y-0.5">
+                <Label htmlFor="digital_is_active">Produit publié</Label>
+                <p className="text-sm text-muted-foreground">
+                  Visible sur le marketplace et disponible à l&apos;achat
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Badge variant={formData.is_active ? 'default' : 'secondary'}>
+                  {formData.is_active ? 'Actif' : 'Inactif'}
+                </Badge>
+                <Switch
+                  id="digital_is_active"
+                  checked={formData.is_active ?? true}
+                  onCheckedChange={checked => handleUpdateFormData({ is_active: checked })}
+                />
+              </div>
+            </div>
+            <DigitalPreview formData={formData as DigitalProductFormData} />
+          </div>
+        );
       default:
         return null;
     }
