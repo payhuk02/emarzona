@@ -173,7 +173,7 @@ if (missingEmarzonaSchema) {
   const reason =
     `Project « ${projectRef} » is missing Emarzona schema (public.stores). ` +
     'Use a dedicated Supabase project with repo migrations applied. ' +
-    'Fix: E2E_SUPABASE_TEST_PROJECT_REF=<emarzona-test-ref> npm run setup:commerce-e2e-secret';
+    'Fix: run workflow bootstrap-e2e-schema.yml or E2E_SUPABASE_TEST_PROJECT_REF=<ref> npm run setup:commerce-e2e-secret';
   if (process.env.CI === 'true') {
     skipOrFailInCi(reason);
   }
@@ -181,7 +181,18 @@ if (missingEmarzonaSchema) {
   process.exit(1);
 }
 
-if (schemaError && !['PGRST116', '42501'].includes(schemaError.code ?? '')) {
+if (schemaError?.code === '42501') {
+  const reason =
+    `Project « ${projectRef} » has public.stores but service_role lacks table privileges (42501). ` +
+    'Re-run GitHub workflow bootstrap-e2e-schema.yml to restore GRANTs after schema import.';
+  if (process.env.CI === 'true') {
+    skipOrFailInCi(reason);
+  }
+  console.error(reason);
+  process.exit(1);
+}
+
+if (schemaError && schemaError.code !== 'PGRST116') {
   console.error(`Schema probe failed for project ${projectRef}: ${schemaError.message}`);
   process.exit(1);
 }

@@ -105,13 +105,38 @@ EOSQL
 }
 
 enable_e2e_extensions() {
-  echo "Enabling prod-matched extensions on E2E..."
+  echo "Recreating prod-matched extensions on E2E (drop stale installs from prior runs)..."
+  e2e_psql -Atc "SELECT format('DROP EXTENSION IF EXISTS %I CASCADE;', extname)
+    FROM pg_extension
+    WHERE extname NOT IN ('plpgsql')
+    ORDER BY extname;" > /tmp/e2e-drop-extensions.sql
+  e2e_psql -v ON_ERROR_STOP=0 -f /tmp/e2e-drop-extensions.sql
   e2e_psql -v ON_ERROR_STOP=0 -f /tmp/e2e-extensions.sql
 }
 
 apply_prod_schema() {
   echo "Applying prod public schema to E2E (${E2E_REF})..."
   e2e_psql --set ON_ERROR_STOP=1 -f /tmp/e2e-schema.sql
+}
+
+restore_supabase_grants() {
+  echo "Restoring Supabase GRANTs stripped by pg_dump --no-privileges..."
+  e2e_psql -v ON_ERROR_STOP=1 <<'EOSQL'
+GRANT USAGE ON SCHEMA public TO postgres, anon, authenticated, service_role;
+GRANT ALL ON ALL TABLES IN SCHEMA public TO postgres, service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO authenticated;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO anon;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO postgres, authenticated, service_role;
+GRANT ALL ON ALL ROUTINES IN SCHEMA public TO postgres, service_role;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO authenticated, anon, service_role;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO postgres, service_role;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO authenticated;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO anon;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO postgres, authenticated, service_role;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON ROUTINES TO postgres, service_role;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT EXECUTE ON FUNCTIONS TO authenticated, anon, service_role;
+NOTIFY pgrst, 'reload schema';
+EOSQL
 }
 
 verify_e2e_schema() {
@@ -121,20 +146,28 @@ verify_e2e_schema() {
     SELECT 1 FROM information_schema.tables
     WHERE table_schema='public' AND table_name='stores'
   ) AS has_stores;"
+  e2e_psql -c "SELECT has_table_privilege('service_role', 'public.stores', 'SELECT') AS service_role_can_select_stores;"
+  e2e_psql -c "SELECT has_table_privilege('service_role', 'public.stores', 'INSERT') AS service_role_can_insert_stores;"
 
-  local table_count has_stores
+  local table_count has_stores can_select can_insert
   table_count=$(e2e_psql -Atc "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='public';")
   has_stores=$(e2e_psql -Atc "SELECT EXISTS (
     SELECT 1 FROM information_schema.tables
     WHERE table_schema='public' AND table_name='stores'
   );")
+  can_select=$(e2e_psql -Atc "SELECT has_table_privilege('service_role', 'public.stores', 'SELECT');")
+  can_insert=$(e2e_psql -Atc "SELECT has_table_privilege('service_role', 'public.stores', 'INSERT');")
 
   if [ "${has_stores}" != "t" ] || [ "${table_count}" -lt "${MIN_PUBLIC_TABLES}" ]; then
     echo "::error::Bootstrap incomplete: public_tables=${table_count} (min ${MIN_PUBLIC_TABLES}), has_stores=${has_stores}"
     exit 1
   fi
+  if [ "${can_select}" != "t" ] || [ "${can_insert}" != "t" ]; then
+    echo "::error::Bootstrap grants incomplete: service_role stores SELECT=${can_select} INSERT=${can_insert}"
+    exit 1
+  fi
 
-  echo "OK: E2E schema bootstrapped (${table_count} public tables, stores present)."
+  echo "OK: E2E schema bootstrapped (${table_count} public tables, stores present, service_role grants OK)."
   echo "Next locally: npx supabase link --project-ref ${E2E_REF} && npx supabase migration repair --status applied"
 }
 
@@ -146,6 +179,7 @@ main() {
   reset_e2e_public
   enable_e2e_extensions
   apply_prod_schema
+  restore_supabase_grants
   verify_e2e_schema
 }
 
