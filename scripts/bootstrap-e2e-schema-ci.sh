@@ -7,6 +7,7 @@ PROD_REF="${PROD_REF:-hbdnzajbyjakdhuavrvb}"
 E2E_REF="${E2E_REF:-ufbztturuwwazfcvhvuu}"
 POOLER_HOST="${POOLER_HOST:-aws-1-eu-west-2.pooler.supabase.com}"
 MIN_PUBLIC_TABLES="${MIN_PUBLIC_TABLES:-500}"
+BOOTSTRAP_MODE="${BOOTSTRAP_MODE:-full}"
 
 if [ -d /usr/lib/postgresql/17/bin ]; then
   export PATH="/usr/lib/postgresql/17/bin:${PATH}"
@@ -15,8 +16,12 @@ PG_DUMP="${PG_DUMP:-pg_dump}"
 PSQL="${PSQL:-psql}"
 
 require_env() {
-  if [ -z "${SUPABASE_PROD_DB_PASSWORD:-}" ] || [ -z "${E2E_SUPABASE_DB_PASSWORD:-}" ]; then
-    echo "::error::Set GitHub secrets SUPABASE_PROD_DB_PASSWORD and E2E_SUPABASE_DB_PASSWORD (Dashboard > Database password)."
+  if [ -z "${E2E_SUPABASE_DB_PASSWORD:-}" ]; then
+    echo "::error::Set GitHub secret E2E_SUPABASE_DB_PASSWORD (Dashboard > Database password)."
+    exit 1
+  fi
+  if [ "${BOOTSTRAP_MODE}" != "grants-only" ] && [ -z "${SUPABASE_PROD_DB_PASSWORD:-}" ]; then
+    echo "::error::Set GitHub secret SUPABASE_PROD_DB_PASSWORD (Dashboard > Database password)."
     exit 1
   fi
 }
@@ -65,6 +70,14 @@ dump_prod_public_schema() {
   echo "Schema dump: ${lines} lines, ${bytes} bytes"
 }
 
+drop_e2e_extensions() {
+  e2e_psql -Atc "SELECT format('DROP EXTENSION IF EXISTS %I CASCADE;', extname)
+    FROM pg_extension
+    WHERE extname NOT IN ('plpgsql')
+    ORDER BY extname;" > /tmp/e2e-drop-extensions.sql
+  e2e_psql -v ON_ERROR_STOP=0 -f /tmp/e2e-drop-extensions.sql
+}
+
 reset_e2e_public() {
   echo "Resetting E2E public schema via batched drops (one statement per transaction)..."
   e2e_psql -v ON_ERROR_STOP=1 <<'EOSQL'
@@ -74,6 +87,9 @@ GRANT ALL ON SCHEMA public TO postgres;
 GRANT ALL ON SCHEMA public TO public;
 GRANT ALL ON SCHEMA public TO anon, authenticated, service_role;
 EOSQL
+
+  echo "Dropping extensions first (releases http/pg_trgm objects bound to public)..."
+  drop_e2e_extensions
 
   {
     e2e_psql -Atc "SELECT format('DROP MATERIALIZED VIEW IF EXISTS public.%I CASCADE;', matviewname) FROM pg_matviews WHERE schemaname = 'public' ORDER BY 1;"
@@ -105,12 +121,8 @@ EOSQL
 }
 
 enable_e2e_extensions() {
-  echo "Recreating prod-matched extensions on E2E (drop stale installs from prior runs)..."
-  e2e_psql -Atc "SELECT format('DROP EXTENSION IF EXISTS %I CASCADE;', extname)
-    FROM pg_extension
-    WHERE extname NOT IN ('plpgsql')
-    ORDER BY extname;" > /tmp/e2e-drop-extensions.sql
-  e2e_psql -v ON_ERROR_STOP=0 -f /tmp/e2e-drop-extensions.sql
+  echo "Recreating prod-matched extensions on E2E..."
+  drop_e2e_extensions
   e2e_psql -v ON_ERROR_STOP=0 -f /tmp/e2e-extensions.sql
 }
 
@@ -171,8 +183,36 @@ verify_e2e_schema() {
   echo "Next locally: npx supabase link --project-ref ${E2E_REF} && npx supabase migration repair --status applied"
 }
 
+verify_e2e_grants_only() {
+  echo "Verifying E2E GRANTs (grants-only mode)..."
+  local has_stores can_select can_insert
+  has_stores=$(e2e_psql -Atc "SELECT EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_schema='public' AND table_name='stores'
+  );")
+  can_select=$(e2e_psql -Atc "SELECT has_table_privilege('service_role', 'public.stores', 'SELECT');")
+  can_insert=$(e2e_psql -Atc "SELECT has_table_privilege('service_role', 'public.stores', 'INSERT');")
+
+  if [ "${has_stores}" != "t" ]; then
+    echo "::error::grants-only: public.stores missing — run full bootstrap first"
+    exit 1
+  fi
+  if [ "${can_select}" != "t" ] || [ "${can_insert}" != "t" ]; then
+    echo "::error::grants-only: service_role stores SELECT=${can_select} INSERT=${can_insert}"
+    exit 1
+  fi
+  echo "OK: service_role can read/write public.stores"
+}
+
 main() {
   require_env
+  if [ "${BOOTSTRAP_MODE}" = "grants-only" ]; then
+    echo "Mode: grants-only"
+    e2e_psql -Atc "SELECT current_database();" >/dev/null
+    restore_supabase_grants
+    verify_e2e_grants_only
+    exit 0
+  fi
   preflight
   collect_prod_extensions
   dump_prod_public_schema

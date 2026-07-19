@@ -2,6 +2,15 @@ name: Bootstrap E2E schema from prod
 
 on:
   workflow_dispatch:
+    inputs:
+      mode:
+        description: 'full = dump prod schema; grants-only = restore Supabase GRANTs on existing E2E schema'
+        required: false
+        default: full
+        type: choice
+        options:
+          - full
+          - grants-only
 
 jobs:
   bootstrap:
@@ -14,6 +23,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install PostgreSQL 17 client
+        if: inputs.mode != 'grants-only'
         run: |
           sudo apt-get update
           sudo apt-get install -y curl ca-certificates
@@ -25,11 +35,16 @@ jobs:
           echo "/usr/lib/postgresql/17/bin" >> "$GITHUB_PATH"
           /usr/lib/postgresql/17/bin/pg_dump --version
 
+      - name: Install PostgreSQL client (grants-only)
+        if: inputs.mode == 'grants-only'
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
       - name: Bootstrap schema (schema-only, no data)
         env:
           PROD_REF: hbdnzajbyjakdhuavrvb
           E2E_REF: ufbztturuwwazfcvhvuu
           POOLER_HOST: aws-1-eu-west-2.pooler.supabase.com
+          BOOTSTRAP_MODE: ${{ inputs.mode }}
           SUPABASE_PROD_DB_PASSWORD: ${{ secrets.SUPABASE_PROD_DB_PASSWORD }}
           E2E_SUPABASE_DB_PASSWORD: ${{ secrets.E2E_SUPABASE_DB_PASSWORD }}
         run: bash scripts/bootstrap-e2e-schema-ci.sh
