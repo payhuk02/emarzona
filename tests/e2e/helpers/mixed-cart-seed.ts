@@ -149,6 +149,7 @@ export async function seedMixedCartFixture(
     throw physicalProductError ?? new Error('physical product insert failed');
   }
 
+  const physicalSku = `E2E-MIX-${runId}`;
   const { data: physicalProduct, error: ppError } = await admin
     .from('physical_products')
     .insert({
@@ -156,6 +157,8 @@ export async function seedMixedCartFixture(
       store_id: store.id,
       requires_shipping: true,
       weight: 0.5,
+      sku: physicalSku,
+      track_inventory: true,
     })
     .select('id')
     .single();
