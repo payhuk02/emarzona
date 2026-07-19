@@ -1,6 +1,8 @@
 -- Idempotent patches applied after prod schema dump on E2E.
 -- pg_dump --no-privileges + trigger/function ordering can leave this RPC missing while
 -- trg_seed_store_notification_settings on public.stores still exists.
+-- Serialize parallel Playwright jobs that apply this file concurrently.
+SELECT pg_advisory_lock(87201419);
 
 CREATE OR REPLACE FUNCTION public.get_or_create_store_notification_settings(p_store_id UUID)
 RETURNS public.store_notification_settings
@@ -292,3 +294,5 @@ END;
 $$;
 
 NOTIFY pgrst, 'reload schema';
+
+SELECT pg_advisory_unlock(87201419);
