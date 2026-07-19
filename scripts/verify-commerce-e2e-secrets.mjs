@@ -83,6 +83,84 @@ function skipOrFailInCi(reason) {
   skipInCi(reason);
 }
 
+const PHYSICAL_BASIC_PLAN = {
+  slug: 'physical_basic',
+  name: 'Physique — Basic',
+  description: 'Abonnement requis pour vendre des produits physiques.',
+  applies_to_product_type: 'physical',
+  trial_days: 30,
+  monthly_price: 7500,
+  yearly_price: 0,
+  max_products: 50,
+  max_variants_per_product: 3,
+  max_warehouses: 0,
+  features: ['Produits physiques', 'Essai 30 jours'],
+  display_order: 0,
+  is_active: true,
+  is_public: true,
+};
+
+const E2E_TERMS_DOCUMENT = {
+  document_type: 'terms-of-service',
+  version: '1.0',
+  language: 'fr',
+  title: 'Conditions Générales de Vente E2E',
+  content: 'Contenu CGV minimal pour les tests E2E commerce.',
+  effective_date: new Date().toISOString(),
+  is_active: true,
+};
+
+/** Idempotent seed for schema-only E2E bootstrap (same data as e2e-post-bootstrap-patches.sql). */
+async function ensureCommerceE2eSeeds(admin, projectRef) {
+  let seeded = false;
+
+  const { data: physicalPlan, error: planProbeError } = await admin
+    .from('platform_vendor_plans')
+    .select('id')
+    .eq('slug', 'physical_basic')
+    .eq('is_active', true)
+    .maybeSingle();
+
+  if (planProbeError) {
+    throw new Error(`platform_vendor_plans probe failed: ${planProbeError.message}`);
+  }
+
+  if (!physicalPlan?.id) {
+    const { error: planUpsertError } = await admin
+      .from('platform_vendor_plans')
+      .upsert(PHYSICAL_BASIC_PLAN, { onConflict: 'slug' });
+    if (planUpsertError) {
+      throw new Error(`platform_vendor_plans.physical_basic upsert failed: ${planUpsertError.message}`);
+    }
+    seeded = true;
+    console.log(`Seeded platform_vendor_plans.physical_basic on project ${projectRef}`);
+  }
+
+  const { data: termsDoc, error: termsProbeError } = await admin
+    .from('legal_documents')
+    .select('id')
+    .eq('document_type', 'terms-of-service')
+    .eq('language', 'fr')
+    .eq('is_active', true)
+    .limit(1)
+    .maybeSingle();
+
+  if (termsProbeError) {
+    throw new Error(`legal_documents probe failed: ${termsProbeError.message}`);
+  }
+
+  if (!termsDoc?.id) {
+    const { error: termsInsertError } = await admin.from('legal_documents').insert(E2E_TERMS_DOCUMENT);
+    if (termsInsertError && termsInsertError.code !== '23505') {
+      throw new Error(`legal_documents terms-of-service insert failed: ${termsInsertError.message}`);
+    }
+    seeded = true;
+    console.log(`Seeded legal_documents terms-of-service/fr on project ${projectRef}`);
+  }
+
+  return seeded;
+}
+
 const missing = [];
 const resolved = {};
 
@@ -197,46 +275,11 @@ if (schemaError && schemaError.code !== 'PGRST116') {
   process.exit(1);
 }
 
-const { data: physicalPlan, error: planError } = await admin
-  .from('platform_vendor_plans')
-  .select('id')
-  .eq('slug', 'physical_basic')
-  .eq('is_active', true)
-  .maybeSingle();
-
-if (planError) {
-  console.error(`platform_vendor_plans probe failed for project ${projectRef}: ${planError.message}`);
-  process.exit(1);
-}
-
-if (!physicalPlan?.id) {
+try {
+  await ensureCommerceE2eSeeds(admin, projectRef);
+} catch (seedError) {
   const reason =
-    `Project « ${projectRef} » is missing platform_vendor_plans.physical_basic seed data. ` +
-    'Re-run GitHub workflow bootstrap-e2e-schema.yml with mode patches-only.';
-  if (process.env.CI === 'true') {
-    skipOrFailInCi(reason);
-  }
-  console.error(reason);
-  process.exit(1);
-}
-
-const { data: termsDoc, error: termsError } = await admin
-  .from('legal_documents')
-  .select('id')
-  .eq('document_type', 'terms-of-service')
-  .eq('language', 'fr')
-  .eq('is_active', true)
-  .limit(1)
-  .maybeSingle();
-
-if (termsError) {
-  console.error(`legal_documents probe failed for project ${projectRef}: ${termsError.message}`);
-  process.exit(1);
-}
-
-if (!termsDoc?.id) {
-  const reason =
-    `Project « ${projectRef} » is missing active legal_documents (terms-of-service/fr). ` +
+    `Project « ${projectRef} » is missing commerce E2E seed data and auto-seed failed: ${seedError.message}. ` +
     'Re-run GitHub workflow bootstrap-e2e-schema.yml with mode patches-only.';
   if (process.env.CI === 'true') {
     skipOrFailInCi(reason);
