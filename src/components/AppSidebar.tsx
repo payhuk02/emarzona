@@ -88,14 +88,11 @@ const isNavItemPlanLocked = (
   commerceType?: StoreCommerceType | null
 ) => isNavPathPlanLocked(url, planSlug, commerceType);
 
-// Helper function to get context sections for a specific item URL
+// Exact hub path only — startsWith would wrap create wizards (/products/new/*)
+// in MegaMenuDropdown (button, no href) and break commerce-gating E2E + deep links.
 const getContextSectionsForItem = (itemUrl: string) => {
-  for (const [pattern, sections] of Object.entries(CONTEXT_SIDEBAR_MAPPING)) {
-    if (itemUrl.startsWith(pattern)) {
-      return sections;
-    }
-  }
-  return [];
+  const path = itemUrl.split('?')[0].replace(/\/+$/, '') || '/';
+  return CONTEXT_SIDEBAR_MAPPING[path] ?? [];
 };
 
 const buildDefaultCollapsedSections = (

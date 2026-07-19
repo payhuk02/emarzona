@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
@@ -198,6 +198,7 @@ const StoreForm = ({
     initialData?.info_message_color || '#3b82f6'
   );
   const [infoMessageFont, setInfoMessageFont] = useState(initialData?.info_message_font || 'Inter');
+  const formRef = useRef<HTMLFormElement>(null);
 
   // Phase 2 - Images supplémentaires
   const [faviconUrl, setFaviconUrl] = useState(initialData?.favicon_url || '');
@@ -996,7 +997,7 @@ const StoreForm = ({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
           <Tabs
             defaultValue={wizardMode && wizardStep ? wizardStep : 'basic'}
             className="w-full"
@@ -1951,10 +1952,7 @@ const StoreForm = ({
                     <RequireTermsConsent
                       actionLabel={t('store.form.common.createStoreAction')}
                       onAction={async () => {
-                        const form = document.querySelector('form');
-                        if (form) {
-                          form.requestSubmit();
-                        }
+                        formRef.current?.requestSubmit();
                       }}
                     >
                       <Button
@@ -2010,10 +2008,7 @@ const StoreForm = ({
                   <RequireTermsConsent
                     actionLabel={t('store.form.common.createStoreAction')}
                     onAction={async () => {
-                      const form = document.querySelector('form');
-                      if (form) {
-                        form.requestSubmit();
-                      }
+                      formRef.current?.requestSubmit();
                     }}
                   >
                     <Button

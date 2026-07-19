@@ -84,12 +84,13 @@ import {
 import { JoinWaitlistButton } from '@/components/service/JoinWaitlistButton';
 
 const PRODUCT_SERVICE_FIELDS =
-  'id, store_id, slug, name, description, short_description, category, tags, product_type, is_active, price, promotional_price, currency, image_url, images, created_at, updated_at, payment_options, pricing_model, licensing_type, license_terms, free_product_id, paid_product_id, is_free_preview, preview_content_description, product_affiliate_settings';
+  'id, store_id, slug, name, description, short_description, category, tags, product_type, is_active, price, promotional_price, currency, image_url, images, created_at, updated_at, payment_options, pricing_model, licensing_type, license_terms, free_product_id, paid_product_id, is_free_preview, preview_content_description';
+const PRODUCT_SERVICE_SELECT = `${PRODUCT_SERVICE_FIELDS}, product_affiliate_settings!left(affiliate_enabled, commission_rate)`;
 const STORE_PUBLIC_FIELDS = 'id, name, slug, logo_url';
 const SERVICE_PRODUCT_FIELDS =
-  'id, product_id, store_id, service_type, booking_type, duration_minutes, location, location_type, min_participants, max_participants, created_at, updated_at';
+  'id, product_id, store_id, service_type, duration_minutes, location_type, location_address, max_participants, advance_booking_days, created_at, updated_at';
 const SERVICE_STAFF_FIELDS =
-  'id, service_product_id, name, role, specialty, bio, photo_url, avatar_url, is_active, created_at, updated_at';
+  'id, service_product_id, name, role, bio, avatar_url, is_active, created_at, updated_at';
 
 interface WindowWithTracking extends Window {
   gtag?: (command: string, eventName: string, params?: Record<string, unknown>) => void;
@@ -143,7 +144,7 @@ export default function ServiceDetail() {
       // Use stores_public for storefront-safe store metadata.
       const { data: productData, error } = await supabase
         .from('products')
-        .select(PRODUCT_SERVICE_FIELDS)
+        .select(PRODUCT_SERVICE_SELECT)
         .eq('id', serviceId)
         .single();
 
@@ -167,7 +168,7 @@ export default function ServiceDetail() {
       if (productData?.free_product_id) {
         const { data: freeData } = await supabase
           .from('products')
-          .select(PRODUCT_SERVICE_FIELDS)
+          .select(PRODUCT_SERVICE_SELECT)
           .eq('id', productData.free_product_id)
           .single();
         freeProduct = freeData;
@@ -176,7 +177,7 @@ export default function ServiceDetail() {
       if (productData?.paid_product_id) {
         const { data: paidData } = await supabase
           .from('products')
-          .select(PRODUCT_SERVICE_FIELDS)
+          .select(PRODUCT_SERVICE_SELECT)
           .eq('id', productData.paid_product_id)
           .single();
         paidProduct = paidData;
@@ -596,8 +597,7 @@ export default function ServiceDetail() {
   const serviceUrl = `${window.location.origin}/service/${serviceId}`;
 
   const maxParticipants = service?.service?.max_participants || 1;
-  const minParticipants = service?.service?.min_participants || 1;
-  const isGroup = service?.service?.booking_type === 'group';
+  const isGroup = maxParticipants > 1;
 
   return (
     <AppPageShell
@@ -697,19 +697,17 @@ export default function ServiceDetail() {
                   <Users className="h-5 w-5 text-primary" />
                   <div>
                     <p className="text-sm text-muted-foreground">Participants</p>
-                    <p className="font-medium">
-                      {minParticipants} - {maxParticipants} personnes
-                    </p>
+                    <p className="font-medium">Jusqu'à {maxParticipants} personnes</p>
                   </div>
                 </div>
               )}
 
-              {service?.service?.location && (
+              {service?.service?.location_address && (
                 <div className="flex items-center gap-3">
                   <MapPin className="h-5 w-5 text-primary" />
                   <div>
                     <p className="text-sm text-muted-foreground">Lieu</p>
-                    <p className="font-medium">{service.service.location}</p>
+                    <p className="font-medium">{service.service.location_address}</p>
                   </div>
                 </div>
               )}
@@ -718,9 +716,7 @@ export default function ServiceDetail() {
                 <Calendar className="h-5 w-5 text-primary" />
                 <div>
                   <p className="text-sm text-muted-foreground">Type</p>
-                  <p className="font-medium">
-                    {service?.service?.booking_type === 'group' ? 'Groupe' : 'Individuel'}
-                  </p>
+                  <p className="font-medium">{isGroup ? 'Groupe' : 'Individuel'}</p>
                 </div>
               </div>
             </CardContent>
@@ -823,9 +819,9 @@ export default function ServiceDetail() {
                       <StaffCard
                         key={member.id}
                         name={member.name}
-                        role={member.specialty || member.role}
+                        role={member.role}
                         bio={member.bio}
-                        avatar_url={member.photo_url || member.avatar_url}
+                        avatar_url={member.avatar_url}
                         variant="compact"
                         availability="available"
                       />

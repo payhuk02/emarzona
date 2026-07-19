@@ -16,7 +16,7 @@ import type {
 } from '@/types/legal';
 
 const USER_CONSENT_FIELDS =
-  'id, user_id, document_type, document_version, consented_at, ip_address, user_agent, consent_method, created_at';
+  'id, user_id, document_type, document_version, consented_at, ip_address, user_agent, consent_method, is_revoked';
 /** Colonnes alignées sur `public.cookie_preferences` (types Supabase) */
 const COOKIE_PREFERENCES_FIELDS =
   'id, user_id, necessary, analytics, marketing, functional, created_at, updated_at';

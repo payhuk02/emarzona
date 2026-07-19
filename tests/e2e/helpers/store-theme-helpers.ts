@@ -60,24 +60,34 @@ export async function seedTermsConsent(admin: SupabaseClient, userId: string): P
     p_user_id: userId,
     p_document_type: 'terms',
     p_document_version: version,
-    p_consent_method: 'e2e',
+    p_consent_method: 'settings',
   });
 
-  if (!rpcError) {
-    return;
+  if (rpcError) {
+    const { error: insertError } = await admin.from('user_consents').insert({
+      user_id: userId,
+      document_type: 'terms',
+      document_version: version,
+      consent_method: 'settings',
+      is_revoked: false,
+    });
+
+    if (insertError && insertError.code !== '23505') {
+      throw insertError;
+    }
   }
 
-  // Fallback: 'e2e' may be rejected by an older CHECK — use settings.
-  const { error: insertError } = await admin.from('user_consents').insert({
-    user_id: userId,
-    document_type: 'terms',
-    document_version: version,
-    consent_method: 'settings',
-    is_revoked: false,
-  });
+  // Verify the app can read consent (same columns as useLegal USER_CONSENT_FIELDS).
+  const { data: readable, error: readError } = await admin
+    .from('user_consents')
+    .select('id, document_type, document_version, is_revoked')
+    .eq('user_id', userId)
+    .eq('document_type', 'terms')
+    .eq('is_revoked', false)
+    .limit(1);
 
-  if (insertError && insertError.code !== '23505') {
-    throw insertError;
+  if (readError || !readable?.length) {
+    throw readError ?? new Error('seedTermsConsent: consent not readable after insert');
   }
 }
 
@@ -203,7 +213,8 @@ export async function submitStoreWizardCreate(page: Page): Promise<void> {
   const response = await createResponsePromise.catch(() => null);
   if (!response) {
     const toastText = await page
-      .locator('[role="status"], [role="alert"]')
+      .locator('[data-sonner-toast], [role="status"]')
+      .filter({ hasNotText: /Analytics et Tracking/i })
       .first()
       .innerText()
       .catch(() => null);
