@@ -8,37 +8,87 @@ import {
 } from './store-theme-helpers';
 import { loginAsSeededUser, waitForReactApp } from '../shared/e2e-test-config';
 
+export type SellerDashboardChromeOptions = {
+  selectedStoreId?: string;
+};
+
 /** Stable seller chrome for dashboard E2E (persona, UX mode, onboarding dismissed). */
-export async function prepareSellerDashboardChrome(page: Page): Promise<void> {
-  await page.addInitScript(() => {
-    localStorage.setItem('sidebarPersona', 'seller');
-    localStorage.setItem('emarzona:ux_level', 'expert');
-    localStorage.setItem('sidebarPersonaOnboarded', 'true');
-  });
+export async function prepareSellerDashboardChrome(
+  page: Page,
+  options: SellerDashboardChromeOptions = {}
+): Promise<void> {
+  const { selectedStoreId } = options;
+  await page.addInitScript(
+    ({ storeId }) => {
+      localStorage.removeItem('selectedStoreId');
+      localStorage.removeItem('sidebarPersona');
+      localStorage.removeItem('sidebarPersonaOnboarded');
+      localStorage.setItem('sidebarPersona', 'seller');
+      localStorage.setItem('emarzona:ux_level', 'expert');
+      localStorage.setItem('sidebarPersonaOnboarded', 'true');
+      if (storeId) {
+        localStorage.setItem('selectedStoreId', storeId);
+      }
+    },
+    { storeId: selectedStoreId ?? null }
+  );
 }
 
 export async function loginSeededSeller(
   page: Page,
   admin: SupabaseClient,
-  email: string
+  email: string,
+  options: SellerDashboardChromeOptions = {}
 ): Promise<void> {
-  await prepareSellerDashboardChrome(page);
+  await prepareSellerDashboardChrome(page, options);
   await loginAsSeededUser(page, admin, email, '/dashboard');
   await waitForReactApp(page);
   await dismissCookieBannerIfVisible(page);
   await dismissPersonaOnboardingIfVisible(page);
 }
 
-export async function waitForStoresLoaded(page: Page): Promise<void> {
-  await page
-    .waitForResponse(
-      response =>
-        response.url().includes('/rest/v1/stores') &&
-        response.request().method() === 'GET' &&
-        response.status() === 200,
-      { timeout: 45_000 }
-    )
-    .catch(() => undefined);
+type WaitForStoresLoadedOptions = {
+  storeId?: string;
+  commerceType?: StoreCommerceType;
+  storeName?: string;
+};
+
+export async function waitForStoresLoaded(
+  page: Page,
+  options: WaitForStoresLoadedOptions = {}
+): Promise<void> {
+  const { storeId, commerceType, storeName } = options;
+
+  await page.waitForResponse(
+    async response => {
+      if (!response.url().includes('/rest/v1/stores')) return false;
+      if (response.request().method() !== 'GET') return false;
+      if (response.status() !== 200) return false;
+
+      try {
+        const rows = (await response.json()) as Array<{
+          id?: string;
+          name?: string;
+          commerce_type?: string;
+          metadata?: { commerce_type?: string } | null;
+        }>;
+        if (!Array.isArray(rows) || rows.length < 1) return false;
+        if (storeId && !rows.some(row => row.id === storeId)) return false;
+        if (commerceType) {
+          const hasType = rows.some(row => {
+            const resolved = row.commerce_type ?? row.metadata?.commerce_type;
+            return resolved === commerceType;
+          });
+          if (!hasType) return false;
+        }
+        if (storeName && !rows.some(row => row.name === storeName)) return false;
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    { timeout: 45_000 }
+  );
 
   await expect(page.locator('.app-sidebar')).toBeVisible({ timeout: 30_000 });
 }
@@ -61,9 +111,10 @@ export async function expectSidebarMissingLink(page: Page, path: string): Promis
 
 export async function waitForCommerceSidebarGating(
   page: Page,
-  commerceType: StoreCommerceType
+  commerceType: StoreCommerceType,
+  options: Omit<WaitForStoresLoadedOptions, 'commerceType'> = {}
 ): Promise<void> {
-  await waitForStoresLoaded(page);
+  await waitForStoresLoaded(page, { ...options, commerceType });
   const createPath = PRIMARY_PRODUCT_CREATE_PATH_BY_TYPE[commerceType];
   await expectSidebarHasLink(page, createPath);
 }

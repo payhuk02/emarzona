@@ -12,6 +12,7 @@ import {
   extractStoreIdFromUrl,
   seedTermsConsent,
   setPrimaryColorField,
+  submitStoreWizardCreate,
 } from './helpers/store-theme-helpers';
 import { prepareSellerDashboardChrome } from './helpers/seller-dashboard-setup';
 import { gotoApp, loginAsSeededUser, waitForReactApp } from './shared/e2e-test-config';
@@ -101,12 +102,22 @@ test.describe('Store create → customize → storefront theme (E2E)', () => {
     await clickWizardNext(page, 4);
     await expect(page.getByText(/Étape 8 sur 8/i)).toBeVisible();
 
-    await page.getByRole('button', { name: /Créer ma boutique/i }).click();
-    await acceptTermsDialogIfVisible(page);
+    await submitStoreWizardCreate(page);
 
-    await expect(page).toHaveURL(/\/dashboard\/onboarding\/store\?storeId=/, {
-      timeout: 90_000,
-    });
+    await expect(page)
+      .toHaveURL(/\/dashboard\/onboarding\/store\?storeId=/, {
+        timeout: 90_000,
+      })
+      .catch(async error => {
+        const toastText = await page
+          .locator('[role="status"], [role="alert"]')
+          .first()
+          .innerText()
+          .catch(() => null);
+        throw new Error(
+          `${String(error)}${toastText ? ` — toast: ${toastText.trim()}` : ''} — url=${page.url()}`
+        );
+      });
 
     const storeId = extractStoreIdFromUrl(page.url());
     expect(storeId, 'storeId from onboarding redirect').toBeTruthy();

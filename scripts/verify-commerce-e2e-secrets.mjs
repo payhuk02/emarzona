@@ -197,6 +197,54 @@ if (schemaError && schemaError.code !== 'PGRST116') {
   process.exit(1);
 }
 
+const { data: physicalPlan, error: planError } = await admin
+  .from('platform_vendor_plans')
+  .select('id')
+  .eq('slug', 'physical_basic')
+  .eq('is_active', true)
+  .maybeSingle();
+
+if (planError) {
+  console.error(`platform_vendor_plans probe failed for project ${projectRef}: ${planError.message}`);
+  process.exit(1);
+}
+
+if (!physicalPlan?.id) {
+  const reason =
+    `Project « ${projectRef} » is missing platform_vendor_plans.physical_basic seed data. ` +
+    'Re-run GitHub workflow bootstrap-e2e-schema.yml with mode patches-only.';
+  if (process.env.CI === 'true') {
+    skipOrFailInCi(reason);
+  }
+  console.error(reason);
+  process.exit(1);
+}
+
+const { data: termsDoc, error: termsError } = await admin
+  .from('legal_documents')
+  .select('id')
+  .eq('document_type', 'terms-of-service')
+  .eq('language', 'fr')
+  .eq('is_active', true)
+  .limit(1)
+  .maybeSingle();
+
+if (termsError) {
+  console.error(`legal_documents probe failed for project ${projectRef}: ${termsError.message}`);
+  process.exit(1);
+}
+
+if (!termsDoc?.id) {
+  const reason =
+    `Project « ${projectRef} » is missing active legal_documents (terms-of-service/fr). ` +
+    'Re-run GitHub workflow bootstrap-e2e-schema.yml with mode patches-only.';
+  if (process.env.CI === 'true') {
+    skipOrFailInCi(reason);
+  }
+  console.error(reason);
+  process.exit(1);
+}
+
 try {
   if (isProductionSupabaseUrl(url)) {
     assertSafeE2ESupabaseUrl(url, 'verify-commerce-e2e-secrets');

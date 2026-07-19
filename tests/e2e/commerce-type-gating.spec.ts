@@ -167,15 +167,15 @@ test.describe('Commerce type gating (E2E minimal)', () => {
         await seedStorePhysicalSubscriptionTrial(admin, storeId!);
       }
 
-      await loginSeededSeller(page, admin, email);
-
-      // Ensure sidebar loaded (commerce_type from StoreContext drives nav filtering)
-      await expect(page.locator('.app-sidebar')).toBeVisible();
+      await loginSeededSeller(page, admin, email, { selectedStoreId: storeId! });
 
       const { mustHave, mustNotHave, forbiddenDirectPath } = typeAssertions[commerceType];
       const ownCreatePath = PRIMARY_PRODUCT_CREATE_PATH_BY_TYPE[commerceType];
 
-      await waitForCommerceSidebarGating(page, commerceType);
+      await waitForCommerceSidebarGating(page, commerceType, {
+        storeId: storeId!,
+        storeName,
+      });
 
       for (const path of mustHave) {
         await expectSidebarHasLink(page, path);
