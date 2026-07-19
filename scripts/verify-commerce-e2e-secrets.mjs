@@ -110,6 +110,56 @@ const E2E_TERMS_DOCUMENT = {
   is_active: true,
 };
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function probePhysicalProductsStoreId(admin) {
+  const { error } = await admin.from('physical_products').select('store_id').limit(0);
+  if (!error) return true;
+
+  if (/store_id|PGRST204/i.test(error.message ?? '') || error.code === 'PGRST204') {
+    return false;
+  }
+
+  if (error.code !== 'PGRST116') {
+    throw new Error(`physical_products probe failed: ${error.message}`);
+  }
+
+  return true;
+}
+
+/** Wait for PostgREST schema cache after direct SQL patches (NOTIFY pgrst is async). */
+async function waitForPostgrestSchemaPatches(admin, projectRef) {
+  const maxAttempts = 8;
+  const delayMs = 4_000;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    const { error: rpcError } = await admin.rpc('e2e_apply_schema_patches');
+    if (!rpcError) {
+      console.log(`PostgREST exposes e2e_apply_schema_patches on ${projectRef} (attempt ${attempt})`);
+      return;
+    }
+
+    const storeIdVisible = await probePhysicalProductsStoreId(admin);
+    if (storeIdVisible) {
+      console.log(`PostgREST exposes physical_products.store_id on ${projectRef} (attempt ${attempt})`);
+      return;
+    }
+
+    if (attempt < maxAttempts) {
+      console.warn(
+        `PostgREST schema cache stale on ${projectRef}, retry ${attempt}/${maxAttempts} in ${delayMs}ms`
+      );
+      await sleep(delayMs);
+    }
+  }
+
+  console.warn(
+    `PostgREST still missing e2e schema patches on ${projectRef} after ${maxAttempts} attempts — continuing (mixed-cart may fail until patches-only runs)`
+  );
+}
+
 /** Idempotent seed for schema-only E2E bootstrap (same data as e2e-post-bootstrap-patches.sql). */
 async function ensureCommerceE2eSchemaPatches(admin, projectRef) {
   const { error } = await admin.rpc('e2e_apply_schema_patches');
@@ -120,28 +170,13 @@ async function ensureCommerceE2eSchemaPatches(admin, projectRef) {
 
   if (/Could not find the function|42883|PGRST202/i.test(error.message ?? '')) {
     console.warn(
-      `e2e_apply_schema_patches RPC missing on ${projectRef} — run bootstrap-e2e-schema patches-only`
+      `e2e_apply_schema_patches RPC not visible on ${projectRef} — waiting for PostgREST schema reload`
     );
-    await probePhysicalProductsStoreId(admin, projectRef);
+    await waitForPostgrestSchemaPatches(admin, projectRef);
     return;
   }
 
   throw new Error(`e2e_apply_schema_patches failed: ${error.message}`);
-}
-
-async function probePhysicalProductsStoreId(admin, projectRef) {
-  const { error } = await admin.from('physical_products').select('store_id').limit(0);
-  if (!error) return;
-
-  if (/store_id|PGRST204/i.test(error.message ?? '') || error.code === 'PGRST204') {
-    throw new Error(
-      `physical_products.store_id missing on ${projectRef} — run bootstrap-e2e-schema.yml mode=patches-only`
-    );
-  }
-
-  if (error.code !== 'PGRST116') {
-    throw new Error(`physical_products probe failed: ${error.message}`);
-  }
 }
 
 /** Idempotent seed for schema-only E2E bootstrap (same data as e2e-post-bootstrap-patches.sql). */

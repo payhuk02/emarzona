@@ -85,6 +85,16 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
+    - name: Apply E2E schema patches (idempotent)
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y postgresql-client
+        bash scripts/apply-e2e-post-bootstrap-patches-ci.sh
+      env:
+        E2E_REF: ufbztturuwwazfcvhvuu
+        POOLER_HOST: aws-1-eu-west-2.pooler.supabase.com
+        E2E_SUPABASE_DB_PASSWORD: ${{ secrets.E2E_SUPABASE_DB_PASSWORD }}
+
     - name: Validate commerce E2E secrets
       id: commerce_e2e_secrets
       run: node scripts/verify-commerce-e2e-secrets.mjs
@@ -143,6 +153,16 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
+    - name: Apply E2E schema patches (idempotent)
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y postgresql-client
+        bash scripts/apply-e2e-post-bootstrap-patches-ci.sh
+      env:
+        E2E_REF: ufbztturuwwazfcvhvuu
+        POOLER_HOST: aws-1-eu-west-2.pooler.supabase.com
+        E2E_SUPABASE_DB_PASSWORD: ${{ secrets.E2E_SUPABASE_DB_PASSWORD }}
+
     - name: Validate commerce E2E secrets
       id: commerce_e2e_secrets
       run: node scripts/verify-commerce-e2e-secrets.mjs
@@ -194,6 +214,16 @@ jobs:
 
     - name: Install dependencies
       run: npm ci
+
+    - name: Apply E2E schema patches (idempotent)
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y postgresql-client
+        bash scripts/apply-e2e-post-bootstrap-patches-ci.sh
+      env:
+        E2E_REF: ufbztturuwwazfcvhvuu
+        POOLER_HOST: aws-1-eu-west-2.pooler.supabase.com
+        E2E_SUPABASE_DB_PASSWORD: ${{ secrets.E2E_SUPABASE_DB_PASSWORD }}
 
     - name: Validate commerce E2E secrets
       id: commerce_e2e_secrets
@@ -247,6 +277,16 @@ jobs:
 
     - name: Install dependencies
       run: npm ci
+
+    - name: Apply E2E schema patches (idempotent)
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y postgresql-client
+        bash scripts/apply-e2e-post-bootstrap-patches-ci.sh
+      env:
+        E2E_REF: ufbztturuwwazfcvhvuu
+        POOLER_HOST: aws-1-eu-west-2.pooler.supabase.com
+        E2E_SUPABASE_DB_PASSWORD: ${{ secrets.E2E_SUPABASE_DB_PASSWORD }}
 
     - name: Validate commerce E2E secrets
       id: commerce_e2e_secrets

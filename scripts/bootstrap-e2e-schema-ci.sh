@@ -20,7 +20,7 @@ require_env() {
     echo "::error::Set GitHub secret E2E_SUPABASE_DB_PASSWORD (Dashboard > Database password)."
     exit 1
   fi
-  if [ "${BOOTSTRAP_MODE}" != "grants-only" ] && [ -z "${SUPABASE_PROD_DB_PASSWORD:-}" ]; then
+  if [ "${BOOTSTRAP_MODE}" != "grants-only" ] && [ "${BOOTSTRAP_MODE}" != "patches-only" ] && [ -z "${SUPABASE_PROD_DB_PASSWORD:-}" ]; then
     echo "::error::Set GitHub secret SUPABASE_PROD_DB_PASSWORD (Dashboard > Database password)."
     exit 1
   fi
@@ -242,6 +242,20 @@ verify_e2e_grants_only() {
   fi
   if [ "${has_notify_rpc}" != "t" ]; then
     echo "::error::grants-only: missing get_or_create_store_notification_settings — use patches-only mode"
+    exit 1
+  fi
+  local has_physical_store_id has_e2e_patches_rpc
+  has_physical_store_id=$(e2e_psql -Atc "SELECT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'physical_products' AND column_name = 'store_id'
+  );")
+  has_e2e_patches_rpc=$(e2e_psql -Atc "SELECT EXISTS (
+    SELECT 1 FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public' AND p.proname = 'e2e_apply_schema_patches'
+  );")
+  if [ "${has_physical_store_id}" != "t" ] || [ "${has_e2e_patches_rpc}" != "t" ]; then
+    echo "::error::patches incomplete (physical_products.store_id=${has_physical_store_id}, e2e_apply_schema_patches=${has_e2e_patches_rpc})"
     exit 1
   fi
   echo "OK: service_role can read/write public.stores"
