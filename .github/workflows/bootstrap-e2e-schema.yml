@@ -4,13 +4,14 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: 'full = dump prod schema; grants-only = restore Supabase GRANTs on existing E2E schema'
+        description: 'full | grants-only | patches-only (SQL fixes on existing E2E schema)'
         required: false
         default: full
         type: choice
         options:
           - full
           - grants-only
+          - patches-only
 
 jobs:
   bootstrap:
@@ -23,7 +24,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install PostgreSQL 17 client
-        if: inputs.mode != 'grants-only'
+        if: inputs.mode == 'full'
         run: |
           sudo apt-get update
           sudo apt-get install -y curl ca-certificates
@@ -36,7 +37,7 @@ jobs:
           /usr/lib/postgresql/17/bin/pg_dump --version
 
       - name: Install PostgreSQL client (grants-only)
-        if: inputs.mode == 'grants-only'
+        if: inputs.mode == 'grants-only' || inputs.mode == 'patches-only'
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
 
       - name: Bootstrap schema (schema-only, no data)

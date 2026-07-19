@@ -151,6 +151,12 @@ NOTIFY pgrst, 'reload schema';
 EOSQL
 }
 
+apply_post_bootstrap_patches() {
+  local patch_file="${BASH_SOURCE%/*}/e2e-post-bootstrap-patches.sql"
+  echo "Applying post-bootstrap SQL patches..."
+  e2e_psql -v ON_ERROR_STOP=1 -f "${patch_file}"
+}
+
 verify_e2e_schema() {
   echo "Verifying E2E schema..."
   e2e_psql -c "SELECT COUNT(*) AS public_tables FROM information_schema.tables WHERE table_schema='public';"
@@ -169,6 +175,13 @@ verify_e2e_schema() {
   );")
   can_select=$(e2e_psql -Atc "SELECT has_table_privilege('service_role', 'public.stores', 'SELECT');")
   can_insert=$(e2e_psql -Atc "SELECT has_table_privilege('service_role', 'public.stores', 'INSERT');")
+  local has_notify_rpc
+  has_notify_rpc=$(e2e_psql -Atc "SELECT EXISTS (
+    SELECT 1 FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'get_or_create_store_notification_settings'
+  );")
 
   if [ "${has_stores}" != "t" ] || [ "${table_count}" -lt "${MIN_PUBLIC_TABLES}" ]; then
     echo "::error::Bootstrap incomplete: public_tables=${table_count} (min ${MIN_PUBLIC_TABLES}), has_stores=${has_stores}"
@@ -178,6 +191,10 @@ verify_e2e_schema() {
     echo "::error::Bootstrap grants incomplete: service_role stores SELECT=${can_select} INSERT=${can_insert}"
     exit 1
   fi
+  if [ "${has_notify_rpc}" != "t" ]; then
+    echo "::error::Bootstrap missing public.get_or_create_store_notification_settings(uuid)"
+    exit 1
+  fi
 
   echo "OK: E2E schema bootstrapped (${table_count} public tables, stores present, service_role grants OK)."
   echo "Next locally: npx supabase link --project-ref ${E2E_REF} && npx supabase migration repair --status applied"
@@ -185,13 +202,19 @@ verify_e2e_schema() {
 
 verify_e2e_grants_only() {
   echo "Verifying E2E GRANTs (grants-only mode)..."
-  local has_stores can_select can_insert
+  local has_stores can_select can_insert has_notify_rpc
   has_stores=$(e2e_psql -Atc "SELECT EXISTS (
     SELECT 1 FROM information_schema.tables
     WHERE table_schema='public' AND table_name='stores'
   );")
   can_select=$(e2e_psql -Atc "SELECT has_table_privilege('service_role', 'public.stores', 'SELECT');")
   can_insert=$(e2e_psql -Atc "SELECT has_table_privilege('service_role', 'public.stores', 'INSERT');")
+  has_notify_rpc=$(e2e_psql -Atc "SELECT EXISTS (
+    SELECT 1 FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'get_or_create_store_notification_settings'
+  );")
 
   if [ "${has_stores}" != "t" ]; then
     echo "::error::grants-only: public.stores missing — run full bootstrap first"
@@ -199,6 +222,10 @@ verify_e2e_grants_only() {
   fi
   if [ "${can_select}" != "t" ] || [ "${can_insert}" != "t" ]; then
     echo "::error::grants-only: service_role stores SELECT=${can_select} INSERT=${can_insert}"
+    exit 1
+  fi
+  if [ "${has_notify_rpc}" != "t" ]; then
+    echo "::error::grants-only: missing get_or_create_store_notification_settings — use patches-only mode"
     exit 1
   fi
   echo "OK: service_role can read/write public.stores"
@@ -213,6 +240,14 @@ main() {
     verify_e2e_grants_only
     exit 0
   fi
+  if [ "${BOOTSTRAP_MODE}" = "patches-only" ]; then
+    echo "Mode: patches-only"
+    e2e_psql -Atc "SELECT current_database();" >/dev/null
+    apply_post_bootstrap_patches
+    restore_supabase_grants
+    verify_e2e_grants_only
+    exit 0
+  fi
   preflight
   collect_prod_extensions
   dump_prod_public_schema
@@ -220,6 +255,7 @@ main() {
   enable_e2e_extensions
   apply_prod_schema
   restore_supabase_grants
+  apply_post_bootstrap_patches
   verify_e2e_schema
 }
 
