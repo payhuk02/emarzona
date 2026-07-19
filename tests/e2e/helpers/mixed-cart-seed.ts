@@ -90,6 +90,7 @@ export async function seedMixedCartFixture(
       is_active: true,
       is_draft: false,
       hide_from_store: false,
+      image_url: 'https://placehold.co/600x400/png',
     })
     .select('id, slug, name')
     .single();

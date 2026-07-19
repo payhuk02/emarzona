@@ -52,7 +52,7 @@ export const useWishlistToggle = (productId: string | undefined) => {
     try {
       await toggleFavorite(productId);
       // Le toast est géré par useMarketplaceFavorites
-    } catch (_error: unknown) {
+    } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Erreur lors de la gestion de la wishlist', { error, productId });
       toast({

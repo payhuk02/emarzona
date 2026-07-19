@@ -109,8 +109,9 @@ export async function waitForStoresLoaded(
   await expandSidebarCreerSection(page);
 }
 
+/** Sidebar only — MegaMenu hubs also expose the same hrefs in #root. */
 export function sidebarLinkLocator(page: Page, path: string) {
-  return page.locator(`.app-sidebar a[href="${path}"], #root a[href="${path}"]`);
+  return page.locator(`.app-sidebar a[href="${path}"]`);
 }
 
 export async function expectSidebarHasLink(page: Page, path: string): Promise<void> {

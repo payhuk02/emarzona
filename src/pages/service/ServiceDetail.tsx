@@ -573,7 +573,17 @@ export default function ServiceDetail() {
     );
   }
 
-  const images = service?.images || [service?.image_url] || [];
+  // Never pass null/non-array into ProductImages → OptimizedImage (src.startsWith crashes).
+  const images: string[] = (() => {
+    const fromArray = Array.isArray(service?.images)
+      ? service.images.filter((u): u is string => typeof u === 'string' && u.length > 0)
+      : [];
+    if (fromArray.length > 0) return fromArray;
+    if (typeof service?.image_url === 'string' && service.image_url.length > 0) {
+      return [service.image_url];
+    }
+    return [];
+  })();
   const availability = service?.is_active ? 'instock' : 'outofstock';
   const currentPrice = service?.promotional_price || service?.price;
   const serviceUrl = `${window.location.origin}/service/${serviceId}`;
@@ -1194,7 +1204,7 @@ export default function ServiceDetail() {
       <ServiceRecommendations
         serviceId={serviceId!}
         category={service?.category}
-        tags={service?.tags}
+        tags={Array.isArray(service?.tags) ? service.tags : undefined}
         limit={6}
         variant="grid"
         title="Services similaires"

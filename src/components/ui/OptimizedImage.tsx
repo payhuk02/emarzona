@@ -54,23 +54,25 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   formats = ['avif', 'webp', 'jpg'],
   ...props
 }) => {
+  const safeSrc = typeof src === 'string' && src.length > 0 ? src : '/placeholder-product.png';
+
   // Pour les fichiers locaux, pas besoin de transition d'opacité (pas de serveur d'images)
   const isLocalFile =
-    src.startsWith('/') ||
-    src.startsWith('./') ||
-    src.startsWith('../') ||
-    src.startsWith('data:') ||
-    src.includes('/assets/');
+    safeSrc.startsWith('/') ||
+    safeSrc.startsWith('./') ||
+    safeSrc.startsWith('../') ||
+    safeSrc.startsWith('data:') ||
+    safeSrc.includes('/assets/');
   const [isLoaded, setIsLoaded] = useState(isLocalFile);
   const [hasError, setHasError] = useState(false);
-  const [currentSrc, setCurrentSrc] = useState(src);
+  const [currentSrc, setCurrentSrc] = useState(safeSrc);
   const { isLowBandwidth } = useAdaptiveLoading();
 
   const { recordMetric } = useImagePerformanceMonitoring();
 
   // Générer les attributs SEO
   const seoAttributes = generateImageSEOAttributes(
-    src.split('/').pop() || 'image',
+    safeSrc.split('/').pop() || 'image',
     alt,
     width,
     height,
@@ -121,20 +123,25 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       breakpoints.forEach(bp => {
         if (width >= bp) {
           const formatParam = format ? `&format=${format}` : '';
-          const resizedSrc = `${src}?w=${bp}&q=${quality}${formatParam}`;
+          const resizedSrc = `${safeSrc}?w=${bp}&q=${quality}${formatParam}`;
           sources.push(`${resizedSrc} ${bp}w`);
         }
       });
 
       return sources.length > 0 ? sources.join(', ') : undefined;
     },
-    [src, width, quality, isLocalFile]
+    [safeSrc, width, quality, isLocalFile]
   );
 
   // Générer les srcsets pour tous les formats si modern formats activé
   const modernSrcSets =
     enableModernFormats && width && !isLowBandwidth && !isLocalFile
-      ? generateResponsiveSrcSet(src, [320, 640, 768, 1024, 1280, 1600], quality, isLowBandwidth)
+      ? generateResponsiveSrcSet(
+          safeSrc,
+          [320, 640, 768, 1024, 1280, 1600],
+          quality,
+          isLowBandwidth
+        )
       : null;
 
   // Fallback srcset classique
@@ -142,7 +149,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
   // Preload LCP image si priority est activé
   useEffect(() => {
-    if (priority && src) {
+    if (priority && safeSrc) {
       const link = document.createElement('link');
       link.rel = 'preload';
       link.as = 'image';
@@ -150,7 +157,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       const preloadSrc =
         enableModernFormats && modernSrcSets?.avif
           ? modernSrcSets.avif.split(',')[0].split(' ')[0] // Prendre la première source AVIF
-          : src;
+          : safeSrc;
       link.href = preloadSrc;
       link.setAttribute('fetchpriority', 'high');
       const srcSetToUse =
@@ -167,7 +174,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         }
       };
     }
-  }, [priority, src, fallbackSrcSet, modernSrcSets, sizes, enableModernFormats]);
+  }, [priority, safeSrc, fallbackSrcSet, modernSrcSets, sizes, enableModernFormats]);
 
   return (
     <div className={cn('relative overflow-hidden', className)}>

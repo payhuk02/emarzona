@@ -195,6 +195,8 @@ export async function submitStoreWizardCreate(page: Page): Promise<void> {
 
   const createButton = page.getByRole('button', { name: /Créer ma boutique/i });
   await expect(createButton).toBeEnabled({ timeout: 15_000 });
+
+  // Prefer explicit click (RequireTermsConsent onAction → handleSubmit), then form.requestSubmit.
   await createButton.click();
   await acceptTermsDialogIfVisible(page);
 
@@ -213,16 +215,37 @@ export async function submitStoreWizardCreate(page: Page): Promise<void> {
     await acceptTermsDialogIfVisible(page);
   }
 
-  const response = await createResponsePromise.catch(() => null);
+  // Last resort: click again after a short settle (consent/slug race).
+  const earlyResponse = await Promise.race([
+    createResponsePromise.then(r => r).catch(() => null),
+    new Promise<null>(resolve => setTimeout(() => resolve(null), 3_000)),
+  ]);
+  if (
+    !earlyResponse &&
+    (await page
+      .getByText(/Étape 8 sur 8/i)
+      .isVisible()
+      .catch(() => false))
+  ) {
+    await createButton.click({ force: true }).catch(() => undefined);
+    await acceptTermsDialogIfVisible(page);
+  }
+
+  const response = earlyResponse ?? (await createResponsePromise.catch(() => null));
   if (!response) {
     const toastText = await page
-      .locator('[data-sonner-toast], [role="status"]')
+      .locator('[data-sonner-toast], [role="status"], [role="alert"]')
       .filter({ hasNotText: /Analytics et Tracking/i })
       .first()
       .innerText()
       .catch(() => null);
+    const validationText = await page
+      .locator('[data-testid="validation-errors"], .text-destructive')
+      .first()
+      .innerText()
+      .catch(() => null);
     throw new Error(
-      `Store create POST never fired — toast=${toastText?.trim() ?? 'none'} url=${page.url()}`
+      `Store create POST never fired — toast=${toastText?.trim() ?? 'none'} validation=${validationText?.trim() ?? 'none'} url=${page.url()} bypass=${await page.evaluate(() => document.documentElement.dataset.e2eBypassTerms ?? '0')}`
     );
   }
   if (response.status() < 200 || response.status() >= 300) {

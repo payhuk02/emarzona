@@ -74,10 +74,11 @@ test.describe('Store create → customize → storefront theme (E2E)', () => {
 
     await seedTermsConsent(admin, userId);
 
-    await prepareSellerDashboardChrome(page);
+    // Bypass must be registered before any navigation in this context.
     await page.addInitScript(() => {
       document.documentElement.dataset.e2eBypassTerms = '1';
     });
+    await prepareSellerDashboardChrome(page);
     await loginAsSeededUser(page, admin, email, '/dashboard', password);
     await waitForReactApp(page);
     await dismissCookieBannerIfVisible(page);

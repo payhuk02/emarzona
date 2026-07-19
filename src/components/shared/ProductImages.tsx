@@ -48,8 +48,11 @@ export const ProductImages = ({
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
 
-  // Fallback pour images vides
-  const displayImages = images.length > 0 ? images : ['/placeholder-product.png'];
+  // Fallback pour images vides / null (évite OptimizedImage src.startsWith crash)
+  const displayImages =
+    Array.isArray(images) && images.some(img => typeof img === 'string' && img.length > 0)
+      ? images.filter((img): img is string => typeof img === 'string' && img.length > 0)
+      : ['/placeholder-product.png'];
   const currentImage = displayImages[selectedIndex];
 
   const handlePrevious = () => {
@@ -325,9 +328,3 @@ export const ProductImagesGrid = ({
     </div>
   );
 };
-
-
-
-
-
-
