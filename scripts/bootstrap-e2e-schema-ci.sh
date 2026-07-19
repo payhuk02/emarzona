@@ -195,6 +195,22 @@ verify_e2e_schema() {
     echo "::error::Bootstrap missing public.get_or_create_store_notification_settings(uuid)"
     exit 1
   fi
+  local has_store_stats_cols has_service_store_id
+  has_store_stats_cols=$(e2e_psql -Atc "SELECT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'stores' AND column_name = 'total_orders'
+  ) AND EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'stores' AND column_name = 'total_revenue'
+  );")
+  has_service_store_id=$(e2e_psql -Atc "SELECT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'service_products' AND column_name = 'store_id'
+  );")
+  if [ "${has_store_stats_cols}" != "t" ] || [ "${has_service_store_id}" != "t" ]; then
+    echo "::error::Bootstrap schema patches incomplete (stores stats cols=${has_store_stats_cols}, service_products.store_id=${has_service_store_id})"
+    exit 1
+  fi
 
   echo "OK: E2E schema bootstrapped (${table_count} public tables, stores present, service_role grants OK)."
   echo "Next locally: npx supabase link --project-ref ${E2E_REF} && npx supabase migration repair --status applied"
