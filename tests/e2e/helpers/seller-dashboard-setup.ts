@@ -36,6 +36,7 @@ export async function prepareSellerDashboardChrome(
         localStorage.setItem('selectedStoreId', storeId);
       }
       document.cookie = 'sidebar:state=true; path=/; max-age=604800; SameSite=Lax';
+      document.documentElement.dataset.e2eBypassTerms = '1';
     },
     { storeId: selectedStoreId ?? null }
   );

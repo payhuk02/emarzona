@@ -2,7 +2,7 @@
  * Composant qui exige l'acceptation des CGV avant de permettre certaines actions
  */
 
-import { ReactNode, useState } from 'react';
+import { ReactNode, useState, isValidElement, cloneElement } from 'react';
 import { SafeHTML } from '@/components/security/SafeHTML';
 import {
   AlertDialog,
@@ -28,28 +28,39 @@ interface RequireTermsConsentProps {
   showDialog?: boolean;
 }
 
-export const RequireTermsConsent = ({ 
-  children, 
+function isE2eTermsBypassEnabled(): boolean {
+  if (typeof document === 'undefined') return false;
+  return document.documentElement.dataset.e2eBypassTerms === '1';
+}
+
+export const RequireTermsConsent = ({
+  children,
   onAction,
-  actionLabel = "continuer",
-  showDialog = true
+  actionLabel = 'continuer',
+  showDialog = true,
 }: RequireTermsConsentProps) => {
-  const { hasConsented, needsUpdate, isLoading, recordConsent, currentTermsDoc } = useRequireTermsConsent();
+  const { hasConsented, needsUpdate, isLoading, recordConsent, currentTermsDoc } =
+    useRequireTermsConsent();
   const [showTermsDialog, setShowTermsDialog] = useState(false);
   const [accepted, setAccepted] = useState(false);
   const [saving, setSaving] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleAction = async () => {
-    if (!hasConsented || needsUpdate) {
+  const bypassTerms = isE2eTermsBypassEnabled();
+  const gatePassed = bypassTerms || (hasConsented && !needsUpdate);
+
+  const handleAction = async (e?: React.MouseEvent) => {
+    if (!gatePassed) {
+      e?.preventDefault();
+      e?.stopPropagation();
       if (showDialog) {
         setShowTermsDialog(true);
       } else {
         toast({
-          title: "CGV requises",
-          description: "Vous devez accepter les Conditions Générales de Vente pour continuer.",
-          variant: "destructive"
+          title: 'CGV requises',
+          description: 'Vous devez accepter les Conditions Générales de Vente pour continuer.',
+          variant: 'destructive',
         });
         navigate('/legal/terms');
       }
@@ -61,12 +72,13 @@ export const RequireTermsConsent = ({
     }
   };
 
-  const handleAcceptTerms = async () => {
+  const handleAcceptTerms = async (e?: React.MouseEvent) => {
+    e?.preventDefault();
     if (!accepted) {
       toast({
-        title: "Acceptation requise",
-        description: "Veuillez accepter les Conditions Générales de Vente pour continuer.",
-        variant: "destructive"
+        title: 'Acceptation requise',
+        description: 'Veuillez accepter les Conditions Générales de Vente pour continuer.',
+        variant: 'destructive',
       });
       return;
     }
@@ -76,41 +88,45 @@ export const RequireTermsConsent = ({
       await recordConsent();
       setShowTermsDialog(false);
       setAccepted(false);
-      
+
       toast({
-        title: "CGV acceptées",
-        description: "Les Conditions Générales de Vente ont été acceptées avec succès.",
+        title: 'CGV acceptées',
+        description: 'Les Conditions Générales de Vente ont été acceptées avec succès.',
       });
 
       if (onAction) {
         await onAction();
       }
-    } catch ( _error: unknown) {
+    } catch (error: unknown) {
       logger.error('Error accepting terms', { error });
       toast({
-        title: "Erreur",
+        title: 'Erreur',
         description: "Impossible d'enregistrer votre acceptation. Veuillez réessayer.",
-        variant: "destructive"
+        variant: 'destructive',
       });
     } finally {
       setSaving(false);
     }
   };
 
-  if (isLoading) {
+  if (isLoading && !bypassTerms) {
     return <div className="opacity-50">{children}</div>;
   }
 
-  // Si les CGV sont déjà acceptées et à jour, afficher normalement
-  if (hasConsented && !needsUpdate) {
+  // Si les CGV sont déjà acceptées et à jour (ou bypass E2E), afficher normalement
+  if (gatePassed) {
     return <>{children}</>;
   }
 
-  // Rendre le composant cliquable mais afficher le dialogue si nécessaire
+  const gatedChild =
+    isValidElement<{ type?: string }>(children) && children.props.type === 'submit'
+      ? cloneElement(children, { type: 'button' })
+      : children;
+
   return (
     <>
-      <div onClick={handleAction} className="cursor-pointer">
-        {children}
+      <div onClick={e => void handleAction(e)} className="cursor-pointer">
+        {gatedChild}
       </div>
 
       <AlertDialog open={showTermsDialog} onOpenChange={setShowTermsDialog}>
@@ -121,19 +137,16 @@ export const RequireTermsConsent = ({
               Acceptation des Conditions Générales de Vente requise
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {needsUpdate 
-                ? "Les Conditions Générales de Vente ont été mises à jour. Veuillez accepter la nouvelle version pour continuer."
-                : "Vous devez accepter les Conditions Générales de Vente pour utiliser cette fonctionnalité."}
+              {needsUpdate
+                ? 'Les Conditions Générales de Vente ont été mises à jour. Veuillez accepter la nouvelle version pour continuer.'
+                : 'Vous devez accepter les Conditions Générales de Vente pour utiliser cette fonctionnalité.'}
             </AlertDialogDescription>
           </AlertDialogHeader>
 
           <div className="space-y-4 py-4">
             <div className="border rounded-lg p-4 bg-muted/50 max-h-[400px] overflow-y-auto">
               {currentTermsDoc?.content ? (
-                <SafeHTML
-                  html={currentTermsDoc.content}
-                  className="prose prose-sm max-w-none"
-                />
+                <SafeHTML html={currentTermsDoc.content} className="prose prose-sm max-w-none" />
               ) : (
                 <p className="text-sm text-muted-foreground">
                   Chargement des Conditions Générales de Vente...
@@ -145,7 +158,7 @@ export const RequireTermsConsent = ({
               <Checkbox
                 id="accept-terms"
                 checked={accepted}
-                onCheckedChange={(checked) => setAccepted(checked === true)}
+                onCheckedChange={checked => setAccepted(checked === true)}
                 className="mt-1"
               />
               <label
@@ -158,24 +171,26 @@ export const RequireTermsConsent = ({
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-primary hover:underline font-medium"
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={e => e.stopPropagation()}
                 >
                   Conditions Générales de Vente
-                </a>
-                {' '}et j'accepte d'être lié par ces conditions.
+                </a>{' '}
+                et j'accepte d'être lié par ces conditions.
               </label>
             </div>
           </div>
 
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => {
-              setShowTermsDialog(false);
-              setAccepted(false);
-            }}>
+            <AlertDialogCancel
+              onClick={() => {
+                setShowTermsDialog(false);
+                setAccepted(false);
+              }}
+            >
               Annuler
             </AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleAcceptTerms}
+              onClick={e => void handleAcceptTerms(e)}
               disabled={!accepted || saving}
               className="gap-2"
             >
@@ -197,10 +212,3 @@ export const RequireTermsConsent = ({
     </>
   );
 };
-
-
-
-
-
-
-

@@ -177,6 +177,9 @@ export function extractStoreIdFromUrl(url: string): string | null {
 }
 
 export async function submitStoreWizardCreate(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    document.documentElement.dataset.e2eBypassTerms = '1';
+  });
   await acceptTermsDialogIfVisible(page);
 
   const onboardingUrl = page.waitForURL(/\/dashboard\/onboarding\/store\?storeId=/, {

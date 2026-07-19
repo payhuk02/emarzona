@@ -75,6 +75,9 @@ test.describe('Store create → customize → storefront theme (E2E)', () => {
     await seedTermsConsent(admin, userId);
 
     await prepareSellerDashboardChrome(page);
+    await page.addInitScript(() => {
+      document.documentElement.dataset.e2eBypassTerms = '1';
+    });
     await loginAsSeededUser(page, admin, email, '/dashboard', password);
     await waitForReactApp(page);
     await dismissCookieBannerIfVisible(page);

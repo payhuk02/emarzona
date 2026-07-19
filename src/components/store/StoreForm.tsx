@@ -1952,7 +1952,9 @@ const StoreForm = ({
                     <RequireTermsConsent
                       actionLabel={t('store.form.common.createStoreAction')}
                       onAction={async () => {
-                        formRef.current?.requestSubmit();
+                        await handleSubmit({
+                          preventDefault() {},
+                        } as React.FormEvent);
                       }}
                     >
                       <Button
@@ -2008,7 +2010,9 @@ const StoreForm = ({
                   <RequireTermsConsent
                     actionLabel={t('store.form.common.createStoreAction')}
                     onAction={async () => {
-                      formRef.current?.requestSubmit();
+                      await handleSubmit({
+                        preventDefault() {},
+                      } as React.FormEvent);
                     }}
                   >
                     <Button

@@ -563,23 +563,32 @@ export function AppSidebar() {
                           {getContextSectionsForItem(item.url).length > 0 ? (
                             <MegaMenuDropdown
                               trigger={
-                                <SidebarMenuButton
-                                  tooltip={item.title}
-                                  className={
-                                    isNavLinkActive(item.url)
-                                      ? `transition-all duration-200 group relative flex items-center ${NAV_LINK_ACTIVE}`
-                                      : `transition-all duration-200 group relative flex items-center ${NAV_LINK_INACTIVE}`
-                                  }
-                                >
-                                  <IconComponent
-                                    className="h-4 w-4 shrink-0 stroke-[2]"
-                                    aria-hidden="true"
-                                  />
-                                  {!isCollapsed ? (
-                                    <span className="flex-1 font-medium">{item.title}</span>
-                                  ) : (
-                                    <span className="sr-only">{item.title}</span>
-                                  )}
+                                <SidebarMenuButton asChild tooltip={item.title}>
+                                  <NavLink
+                                    to={parseNavTo(resolveNavHref(item.url))}
+                                    end
+                                    data-sidebar-path={item.url.split('?')[0]}
+                                    onClick={e => {
+                                      // Keep href for E2E/deep-link discovery; open mega menu instead of navigating.
+                                      e.preventDefault();
+                                      recordNavClick(item.url);
+                                    }}
+                                    className={
+                                      isNavLinkActive(item.url)
+                                        ? `transition-all duration-200 group relative flex items-center ${NAV_LINK_ACTIVE}`
+                                        : `transition-all duration-200 group relative flex items-center ${NAV_LINK_INACTIVE}`
+                                    }
+                                  >
+                                    <IconComponent
+                                      className="h-4 w-4 shrink-0 stroke-[2]"
+                                      aria-hidden="true"
+                                    />
+                                    {!isCollapsed ? (
+                                      <span className="flex-1 font-medium">{item.title}</span>
+                                    ) : (
+                                      <span className="sr-only">{item.title}</span>
+                                    )}
+                                  </NavLink>
                                 </SidebarMenuButton>
                               }
                               sections={getContextSectionsForItem(item.url)}

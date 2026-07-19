@@ -84,8 +84,8 @@ import {
 import { JoinWaitlistButton } from '@/components/service/JoinWaitlistButton';
 
 const PRODUCT_SERVICE_FIELDS =
-  'id, store_id, slug, name, description, short_description, category, tags, product_type, is_active, price, promotional_price, currency, image_url, images, created_at, updated_at, payment_options, pricing_model, licensing_type, license_terms, free_product_id, paid_product_id, is_free_preview, preview_content_description';
-const PRODUCT_SERVICE_SELECT = `${PRODUCT_SERVICE_FIELDS}, product_affiliate_settings!left(affiliate_enabled, commission_rate)`;
+  'id, store_id, slug, name, description, short_description, category, tags, product_type, is_active, price, promotional_price, currency, image_url, images, created_at, updated_at, payment_options, pricing_model, licensing_type, license_terms';
+const PRODUCT_SERVICE_SELECT = PRODUCT_SERVICE_FIELDS;
 const STORE_PUBLIC_FIELDS = 'id, name, slug, logo_url';
 const SERVICE_PRODUCT_FIELDS =
   'id, product_id, store_id, service_type, duration_minutes, location_type, location_address, max_participants, advance_booking_days, created_at, updated_at';
@@ -161,47 +161,29 @@ export default function ServiceDetail() {
         storePublic = storeRow;
       }
 
-      // Récupérer les produits preview/paid si ils existent
-      let freeProduct = null;
-      let paidProduct = null;
-
-      if (productData?.free_product_id) {
-        const { data: freeData } = await supabase
-          .from('products')
-          .select(PRODUCT_SERVICE_SELECT)
-          .eq('id', productData.free_product_id)
-          .single();
-        freeProduct = freeData;
-      }
-
-      if (productData?.paid_product_id) {
-        const { data: paidData } = await supabase
-          .from('products')
-          .select(PRODUCT_SERVICE_SELECT)
-          .eq('id', productData.paid_product_id)
-          .single();
-        paidProduct = paidData;
-      }
-
       // Fetch service details
       const { data: serviceData } = await supabase
         .from('service_products')
         .select(SERVICE_PRODUCT_FIELDS)
         .eq('product_id', serviceId)
-        .single();
+        .maybeSingle();
 
-      // Fetch staff
-      const { data: staff } = await supabase
-        .from('service_staff_members')
-        .select(SERVICE_STAFF_FIELDS)
-        .eq('service_product_id', serviceData?.id);
+      // Fetch staff (best-effort — schema differences must not crash the page)
+      let staff: Array<Record<string, unknown>> = [];
+      if (serviceData?.id) {
+        const { data: staffRows } = await supabase
+          .from('service_staff_members')
+          .select(SERVICE_STAFF_FIELDS)
+          .eq('service_product_id', serviceData.id);
+        staff = staffRows || [];
+      }
 
       return {
         ...productData,
-        free_product: freeProduct,
-        paid_product: paidProduct,
+        free_product: null,
+        paid_product: null,
         service: serviceData,
-        staff: staff || [],
+        staff,
         store: storePublic,
       };
     },
@@ -878,7 +860,7 @@ export default function ServiceDetail() {
                   </div>
                   {service?.promotional_price && (
                     <span className="text-sm line-through text-muted-foreground">
-                      {service.price.toLocaleString()} {service.currency}
+                      {(service.price ?? 0).toLocaleString()} {service.currency}
                     </span>
                   )}
                 </div>
