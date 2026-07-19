@@ -10,6 +10,7 @@ import {
   type SeededStore,
   type SeededProduct,
 } from './paid-vertical-seed';
+import { seedStorePhysicalSubscriptionTrial } from './seed-physical-subscription';
 
 export type MixedCartFixture = {
   vendor: SeededUser;
@@ -107,6 +108,8 @@ export async function seedMixedCartFixture(
     .single();
 
   if (spError || !serviceProduct) throw spError ?? new Error('service_products insert failed');
+
+  await seedStorePhysicalSubscriptionTrial(admin, store.id);
 
   const { date } = tomorrowAt10();
   for (let dow = 0; dow <= 6; dow += 1) {

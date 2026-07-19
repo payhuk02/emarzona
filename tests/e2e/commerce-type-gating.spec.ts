@@ -1,7 +1,14 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import { createNodeSupabaseClient } from './helpers/create-node-supabase-client';
 import { assertSafeE2ESupabaseUrl, resolveE2ESupabaseUrl } from './helpers/e2e-supabase-guard';
 import { PRIMARY_PRODUCT_CREATE_PATH_BY_TYPE } from '../../src/lib/commerce/store-capability-map';
+import {
+  expectSidebarHasLink,
+  expectSidebarMissingLink,
+  loginSeededSeller,
+  waitForCommerceSidebarGating,
+} from './helpers/seller-dashboard-setup';
+import { seedStorePhysicalSubscriptionTrial } from './helpers/seed-physical-subscription';
 
 type StoreCommerceType = 'physical' | 'digital' | 'service' | 'course' | 'artist';
 
@@ -38,18 +45,6 @@ function slugify(input: string): string {
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
     .trim();
-}
-
-function expectSidebarHasLink(page: Page, path: string) {
-  return expect(page.locator(`.app-sidebar a[href="${path}"]`)).toHaveCount(1, {
-    timeout: process.env.CI ? 30_000 : 15_000,
-  });
-}
-
-function expectSidebarMissingLink(page: Page, path: string) {
-  return expect(page.locator(`.app-sidebar a[href="${path}"]`)).toHaveCount(0, {
-    timeout: 5_000,
-  });
 }
 
 const typeAssertions: Record<
@@ -168,16 +163,11 @@ test.describe('Commerce type gating (E2E minimal)', () => {
       const storeId = (storeData as { id: string } | null)?.id;
       expect(storeId, 'created store id').toBeTruthy();
 
-      // Login via UI (selectors alignés avec Auth.tsx)
-      await page.goto('/login', { waitUntil: 'domcontentloaded' });
-      await page.locator('input[name="email-login"]').fill(email);
-      await page.locator('#password-login').fill(password);
-      await page
-        .locator('form')
-        .filter({ has: page.locator('#password-login') })
-        .locator('button[type="submit"]')
-        .click();
-      await expect(page).toHaveURL('/dashboard', { timeout: 30_000 });
+      if (commerceType === 'physical') {
+        await seedStorePhysicalSubscriptionTrial(admin, storeId!);
+      }
+
+      await loginSeededSeller(page, admin, email);
 
       // Ensure sidebar loaded (commerce_type from StoreContext drives nav filtering)
       await expect(page.locator('.app-sidebar')).toBeVisible();
@@ -185,8 +175,7 @@ test.describe('Commerce type gating (E2E minimal)', () => {
       const { mustHave, mustNotHave, forbiddenDirectPath } = typeAssertions[commerceType];
       const ownCreatePath = PRIMARY_PRODUCT_CREATE_PATH_BY_TYPE[commerceType];
 
-      // Wait for store-driven gating before asserting full matrix (StoreContext fetch + nav resolve)
-      await expectSidebarHasLink(page, ownCreatePath);
+      await waitForCommerceSidebarGating(page, commerceType);
 
       for (const path of mustHave) {
         await expectSidebarHasLink(page, path);

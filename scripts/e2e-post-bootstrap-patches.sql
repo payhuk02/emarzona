@@ -63,4 +63,7 @@ WHERE sp.product_id = p.id
 
 CREATE INDEX IF NOT EXISTS idx_service_products_store_id ON public.service_products(store_id);
 
+-- Store wizard + create flow RPCs (pg_dump --no-privileges may omit EXECUTE for authenticated).
+GRANT EXECUTE ON FUNCTION public.is_store_slug_available(text, uuid) TO authenticated, anon, service_role;
+
 NOTIFY pgrst, 'reload schema';

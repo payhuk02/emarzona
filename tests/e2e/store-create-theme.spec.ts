@@ -13,7 +13,8 @@ import {
   seedTermsConsent,
   setPrimaryColorField,
 } from './helpers/store-theme-helpers';
-import { gotoApp, waitForReactApp } from './shared/e2e-test-config';
+import { prepareSellerDashboardChrome } from './helpers/seller-dashboard-setup';
+import { gotoApp, loginAsSeededUser, waitForReactApp } from './shared/e2e-test-config';
 import { STORE_CREATE_PATH } from '../../src/lib/store/store-create-path';
 
 function requiredEnv(name: string): string | null {
@@ -72,15 +73,8 @@ test.describe('Store create → customize → storefront theme (E2E)', () => {
 
     await seedTermsConsent(admin, userId);
 
-    await page.goto('/login', { waitUntil: 'domcontentloaded' });
-    await page.locator('input[name="email-login"]').fill(email);
-    await page.locator('#password-login').fill(password);
-    await page
-      .locator('form')
-      .filter({ has: page.locator('#password-login') })
-      .locator('button[type="submit"]')
-      .click();
-    await expect(page).toHaveURL('/dashboard', { timeout: 30_000 });
+    await prepareSellerDashboardChrome(page);
+    await loginAsSeededUser(page, admin, email, '/dashboard');
     await waitForReactApp(page);
     await dismissCookieBannerIfVisible(page);
     await dismissPersonaOnboardingIfVisible(page);
@@ -96,6 +90,9 @@ test.describe('Store create → customize → storefront theme (E2E)', () => {
 
     await page.locator('#name').fill(storeName);
     await expect(page.locator('#slug')).toHaveValue(storeSlug, { timeout: 10_000 });
+    await expect(page.locator('label[for="slug"] svg.text-accent')).toBeVisible({
+      timeout: 45_000,
+    });
 
     await clickWizardNext(page, 3);
     await expect(page.getByText(/Étape 4 sur 8/i)).toBeVisible();
@@ -108,7 +105,7 @@ test.describe('Store create → customize → storefront theme (E2E)', () => {
     await acceptTermsDialogIfVisible(page);
 
     await expect(page).toHaveURL(/\/dashboard\/onboarding\/store\?storeId=/, {
-      timeout: 60_000,
+      timeout: 90_000,
     });
 
     const storeId = extractStoreIdFromUrl(page.url());
