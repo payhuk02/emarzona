@@ -146,8 +146,53 @@ if (dump.status !== 0) {
   process.exit(1);
 }
 
-writeFileSync(schemaFile, dump.stdout);
-console.log(`Schema written: ${schemaFile} (${dump.stdout.length} bytes)`);
+let schemaSql = dump.stdout.toString('utf8');
+schemaSql = schemaSql.replace(/^CREATE SCHEMA public;\s*$/m, '');
+schemaSql = schemaSql.replace(/^COMMENT ON SCHEMA public IS.*$/m, '');
+schemaSql = schemaSql.replace(/public\.gin_trgm_ops/g, 'extensions.gin_trgm_ops');
+schemaSql = schemaSql.replace(/public\.gist_trgm_ops/g, 'extensions.gist_trgm_ops');
+writeFileSync(schemaFile, schemaSql);
+console.log(`Schema written: ${schemaFile} (${schemaSql.length} bytes)`);
+
+console.log('Collecting prod extensions...');
+const prodClient = new pg.Client({
+  connectionString: dbUrl(PROD_REF, DB_PASSWORD),
+  ssl: { rejectUnauthorized: false },
+});
+await prodClient.connect();
+const extRows = await prodClient.query(`
+  SELECT format('CREATE EXTENSION IF NOT EXISTS %I WITH SCHEMA %I;', e.extname, n.nspname) AS ddl
+  FROM pg_extension e
+  JOIN pg_namespace n ON n.oid = e.extnamespace
+  WHERE e.extname NOT IN ('plpgsql')
+  ORDER BY e.extname
+`);
+await prodClient.end();
+const extensionSql = extRows.rows.map(r => r.ddl).join('\n');
+console.log(extensionSql || '(no extensions)');
+
+console.log('Resetting E2E public schema and enabling extensions...');
+const e2eClient = new pg.Client({
+  connectionString: dbUrl(E2E_REF, E2E_DB_PASSWORD),
+  ssl: { rejectUnauthorized: false },
+});
+await e2eClient.connect();
+await e2eClient.query(`
+  DROP SCHEMA IF EXISTS public CASCADE;
+  CREATE SCHEMA public;
+  GRANT ALL ON SCHEMA public TO postgres;
+  GRANT ALL ON SCHEMA public TO public;
+  GRANT ALL ON SCHEMA public TO anon, authenticated, service_role;
+  CREATE SCHEMA IF NOT EXISTS extensions;
+`);
+for (const ddl of extRows.rows.map(r => r.ddl)) {
+  try {
+    await e2eClient.query(ddl);
+  } catch (error) {
+    console.warn(`WARN extension: ${error.message}`);
+  }
+}
+await e2eClient.end();
 
 console.log('Applying schema to E2E project...');
 const psql = pgDump.replace(/pg_dump(\.exe)?$/i, 'psql$1');
