@@ -66,61 +66,33 @@ dump_prod_public_schema() {
 }
 
 reset_e2e_public() {
-  echo "Resetting E2E public schema via batched drops (pooler, avoids CASCADE lock limits)..."
+  echo "Resetting E2E public schema via batched drops (one statement per transaction)..."
   e2e_psql -v ON_ERROR_STOP=1 <<'EOSQL'
 CREATE SCHEMA IF NOT EXISTS public;
 CREATE SCHEMA IF NOT EXISTS extensions;
 GRANT ALL ON SCHEMA public TO postgres;
 GRANT ALL ON SCHEMA public TO public;
 GRANT ALL ON SCHEMA public TO anon, authenticated, service_role;
-
-DO $$
-DECLARE
-  r RECORD;
-  remaining INTEGER;
-BEGIN
-  FOR r IN (SELECT matviewname FROM pg_matviews WHERE schemaname = 'public') LOOP
-    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS public.%I CASCADE', r.matviewname);
-  END LOOP;
-
-  FOR r IN (SELECT viewname FROM pg_views WHERE schemaname = 'public') LOOP
-    EXECUTE format('DROP VIEW IF EXISTS public.%I CASCADE', r.viewname);
-  END LOOP;
-
-  FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public') LOOP
-    EXECUTE format('DROP TABLE IF EXISTS public.%I CASCADE', r.tablename);
-  END LOOP;
-
-  FOR r IN (
-    SELECT sequence_name FROM information_schema.sequences WHERE sequence_schema = 'public'
-  ) LOOP
-    EXECUTE format('DROP SEQUENCE IF EXISTS public.%I CASCADE', r.sequence_name);
-  END LOOP;
-
-  -- Functions can depend on each other; repeat until none remain.
-  LOOP
-    remaining := 0;
-    FOR r IN (
-      SELECT p.oid, p.proname, pg_get_function_identity_arguments(p.oid) AS args
-      FROM pg_proc p
-      JOIN pg_namespace n ON n.oid = p.pronamespace
-      WHERE n.nspname = 'public'
-    ) LOOP
-      remaining := remaining + 1;
-      EXECUTE format('DROP FUNCTION IF EXISTS public.%I(%s) CASCADE', r.proname, r.args);
-    END LOOP;
-    EXIT WHEN remaining = 0;
-  END LOOP;
-
-  FOR r IN (
-    SELECT typname FROM pg_type t
-    JOIN pg_namespace n ON n.oid = t.typnamespace
-    WHERE n.nspname = 'public' AND t.typtype IN ('e', 'c', 'd')
-  ) LOOP
-    EXECUTE format('DROP TYPE IF EXISTS public.%I CASCADE', r.typname);
-  END LOOP;
-END $$;
 EOSQL
+
+  {
+    e2e_psql -Atc "SELECT format('DROP MATERIALIZED VIEW IF EXISTS public.%I CASCADE;', matviewname) FROM pg_matviews WHERE schemaname = 'public' ORDER BY 1;"
+    e2e_psql -Atc "SELECT format('DROP VIEW IF EXISTS public.%I CASCADE;', viewname) FROM pg_views WHERE schemaname = 'public' ORDER BY 1;"
+    e2e_psql -Atc "SELECT format('DROP TABLE IF EXISTS public.%I CASCADE;', tablename) FROM pg_tables WHERE schemaname = 'public' ORDER BY 1;"
+    e2e_psql -Atc "SELECT format('DROP SEQUENCE IF EXISTS public.%I CASCADE;', sequence_name) FROM information_schema.sequences WHERE sequence_schema = 'public' ORDER BY 1;"
+    for _pass in 1 2 3 4 5; do
+      e2e_psql -Atc "SELECT format('DROP FUNCTION IF EXISTS public.%I(%s) CASCADE;', p.proname, pg_get_function_identity_arguments(p.oid))
+        FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace WHERE n.nspname = 'public' ORDER BY 1;"
+    done
+    e2e_psql -Atc "SELECT format('DROP TYPE IF EXISTS public.%I CASCADE;', typname)
+      FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace
+      WHERE n.nspname = 'public' AND t.typtype IN ('e', 'c', 'd') ORDER BY 1;"
+  } > /tmp/e2e-reset.sql
+
+  local drop_count
+  drop_count=$(wc -l < /tmp/e2e-reset.sql)
+  echo "Executing ${drop_count} reset statements..."
+  e2e_psql -v ON_ERROR_STOP=0 -f /tmp/e2e-reset.sql
 
   local tables funcs
   tables=$(e2e_psql -Atc "SELECT COUNT(*) FROM pg_tables WHERE schemaname='public';")
