@@ -7,7 +7,7 @@ jobs:
   bootstrap:
     name: Copy prod public schema to E2E
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     steps:
       - name: Checkout
@@ -53,6 +53,14 @@ jobs:
           GRANT ALL ON SCHEMA public TO postgres;
           GRANT ALL ON SCHEMA public TO public;
           GRANT ALL ON SCHEMA public TO anon, authenticated, service_role;
+          CREATE SCHEMA IF NOT EXISTS extensions;
+          CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA extensions;
+          CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA extensions;
+          CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA extensions;
+          CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA extensions;
+          CREATE EXTENSION IF NOT EXISTS moddatetime WITH SCHEMA extensions;
+          CREATE EXTENSION IF NOT EXISTS citext WITH SCHEMA extensions;
+          CREATE EXTENSION IF NOT EXISTS unaccent WITH SCHEMA extensions;
           EOSQL
           echo "Applying to E2E (${E2E_REF})..."
           export PGPASSWORD="${E2E_SUPABASE_DB_PASSWORD}"
