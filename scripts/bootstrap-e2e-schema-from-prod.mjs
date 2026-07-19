@@ -39,15 +39,70 @@ if (E2E_REF === PROD_REF) {
 }
 
 const POOLER_HOST = process.env.SUPABASE_POOLER_HOST?.trim() || 'aws-1-eu-west-2.pooler.supabase.com';
+const E2E_DIRECT_HOST = process.env.E2E_DIRECT_HOST?.trim() || `db.${E2E_REF}.supabase.co`;
 
-function dbUrl(ref, password) {
+function poolerUrl(ref, password) {
   const encoded = encodeURIComponent(password);
   return `postgresql://postgres.${ref}:${encoded}@${POOLER_HOST}:5432/postgres`;
 }
 
-async function probe(label, ref, password) {
+function e2eDirectUrl(password) {
+  const encoded = encodeURIComponent(password);
+  return `postgresql://postgres:${encoded}@${E2E_DIRECT_HOST}:5432/postgres`;
+}
+
+const RESET_E2E_PUBLIC_SQL = `
+CREATE SCHEMA IF NOT EXISTS public;
+CREATE SCHEMA IF NOT EXISTS extensions;
+GRANT ALL ON SCHEMA public TO postgres;
+GRANT ALL ON SCHEMA public TO public;
+GRANT ALL ON SCHEMA public TO anon, authenticated, service_role;
+
+DO $$
+DECLARE
+  r RECORD;
+  remaining INTEGER;
+BEGIN
+  FOR r IN (SELECT matviewname FROM pg_matviews WHERE schemaname = 'public') LOOP
+    EXECUTE format('DROP MATERIALIZED VIEW IF EXISTS public.%I CASCADE', r.matviewname);
+  END LOOP;
+  FOR r IN (SELECT viewname FROM pg_views WHERE schemaname = 'public') LOOP
+    EXECUTE format('DROP VIEW IF EXISTS public.%I CASCADE', r.viewname);
+  END LOOP;
+  FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public') LOOP
+    EXECUTE format('DROP TABLE IF EXISTS public.%I CASCADE', r.tablename);
+  END LOOP;
+  FOR r IN (
+    SELECT sequence_name FROM information_schema.sequences WHERE sequence_schema = 'public'
+  ) LOOP
+    EXECUTE format('DROP SEQUENCE IF EXISTS public.%I CASCADE', r.sequence_name);
+  END LOOP;
+  LOOP
+    remaining := 0;
+    FOR r IN (
+      SELECT p.oid, p.proname, pg_get_function_identity_arguments(p.oid) AS args
+      FROM pg_proc p
+      JOIN pg_namespace n ON n.oid = p.pronamespace
+      WHERE n.nspname = 'public'
+    ) LOOP
+      remaining := remaining + 1;
+      EXECUTE format('DROP FUNCTION IF EXISTS public.%I(%s) CASCADE', r.proname, r.args);
+    END LOOP;
+    EXIT WHEN remaining = 0;
+  END LOOP;
+  FOR r IN (
+    SELECT typname FROM pg_type t
+    JOIN pg_namespace n ON n.oid = t.typnamespace
+    WHERE n.nspname = 'public' AND t.typtype IN ('e', 'c', 'd')
+  ) LOOP
+    EXECUTE format('DROP TYPE IF EXISTS public.%I CASCADE', r.typname);
+  END LOOP;
+END $$;
+`;
+
+async function probe(label, ref, password, { direct = false } = {}) {
   const client = new pg.Client({
-    connectionString: dbUrl(ref, password),
+    connectionString: direct ? e2eDirectUrl(password) : poolerUrl(ref, password),
     ssl: { rejectUnauthorized: false },
   });
   try {
@@ -105,7 +160,7 @@ try {
 }
 
 try {
-  await probe('e2e (before)', E2E_REF, E2E_DB_PASSWORD);
+  await probe('e2e (before)', E2E_REF, E2E_DB_PASSWORD, { direct: true });
 } catch (error) {
   console.error(`Cannot connect to E2E DB: ${error.message}`);
   console.error('Set E2E_SUPABASE_DB_PASSWORD if the E2E project uses a different database password.');
@@ -154,7 +209,7 @@ console.log(`Schema written: ${schemaFile} (${schemaSql.length} bytes)`);
 
 console.log('Collecting prod extensions...');
 const prodClient = new pg.Client({
-  connectionString: dbUrl(PROD_REF, DB_PASSWORD),
+  connectionString: poolerUrl(PROD_REF, DB_PASSWORD),
   ssl: { rejectUnauthorized: false },
 });
 await prodClient.connect();
@@ -169,20 +224,13 @@ await prodClient.end();
 const extensionSql = extRows.rows.map(r => r.ddl).join('\n');
 console.log(extensionSql || '(no extensions)');
 
-console.log('Resetting E2E public schema and enabling extensions...');
+console.log('Resetting E2E public schema (batched drops via direct DB)...');
 const e2eClient = new pg.Client({
-  connectionString: dbUrl(E2E_REF, E2E_DB_PASSWORD),
+  connectionString: e2eDirectUrl(E2E_DB_PASSWORD),
   ssl: { rejectUnauthorized: false },
 });
 await e2eClient.connect();
-await e2eClient.query(`
-  DROP SCHEMA IF EXISTS public CASCADE;
-  CREATE SCHEMA public;
-  GRANT ALL ON SCHEMA public TO postgres;
-  GRANT ALL ON SCHEMA public TO public;
-  GRANT ALL ON SCHEMA public TO anon, authenticated, service_role;
-  CREATE SCHEMA IF NOT EXISTS extensions;
-`);
+await e2eClient.query(RESET_E2E_PUBLIC_SQL);
 for (const ddl of extRows.rows.map(r => r.ddl)) {
   try {
     await e2eClient.query(ddl);
@@ -192,7 +240,7 @@ for (const ddl of extRows.rows.map(r => r.ddl)) {
 }
 await e2eClient.end();
 
-console.log('Applying schema to E2E project...');
+console.log('Applying schema to E2E project (direct DB)...');
 const psql = pgDump.replace(/pg_dump(\.exe)?$/i, 'psql$1');
 if (!existsSync(psql)) {
   console.error(`psql not found next to pg_dump (${psql}). Set PG_DUMP_PATH directory manually.`);
@@ -203,11 +251,11 @@ const apply = spawnSync(
   psql,
   [
     '-h',
-    POOLER_HOST,
+    E2E_DIRECT_HOST,
     '-p',
     '5432',
     '-U',
-    `postgres.${E2E_REF}`,
+    'postgres',
     '-d',
     'postgres',
     '--set',
@@ -223,9 +271,9 @@ if (apply.status !== 0) {
   process.exit(1);
 }
 
-const after = await probe('e2e (after)', E2E_REF, E2E_DB_PASSWORD);
-if (!after.hasStores) {
-  console.error('Schema apply finished but public.stores is still missing.');
+const after = await probe('e2e (after)', E2E_REF, E2E_DB_PASSWORD, { direct: true });
+if (!after.hasStores || after.tables < 500) {
+  console.error(`Schema apply finished but verification failed (tables=${after.tables}, stores=${after.hasStores}).`);
   process.exit(1);
 }
 
