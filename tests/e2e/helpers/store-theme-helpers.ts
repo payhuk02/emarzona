@@ -14,19 +14,33 @@ const E2E_TERMS_DOCUMENT = {
   is_active: true,
 } as const;
 
+/**
+ * Resolve the same legal document version the app uses via get_latest_legal_document('terms').
+ * Hard-coding v1.0 breaks RequireTermsConsent when a newer active doc exists on E2E.
+ */
 async function ensureE2eTermsDocument(admin: SupabaseClient): Promise<string> {
-  const { data: existing, error: existingError } = await admin
+  const { data: latestRows, error: latestError } = await admin.rpc('get_latest_legal_document', {
+    doc_type: 'terms',
+    doc_language: 'fr',
+  });
+
+  if (!latestError) {
+    const latest = Array.isArray(latestRows) ? latestRows[0] : latestRows;
+    if (latest && typeof latest === 'object' && 'version' in latest && latest.version) {
+      return String(latest.version);
+    }
+  }
+
+  const { data: existing } = await admin
     .from('legal_documents')
     .select('version')
     .eq('document_type', E2E_TERMS_DOCUMENT.document_type)
     .eq('language', E2E_TERMS_DOCUMENT.language)
-    .eq('version', E2E_TERMS_DOCUMENT.version)
     .eq('is_active', true)
+    .order('effective_date', { ascending: false })
+    .limit(1)
     .maybeSingle();
 
-  if (existingError && existingError.code !== 'PGRST116') {
-    throw existingError;
-  }
   if (existing?.version) {
     return existing.version;
   }
@@ -53,14 +67,15 @@ export async function seedTermsConsent(admin: SupabaseClient, userId: string): P
     return;
   }
 
+  // Fallback: 'e2e' may be rejected by an older CHECK — use settings.
   const { error: insertError } = await admin.from('user_consents').insert({
     user_id: userId,
     document_type: 'terms',
     document_version: version,
+    consent_method: 'settings',
     is_revoked: false,
   });
 
-  // Ignore duplicate consent rows on re-runs.
   if (insertError && insertError.code !== '23505') {
     throw insertError;
   }
@@ -99,8 +114,18 @@ export async function acceptTermsDialogIfVisible(page: Page): Promise<void> {
     return;
   }
 
-  await page.locator('#accept-terms').check();
-  await page.getByRole('button', { name: /Accepter et/i }).click();
+  const checkbox = dialog.getByRole('checkbox', { name: /conditions générales/i });
+  if (await checkbox.isVisible().catch(() => false)) {
+    if (!(await checkbox.isChecked().catch(() => false))) {
+      await checkbox.click();
+    }
+  } else {
+    await page.locator('#accept-terms').check();
+  }
+
+  const accept = dialog.getByRole('button', { name: /Accepter et/i });
+  await expect(accept).toBeEnabled({ timeout: 10_000 });
+  await accept.click();
   await expect(dialog).toBeHidden({ timeout: 30_000 });
 }
 
@@ -147,18 +172,17 @@ export async function submitStoreWizardCreate(page: Page): Promise<void> {
   const onboardingUrl = page.waitForURL(/\/dashboard\/onboarding\/store\?storeId=/, {
     timeout: 90_000,
   });
-  const createResponse = page
-    .waitForResponse(
-      response =>
-        response.url().includes('/rest/v1/stores') &&
-        response.request().method() === 'POST' &&
-        response.status() >= 200 &&
-        response.status() < 300,
-      { timeout: 90_000 }
-    )
-    .catch(() => null);
 
-  await page.getByRole('button', { name: /Créer ma boutique/i }).click();
+  // Capture ANY stores POST (including 4xx) — never filter on 2xx only.
+  const createResponsePromise = page.waitForResponse(
+    response =>
+      response.url().includes('/rest/v1/stores') && response.request().method() === 'POST',
+    { timeout: 90_000 }
+  );
+
+  const createButton = page.getByRole('button', { name: /Créer ma boutique/i });
+  await expect(createButton).toBeEnabled({ timeout: 15_000 });
+  await createButton.click();
   await acceptTermsDialogIfVisible(page);
 
   const stillOnWizard = await page
@@ -166,17 +190,32 @@ export async function submitStoreWizardCreate(page: Page): Promise<void> {
     .isVisible()
     .catch(() => false);
   if (stillOnWizard) {
-    await page.evaluate(() => {
-      const form = document.querySelector('form');
-      form?.requestSubmit();
-    });
+    await page
+      .locator('form')
+      .filter({ has: createButton })
+      .evaluate(form => {
+        (form as HTMLFormElement).requestSubmit();
+      })
+      .catch(() => undefined);
     await acceptTermsDialogIfVisible(page);
   }
 
-  const response = await createResponse;
-  if (response && response.status() >= 400) {
+  const response = await createResponsePromise.catch(() => null);
+  if (!response) {
+    const toastText = await page
+      .locator('[role="status"], [role="alert"]')
+      .first()
+      .innerText()
+      .catch(() => null);
+    throw new Error(
+      `Store create POST never fired — toast=${toastText?.trim() ?? 'none'} url=${page.url()}`
+    );
+  }
+  if (response.status() < 200 || response.status() >= 300) {
     const bodyText = await response.text().catch(() => '');
-    throw new Error(`Store create POST failed (${response.status()}): ${bodyText.slice(0, 500)}`);
+    throw new Error(
+      `Store create POST failed (${response.status()}): ${bodyText.slice(0, 800)} — url=${page.url()}`
+    );
   }
 
   await onboardingUrl;

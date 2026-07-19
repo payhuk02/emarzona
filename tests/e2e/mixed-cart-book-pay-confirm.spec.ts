@@ -45,13 +45,20 @@ test.describe('Mixed cart book → pay → confirm (E2E)', () => {
     let orderId: string | undefined;
 
     try {
-      await loginAsSeededUser(page, admin, fixture.buyer.email);
+      await loginAsSeededUser(
+        page,
+        admin,
+        fixture.buyer.email,
+        '/dashboard',
+        fixture.buyer.password
+      );
       await gotoApp(page, `/service/${fixture.serviceProduct.id}`);
 
+      await expect(page.getByText(/Service non trouvé/i)).toHaveCount(0, { timeout: 5_000 });
       await expect(page.getByRole('heading', { level: 1 })).toContainText(
         fixture.serviceProduct.name,
         {
-          timeout: 20_000,
+          timeout: 30_000,
         }
       );
 

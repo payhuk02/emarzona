@@ -178,4 +178,117 @@ WHERE NOT EXISTS (
     AND ld.version = '1.0'
 );
 
+-- Legal RPCs: app RequireTermsConsent + E2E seedTermsConsent must agree on doc type mapping.
+CREATE OR REPLACE FUNCTION public.resolve_legal_document_type(p_type TEXT)
+RETURNS TEXT
+LANGUAGE sql
+IMMUTABLE
+SET search_path = public
+AS $$
+  SELECT CASE lower(trim(p_type))
+    WHEN 'terms' THEN 'terms-of-service'
+    WHEN 'privacy' THEN 'privacy-policy'
+    WHEN 'cookies' THEN 'cookie-policy'
+    WHEN 'refund' THEN 'refund-policy'
+    ELSE lower(trim(p_type))
+  END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.get_latest_legal_document(
+  doc_type TEXT,
+  doc_language TEXT DEFAULT 'fr'
+)
+RETURNS TABLE(
+  id UUID,
+  type TEXT,
+  version TEXT,
+  content TEXT,
+  language TEXT,
+  effective_date TIMESTAMPTZ
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    d.id,
+    lower(trim(doc_type)) AS type,
+    d.version,
+    d.content,
+    d.language,
+    d.effective_date
+  FROM public.legal_documents d
+  WHERE d.document_type = public.resolve_legal_document_type(doc_type)
+    AND d.language = doc_language
+    AND d.is_active = TRUE
+  ORDER BY d.effective_date DESC
+  LIMIT 1;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.record_user_consent(
+  p_user_id UUID,
+  p_document_type TEXT,
+  p_document_version TEXT,
+  p_ip_address TEXT DEFAULT NULL,
+  p_user_agent TEXT DEFAULT NULL,
+  p_consent_method TEXT DEFAULT 'settings'
+)
+RETURNS UUID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_consent_id UUID;
+BEGIN
+  INSERT INTO public.user_consents (
+    user_id,
+    document_type,
+    document_version,
+    ip_address,
+    user_agent,
+    consent_method
+  ) VALUES (
+    p_user_id,
+    lower(trim(p_document_type)),
+    p_document_version,
+    p_ip_address,
+    p_user_agent,
+    COALESCE(p_consent_method, 'settings')
+  )
+  RETURNING id INTO v_consent_id;
+
+  RETURN v_consent_id;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.resolve_legal_document_type(text) TO authenticated, anon, service_role;
+GRANT EXECUTE ON FUNCTION public.get_latest_legal_document(text, text) TO authenticated, anon, service_role;
+GRANT EXECUTE ON FUNCTION public.record_user_consent(uuid, text, text, text, text, text) TO authenticated, service_role;
+
+-- Harden legacy inventory auto-create: physical_products.sku is nullable, inventory_items.sku is NOT NULL.
+CREATE OR REPLACE FUNCTION public.create_inventory_item_for_product()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  IF COALESCE(NEW.track_inventory, true) = TRUE
+     AND COALESCE(NEW.has_variants, false) = FALSE THEN
+    INSERT INTO public.inventory_items (
+      physical_product_id,
+      sku,
+      quantity_available
+    ) VALUES (
+      NEW.id,
+      COALESCE(NULLIF(BTRIM(NEW.sku), ''), 'AUTO-' || NEW.id::text),
+      0
+    );
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
 NOTIFY pgrst, 'reload schema';

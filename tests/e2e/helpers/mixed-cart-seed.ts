@@ -89,6 +89,7 @@ export async function seedMixedCartFixture(
       product_type: 'service',
       is_active: true,
       is_draft: false,
+      hide_from_store: false,
     })
     .select('id, slug, name')
     .single();
@@ -139,6 +140,7 @@ export async function seedMixedCartFixture(
       product_type: 'physical',
       is_active: true,
       is_draft: false,
+      hide_from_store: false,
       stock: 25,
       stock_quantity: 25,
     })
@@ -158,7 +160,8 @@ export async function seedMixedCartFixture(
       requires_shipping: true,
       weight: 0.5,
       sku: physicalSku,
-      track_inventory: true,
+      // Skip legacy inventory_items trigger; mixed-cart does not exercise stock reservation.
+      track_inventory: false,
     })
     .select('id')
     .single();

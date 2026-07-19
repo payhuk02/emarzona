@@ -139,20 +139,26 @@ export default function ServiceDetail() {
   const { data: service, isLoading } = useQuery({
     queryKey: ['service', serviceId],
     queryFn: async () => {
+      // Do not embed public.stores — buyers are blocked by stores RLS (owner-only).
+      // Use stores_public for storefront-safe store metadata.
       const { data: productData, error } = await supabase
         .from('products')
-        .select(
-          `
-          ${PRODUCT_SERVICE_FIELDS},
-          stores (
-            ${STORE_PUBLIC_FIELDS}
-          )
-        `
-        )
+        .select(PRODUCT_SERVICE_FIELDS)
         .eq('id', serviceId)
         .single();
 
       if (error) throw error;
+
+      let storePublic: { id: string; name: string; slug: string; logo_url: string | null } | null =
+        null;
+      if (productData?.store_id) {
+        const { data: storeRow } = await supabase
+          .from('stores_public')
+          .select(STORE_PUBLIC_FIELDS)
+          .eq('id', productData.store_id)
+          .maybeSingle();
+        storePublic = storeRow;
+      }
 
       // Récupérer les produits preview/paid si ils existent
       let freeProduct = null;
@@ -195,7 +201,7 @@ export default function ServiceDetail() {
         paid_product: paidProduct,
         service: serviceData,
         staff: staff || [],
-        store: productData.stores,
+        store: storePublic,
       };
     },
     enabled: !!serviceId,
@@ -547,7 +553,12 @@ export default function ServiceDetail() {
 
   if (isLoading) {
     return (
-      <AppPageShell mainClassName="p-8" hideSidebar={true} showUtilityBar={false} hideHorizontalNav={true}>
+      <AppPageShell
+        mainClassName="p-8"
+        hideSidebar={true}
+        showUtilityBar={false}
+        hideHorizontalNav={true}
+      >
         <div className="space-y-8">
           <Skeleton className="h-10 w-32" />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -561,7 +572,12 @@ export default function ServiceDetail() {
 
   if (!service) {
     return (
-      <AppPageShell mainClassName="p-8" hideSidebar={true} showUtilityBar={false} hideHorizontalNav={true}>
+      <AppPageShell
+        mainClassName="p-8"
+        hideSidebar={true}
+        showUtilityBar={false}
+        hideHorizontalNav={true}
+      >
         <Card className="border-destructive">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 text-destructive">
@@ -584,7 +600,12 @@ export default function ServiceDetail() {
   const isGroup = service?.service?.booking_type === 'group';
 
   return (
-    <AppPageShell mainClassName="p-8" hideSidebar={true} showUtilityBar={false} hideHorizontalNav={true}>
+    <AppPageShell
+      mainClassName="p-8"
+      hideSidebar={true}
+      showUtilityBar={false}
+      hideHorizontalNav={true}
+    >
       {/* SEO Meta Tags */}
       <SEOMeta
         title={service.name}

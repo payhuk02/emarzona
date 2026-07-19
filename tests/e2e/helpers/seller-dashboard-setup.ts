@@ -79,46 +79,31 @@ async function selectStoreInSidebar(page: Page, storeName?: string): Promise<voi
   }
 }
 
+/**
+ * Race-safe wait for seller chrome + selected store.
+ * Do NOT rely on waitForResponse: StoreContext uses PostgREST `.or(user_id.eq.…)`
+ * when the owner is also in store_members (always true after trg_add_store_owner_as_member),
+ * and the stores GET often completes before a post-login wait is armed.
+ */
 export async function waitForStoresLoaded(
   page: Page,
   options: WaitForStoresLoadedOptions = {}
 ): Promise<void> {
-  const { storeId, commerceType, storeName } = options;
-
-  await page.waitForResponse(
-    async response => {
-      const url = response.url();
-      if (!url.includes('/rest/v1/stores')) return false;
-      if (!url.includes('user_id=eq.')) return false;
-      if (response.request().method() !== 'GET') return false;
-      if (response.status() !== 200) return false;
-
-      try {
-        const rows = (await response.json()) as Array<{
-          id?: string;
-          name?: string;
-          commerce_type?: string;
-          metadata?: { commerce_type?: string } | null;
-        }>;
-        if (!Array.isArray(rows) || rows.length < 1) return false;
-        if (storeId && !rows.some(row => row.id === storeId)) return false;
-        if (commerceType) {
-          const hasType = rows.some(row => {
-            const resolved = row.commerce_type ?? row.metadata?.commerce_type;
-            return resolved === commerceType;
-          });
-          if (!hasType) return false;
-        }
-        if (storeName && !rows.some(row => row.name === storeName)) return false;
-        return true;
-      } catch {
-        return false;
-      }
-    },
-    { timeout: 45_000 }
-  );
+  const { storeId, storeName } = options;
 
   await expect(page.locator('.app-sidebar')).toBeVisible({ timeout: 30_000 });
+
+  if (storeId) {
+    await expect
+      .poll(
+        async () => page.evaluate(id => localStorage.getItem('selectedStoreId') === id, storeId),
+        {
+          timeout: 45_000,
+        }
+      )
+      .toBe(true);
+  }
+
   await selectStoreInSidebar(page, storeName);
   await expandSidebarCreerSection(page);
 }
@@ -146,8 +131,6 @@ export async function waitForCommerceSidebarGating(
   commerceType: StoreCommerceType,
   options: Omit<WaitForStoresLoadedOptions, 'commerceType'> = {}
 ): Promise<void> {
-  await waitForStoresLoaded(page, { ...options, commerceType });
-
   if (options.storeId) {
     await page.evaluate(
       ({ storeId }) => {
@@ -157,8 +140,9 @@ export async function waitForCommerceSidebarGating(
     );
     await page.reload({ waitUntil: 'domcontentloaded' });
     await waitForReactApp(page);
-    await waitForStoresLoaded(page, { ...options, commerceType });
   }
+
+  await waitForStoresLoaded(page, { ...options, commerceType });
 
   const createPath = PRIMARY_PRODUCT_CREATE_PATH_BY_TYPE[commerceType];
   await expectSidebarHasLink(page, createPath);
