@@ -10,6 +10,7 @@ import { loginAsSeededUser, waitForReactApp } from '../shared/e2e-test-config';
 
 export type SellerDashboardChromeOptions = {
   selectedStoreId?: string;
+  password?: string;
 };
 
 /** Stable seller chrome for dashboard E2E (persona, UX mode, onboarding dismissed). */
@@ -20,6 +21,11 @@ export async function prepareSellerDashboardChrome(
   const { selectedStoreId } = options;
   await page.addInitScript(
     ({ storeId }) => {
+      for (const key of Object.keys(localStorage)) {
+        if (key.startsWith('sidebarCollapsedSections')) {
+          localStorage.removeItem(key);
+        }
+      }
       localStorage.removeItem('selectedStoreId');
       localStorage.removeItem('sidebarPersona');
       localStorage.removeItem('sidebarPersonaOnboarded');
@@ -29,6 +35,7 @@ export async function prepareSellerDashboardChrome(
       if (storeId) {
         localStorage.setItem('selectedStoreId', storeId);
       }
+      document.cookie = 'sidebar:state=true; path=/; max-age=604800; SameSite=Lax';
     },
     { storeId: selectedStoreId ?? null }
   );
@@ -41,7 +48,7 @@ export async function loginSeededSeller(
   options: SellerDashboardChromeOptions = {}
 ): Promise<void> {
   await prepareSellerDashboardChrome(page, options);
-  await loginAsSeededUser(page, admin, email, '/dashboard');
+  await loginAsSeededUser(page, admin, email, '/dashboard', options.password);
   await waitForReactApp(page);
   await dismissCookieBannerIfVisible(page);
   await dismissPersonaOnboardingIfVisible(page);
@@ -53,6 +60,25 @@ type WaitForStoresLoadedOptions = {
   storeName?: string;
 };
 
+async function expandSidebarCreerSection(page: Page): Promise<void> {
+  const header = page.locator('.app-sidebar-section-header').filter({ hasText: /^Créer$/i });
+  if (await header.isVisible().catch(() => false)) {
+    const expanded = await header.getAttribute('aria-expanded');
+    if (expanded === 'false') {
+      await header.click();
+    }
+  }
+}
+
+async function selectStoreInSidebar(page: Page, storeName?: string): Promise<void> {
+  if (!storeName) return;
+  const storeButton = page.getByRole('button', { name: storeName });
+  if (await storeButton.isVisible().catch(() => false)) {
+    await storeButton.click();
+    await page.waitForLoadState('domcontentloaded');
+  }
+}
+
 export async function waitForStoresLoaded(
   page: Page,
   options: WaitForStoresLoadedOptions = {}
@@ -61,7 +87,9 @@ export async function waitForStoresLoaded(
 
   await page.waitForResponse(
     async response => {
-      if (!response.url().includes('/rest/v1/stores')) return false;
+      const url = response.url();
+      if (!url.includes('/rest/v1/stores')) return false;
+      if (!url.includes('user_id=eq.')) return false;
       if (response.request().method() !== 'GET') return false;
       if (response.status() !== 200) return false;
 
@@ -91,16 +119,20 @@ export async function waitForStoresLoaded(
   );
 
   await expect(page.locator('.app-sidebar')).toBeVisible({ timeout: 30_000 });
+  await selectStoreInSidebar(page, storeName);
+  await expandSidebarCreerSection(page);
 }
 
 export function sidebarLinkLocator(page: Page, path: string) {
-  return page.locator(`.app-sidebar a[href="${path}"]`);
+  return page.locator(`.app-sidebar a[href="${path}"], #root a[href="${path}"]`);
 }
 
 export async function expectSidebarHasLink(page: Page, path: string): Promise<void> {
-  await expect(sidebarLinkLocator(page, path)).toHaveCount(1, {
-    timeout: process.env.CI ? 45_000 : 20_000,
-  });
+  await expect
+    .poll(async () => sidebarLinkLocator(page, path).count(), {
+      timeout: process.env.CI ? 45_000 : 20_000,
+    })
+    .toBe(1);
 }
 
 export async function expectSidebarMissingLink(page: Page, path: string): Promise<void> {
@@ -115,6 +147,19 @@ export async function waitForCommerceSidebarGating(
   options: Omit<WaitForStoresLoadedOptions, 'commerceType'> = {}
 ): Promise<void> {
   await waitForStoresLoaded(page, { ...options, commerceType });
+
+  if (options.storeId) {
+    await page.evaluate(
+      ({ storeId }) => {
+        localStorage.setItem('selectedStoreId', storeId);
+      },
+      { storeId: options.storeId }
+    );
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await waitForReactApp(page);
+    await waitForStoresLoaded(page, { ...options, commerceType });
+  }
+
   const createPath = PRIMARY_PRODUCT_CREATE_PATH_BY_TYPE[commerceType];
   await expectSidebarHasLink(page, createPath);
 }

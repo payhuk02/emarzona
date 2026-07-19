@@ -75,7 +75,7 @@ test.describe('Store create → customize → storefront theme (E2E)', () => {
     await seedTermsConsent(admin, userId);
 
     await prepareSellerDashboardChrome(page);
-    await loginAsSeededUser(page, admin, email, '/dashboard');
+    await loginAsSeededUser(page, admin, email, '/dashboard', password);
     await waitForReactApp(page);
     await dismissCookieBannerIfVisible(page);
     await dismissPersonaOnboardingIfVisible(page);

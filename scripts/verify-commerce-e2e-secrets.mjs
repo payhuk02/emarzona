@@ -111,6 +111,40 @@ const E2E_TERMS_DOCUMENT = {
 };
 
 /** Idempotent seed for schema-only E2E bootstrap (same data as e2e-post-bootstrap-patches.sql). */
+async function ensureCommerceE2eSchemaPatches(admin, projectRef) {
+  const { error } = await admin.rpc('e2e_apply_schema_patches');
+  if (!error) {
+    console.log(`Applied e2e_apply_schema_patches on project ${projectRef}`);
+    return;
+  }
+
+  if (/Could not find the function|42883|PGRST202/i.test(error.message ?? '')) {
+    console.warn(
+      `e2e_apply_schema_patches RPC missing on ${projectRef} — run bootstrap-e2e-schema patches-only`
+    );
+    await probePhysicalProductsStoreId(admin, projectRef);
+    return;
+  }
+
+  throw new Error(`e2e_apply_schema_patches failed: ${error.message}`);
+}
+
+async function probePhysicalProductsStoreId(admin, projectRef) {
+  const { error } = await admin.from('physical_products').select('store_id').limit(0);
+  if (!error) return;
+
+  if (/store_id|PGRST204/i.test(error.message ?? '') || error.code === 'PGRST204') {
+    throw new Error(
+      `physical_products.store_id missing on ${projectRef} — run bootstrap-e2e-schema.yml mode=patches-only`
+    );
+  }
+
+  if (error.code !== 'PGRST116') {
+    throw new Error(`physical_products probe failed: ${error.message}`);
+  }
+}
+
+/** Idempotent seed for schema-only E2E bootstrap (same data as e2e-post-bootstrap-patches.sql). */
 async function ensureCommerceE2eSeeds(admin, projectRef) {
   let seeded = false;
 
@@ -276,6 +310,7 @@ if (schemaError && schemaError.code !== 'PGRST116') {
 }
 
 try {
+  await ensureCommerceE2eSchemaPatches(admin, projectRef);
   await ensureCommerceE2eSeeds(admin, projectRef);
 } catch (seedError) {
   const reason =

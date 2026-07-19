@@ -43,7 +43,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run dev',
+    command: 'node scripts/start-e2e-dev.mjs',
     url: 'http://localhost:8080',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
@@ -52,6 +52,7 @@ export default defineConfig({
       VITE_SUPABASE_URL: supabaseUrl,
       VITE_SUPABASE_ANON_KEY: supabaseAnonKey,
       VITE_SUPABASE_PUBLISHABLE_KEY: supabaseAnonKey,
+      VITE_E2E_PAYMENT_STUB: process.env.VITE_E2E_PAYMENT_STUB ?? 'true',
     },
   },
 });

@@ -10,6 +10,7 @@ import {
   type SeededStore,
   type SeededProduct,
 } from './paid-vertical-seed';
+import { ensureE2eSchemaPatches } from './e2e-schema-patches';
 import { seedStorePhysicalSubscriptionTrial } from './seed-physical-subscription';
 
 export type MixedCartFixture = {
@@ -69,6 +70,7 @@ export async function seedMixedCartFixture(
   runId: string
 ): Promise<MixedCartFixture> {
   assertSafeE2ESupabaseUrl(resolveE2ESupabaseUrl(), 'seedMixedCartFixture');
+  await ensureE2eSchemaPatches(admin);
   const vendor = await createE2EUser(admin, `e2e-mixed-vendor-${runId}@example.com`);
   const buyer = await createE2EUser(admin, `e2e-mixed-buyer-${runId}@example.com`);
   const store = await createServiceStore(admin, vendor.id, runId);

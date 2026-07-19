@@ -167,7 +167,10 @@ test.describe('Commerce type gating (E2E minimal)', () => {
         await seedStorePhysicalSubscriptionTrial(admin, storeId!);
       }
 
-      await loginSeededSeller(page, admin, email, { selectedStoreId: storeId! });
+      await loginSeededSeller(page, admin, email, {
+        selectedStoreId: storeId!,
+        password,
+      });
 
       const { mustHave, mustNotHave, forbiddenDirectPath } = typeAssertions[commerceType];
       const ownCreatePath = PRIMARY_PRODUCT_CREATE_PATH_BY_TYPE[commerceType];

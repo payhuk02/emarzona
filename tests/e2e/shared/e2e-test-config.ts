@@ -88,6 +88,20 @@ export async function loginAs(
   await waitForReactApp(page);
 }
 
+/** Connexion UI fiable quand le mot de passe est connu (utilisateurs seedés admin API). */
+export async function loginAsSeededUserWithPassword(
+  page: PlaywrightPage,
+  email: string,
+  password: string,
+  redirectPath = '/dashboard'
+): Promise<void> {
+  await loginAs(page, email, password);
+  if (!page.url().includes(redirectPath.split('?')[0])) {
+    await gotoApp(page, redirectPath);
+  }
+  await waitForReactApp(page);
+}
+
 /**
  * Connexion fiable pour utilisateurs créés via service role — évite signIn UI quand la clé publishable locale est invalide/tronquée.
  */
@@ -95,8 +109,14 @@ export async function loginAsSeededUser(
   page: PlaywrightPage,
   admin: SupabaseClient,
   email: string,
-  redirectPath = '/dashboard'
+  redirectPath = '/dashboard',
+  password?: string
 ): Promise<void> {
+  if (password) {
+    await loginAsSeededUserWithPassword(page, email, password, redirectPath);
+    return;
+  }
+
   const baseURL = process.env.PLAYWRIGHT_TEST_BASE_URL ?? 'http://localhost:8080';
   const supabaseUrl = process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL ?? '';
   if (!supabaseUrl) {

@@ -63,6 +63,52 @@ WHERE sp.product_id = p.id
 
 CREATE INDEX IF NOT EXISTS idx_service_products_store_id ON public.service_products(store_id);
 
+-- physical_products.store_id required by mixed-cart E2E seeds (PostgREST schema cache).
+ALTER TABLE public.physical_products
+  ADD COLUMN IF NOT EXISTS store_id UUID REFERENCES public.stores(id) ON DELETE CASCADE;
+
+UPDATE public.physical_products pp
+SET store_id = p.store_id
+FROM public.products p
+WHERE pp.product_id = p.id
+  AND pp.store_id IS NULL;
+
+CREATE INDEX IF NOT EXISTS idx_physical_products_store_id ON public.physical_products(store_id);
+
+-- Idempotent DDL callable from CI verify (service_role) without a separate patches-only run.
+CREATE OR REPLACE FUNCTION public.e2e_apply_schema_patches()
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  ALTER TABLE public.stores
+    ADD COLUMN IF NOT EXISTS total_orders INTEGER NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS total_revenue NUMERIC NOT NULL DEFAULT 0;
+
+  ALTER TABLE public.service_products
+    ADD COLUMN IF NOT EXISTS store_id UUID REFERENCES public.stores(id) ON DELETE CASCADE;
+
+  UPDATE public.service_products sp
+  SET store_id = p.store_id
+  FROM public.products p
+  WHERE sp.product_id = p.id
+    AND sp.store_id IS NULL;
+
+  ALTER TABLE public.physical_products
+    ADD COLUMN IF NOT EXISTS store_id UUID REFERENCES public.stores(id) ON DELETE CASCADE;
+
+  UPDATE public.physical_products pp
+  SET store_id = p.store_id
+  FROM public.products p
+  WHERE pp.product_id = p.id
+    AND pp.store_id IS NULL;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.e2e_apply_schema_patches() TO service_role;
+
 -- Store wizard + create flow RPCs (pg_dump --no-privileges may omit EXECUTE for authenticated).
 GRANT EXECUTE ON FUNCTION public.is_store_slug_available(text, uuid) TO authenticated, anon, service_role;
 

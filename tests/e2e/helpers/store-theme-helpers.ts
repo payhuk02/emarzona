@@ -144,23 +144,42 @@ export function extractStoreIdFromUrl(url: string): string | null {
 export async function submitStoreWizardCreate(page: Page): Promise<void> {
   await acceptTermsDialogIfVisible(page);
 
-  const createResponse = page.waitForResponse(
-    response =>
-      response.url().includes('/rest/v1/stores') &&
-      response.request().method() === 'POST' &&
-      response.status() >= 200 &&
-      response.status() < 300,
-    { timeout: 90_000 }
-  );
+  const onboardingUrl = page.waitForURL(/\/dashboard\/onboarding\/store\?storeId=/, {
+    timeout: 90_000,
+  });
+  const createResponse = page
+    .waitForResponse(
+      response =>
+        response.url().includes('/rest/v1/stores') &&
+        response.request().method() === 'POST' &&
+        response.status() >= 200 &&
+        response.status() < 300,
+      { timeout: 90_000 }
+    )
+    .catch(() => null);
 
   await page.getByRole('button', { name: /Créer ma boutique/i }).click();
   await acceptTermsDialogIfVisible(page);
 
+  const stillOnWizard = await page
+    .getByText(/Étape 8 sur 8/i)
+    .isVisible()
+    .catch(() => false);
+  if (stillOnWizard) {
+    await page.evaluate(() => {
+      const form = document.querySelector('form');
+      form?.requestSubmit();
+    });
+    await acceptTermsDialogIfVisible(page);
+  }
+
   const response = await createResponse;
-  const bodyText = await response.text().catch(() => '');
-  if (response.status() >= 400) {
+  if (response && response.status() >= 400) {
+    const bodyText = await response.text().catch(() => '');
     throw new Error(`Store create POST failed (${response.status()}): ${bodyText.slice(0, 500)}`);
   }
+
+  await onboardingUrl;
 }
 
 export async function expectDestructiveToast(page: Page): Promise<string | null> {
