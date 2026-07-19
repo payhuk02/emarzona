@@ -3,9 +3,9 @@
  *
  * Priority:
  *   1. E2E_SUPABASE_TEST_PROJECT_REF / SUPABASE_TEST_PROJECT_REF (process.env)
- *   2. .env.e2e.local → E2E_SUPABASE_TEST_PROJECT_REF
- *   3. .env.e2e.local → VITE_SUPABASE_TEST_URL
- *   4. .e2e-commerce-project-ref (single line, gitignored)
+ *   2. .e2e-commerce-project-ref (gitignored, explicit operator config)
+ *   3. .env.e2e.local → E2E_SUPABASE_TEST_PROJECT_REF
+ *   4. .env.e2e.local → VITE_SUPABASE_TEST_URL
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -18,13 +18,6 @@ export function resolveE2ECommerceProjectRef(root = process.cwd()) {
     process.env.SUPABASE_TEST_PROJECT_REF?.trim();
   if (fromEnv) return fromEnv;
 
-  const e2eLayer = loadEnvFile(resolve(root, '.env.e2e.local'));
-  const fromE2eRef = e2eLayer.E2E_SUPABASE_TEST_PROJECT_REF?.trim();
-  if (fromE2eRef) return fromE2eRef;
-
-  const refFromTestUrl = extractSupabaseProjectRef(e2eLayer.VITE_SUPABASE_TEST_URL?.trim() ?? '');
-  if (refFromTestUrl) return refFromTestUrl;
-
   const configPath = resolve(root, '.e2e-commerce-project-ref');
   if (existsSync(configPath)) {
     const line = readFileSync(configPath, 'utf8')
@@ -33,6 +26,13 @@ export function resolveE2ECommerceProjectRef(root = process.cwd()) {
       .find(l => l && !l.startsWith('#'));
     if (line) return line.split(/\s+/)[0];
   }
+
+  const e2eLayer = loadEnvFile(resolve(root, '.env.e2e.local'));
+  const fromE2eRef = e2eLayer.E2E_SUPABASE_TEST_PROJECT_REF?.trim();
+  if (fromE2eRef) return fromE2eRef;
+
+  const refFromTestUrl = extractSupabaseProjectRef(e2eLayer.VITE_SUPABASE_TEST_URL?.trim() ?? '');
+  if (refFromTestUrl) return refFromTestUrl;
 
   return '';
 }

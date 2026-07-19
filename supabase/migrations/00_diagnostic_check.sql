@@ -187,12 +187,26 @@ BEGIN
   RAISE NOTICE '📊 DONNÉES EXISTANTES:';
   
   -- Digital
-  SELECT COUNT(*) INTO v_count FROM public.digital_products;
-  RAISE NOTICE '  Digital products: %', v_count;
-  
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'digital_products'
+  ) THEN
+    SELECT COUNT(*) INTO v_count FROM public.digital_products;
+    RAISE NOTICE '  Digital products: %', v_count;
+  ELSE
+    RAISE NOTICE '  Digital products: 0 (table manquante)';
+  END IF;
+
   -- Physical
-  SELECT COUNT(*) INTO v_count FROM public.physical_products;
-  RAISE NOTICE '  Physical products: %', v_count;
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'physical_products'
+  ) THEN
+    SELECT COUNT(*) INTO v_count FROM public.physical_products;
+    RAISE NOTICE '  Physical products: %', v_count;
+  ELSE
+    RAISE NOTICE '  Physical products: 0 (table manquante)';
+  END IF;
   
   -- Check variants table (old or new)
   IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'physical_product_variants') THEN
@@ -206,12 +220,26 @@ BEGIN
   END IF;
   
   -- Service
-  SELECT COUNT(*) INTO v_count FROM public.service_products;
-  RAISE NOTICE '  Service products: %', v_count;
-  
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'service_products'
+  ) THEN
+    SELECT COUNT(*) INTO v_count FROM public.service_products;
+    RAISE NOTICE '  Service products: %', v_count;
+  ELSE
+    RAISE NOTICE '  Service products: 0 (table manquante)';
+  END IF;
+
   -- Orders
-  SELECT COUNT(*) INTO v_count FROM public.order_items;
-  RAISE NOTICE '  Order items: %', v_count;
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'order_items'
+  ) THEN
+    SELECT COUNT(*) INTO v_count FROM public.order_items;
+    RAISE NOTICE '  Order items: %', v_count;
+  ELSE
+    RAISE NOTICE '  Order items: 0 (table manquante)';
+  END IF;
   
   RAISE NOTICE '';
 END $$;

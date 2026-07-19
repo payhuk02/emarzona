@@ -15,8 +15,8 @@
  *
  * Project ref resolution (first match wins):
  *   - E2E_SUPABASE_TEST_PROJECT_REF / SUPABASE_TEST_PROJECT_REF
- *   - .env.e2e.local → E2E_SUPABASE_TEST_PROJECT_REF or VITE_SUPABASE_TEST_URL
  *   - .e2e-commerce-project-ref (gitignored, single line)
+ *   - .env.e2e.local → E2E_SUPABASE_TEST_PROJECT_REF or VITE_SUPABASE_TEST_URL
  *
  * Usage:
  *   npm run setup:commerce-e2e-secret
@@ -24,6 +24,7 @@
  *   E2E_SUPABASE_TEST_PROJECT_REF=<ref> npm run setup:commerce-e2e-secret
  *   npm run setup:commerce-e2e-secret -- --local-only   # skip gh, update .env.e2e.local only
  *   npm run setup:commerce-e2e-secret -- --mirror-prod-secrets   # CI skip mode (prod URL → verify skips destructive E2E)
+ *   npm run setup:commerce-e2e-secret:from-env   # keys from Dashboard when Management API returns 403
  */
 import { execSync, spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
@@ -40,6 +41,7 @@ const args = new Set(process.argv.slice(2));
 const LOCAL_ONLY = args.has('--local-only');
 const LIST_PROJECTS = args.has('--list-projects');
 const MIRROR_PROD_SECRETS = args.has('--mirror-prod-secrets');
+const FROM_ENV = args.has('--from-env');
 const GH_REPO = process.env.GH_REPO?.trim() || 'payhuk02/emarzona';
 
 const SERVICE_ROLE_SECRET = 'SUPABASE_TEST_SERVICE_ROLE_KEY';
@@ -114,8 +116,8 @@ function assertNonProductionRef(projectRef) {
   }
 }
 
-const accessToken = resolveAccessToken();
-if (!accessToken) {
+const accessToken = FROM_ENV ? null : resolveAccessToken();
+if (!FROM_ENV && !accessToken) {
   console.error('Missing SUPABASE_ACCESS_TOKEN.');
   console.error('Create one at https://supabase.com/dashboard/account/tokens');
   console.error('Or login via Supabase CLI (Windows: token read from Credential Manager).');
@@ -154,36 +156,60 @@ if (MIRROR_PROD_SECRETS) {
 
 const PROJECT_URL = `https://${PROJECT_REF}.supabase.co`;
 
-const response = await fetch(
-  `https://api.supabase.com/v1/projects/${PROJECT_REF}/api-keys?reveal=true`,
-  {
-    headers: { Authorization: `Bearer ${accessToken}` },
+let serviceKey;
+let publishableKey;
+let serviceKeyLabel = 'env';
+let publishableKeyLabel = 'env';
+
+if (FROM_ENV) {
+  serviceKey = process.env.SUPABASE_TEST_SERVICE_ROLE_KEY?.trim() ?? '';
+  publishableKey = process.env.VITE_SUPABASE_TEST_ANON_KEY?.trim() ?? '';
+  if (!serviceKey || !publishableKey) {
+    console.error('Missing SUPABASE_TEST_SERVICE_ROLE_KEY or VITE_SUPABASE_TEST_ANON_KEY.');
+    console.error('Copy sb_secret_... and sb_publishable_... from Supabase Dashboard → Project Settings → API Keys.');
+    console.error('Then: npm run setup:commerce-e2e-secret:from-env');
+    process.exit(1);
   }
-);
+} else {
+  const response = await fetch(
+    `https://api.supabase.com/v1/projects/${PROJECT_REF}/api-keys?reveal=true`,
+    {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    }
+  );
 
-if (!response.ok) {
-  const body = await response.text();
-  console.error(`Management API error (${response.status}): ${body}`);
-  process.exit(1);
+  if (!response.ok) {
+    const body = await response.text();
+    console.error(`Management API error (${response.status}): ${body}`);
+    if (response.status === 403) {
+      console.error('');
+      console.error('If the E2E project is on another Supabase account, copy API keys from the Dashboard and run:');
+      console.error('  npm run setup:commerce-e2e-secret:from-env');
+    }
+    process.exit(1);
+  }
+
+  /** @type {Array<{ name: string; type: string; api_key: string }>} */
+  const keys = await response.json();
+
+  const serviceKeyEntry = pickKey(keys, 'secret', PREFERRED_SERVICE_NAMES);
+  const publishableKeyEntry = pickKey(keys, 'publishable', PREFERRED_PUBLISHABLE_NAMES);
+
+  if (!serviceKeyEntry?.api_key?.startsWith('sb_secret_')) {
+    console.error('No sb_secret_ service role key found.');
+    process.exit(1);
+  }
+  if (!publishableKeyEntry?.api_key?.startsWith('sb_publishable_')) {
+    console.error('No sb_publishable_ anon key found.');
+    process.exit(1);
+  }
+
+  serviceKey = serviceKeyEntry.api_key;
+  publishableKey = publishableKeyEntry.api_key;
+  serviceKeyLabel = serviceKeyEntry.name;
+  publishableKeyLabel = publishableKeyEntry.name;
 }
 
-/** @type {Array<{ name: string; type: string; api_key: string }>} */
-const keys = await response.json();
-
-const serviceKeyEntry = pickKey(keys, 'secret', PREFERRED_SERVICE_NAMES);
-const publishableKeyEntry = pickKey(keys, 'publishable', PREFERRED_PUBLISHABLE_NAMES);
-
-if (!serviceKeyEntry?.api_key?.startsWith('sb_secret_')) {
-  console.error('No sb_secret_ service role key found.');
-  process.exit(1);
-}
-if (!publishableKeyEntry?.api_key?.startsWith('sb_publishable_')) {
-  console.error('No sb_publishable_ anon key found.');
-  process.exit(1);
-}
-
-const serviceKey = serviceKeyEntry.api_key;
-const publishableKey = publishableKeyEntry.api_key;
 assertAsciiKey(serviceKey, 'Service role key');
 assertAsciiKey(publishableKey, 'Publishable key');
 
@@ -196,7 +222,7 @@ const admin = createClient(PROJECT_URL, serviceKey, {
 });
 const { error: adminError } = await admin.auth.admin.listUsers({ page: 1, perPage: 1 });
 if (adminError) {
-  console.error(`Service role key "${serviceKeyEntry.name}" failed: ${adminError.message}`);
+  console.error(`Service role key "${serviceKeyLabel}" failed: ${adminError.message}`);
   process.exit(1);
 }
 
@@ -216,13 +242,13 @@ if (restError) {
         'Apply Emarzona migrations on this project before running wizard E2E.'
     );
   } else {
-    console.error(`Publishable key "${publishableKeyEntry.name}" failed REST ping: ${restError.message}`);
+    console.error(`Publishable key "${publishableKeyLabel}" failed REST ping: ${restError.message}`);
     process.exit(1);
   }
 }
 
-console.log(`Validated service role "${serviceKeyEntry.name}" (${serviceKey.slice(0, 16)}...)`);
-console.log(`Validated publishable "${publishableKeyEntry.name}" (${publishableKey.slice(0, 20)}...)`);
+console.log(`Validated service role "${serviceKeyLabel}" (${serviceKey.slice(0, 16)}...)`);
+console.log(`Validated publishable "${publishableKeyLabel}" (${publishableKey.slice(0, 20)}...)`);
 console.log(`Target project: ${PROJECT_REF} (${PROJECT_URL})`);
 
 if (!LOCAL_ONLY) {
