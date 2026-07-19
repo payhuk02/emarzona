@@ -52,9 +52,10 @@ collect_prod_extensions() {
 
 dump_prod_public_schema() {
   echo "Dumping prod public schema (schema-only, no data)..."
+  export PGPASSWORD="${SUPABASE_PROD_DB_PASSWORD}"
   prod_psql -Atc "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='public';" \
     | xargs -I{} echo "Prod public tables: {}"
-  "${PG_DUMP}" -h "${POOLER_HOST}" -p 5432 -U "postgres.${PROD_REF}" -d postgres \
+  PGPASSWORD="${SUPABASE_PROD_DB_PASSWORD}" "${PG_DUMP}" -h "${POOLER_HOST}" -p 5432 -U "postgres.${PROD_REF}" -d postgres \
     --schema=public --schema-only --no-owner --no-privileges > /tmp/e2e-schema.sql
   sed -i '/^CREATE SCHEMA public;/d' /tmp/e2e-schema.sql
   sed -i '/^COMMENT ON SCHEMA public IS/d' /tmp/e2e-schema.sql
