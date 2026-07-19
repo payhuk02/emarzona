@@ -149,8 +149,6 @@ if (dump.status !== 0) {
 let schemaSql = dump.stdout.toString('utf8');
 schemaSql = schemaSql.replace(/^CREATE SCHEMA public;\s*$/m, '');
 schemaSql = schemaSql.replace(/^COMMENT ON SCHEMA public IS.*$/m, '');
-schemaSql = schemaSql.replace(/public\.gin_trgm_ops/g, 'extensions.gin_trgm_ops');
-schemaSql = schemaSql.replace(/public\.gist_trgm_ops/g, 'extensions.gist_trgm_ops');
 writeFileSync(schemaFile, schemaSql);
 console.log(`Schema written: ${schemaFile} (${schemaSql.length} bytes)`);
 

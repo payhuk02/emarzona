@@ -37,8 +37,10 @@ jobs:
             echo "::error::Set GitHub secrets SUPABASE_PROD_DB_PASSWORD and E2E_SUPABASE_DB_PASSWORD (Dashboard > Database password)."
             exit 1
           fi
-          PROD_URL="postgresql://postgres.${PROD_REF}@${POOLER_HOST}:5432/postgres"
-          E2E_URL="postgresql://postgres.${E2E_REF}@${POOLER_HOST}:5432/postgres"
+          E2E_DIRECT_HOST="db.${E2E_REF}.supabase.co"
+          e2e_psql() {
+            PGPASSWORD="${E2E_SUPABASE_DB_PASSWORD}" psql -h "${E2E_DIRECT_HOST}" -p 5432 -U postgres -d postgres "$@"
+          }
           export PGPASSWORD="${SUPABASE_PROD_DB_PASSWORD}"
           echo "Collecting prod extensions (schema-matched)..."
           psql -h "${POOLER_HOST}" -p 5432 -U "postgres.${PROD_REF}" -d postgres -Atc \
@@ -54,12 +56,9 @@ jobs:
             --schema=public --schema-only --no-owner --no-privileges > /tmp/e2e-schema.sql
           sed -i '/^CREATE SCHEMA public;/d' /tmp/e2e-schema.sql
           sed -i '/^COMMENT ON SCHEMA public IS/d' /tmp/e2e-schema.sql
-          # pg_dump may qualify extension opclasses as public even when installed in extensions.
-          sed -i 's/public\.gin_trgm_ops/extensions.gin_trgm_ops/g' /tmp/e2e-schema.sql
-          sed -i 's/public\.gist_trgm_ops/extensions.gist_trgm_ops/g' /tmp/e2e-schema.sql
-          echo "Resetting E2E public schema..."
-          export PGPASSWORD="${E2E_SUPABASE_DB_PASSWORD}"
-          psql -h "${POOLER_HOST}" -p 5432 -U "postgres.${E2E_REF}" -d postgres -v ON_ERROR_STOP=1 <<'EOSQL'
+          echo "Resetting E2E public schema (direct DB, avoids pooler lock limits)..."
+          if ! e2e_psql -v ON_ERROR_STOP=1 <<'EOSQL'
+          SET max_locks_per_transaction = 2048;
           DROP SCHEMA IF EXISTS public CASCADE;
           CREATE SCHEMA public;
           GRANT ALL ON SCHEMA public TO postgres;
@@ -67,16 +66,49 @@ jobs:
           GRANT ALL ON SCHEMA public TO anon, authenticated, service_role;
           CREATE SCHEMA IF NOT EXISTS extensions;
           EOSQL
+          then
+            echo "DROP SCHEMA CASCADE hit lock limits; falling back to batched drops..."
+            e2e_psql -v ON_ERROR_STOP=1 <<'EOSQL'
+          DO $$
+          DECLARE r RECORD;
+          BEGIN
+            FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public') LOOP
+              EXECUTE format('DROP TABLE IF EXISTS public.%I CASCADE', r.tablename);
+            END LOOP;
+            FOR r IN (
+              SELECT sequence_name FROM information_schema.sequences WHERE sequence_schema = 'public'
+            ) LOOP
+              EXECUTE format('DROP SEQUENCE IF EXISTS public.%I CASCADE', r.sequence_name);
+            END LOOP;
+            FOR r IN (
+              SELECT p.oid, p.proname, pg_get_function_identity_arguments(p.oid) AS args
+              FROM pg_proc p
+              JOIN pg_namespace n ON n.oid = p.pronamespace
+              WHERE n.nspname = 'public'
+            ) LOOP
+              EXECUTE format('DROP FUNCTION IF EXISTS public.%I(%s) CASCADE', r.proname, r.args);
+            END LOOP;
+            FOR r IN (SELECT viewname FROM pg_views WHERE schemaname = 'public') LOOP
+              EXECUTE format('DROP VIEW IF EXISTS public.%I CASCADE', r.viewname);
+            END LOOP;
+            FOR r IN (SELECT typname FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace WHERE n.nspname = 'public' AND t.typtype = 'e') LOOP
+              EXECUTE format('DROP TYPE IF EXISTS public.%I CASCADE', r.typname);
+            END LOOP;
+          END $$;
+          CREATE SCHEMA IF NOT EXISTS public;
+          GRANT ALL ON SCHEMA public TO postgres;
+          GRANT ALL ON SCHEMA public TO public;
+          GRANT ALL ON SCHEMA public TO anon, authenticated, service_role;
+          CREATE SCHEMA IF NOT EXISTS extensions;
+          EOSQL
+          fi
           echo "Enabling prod-matched extensions on E2E..."
-          psql -h "${POOLER_HOST}" -p 5432 -U "postgres.${E2E_REF}" -d postgres \
-            -v ON_ERROR_STOP=0 -f /tmp/e2e-extensions.sql
+          e2e_psql -v ON_ERROR_STOP=0 -f /tmp/e2e-extensions.sql
           echo "Applying to E2E (${E2E_REF})..."
-          export PGPASSWORD="${E2E_SUPABASE_DB_PASSWORD}"
-          psql -h "${POOLER_HOST}" -p 5432 -U "postgres.${E2E_REF}" -d postgres \
-            --set ON_ERROR_STOP=1 -f /tmp/e2e-schema.sql
-          psql -h "${POOLER_HOST}" -p 5432 -U "postgres.${E2E_REF}" -d postgres \
+          e2e_psql --set ON_ERROR_STOP=1 -f /tmp/e2e-schema.sql
+          e2e_psql \
             -c "SELECT COUNT(*) AS public_tables FROM information_schema.tables WHERE table_schema='public';"
-          psql -h "${POOLER_HOST}" -p 5432 -U "postgres.${E2E_REF}" -d postgres \
+          e2e_psql \
             -c "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='stores') AS has_stores;"
 
       - name: Mark migrations applied on E2E (optional follow-up locally)
