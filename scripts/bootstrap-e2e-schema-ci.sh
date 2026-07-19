@@ -6,8 +6,13 @@ set -euo pipefail
 PROD_REF="${PROD_REF:-hbdnzajbyjakdhuavrvb}"
 E2E_REF="${E2E_REF:-ufbztturuwwazfcvhvuu}"
 POOLER_HOST="${POOLER_HOST:-aws-1-eu-west-2.pooler.supabase.com}"
-E2E_DIRECT_HOST="db.${E2E_REF}.supabase.co"
 MIN_PUBLIC_TABLES="${MIN_PUBLIC_TABLES:-500}"
+
+if [ -d /usr/lib/postgresql/17/bin ]; then
+  export PATH="/usr/lib/postgresql/17/bin:${PATH}"
+fi
+PG_DUMP="${PG_DUMP:-pg_dump}"
+PSQL="${PSQL:-psql}"
 
 require_env() {
   if [ -z "${SUPABASE_PROD_DB_PASSWORD:-}" ] || [ -z "${E2E_SUPABASE_DB_PASSWORD:-}" ]; then
@@ -21,15 +26,15 @@ prod_psql() {
 }
 
 e2e_psql() {
-  PGPASSWORD="${E2E_SUPABASE_DB_PASSWORD}" psql -h "${E2E_DIRECT_HOST}" -p 5432 -U postgres -d postgres "$@"
+  PGPASSWORD="${E2E_SUPABASE_DB_PASSWORD}" psql -h "${POOLER_HOST}" -p 5432 -U "postgres.${E2E_REF}" -d postgres "$@"
 }
 
 preflight() {
   echo "Preflight: pg_dump version"
-  pg_dump --version
+  "${PG_DUMP}" --version
   echo "Preflight: prod connectivity"
   prod_psql -Atc "SELECT current_database(), version();" | head -1
-  echo "Preflight: E2E connectivity (direct DB ${E2E_DIRECT_HOST})"
+  echo "Preflight: E2E connectivity (pooler ${POOLER_HOST})"
   e2e_psql -Atc "SELECT current_database(), version();" | head -1
 }
 
@@ -49,7 +54,7 @@ dump_prod_public_schema() {
   echo "Dumping prod public schema (schema-only, no data)..."
   prod_psql -Atc "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='public';" \
     | xargs -I{} echo "Prod public tables: {}"
-  pg_dump -h "${POOLER_HOST}" -p 5432 -U "postgres.${PROD_REF}" -d postgres \
+  "${PG_DUMP}" -h "${POOLER_HOST}" -p 5432 -U "postgres.${PROD_REF}" -d postgres \
     --schema=public --schema-only --no-owner --no-privileges > /tmp/e2e-schema.sql
   sed -i '/^CREATE SCHEMA public;/d' /tmp/e2e-schema.sql
   sed -i '/^COMMENT ON SCHEMA public IS/d' /tmp/e2e-schema.sql
@@ -60,7 +65,7 @@ dump_prod_public_schema() {
 }
 
 reset_e2e_public() {
-  echo "Resetting E2E public schema via batched drops (direct DB, avoids lock limits)..."
+  echo "Resetting E2E public schema via batched drops (pooler, avoids CASCADE lock limits)..."
   e2e_psql -v ON_ERROR_STOP=1 <<'EOSQL'
 CREATE SCHEMA IF NOT EXISTS public;
 CREATE SCHEMA IF NOT EXISTS extensions;
