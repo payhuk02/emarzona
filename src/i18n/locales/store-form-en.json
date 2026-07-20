@@ -561,5 +561,14 @@
       "customDomainDescription": "Connect your own domain to your store",
       "manageDomains": "Manage my custom domains"
     }
+  },
+  "express": {
+    "title": "Create your store in seconds",
+    "subtitle": "Name, business type, and theme — configure the rest later.",
+    "nameRequired": "Store name is required.",
+    "urlPreview": "https://{{slug}}.myemarzona.shop",
+    "themeLabel": "Visual theme",
+    "deferHint": "Logo, SEO, legal pages, and analytics can be configured after creation via the activation checklist.",
+    "advancedSetup": "Advanced setup (8 steps)"
   }
 }

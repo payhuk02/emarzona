@@ -1347,6 +1347,7 @@ const StoreForm = ({
                     description={t('store.form.branding.logoDescription')}
                     maxSize={5}
                     imageType="store-logo"
+                    storeId={initialData?.id}
                   />
 
                   <StoreImageUpload
@@ -1357,6 +1358,7 @@ const StoreForm = ({
                     description={t('store.form.branding.bannerDescription')}
                     maxSize={10}
                     imageType="store-banner"
+                    storeId={initialData?.id}
                   />
 
                   <div className="pt-4 border-t">
@@ -1372,6 +1374,7 @@ const StoreForm = ({
                         description={t('store.form.branding.faviconDescription')}
                         maxSize={1}
                         imageType="store-favicon"
+                        storeId={initialData?.id}
                       />
 
                       <StoreImageUpload
@@ -1382,6 +1385,7 @@ const StoreForm = ({
                         description={t('store.form.branding.appleTouchDescription')}
                         maxSize={2}
                         imageType="store-apple-touch-icon"
+                        storeId={initialData?.id}
                       />
 
                       <StoreImageUpload
@@ -1392,6 +1396,7 @@ const StoreForm = ({
                         description={t('store.form.branding.watermarkDescription')}
                         maxSize={5}
                         imageType="store-watermark"
+                        storeId={initialData?.id}
                       />
 
                       <StoreImageUpload
@@ -1402,6 +1407,7 @@ const StoreForm = ({
                         description={t('store.form.branding.placeholderDescription')}
                         maxSize={5}
                         imageType="store-placeholder"
+                        storeId={initialData?.id}
                       />
                     </div>
                   </div>

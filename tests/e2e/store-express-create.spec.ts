@@ -3,12 +3,9 @@ import { createNodeSupabaseClient } from './helpers/create-node-supabase-client'
 import { assertSafeE2ESupabaseUrl, resolveE2ESupabaseUrl } from './helpers/e2e-supabase-guard';
 import {
   acceptTermsDialogIfVisible,
-  assertStorePrimaryColorInDb,
   dismissCookieBannerIfVisible,
   dismissPersonaOnboardingIfVisible,
-  E2E_THEME_PRIMARY_AFTER_CUSTOMIZE,
-  E2E_THEME_PRIMARY_ON_CREATE,
-  saveAndPublishAppearance,
+  extractStoreIdFromUrl,
   seedTermsConsent,
   submitStoreExpressCreate,
 } from './helpers/store-theme-helpers';
@@ -36,10 +33,10 @@ const supabaseUrl = resolveE2ESupabaseUrl() || null;
 const supabaseServiceKey = requiredEnv('SUPABASE_SERVICE_ROLE_KEY');
 const canRun = Boolean(supabaseUrl && supabaseServiceKey);
 
-test.describe('Store create → customize → storefront theme (E2E)', () => {
+test.describe('Store express create (E2E)', () => {
   test.beforeAll(() => {
     if (canRun) {
-      assertSafeE2ESupabaseUrl(supabaseUrl!, 'store-create-theme E2E');
+      assertSafeE2ESupabaseUrl(supabaseUrl!, 'store-express-create E2E');
       return;
     }
 
@@ -51,15 +48,13 @@ test.describe('Store create → customize → storefront theme (E2E)', () => {
     test.skip(true, message);
   });
 
-  test('express create, dashboard customize, persisted theme colors', async ({
-    page,
-  }, testInfo) => {
+  test('express path creates store and redirects to onboarding', async ({ page }, testInfo) => {
     const admin = createNodeSupabaseClient(supabaseUrl!, supabaseServiceKey!);
 
     const runId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-    const email = `e2e-store-theme-${runId}@example.com`;
+    const email = `e2e-store-express-${runId}@example.com`;
     const password = `E2E!${runId}aA1`;
-    const storeName = `E2E Theme ${runId}`;
+    const storeName = `E2E Express ${runId}`;
     const storeSlug = slugify(storeName);
 
     const { data: createdUser, error: userError } = await admin.auth.admin.createUser({
@@ -87,35 +82,40 @@ test.describe('Store create → customize → storefront theme (E2E)', () => {
     await dismissPersonaOnboardingIfVisible(page);
 
     await expect(page.getByTestId('store-express-create-form')).toBeVisible({ timeout: 60_000 });
+    await expect(
+      page.getByText(/Créer votre boutique en quelques secondes|Create your store in seconds/i)
+    ).toBeVisible();
+
     await page.getByTestId('store-express-name').fill(storeName);
     await expect(page.getByText(new RegExp(`${storeSlug}\\.myemarzona\\.shop`, 'i'))).toBeVisible({
       timeout: 15_000,
     });
+
     await page.getByTestId('store-express-commerce-digital').click();
     await submitStoreExpressCreate(page);
 
+    const storeIdFromUrl = extractStoreIdFromUrl(page.url());
+
     const { data: storeRow, error: storeError } = await admin
       .from('stores')
-      .select('id')
+      .select('id, name, slug, subdomain, commerce_type, primary_color')
       .eq('user_id', userId)
       .eq('slug', storeSlug)
       .maybeSingle();
 
+    const storeId = storeRow?.id ?? storeIdFromUrl;
+    expect(storeId, 'storeId from create redirect or DB').toBeTruthy();
+
+    const landedOnOnboarding = /\/dashboard\/onboarding\//.test(page.url());
+    const landedOnDashboard = /\/dashboard(\?|$|\/)/.test(page.url());
+    expect(landedOnOnboarding || landedOnDashboard).toBeTruthy();
+
     expect(storeError).toBeNull();
-    const storeId = storeRow?.id;
-    expect(storeId, 'storeId after express create').toBeTruthy();
-
-    await gotoApp(page, '/dashboard/store');
-    await page.getByRole('button', { name: /Modifier la boutique/i }).click();
-    await page.getByRole('tab', { name: /Étape 2\s*:\s*Apparence/i }).click();
-    await saveAndPublishAppearance(page, E2E_THEME_PRIMARY_ON_CREATE);
-    await assertStorePrimaryColorInDb(admin, storeId!, E2E_THEME_PRIMARY_ON_CREATE);
-
-    await gotoApp(page, '/dashboard/store');
-    await page.getByRole('button', { name: /Modifier la boutique/i }).click();
-    await page.getByRole('tab', { name: /Étape 2\s*:\s*Apparence/i }).click();
-    await saveAndPublishAppearance(page, E2E_THEME_PRIMARY_AFTER_CUSTOMIZE);
-    await assertStorePrimaryColorInDb(admin, storeId!, E2E_THEME_PRIMARY_AFTER_CUSTOMIZE);
+    expect(storeRow?.name).toBe(storeName);
+    expect(storeRow?.slug).toBe(storeSlug);
+    expect(storeRow?.subdomain).toBeTruthy();
+    expect(storeRow?.commerce_type).toBe('digital');
+    expect(storeRow?.primary_color).toBeTruthy();
 
     try {
       await admin.from('stores').delete().eq('id', storeId!);

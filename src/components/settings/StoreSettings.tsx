@@ -51,8 +51,15 @@ import { supabase } from '@/integrations/supabase/client';
 import { parseStoreCommerceType } from '@/lib/billing/store-commerce-access';
 import { getStoreOnboardingPath } from '@/lib/commerce/store-vertical-config';
 import StoreFormWizard from '@/components/store/StoreFormWizard';
+import { StoreExpressCreateForm } from '@/components/store/StoreExpressCreateForm';
 
-export const StoreSettings = ({ action }: { action?: string | null }) => {
+export const StoreSettings = ({
+  action,
+  createMode: createModeFromUrl,
+}: {
+  action?: string | null;
+  createMode?: string | null;
+}) => {
   const {
     stores,
     loading: storesLoading,
@@ -77,6 +84,7 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
     from: StoreCommerceType;
     to: StoreCommerceType;
   } | null>(null);
+  const [createMode, setCreateMode] = useState<'express' | 'advanced'>('express');
 
   const commerceTypeGuardQueries = useQueries({
     queries: stores.map(store => ({
@@ -122,8 +130,9 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
   useEffect(() => {
     if (action === 'create') {
       setActiveTab('create');
+      setCreateMode(createModeFromUrl === 'advanced' ? 'advanced' : 'express');
     }
-  }, [action]);
+  }, [action, createModeFromUrl]);
 
   const handleCommerceTypeDraftChange = (storeId: string, value: StoreCommerceType) => {
     setCommerceTypeDraft(prev => ({ ...prev, [storeId]: value }));
@@ -491,12 +500,30 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
                 existante avant d'en créer une nouvelle.
               </AlertDescription>
             </Alert>
+          ) : createMode === 'advanced' ? (
+            <div className="space-y-4">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground"
+                onClick={() => setCreateMode('express')}
+              >
+                ← Création express
+              </Button>
+              <StoreFormWizard
+                onSuccess={() => {
+                  void refreshStores();
+                  setActiveTab('list');
+                }}
+              />
+            </div>
           ) : (
-            <StoreFormWizard
+            <StoreExpressCreateForm
               onSuccess={() => {
                 void refreshStores();
-                setActiveTab('list');
               }}
+              onAdvancedSetup={() => setCreateMode('advanced')}
             />
           )}
         </TabsContent>

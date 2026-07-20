@@ -76,12 +76,21 @@ export async function saveStoreAppearanceDraft(
   form: StoreAppearanceFormDraft
 ): Promise<void> {
   const draft = appearanceFormToDraftRecord(form);
-  const { error } = await supabase
-    .from('stores')
-    .update({ appearance_draft: draft as never })
-    .eq('id', storeId);
+  const { error } = await supabase.rpc('save_store_appearance_draft', {
+    p_store_id: storeId,
+    p_draft: draft as never,
+  });
 
-  if (error) throw error;
+  if (error) {
+    // Fallback si migration pas encore déployée
+    const { error: legacyError } = await supabase
+      .from('stores')
+      .update({ appearance_draft: draft as never })
+      .eq('id', storeId);
+
+    if (legacyError) throw legacyError;
+    return;
+  }
 }
 
 export async function publishStoreAppearance(storeId: string): Promise<Store> {

@@ -316,6 +316,7 @@ export const StoreAppearanceTab = ({
                 aspectRatio="square"
                 description={t('store.appearance.logoHint')}
                 imageType="store-logo"
+                storeId={store.id}
               />
               <StoreImageUpload
                 label={t('store.appearance.bannerLabel')}
@@ -325,6 +326,7 @@ export const StoreAppearanceTab = ({
                 aspectRatio="banner"
                 description={t('store.appearance.bannerHint')}
                 imageType="store-banner"
+                storeId={store.id}
               />
               <Separator />
               <div className="space-y-4">
@@ -338,6 +340,7 @@ export const StoreAppearanceTab = ({
                     aspectRatio="square"
                     description={t('store.appearance.faviconHint')}
                     imageType="store-favicon"
+                    storeId={store.id}
                   />
                   <StoreImageUpload
                     label={t('store.appearance.appleTouchLabel')}
@@ -347,6 +350,7 @@ export const StoreAppearanceTab = ({
                     aspectRatio="square"
                     description={t('store.appearance.appleTouchHint')}
                     imageType="store-apple-touch-icon"
+                    storeId={store.id}
                   />
                   <StoreImageUpload
                     label={t('store.appearance.watermarkLabel')}
@@ -356,6 +360,7 @@ export const StoreAppearanceTab = ({
                     aspectRatio="square"
                     description={t('store.appearance.watermarkHint')}
                     imageType="store-watermark"
+                    storeId={store.id}
                   />
                   <StoreImageUpload
                     label={t('store.appearance.placeholderLabel')}
@@ -365,6 +370,7 @@ export const StoreAppearanceTab = ({
                     aspectRatio="square"
                     description={t('store.appearance.placeholderHint')}
                     imageType="store-placeholder"
+                    storeId={store.id}
                   />
                 </div>
               </div>

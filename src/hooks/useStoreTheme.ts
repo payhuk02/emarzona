@@ -5,6 +5,11 @@
 
 import { useMemo } from 'react';
 import type { Store } from '@/hooks/useStores';
+import {
+  sanitizeCssSize,
+  sanitizeHexColor,
+  sanitizeStoreFont,
+} from '@/lib/storefront/css-sanitize';
 
 export interface StoreTheme {
   // Couleurs
@@ -20,11 +25,11 @@ export interface StoreTheme {
   buttonSecondaryText: string;
   linkColor: string;
   linkHoverColor: string;
-  
+
   // Style
   borderRadius: 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full';
   shadowIntensity: 'none' | 'sm' | 'md' | 'lg' | 'xl';
-  
+
   // Typographie
   headingFont: string;
   bodyFont: string;
@@ -34,7 +39,7 @@ export interface StoreTheme {
   headingSizeH3: string;
   lineHeight: string;
   letterSpacing: string;
-  
+
   // Layout
   headerStyle: 'minimal' | 'standard' | 'extended';
   footerStyle: 'minimal' | 'standard' | 'extended';
@@ -45,7 +50,7 @@ export interface StoreTheme {
   navigationStyle: 'horizontal' | 'vertical' | 'mega';
 }
 
-const  DEFAULT_THEME: StoreTheme = {
+const DEFAULT_THEME: StoreTheme = {
   primaryColor: '#3b82f6',
   secondaryColor: '#8b5cf6',
   accentColor: '#f59e0b',
@@ -84,35 +89,43 @@ export const useStoreTheme = (store: Store | null): StoreTheme => {
     }
 
     return {
-      // Couleurs avec fallback sur valeurs par défaut
-      primaryColor: store.primary_color || DEFAULT_THEME.primaryColor,
-      secondaryColor: store.secondary_color || DEFAULT_THEME.secondaryColor,
-      accentColor: store.accent_color || DEFAULT_THEME.accentColor,
-      backgroundColor: store.background_color || DEFAULT_THEME.backgroundColor,
-      textColor: store.text_color || DEFAULT_THEME.textColor,
-      textSecondaryColor: store.text_secondary_color || DEFAULT_THEME.textSecondaryColor,
-      buttonPrimaryColor: store.button_primary_color || DEFAULT_THEME.buttonPrimaryColor,
-      buttonPrimaryText: store.button_primary_text || DEFAULT_THEME.buttonPrimaryText,
-      buttonSecondaryColor: store.button_secondary_color || DEFAULT_THEME.buttonSecondaryColor,
-      buttonSecondaryText: store.button_secondary_text || DEFAULT_THEME.buttonSecondaryText,
-      linkColor: store.link_color || DEFAULT_THEME.linkColor,
-      linkHoverColor: store.link_hover_color || DEFAULT_THEME.linkHoverColor,
-      
-      // Style
+      primaryColor: sanitizeHexColor(store.primary_color, DEFAULT_THEME.primaryColor),
+      secondaryColor: sanitizeHexColor(store.secondary_color, DEFAULT_THEME.secondaryColor),
+      accentColor: sanitizeHexColor(store.accent_color, DEFAULT_THEME.accentColor),
+      backgroundColor: sanitizeHexColor(store.background_color, DEFAULT_THEME.backgroundColor),
+      textColor: sanitizeHexColor(store.text_color, DEFAULT_THEME.textColor),
+      textSecondaryColor: sanitizeHexColor(
+        store.text_secondary_color,
+        DEFAULT_THEME.textSecondaryColor
+      ),
+      buttonPrimaryColor: sanitizeHexColor(
+        store.button_primary_color,
+        DEFAULT_THEME.buttonPrimaryColor
+      ),
+      buttonPrimaryText: sanitizeHexColor(
+        store.button_primary_text,
+        DEFAULT_THEME.buttonPrimaryText
+      ),
+      buttonSecondaryColor: sanitizeHexColor(
+        store.button_secondary_color,
+        DEFAULT_THEME.buttonSecondaryColor
+      ),
+      buttonSecondaryText: sanitizeHexColor(
+        store.button_secondary_text,
+        DEFAULT_THEME.buttonSecondaryText
+      ),
+      linkColor: sanitizeHexColor(store.link_color, DEFAULT_THEME.linkColor),
+      linkHoverColor: sanitizeHexColor(store.link_hover_color, DEFAULT_THEME.linkHoverColor),
       borderRadius: store.border_radius || DEFAULT_THEME.borderRadius,
       shadowIntensity: store.shadow_intensity || DEFAULT_THEME.shadowIntensity,
-      
-      // Typographie
-      headingFont: store.heading_font || DEFAULT_THEME.headingFont,
-      bodyFont: store.body_font || DEFAULT_THEME.bodyFont,
-      fontSizeBase: store.font_size_base || DEFAULT_THEME.fontSizeBase,
-      headingSizeH1: store.heading_size_h1 || DEFAULT_THEME.headingSizeH1,
-      headingSizeH2: store.heading_size_h2 || DEFAULT_THEME.headingSizeH2,
-      headingSizeH3: store.heading_size_h3 || DEFAULT_THEME.headingSizeH3,
-      lineHeight: store.line_height || DEFAULT_THEME.lineHeight,
-      letterSpacing: store.letter_spacing || DEFAULT_THEME.letterSpacing,
-      
-      // Layout
+      headingFont: sanitizeStoreFont(store.heading_font, DEFAULT_THEME.headingFont),
+      bodyFont: sanitizeStoreFont(store.body_font, DEFAULT_THEME.bodyFont),
+      fontSizeBase: sanitizeCssSize(store.font_size_base, DEFAULT_THEME.fontSizeBase),
+      headingSizeH1: sanitizeCssSize(store.heading_size_h1, DEFAULT_THEME.headingSizeH1),
+      headingSizeH2: sanitizeCssSize(store.heading_size_h2, DEFAULT_THEME.headingSizeH2),
+      headingSizeH3: sanitizeCssSize(store.heading_size_h3, DEFAULT_THEME.headingSizeH3),
+      lineHeight: sanitizeCssSize(store.line_height, DEFAULT_THEME.lineHeight),
+      letterSpacing: sanitizeCssSize(store.letter_spacing, DEFAULT_THEME.letterSpacing),
       headerStyle: store.header_style || DEFAULT_THEME.headerStyle,
       footerStyle: store.footer_style || DEFAULT_THEME.footerStyle,
       sidebarEnabled: store.sidebar_enabled ?? DEFAULT_THEME.sidebarEnabled,
@@ -128,7 +141,7 @@ export const useStoreTheme = (store: Store | null): StoreTheme => {
  * Convertit la valeur de borderRadius en valeur CSS
  */
 export const getBorderRadiusValue = (borderRadius: StoreTheme['borderRadius']): string => {
-  const  map: Record<StoreTheme['borderRadius'], string> = {
+  const map: Record<StoreTheme['borderRadius'], string> = {
     none: '0',
     sm: '0.125rem',
     md: '0.375rem',
@@ -143,7 +156,7 @@ export const getBorderRadiusValue = (borderRadius: StoreTheme['borderRadius']): 
  * Convertit la valeur de shadowIntensity en valeur CSS
  */
 export const getShadowValue = (shadowIntensity: StoreTheme['shadowIntensity']): string => {
-  const  map: Record<StoreTheme['shadowIntensity'], string> = {
+  const map: Record<StoreTheme['shadowIntensity'], string> = {
     none: 'none',
     sm: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
     md: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
@@ -152,10 +165,3 @@ export const getShadowValue = (shadowIntensity: StoreTheme['shadowIntensity']): 
   };
   return map[shadowIntensity];
 };
-
-
-
-
-
-
-

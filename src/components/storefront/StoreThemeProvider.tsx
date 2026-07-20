@@ -302,15 +302,17 @@ const generateThemeCSS = (theme: StoreTheme): string => {
  * Charge une police Google Fonts si elle n'est pas déjà chargée
  */
 const loadGoogleFont = (fontName: string): void => {
-  // Vérifier si la police est déjà chargée
-  const existingLink = document.querySelector(`link[href*="${fontName.replace(/\s+/g, '+')}"]`);
+  const safeFont = fontName.replace(/[^a-zA-Z0-9\s-]/g, '').trim();
+  if (!safeFont) return;
+
+  const encoded = encodeURIComponent(safeFont).replace(/%20/g, '+');
+  const existingLink = document.querySelector(`link[href*="${encoded}"]`);
   if (existingLink) {
     return;
   }
 
-  // Créer le lien pour charger la police
   const link = document.createElement('link');
   link.rel = 'stylesheet';
-  link.href = `https://fonts.googleapis.com/css2?family=${fontName.replace(/\s+/g, '+')}:wght@400;500;600;700&display=swap`;
+  link.href = `https://fonts.googleapis.com/css2?family=${encoded}:wght@400;500;600;700&display=swap`;
   document.head.appendChild(link);
 };

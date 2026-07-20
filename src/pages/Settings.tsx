@@ -139,7 +139,10 @@ const Settings = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="px-3 pb-3 sm:px-4 sm:pb-4 md:px-6 md:pb-6">
-                <StoreSettings action={searchParams.get('action')} />
+                <StoreSettings
+                  action={searchParams.get('action')}
+                  createMode={searchParams.get('mode')}
+                />
               </CardContent>
             </Card>
           </TabsContent>

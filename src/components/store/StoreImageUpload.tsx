@@ -1,25 +1,26 @@
-import { useState, useRef, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
-import { Upload, X, Image as ImageIcon, AlertCircle, Check, Info } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { uploadImage, validateImageFile, replaceImage, ImageType } from "@/lib/image-upload";
-import { supabase } from "@/integrations/supabase/client";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { logger } from "@/lib/logger";
+import { useState, useRef, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent } from '@/components/ui/card';
+import { Upload, X, Image as ImageIcon, AlertCircle, Check, Info } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { uploadImage, validateImageFile, replaceImage, ImageType } from '@/lib/image-upload';
+import { supabase } from '@/integrations/supabase/client';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { logger } from '@/lib/logger';
 
 interface StoreImageUploadProps {
   label: string;
   value: string;
   onChange: (url: string) => void;
   disabled?: boolean;
-  aspectRatio?: "square" | "banner" | "free";
+  aspectRatio?: 'square' | 'banner' | 'free';
   description?: string;
   maxSize?: number; // en MB
   acceptedFormats?: string[];
-  imageType?: ImageType; // Type d'image pour le storage
+  imageType?: ImageType;
+  storeId?: string;
 }
 
 const StoreImageUpload = ({
@@ -27,11 +28,12 @@ const StoreImageUpload = ({
   value,
   onChange,
   disabled = false,
-  aspectRatio = "free",
+  aspectRatio = 'free',
   description,
   maxSize = 5,
-  acceptedFormats = ["image/jpeg", "image/png", "image/webp", "image/gif"],
-  imageType = "store-logo"
+  acceptedFormats = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
+  imageType = 'store-logo',
+  storeId,
 }: StoreImageUploadProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
@@ -43,7 +45,9 @@ const StoreImageUpload = ({
   // Récupérer l'ID utilisateur au montage
   useEffect(() => {
     const getUserId = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (user) {
         setUserId(user.id);
       }
@@ -53,23 +57,23 @@ const StoreImageUpload = ({
 
   const getAspectRatioClass = () => {
     switch (aspectRatio) {
-      case "square":
-        return "aspect-square";
-      case "banner":
-        return "aspect-[3/1]";
+      case 'square':
+        return 'aspect-square';
+      case 'banner':
+        return 'aspect-[3/1]';
       default:
-        return "aspect-auto";
+        return 'aspect-auto';
     }
   };
 
   const handleImageUpload = async (file: File): Promise<string | null> => {
     if (!userId) {
-      throw new Error("Utilisateur non authentifié");
+      throw new Error('Utilisateur non authentifié');
     }
 
     // Si une image existe déjà, on utilise replaceImage
     if (value) {
-      const result = await replaceImage(value, file, imageType, userId);
+      const result = await replaceImage(value, file, imageType, userId, storeId);
       if (!result.success) {
         throw new Error(result.error || "Erreur lors de l'upload");
       }
@@ -81,8 +85,9 @@ const StoreImageUpload = ({
       file,
       type: imageType,
       userId,
+      storeId,
       maxSizeMB: maxSize,
-      acceptedFormats
+      acceptedFormats,
     });
 
     if (!result.success) {
@@ -94,26 +99,26 @@ const StoreImageUpload = ({
 
   const handleFileSelect = async (file: File) => {
     setError(null);
-    
+
     // Validation du fichier
     const validation = validateImageFile(file, maxSize, acceptedFormats);
     if (!validation.valid) {
-      setError(validation.error || "Fichier invalide");
+      setError(validation.error || 'Fichier invalide');
       toast({
-        title: "Erreur de fichier",
+        title: 'Erreur de fichier',
         description: validation.error,
-        variant: "destructive"
+        variant: 'destructive',
       });
       return;
     }
 
     // Vérifier que l'utilisateur est authentifié
     if (!userId) {
-      setError("Vous devez être connecté pour uploader une image");
+      setError('Vous devez être connecté pour uploader une image');
       toast({
-        title: "Authentification requise",
-        description: "Veuillez vous connecter pour uploader une image.",
-        variant: "destructive"
+        title: 'Authentification requise',
+        description: 'Veuillez vous connecter pour uploader une image.',
+        variant: 'destructive',
       });
       return;
     }
@@ -124,18 +129,19 @@ const StoreImageUpload = ({
       if (url) {
         onChange(url);
         toast({
-          title: "Image uploadée",
-          description: "L'image a été uploadée avec succès."
+          title: 'Image uploadée',
+          description: "L'image a été uploadée avec succès.",
         });
       }
-    } catch ( _error: any) {
-      logger.error("Upload error", { error });
-      const errorMessage = error.message || "Impossible d'uploader l'image. Réessayez.";
+    } catch (caught: unknown) {
+      logger.error('Upload error', { error: caught });
+      const errorMessage =
+        caught instanceof Error ? caught.message : "Impossible d'uploader l'image. Réessayez.";
       setError(errorMessage);
       toast({
         title: "Erreur d'upload",
         description: errorMessage,
-        variant: "destructive"
+        variant: 'destructive',
       });
     } finally {
       setIsUploading(false);
@@ -145,9 +151,9 @@ const StoreImageUpload = ({
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setDragOver(false);
-    
+
     if (disabled || isUploading) return;
-    
+
     const files = Array.from(e.dataTransfer.files);
     if (files.length > 0) {
       handleFileSelect(files[0]);
@@ -173,7 +179,7 @@ const StoreImageUpload = ({
   };
 
   const removeImage = () => {
-    onChange("");
+    onChange('');
     setError(null);
   };
 
@@ -183,34 +189,40 @@ const StoreImageUpload = ({
         <Label className="text-sm font-medium">{label}</Label>
         <Tooltip>
           <TooltipTrigger asChild>
-            <button type="button" aria-label="Guidelines Médias" className="text-gray-500 hover:text-gray-700">
+            <button
+              type="button"
+              aria-label="Guidelines Médias"
+              className="text-gray-500 hover:text-gray-700"
+            >
               <Info className="h-4 w-4" />
             </button>
           </TooltipTrigger>
           <TooltipContent align="start">
             <div className="max-w-[260px] text-xs">
-              {aspectRatio === 'banner' ? 'Recommandé: 1280×720 (16:9) – WebP/JPEG' : aspectRatio === 'square' ? 'Recommandé: 500×500 (carré) – WebP/PNG' : 'Utilisez des images optimisées (WebP)'}
+              {aspectRatio === 'banner'
+                ? 'Recommandé: 1280×720 (16:9) – WebP/JPEG'
+                : aspectRatio === 'square'
+                  ? 'Recommandé: 500×500 (carré) – WebP/PNG'
+                  : 'Utilisez des images optimisées (WebP)'}
               <a
                 href="https://github.com/emarzona/emarzona/blob/main/docs/MEDIA_GUIDELINES.md"
                 target="_blank"
                 rel="noreferrer"
                 className="text-blue-600 underline ml-1"
-              >Voir Médias</a>
+              >
+                Voir Médias
+              </a>
             </div>
           </TooltipContent>
         </Tooltip>
       </div>
-      
+
       {value ? (
         <Card className="overflow-hidden">
           <CardContent className="p-0">
             <div className="relative group">
               <div className={`${getAspectRatioClass()} overflow-hidden`}>
-                <img
-                  src={value}
-                  alt={label}
-                  className="w-full h-full object-cover"
-                />
+                <img src={value} alt={label} className="w-full h-full object-cover" />
               </div>
               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                 <div className="flex gap-2">
@@ -243,16 +255,16 @@ const StoreImageUpload = ({
         <div
           className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
             dragOver
-              ? "border-primary bg-primary/5"
-              : "border-muted-foreground/25 hover:border-muted-foreground/50"
-          } ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+              ? 'border-primary bg-primary/5'
+              : 'border-muted-foreground/25 hover:border-muted-foreground/50'
+          } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
           onDrop={handleDrop}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onClick={() => !disabled && !isUploading && fileInputRef.current?.click()}
           role="button"
           tabIndex={disabled || isUploading ? -1 : 0}
-          onKeyDown={(e) => {
+          onKeyDown={e => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
               if (!disabled && !isUploading) {
@@ -293,19 +305,21 @@ const StoreImageUpload = ({
         </div>
       )}
 
-      {description && (
-        <p className="text-xs text-muted-foreground">{description}</p>
-      )}
+      {description && <p className="text-xs text-muted-foreground">{description}</p>}
       {!description && (
         <p className="text-xs text-muted-foreground">
-          {aspectRatio === 'banner' ? 'Format recommandé: 1280×720 (16:9) – idéal pour les bannières.' : aspectRatio === 'square' ? 'Format recommandé: 500×500 (ratio 1:1) pour les logos.' : 'Préférez des images en WebP, taille ≤ ' + maxSize + 'MB.'}
+          {aspectRatio === 'banner'
+            ? 'Format recommandé: 1280×720 (16:9) – idéal pour les bannières.'
+            : aspectRatio === 'square'
+              ? 'Format recommandé: 500×500 (ratio 1:1) pour les logos.'
+              : 'Préférez des images en WebP, taille ≤ ' + maxSize + 'MB.'}
         </p>
       )}
 
       <Input
         ref={fileInputRef}
         type="file"
-        accept={acceptedFormats.join(",")}
+        accept={acceptedFormats.join(',')}
         onChange={handleFileInputChange}
         className="hidden"
         disabled={disabled || isUploading}
@@ -315,9 +329,3 @@ const StoreImageUpload = ({
 };
 
 export default StoreImageUpload;
-
-
-
-
-
-

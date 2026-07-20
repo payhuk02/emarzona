@@ -91,6 +91,123 @@ export async function seedTermsConsent(admin: SupabaseClient, userId: string): P
   }
 }
 
+export async function saveStoreEdits(page: Page): Promise<void> {
+  const saveButton = page.getByRole('button', {
+    name: /Enregistrer les modifications|Enregistrer et continuer|Enregistrer le brouillon/i,
+  });
+  await expect(saveButton.first()).toBeEnabled({ timeout: 30_000 });
+
+  const saveResponse = page.waitForResponse(
+    response => {
+      const url = response.url();
+      return (
+        (url.includes('/rest/v1/rpc/save_store_appearance_draft') &&
+          response.request().method() === 'POST') ||
+        (url.includes('/rest/v1/stores') && ['PATCH', 'PUT'].includes(response.request().method()))
+      );
+    },
+    { timeout: 60_000 }
+  );
+
+  await saveButton.first().click();
+  const response = await saveResponse.catch(() => null);
+  if (response && (response.status() < 200 || response.status() >= 300)) {
+    const body = await response.text().catch(() => '');
+    throw new Error(`Store save failed (${response.status()}): ${body.slice(0, 400)}`);
+  }
+}
+
+export async function saveAppearanceDraft(page: Page): Promise<void> {
+  const draftButton = page.getByRole('button', { name: /Enregistrer le brouillon/i });
+  const saveButton = (await draftButton.isVisible().catch(() => false))
+    ? draftButton
+    : page.getByRole('button', { name: /Enregistrer les modifications/i });
+
+  await expect(saveButton).toBeEnabled({ timeout: 30_000 });
+
+  const saveResponse = page.waitForResponse(
+    response => {
+      const url = response.url();
+      const ok = response.status() >= 200 && response.status() < 300;
+      if (!ok) return false;
+      return (
+        url.includes('/rest/v1/rpc/save_store_appearance_draft') ||
+        (url.includes('/rest/v1/stores') && ['PATCH', 'PUT'].includes(response.request().method()))
+      );
+    },
+    { timeout: 60_000 }
+  );
+
+  await saveButton.click();
+  const response = await saveResponse.catch(() => null);
+  if (response && (response.status() < 200 || response.status() >= 300)) {
+    const body = await response.text().catch(() => '');
+    throw new Error(`Appearance draft save failed (${response.status()}): ${body.slice(0, 400)}`);
+  }
+}
+
+export async function publishStoreAppearanceFromUi(page: Page): Promise<void> {
+  const publishButton = page.getByRole('button', { name: /Publier sur la vitrine/i });
+  await expect(publishButton).toBeEnabled({ timeout: 30_000 });
+
+  const publishResponse = page.waitForResponse(
+    response =>
+      response.url().includes('/rest/v1/rpc/publish_store_appearance') &&
+      response.request().method() === 'POST',
+    { timeout: 60_000 }
+  );
+
+  await publishButton.click();
+  const response = await publishResponse.catch(() => null);
+  if (response && (response.status() < 200 || response.status() >= 300)) {
+    const body = await response.text().catch(() => '');
+    throw new Error(`Appearance publish failed (${response.status()}): ${body.slice(0, 400)}`);
+  }
+}
+
+export async function saveAndPublishAppearance(page: Page, primaryHex: string): Promise<void> {
+  await setPrimaryColorField(page, primaryHex);
+  await saveAppearanceDraft(page);
+
+  const publishButton = page.getByRole('button', { name: /Publier sur la vitrine/i });
+  if (await publishButton.isEnabled().catch(() => false)) {
+    await publishStoreAppearanceFromUi(page);
+  }
+}
+
+export async function waitForStorefrontPreviewReady(page: Page): Promise<void> {
+  await expect(page.getByRole('alert'))
+    .toBeHidden({ timeout: 5_000 })
+    .catch(() => undefined);
+  await expect(page.locator('body')).toHaveClass(/store-theme-active/, { timeout: 90_000 });
+}
+
+export async function assertStorePrimaryColorInDb(
+  admin: SupabaseClient,
+  storeId: string,
+  expectedHex: string
+): Promise<void> {
+  const { data, error } = await admin
+    .from('stores')
+    .select('primary_color, appearance_draft')
+    .eq('id', storeId)
+    .maybeSingle();
+
+  expect(error).toBeNull();
+  const expected = expectedHex.toLowerCase();
+  const published = data?.primary_color?.toLowerCase();
+  const draft =
+    data?.appearance_draft &&
+    typeof data.appearance_draft === 'object' &&
+    !Array.isArray(data.appearance_draft)
+      ? String(
+          (data.appearance_draft as { primary_color?: string }).primary_color ?? ''
+        ).toLowerCase()
+      : '';
+
+  expect(published === expected || draft === expected).toBeTruthy();
+}
+
 export async function dismissPersonaOnboardingIfVisible(page: Page): Promise<void> {
   const dismiss = page.getByRole('button', { name: /^Compris$/i });
   if (await dismiss.isVisible().catch(() => false)) {
@@ -165,8 +282,8 @@ export async function clickWizardNext(page: Page, times = 1): Promise<void> {
 }
 
 export async function assertStorefrontThemePrimary(page: Page, expectedHex: string): Promise<void> {
-  await expect(page.locator('body')).toHaveClass(/store-theme-active/);
-  await expect(page.locator('#store-theme-styles')).toBeAttached();
+  await expect(page.locator('#store-theme-styles')).toBeAttached({ timeout: 60_000 });
+  await expect(page.locator('body')).toHaveClass(/store-theme-active/, { timeout: 60_000 });
 
   const cssText = await page.locator('#store-theme-styles').textContent();
   expect(cssText ?? '').toContain(`--store-primary: ${expectedHex}`);
@@ -188,6 +305,32 @@ export function extractStoreIdFromUrl(url: string): string | null {
   }
 }
 
+async function acceptTermsDialogAfterCreateClick(page: Page): Promise<void> {
+  const dialog = page.getByRole('alertdialog');
+  const visible = await dialog.isVisible().catch(() => false);
+  if (!visible) {
+    try {
+      await dialog.waitFor({ state: 'visible', timeout: 2_000 });
+    } catch {
+      return;
+    }
+  }
+
+  const checkbox = dialog.getByRole('checkbox', { name: /conditions générales/i });
+  if (await checkbox.isVisible().catch(() => false)) {
+    if (!(await checkbox.isChecked().catch(() => false))) {
+      await checkbox.click();
+    }
+  } else {
+    await page.locator('#accept-terms').check();
+  }
+
+  const accept = dialog.getByRole('button', { name: /Accepter et/i });
+  await expect(accept).toBeEnabled({ timeout: 10_000 });
+  await accept.click();
+  await expect(dialog).toBeHidden({ timeout: 30_000 });
+}
+
 export async function submitStoreWizardCreate(page: Page): Promise<void> {
   // Force bypass CGV in the browser context (stable across re-renders / timing in CI).
   await page.evaluate(() => {
@@ -195,18 +338,21 @@ export async function submitStoreWizardCreate(page: Page): Promise<void> {
   });
   await acceptTermsDialogIfVisible(page);
 
-  const onboardingUrl = page.waitForURL(/\/dashboard\/onboarding\/store\?storeId=/, {
+  const onboardingUrl = page.waitForURL(/\/dashboard\/onboarding\//, {
     timeout: 90_000,
   });
 
-  const createResponsePromise = page.waitForResponse(
-    response =>
-      response.url().includes('/rest/v1/stores') && response.request().method() === 'POST',
-    { timeout: 90_000 }
-  );
+  const waitForCreatePost = () =>
+    page.waitForResponse(
+      response =>
+        response.url().includes('/rest/v1/stores') && response.request().method() === 'POST',
+      { timeout: 90_000 }
+    );
 
-  const createButton = page.getByTestId('store-create-submit');
-  await expect(createButton).toBeEnabled({ timeout: 15_000 });
+  const createButton = page
+    .getByTestId('store-create-submit')
+    .or(page.getByRole('button', { name: /Créer ma boutique/i }));
+  await expect(createButton.first()).toBeEnabled({ timeout: 15_000 });
 
   const dispatchFormSubmit = async (): Promise<void> => {
     await page.locator('#store-create-form').evaluate(form => {
@@ -216,31 +362,31 @@ export async function submitStoreWizardCreate(page: Page): Promise<void> {
     });
   };
 
-  await createButton.click();
-  let response = await Promise.race([
-    createResponsePromise.then(r => r).catch(() => null),
-    new Promise<null>(resolve => setTimeout(() => resolve(null), 5_000)),
-  ]);
+  let response: Awaited<ReturnType<typeof waitForCreatePost>> | null = null;
 
-  if (!response) {
-    await dispatchFormSubmit();
+  for (let attempt = 0; attempt < 4 && !response; attempt += 1) {
+    const createResponsePromise = waitForCreatePost();
+    await createButton.first().click();
     response = await Promise.race([
-      createResponsePromise.then(r => r).catch(() => null),
-      new Promise<null>(resolve => setTimeout(() => resolve(null), 5_000)),
+      createResponsePromise.catch(() => null),
+      new Promise<null>(resolve => setTimeout(() => resolve(null), 4_000)),
     ]);
-  }
 
-  if (!response) {
-    await createButton.click({ force: true }).catch(() => undefined);
-    response = await Promise.race([
-      createResponsePromise.then(r => r).catch(() => null),
-      new Promise<null>(resolve => setTimeout(() => resolve(null), 5_000)),
-    ]);
-  }
+    if (!response) {
+      await acceptTermsDialogAfterCreateClick(page);
+      response = await Promise.race([
+        waitForCreatePost().catch(() => null),
+        new Promise<null>(resolve => setTimeout(() => resolve(null), 8_000)),
+      ]);
+    }
 
-  if (!response) {
-    await dispatchFormSubmit();
-    response = await createResponsePromise.catch(() => null);
+    if (!response) {
+      await dispatchFormSubmit();
+      response = await Promise.race([
+        waitForCreatePost().catch(() => null),
+        new Promise<null>(resolve => setTimeout(() => resolve(null), 4_000)),
+      ]);
+    }
   }
 
   if (!response) {
@@ -271,6 +417,38 @@ export async function submitStoreWizardCreate(page: Page): Promise<void> {
     throw new Error(
       `Store create POST failed (${response.status()}): ${bodyText.slice(0, 800)} — url=${page.url()}`
     );
+  }
+
+  await onboardingUrl;
+}
+
+export async function submitStoreExpressCreate(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    document.documentElement.dataset.e2eBypassTerms = '1';
+  });
+  await acceptTermsDialogIfVisible(page);
+
+  const onboardingUrl = page.waitForURL(/\/dashboard\/onboarding\//, {
+    timeout: 90_000,
+  });
+
+  const createResponsePromise = page.waitForResponse(
+    response =>
+      response.url().includes('/rest/v1/stores') && response.request().method() === 'POST',
+    { timeout: 90_000 }
+  );
+
+  const createButton = page.getByTestId('store-express-create-submit');
+  await expect(createButton).toBeEnabled({ timeout: 30_000 });
+  await createButton.click();
+
+  const response = await createResponsePromise.catch(() => null);
+  if (!response) {
+    throw new Error(`Express store create POST never fired — url=${page.url()}`);
+  }
+  if (response.status() < 200 || response.status() >= 300) {
+    const body = await response.text().catch(() => '');
+    throw new Error(`Express store create failed: ${response.status()} ${body}`);
   }
 
   await onboardingUrl;

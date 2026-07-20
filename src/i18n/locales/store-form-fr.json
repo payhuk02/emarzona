@@ -561,5 +561,14 @@
       "customDomainDescription": "Connectez votre propre domaine à votre boutique",
       "manageDomains": "Gérer mes domaines personnalisés"
     }
+  },
+  "express": {
+    "title": "Créer votre boutique en quelques secondes",
+    "subtitle": "Nom, type d'activité et thème — le reste se configure ensuite.",
+    "nameRequired": "Le nom de la boutique est requis.",
+    "urlPreview": "https://{{slug}}.myemarzona.shop",
+    "themeLabel": "Thème visuel",
+    "deferHint": "Logo, SEO, pages légales et analytics pourront être configurés après la création via la checklist d'activation.",
+    "advancedSetup": "Configuration avancée (8 étapes)"
   }
 }

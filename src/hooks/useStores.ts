@@ -7,9 +7,13 @@ import type { Database } from '@/integrations/supabase/types';
 import type { StoreCommerceType } from '@/constants/store-commerce-types';
 import { STORE_COMMERCE_TYPES } from '@/constants/store-commerce-types';
 import { resolveStoreCommerceTypeFromStore } from '@/lib/commerce/store-capability-map';
-import { buildStoreCreateDefaults } from '@/lib/commerce/store-create-defaults';
 import { sanitizeStorePayload } from '@/lib/store-payload-utils';
 import { assertReadyToCreateStore } from '@/lib/store/create-store-service';
+import {
+  buildCreateStoreInsertPayload,
+  CREATE_STORE_ALLOWED_CLIENT_KEYS,
+  type CreateStoreOptions,
+} from '@/lib/store/store-express-create-schema';
 
 type StoreInsert = Database['public']['Tables']['stores']['Insert'];
 type StoreUpdate = Database['public']['Tables']['stores']['Update'];
@@ -203,6 +207,18 @@ export interface Store {
 
 const MAX_STORES_PER_USER = 3;
 
+export type { CreateStoreOptions } from '@/lib/store/store-express-create-schema';
+
+function pickAllowedCreateOverrides(storeData: Partial<Store>): Record<string, unknown> {
+  const overrides: Record<string, unknown> = {};
+  for (const key of CREATE_STORE_ALLOWED_CLIENT_KEYS) {
+    if (key in storeData && storeData[key as keyof Store] !== undefined) {
+      overrides[key] = storeData[key as keyof Store];
+    }
+  }
+  return overrides;
+}
+
 function assertCreateStoreCommerceType(value: unknown): StoreCommerceType {
   if (typeof value === 'string' && (STORE_COMMERCE_TYPES as readonly string[]).includes(value)) {
     return value as StoreCommerceType;
@@ -280,7 +296,8 @@ export const useStores = () => {
 
   // Mutation pour créer une boutique
   const createStoreMutation = useMutation({
-    mutationFn: async (storeData: Partial<Store>) => {
+    mutationFn: async (input: { storeData: Partial<Store>; options?: CreateStoreOptions }) => {
+      const { storeData, options } = input;
       const {
         data: { user: authUser },
       } = await supabase.auth.getUser();
@@ -302,28 +319,28 @@ export const useStores = () => {
       });
 
       const commerceType = assertCreateStoreCommerceType(validated.commerce_type);
-      const verticalDefaults = buildStoreCreateDefaults(commerceType);
-      const metadata =
-        storeData.metadata && typeof storeData.metadata === 'object'
-          ? { ...(storeData.metadata as Record<string, unknown>), commerce_type: commerceType }
-          : { commerce_type: commerceType };
+
+      const sanitizedExtras = sanitizeStorePayload(storeData as Record<string, unknown>);
+      for (const key of ['user_id', 'is_active', 'commerce_type', 'metadata'] as const) {
+        delete sanitizedExtras[key];
+      }
+
+      const isExpress = options?.mode === 'express';
+      const writableFields = isExpress
+        ? pickAllowedCreateOverrides(storeData)
+        : (sanitizedExtras as Record<string, unknown>);
+
+      const insertPayload = buildCreateStoreInsertPayload({
+        validated,
+        commerceType,
+        userId: authUser.id,
+        themeTemplateId: options?.themeTemplateId,
+        writableFields,
+      });
 
       const { data, error } = await supabase
         .from('stores')
-        .insert([
-          {
-            ...verticalDefaults,
-            name: validated.name,
-            slug: validated.slug,
-            description: validated.description || null,
-            default_currency: validated.default_currency,
-            ...storeData,
-            commerce_type: commerceType,
-            metadata,
-            user_id: authUser.id,
-            is_active: true,
-          } as unknown as StoreInsert,
-        ])
+        .insert([insertPayload as unknown as StoreInsert])
         .select()
         .single();
 
@@ -451,7 +468,8 @@ export const useStores = () => {
     stores,
     loading,
     error: storesLoadErrorMessage,
-    createStore: createStoreMutation.mutateAsync,
+    createStore: (storeData: Partial<Store>, options?: CreateStoreOptions) =>
+      createStoreMutation.mutateAsync({ storeData, options }),
     updateStore: updateStoreMutation.mutateAsync,
     deleteStore: deleteStoreMutation.mutateAsync,
     refetch,
