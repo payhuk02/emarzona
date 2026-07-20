@@ -4,6 +4,7 @@
     "strict": true
   },
   "imports": {
-    "@supabase/supabase-js": "npm:@supabase/supabase-js@2.58.0"
+    "@supabase/supabase-js": "npm:@supabase/supabase-js@2.58.0",
+    "svix": "npm:svix@1.37.0"
   }
 }

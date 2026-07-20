@@ -3,7 +3,7 @@
  */
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'npm:@supabase/supabase-js@2.58.0';
-import { Webhook } from 'https://esm.sh/svix@1.37.0';
+import { Webhook } from 'npm:svix@1.37.0';
 import {
   buildComplaintUnsubscribeRow,
   buildEmailLogUpdate,

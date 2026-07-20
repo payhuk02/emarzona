@@ -1,7 +1,8 @@
 {
   "version": "5",
   "specifiers": {
-    "npm:@supabase/supabase-js@2.58.0": "2.58.0"
+    "npm:@supabase/supabase-js@2.58.0": "2.58.0",
+    "npm:svix@1.37.0": "1.37.0"
   },
   "npm": {
     "@supabase/auth-js@2.72.0": {
@@ -87,6 +88,16 @@
     },
     "ws@8.21.0": {
       "integrity": "sha512-Vsp28b7DRcimFQvrqu2Wek3z1iYxDCWqHYB8Qsnk/S4RfaCQzPGPyBNuVjJV3cd6UiKtUtp6sNM77gWvzcCH+g=="
+    },
+    "svix@1.37.0": {
+      "integrity": "sha512-zXtHLEN54ajW/qLreLLWbAyjHQVrpUnULIZY7WgneBVS/LdWVc3xR5vqLKzGVA4XWl/B9GXrs4+OL8EoFNWfIQ==",
+      "dependencies": [
+        "@stablelib/base64",
+        "es6-promise",
+        "fast-sha256",
+        "svix-fetch",
+        "url-parse"
+      ]
     }
   },
   "redirects": {
@@ -109,14 +120,12 @@
     "https://deno.land/std@0.168.0/testing/_format.ts": "cd11136e1797791045e639e9f0f4640d5b4166148796cad37e6ef75f7d7f3832",
     "https://deno.land/std@0.168.0/testing/asserts.ts": "51353e79437361d4b02d8e32f3fc83b22231bc8f8d4c841d86fd32b0b0afe940",
     "https://esm.sh/@supabase/supabase-js@2.110.0": "b99c0ce7729f9de7797f836b93ab9ec94f1cfe079b4f937fa4144fe13525e979",
-    "https://esm.sh/@supabase/supabase-js@2.58.0": "7dabd2478b8ee4e38a36544ae38af5f437d745f55bc52d6cb0841e57b21c32a4",
-    "https://esm.sh/svix-fetch@3.0.0": "5a1dba6b172e83a41384b51192fe349e1efa6474c061bb82f936103190eee4b9",
-    "https://esm.sh/svix-fetch@3.0.0/denonext/svix-fetch.mjs": "40f1a1c388e884af3d1639fb28cdf83f94da2fc1bf5b971fe7501083b291734c",
-    "https://esm.sh/svix@1.37.0": "8a8513271506a7a475e1d9f0c0ef407ec5046460744c2cb7d10f23bab42e015e"
+    "https://esm.sh/@supabase/supabase-js@2.58.0": "7dabd2478b8ee4e38a36544ae38af5f437d745f55bc52d6cb0841e57b21c32a4"
   },
   "workspace": {
     "dependencies": [
-      "npm:@supabase/supabase-js@2.58.0"
+      "npm:@supabase/supabase-js@2.58.0",
+      "npm:svix@1.37.0"
     ]
   }
 }
