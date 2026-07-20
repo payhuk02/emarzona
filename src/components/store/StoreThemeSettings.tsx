@@ -8,7 +8,13 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Palette, Type, Layout } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -48,7 +54,7 @@ interface StoreThemeSettingsProps {
   // Callbacks
   onColorChange: (field: string, value: string) => void;
   onTypographyChange: (field: string, value: string) => void;
-  onLayoutChange: (field: string, value: any) => void;
+  onLayoutChange: (field: string, value: string | number | boolean) => void;
 }
 
 const AVAILABLE_FONTS = [
@@ -64,7 +70,7 @@ const AVAILABLE_FONTS = [
   { value: 'Playfair Display', label: 'Playfair Display' },
 ];
 
-export const StoreThemeSettings : React.FC<StoreThemeSettingsProps> = ({
+export const StoreThemeSettings: React.FC<StoreThemeSettingsProps> = ({
   primaryColor,
   secondaryColor,
   accentColor,
@@ -112,17 +118,26 @@ export const StoreThemeSettings : React.FC<StoreThemeSettingsProps> = ({
       <CardContent>
         <Tabs defaultValue="colors" className="w-full">
           <TabsList className="grid w-full grid-cols-3 gap-1 sm:gap-2">
-            <TabsTrigger value="colors" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+            <TabsTrigger
+              value="colors"
+              className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
+            >
               <Palette className="h-3 w-3 sm:h-4 sm:w-4" />
               <span className="hidden sm:inline">Couleurs</span>
               <span className="sm:hidden">Couleurs</span>
             </TabsTrigger>
-            <TabsTrigger value="typography" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+            <TabsTrigger
+              value="typography"
+              className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
+            >
               <Type className="h-3 w-3 sm:h-4 sm:w-4" />
               <span className="hidden sm:inline">Typographie</span>
               <span className="sm:hidden">Typo</span>
             </TabsTrigger>
-            <TabsTrigger value="layout" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+            <TabsTrigger
+              value="layout"
+              className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
+            >
               <Layout className="h-3 w-3 sm:h-4 sm:w-4" />
               <span className="hidden sm:inline">Layout</span>
               <span className="sm:hidden">Layout</span>
@@ -139,13 +154,14 @@ export const StoreThemeSettings : React.FC<StoreThemeSettingsProps> = ({
                     id="primary_color"
                     type="color"
                     value={primaryColor}
-                    onChange={(e) => onColorChange('primary_color', e.target.value)}
+                    onChange={e => onColorChange('primary_color', e.target.value)}
                     className="h-10 w-20 cursor-pointer"
                   />
                   <Input
                     type="text"
+                    data-testid="store-primary-color-text"
                     value={primaryColor}
-                    onChange={(e) => onColorChange('primary_color', e.target.value)}
+                    onChange={e => onColorChange('primary_color', e.target.value)}
                     placeholder="#3b82f6"
                     className="flex-1 font-mono text-sm"
                   />
@@ -159,13 +175,13 @@ export const StoreThemeSettings : React.FC<StoreThemeSettingsProps> = ({
                     id="secondary_color"
                     type="color"
                     value={secondaryColor}
-                    onChange={(e) => onColorChange('secondary_color', e.target.value)}
+                    onChange={e => onColorChange('secondary_color', e.target.value)}
                     className="h-10 w-20 cursor-pointer"
                   />
                   <Input
                     type="text"
                     value={secondaryColor}
-                    onChange={(e) => onColorChange('secondary_color', e.target.value)}
+                    onChange={e => onColorChange('secondary_color', e.target.value)}
                     placeholder="#8b5cf6"
                     className="flex-1 font-mono text-sm"
                   />
@@ -179,13 +195,13 @@ export const StoreThemeSettings : React.FC<StoreThemeSettingsProps> = ({
                     id="accent_color"
                     type="color"
                     value={accentColor}
-                    onChange={(e) => onColorChange('accent_color', e.target.value)}
+                    onChange={e => onColorChange('accent_color', e.target.value)}
                     className="h-10 w-20 cursor-pointer"
                   />
                   <Input
                     type="text"
                     value={accentColor}
-                    onChange={(e) => onColorChange('accent_color', e.target.value)}
+                    onChange={e => onColorChange('accent_color', e.target.value)}
                     placeholder="#f59e0b"
                     className="flex-1 font-mono text-sm"
                   />
@@ -199,13 +215,13 @@ export const StoreThemeSettings : React.FC<StoreThemeSettingsProps> = ({
                     id="background_color"
                     type="color"
                     value={backgroundColor}
-                    onChange={(e) => onColorChange('background_color', e.target.value)}
+                    onChange={e => onColorChange('background_color', e.target.value)}
                     className="h-10 w-20 cursor-pointer"
                   />
                   <Input
                     type="text"
                     value={backgroundColor}
-                    onChange={(e) => onColorChange('background_color', e.target.value)}
+                    onChange={e => onColorChange('background_color', e.target.value)}
                     placeholder="#ffffff"
                     className="flex-1 font-mono text-sm"
                   />
@@ -219,13 +235,13 @@ export const StoreThemeSettings : React.FC<StoreThemeSettingsProps> = ({
                     id="text_color"
                     type="color"
                     value={textColor}
-                    onChange={(e) => onColorChange('text_color', e.target.value)}
+                    onChange={e => onColorChange('text_color', e.target.value)}
                     className="h-10 w-20 cursor-pointer"
                   />
                   <Input
                     type="text"
                     value={textColor}
-                    onChange={(e) => onColorChange('text_color', e.target.value)}
+                    onChange={e => onColorChange('text_color', e.target.value)}
                     placeholder="#1f2937"
                     className="flex-1 font-mono text-sm"
                   />
@@ -239,13 +255,13 @@ export const StoreThemeSettings : React.FC<StoreThemeSettingsProps> = ({
                     id="text_secondary_color"
                     type="color"
                     value={textSecondaryColor}
-                    onChange={(e) => onColorChange('text_secondary_color', e.target.value)}
+                    onChange={e => onColorChange('text_secondary_color', e.target.value)}
                     className="h-10 w-20 cursor-pointer"
                   />
                   <Input
                     type="text"
                     value={textSecondaryColor}
-                    onChange={(e) => onColorChange('text_secondary_color', e.target.value)}
+                    onChange={e => onColorChange('text_secondary_color', e.target.value)}
                     placeholder="#6b7280"
                     className="flex-1 font-mono text-sm"
                   />
@@ -263,13 +279,13 @@ export const StoreThemeSettings : React.FC<StoreThemeSettingsProps> = ({
                       id="button_primary_color"
                       type="color"
                       value={buttonPrimaryColor}
-                      onChange={(e) => onColorChange('button_primary_color', e.target.value)}
+                      onChange={e => onColorChange('button_primary_color', e.target.value)}
                       className="h-10 w-20 cursor-pointer"
                     />
                     <Input
                       type="text"
                       value={buttonPrimaryColor}
-                      onChange={(e) => onColorChange('button_primary_color', e.target.value)}
+                      onChange={e => onColorChange('button_primary_color', e.target.value)}
                       className="flex-1 font-mono text-sm"
                     />
                   </div>
@@ -282,13 +298,13 @@ export const StoreThemeSettings : React.FC<StoreThemeSettingsProps> = ({
                       id="button_primary_text"
                       type="color"
                       value={buttonPrimaryText}
-                      onChange={(e) => onColorChange('button_primary_text', e.target.value)}
+                      onChange={e => onColorChange('button_primary_text', e.target.value)}
                       className="h-10 w-20 cursor-pointer"
                     />
                     <Input
                       type="text"
                       value={buttonPrimaryText}
-                      onChange={(e) => onColorChange('button_primary_text', e.target.value)}
+                      onChange={e => onColorChange('button_primary_text', e.target.value)}
                       className="flex-1 font-mono text-sm"
                     />
                   </div>
@@ -301,13 +317,13 @@ export const StoreThemeSettings : React.FC<StoreThemeSettingsProps> = ({
                       id="button_secondary_color"
                       type="color"
                       value={buttonSecondaryColor}
-                      onChange={(e) => onColorChange('button_secondary_color', e.target.value)}
+                      onChange={e => onColorChange('button_secondary_color', e.target.value)}
                       className="h-10 w-20 cursor-pointer"
                     />
                     <Input
                       type="text"
                       value={buttonSecondaryColor}
-                      onChange={(e) => onColorChange('button_secondary_color', e.target.value)}
+                      onChange={e => onColorChange('button_secondary_color', e.target.value)}
                       className="flex-1 font-mono text-sm"
                     />
                   </div>
@@ -320,13 +336,13 @@ export const StoreThemeSettings : React.FC<StoreThemeSettingsProps> = ({
                       id="button_secondary_text"
                       type="color"
                       value={buttonSecondaryText}
-                      onChange={(e) => onColorChange('button_secondary_text', e.target.value)}
+                      onChange={e => onColorChange('button_secondary_text', e.target.value)}
                       className="h-10 w-20 cursor-pointer"
                     />
                     <Input
                       type="text"
                       value={buttonSecondaryText}
-                      onChange={(e) => onColorChange('button_secondary_text', e.target.value)}
+                      onChange={e => onColorChange('button_secondary_text', e.target.value)}
                       className="flex-1 font-mono text-sm"
                     />
                   </div>
@@ -344,13 +360,13 @@ export const StoreThemeSettings : React.FC<StoreThemeSettingsProps> = ({
                       id="link_color"
                       type="color"
                       value={linkColor}
-                      onChange={(e) => onColorChange('link_color', e.target.value)}
+                      onChange={e => onColorChange('link_color', e.target.value)}
                       className="h-10 w-20 cursor-pointer"
                     />
                     <Input
                       type="text"
                       value={linkColor}
-                      onChange={(e) => onColorChange('link_color', e.target.value)}
+                      onChange={e => onColorChange('link_color', e.target.value)}
                       className="flex-1 font-mono text-sm"
                     />
                   </div>
@@ -363,13 +379,13 @@ export const StoreThemeSettings : React.FC<StoreThemeSettingsProps> = ({
                       id="link_hover_color"
                       type="color"
                       value={linkHoverColor}
-                      onChange={(e) => onColorChange('link_hover_color', e.target.value)}
+                      onChange={e => onColorChange('link_hover_color', e.target.value)}
                       className="h-10 w-20 cursor-pointer"
                     />
                     <Input
                       type="text"
                       value={linkHoverColor}
-                      onChange={(e) => onColorChange('link_hover_color', e.target.value)}
+                      onChange={e => onColorChange('link_hover_color', e.target.value)}
                       className="flex-1 font-mono text-sm"
                     />
                   </div>
@@ -377,7 +393,10 @@ export const StoreThemeSettings : React.FC<StoreThemeSettingsProps> = ({
 
                 <div className="space-y-2">
                   <Label htmlFor="border_radius">Rayon des bordures</Label>
-                  <Select value={borderRadius} onValueChange={(v) => onColorChange('border_radius', v)}>
+                  <Select
+                    value={borderRadius}
+                    onValueChange={v => onColorChange('border_radius', v)}
+                  >
                     <SelectTrigger id="border_radius">
                       <SelectValue />
                     </SelectTrigger>
@@ -394,7 +413,10 @@ export const StoreThemeSettings : React.FC<StoreThemeSettingsProps> = ({
 
                 <div className="space-y-2">
                   <Label htmlFor="shadow_intensity">Intensité des ombres</Label>
-                  <Select value={shadowIntensity} onValueChange={(v) => onColorChange('shadow_intensity', v)}>
+                  <Select
+                    value={shadowIntensity}
+                    onValueChange={v => onColorChange('shadow_intensity', v)}
+                  >
                     <SelectTrigger id="shadow_intensity">
                       <SelectValue />
                     </SelectTrigger>
@@ -413,15 +435,28 @@ export const StoreThemeSettings : React.FC<StoreThemeSettingsProps> = ({
             {/* Aperçu */}
             <div className="border-t pt-4">
               <Label>Aperçu du thème</Label>
-              <div 
+              <div
                 className="p-6 rounded-lg mt-2"
                 style={{
                   backgroundColor: backgroundColor,
                   color: textColor,
-                  borderRadius: borderRadius === 'none' ? '0' : borderRadius === 'sm' ? '0.125rem' : borderRadius === 'md' ? '0.375rem' : borderRadius === 'lg' ? '0.5rem' : borderRadius === 'xl' ? '0.75rem' : '9999px',
+                  borderRadius:
+                    borderRadius === 'none'
+                      ? '0'
+                      : borderRadius === 'sm'
+                        ? '0.125rem'
+                        : borderRadius === 'md'
+                          ? '0.375rem'
+                          : borderRadius === 'lg'
+                            ? '0.5rem'
+                            : borderRadius === 'xl'
+                              ? '0.75rem'
+                              : '9999px',
                 }}
               >
-                <h3 style={{ color: primaryColor, fontFamily: headingFont }}>Titre de la boutique</h3>
+                <h3 style={{ color: primaryColor, fontFamily: headingFont }}>
+                  Titre de la boutique
+                </h3>
                 <p style={{ color: textSecondaryColor, fontFamily: bodyFont }} className="mt-2">
                   Description de votre boutique avec un texte secondaire.
                 </p>
@@ -430,7 +465,18 @@ export const StoreThemeSettings : React.FC<StoreThemeSettingsProps> = ({
                     style={{
                       backgroundColor: buttonPrimaryColor,
                       color: buttonPrimaryText,
-                      borderRadius: borderRadius === 'none' ? '0' : borderRadius === 'sm' ? '0.125rem' : borderRadius === 'md' ? '0.375rem' : borderRadius === 'lg' ? '0.5rem' : borderRadius === 'xl' ? '0.75rem' : '9999px',
+                      borderRadius:
+                        borderRadius === 'none'
+                          ? '0'
+                          : borderRadius === 'sm'
+                            ? '0.125rem'
+                            : borderRadius === 'md'
+                              ? '0.375rem'
+                              : borderRadius === 'lg'
+                                ? '0.5rem'
+                                : borderRadius === 'xl'
+                                  ? '0.75rem'
+                                  : '9999px',
                     }}
                     className="px-4 py-2"
                   >
@@ -440,14 +486,29 @@ export const StoreThemeSettings : React.FC<StoreThemeSettingsProps> = ({
                     style={{
                       backgroundColor: buttonSecondaryColor,
                       color: buttonSecondaryText,
-                      borderRadius: borderRadius === 'none' ? '0' : borderRadius === 'sm' ? '0.125rem' : borderRadius === 'md' ? '0.375rem' : borderRadius === 'lg' ? '0.5rem' : borderRadius === 'xl' ? '0.75rem' : '9999px',
+                      borderRadius:
+                        borderRadius === 'none'
+                          ? '0'
+                          : borderRadius === 'sm'
+                            ? '0.125rem'
+                            : borderRadius === 'md'
+                              ? '0.375rem'
+                              : borderRadius === 'lg'
+                                ? '0.5rem'
+                                : borderRadius === 'xl'
+                                  ? '0.75rem'
+                                  : '9999px',
                     }}
                     className="px-4 py-2"
                   >
                     Bouton secondaire
                   </button>
                 </div>
-                <a href="#" style={{ color: linkColor }} className="mt-4 inline-block hover:underline">
+                <a
+                  href="#"
+                  style={{ color: linkColor }}
+                  className="mt-4 inline-block hover:underline"
+                >
                   Lien exemple
                 </a>
               </div>
@@ -459,12 +520,15 @@ export const StoreThemeSettings : React.FC<StoreThemeSettingsProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="heading_font">Police des titres</Label>
-                <Select value={headingFont} onValueChange={(v) => onTypographyChange('heading_font', v)}>
+                <Select
+                  value={headingFont}
+                  onValueChange={v => onTypographyChange('heading_font', v)}
+                >
                   <SelectTrigger id="heading_font">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {AVAILABLE_FONTS.map((font) => (
+                    {AVAILABLE_FONTS.map(font => (
                       <SelectItem key={font.value} value={font.value}>
                         {font.label}
                       </SelectItem>
@@ -475,12 +539,12 @@ export const StoreThemeSettings : React.FC<StoreThemeSettingsProps> = ({
 
               <div className="space-y-2">
                 <Label htmlFor="body_font">Police du corps</Label>
-                <Select value={bodyFont} onValueChange={(v) => onTypographyChange('body_font', v)}>
+                <Select value={bodyFont} onValueChange={v => onTypographyChange('body_font', v)}>
                   <SelectTrigger id="body_font">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {AVAILABLE_FONTS.map((font) => (
+                    {AVAILABLE_FONTS.map(font => (
                       <SelectItem key={font.value} value={font.value}>
                         {font.label}
                       </SelectItem>
@@ -494,7 +558,7 @@ export const StoreThemeSettings : React.FC<StoreThemeSettingsProps> = ({
                 <Input
                   id="font_size_base"
                   value={fontSizeBase}
-                  onChange={(e) => onTypographyChange('font_size_base', e.target.value)}
+                  onChange={e => onTypographyChange('font_size_base', e.target.value)}
                   placeholder="16px"
                 />
               </div>
@@ -504,7 +568,7 @@ export const StoreThemeSettings : React.FC<StoreThemeSettingsProps> = ({
                 <Input
                   id="line_height"
                   value={lineHeight}
-                  onChange={(e) => onTypographyChange('line_height', e.target.value)}
+                  onChange={e => onTypographyChange('line_height', e.target.value)}
                   placeholder="1.6"
                 />
               </div>
@@ -514,7 +578,7 @@ export const StoreThemeSettings : React.FC<StoreThemeSettingsProps> = ({
                 <Input
                   id="heading_size_h1"
                   value={headingSizeH1}
-                  onChange={(e) => onTypographyChange('heading_size_h1', e.target.value)}
+                  onChange={e => onTypographyChange('heading_size_h1', e.target.value)}
                   placeholder="2.5rem"
                 />
               </div>
@@ -524,7 +588,7 @@ export const StoreThemeSettings : React.FC<StoreThemeSettingsProps> = ({
                 <Input
                   id="heading_size_h2"
                   value={headingSizeH2}
-                  onChange={(e) => onTypographyChange('heading_size_h2', e.target.value)}
+                  onChange={e => onTypographyChange('heading_size_h2', e.target.value)}
                   placeholder="2rem"
                 />
               </div>
@@ -534,7 +598,7 @@ export const StoreThemeSettings : React.FC<StoreThemeSettingsProps> = ({
                 <Input
                   id="heading_size_h3"
                   value={headingSizeH3}
-                  onChange={(e) => onTypographyChange('heading_size_h3', e.target.value)}
+                  onChange={e => onTypographyChange('heading_size_h3', e.target.value)}
                   placeholder="1.5rem"
                 />
               </div>
@@ -544,7 +608,7 @@ export const StoreThemeSettings : React.FC<StoreThemeSettingsProps> = ({
                 <Input
                   id="letter_spacing"
                   value={letterSpacing}
-                  onChange={(e) => onTypographyChange('letter_spacing', e.target.value)}
+                  onChange={e => onTypographyChange('letter_spacing', e.target.value)}
                   placeholder="normal"
                 />
               </div>
@@ -554,18 +618,50 @@ export const StoreThemeSettings : React.FC<StoreThemeSettingsProps> = ({
             <div className="border-t pt-4">
               <Label>Aperçu typographique</Label>
               <div className="mt-2 p-4 border rounded-lg">
-                <h1 style={{ fontFamily: headingFont, fontSize: headingSizeH1, lineHeight, letterSpacing }}>
+                <h1
+                  style={{
+                    fontFamily: headingFont,
+                    fontSize: headingSizeH1,
+                    lineHeight,
+                    letterSpacing,
+                  }}
+                >
                   Titre H1 - {headingFont}
                 </h1>
-                <h2 style={{ fontFamily: headingFont, fontSize: headingSizeH2, lineHeight, letterSpacing }} className="mt-2">
+                <h2
+                  style={{
+                    fontFamily: headingFont,
+                    fontSize: headingSizeH2,
+                    lineHeight,
+                    letterSpacing,
+                  }}
+                  className="mt-2"
+                >
                   Titre H2 - {headingFont}
                 </h2>
-                <h3 style={{ fontFamily: headingFont, fontSize: headingSizeH3, lineHeight, letterSpacing }} className="mt-2">
+                <h3
+                  style={{
+                    fontFamily: headingFont,
+                    fontSize: headingSizeH3,
+                    lineHeight,
+                    letterSpacing,
+                  }}
+                  className="mt-2"
+                >
                   Titre H3 - {headingFont}
                 </h3>
-                <p style={{ fontFamily: bodyFont, fontSize: fontSizeBase, lineHeight, letterSpacing }} className="mt-4">
-                  Ceci est un paragraphe de texte avec la police {bodyFont} et une taille de {fontSizeBase}. 
-                  La hauteur de ligne est de {lineHeight} et l'espacement des lettres est {letterSpacing}.
+                <p
+                  style={{
+                    fontFamily: bodyFont,
+                    fontSize: fontSizeBase,
+                    lineHeight,
+                    letterSpacing,
+                  }}
+                  className="mt-4"
+                >
+                  Ceci est un paragraphe de texte avec la police {bodyFont} et une taille de{' '}
+                  {fontSizeBase}. La hauteur de ligne est de {lineHeight} et l'espacement des
+                  lettres est {letterSpacing}.
                 </p>
               </div>
             </div>
@@ -576,7 +672,7 @@ export const StoreThemeSettings : React.FC<StoreThemeSettingsProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="header_style">Style du header</Label>
-                <Select value={headerStyle} onValueChange={(v) => onLayoutChange('header_style', v)}>
+                <Select value={headerStyle} onValueChange={v => onLayoutChange('header_style', v)}>
                   <SelectTrigger id="header_style">
                     <SelectValue />
                   </SelectTrigger>
@@ -590,7 +686,7 @@ export const StoreThemeSettings : React.FC<StoreThemeSettingsProps> = ({
 
               <div className="space-y-2">
                 <Label htmlFor="footer_style">Style du footer</Label>
-                <Select value={footerStyle} onValueChange={(v) => onLayoutChange('footer_style', v)}>
+                <Select value={footerStyle} onValueChange={v => onLayoutChange('footer_style', v)}>
                   <SelectTrigger id="footer_style">
                     <SelectValue />
                   </SelectTrigger>
@@ -604,7 +700,10 @@ export const StoreThemeSettings : React.FC<StoreThemeSettingsProps> = ({
 
               <div className="space-y-2">
                 <Label htmlFor="product_grid_columns">Colonnes grille produits</Label>
-                <Select value={productGridColumns.toString()} onValueChange={(v) => onLayoutChange('product_grid_columns', parseInt(v))}>
+                <Select
+                  value={productGridColumns.toString()}
+                  onValueChange={v => onLayoutChange('product_grid_columns', parseInt(v))}
+                >
                   <SelectTrigger id="product_grid_columns">
                     <SelectValue />
                   </SelectTrigger>
@@ -620,7 +719,10 @@ export const StoreThemeSettings : React.FC<StoreThemeSettingsProps> = ({
 
               <div className="space-y-2">
                 <Label htmlFor="product_card_style">Style des cartes produits</Label>
-                <Select value={productCardStyle} onValueChange={(v) => onLayoutChange('product_card_style', v)}>
+                <Select
+                  value={productCardStyle}
+                  onValueChange={v => onLayoutChange('product_card_style', v)}
+                >
                   <SelectTrigger id="product_card_style">
                     <SelectValue />
                   </SelectTrigger>
@@ -634,7 +736,10 @@ export const StoreThemeSettings : React.FC<StoreThemeSettingsProps> = ({
 
               <div className="space-y-2">
                 <Label htmlFor="navigation_style">Style de navigation</Label>
-                <Select value={navigationStyle} onValueChange={(v) => onLayoutChange('navigation_style', v)}>
+                <Select
+                  value={navigationStyle}
+                  onValueChange={v => onLayoutChange('navigation_style', v)}
+                >
                   <SelectTrigger id="navigation_style">
                     <SelectValue />
                   </SelectTrigger>
@@ -652,11 +757,3 @@ export const StoreThemeSettings : React.FC<StoreThemeSettingsProps> = ({
     </Card>
   );
 };
-
-
-
-
-
-
-
-

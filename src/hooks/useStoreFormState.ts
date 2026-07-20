@@ -69,13 +69,6 @@ export function useStoreFormState(store: ExtendedStore) {
     setPublishedAppearanceBaseline(initialPublishedAppearanceBaseline(source));
   }, []);
 
-  useEffect(() => {
-    const publishedAt = store.appearance_published_at ?? null;
-    if (publishedAt === lastPublishedAtRef.current) return;
-    lastPublishedAtRef.current = publishedAt;
-    syncAppearanceFieldsFromStore(store);
-  }, [store, syncAppearanceFieldsFromStore]);
-
   const { getStoreUrl, checkSlugAvailability } = useStore();
   const { updateStore: updateStoreById } = useStores();
   const { refreshStores } = useStoreContext();
@@ -365,6 +358,15 @@ export function useStoreFormState(store: ExtendedStore) {
       }),
     [hasRemoteAppearanceDraft, store, publishedAppearanceBaseline, appearanceFormDraft]
   );
+
+  // After publish, store detail refetch can race with the next color edit — never clobber dirty form.
+  useEffect(() => {
+    const publishedAt = store.appearance_published_at ?? null;
+    if (publishedAt === lastPublishedAtRef.current) return;
+    lastPublishedAtRef.current = publishedAt;
+    if (hasUnpublishedAppearanceDraft) return;
+    syncAppearanceFieldsFromStore(store);
+  }, [store, syncAppearanceFieldsFromStore, hasUnpublishedAppearanceDraft]);
 
   const hasUnpublishedContentDraft = useMemo(() => {
     const domain = tabToContentDomain(currentTab);

@@ -167,7 +167,15 @@ export async function publishStoreAppearanceFromUi(page: Page): Promise<void> {
 
 export async function saveAndPublishAppearance(page: Page, primaryHex: string): Promise<void> {
   await setPrimaryColorField(page, primaryHex);
+
+  const textInput = page.getByTestId('store-primary-color-text');
+  // Guard against late store-sync overwriting the field before draft save.
+  if ((await textInput.inputValue()) !== primaryHex) {
+    await setPrimaryColorField(page, primaryHex);
+  }
+
   await saveAppearanceDraft(page);
+  await expect(textInput).toHaveValue(primaryHex, { timeout: 5_000 });
 
   const publishButton = page.getByRole('button', { name: /Publier sur la vitrine/i });
   await expect(publishButton).toBeEnabled({ timeout: 30_000 });
@@ -282,9 +290,18 @@ export async function acceptTermsDialogIfVisible(page: Page): Promise<void> {
 }
 
 export async function setPrimaryColorField(page: Page, hex: string): Promise<void> {
-  const textInput = page.locator('#primary_color ~ input[type="text"]');
-  await textInput.fill(hex);
+  const colorsTab = page.getByRole('tab', { name: /Couleurs/i });
+  if (await colorsTab.isVisible().catch(() => false)) {
+    await colorsTab.click();
+  }
+
+  const textInput = page.getByTestId('store-primary-color-text');
+  await expect(textInput).toBeVisible({ timeout: 15_000 });
+  await textInput.click();
+  await textInput.fill('');
+  await textInput.pressSequentially(hex, { delay: 15 });
   await textInput.blur();
+  await expect(textInput).toHaveValue(hex, { timeout: 5_000 });
 }
 
 export async function clickWizardNext(page: Page, times = 1): Promise<void> {
