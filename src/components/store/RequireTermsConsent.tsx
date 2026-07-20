@@ -35,6 +35,7 @@ interface RequireTermsConsentProps {
 }
 
 function isE2eTermsBypassEnabled(): boolean {
+  if (import.meta.env.VITE_E2E_BYPASS_TERMS === 'true') return true;
   if (typeof document === 'undefined') return false;
   return document.documentElement.dataset.e2eBypassTerms === '1';
 }
@@ -130,9 +131,8 @@ export const RequireTermsConsent = ({
     return <>{children}</>;
   }
 
-  const gatedChild = isValidElement<{ type?: string; onClick?: unknown }>(children)
+  const gatedChild = isValidElement<{ onClick?: unknown; type?: string }>(children)
     ? cloneElement(children, {
-        type: 'button',
         onClick: (e: ReactMouseEvent) => {
           e.preventDefault();
           e.stopPropagation();

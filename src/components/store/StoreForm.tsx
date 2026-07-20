@@ -1964,7 +1964,7 @@ const StoreForm = ({
                       onAction={submitCreateStore}
                     >
                       <Button
-                        type="button"
+                        type="submit"
                         data-testid="store-create-submit"
                         className="flex-1 sm:flex-none"
                         disabled={isSubmitting || slugAvailable === false}
@@ -2020,7 +2020,7 @@ const StoreForm = ({
                     onAction={submitCreateStore}
                   >
                     <Button
-                      type="button"
+                      type="submit"
                       data-testid="store-create-submit"
                       className="w-full"
                       disabled={isSubmitting || slugAvailable === false}

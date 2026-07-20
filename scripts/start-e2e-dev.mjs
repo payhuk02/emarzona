@@ -16,6 +16,7 @@ if (!merged.VITE_SUPABASE_URL?.trim() || !anonKey.trim()) {
 merged.VITE_SUPABASE_ANON_KEY = anonKey;
 merged.VITE_SUPABASE_PUBLISHABLE_KEY = anonKey;
 merged.VITE_E2E_PAYMENT_STUB = merged.VITE_E2E_PAYMENT_STUB ?? 'true';
+merged.VITE_E2E_BYPASS_TERMS = merged.VITE_E2E_BYPASS_TERMS ?? 'true';
 
 console.log(
   `[start-e2e-dev] ${merged.VITE_SUPABASE_URL} — publishable ${anonKey.slice(0, 20)}... (${anonKey.length} car.)`

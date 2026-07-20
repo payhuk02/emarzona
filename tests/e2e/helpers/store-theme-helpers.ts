@@ -177,16 +177,12 @@ export function extractStoreIdFromUrl(url: string): string | null {
 }
 
 export async function submitStoreWizardCreate(page: Page): Promise<void> {
-  await page.evaluate(() => {
-    document.documentElement.dataset.e2eBypassTerms = '1';
-  });
   await acceptTermsDialogIfVisible(page);
 
   const onboardingUrl = page.waitForURL(/\/dashboard\/onboarding\/store\?storeId=/, {
     timeout: 90_000,
   });
 
-  // Capture ANY stores POST (including 4xx) — never filter on 2xx only.
   const createResponsePromise = page.waitForResponse(
     response =>
       response.url().includes('/rest/v1/stores') && response.request().method() === 'POST',
@@ -199,37 +195,32 @@ export async function submitStoreWizardCreate(page: Page): Promise<void> {
   await createButton.click();
   await acceptTermsDialogIfVisible(page);
 
-  const stillOnWizard = await page
-    .getByText(/Étape 8 sur 8/i)
-    .isVisible()
-    .catch(() => false);
-  if (stillOnWizard) {
+  let response = await Promise.race([
+    createResponsePromise.then(r => r).catch(() => null),
+    new Promise<null>(resolve => setTimeout(() => resolve(null), 5_000)),
+  ]);
+
+  if (!response) {
     await page.locator('#store-create-form').evaluate(form => {
       (form as HTMLFormElement).requestSubmit();
     });
     await acceptTermsDialogIfVisible(page);
+    response = await Promise.race([
+      createResponsePromise.then(r => r).catch(() => null),
+      new Promise<null>(resolve => setTimeout(() => resolve(null), 5_000)),
+    ]);
   }
 
-  const earlyResponse = await Promise.race([
-    createResponsePromise.then(r => r).catch(() => null),
-    new Promise<null>(resolve => setTimeout(() => resolve(null), 3_000)),
-  ]);
-  if (
-    !earlyResponse &&
-    (await page
-      .getByText(/Étape 8 sur 8/i)
-      .isVisible()
-      .catch(() => false))
-  ) {
+  if (!response) {
     await createButton.click({ force: true }).catch(() => undefined);
     await acceptTermsDialogIfVisible(page);
+    response = await createResponsePromise.catch(() => null);
   }
 
-  const response = earlyResponse ?? (await createResponsePromise.catch(() => null));
   if (!response) {
     const toastText = await page
       .locator('[data-sonner-toast], [role="status"], [role="alert"]')
-      .filter({ hasNotText: /Analytics et Tracking/i })
+      .filter({ hasNotText: /Analytics et Tracking|Note importante/i })
       .first()
       .innerText()
       .catch(() => null);
@@ -238,11 +229,15 @@ export async function submitStoreWizardCreate(page: Page): Promise<void> {
       .first()
       .innerText()
       .catch(() => null);
-    const bypass = await page
-      .evaluate(() => document.documentElement.dataset.e2eBypassTerms ?? '0')
+    const bypassEnv = await page
+      .evaluate(
+        () =>
+          (import.meta as { env?: { VITE_E2E_BYPASS_TERMS?: string } }).env
+            ?.VITE_E2E_BYPASS_TERMS ?? 'unset'
+      )
       .catch(() => 'unknown');
     throw new Error(
-      `Store create POST never fired — toast=${toastText?.trim() ?? 'none'} validation=${validationText?.trim() ?? 'none'} url=${page.url()} bypass=${bypass}`
+      `Store create POST never fired — toast=${toastText?.trim() ?? 'none'} validation=${validationText?.trim() ?? 'none'} url=${page.url()} bypassEnv=${bypassEnv}`
     );
   }
   if (response.status() < 200 || response.status() >= 300) {

@@ -1073,7 +1073,9 @@ export default function ServiceDetail() {
                   <label className="text-sm font-medium mb-2 block">Choisissez un créneau</label>
                   <TimeSlotPicker
                     serviceId={serviceId!}
+                    serviceProductId={serviceProductId ?? undefined}
                     date={selectedDate}
+                    durationMinutes={service?.service?.duration_minutes ?? 60}
                     onSlotSelect={setSelectedSlot}
                   />
 

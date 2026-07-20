@@ -124,6 +124,9 @@ export default defineConfig(({ mode }) => {
       'import.meta.env.VITE_E2E_PAYMENT_STUB': JSON.stringify(
         env.VITE_E2E_PAYMENT_STUB || process.env.VITE_E2E_PAYMENT_STUB || ''
       ),
+      'import.meta.env.VITE_E2E_BYPASS_TERMS': JSON.stringify(
+        env.VITE_E2E_BYPASS_TERMS || process.env.VITE_E2E_BYPASS_TERMS || ''
+      ),
       'process.env.SUPABASE_SERVICE_ROLE_KEY': JSON.stringify(''),
     },
     server: { host: '::', port: 8080 },

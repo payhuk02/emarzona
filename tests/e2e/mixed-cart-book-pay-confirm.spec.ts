@@ -15,6 +15,10 @@ import {
   simulateMixedCartPayment,
   tomorrowAt10,
 } from './helpers/mixed-cart-seed';
+import {
+  selectFirstAvailableTimeSlot,
+  selectServiceCalendarDay,
+} from './helpers/service-booking-ui';
 import { gotoApp, loginAsSeededUser } from './shared/e2e-test-config';
 
 const supabaseUrl = resolveE2ESupabaseUrl() || undefined;
@@ -63,22 +67,8 @@ test.describe('Mixed cart book → pay → confirm (E2E)', () => {
       );
 
       const { date } = tomorrowAt10();
-      const calendarDay = page
-        .locator('.fc-daygrid-day')
-        .filter({ hasText: String(date.getDate()) })
-        .first();
-      if (await calendarDay.isVisible({ timeout: 10_000 }).catch(() => false)) {
-        await calendarDay.click();
-      } else {
-        await page
-          .getByRole('button', { name: new RegExp(String(date.getDate()), 'i') })
-          .first()
-          .click();
-      }
-
-      const slotButton = page.getByRole('button', { name: /10:00|09:00|11:00/ }).first();
-      await expect(slotButton).toBeVisible({ timeout: 15_000 });
-      await slotButton.click();
+      await selectServiceCalendarDay(page, date);
+      await selectFirstAvailableTimeSlot(page);
 
       await page.getByRole('button', { name: /ajouter au panier/i }).click();
       await page.waitForURL(/\/cart/, { timeout: 30_000 });
