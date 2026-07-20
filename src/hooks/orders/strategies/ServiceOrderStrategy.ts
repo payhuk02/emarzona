@@ -272,6 +272,7 @@ export class ServiceOrderStrategy implements OrderStrategy {
 
     if (authenticatedUserId) {
       const { data: bookingResult, error: bookingError } = await supabase.rpc(
+        // @ts-expect-error: RPC type not yet updated in supabase types
         'reserve_service_booking',
         {
           p_product_id: productId,
@@ -291,10 +292,14 @@ export class ServiceOrderStrategy implements OrderStrategy {
         throw new Error(bookingError.message || 'Impossible de finaliser la réservation.');
       }
 
-      const row = Array.isArray(bookingResult) ? bookingResult[0] : bookingResult;
+      const rows = bookingResult as unknown as Array<{
+        booking_id: string | null;
+        error_message: string | null;
+      }> | null;
+      const row = Array.isArray(rows) ? rows[0] : null;
       if (row?.error_message) throw new Error(String(row.error_message));
       if (!row?.booking_id) throw new Error('Erreur inattendue lors de la réservation');
-      bookingId = row.booking_id as string;
+      bookingId = row.booking_id;
     } else {
       const invokePromise = supabase.functions.invoke('service-checkout-provisioning', {
         body: {
