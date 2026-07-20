@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,6 +23,7 @@ import {
   getStoreCustomizationSteps,
 } from '@/lib/commerce/store-customization-steps';
 import { useStoreFormState } from '@/hooks/useStoreFormState';
+import { useStores } from '@/hooks/useStores';
 import { StoreCustomizationWizard } from './StoreCustomizationWizard';
 import { StoreLegalPagesComponent, DEFAULT_LEGAL_TAB } from './StoreLegalPages';
 import { StoreMarketingContentComponent, DEFAULT_MARKETING_TAB } from './StoreMarketingContent';
@@ -41,8 +42,15 @@ interface StoreDetailsProps {
   store: ExtendedStore;
 }
 
-const StoreDetails = ({ store }: StoreDetailsProps) => {
+const StoreDetails = ({ store: initialStore }: StoreDetailsProps) => {
   const { t } = useTranslation();
+  const { stores } = useStores();
+  const store = useMemo(
+    () =>
+      (stores.find(entry => entry.id === initialStore.id) as ExtendedStore | undefined) ??
+      initialStore,
+    [stores, initialStore]
+  );
   const form = useStoreFormState(store);
 
   const {
@@ -57,8 +65,10 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
     currentTab,
     setCurrentTab,
     fieldTouched,
+    hasUnpublishedAppearanceDraft,
     storeUrl,
     handleSubmit,
+    handleSaveAppearanceDraft,
     handlePublishAppearance,
     handleCancel,
     resetForm,
@@ -118,8 +128,7 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
               setters={setters}
               isEditing={isEditing}
               isSubmitting={isSubmitting}
-              handleSubmit={handleSubmit}
-              onPublishAppearance={handlePublishAppearance}
+              hasDraftChanges={hasUnpublishedAppearanceDraft}
               applyConfig={applyConfig}
               handleColorChange={handleColorChange}
               handleTypographyChange={handleTypographyChange}
@@ -370,6 +379,9 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
         renderContent={renderTabContent}
         onSave={handleSubmit}
         isSubmitting={isSubmitting}
+        hasUnpublishedAppearanceDraft={hasUnpublishedAppearanceDraft}
+        onPublishAppearance={handlePublishAppearance}
+        onSaveAppearanceDraft={handleSaveAppearanceDraft}
       />
 
       {/* Social links (read-only card) */}

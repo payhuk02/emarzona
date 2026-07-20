@@ -3,16 +3,12 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { Save, Upload } from 'lucide-react';
 import StoreImageUpload from '../StoreImageUpload';
 import { StoreThemeSettings } from '../StoreThemeSettings';
 import { StoreThemeTemplateSelector } from '../StoreThemeTemplateSelector';
 import { StorePreview } from '../StorePreview';
 import { applyThemeTemplate } from '@/lib/store-theme-templates';
 import { resolveStoreCommerceTypeFromStore } from '@/lib/commerce/store-capability-map';
-import { hasUnpublishedAppearance } from '@/lib/storefront/store-preview-draft';
 import type { Store } from '@/hooks/useStores';
 import type { ExtendedStore, StoreFormState, StoreThemeConfig } from '../types/store-form';
 import type { useToast } from '@/hooks/use-toast';
@@ -23,8 +19,7 @@ interface StoreAppearanceTabProps {
   setters: Record<string, (v: string | null) => void>;
   isEditing: boolean;
   isSubmitting: boolean;
-  handleSubmit: (e?: React.FormEvent) => Promise<void>;
-  onPublishAppearance?: () => Promise<void>;
+  hasDraftChanges?: boolean;
   applyConfig: (config: StoreThemeConfig) => void;
   handleColorChange: (field: string, value: string) => void;
   handleTypographyChange: (field: string, value: string) => void;
@@ -38,8 +33,7 @@ export const StoreAppearanceTab = ({
   setters,
   isEditing,
   isSubmitting,
-  handleSubmit,
-  onPublishAppearance,
+  hasDraftChanges: hasDraftChangesProp,
   applyConfig,
   handleColorChange,
   handleTypographyChange,
@@ -85,6 +79,8 @@ export const StoreAppearanceTab = ({
     productCardStyle,
     navigationStyle,
   } = formState;
+
+  const hasDraftChanges = hasDraftChangesProp ?? false;
 
   const appearanceFormDraft = useMemo(
     () => ({
@@ -163,11 +159,6 @@ export const StoreAppearanceTab = ({
     ]
   );
 
-  const hasDraftChanges = useMemo(
-    () => hasUnpublishedAppearance(store as Store, appearanceFormDraft),
-    [store, appearanceFormDraft]
-  );
-
   const publishedAtLabel = useMemo(() => {
     const publishedAt = (store as Store).appearance_published_at;
     if (!publishedAt) return null;
@@ -216,42 +207,8 @@ export const StoreAppearanceTab = ({
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
-            {hasDraftChanges && (
-              <Alert>
-                <AlertDescription>{t('store.appearance.draftHint')}</AlertDescription>
-              </Alert>
-            )}
             {publishedAtLabel && !hasDraftChanges && (
               <p className="text-xs text-muted-foreground">{publishedAtLabel}</p>
-            )}
-            {isEditing && (
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  disabled={isSubmitting}
-                  onClick={() => void handleSubmit()}
-                  className="gap-2"
-                >
-                  <Save className="h-4 w-4" />
-                  {isSubmitting ? t('store.customization.saving') : t('store.appearance.saveDraft')}
-                </Button>
-                {onPublishAppearance && (
-                  <Button
-                    type="button"
-                    size="sm"
-                    disabled={isSubmitting}
-                    onClick={() => void onPublishAppearance()}
-                    className="gap-2"
-                  >
-                    <Upload className="h-4 w-4" />
-                    {isSubmitting
-                      ? t('store.appearance.publishing')
-                      : t('store.appearance.publish')}
-                  </Button>
-                )}
-              </div>
             )}
             <StorePreview
               store={{ ...store, is_active: store.is_active ?? true } as Store}

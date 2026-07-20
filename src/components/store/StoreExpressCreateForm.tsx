@@ -24,6 +24,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
+import { useAnalytics } from '@/hooks/useAnalytics';
 import { useStores } from '@/hooks/useStores';
 import { useStoreContext } from '@/contexts/StoreContext';
 import {
@@ -63,6 +64,7 @@ export function StoreExpressCreateForm({
   const navigate = useNavigate();
   const { createStore, canCreateStore } = useStores();
   const { refreshStores } = useStoreContext();
+  const { trackEvent } = useAnalytics();
 
   const [name, setName] = useState('');
   const [commerceType, setCommerceType] = useState<StoreCommerceType>('physical');
@@ -157,18 +159,30 @@ export function StoreExpressCreateForm({
 
         await refreshStores();
 
+        void trackEvent({
+          storeId: createdStore.id,
+          eventType: 'store_create_started',
+          eventData: {
+            mode: 'express',
+            commerce_type: commerceType,
+            template_id: themeTemplateId ?? verticalProfile.defaultThemeTemplateId,
+            started_at: new Date(startedAt).toISOString(),
+          },
+        });
+        void trackEvent({
+          storeId: createdStore.id,
+          eventType: 'store_create_completed',
+          eventData: {
+            mode: 'express',
+            commerce_type: commerceType,
+            template_id: themeTemplateId ?? verticalProfile.defaultThemeTemplateId,
+            duration_ms: Date.now() - startedAt,
+          },
+        });
+
         const redirectTarget = getStoreOnboardingPath(createdStore.id, commerceType);
         navigate(redirectTarget, { replace: true });
         onSuccess?.();
-
-        if (import.meta.env.DEV) {
-          // eslint-disable-next-line no-console
-          console.info('store_create_completed', {
-            mode: 'express',
-            duration_ms: Date.now() - startedAt,
-            template_id: themeTemplateId,
-          });
-        }
       } catch (error: unknown) {
         const message =
           error instanceof Error ? error.message : t('store.form.common.unknownError');
@@ -193,6 +207,7 @@ export function StoreExpressCreateForm({
       t,
       themeTemplateId,
       toast,
+      trackEvent,
       verticalProfile.defaultThemeTemplateId,
     ]
   );

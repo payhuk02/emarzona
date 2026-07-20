@@ -19,7 +19,9 @@ export type AnalyticsEventType =
   | 'search'
   | 'physical_onboarding_seen'
   | 'trial_continue_clicked'
-  | 'billing_cta_clicked';
+  | 'billing_cta_clicked'
+  | 'store_create_started'
+  | 'store_create_completed';
 
 interface TrackEventParams {
   storeId: string;

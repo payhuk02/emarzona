@@ -88,8 +88,6 @@ const STOREFRONT_STORE_PUBLIC_COLUMNS = [
   'google_tag_manager_enabled',
   'tiktok_pixel_id',
   'tiktok_pixel_enabled',
-  'custom_tracking_scripts',
-  'custom_scripts_enabled',
   'custom_domain',
   'domain_status',
   'domain_verified_at',

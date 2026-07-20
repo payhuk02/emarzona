@@ -1698,6 +1698,12 @@
         "notifications": { "title": "Notifications", "description": "Alertes et notifications" }
       }
     },
+    "publishBanner": {
+      "unpublishedAppearanceTitle": "Apparence non publiée",
+      "unpublishedAppearanceDescription": "Des modifications d'apparence sont en brouillon. Les visiteurs voient encore l'ancienne version tant que vous n'avez pas publié.",
+      "appearanceDraftHint": "Les changements d'apparence sont enregistrés en brouillon. Publiez pour les rendre visibles sur la vitrine.",
+      "immediateHint": "Les modifications de cet onglet sont publiées immédiatement sur la boutique publique."
+    },
     "preview": {
       "openPreview": "Prévisualiser la boutique",
       "openNewTab": "Ouvrir dans un nouvel onglet",

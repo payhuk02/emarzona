@@ -1550,6 +1550,12 @@
         "notifications": { "title": "Notifications", "description": "Alerts and notifications" }
       }
     },
+    "publishBanner": {
+      "unpublishedAppearanceTitle": "Appearance not published",
+      "unpublishedAppearanceDescription": "Appearance changes are saved as a draft. Visitors still see the published version until you publish.",
+      "appearanceDraftHint": "Appearance changes are saved as drafts. Publish to make them visible on your storefront.",
+      "immediateHint": "Changes on this tab are published immediately on your public storefront."
+    },
     "preview": {
       "openPreview": "Preview store",
       "openNewTab": "Open in new tab",

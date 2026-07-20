@@ -21,6 +21,7 @@ import {
 } from '@/lib/commerce/store-customization-steps';
 import { resolveStoreCommerceTypeFromStore } from '@/lib/commerce/store-capability-map';
 import { useStoreCustomizationSteps } from '@/hooks/store/useStoreCustomizationSteps';
+import { StorefrontPublishBanner } from './StorefrontPublishBanner';
 
 const TABS_WITH_INTERNAL_SUBSTEPS = new Set(['legal', 'marketing']);
 
@@ -33,6 +34,9 @@ interface StoreCustomizationWizardProps {
   className?: string;
   onSave?: () => void | Promise<void>;
   isSubmitting?: boolean;
+  hasUnpublishedAppearanceDraft?: boolean;
+  onPublishAppearance?: () => void | Promise<void>;
+  onSaveAppearanceDraft?: () => void | Promise<void>;
 }
 
 export const StoreCustomizationWizard = ({
@@ -44,6 +48,9 @@ export const StoreCustomizationWizard = ({
   className,
   onSave,
   isSubmitting = false,
+  hasUnpublishedAppearanceDraft = false,
+  onPublishAppearance,
+  onSaveAppearanceDraft,
 }: StoreCustomizationWizardProps) => {
   const { t } = useTranslation();
   const headerRef = useScrollAnimation<HTMLDivElement>();
@@ -117,6 +124,7 @@ export const StoreCustomizationWizard = ({
   const showSaveFooter =
     !!onSave &&
     !TABS_WITH_INTERNAL_SUBSTEPS.has(currentTab) &&
+    currentTab !== 'appearance' &&
     currentTab !== 'url' &&
     currentTab !== 'commerce' &&
     currentTab !== 'notifications';
@@ -137,6 +145,9 @@ export const StoreCustomizationWizard = ({
         case 'settings':
           return !!(store.name && store.description);
         case 'appearance':
+          if (store.appearance_draft && typeof store.appearance_draft === 'object') {
+            return false;
+          }
           return !!(store.logo_url || store.banner_url || store.primary_color);
         case 'location':
           return !!(store.address_line1 || store.city || store.country);
@@ -285,6 +296,14 @@ export const StoreCustomizationWizard = ({
           </div>
         </CardContent>
       </Card>
+
+      <StorefrontPublishBanner
+        currentTab={currentTab}
+        hasUnpublishedAppearanceDraft={hasUnpublishedAppearanceDraft}
+        isSubmitting={isSubmitting}
+        onSaveAppearanceDraft={onSaveAppearanceDraft}
+        onPublishAppearance={onPublishAppearance}
+      />
 
       <Card
         ref={contentRef}

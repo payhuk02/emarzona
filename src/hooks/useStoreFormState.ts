@@ -21,6 +21,10 @@ import {
   saveStoreAppearanceDraft,
 } from '@/lib/storefront/store-appearance-publish';
 import type { StoreAppearanceFormDraft } from '@/lib/storefront/store-preview-draft';
+import {
+  appearanceFormToPreviewDraft,
+  hasAppearanceDraftChanges,
+} from '@/lib/storefront/store-preview-draft';
 
 function initState(store: ExtendedStore): StoreFormState {
   const base: StoreFormState = {
@@ -157,6 +161,50 @@ function initState(store: ExtendedStore): StoreFormState {
     productCardStyle: form.productCardStyle ?? base.productCardStyle,
     navigationStyle: form.navigationStyle ?? base.navigationStyle,
   };
+}
+
+function appearanceFormFromState(state: StoreFormState): StoreAppearanceFormDraft {
+  return {
+    logoUrl: state.logoUrl,
+    bannerUrl: state.bannerUrl,
+    faviconUrl: state.faviconUrl,
+    appleTouchIconUrl: state.appleTouchIconUrl,
+    watermarkUrl: state.watermarkUrl,
+    placeholderImageUrl: state.placeholderImageUrl,
+    primaryColor: state.primaryColor,
+    secondaryColor: state.secondaryColor,
+    accentColor: state.accentColor,
+    backgroundColor: state.backgroundColor,
+    textColor: state.textColor,
+    textSecondaryColor: state.textSecondaryColor,
+    buttonPrimaryColor: state.buttonPrimaryColor,
+    buttonPrimaryText: state.buttonPrimaryText,
+    buttonSecondaryColor: state.buttonSecondaryColor,
+    buttonSecondaryText: state.buttonSecondaryText,
+    linkColor: state.linkColor,
+    linkHoverColor: state.linkHoverColor,
+    borderRadius: state.borderRadius,
+    shadowIntensity: state.shadowIntensity,
+    headingFont: state.headingFont,
+    bodyFont: state.bodyFont,
+    fontSizeBase: state.fontSizeBase,
+    headingSizeH1: state.headingSizeH1,
+    headingSizeH2: state.headingSizeH2,
+    headingSizeH3: state.headingSizeH3,
+    lineHeight: state.lineHeight,
+    letterSpacing: state.letterSpacing,
+    headerStyle: state.headerStyle,
+    footerStyle: state.footerStyle,
+    sidebarEnabled: state.sidebarEnabled,
+    sidebarPosition: state.sidebarPosition,
+    productGridColumns: state.productGridColumns,
+    productCardStyle: state.productCardStyle,
+    navigationStyle: state.navigationStyle,
+  };
+}
+
+function publishedAppearanceFormFromStore(store: ExtendedStore): StoreAppearanceFormDraft {
+  return appearanceFormFromState(initState({ ...store, appearance_draft: null }));
 }
 
 export function useStoreFormState(store: ExtendedStore) {
@@ -308,6 +356,13 @@ export function useStoreFormState(store: ExtendedStore) {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [currentTab, setCurrentTab] = useState<string>('settings');
   const [fieldTouched, setFieldTouched] = useState<Record<string, boolean>>({});
+  const [hasRemoteAppearanceDraft, setHasRemoteAppearanceDraft] = useState(() =>
+    Boolean(getStoreAppearanceDraft(store))
+  );
+  const [publishedAppearanceBaseline, setPublishedAppearanceBaseline] =
+    useState<StoreAppearanceFormDraft | null>(() =>
+      getStoreAppearanceDraft(store) ? null : publishedAppearanceFormFromStore(store)
+    );
 
   const { getStoreUrl, checkSlugAvailability } = useStore();
   const { updateStore: updateStoreById } = useStores();
@@ -885,12 +940,51 @@ export function useStoreFormState(store: ExtendedStore) {
     ]
   );
 
+  const hasUnpublishedAppearanceDraft = useMemo(() => {
+    if (hasRemoteAppearanceDraft) return true;
+    if (store.appearance_draft && typeof store.appearance_draft === 'object') return true;
+    const baseline = publishedAppearanceBaseline;
+    if (!baseline) {
+      return hasAppearanceDraftChanges(store, buildAppearanceFormDraft());
+    }
+    const baselineStore = {
+      ...store,
+      ...appearanceFormToPreviewDraft(baseline),
+    } as Store;
+    return hasAppearanceDraftChanges(baselineStore, buildAppearanceFormDraft());
+  }, [hasRemoteAppearanceDraft, store, publishedAppearanceBaseline, buildAppearanceFormDraft]);
+
+  const handleSaveAppearanceDraft = useCallback(async () => {
+    setIsSubmitting(true);
+    try {
+      await saveStoreAppearanceDraft(store.id, buildAppearanceFormDraft());
+      await refreshStores().catch(() => {});
+      setHasRemoteAppearanceDraft(true);
+      setLastSaved(new Date());
+      toast({
+        title: t('store.appearance.draftSavedTitle'),
+        description: t('store.appearance.draftSavedDescription'),
+        duration: 3000,
+      });
+    } catch {
+      toast({
+        title: t('store.form.common.error'),
+        description: t('store.appearance.draftSaveError'),
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [store.id, buildAppearanceFormDraft, refreshStores, toast, t]);
+
   const handlePublishAppearance = useCallback(async () => {
     setIsSubmitting(true);
     try {
       await saveStoreAppearanceDraft(store.id, buildAppearanceFormDraft());
       await publishStoreAppearance(store.id);
       await refreshStores().catch(() => {});
+      setHasRemoteAppearanceDraft(false);
+      setPublishedAppearanceBaseline(buildAppearanceFormDraft());
       setLastSaved(new Date());
       toast({
         title: t('store.appearance.publishedTitle'),
@@ -913,25 +1007,7 @@ export function useStoreFormState(store: ExtendedStore) {
       e?.preventDefault();
 
       if (currentTab === 'appearance') {
-        setIsSubmitting(true);
-        try {
-          await saveStoreAppearanceDraft(store.id, buildAppearanceFormDraft());
-          await refreshStores().catch(() => {});
-          setLastSaved(new Date());
-          toast({
-            title: t('store.appearance.draftSavedTitle'),
-            description: t('store.appearance.draftSavedDescription'),
-            duration: 3000,
-          });
-        } catch {
-          toast({
-            title: t('store.form.common.error'),
-            description: t('store.appearance.draftSaveError'),
-            variant: 'destructive',
-          });
-        } finally {
-          setIsSubmitting(false);
-        }
+        await handleSaveAppearanceDraft();
         return;
       }
 
@@ -980,7 +1056,7 @@ export function useStoreFormState(store: ExtendedStore) {
     },
     [
       currentTab,
-      buildAppearanceFormDraft,
+      handleSaveAppearanceDraft,
       name,
       description,
       contactEmail,
@@ -1141,12 +1217,14 @@ export function useStoreFormState(store: ExtendedStore) {
     currentTab,
     setCurrentTab,
     fieldTouched,
+    hasUnpublishedAppearanceDraft,
     // Store utilities
     storeUrl,
     checkSlugAvailability,
     toast,
     // Handlers
     handleSubmit,
+    handleSaveAppearanceDraft,
     handlePublishAppearance,
     handleCancel,
     resetForm,
