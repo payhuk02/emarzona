@@ -170,9 +170,8 @@ export async function saveAndPublishAppearance(page: Page, primaryHex: string): 
   await saveAppearanceDraft(page);
 
   const publishButton = page.getByRole('button', { name: /Publier sur la vitrine/i });
-  if (await publishButton.isEnabled().catch(() => false)) {
-    await publishStoreAppearanceFromUi(page);
-  }
+  await expect(publishButton).toBeEnabled({ timeout: 30_000 });
+  await publishStoreAppearanceFromUi(page);
 }
 
 export async function waitForStorefrontPreviewReady(page: Page): Promise<void> {
@@ -187,25 +186,39 @@ export async function assertStorePrimaryColorInDb(
   storeId: string,
   expectedHex: string
 ): Promise<void> {
-  const { data, error } = await admin
-    .from('store_appearance')
-    .select('primary_color, appearance_draft')
-    .eq('store_id', storeId)
-    .maybeSingle();
-
-  expect(error).toBeNull();
   const expected = expectedHex.toLowerCase();
-  const published = data?.primary_color?.toLowerCase();
-  const draft =
-    data?.appearance_draft &&
-    typeof data.appearance_draft === 'object' &&
-    !Array.isArray(data.appearance_draft)
-      ? String(
-          (data.appearance_draft as { primary_color?: string }).primary_color ?? ''
-        ).toLowerCase()
-      : '';
+  let lastPublished = '';
+  let lastDraft = '';
+  let lastError: unknown = null;
 
-  expect(published === expected || draft === expected).toBeTruthy();
+  for (let attempt = 1; attempt <= 10; attempt += 1) {
+    const { data, error } = await admin
+      .from('store_appearance')
+      .select('primary_color, appearance_draft')
+      .eq('store_id', storeId)
+      .maybeSingle();
+
+    lastError = error;
+    lastPublished = data?.primary_color?.toLowerCase() ?? '';
+    lastDraft =
+      data?.appearance_draft &&
+      typeof data.appearance_draft === 'object' &&
+      !Array.isArray(data.appearance_draft)
+        ? String(
+            (data.appearance_draft as { primary_color?: string }).primary_color ?? ''
+          ).toLowerCase()
+        : '';
+
+    if (!error && (lastPublished === expected || lastDraft === expected)) {
+      return;
+    }
+    await new Promise(resolve => setTimeout(resolve, 500));
+  }
+
+  expect(lastError).toBeNull();
+  throw new Error(
+    `store_appearance primary_color mismatch for ${storeId}: expected=${expected} published=${lastPublished} draft=${lastDraft}`
+  );
 }
 
 export async function dismissPersonaOnboardingIfVisible(page: Page): Promise<void> {

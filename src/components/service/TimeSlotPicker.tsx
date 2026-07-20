@@ -43,9 +43,15 @@ export const TimeSlotPicker = ({
   // Normaliser l'ID du service
   const normalizedServiceProductId = serviceProductId || serviceId;
 
-  // Récupérer les créneaux disponibles pour ce jour
+  // Récupérer les créneaux disponibles pour ce jour (clé date locale, pas UTC ISO).
+  const localDateKey = [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, '0'),
+    String(date.getDate()).padStart(2, '0'),
+  ].join('-');
+
   const { data: slots, isLoading } = useQuery({
-    queryKey: ['availability-slots', normalizedServiceProductId, date.toISOString().split('T')[0]],
+    queryKey: ['availability-slots', normalizedServiceProductId, localDateKey],
     queryFn: async () => {
       if (!normalizedServiceProductId) return [];
 

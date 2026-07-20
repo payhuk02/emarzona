@@ -75,7 +75,7 @@ export const ServiceCalendarEnhanced = ({
   maxDate,
   disabledDates = [],
 }: ServiceCalendarEnhancedProps) => {
-  const [view, setView] = useState<CalendarView>('month');
+  const [view, setView] = useState<CalendarView>('week');
   const [date, setDate] = useState(selectedDate || new Date());
 
   // Fetch service product ID
@@ -216,8 +216,10 @@ export const ServiceCalendarEnhanced = ({
     };
 
     const color = statusColors[status] || statusColors.unavailable;
+    const dayKey = format(event.start, 'yyyy-MM-dd');
 
     return {
+      className: `service-cal-event service-cal-event--${status} service-cal-event--${dayKey}`,
       style: {
         backgroundColor: color.bg,
         color: color.text,

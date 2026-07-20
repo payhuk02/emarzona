@@ -44,7 +44,10 @@ async function restoreAppearanceRevision(
   await expect(panel).toBeVisible({ timeout: 30_000 });
 
   const revisionRow = panel.locator('li').filter({
-    hasText: new RegExp(`Révision\\s*${revisionNumber}|Revision\\s*${revisionNumber}`, 'i'),
+    hasText: new RegExp(
+      `Révision\\s*#?\\s*${revisionNumber}|Revision\\s*#?\\s*${revisionNumber}`,
+      'i'
+    ),
   });
   await expect(revisionRow).toBeVisible({ timeout: 15_000 });
 

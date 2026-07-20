@@ -1063,13 +1063,17 @@ export default function ServiceDetail() {
                 <ServiceCalendarEnhanced
                   serviceId={serviceId!}
                   selectedDate={selectedDate || undefined}
-                  onDateSelect={setSelectedDate}
+                  onDateSelect={nextDate => {
+                    setSelectedDate(nextDate);
+                    setSelectedSlot(null);
+                    setValidationError(null);
+                  }}
                 />
               </div>
 
               {/* Time Slots */}
               {selectedDate && (
-                <div className="space-y-2">
+                <div className="space-y-2" data-testid="service-time-slots">
                   <label className="text-sm font-medium mb-2 block">Choisissez un créneau</label>
                   <TimeSlotPicker
                     serviceId={serviceId!}

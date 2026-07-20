@@ -11,7 +11,7 @@ async function dismissCookieBannerIfVisible(page: Page): Promise<void> {
   }
 }
 
-async function waitForTimeSlots(page: Page, timeout = 20_000): Promise<boolean> {
+async function waitForTimeSlots(page: Page, timeout = 12_000): Promise<boolean> {
   return page
     .locator('[data-testid^="time-slot-"]')
     .first()
@@ -19,78 +19,42 @@ async function waitForTimeSlots(page: Page, timeout = 20_000): Promise<boolean> 
     .catch(() => false);
 }
 
-/**
- * Select a bookable day in ServiceCalendarEnhanced so TimeSlotPicker renders.
- * Prefer a future "Disponible" event; fall back to clicking tomorrow's month cell.
- */
-export async function selectServiceCalendarDay(page: Page, date: Date): Promise<void> {
+/** Select a bookable day so TimeSlotPicker renders (week view + Disponible events). */
+export async function selectServiceCalendarDay(page: Page, _date: Date): Promise<void> {
   await dismissCookieBannerIfVisible(page);
   await expect(page.locator('.rbc-calendar')).toBeVisible({ timeout: 30_000 });
 
-  const slotsVisible = () => waitForTimeSlots(page, 8_000);
+  // Prefer week view — events are larger and include "Disponible" labels.
+  const weekButton = page.getByRole('button', { name: /^Semaine$/i });
+  if (await weekButton.isVisible().catch(() => false)) {
+    await weekButton.click();
+  }
 
-  // Future "Disponible" events (calendar now generates the full month, skipping past days).
   const availableEvent = page
     .locator('.rbc-event')
     .filter({ hasText: /Disponible/i })
     .first();
-  if (await availableEvent.isVisible({ timeout: 15_000 }).catch(() => false)) {
-    await availableEvent.scrollIntoViewIfNeeded().catch(() => undefined);
-    await availableEvent.click({ force: true });
-    if (await slotsVisible()) return;
-    await availableEvent.click({ force: true });
-    if (await slotsVisible()) return;
-  }
 
-  // Month view: click the date cell for the target day (current-month only).
-  const monthButton = page.getByRole('button', { name: /^Mois$/i });
-  if (await monthButton.isVisible().catch(() => false)) {
-    await monthButton.click();
-  }
+  await expect(availableEvent).toBeVisible({ timeout: 30_000 });
+  await availableEvent.scrollIntoViewIfNeeded().catch(() => undefined);
+  await availableEvent.click({ force: true });
 
-  const monthName = date.toLocaleDateString('fr-FR', { month: 'long' });
-  const year = date.getFullYear();
-  const toolbar = page.locator('.rbc-toolbar-label');
-  const nextMonth = page.getByRole('button', { name: /mois suivant|suivant/i }).first();
+  if (await waitForTimeSlots(page)) return;
 
-  for (let attempt = 0; attempt < 14; attempt += 1) {
-    const label = ((await toolbar.textContent()) ?? '').toLowerCase();
-    if (label.includes(monthName.toLowerCase()) && label.includes(String(year))) {
-      break;
-    }
-    await nextMonth.click();
-  }
+  // Re-click once (CI can miss the first selection).
+  await availableEvent.click({ force: true });
+  if (await waitForTimeSlots(page)) return;
 
-  const dayNum = date.getDate();
-  // rbc-date-cell and rbc-day-bg are siblings — click the in-month date button/label.
-  const inMonthDate = page
-    .locator(
-      '.rbc-month-view .rbc-date-cell:not(.rbc-off-range) button, .rbc-month-view .rbc-date-cell:not(.rbc-off-range) a, .rbc-month-view .rbc-date-cell:not(.rbc-off-range)'
-    )
-    .filter({ hasText: new RegExp(`^\\s*${dayNum}\\s*$`) })
-    .first();
-
-  if (await inMonthDate.isVisible().catch(() => false)) {
-    await inMonthDate.click({ force: true });
-  } else {
-    // Last resort: click any matching date number, then the day background via evaluate.
-    await page.evaluate(targetDay => {
-      const cells = Array.from(
-        document.querySelectorAll('.rbc-month-view .rbc-date-cell:not(.rbc-off-range)')
-      );
-      const match = cells.find(cell => (cell.textContent || '').trim() === String(targetDay));
-      if (match instanceof HTMLElement) {
-        match.click();
-        const row = match.closest('.rbc-month-row');
-        const idx = match.parentElement
-          ? Array.from(match.parentElement.children).indexOf(match)
-          : -1;
-        const bgs = row?.querySelectorAll('.rbc-day-bg');
-        if (idx >= 0 && bgs?.[idx] instanceof HTMLElement) {
-          (bgs[idx] as HTMLElement).click();
-        }
-      }
-    }, dayNum);
+  // Advance one week if current week only had past slots filtered out.
+  const next = page.getByRole('button', { name: /suivant|next/i }).first();
+  if (await next.isVisible().catch(() => false)) {
+    await next.click();
+    const nextEvent = page
+      .locator('.rbc-event')
+      .filter({ hasText: /Disponible/i })
+      .first();
+    await expect(nextEvent).toBeVisible({ timeout: 20_000 });
+    await nextEvent.click({ force: true });
   }
 
   await expect(page.locator('[data-testid^="time-slot-"]').first()).toBeVisible({
