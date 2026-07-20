@@ -1554,7 +1554,21 @@
       "unpublishedAppearanceTitle": "Appearance not published",
       "unpublishedAppearanceDescription": "Appearance changes are saved as a draft. Visitors still see the published version until you publish.",
       "appearanceDraftHint": "Appearance changes are saved as drafts. Publish to make them visible on your storefront.",
+      "unpublishedContentTitle": "Content not published",
+      "unpublishedContentDescription": "SEO, marketing, or legal changes are in draft. Publish to show them on your public storefront.",
+      "contentDraftHint": "Changes on this tab are saved as drafts. Publish to make them visible on your storefront.",
       "immediateHint": "Changes on this tab are published immediately on your public storefront."
+    },
+    "content": {
+      "saveDraft": "Save draft",
+      "publish": "Publish to storefront",
+      "publishing": "Publishing...",
+      "draftSavedTitle": "Draft saved",
+      "draftSavedDescription": "Your changes are saved as a draft and are not yet visible on the public store.",
+      "draftSaveError": "Could not save the draft.",
+      "publishedTitle": "Content published",
+      "publishedDescription": "Your public storefront now displays this content.",
+      "publishError": "Could not publish content."
     },
     "preview": {
       "openPreview": "Preview store",

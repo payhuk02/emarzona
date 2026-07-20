@@ -1702,7 +1702,21 @@
       "unpublishedAppearanceTitle": "Apparence non publiée",
       "unpublishedAppearanceDescription": "Des modifications d'apparence sont en brouillon. Les visiteurs voient encore l'ancienne version tant que vous n'avez pas publié.",
       "appearanceDraftHint": "Les changements d'apparence sont enregistrés en brouillon. Publiez pour les rendre visibles sur la vitrine.",
+      "unpublishedContentTitle": "Contenu non publié",
+      "unpublishedContentDescription": "Des modifications SEO, marketing ou légales sont en brouillon. Publiez pour les afficher sur la boutique publique.",
+      "contentDraftHint": "Les changements de cet onglet sont enregistrés en brouillon. Publiez pour les rendre visibles sur la vitrine.",
       "immediateHint": "Les modifications de cet onglet sont publiées immédiatement sur la boutique publique."
+    },
+    "content": {
+      "saveDraft": "Enregistrer le brouillon",
+      "publish": "Publier sur la vitrine",
+      "publishing": "Publication...",
+      "draftSavedTitle": "Brouillon enregistré",
+      "draftSavedDescription": "Vos modifications sont en brouillon et ne sont pas encore visibles sur la boutique publique.",
+      "draftSaveError": "Impossible d'enregistrer le brouillon.",
+      "publishedTitle": "Contenu publié",
+      "publishedDescription": "Votre vitrine publique affiche désormais ce contenu.",
+      "publishError": "Impossible de publier le contenu."
     },
     "preview": {
       "openPreview": "Prévisualiser la boutique",

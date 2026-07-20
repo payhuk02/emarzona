@@ -39,8 +39,11 @@ interface StoreCustomizationWizardProps {
   onSave?: () => void | Promise<void>;
   isSubmitting?: boolean;
   hasUnpublishedAppearanceDraft?: boolean;
+  hasUnpublishedContentDraft?: boolean;
   onPublishAppearance?: () => void | Promise<void>;
   onSaveAppearanceDraft?: () => void | Promise<void>;
+  onPublishContent?: () => void | Promise<void>;
+  onSaveContentDraft?: () => void | Promise<void>;
 }
 
 export const StoreCustomizationWizard = ({
@@ -53,8 +56,11 @@ export const StoreCustomizationWizard = ({
   onSave,
   isSubmitting = false,
   hasUnpublishedAppearanceDraft = false,
+  hasUnpublishedContentDraft = false,
   onPublishAppearance,
   onSaveAppearanceDraft,
+  onPublishContent,
+  onSaveContentDraft,
 }: StoreCustomizationWizardProps) => {
   const { t } = useTranslation();
   const headerRef = useScrollAnimation<HTMLDivElement>();
@@ -132,6 +138,7 @@ export const StoreCustomizationWizard = ({
     currentTab !== 'url' &&
     currentTab !== 'commerce' &&
     currentTab !== 'notifications';
+  // SEO / marketing / legal : footer "Enregistrer" → brouillon (handleSubmit → saveStoreContentDraft)
 
   const isLastStep = currentStep >= steps.length;
 
@@ -301,9 +308,12 @@ export const StoreCustomizationWizard = ({
       <StorefrontPublishBanner
         currentTab={currentTab}
         hasUnpublishedAppearanceDraft={hasUnpublishedAppearanceDraft}
+        hasUnpublishedContentDraft={hasUnpublishedContentDraft}
         isSubmitting={isSubmitting}
         onSaveAppearanceDraft={onSaveAppearanceDraft}
         onPublishAppearance={onPublishAppearance}
+        onSaveContentDraft={onSaveContentDraft}
+        onPublishContent={onPublishContent}
       />
 
       <Card

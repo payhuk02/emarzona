@@ -5,25 +5,33 @@ import { Info, Save, Upload } from 'lucide-react';
 import {
   getStorefrontPublishMode,
   isDraftAndPublishTab,
+  tabToContentDomain,
 } from '@/lib/storefront/storefront-publish-model';
 
 interface StorefrontPublishBannerProps {
   currentTab: string;
   hasUnpublishedAppearanceDraft: boolean;
+  hasUnpublishedContentDraft?: boolean;
   isSubmitting?: boolean;
   onSaveAppearanceDraft?: () => void | Promise<void>;
   onPublishAppearance?: () => void | Promise<void>;
+  onSaveContentDraft?: () => void | Promise<void>;
+  onPublishContent?: () => void | Promise<void>;
 }
 
 export function StorefrontPublishBanner({
   currentTab,
   hasUnpublishedAppearanceDraft,
+  hasUnpublishedContentDraft = false,
   isSubmitting = false,
   onSaveAppearanceDraft,
   onPublishAppearance,
+  onSaveContentDraft,
+  onPublishContent,
 }: StorefrontPublishBannerProps) {
   const { t } = useTranslation();
   const publishMode = getStorefrontPublishMode(currentTab);
+  const contentDomain = tabToContentDomain(currentTab);
 
   if (hasUnpublishedAppearanceDraft) {
     return (
@@ -68,11 +76,58 @@ export function StorefrontPublishBanner({
     );
   }
 
-  if (isDraftAndPublishTab(currentTab) && publishMode === 'draft_and_publish') {
+  if (contentDomain && hasUnpublishedContentDraft) {
     return (
-      <Alert data-testid="storefront-publish-banner-appearance-hint">
+      <Alert
+        data-testid="storefront-publish-banner-unpublished-content"
+        variant="default"
+        className="border-amber-500/40 bg-amber-50/80 dark:bg-amber-950/20"
+      >
+        <Info className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+        <AlertTitle>{t('store.publishBanner.unpublishedContentTitle')}</AlertTitle>
+        <AlertDescription className="space-y-3">
+          <p>{t('store.publishBanner.unpublishedContentDescription')}</p>
+          <div className="flex flex-wrap gap-2">
+            {onSaveContentDraft && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={isSubmitting}
+                onClick={() => void onSaveContentDraft()}
+                className="gap-2"
+              >
+                <Save className="h-4 w-4" />
+                {isSubmitting ? t('store.customization.saving') : t('store.content.saveDraft')}
+              </Button>
+            )}
+            {onPublishContent && (
+              <Button
+                type="button"
+                size="sm"
+                disabled={isSubmitting}
+                onClick={() => void onPublishContent()}
+                className="gap-2"
+              >
+                <Upload className="h-4 w-4" />
+                {isSubmitting ? t('store.content.publishing') : t('store.content.publish')}
+              </Button>
+            )}
+          </div>
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (isDraftAndPublishTab(currentTab) && publishMode === 'draft_and_publish') {
+    const hintKey =
+      currentTab === 'appearance'
+        ? 'store.publishBanner.appearanceDraftHint'
+        : 'store.publishBanner.contentDraftHint';
+    return (
+      <Alert data-testid="storefront-publish-banner-draft-hint">
         <Info className="h-4 w-4" />
-        <AlertDescription>{t('store.publishBanner.appearanceDraftHint')}</AlertDescription>
+        <AlertDescription>{t(hintKey)}</AlertDescription>
       </Alert>
     );
   }

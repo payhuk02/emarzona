@@ -13,6 +13,11 @@ import {
   draftRecordToAppearanceForm,
   getStoreAppearanceDraft,
 } from '@/lib/storefront/store-appearance-publish';
+import {
+  getStoreLegalDraft,
+  getStoreMarketingDraft,
+  getStoreSeoDraft,
+} from '@/lib/storefront/store-content-publish';
 
 const DEFAULT_LEGAL_PAGES: StoreLegalPages = {
   terms_of_service: '',
@@ -120,11 +125,37 @@ export function initStoreFormState(store: ExtendedStore): StoreFormState {
   };
 
   const draft = getStoreAppearanceDraft(store);
-  if (!draft) return base;
+  const seoDraft = getStoreSeoDraft(store);
+  const marketingDraft = getStoreMarketingDraft(store);
+  const legalDraft = getStoreLegalDraft(store);
+
+  let next = base;
+
+  if (seoDraft) {
+    next = {
+      ...next,
+      metaTitle: seoDraft.meta_title ?? next.metaTitle,
+      metaDescription: seoDraft.meta_description ?? next.metaDescription,
+      metaKeywords: seoDraft.meta_keywords ?? next.metaKeywords,
+      ogTitle: seoDraft.og_title ?? next.ogTitle,
+      ogDescription: seoDraft.og_description ?? next.ogDescription,
+      ogImageUrl: seoDraft.og_image ?? next.ogImageUrl,
+    };
+  }
+
+  if (marketingDraft) {
+    next = { ...next, marketingContent: marketingDraft };
+  }
+
+  if (legalDraft) {
+    next = { ...next, legalPages: { ...DEFAULT_LEGAL_PAGES, ...legalDraft } };
+  }
+
+  if (!draft) return next;
 
   const form = draftRecordToAppearanceForm(draft);
   return {
-    ...base,
+    ...next,
     logoUrl: form.logoUrl ?? base.logoUrl,
     bannerUrl: form.bannerUrl ?? base.bannerUrl,
     faviconUrl: form.faviconUrl ?? base.faviconUrl,

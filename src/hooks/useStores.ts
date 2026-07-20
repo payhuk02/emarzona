@@ -209,7 +209,15 @@ export interface Store {
   meta_title?: string | null;
   meta_description?: string | null;
   meta_keywords?: string | null;
+  og_title?: string | null;
+  og_description?: string | null;
   og_image?: string | null;
+  seo_draft?: Record<string, unknown> | null;
+  marketing_content_draft?: StoreMarketingContent | null;
+  legal_pages_draft?: StoreLegalPages | null;
+  seo_published_at?: string | null;
+  marketing_published_at?: string | null;
+  legal_published_at?: string | null;
   seo_score?: number | null;
   theme_color?: string | null;
   // Phase 2 - Analytics et Tracking
@@ -290,7 +298,7 @@ export const useStores = () => {
         }
       )
         .select(
-          `id, user_id, name, slug, subdomain, description, is_active, created_at, updated_at, custom_domain, domain_status, metadata, commerce_type, ${STORE_APPEARANCE_EMBED_SELECT}`
+          `id, user_id, name, slug, subdomain, description, is_active, created_at, updated_at, custom_domain, domain_status, metadata, commerce_type, marketing_content, legal_pages, meta_title, meta_description, meta_keywords, og_title, og_description, og_image, seo_draft, marketing_content_draft, legal_pages_draft, seo_published_at, marketing_published_at, legal_published_at, ${STORE_APPEARANCE_EMBED_SELECT}`
         )
         .eq('user_id', user.id)
         .order('created_at', { ascending: true });

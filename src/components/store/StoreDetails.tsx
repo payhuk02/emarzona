@@ -66,10 +66,13 @@ const StoreDetails = ({ store: initialStore }: StoreDetailsProps) => {
     setCurrentTab,
     fieldTouched,
     hasUnpublishedAppearanceDraft,
+    hasUnpublishedContentDraft,
     storeUrl,
     handleSubmit,
     handleSaveAppearanceDraft,
     handlePublishAppearance,
+    handleSaveContentDraft,
+    handlePublishContent,
     handleAppearanceRestored,
     handleCancel,
     resetForm,
@@ -382,8 +385,11 @@ const StoreDetails = ({ store: initialStore }: StoreDetailsProps) => {
         onSave={handleSubmit}
         isSubmitting={isSubmitting}
         hasUnpublishedAppearanceDraft={hasUnpublishedAppearanceDraft}
+        hasUnpublishedContentDraft={hasUnpublishedContentDraft}
         onPublishAppearance={handlePublishAppearance}
         onSaveAppearanceDraft={handleSaveAppearanceDraft}
+        onPublishContent={handlePublishContent}
+        onSaveContentDraft={handleSaveContentDraft}
       />
 
       {/* Social links (read-only card) */}

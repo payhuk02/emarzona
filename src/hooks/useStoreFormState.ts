@@ -18,6 +18,13 @@ import {
   saveStoreAppearanceDraft,
 } from '@/lib/storefront/store-appearance-publish';
 import {
+  hasUnpublishedContentDraft as storeHasContentDraft,
+  publishStoreContent,
+  saveStoreContentDraft,
+  type StoreSeoDraft,
+} from '@/lib/storefront/store-content-publish';
+import { tabToContentDomain } from '@/lib/storefront/storefront-publish-model';
+import {
   appearanceFormFromState,
   computeHasUnpublishedAppearanceDraft,
   initStoreFormState,
@@ -355,6 +362,86 @@ export function useStoreFormState(store: ExtendedStore) {
     [hasRemoteAppearanceDraft, store, publishedAppearanceBaseline, appearanceFormDraft]
   );
 
+  const hasUnpublishedContentDraft = useMemo(() => {
+    const domain = tabToContentDomain(currentTab);
+    if (!domain) return false;
+    return storeHasContentDraft(store, domain);
+  }, [store, currentTab]);
+
+  const buildContentDraftPayload = useCallback(() => {
+    const domain = tabToContentDomain(currentTab);
+    if (!domain) return null;
+
+    if (domain === 'seo') {
+      const draft: StoreSeoDraft = {
+        meta_title: formState.metaTitle || null,
+        meta_description: formState.metaDescription || null,
+        meta_keywords: formState.metaKeywords || null,
+        og_title: formState.ogTitle || null,
+        og_description: formState.ogDescription || null,
+        og_image: formState.ogImageUrl || null,
+      };
+      return { domain, draft };
+    }
+
+    if (domain === 'marketing') {
+      return { domain, draft: formState.marketingContent || null };
+    }
+
+    return { domain, draft: formState.legalPages || null };
+  }, [currentTab, formState]);
+
+  const handleSaveContentDraft = useCallback(async () => {
+    const payload = buildContentDraftPayload();
+    if (!payload) return;
+
+    setIsSubmitting(true);
+    try {
+      await saveStoreContentDraft(store.id, payload.domain, payload.draft);
+      await refreshStores().catch(() => {});
+      setLastSaved(new Date());
+      toast({
+        title: t('store.content.draftSavedTitle'),
+        description: t('store.content.draftSavedDescription'),
+        duration: 3000,
+      });
+    } catch {
+      toast({
+        title: t('store.form.common.error'),
+        description: t('store.content.draftSaveError'),
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [buildContentDraftPayload, store.id, refreshStores, toast, t]);
+
+  const handlePublishContent = useCallback(async () => {
+    const payload = buildContentDraftPayload();
+    if (!payload) return;
+
+    setIsSubmitting(true);
+    try {
+      await saveStoreContentDraft(store.id, payload.domain, payload.draft);
+      await publishStoreContent(store.id, payload.domain);
+      await refreshStores().catch(() => {});
+      setLastSaved(new Date());
+      toast({
+        title: t('store.content.publishedTitle'),
+        description: t('store.content.publishedDescription'),
+        duration: 3000,
+      });
+    } catch {
+      toast({
+        title: t('store.form.common.error'),
+        description: t('store.content.publishError'),
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [buildContentDraftPayload, store.id, refreshStores, toast, t]);
+
   const handleSaveAppearanceDraft = useCallback(async () => {
     setIsSubmitting(true);
     try {
@@ -421,6 +508,11 @@ export function useStoreFormState(store: ExtendedStore) {
         return;
       }
 
+      if (tabToContentDomain(currentTab)) {
+        await handleSaveContentDraft();
+        return;
+      }
+
       const formData = {
         name: formState.name.trim(),
         description: formState.description.trim() || undefined,
@@ -467,6 +559,7 @@ export function useStoreFormState(store: ExtendedStore) {
     [
       currentTab,
       handleSaveAppearanceDraft,
+      handleSaveContentDraft,
       formState,
       buildUpdatePayload,
       updateStoreById,
@@ -582,12 +675,15 @@ export function useStoreFormState(store: ExtendedStore) {
     setCurrentTab,
     fieldTouched,
     hasUnpublishedAppearanceDraft,
+    hasUnpublishedContentDraft,
     storeUrl,
     checkSlugAvailability,
     toast,
     handleSubmit,
     handleSaveAppearanceDraft,
     handlePublishAppearance,
+    handleSaveContentDraft,
+    handlePublishContent,
     handleAppearanceRestored,
     handleCancel,
     resetForm,
