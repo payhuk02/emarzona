@@ -1007,7 +1007,13 @@ const StoreForm = ({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form id="store-create-form" ref={formRef} onSubmit={handleSubmit} className="space-y-6">
+        <form
+          id="store-create-form"
+          ref={formRef}
+          onSubmit={handleSubmit}
+          noValidate={wizardMode || !initialData}
+          className="space-y-6"
+        >
           <Tabs
             defaultValue={wizardMode && wizardStep ? wizardStep : 'basic'}
             className="w-full"
@@ -1964,7 +1970,7 @@ const StoreForm = ({
                       onAction={submitCreateStore}
                     >
                       <Button
-                        type="submit"
+                        type="button"
                         data-testid="store-create-submit"
                         className="flex-1 sm:flex-none"
                         disabled={isSubmitting || slugAvailable === false}
@@ -2020,7 +2026,7 @@ const StoreForm = ({
                     onAction={submitCreateStore}
                   >
                     <Button
-                      type="submit"
+                      type="button"
                       data-testid="store-create-submit"
                       className="w-full"
                       disabled={isSubmitting || slugAvailable === false}

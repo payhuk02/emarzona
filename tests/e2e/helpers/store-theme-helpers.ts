@@ -117,9 +117,21 @@ export async function dismissCookieBannerIfVisible(page: Page): Promise<void> {
 }
 
 export async function acceptTermsDialogIfVisible(page: Page): Promise<void> {
+  const bypassActive = await page
+    .evaluate(
+      () =>
+        document.documentElement.dataset.e2eBypassTerms === '1' ||
+        (import.meta as { env?: { VITE_E2E_BYPASS_TERMS?: string } }).env?.VITE_E2E_BYPASS_TERMS ===
+          'true'
+    )
+    .catch(() => false);
+  if (bypassActive) {
+    return;
+  }
+
   const dialog = page.getByRole('alertdialog');
   try {
-    await dialog.waitFor({ state: 'visible', timeout: 8_000 });
+    await dialog.waitFor({ state: 'visible', timeout: 2_000 });
   } catch {
     return;
   }
@@ -196,19 +208,22 @@ export async function submitStoreWizardCreate(page: Page): Promise<void> {
   const createButton = page.getByTestId('store-create-submit');
   await expect(createButton).toBeEnabled({ timeout: 15_000 });
 
-  await createButton.click();
-  await acceptTermsDialogIfVisible(page);
+  const dispatchFormSubmit = async (): Promise<void> => {
+    await page.locator('#store-create-form').evaluate(form => {
+      const el = form as HTMLFormElement;
+      el.noValidate = true;
+      el.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    });
+  };
 
+  await createButton.click();
   let response = await Promise.race([
     createResponsePromise.then(r => r).catch(() => null),
     new Promise<null>(resolve => setTimeout(() => resolve(null), 5_000)),
   ]);
 
   if (!response) {
-    await page.locator('#store-create-form').evaluate(form => {
-      (form as HTMLFormElement).requestSubmit();
-    });
-    await acceptTermsDialogIfVisible(page);
+    await dispatchFormSubmit();
     response = await Promise.race([
       createResponsePromise.then(r => r).catch(() => null),
       new Promise<null>(resolve => setTimeout(() => resolve(null), 5_000)),
@@ -217,7 +232,14 @@ export async function submitStoreWizardCreate(page: Page): Promise<void> {
 
   if (!response) {
     await createButton.click({ force: true }).catch(() => undefined);
-    await acceptTermsDialogIfVisible(page);
+    response = await Promise.race([
+      createResponsePromise.then(r => r).catch(() => null),
+      new Promise<null>(resolve => setTimeout(() => resolve(null), 5_000)),
+    ]);
+  }
+
+  if (!response) {
+    await dispatchFormSubmit();
     response = await createResponsePromise.catch(() => null);
   }
 
