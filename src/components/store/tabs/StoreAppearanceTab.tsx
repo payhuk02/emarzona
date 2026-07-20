@@ -8,6 +8,7 @@ import { StoreThemeSettings } from '../StoreThemeSettings';
 import { StoreThemeTemplateSelector } from '../StoreThemeTemplateSelector';
 import { StorePreview } from '../StorePreview';
 import { StoreAppearanceRevisionsPanel } from '../StoreAppearanceRevisionsPanel';
+import { StoreAppearanceQualityChecklist } from '../StoreAppearanceQualityChecklist';
 import { applyThemeTemplate } from '@/lib/store-theme-templates';
 import { resolveStoreCommerceTypeFromStore } from '@/lib/commerce/store-capability-map';
 import type { Store } from '@/hooks/useStores';
@@ -216,7 +217,9 @@ export const StoreAppearanceTab = ({
             <StorePreview
               store={{ ...store, is_active: store.is_active ?? true } as Store}
               formDraft={appearanceFormDraft}
+              inline={isEditing}
             />
+            {isEditing && <StoreAppearanceQualityChecklist formDraft={appearanceFormDraft} />}
           </CardContent>
         </Card>
       )}

@@ -189,9 +189,18 @@ export function hasUnpublishedAppearance(store: Store, form: StoreAppearanceForm
   return hasAppearanceDraftChanges(store, form);
 }
 
+export const STORE_PREVIEW_CHANNEL = 'emarzona-store-preview';
+
 export function writeStorePreviewDraft(storeId: string, draft: StorePreviewDraft): void {
   if (typeof window === 'undefined') return;
   sessionStorage.setItem(draftKey(storeId), JSON.stringify({ ...draft, _updatedAt: Date.now() }));
+  try {
+    const channel = new BroadcastChannel(STORE_PREVIEW_CHANNEL);
+    channel.postMessage({ type: 'draft-updated', storeId });
+    channel.close();
+  } catch {
+    // BroadcastChannel unsupported — storage event / remount fallback
+  }
 }
 
 export function readStorePreviewDraft(storeId: string): StorePreviewDraft | null {

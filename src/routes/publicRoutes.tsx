@@ -284,8 +284,6 @@ export const publicRoutes = (
     {/* Collections & Enchères */}
     <Route path="/collections" element={<CollectionsPage />} />
     <Route path="/collections/:collectionSlug" element={<CollectionDetail />} />
-    {/* Collections sous stores — redirection vers sous-domaine */}
-    {/* TODO: Ajouter redirection collections vers sous-domaine quand les routes subdomain les supporteront */}
     <Route path="/auctions" element={<AuctionsListPage />} />
     <Route path="/auctions/:slug" element={<AuctionDetailPage />} />
     <Route path="/verify/:code" element={<VerifyCertificatePage />} />

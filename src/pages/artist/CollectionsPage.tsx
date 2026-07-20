@@ -1,5 +1,5 @@
 /**
- * Page Collections d'Œuvres d'Artiste — marketplace globale
+ * Page Collections d'Œuvres d'Artiste — marketplace globale ou scoped tenant
  */
 
 import { useMemo, useState } from 'react';
@@ -10,6 +10,7 @@ import { ArtistPublicPageShell } from '@/components/artist/ArtistPublicPageShell
 import { usePublicArtistCollections } from '@/hooks/artist/useCollections';
 import { SEOMeta, ItemListSchema } from '@/components/seo';
 import { Search } from 'lucide-react';
+import { useStoreSlug } from '@/contexts/StoreSlugContext';
 
 const TYPE_FILTERS = [
   { value: 'all', label: 'Toutes' },
@@ -24,8 +25,11 @@ type TypeFilter = (typeof TYPE_FILTERS)[number]['value'];
 const CollectionsPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
+  const tenantSlug = useStoreSlug();
 
-  const { data: collections = [], isLoading } = usePublicArtistCollections();
+  const { data: collections = [], isLoading } = usePublicArtistCollections({
+    storeSlug: tenantSlug ?? null,
+  });
 
   const filteredCollections = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -52,19 +56,24 @@ const CollectionsPage = () => {
     [filteredCollections]
   );
 
+  const pageTitle = tenantSlug ? "Collections d'œuvres" : "Collections d'œuvres d'art";
+  const pageDescription = tenantSlug
+    ? 'Parcourez les galeries et séries de cette boutique.'
+    : 'Découvrez les collections d’œuvres originales par les artistes de la marketplace Emarzona.';
+
   return (
     <ArtistPublicPageShell>
       <SEOMeta
-        title="Collections d'œuvres d'art"
-        description="Découvrez les collections d'œuvres originales par les artistes de la marketplace Emarzona. Achetez en direct et soutenez les créateurs."
-        url="https://www.emarzona.com/collections"
-        canonical="https://www.emarzona.com/collections"
+        title={pageTitle}
+        description={pageDescription}
+        url={tenantSlug ? undefined : 'https://www.emarzona.com/collections'}
+        canonical={tenantSlug ? undefined : 'https://www.emarzona.com/collections'}
       />
 
       {schemaItems.length > 0 && (
         <ItemListSchema
-          name="Collections d'œuvres Emarzona"
-          description="Galeries thématiques et séries d'artistes sur Emarzona"
+          name={tenantSlug ? 'Collections de la boutique' : "Collections d'œuvres Emarzona"}
+          description={pageDescription}
           url="/collections"
           numberOfItems={filteredCollections.length}
           items={schemaItems}
@@ -73,13 +82,8 @@ const CollectionsPage = () => {
 
       <div className="space-y-8">
         <div className="space-y-2">
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
-            Collections d&apos;œuvres
-          </h1>
-          <p className="text-muted-foreground text-lg max-w-2xl">
-            Parcourez les galeries thématiques et séries d&apos;artistes de toute la marketplace
-            Emarzona.
-          </p>
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">{pageTitle}</h1>
+          <p className="text-muted-foreground text-lg max-w-2xl">{pageDescription}</p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4">

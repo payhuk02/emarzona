@@ -1710,7 +1710,20 @@
       "dialogTitle": "Prévisualisation — storefront réel",
       "dialogDescription": "Rendu identique à la boutique publique, avec vos modifications en cours (non publiées tant que vous n'enregistrez pas).",
       "refreshAriaLabel": "Actualiser la prévisualisation",
-      "iframeTitle": "Prévisualisation de {{name}}"
+      "iframeTitle": "Prévisualisation de {{name}}",
+      "liveTitle": "Aperçu en direct",
+      "device": {
+        "desktop": "Bureau",
+        "tablet": "Tablette",
+        "mobile": "Mobile"
+      }
+    },
+    "quality": {
+      "checklistTitle": "Checklist qualité apparence",
+      "logoRequired": "Logo boutique renseigné",
+      "textContrast": "Contraste texte / fond (WCAG AA)",
+      "buttonContrast": "Contraste bouton principal (WCAG AA)",
+      "linkContrast": "Contraste liens / fond (WCAG AA)"
     },
     "appearance": {
       "previewTitle": "Prévisualisation",

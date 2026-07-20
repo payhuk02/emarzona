@@ -11,6 +11,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './AuthContext';
 import { logger } from '@/lib/logger';
 import { resolveStoreCommerceTypeFromStore } from '@/lib/commerce/store-capability-map';
+import {
+  fallbackStoreQuota,
+  fetchUserStoreQuota,
+  type UserStoreQuota,
+} from '@/lib/billing/user-store-quota';
 
 // Import des types depuis useStores pour éviter la duplication
 import type { Store as StoreType } from '@/hooks/useStores';
@@ -29,6 +34,7 @@ interface StoreContextType {
   refreshStores: () => Promise<void>;
   canCreateStore: () => boolean;
   getRemainingStores: () => number;
+  storeQuota: UserStoreQuota | null;
 }
 
 const StoreContext = createContext<StoreContextType>({
@@ -42,9 +48,9 @@ const StoreContext = createContext<StoreContextType>({
   refreshStores: async () => {},
   canCreateStore: () => false,
   getRemainingStores: () => 0,
+  storeQuota: null,
 });
 
-const MAX_STORES_PER_USER = 3;
 const STORAGE_KEY = 'selectedStoreId';
 
 export const useStoreContext = () => {
@@ -294,17 +300,43 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
 
   // Limite de création : boutiques possédées uniquement (pas les membres invités)
   const ownedStoreCount = stores.filter(store => store.user_id === user?.id).length;
+  const [storeQuota, setStoreQuota] = useState<UserStoreQuota | null>(null);
+
+  useEffect(() => {
+    if (!user?.id) {
+      setStoreQuota(null);
+      return;
+    }
+
+    let cancelled = false;
+    void fetchUserStoreQuota(user.id)
+      .then(quota => {
+        if (!cancelled) setStoreQuota(quota);
+      })
+      .catch(() => {
+        if (!cancelled) setStoreQuota(fallbackStoreQuota(ownedStoreCount));
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id, ownedStoreCount]);
+
+  const effectiveQuota = storeQuota ?? fallbackStoreQuota(ownedStoreCount);
 
   const canCreateStore = useCallback(() => {
     if (!user?.id) {
       return false;
     }
-    return ownedStoreCount < MAX_STORES_PER_USER;
-  }, [ownedStoreCount, user?.id]);
+    return effectiveQuota.can_create;
+  }, [effectiveQuota.can_create, user?.id]);
 
   const getRemainingStores = useCallback(() => {
-    return Math.max(0, MAX_STORES_PER_USER - ownedStoreCount);
-  }, [ownedStoreCount]);
+    if (effectiveQuota.remaining_stores == null) {
+      return Number.POSITIVE_INFINITY;
+    }
+    return effectiveQuota.remaining_stores;
+  }, [effectiveQuota.remaining_stores]);
 
   // ✅ FIX: Écouter les changements de localStorage sans dépendances problématiques
   useEffect(() => {
@@ -350,6 +382,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     refreshStores,
     canCreateStore,
     getRemainingStores,
+    storeQuota: effectiveQuota,
   };
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

@@ -1,11 +1,11 @@
 /**
- * StorePreview — iframe vers le storefront React réel (/dashboard/store/preview).
+ * StorePreview — iframe storefront réel + sync live + device frames (Sprint 4 WYSIWYG).
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
-import { Eye, ExternalLink, RefreshCw, X } from 'lucide-react';
+import { Eye, ExternalLink, Monitor, RefreshCw, Smartphone, Tablet, X } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -13,6 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { cn } from '@/lib/utils';
 import type { Store } from '@/hooks/useStores';
 import {
   appearanceFormToPreviewDraft,
@@ -20,16 +21,33 @@ import {
   type StoreAppearanceFormDraft,
 } from '@/lib/storefront/store-preview-draft';
 
+type DevicePreset = 'desktop' | 'tablet' | 'mobile';
+
+const DEVICE_WIDTH: Record<DevicePreset, string> = {
+  desktop: '100%',
+  tablet: '768px',
+  mobile: '390px',
+};
+
 interface StorePreviewProps {
   store: Store | null;
   formDraft: StoreAppearanceFormDraft;
   onClose?: () => void;
+  /** Affiche un panneau iframe inline (à côté du formulaire) */
+  inline?: boolean;
 }
 
-export const StorePreview: React.FC<StorePreviewProps> = ({ store, formDraft, onClose }) => {
+export const StorePreview: React.FC<StorePreviewProps> = ({
+  store,
+  formDraft,
+  onClose,
+  inline = false,
+}) => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [iframeKey, setIframeKey] = useState(0);
+  const [device, setDevice] = useState<DevicePreset>('desktop');
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const previewDraft = useMemo(() => appearanceFormToPreviewDraft(formDraft), [formDraft]);
 
@@ -58,14 +76,102 @@ export const StorePreview: React.FC<StorePreviewProps> = ({ store, formDraft, on
     setIframeKey(key => key + 1);
   };
 
+  // Sync draft without remounting iframe (preview page listens to storage)
   useEffect(() => {
-    if (!isOpen || !store?.id) return;
-    syncPreviewDraft();
-    setIframeKey(key => key + 1);
-  }, [isOpen, previewDraft, syncPreviewDraft, store?.id]);
+    if ((!isOpen && !inline) || !store?.id) return;
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      syncPreviewDraft();
+    }, 250);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [isOpen, inline, previewDraft, syncPreviewDraft, store?.id]);
+
+  useEffect(() => {
+    if (inline && store?.id) {
+      syncPreviewDraft();
+    }
+  }, [inline, store?.id, syncPreviewDraft]);
 
   if (!store?.id) {
     return null;
+  }
+
+  const deviceToggle = (
+    <div className="flex items-center gap-1 rounded-md border p-0.5">
+      {(
+        [
+          ['desktop', Monitor],
+          ['tablet', Tablet],
+          ['mobile', Smartphone],
+        ] as const
+      ).map(([id, Icon]) => (
+        <Button
+          key={id}
+          type="button"
+          size="icon"
+          variant={device === id ? 'secondary' : 'ghost'}
+          className="h-8 w-8"
+          onClick={() => setDevice(id)}
+          aria-label={t(`store.preview.device.${id}`)}
+        >
+          <Icon className="h-4 w-4" />
+        </Button>
+      ))}
+    </div>
+  );
+
+  const iframeFrame = (
+    <div className="flex-1 min-h-0 border-t bg-muted/40 flex justify-center overflow-auto">
+      <div
+        className={cn(
+          'h-full bg-background shadow-sm transition-[width] duration-200',
+          device !== 'desktop' && 'border-x'
+        )}
+        style={{ width: DEVICE_WIDTH[device], maxWidth: '100%' }}
+      >
+        <iframe
+          key={iframeKey}
+          src={previewUrl}
+          className="h-full w-full border-0 bg-background min-h-[480px]"
+          title={t('store.preview.iframeTitle', { name: store.name })}
+        />
+      </div>
+    </div>
+  );
+
+  if (inline) {
+    return (
+      <div
+        className="flex flex-col rounded-lg border overflow-hidden min-h-[520px] h-[70vh]"
+        data-testid="store-preview-inline"
+      >
+        <div className="flex items-center justify-between gap-2 p-2 border-b bg-card">
+          <div className="flex items-center gap-2 text-sm font-medium">
+            <Eye className="h-4 w-4" />
+            {t('store.preview.liveTitle')}
+          </div>
+          <div className="flex items-center gap-1">
+            {deviceToggle}
+            <Button type="button" variant="ghost" size="icon" onClick={handleRefreshPreview}>
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+            <Button type="button" variant="ghost" size="icon" asChild>
+              <a
+                href={previewUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={syncPreviewDraft}
+              >
+                <ExternalLink className="h-4 w-4" />
+              </a>
+            </Button>
+          </div>
+        </div>
+        {iframeFrame}
+      </div>
+    );
   }
 
   return (
@@ -101,6 +207,7 @@ export const StorePreview: React.FC<StorePreviewProps> = ({ store, formDraft, on
                 <DialogDescription>{t('store.preview.dialogDescription')}</DialogDescription>
               </div>
               <div className="flex items-center gap-1">
+                {deviceToggle}
                 <Button
                   type="button"
                   variant="ghost"
@@ -116,14 +223,7 @@ export const StorePreview: React.FC<StorePreviewProps> = ({ store, formDraft, on
               </div>
             </div>
           </DialogHeader>
-          <div className="flex-1 min-h-0 border-t">
-            <iframe
-              key={iframeKey}
-              src={previewUrl}
-              className="h-full w-full border-0 bg-background"
-              title={t('store.preview.iframeTitle', { name: store.name })}
-            />
-          </div>
+          {iframeFrame}
         </DialogContent>
       </Dialog>
     </>

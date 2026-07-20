@@ -4,11 +4,15 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { StoreSlugProvider } from '@/contexts/StoreSlugContext';
 import Storefront from '@/pages/Storefront';
-import { STOREFRONT_STORE_PUBLIC_SELECT } from '@/lib/storefront/store-public-fields';
 import {
   mergeStorePreviewDraft,
   readStorePreviewDraft,
+  STORE_PREVIEW_CHANNEL,
 } from '@/lib/storefront/store-preview-draft';
+import {
+  flattenStoreWithAppearance,
+  STORE_APPEARANCE_EMBED_SELECT,
+} from '@/lib/storefront/flatten-store-appearance';
 import type { Store } from '@/hooks/useStores';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -41,7 +45,9 @@ export default function StorefrontPreviewPage() {
       try {
         const { data, error: fetchError } = await supabase
           .from('stores')
-          .select(`${STOREFRONT_STORE_PUBLIC_SELECT}, user_id`)
+          .select(
+            `id, user_id, name, slug, subdomain, description, is_active, ${STORE_APPEARANCE_EMBED_SELECT}`
+          )
           .eq('id', storeId)
           .maybeSingle();
 
@@ -53,7 +59,9 @@ export default function StorefrontPreviewPage() {
           throw new Error('Boutique introuvable ou accès refusé.');
         }
 
-        const row = data as Store & { user_id?: string };
+        const row = flattenStoreWithAppearance(data as Record<string, unknown>) as Store & {
+          user_id?: string;
+        };
         if (row.user_id !== user.id) {
           const { data: canView } = await supabase.rpc('has_store_permission', {
             _store_id: storeId,
@@ -85,18 +93,39 @@ export default function StorefrontPreviewPage() {
       }
     };
 
+    const applyDraftOnly = () => {
+      if (!storeId || cancelled) return;
+      setStore(prev => {
+        if (!prev) return prev;
+        return mergeStorePreviewDraft(prev, readStorePreviewDraft(storeId));
+      });
+    };
+
     void load();
 
     const onStorage = (event: StorageEvent) => {
       if (event.key?.startsWith('emarzona:store-preview:')) {
-        void load();
+        applyDraftOnly();
       }
     };
+
+    let channel: BroadcastChannel | null = null;
+    try {
+      channel = new BroadcastChannel(STORE_PREVIEW_CHANNEL);
+      channel.onmessage = event => {
+        if (event.data?.type === 'draft-updated' && event.data?.storeId === storeId) {
+          applyDraftOnly();
+        }
+      };
+    } catch {
+      channel = null;
+    }
 
     window.addEventListener('storage', onStorage);
     return () => {
       cancelled = true;
       window.removeEventListener('storage', onStorage);
+      channel?.close();
     };
   }, [storeId, user?.id, authLoading]);
 

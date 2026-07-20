@@ -15,6 +15,7 @@ import {
   flattenStoreWithAppearance,
   STORE_APPEARANCE_EMBED_SELECT,
 } from '@/lib/storefront/flatten-store-appearance';
+import { fallbackStoreQuota, fetchUserStoreQuota } from '@/lib/billing/user-store-quota';
 import { sanitizeStorePayload } from '@/lib/store-payload-utils';
 import { assertReadyToCreateStore } from '@/lib/store/create-store-service';
 import {
@@ -213,8 +214,6 @@ export interface Store {
   active_clients?: number | null;
 }
 
-const MAX_STORES_PER_USER = 3;
-
 export type { CreateStoreOptions } from '@/lib/store/store-express-create-schema';
 
 function pickAllowedCreateOverrides(storeData: Partial<Store>): Record<string, unknown> {
@@ -317,8 +316,17 @@ export const useStores = () => {
         throw new Error('Utilisateur non authentifié');
       }
 
-      if (stores.length >= MAX_STORES_PER_USER) {
-        throw new Error(`Limite de ${MAX_STORES_PER_USER} boutiques atteinte.`);
+      let quota;
+      try {
+        quota = await fetchUserStoreQuota(authUser.id);
+      } catch {
+        quota = fallbackStoreQuota(stores.length);
+      }
+      if (!quota.can_create) {
+        const maxLabel = quota.max_stores == null ? 'illimitée' : String(quota.max_stores);
+        throw new Error(
+          `Limite de ${maxLabel} boutique(s) atteinte pour votre plan. Passez à un plan supérieur ou supprimez une boutique.`
+        );
       }
 
       const validated = await assertReadyToCreateStore({
@@ -497,11 +505,12 @@ export const useStores = () => {
   });
 
   const canCreateStore = () => {
-    return stores.length < MAX_STORES_PER_USER;
+    // Optimistic client check — DB trigger remains authoritative
+    return fallbackStoreQuota(stores.length).can_create;
   };
 
   const getRemainingStores = () => {
-    return Math.max(0, MAX_STORES_PER_USER - stores.length);
+    return fallbackStoreQuota(stores.length).remaining_stores ?? Number.POSITIVE_INFINITY;
   };
 
   return {

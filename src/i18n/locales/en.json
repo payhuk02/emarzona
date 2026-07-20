@@ -1562,7 +1562,20 @@
       "dialogTitle": "Preview — live storefront",
       "dialogDescription": "Same rendering as the public store, with your unsaved changes (not visible to visitors until you save).",
       "refreshAriaLabel": "Refresh preview",
-      "iframeTitle": "Preview of {{name}}"
+      "iframeTitle": "Preview of {{name}}",
+      "liveTitle": "Live preview",
+      "device": {
+        "desktop": "Desktop",
+        "tablet": "Tablet",
+        "mobile": "Mobile"
+      }
+    },
+    "quality": {
+      "checklistTitle": "Appearance quality checklist",
+      "logoRequired": "Store logo provided",
+      "textContrast": "Text / background contrast (WCAG AA)",
+      "buttonContrast": "Primary button contrast (WCAG AA)",
+      "linkContrast": "Link / background contrast (WCAG AA)"
     },
     "appearance": {
       "previewTitle": "Preview",

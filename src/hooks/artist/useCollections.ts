@@ -92,13 +92,43 @@ export interface AddItemToCollectionData {
 }
 
 /**
- * Collections publiques marketplace (toutes boutiques).
+ * Collections publiques marketplace (toutes boutiques, ou filtrées par store_id / slug).
  */
-export const usePublicArtistCollections = (options?: { limit?: number; enabled?: boolean }) => {
+export const usePublicArtistCollections = (options?: {
+  limit?: number;
+  enabled?: boolean;
+  storeId?: string | null;
+  storeSlug?: string | null;
+}) => {
   return useQuery({
-    queryKey: ['public-artist-collections', options?.limit],
+    queryKey: [
+      'public-artist-collections',
+      options?.limit,
+      options?.storeId ?? null,
+      options?.storeSlug ?? null,
+    ],
     enabled: options?.enabled !== false,
     queryFn: async (): Promise<PublicArtistCollection[]> => {
+      let resolvedStoreId = options?.storeId ?? null;
+      if (!resolvedStoreId && options?.storeSlug) {
+        const slug = options.storeSlug.trim();
+        const { data: bySlug } = await supabase
+          .from('stores_public')
+          .select('id')
+          .eq('slug', slug)
+          .maybeSingle();
+        resolvedStoreId = bySlug?.id ?? null;
+        if (!resolvedStoreId) {
+          const { data: bySubdomain } = await supabase
+            .from('stores_public')
+            .select('id')
+            .eq('subdomain', slug)
+            .maybeSingle();
+          resolvedStoreId = bySubdomain?.id ?? null;
+        }
+        if (!resolvedStoreId) return [];
+      }
+
       let query = supabase
         .from('artist_collections')
         .select(ARTIST_COLLECTION_FIELDS)
@@ -106,6 +136,10 @@ export const usePublicArtistCollections = (options?: { limit?: number; enabled?:
         .order('is_featured', { ascending: false })
         .order('display_order', { ascending: true })
         .order('created_at', { ascending: false });
+
+      if (resolvedStoreId) {
+        query = query.eq('store_id', resolvedStoreId);
+      }
 
       if (options?.limit) {
         query = query.limit(options.limit);

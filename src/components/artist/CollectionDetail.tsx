@@ -1,7 +1,9 @@
 /**
  * Détail d'une collection d'œuvres — marketplace (UUID ou slug + ?store=)
+ * Redirige vers le host tenant quand ?store= est présent hors sous-domaine.
  */
 
+import { useEffect } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -18,6 +20,11 @@ import { SEOMeta } from '@/components/seo/SEOMeta';
 import { fetchPublicArtistCollection, isArtistCollectionId } from '@/lib/artist-collection-resolve';
 import { transformToUnifiedProduct } from '@/lib/product-transform';
 import type { CollectionItem } from '@/hooks/artist/useCollections';
+import { useStoreSlug } from '@/contexts/StoreSlugContext';
+import {
+  buildTenantCollectionUrl,
+  shouldRedirectCollectionToTenant,
+} from '@/lib/storefront/collection-tenant-redirect';
 
 const COLLECTION_PRODUCT_FIELDS =
   'id, store_id, name, slug, description, short_description, price, compare_at_price, currency, image_url, images, product_type, is_active, is_draft, created_at, updated_at';
@@ -35,7 +42,24 @@ const collectionTypeLabels: Record<string, string> = {
 export const CollectionDetail = () => {
   const { collectionSlug } = useParams<{ collectionSlug: string }>();
   const [searchParams] = useSearchParams();
-  const storeSlug = searchParams.get('store');
+  const contextSlug = useStoreSlug();
+  const storeSlug = searchParams.get('store') || contextSlug || null;
+
+  useEffect(() => {
+    if (
+      !shouldRedirectCollectionToTenant({
+        storeSlugFromQuery: searchParams.get('store'),
+        collectionSlug: collectionSlug ?? null,
+      })
+    ) {
+      return;
+    }
+    const target = buildTenantCollectionUrl({
+      storeSlug: searchParams.get('store')!,
+      collectionSlug: collectionSlug!,
+    });
+    window.location.replace(target);
+  }, [searchParams, collectionSlug]);
 
   const {
     data: collection,

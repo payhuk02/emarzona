@@ -21,6 +21,10 @@ import {
 } from '@/lib/commerce/store-customization-steps';
 import { resolveStoreCommerceTypeFromStore } from '@/lib/commerce/store-capability-map';
 import { useStoreCustomizationSteps } from '@/hooks/store/useStoreCustomizationSteps';
+import {
+  isAppearanceStepComplete,
+  isMarketingContentMeaningful,
+} from '@/lib/storefront/store-quality-checklist';
 import { StorefrontPublishBanner } from './StorefrontPublishBanner';
 
 const TABS_WITH_INTERNAL_SUBSTEPS = new Set(['legal', 'marketing']);
@@ -145,10 +149,7 @@ export const StoreCustomizationWizard = ({
         case 'settings':
           return !!(store.name && store.description);
         case 'appearance':
-          if (store.appearance_draft && typeof store.appearance_draft === 'object') {
-            return false;
-          }
-          return !!(store.logo_url || store.banner_url || store.primary_color);
+          return isAppearanceStepComplete(store);
         case 'location':
           return !!(store.address_line1 || store.city || store.country);
         case 'seo':
@@ -158,7 +159,7 @@ export const StoreCustomizationWizard = ({
         case 'url':
           return !!store.slug;
         case 'marketing':
-          return !!(store.marketing_content && typeof store.marketing_content === 'object');
+          return isMarketingContentMeaningful(store.marketing_content);
         case 'analytics':
           return !!(store.google_analytics_id || store.facebook_pixel_id);
         case 'commerce':
