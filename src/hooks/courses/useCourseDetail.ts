@@ -65,82 +65,80 @@ export const useCourseDetail = (slug: string) => {
         throw new Error(`Détails du cours non trouvés: ${courseError.message}`);
       }
 
-      // 3. Récupérer les sections
-      const { data: sections, error: sectionsError } = await supabase
-        .from('course_sections')
-        .select(COURSE_SECTION_FIELDS)
-        .eq('course_id', course.id)
-        .order('order_index', { ascending: true });
+      // 3–6. Parallelize sections / lessons / store / enrollment to avoid serial timeouts.
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-      if (sectionsError) {
-        throw new Error(`Erreur sections: ${sectionsError.message}`);
+      const [sectionsResult, lessonsResult, storeResult, enrollmentResult] = await Promise.all([
+        supabase
+          .from('course_sections')
+          .select(COURSE_SECTION_FIELDS)
+          .eq('course_id', course.id)
+          .order('order_index', { ascending: true }),
+        supabase
+          .from('course_lessons')
+          .select(COURSE_LESSON_FIELDS)
+          .eq('course_id', course.id)
+          .order('order_index', { ascending: true }),
+        supabase
+          .from('stores_public')
+          .select('id, name, slug, logo_url')
+          .eq('id', product.store_id)
+          .maybeSingle(),
+        user
+          ? supabase
+              .from('course_enrollments')
+              .select('id, status')
+              .eq('course_id', course.id)
+              .eq('user_id', user.id)
+              .eq('status', 'active')
+              .maybeSingle()
+          : Promise.resolve({ data: null, error: null }),
+      ]);
+
+      if (sectionsResult.error) {
+        throw new Error(`Erreur sections: ${sectionsResult.error.message}`);
+      }
+      if (lessonsResult.error) {
+        throw new Error(`Erreur leçons: ${lessonsResult.error.message}`);
       }
 
-      // 4. Récupérer toutes les leçons
-      const { data: lessons, error: lessonsError } = await supabase
-        .from('course_lessons')
-        .select(COURSE_LESSON_FIELDS)
-        .eq('course_id', course.id)
-        .order('order_index', { ascending: true });
+      const sections = sectionsResult.data ?? [];
+      const lessons = lessonsResult.data ?? [];
+      const store = storeResult.data ?? null;
 
-      if (lessonsError) {
-        throw new Error(`Erreur leçons: ${lessonsError.message}`);
-      }
-
-      // 5. Organiser les leçons par section
       const sectionsWithLessons = sections.map(section => ({
         ...section,
         lessons: lessons.filter(lesson => lesson.section_id === section.id),
       }));
 
-      // 6. Récupérer le store (pour afficher l'instructeur)
-      const { data: store } = await supabase
-        .from('stores_public')
-        .select('id, name, slug, logo_url')
-        .eq('id', product.store_id)
-        .maybeSingle();
-
-      // 7. Vérifier si l'utilisateur est inscrit et récupérer la progression
       let isEnrolled = false;
       let enrollment = null;
       let lastViewedLesson = null;
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
 
-      if (user) {
-        const { data: enrollmentData } = await supabase
-          .from('course_enrollments')
-          .select('id, status')
-          .eq('course_id', course.id)
-          .eq('user_id', user.id)
-          .eq('status', 'active')
-          .maybeSingle();
-
-        isEnrolled = !!enrollmentData;
+      const enrollmentData = enrollmentResult.data;
+      if (enrollmentData) {
+        isEnrolled = true;
         enrollment = enrollmentData;
 
-        // 8. Si inscrit, récupérer la dernière leçon visualisée
-        if (enrollmentData) {
-          const { data: progressData } = await supabase
-            .from('course_lesson_progress')
-            .select('lesson_id, updated_at, is_completed')
-            .eq('enrollment_id', enrollmentData.id)
-            .eq('user_id', user.id)
-            .order('updated_at', { ascending: false })
-            .limit(1)
-            .maybeSingle();
+        const { data: progressData } = await supabase
+          .from('course_lesson_progress')
+          .select('lesson_id, updated_at, is_completed')
+          .eq('enrollment_id', enrollmentData.id)
+          .eq('user_id', user!.id)
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
 
-          if (progressData) {
-            // Trouver la leçon correspondante
-            for (const section of sectionsWithLessons) {
-              const lesson = section.lessons.find(
-                (l: { id: string }) => l.id === progressData.lesson_id
-              );
-              if (lesson) {
-                lastViewedLesson = lesson;
-                break;
-              }
+        if (progressData) {
+          for (const section of sectionsWithLessons) {
+            const lesson = section.lessons.find(
+              (l: { id: string }) => l.id === progressData.lesson_id
+            );
+            if (lesson) {
+              lastViewedLesson = lesson;
+              break;
             }
           }
         }
@@ -161,5 +159,7 @@ export const useCourseDetail = (slug: string) => {
       };
     },
     enabled: !!slug,
+    retry: 1,
+    staleTime: 30_000,
   });
 };

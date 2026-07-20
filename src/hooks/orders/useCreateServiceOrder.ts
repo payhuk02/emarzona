@@ -475,7 +475,7 @@ export const useCreateServiceOrder = () => {
       let userId: string | null = authenticatedUserId;
 
       if (authenticatedUserId) {
-        const { data: bookingResult, error: bookingError } = await supabase.rpc(
+        const rpcPromise = supabase.rpc(
           // @ts-expect-error: RPC type not yet updated in supabase types
           'reserve_service_booking',
           {
@@ -491,6 +491,18 @@ export const useCreateServiceOrder = () => {
             p_customer_notes: notes ?? null,
           }
         );
+
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          setTimeout(
+            () => reject(new Error('Délai dépassé lors de la réservation. Réessayez.')),
+            45_000
+          );
+        });
+
+        const { data: bookingResult, error: bookingError } = await Promise.race([
+          rpcPromise,
+          timeoutPromise,
+        ]);
 
         if (bookingError) {
           logger.error('reserve_service_booking RPC error', { error: bookingError });

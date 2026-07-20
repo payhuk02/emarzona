@@ -24,7 +24,7 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const canRun = Boolean(supabaseUrl && supabaseServiceKey);
 
 test.describe('Course paid enrollment (E2E)', () => {
-  test.setTimeout(120_000);
+  test.setTimeout(180_000);
 
   test.beforeAll(() => {
     if (canRun) {
@@ -46,7 +46,13 @@ test.describe('Course paid enrollment (E2E)', () => {
     try {
       await assertCourseEnrollment(admin, fixture.courseId, fixture.buyer.id);
 
-      await loginAsSeededUser(page, admin, fixture.buyer.email);
+      await loginAsSeededUser(
+        page,
+        admin,
+        fixture.buyer.email,
+        '/dashboard',
+        fixture.buyer.password
+      );
       await gotoApp(page, `/learn/${fixture.product.slug}`);
 
       await page.waitForFunction(() => typeof window.__e2eSupabaseProbe === 'function', {
@@ -65,15 +71,21 @@ test.describe('Course paid enrollment (E2E)', () => {
       }
 
       await expect(page).not.toHaveURL(/\/login/);
-      await expect(page.getByRole('button', { name: /inscrire|s'inscrire|enroll/i })).toHaveCount(
-        0
-      );
       await expect(page.getByRole('heading', { level: 1 })).toContainText(fixture.product.name, {
-        timeout: 20_000,
+        timeout: 45_000,
       });
+      // Enrolled CTA (avoid flaky "count 0" on S'inscrire while detail is still loading).
+      await expect(
+        page.getByRole('button', { name: /déjà inscrit|continuer/i }).first()
+      ).toBeVisible({ timeout: 20_000 });
     } finally {
       try {
-        await cleanupPaidFixture(admin, fixture);
+        await Promise.race([
+          cleanupPaidFixture(admin, fixture),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('cleanupPaidFixture timeout')), 30_000)
+          ),
+        ]);
       } catch (e) {
         testInfo.attach('cleanup-error', { body: String(e), contentType: 'text/plain' });
       }

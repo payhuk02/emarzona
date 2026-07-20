@@ -185,7 +185,12 @@ test.describe('Mixed cart book → pay → confirm (E2E)', () => {
       await assertServiceBookingStatus(admin, bookingId!, 'confirmed');
     } finally {
       try {
-        await cleanupMixedCartFixture(admin, fixture);
+        await Promise.race([
+          cleanupMixedCartFixture(admin, fixture),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('cleanupMixedCartFixture timeout')), 30_000)
+          ),
+        ]);
       } catch (e) {
         testInfo.attach('cleanup-error', { body: String(e), contentType: 'text/plain' });
       }
