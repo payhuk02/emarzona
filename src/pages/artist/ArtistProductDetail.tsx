@@ -117,18 +117,13 @@ const ArtistProductDetail = () => {
         throw new Error('Product ID is required');
       }
       const validProductId = productId; // Type narrowing
-      // Single optimized query with all joins to eliminate N+1 queries
+      // Do not embed public.stores — buyers are blocked by stores RLS, and appearance
+      // columns (logo_url, …) live on store_appearance / stores_public after Sprint 3.
       const { data: productData, error } = await supabase
         .from('products')
         .select(
           `
           *,
-          stores (
-            id,
-            name,
-            slug,
-            logo_url
-          ),
           artist_products (
             *
           )
@@ -138,6 +133,21 @@ const ArtistProductDetail = () => {
         .single();
 
       if (error) throw error;
+
+      let storePublic: {
+        id: string;
+        name: string;
+        slug: string;
+        logo_url: string | null;
+      } | null = null;
+      if (productData.store_id) {
+        const { data: storeRow } = await supabase
+          .from('stores_public')
+          .select('id, name, slug, logo_url')
+          .eq('id', productData.store_id)
+          .maybeSingle();
+        storePublic = storeRow;
+      }
 
       // Extract artist data from the joined result
       const artistProducts = productData.artist_products;
@@ -153,7 +163,7 @@ const ArtistProductDetail = () => {
       return {
         ...productData,
         artist: artistData || null,
-        store: Array.isArray(productData.stores) ? productData.stores[0] : productData.stores,
+        store: storePublic,
         images: images as string[],
       };
     },

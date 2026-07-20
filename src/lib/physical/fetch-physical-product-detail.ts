@@ -48,20 +48,25 @@ export type PhysicalProductDetailData = {
 export async function fetchPhysicalProductDetail(
   productId: string
 ): Promise<PhysicalProductDetailData> {
+  // Do not embed public.stores — buyers are blocked by stores RLS; logo_url lives on
+  // store_appearance / stores_public after Sprint 3 column drop.
   const { data: productData, error: productError } = await supabase
     .from('products')
-    .select(
-      `
-      ${PRODUCT_PHYSICAL_FIELDS},
-      stores (
-        ${STORE_PUBLIC_FIELDS}
-      )
-    `
-    )
+    .select(PRODUCT_PHYSICAL_FIELDS)
     .eq('id', productId)
     .single();
 
   if (productError) throw productError;
+
+  let store: PhysicalProductDetailStore | null = null;
+  if (productData.store_id) {
+    const { data: storeRow } = await supabase
+      .from('stores_public')
+      .select(STORE_PUBLIC_FIELDS)
+      .eq('id', productData.store_id)
+      .maybeSingle();
+    store = storeRow;
+  }
 
   const { data: physicalData, error: physicalError } = await supabase
     .from('physical_products')
@@ -108,12 +113,6 @@ export async function fetchPhysicalProductDetail(
     if (inventoryPhysicalError) throw inventoryPhysicalError;
     inventory = (inventoryByPhysical ?? []) as PhysicalInventoryRow[];
   }
-
-  const storeRaw = productData.stores as
-    | PhysicalProductDetailStore
-    | PhysicalProductDetailStore[]
-    | null;
-  const store = Array.isArray(storeRaw) ? (storeRaw[0] ?? null) : storeRaw;
 
   return {
     ...(productData as Omit<

@@ -144,10 +144,15 @@ test.describe('Store appearance revisions (E2E)', () => {
     await saveAndPublishAppearance(page, E2E_THEME_PRIMARY_AFTER_CUSTOMIZE);
     await assertStorePrimaryColorInDb(admin, storeId!, E2E_THEME_PRIMARY_AFTER_CUSTOMIZE);
 
-    const { data: revisionsBefore } = await admin.rpc('list_store_appearance_revisions', {
-      p_store_id: storeId,
-      p_limit: 5,
-    });
+    // Service-role has no auth.uid(), so list_store_appearance_revisions (permission-gated)
+    // returns empty/Forbidden — count revisions via the table instead.
+    const { data: revisionsBefore, error: revisionsError } = await admin
+      .from('store_appearance_revisions')
+      .select('revision_number')
+      .eq('store_id', storeId)
+      .order('revision_number', { ascending: false })
+      .limit(5);
+    expect(revisionsError).toBeNull();
     expect((revisionsBefore ?? []).length).toBeGreaterThanOrEqual(2);
 
     await restoreAppearanceRevision(page, 1);

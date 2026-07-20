@@ -70,8 +70,32 @@ test.describe('Mixed cart book → pay → confirm (E2E)', () => {
       await selectServiceCalendarDay(page, date);
       await selectFirstAvailableTimeSlot(page);
 
-      await page.getByRole('button', { name: /ajouter au panier/i }).click();
-      await page.waitForURL(/\/cart/, { timeout: 30_000 });
+      await expect(page.getByText(/Créneau disponible/i)).toBeVisible({ timeout: 20_000 });
+
+      const addToCart = page.getByRole('button', { name: /ajouter au panier/i });
+      await expect(addToCart).toBeEnabled({ timeout: 10_000 });
+
+      const bookingError = page.getByText(
+        /Erreur de réservation|Réservation impossible|Authentification requise|Impossible de finaliser/i
+      );
+      await addToCart.click();
+
+      const navigated = await page
+        .waitForURL(/\/cart/, { timeout: 60_000 })
+        .then(() => true)
+        .catch(() => false);
+      if (!navigated) {
+        const errText = (await bookingError.textContent().catch(() => null)) ?? '';
+        const bodySnippet = (
+          await page
+            .locator('body')
+            .innerText()
+            .catch(() => '')
+        ).slice(0, 800);
+        throw new Error(
+          `Expected /cart after add-to-cart. toast=${errText || '(none)'} page=${bodySnippet}`
+        );
+      }
       await expect(page.getByText(fixture.serviceProduct.name)).toBeVisible({ timeout: 10_000 });
 
       await gotoApp(page, `/physical/${fixture.physicalProduct.id}`);
