@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Store } from '@/hooks/useStores';
 import type { StoreOpeningHours, StoreLegalPages, StoreMarketingContent } from '@/hooks/useStores';
@@ -20,11 +20,12 @@ import {
   publishStoreAppearance,
   saveStoreAppearanceDraft,
 } from '@/lib/storefront/store-appearance-publish';
-import type { StoreAppearanceFormDraft } from '@/lib/storefront/store-preview-draft';
 import {
-  appearanceFormToPreviewDraft,
-  hasAppearanceDraftChanges,
-} from '@/lib/storefront/store-preview-draft';
+  computeHasUnpublishedAppearanceDraft,
+  initialHasRemoteAppearanceDraft,
+  initialPublishedAppearanceBaseline,
+} from '@/lib/storefront/store-appearance-form-state';
+import type { StoreAppearanceFormDraft } from '@/lib/storefront/store-preview-draft';
 
 function initState(store: ExtendedStore): StoreFormState {
   const base: StoreFormState = {
@@ -161,50 +162,6 @@ function initState(store: ExtendedStore): StoreFormState {
     productCardStyle: form.productCardStyle ?? base.productCardStyle,
     navigationStyle: form.navigationStyle ?? base.navigationStyle,
   };
-}
-
-function appearanceFormFromState(state: StoreFormState): StoreAppearanceFormDraft {
-  return {
-    logoUrl: state.logoUrl,
-    bannerUrl: state.bannerUrl,
-    faviconUrl: state.faviconUrl,
-    appleTouchIconUrl: state.appleTouchIconUrl,
-    watermarkUrl: state.watermarkUrl,
-    placeholderImageUrl: state.placeholderImageUrl,
-    primaryColor: state.primaryColor,
-    secondaryColor: state.secondaryColor,
-    accentColor: state.accentColor,
-    backgroundColor: state.backgroundColor,
-    textColor: state.textColor,
-    textSecondaryColor: state.textSecondaryColor,
-    buttonPrimaryColor: state.buttonPrimaryColor,
-    buttonPrimaryText: state.buttonPrimaryText,
-    buttonSecondaryColor: state.buttonSecondaryColor,
-    buttonSecondaryText: state.buttonSecondaryText,
-    linkColor: state.linkColor,
-    linkHoverColor: state.linkHoverColor,
-    borderRadius: state.borderRadius,
-    shadowIntensity: state.shadowIntensity,
-    headingFont: state.headingFont,
-    bodyFont: state.bodyFont,
-    fontSizeBase: state.fontSizeBase,
-    headingSizeH1: state.headingSizeH1,
-    headingSizeH2: state.headingSizeH2,
-    headingSizeH3: state.headingSizeH3,
-    lineHeight: state.lineHeight,
-    letterSpacing: state.letterSpacing,
-    headerStyle: state.headerStyle,
-    footerStyle: state.footerStyle,
-    sidebarEnabled: state.sidebarEnabled,
-    sidebarPosition: state.sidebarPosition,
-    productGridColumns: state.productGridColumns,
-    productCardStyle: state.productCardStyle,
-    navigationStyle: state.navigationStyle,
-  };
-}
-
-function publishedAppearanceFormFromStore(store: ExtendedStore): StoreAppearanceFormDraft {
-  return appearanceFormFromState(initState({ ...store, appearance_draft: null }));
 }
 
 export function useStoreFormState(store: ExtendedStore) {
@@ -357,12 +314,60 @@ export function useStoreFormState(store: ExtendedStore) {
   const [currentTab, setCurrentTab] = useState<string>('settings');
   const [fieldTouched, setFieldTouched] = useState<Record<string, boolean>>({});
   const [hasRemoteAppearanceDraft, setHasRemoteAppearanceDraft] = useState(() =>
-    Boolean(getStoreAppearanceDraft(store))
+    initialHasRemoteAppearanceDraft(store)
   );
   const [publishedAppearanceBaseline, setPublishedAppearanceBaseline] =
-    useState<StoreAppearanceFormDraft | null>(() =>
-      getStoreAppearanceDraft(store) ? null : publishedAppearanceFormFromStore(store)
-    );
+    useState<StoreAppearanceFormDraft | null>(() => initialPublishedAppearanceBaseline(store));
+
+  const lastPublishedAtRef = useRef(store.appearance_published_at ?? null);
+
+  const syncAppearanceFieldsFromStore = useCallback((source: ExtendedStore) => {
+    const initial = initState(source);
+    setLogoUrl(initial.logoUrl);
+    setBannerUrl(initial.bannerUrl);
+    setFaviconUrl(initial.faviconUrl);
+    setAppleTouchIconUrl(initial.appleTouchIconUrl);
+    setWatermarkUrl(initial.watermarkUrl);
+    setPlaceholderImageUrl(initial.placeholderImageUrl);
+    setPrimaryColor(initial.primaryColor);
+    setSecondaryColor(initial.secondaryColor);
+    setAccentColor(initial.accentColor);
+    setBackgroundColor(initial.backgroundColor);
+    setTextColor(initial.textColor);
+    setTextSecondaryColor(initial.textSecondaryColor);
+    setButtonPrimaryColor(initial.buttonPrimaryColor);
+    setButtonPrimaryText(initial.buttonPrimaryText);
+    setButtonSecondaryColor(initial.buttonSecondaryColor);
+    setButtonSecondaryText(initial.buttonSecondaryText);
+    setLinkColor(initial.linkColor);
+    setLinkHoverColor(initial.linkHoverColor);
+    setBorderRadius(initial.borderRadius);
+    setShadowIntensity(initial.shadowIntensity);
+    setHeadingFont(initial.headingFont);
+    setBodyFont(initial.bodyFont);
+    setFontSizeBase(initial.fontSizeBase);
+    setHeadingSizeH1(initial.headingSizeH1);
+    setHeadingSizeH2(initial.headingSizeH2);
+    setHeadingSizeH3(initial.headingSizeH3);
+    setLineHeight(initial.lineHeight);
+    setLetterSpacing(initial.letterSpacing);
+    setHeaderStyle(initial.headerStyle);
+    setFooterStyle(initial.footerStyle);
+    setSidebarEnabled(initial.sidebarEnabled);
+    setSidebarPosition(initial.sidebarPosition);
+    setProductGridColumns(initial.productGridColumns);
+    setProductCardStyle(initial.productCardStyle);
+    setNavigationStyle(initial.navigationStyle);
+    setHasRemoteAppearanceDraft(initialHasRemoteAppearanceDraft(source));
+    setPublishedAppearanceBaseline(initialPublishedAppearanceBaseline(source));
+  }, []);
+
+  useEffect(() => {
+    const publishedAt = store.appearance_published_at ?? null;
+    if (publishedAt === lastPublishedAtRef.current) return;
+    lastPublishedAtRef.current = publishedAt;
+    syncAppearanceFieldsFromStore(store);
+  }, [store, syncAppearanceFieldsFromStore]);
 
   const { getStoreUrl, checkSlugAvailability } = useStore();
   const { updateStore: updateStoreById } = useStores();
@@ -940,19 +945,16 @@ export function useStoreFormState(store: ExtendedStore) {
     ]
   );
 
-  const hasUnpublishedAppearanceDraft = useMemo(() => {
-    if (hasRemoteAppearanceDraft) return true;
-    if (store.appearance_draft && typeof store.appearance_draft === 'object') return true;
-    const baseline = publishedAppearanceBaseline;
-    if (!baseline) {
-      return hasAppearanceDraftChanges(store, buildAppearanceFormDraft());
-    }
-    const baselineStore = {
-      ...store,
-      ...appearanceFormToPreviewDraft(baseline),
-    } as Store;
-    return hasAppearanceDraftChanges(baselineStore, buildAppearanceFormDraft());
-  }, [hasRemoteAppearanceDraft, store, publishedAppearanceBaseline, buildAppearanceFormDraft]);
+  const hasUnpublishedAppearanceDraft = useMemo(
+    () =>
+      computeHasUnpublishedAppearanceDraft({
+        store,
+        form: buildAppearanceFormDraft(),
+        hasRemoteDraft: hasRemoteAppearanceDraft,
+        publishedBaseline: publishedAppearanceBaseline,
+      }),
+    [hasRemoteAppearanceDraft, store, publishedAppearanceBaseline, buildAppearanceFormDraft]
+  );
 
   const handleSaveAppearanceDraft = useCallback(async () => {
     setIsSubmitting(true);
@@ -1001,6 +1003,15 @@ export function useStoreFormState(store: ExtendedStore) {
       setIsSubmitting(false);
     }
   }, [store.id, buildAppearanceFormDraft, refreshStores, toast, t]);
+
+  const handleAppearanceRestored = useCallback(async () => {
+    await refreshStores().catch(() => {});
+    toast({
+      title: t('store.appearance.restoredTitle'),
+      description: t('store.appearance.restoredDescription'),
+      duration: 3000,
+    });
+  }, [refreshStores, toast, t]);
 
   const handleSubmit = useCallback(
     async (e?: React.FormEvent) => {
@@ -1226,6 +1237,7 @@ export function useStoreFormState(store: ExtendedStore) {
     handleSubmit,
     handleSaveAppearanceDraft,
     handlePublishAppearance,
+    handleAppearanceRestored,
     handleCancel,
     resetForm,
     handleCopyUrl,
@@ -1238,5 +1250,6 @@ export function useStoreFormState(store: ExtendedStore) {
     handleAddressChange,
     handleFieldBlur,
     validateField,
+    updateStore: updateStoreById,
   };
 }

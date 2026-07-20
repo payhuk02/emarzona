@@ -22,7 +22,7 @@ import {
   isStoreCustomizationTabVisible,
   getStoreCustomizationSteps,
 } from '@/lib/commerce/store-customization-steps';
-import { useStoreFormState } from '@/hooks/useStoreFormState';
+import { useStoreFormStateRefactored as useStoreFormState } from '@/hooks/useStoreFormStateRefactored';
 import { useStores } from '@/hooks/useStores';
 import { StoreCustomizationWizard } from './StoreCustomizationWizard';
 import { StoreLegalPagesComponent, DEFAULT_LEGAL_TAB } from './StoreLegalPages';
@@ -70,6 +70,7 @@ const StoreDetails = ({ store: initialStore }: StoreDetailsProps) => {
     handleSubmit,
     handleSaveAppearanceDraft,
     handlePublishAppearance,
+    handleAppearanceRestored,
     handleCancel,
     resetForm,
     handleCopyUrl,
@@ -129,6 +130,7 @@ const StoreDetails = ({ store: initialStore }: StoreDetailsProps) => {
               isEditing={isEditing}
               isSubmitting={isSubmitting}
               hasDraftChanges={hasUnpublishedAppearanceDraft}
+              onAppearanceRestored={handleAppearanceRestored}
               applyConfig={applyConfig}
               handleColorChange={handleColorChange}
               handleTypographyChange={handleTypographyChange}

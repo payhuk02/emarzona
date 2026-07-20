@@ -1,9 +1,6 @@
 /**
- * Composant de configuration des Analytics et Tracking pour une boutique
- * Permet de configurer Google Analytics, Facebook Pixel, Google Tag Manager,
- * TikTok Pixel et des scripts personnalisés
- * 
- * SECURITY: Custom scripts are validated against whitelist patterns to prevent XSS attacks
+ * Composant de configuration des Analytics et Tracking pour une boutique.
+ * Pixels standards uniquement en production (scripts custom désactivés — XSS).
  */
 
 import { useState, useMemo } from 'react';
@@ -13,29 +10,32 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { BarChart3, Code, AlertCircle, Info, CheckCircle2, XCircle } from 'lucide-react';
+import { BarChart3, AlertCircle, Info, CheckCircle2 } from 'lucide-react';
+
+const ALLOW_CUSTOM_TRACKING_SCRIPTS_UI =
+  import.meta.env.DEV && import.meta.env.VITE_ALLOW_CUSTOM_TRACKING_SCRIPTS === 'true';
 
 interface StoreAnalyticsSettingsProps {
   // Google Analytics
   googleAnalyticsId?: string | null;
   googleAnalyticsEnabled?: boolean;
   onGoogleAnalyticsChange?: (id: string, enabled: boolean) => void;
-  
+
   // Facebook Pixel
   facebookPixelId?: string | null;
   facebookPixelEnabled?: boolean;
   onFacebookPixelChange?: (id: string, enabled: boolean) => void;
-  
+
   // Google Tag Manager
   googleTagManagerId?: string | null;
   googleTagManagerEnabled?: boolean;
   onGoogleTagManagerChange?: (id: string, enabled: boolean) => void;
-  
+
   // TikTok Pixel
   tiktokPixelId?: string | null;
   tiktokPixelEnabled?: boolean;
   onTiktokPixelChange?: (id: string, enabled: boolean) => void;
-  
+
   // Scripts personnalisés
   customScripts?: string | null;
   customScriptsEnabled?: boolean;
@@ -55,23 +55,23 @@ const SCRIPT_VALIDATION = {
     /window\.dataLayer\s*=/,
     /gtag\s*\(/,
     /ga\s*\(/,
-    
+
     // Facebook Pixel
     /<script[^>]*src=["']https:\/\/connect\.facebook\.net\/[a-z_]+\/fbevents\.js["'][^>]*>/,
     /fbq\s*\(/,
-    
+
     // TikTok Pixel
     /<script[^>]*src=["']https:\/\/analytics\.tiktok\.com\/[a-z0-9]+\/pixel\.js["'][^>]*>/,
     /ttq\s*\(/,
-    
+
     // Hotjar
     /<script[^>]*src=["']https:\/\/static\.hotjar\.com\/c\/hotjar-[0-9]+\.js["'][^>]*>/,
     /hj\s*\(/,
-    
+
     // Mixpanel
     /<script[^>]*src=["']https:\/\/cdn\.mxpnl\.com\/libs\/mixpanel-[0-9.]+\.min\.js["'][^>]*>/,
     /mixpanel\s*\./,
-    
+
     // Generic safe patterns
     /window\._{0,2}[a-zA-Z0-9_]+\s*=/,
     /\(function\s*\([^)]*\)\s*\{/,
@@ -130,14 +130,13 @@ function validateCustomScript(script: string): { valid: boolean; error?: string 
   }
 
   // Check if script contains at least one allowed pattern
-  const hasAllowedPattern = SCRIPT_VALIDATION.allowedPatterns.some(pattern =>
-    pattern.test(script)
-  );
+  const hasAllowedPattern = SCRIPT_VALIDATION.allowedPatterns.some(pattern => pattern.test(script));
 
   if (!hasAllowedPattern) {
     return {
       valid: false,
-      error: 'Script ne contient aucun pattern de tracking reconnu. Utilisez les intégrations natives (GA, Facebook, TikTok) ou contactez le support.',
+      error:
+        'Script ne contient aucun pattern de tracking reconnu. Utilisez les intégrations natives (GA, Facebook, TikTok) ou contactez le support.',
     };
   }
 
@@ -170,11 +169,13 @@ export const StoreAnalyticsSettings = ({
   onCustomScriptsChange,
 }: StoreAnalyticsSettingsProps) => {
   const [localGoogleAnalyticsId, setLocalGoogleAnalyticsId] = useState(googleAnalyticsId || '');
-  const [localGoogleAnalyticsEnabled, setLocalGoogleAnalyticsEnabled] = useState(googleAnalyticsEnabled);
+  const [localGoogleAnalyticsEnabled, setLocalGoogleAnalyticsEnabled] =
+    useState(googleAnalyticsEnabled);
   const [localFacebookPixelId, setLocalFacebookPixelId] = useState(facebookPixelId || '');
   const [localFacebookPixelEnabled, setLocalFacebookPixelEnabled] = useState(facebookPixelEnabled);
   const [localGoogleTagManagerId, setLocalGoogleTagManagerId] = useState(googleTagManagerId || '');
-  const [localGoogleTagManagerEnabled, setLocalGoogleTagManagerEnabled] = useState(googleTagManagerEnabled);
+  const [localGoogleTagManagerEnabled, setLocalGoogleTagManagerEnabled] =
+    useState(googleTagManagerEnabled);
   const [localTiktokPixelId, setLocalTiktokPixelId] = useState(tiktokPixelId || '');
   const [localTiktokPixelEnabled, setLocalTiktokPixelEnabled] = useState(tiktokPixelEnabled);
   const [localCustomScripts, setLocalCustomScripts] = useState(customScripts || '');
@@ -228,7 +229,7 @@ export const StoreAnalyticsSettings = ({
 
   const handleCustomScriptsChange = (value: string) => {
     setLocalCustomScripts(value);
-    
+
     // Validate before allowing save
     const validation = validateCustomScript(value);
     if (!validation.valid) {
@@ -236,7 +237,7 @@ export const StoreAnalyticsSettings = ({
       // Don't call parent if invalid
       return;
     }
-    
+
     setScriptValidationError(null);
     onCustomScriptsChange?.(value, localCustomScriptsEnabled);
   };
@@ -250,7 +251,7 @@ export const StoreAnalyticsSettings = ({
         return;
       }
     }
-    
+
     setLocalCustomScriptsEnabled(enabled);
     setScriptValidationError(null);
     onCustomScriptsChange?.(localCustomScripts, enabled);
@@ -262,8 +263,8 @@ export const StoreAnalyticsSettings = ({
         <Info className="h-4 w-4" />
         <AlertTitle>Analytics et Tracking</AlertTitle>
         <AlertDescription>
-          Configurez vos outils de suivi et d'analyse pour mesurer les performances de votre boutique.
-          Les scripts seront automatiquement injectés dans votre storefront public.
+          Configurez vos outils de suivi et d'analyse pour mesurer les performances de votre
+          boutique. Les scripts seront automatiquement injectés dans votre storefront public.
         </AlertDescription>
       </Alert>
 
@@ -294,7 +295,7 @@ export const StoreAnalyticsSettings = ({
                 id="google_analytics_id"
                 type="text"
                 value={localGoogleAnalyticsId}
-                onChange={(e) => handleGoogleAnalyticsIdChange(e.target.value)}
+                onChange={e => handleGoogleAnalyticsIdChange(e.target.value)}
                 placeholder="G-XXXXXXXXXX ou UA-XXXXXXXXX-X"
                 className="font-mono text-sm"
               />
@@ -333,13 +334,11 @@ export const StoreAnalyticsSettings = ({
                 id="facebook_pixel_id"
                 type="text"
                 value={localFacebookPixelId}
-                onChange={(e) => handleFacebookPixelIdChange(e.target.value)}
+                onChange={e => handleFacebookPixelIdChange(e.target.value)}
                 placeholder="123456789012345"
                 className="font-mono text-sm"
               />
-              <p className="text-xs text-muted-foreground">
-                Votre Facebook Pixel ID (15 chiffres)
-              </p>
+              <p className="text-xs text-muted-foreground">Votre Facebook Pixel ID (15 chiffres)</p>
             </div>
           </CardContent>
         )}
@@ -372,13 +371,11 @@ export const StoreAnalyticsSettings = ({
                 id="google_tag_manager_id"
                 type="text"
                 value={localGoogleTagManagerId}
-                onChange={(e) => handleGoogleTagManagerIdChange(e.target.value)}
+                onChange={e => handleGoogleTagManagerIdChange(e.target.value)}
                 placeholder="GTM-XXXXXXX"
                 className="font-mono text-sm"
               />
-              <p className="text-xs text-muted-foreground">
-                Format: GTM-XXXXXXX
-              </p>
+              <p className="text-xs text-muted-foreground">Format: GTM-XXXXXXX</p>
             </div>
           </CardContent>
         )}
@@ -411,7 +408,7 @@ export const StoreAnalyticsSettings = ({
                 id="tiktok_pixel_id"
                 type="text"
                 value={localTiktokPixelId}
-                onChange={(e) => handleTiktokPixelIdChange(e.target.value)}
+                onChange={e => handleTiktokPixelIdChange(e.target.value)}
                 placeholder="CXXXXXXXXXXXXXXX"
                 className="font-mono text-sm"
               />
@@ -423,101 +420,43 @@ export const StoreAnalyticsSettings = ({
         )}
       </Card>
 
-      {/* Scripts personnalisés */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Code className="h-5 w-5 text-purple-600" />
-              <div>
-                <CardTitle className="text-base">Scripts personnalisés</CardTitle>
-                <CardDescription className="text-xs">
-                  Ajoutez vos propres scripts de tracking (HTML/JavaScript)
-                </CardDescription>
-              </div>
-            </div>
-            <Switch
-              checked={localCustomScriptsEnabled}
-              onCheckedChange={handleCustomScriptsEnabledChange}
+      {ALLOW_CUSTOM_TRACKING_SCRIPTS_UI ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Scripts personnalisés (dev)</CardTitle>
+            <CardDescription className="text-xs">
+              Visible uniquement en développement avec VITE_ALLOW_CUSTOM_TRACKING_SCRIPTS=true
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Textarea
+              value={localCustomScripts}
+              onChange={e => handleCustomScriptsChange(e.target.value)}
+              className="font-mono text-xs min-h-[120px]"
+              disabled={!localCustomScriptsEnabled}
             />
-          </div>
-        </CardHeader>
-        {localCustomScriptsEnabled && (
-          <CardContent className="space-y-4">
-            <Alert variant="warning">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Attention</AlertTitle>
-              <AlertDescription className="text-xs">
-                Assurez-vous que vos scripts sont sûrs et ne contiennent pas de code malveillant.
-                Les scripts seront injectés dans toutes les pages de votre storefront.
-                <br /><br />
-                <strong>Scripts autorisés:</strong> Google Analytics, Facebook Pixel, TikTok Pixel, Hotjar, Mixpanel, et autres outils de tracking standards.
-              </AlertDescription>
-            </Alert>
-
-            {/* Real-time validation status */}
-            {localCustomScripts && (
-              <Alert variant={scriptValidationResult.valid ? "default" : "destructive"}>
-                {scriptValidationResult.valid ? (
-                  <CheckCircle2 className="h-4 w-4" />
-                ) : (
-                  <XCircle className="h-4 w-4" />
-                )}
-                <AlertTitle>
-                  {scriptValidationResult.valid ? 'Script valide' : 'Script invalide'}
-                </AlertTitle>
-                <AlertDescription className="text-xs">
-                  {scriptValidationResult.valid
-                    ? 'Le script respecte les règles de sécurité et peut être activé.'
-                    : scriptValidationResult.error || 'Ce script contient des patterns non autorisés.'}
-                </AlertDescription>
-              </Alert>
-            )}
-
-            <div className="space-y-2">
-              <Label htmlFor="custom_scripts">Code HTML/JavaScript</Label>
-              <Textarea
-                id="custom_scripts"
-                value={localCustomScripts}
-                onChange={(e) => handleCustomScriptsChange(e.target.value)}
-                placeholder={`<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-</script>`}
-                className={`font-mono text-xs min-h-[200px] ${
-                  scriptValidationError ? 'border-red-500 focus-visible:ring-red-500' : ''
-                }`}
-                disabled={!localCustomScriptsEnabled}
-              />
-              <div className="flex items-center justify-between">
-                <p className="text-xs text-muted-foreground">
-                  Insérez vos scripts de tracking personnalisés (ex: Hotjar, Mixpanel, etc.)
-                </p>
-                <span className="text-xs text-muted-foreground">
-                  {localCustomScripts.length} / 50 000
-                </span>
-              </div>
-            </div>
           </CardContent>
-        )}
-      </Card>
+        </Card>
+      ) : (
+        <Alert>
+          <Info className="h-4 w-4" />
+          <AlertTitle>Pixels standards uniquement</AlertTitle>
+          <AlertDescription className="text-xs">
+            Les scripts HTML/JavaScript personnalisés ne sont plus proposés sur la vitrine publique
+            pour des raisons de sécurité. Utilisez Google Analytics, Meta Pixel, GTM ou TikTok Pixel
+            ci-dessus.
+          </AlertDescription>
+        </Alert>
+      )}
 
       <Alert>
         <CheckCircle2 className="h-4 w-4" />
         <AlertTitle>Note importante</AlertTitle>
         <AlertDescription className="text-xs">
-          Les scripts de tracking ne seront actifs que sur votre storefront public.
-          Ils ne sont pas chargés dans l'interface d'administration pour préserver votre vie privée.
+          Les scripts de tracking ne seront actifs que sur votre storefront public. Ils ne sont pas
+          chargés dans l'interface d'administration pour préserver votre vie privée.
         </AlertDescription>
       </Alert>
     </div>
   );
 };
-
-
-
-
-
-
-

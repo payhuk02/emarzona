@@ -7,6 +7,7 @@ import StoreImageUpload from '../StoreImageUpload';
 import { StoreThemeSettings } from '../StoreThemeSettings';
 import { StoreThemeTemplateSelector } from '../StoreThemeTemplateSelector';
 import { StorePreview } from '../StorePreview';
+import { StoreAppearanceRevisionsPanel } from '../StoreAppearanceRevisionsPanel';
 import { applyThemeTemplate } from '@/lib/store-theme-templates';
 import { resolveStoreCommerceTypeFromStore } from '@/lib/commerce/store-capability-map';
 import type { Store } from '@/hooks/useStores';
@@ -20,6 +21,7 @@ interface StoreAppearanceTabProps {
   isEditing: boolean;
   isSubmitting: boolean;
   hasDraftChanges?: boolean;
+  onAppearanceRestored?: () => void | Promise<void>;
   applyConfig: (config: StoreThemeConfig) => void;
   handleColorChange: (field: string, value: string) => void;
   handleTypographyChange: (field: string, value: string) => void;
@@ -34,6 +36,7 @@ export const StoreAppearanceTab = ({
   isEditing,
   isSubmitting,
   hasDraftChanges: hasDraftChangesProp,
+  onAppearanceRestored,
   applyConfig,
   handleColorChange,
   handleTypographyChange,
@@ -216,6 +219,14 @@ export const StoreAppearanceTab = ({
             />
           </CardContent>
         </Card>
+      )}
+
+      {isEditing && (
+        <StoreAppearanceRevisionsPanel
+          storeId={store.id}
+          isSubmitting={isSubmitting}
+          onRestored={onAppearanceRestored}
+        />
       )}
 
       <StoreThemeSettings
