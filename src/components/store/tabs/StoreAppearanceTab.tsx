@@ -22,6 +22,8 @@ interface StoreAppearanceTabProps {
   isEditing: boolean;
   isSubmitting: boolean;
   hasDraftChanges?: boolean;
+  /** Changes after each appearance publish so the revisions panel refetches. */
+  revisionsReloadToken?: string | null;
   onAppearanceRestored?: () => void | Promise<void>;
   applyConfig: (config: StoreThemeConfig) => void;
   handleColorChange: (field: string, value: string) => void;
@@ -37,6 +39,7 @@ export const StoreAppearanceTab = ({
   isEditing,
   isSubmitting,
   hasDraftChanges: hasDraftChangesProp,
+  revisionsReloadToken = null,
   onAppearanceRestored,
   applyConfig,
   handleColorChange,
@@ -227,6 +230,11 @@ export const StoreAppearanceTab = ({
       {isEditing && (
         <StoreAppearanceRevisionsPanel
           storeId={store.id}
+          reloadToken={
+            revisionsReloadToken ??
+            (store as Store).appearance_published_at ??
+            (hasDraftChanges ? 'draft' : 'idle')
+          }
           isSubmitting={isSubmitting}
           onRestored={onAppearanceRestored}
         />

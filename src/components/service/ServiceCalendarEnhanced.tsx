@@ -133,68 +133,69 @@ export const ServiceCalendarEnhanced = ({
 
       const bookingRows = bookingsError ? [] : (bookings ?? []);
 
-      // Create events for available slots
+      // Create events for every matching day in the visible month (not only the first week).
+      const daysInMonth = monthEnd.getDate();
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+
       slots.forEach(slot => {
         if (!slot.start_time) return;
-        // For each day of the week that matches this slot
-        for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
-          const slotDate = new Date(monthStart);
-          slotDate.setDate(monthStart.getDate() + dayOffset);
+        for (let dayOfMonth = 1; dayOfMonth <= daysInMonth; dayOfMonth++) {
+          const slotDate = new Date(monthStart.getFullYear(), monthStart.getMonth(), dayOfMonth);
+          if (slotDate.getDay() !== slot.day_of_week) continue;
+          // Skip past days — buyers cannot book them and E2E needs a future date.
+          if (slotDate < todayStart) continue;
 
-          if (slotDate.getDay() === slot.day_of_week) {
-            // Check if there are bookings for this time slot
-            const bookingsAtThisTime =
-              bookingRows.filter(b => {
-                const bookingDate = new Date(b.scheduled_date);
-                return (
-                  bookingDate.getDate() === slotDate.getDate() &&
-                  bookingDate.getMonth() === slotDate.getMonth() &&
-                  b.scheduled_start_time?.substring(0, 5) === slot.start_time?.substring(0, 5)
-                );
-              }) || [];
+          const bookingsAtThisTime =
+            bookingRows.filter(b => {
+              const bookingDate = new Date(b.scheduled_date);
+              return (
+                bookingDate.getDate() === slotDate.getDate() &&
+                bookingDate.getMonth() === slotDate.getMonth() &&
+                b.scheduled_start_time?.substring(0, 5) === slot.start_time?.substring(0, 5)
+              );
+            }) || [];
 
-            const availableSpots =
-              (serviceProduct?.max_participants || 1) - bookingsAtThisTime.length;
-            const totalSlots = serviceProduct?.max_participants || 1;
+          const availableSpots =
+            (serviceProduct?.max_participants || 1) - bookingsAtThisTime.length;
+          const totalSlots = serviceProduct?.max_participants || 1;
 
-            let status: 'available' | 'limited' | 'full' | 'unavailable' = 'unavailable';
-            if (availableSpots > 0) {
-              if (availableSpots <= totalSlots * 0.3) {
-                status = 'limited';
-              } else {
-                status = 'available';
-              }
+          let status: 'available' | 'limited' | 'full' | 'unavailable' = 'unavailable';
+          if (availableSpots > 0) {
+            if (availableSpots <= totalSlots * 0.3) {
+              status = 'limited';
             } else {
-              status = 'full';
+              status = 'available';
             }
-
-            // Create event for this time slot
-            const [hours, minutes] = slot.start_time.split(':').map(Number);
-            const startDateTime = new Date(slotDate);
-            startDateTime.setHours(hours, minutes, 0, 0);
-
-            const endDateTime = new Date(startDateTime);
-            endDateTime.setMinutes(
-              endDateTime.getMinutes() + (serviceProduct?.duration_minutes || 60)
-            );
-
-            events.push({
-              id: `slot-${slot.id}-${slotDate.toISOString()}`,
-              title:
-                status === 'available'
-                  ? `Disponible (${availableSpots} place${availableSpots > 1 ? 's' : ''})`
-                  : status === 'limited'
-                    ? `Limité (${availableSpots} place${availableSpots > 1 ? 's' : ''})`
-                    : 'Complet',
-              start: startDateTime,
-              end: endDateTime,
-              resource: {
-                availableSlots: availableSpots,
-                totalSlots,
-                status,
-              },
-            });
+          } else {
+            status = 'full';
           }
+
+          const [hours, minutes] = slot.start_time.split(':').map(Number);
+          const startDateTime = new Date(slotDate);
+          startDateTime.setHours(hours, minutes, 0, 0);
+
+          const endDateTime = new Date(startDateTime);
+          endDateTime.setMinutes(
+            endDateTime.getMinutes() + (serviceProduct?.duration_minutes || 60)
+          );
+
+          events.push({
+            id: `slot-${slot.id}-${slotDate.toISOString()}`,
+            title:
+              status === 'available'
+                ? `Disponible (${availableSpots} place${availableSpots > 1 ? 's' : ''})`
+                : status === 'limited'
+                  ? `Limité (${availableSpots} place${availableSpots > 1 ? 's' : ''})`
+                  : 'Complet',
+            start: startDateTime,
+            end: endDateTime,
+            resource: {
+              availableSlots: availableSpots,
+              totalSlots,
+              status,
+            },
+          });
         }
       });
 

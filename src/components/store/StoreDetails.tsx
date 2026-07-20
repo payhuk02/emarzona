@@ -84,6 +84,7 @@ const StoreDetails = ({ store: initialStore }: StoreDetailsProps) => {
     handleSubmit,
     handleSaveAppearanceDraft,
     handlePublishAppearance,
+    appearancePublishEpoch,
     handleSaveContentDraft,
     handlePublishContent,
     handleAppearanceRestored,
@@ -146,6 +147,7 @@ const StoreDetails = ({ store: initialStore }: StoreDetailsProps) => {
               isEditing={isEditing}
               isSubmitting={isSubmitting}
               hasDraftChanges={hasUnpublishedAppearanceDraft}
+              revisionsReloadToken={`${appearancePublishEpoch}:${store.appearance_published_at ?? ''}`}
               onAppearanceRestored={handleAppearanceRestored}
               applyConfig={applyConfig}
               handleColorChange={handleColorChange}
@@ -263,8 +265,11 @@ const StoreDetails = ({ store: initialStore }: StoreDetailsProps) => {
       lastSaved,
       fieldTouched,
       storeUrl,
+      hasUnpublishedAppearanceDraft,
+      appearancePublishEpoch,
       handleSubmit,
       handlePublishAppearance,
+      handleAppearanceRestored,
       handleCopyUrl,
       handleSlugUpdate,
       applyConfig,

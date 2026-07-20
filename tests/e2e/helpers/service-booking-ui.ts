@@ -11,34 +11,38 @@ async function dismissCookieBannerIfVisible(page: Page): Promise<void> {
   }
 }
 
-/** Select a bookable day/slot in ServiceCalendarEnhanced (react-big-calendar). */
+async function waitForTimeSlots(page: Page, timeout = 20_000): Promise<boolean> {
+  return page
+    .locator('[data-testid^="time-slot-"]')
+    .first()
+    .isVisible({ timeout })
+    .catch(() => false);
+}
+
+/**
+ * Select a bookable day in ServiceCalendarEnhanced so TimeSlotPicker renders.
+ * Prefer a future "Disponible" event; fall back to clicking tomorrow's month cell.
+ */
 export async function selectServiceCalendarDay(page: Page, date: Date): Promise<void> {
   await dismissCookieBannerIfVisible(page);
   await expect(page.locator('.rbc-calendar')).toBeVisible({ timeout: 30_000 });
 
-  // Seed data creates green "Disponible" events — most reliable path in CI.
+  const slotsVisible = () => waitForTimeSlots(page, 8_000);
+
+  // Future "Disponible" events (calendar now generates the full month, skipping past days).
   const availableEvent = page
     .locator('.rbc-event')
     .filter({ hasText: /Disponible/i })
     .first();
-  if (await availableEvent.isVisible({ timeout: 10_000 }).catch(() => false)) {
-    await availableEvent.click();
-    const slots = page.locator('[data-testid^="time-slot-"]');
-    if (
-      await slots
-        .first()
-        .isVisible({ timeout: 8_000 })
-        .catch(() => false)
-    ) {
-      return;
-    }
-    // Re-click once — CI can miss the first selection
-    await availableEvent.click();
-    await expect(slots.first()).toBeVisible({ timeout: 20_000 });
-    return;
+  if (await availableEvent.isVisible({ timeout: 15_000 }).catch(() => false)) {
+    await availableEvent.scrollIntoViewIfNeeded().catch(() => undefined);
+    await availableEvent.click({ force: true });
+    if (await slotsVisible()) return;
+    await availableEvent.click({ force: true });
+    if (await slotsVisible()) return;
   }
 
-  // Month view fallback: navigate to target month then pick the day number.
+  // Month view: click the date cell for the target day (current-month only).
   const monthButton = page.getByRole('button', { name: /^Mois$/i });
   if (await monthButton.isVisible().catch(() => false)) {
     await monthButton.click();
@@ -57,25 +61,40 @@ export async function selectServiceCalendarDay(page: Page, date: Date): Promise<
     await nextMonth.click();
   }
 
-  const dayCell = page
-    .locator('.rbc-day-bg')
-    .filter({
-      has: page.locator('.rbc-date-cell').filter({ hasText: new RegExp(`^${date.getDate()}$`) }),
-    })
+  const dayNum = date.getDate();
+  // rbc-date-cell and rbc-day-bg are siblings — click the in-month date button/label.
+  const inMonthDate = page
+    .locator(
+      '.rbc-month-view .rbc-date-cell:not(.rbc-off-range) button, .rbc-month-view .rbc-date-cell:not(.rbc-off-range) a, .rbc-month-view .rbc-date-cell:not(.rbc-off-range)'
+    )
+    .filter({ hasText: new RegExp(`^\\s*${dayNum}\\s*$`) })
     .first();
 
-  if (await dayCell.isVisible().catch(() => false)) {
-    await dayCell.click();
+  if (await inMonthDate.isVisible().catch(() => false)) {
+    await inMonthDate.click({ force: true });
   } else {
-    await page
-      .locator('.rbc-date-cell')
-      .filter({ hasText: new RegExp(`^${date.getDate()}$`) })
-      .first()
-      .click();
+    // Last resort: click any matching date number, then the day background via evaluate.
+    await page.evaluate(targetDay => {
+      const cells = Array.from(
+        document.querySelectorAll('.rbc-month-view .rbc-date-cell:not(.rbc-off-range)')
+      );
+      const match = cells.find(cell => (cell.textContent || '').trim() === String(targetDay));
+      if (match instanceof HTMLElement) {
+        match.click();
+        const row = match.closest('.rbc-month-row');
+        const idx = match.parentElement
+          ? Array.from(match.parentElement.children).indexOf(match)
+          : -1;
+        const bgs = row?.querySelectorAll('.rbc-day-bg');
+        if (idx >= 0 && bgs?.[idx] instanceof HTMLElement) {
+          (bgs[idx] as HTMLElement).click();
+        }
+      }
+    }, dayNum);
   }
 
   await expect(page.locator('[data-testid^="time-slot-"]').first()).toBeVisible({
-    timeout: 20_000,
+    timeout: 25_000,
   });
 }
 

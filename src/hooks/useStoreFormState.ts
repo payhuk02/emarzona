@@ -56,6 +56,8 @@ export function useStoreFormState(store: ExtendedStore) {
   );
   const [publishedAppearanceBaseline, setPublishedAppearanceBaseline] =
     useState<StoreAppearanceFormDraft | null>(() => initialPublishedAppearanceBaseline(store));
+  /** Forces revisions panel refetch after each publish (mount alone sees 0 rows). */
+  const [appearancePublishEpoch, setAppearancePublishEpoch] = useState(0);
 
   const lastPublishedAtRef = useRef(store.appearance_published_at ?? null);
 
@@ -455,6 +457,9 @@ export function useStoreFormState(store: ExtendedStore) {
     try {
       await saveStoreAppearanceDraft(store.id, appearanceFormDraft);
       await refreshStores().catch(() => {});
+      await queryClient.invalidateQueries({
+        queryKey: ['store-customization-detail', store.id],
+      });
       setHasRemoteAppearanceDraft(true);
       setLastSaved(new Date());
       toast({
@@ -471,7 +476,7 @@ export function useStoreFormState(store: ExtendedStore) {
     } finally {
       setIsSubmitting(false);
     }
-  }, [store.id, appearanceFormDraft, refreshStores, toast, t]);
+  }, [store.id, appearanceFormDraft, refreshStores, queryClient, toast, t]);
 
   const handlePublishAppearance = useCallback(async () => {
     setIsSubmitting(true);
@@ -479,8 +484,12 @@ export function useStoreFormState(store: ExtendedStore) {
       await saveStoreAppearanceDraft(store.id, appearanceFormDraft);
       await publishStoreAppearance(store.id);
       await refreshStores().catch(() => {});
+      await queryClient.invalidateQueries({
+        queryKey: ['store-customization-detail', store.id],
+      });
       setHasRemoteAppearanceDraft(false);
       setPublishedAppearanceBaseline(appearanceFormDraft);
+      setAppearancePublishEpoch(epoch => epoch + 1);
       setLastSaved(new Date());
       toast({
         title: t('store.appearance.publishedTitle'),
@@ -496,7 +505,7 @@ export function useStoreFormState(store: ExtendedStore) {
     } finally {
       setIsSubmitting(false);
     }
-  }, [store.id, appearanceFormDraft, refreshStores, toast, t]);
+  }, [store.id, appearanceFormDraft, refreshStores, queryClient, toast, t]);
 
   const handleAppearanceRestored = useCallback(async () => {
     await refreshStores().catch(() => {});
@@ -690,6 +699,7 @@ export function useStoreFormState(store: ExtendedStore) {
     handleSubmit,
     handleSaveAppearanceDraft,
     handlePublishAppearance,
+    appearancePublishEpoch,
     handleSaveContentDraft,
     handlePublishContent,
     handleAppearanceRestored,

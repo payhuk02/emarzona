@@ -155,6 +155,11 @@ test.describe('Store appearance revisions (E2E)', () => {
     expect(revisionsError).toBeNull();
     expect((revisionsBefore ?? []).length).toBeGreaterThanOrEqual(2);
 
+    // Panel remounts/refetches via appearancePublishEpoch after publishes.
+    await page
+      .getByTestId('store-appearance-revisions-panel')
+      .scrollIntoViewIfNeeded()
+      .catch(() => undefined);
     await restoreAppearanceRevision(page, 1);
     await assertStorePrimaryColorInDb(admin, storeId!, E2E_THEME_PRIMARY_ON_CREATE);
 

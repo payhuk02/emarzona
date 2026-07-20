@@ -21,12 +21,15 @@ import {
 
 interface StoreAppearanceRevisionsPanelProps {
   storeId: string;
+  /** Bumps after each publish so the panel reloads (mount alone sees 0 revisions). */
+  reloadToken?: string | null;
   isSubmitting?: boolean;
   onRestored?: () => void | Promise<void>;
 }
 
 export function StoreAppearanceRevisionsPanel({
   storeId,
+  reloadToken = null,
   isSubmitting = false,
   onRestored,
 }: StoreAppearanceRevisionsPanelProps) {
@@ -53,7 +56,7 @@ export function StoreAppearanceRevisionsPanel({
 
   useEffect(() => {
     void loadRevisions();
-  }, [loadRevisions]);
+  }, [loadRevisions, reloadToken]);
 
   const handleRestore = useCallback(async () => {
     if (confirmRevision == null) return;
