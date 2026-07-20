@@ -11,54 +11,36 @@ async function dismissCookieBannerIfVisible(page: Page): Promise<void> {
   }
 }
 
-async function waitForTimeSlots(page: Page, timeout = 12_000): Promise<boolean> {
-  return page
-    .locator('[data-testid^="time-slot-"]')
-    .first()
-    .isVisible({ timeout })
-    .catch(() => false);
+function localDayKey(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
 }
 
-/** Select a bookable day so TimeSlotPicker renders (week view + Disponible events). */
-export async function selectServiceCalendarDay(page: Page, _date: Date): Promise<void> {
+/**
+ * Select a bookable day via stable quick-day buttons (avoids flaky react-big-calendar clicks).
+ */
+export async function selectServiceCalendarDay(page: Page, date?: Date): Promise<void> {
   await dismissCookieBannerIfVisible(page);
-  await expect(page.locator('.rbc-calendar')).toBeVisible({ timeout: 30_000 });
 
-  // Prefer week view — events are larger and include "Disponible" labels.
-  const weekButton = page.getByRole('button', { name: /^Semaine$/i });
-  if (await weekButton.isVisible().catch(() => false)) {
-    await weekButton.click();
+  const quickDays = page.getByTestId('service-quick-days');
+  await expect(quickDays).toBeVisible({ timeout: 45_000 });
+
+  if (date) {
+    const specific = page.getByTestId(`service-quick-day-${localDayKey(date)}`);
+    if (await specific.isVisible().catch(() => false)) {
+      await specific.click();
+      await expect(page.locator('[data-testid^="time-slot-"]').first()).toBeVisible({
+        timeout: 20_000,
+      });
+      return;
+    }
   }
 
-  const availableEvent = page
-    .locator('.rbc-event')
-    .filter({ hasText: /Disponible/i })
-    .first();
-
-  await expect(availableEvent).toBeVisible({ timeout: 30_000 });
-  await availableEvent.scrollIntoViewIfNeeded().catch(() => undefined);
-  await availableEvent.click({ force: true });
-
-  if (await waitForTimeSlots(page)) return;
-
-  // Re-click once (CI can miss the first selection).
-  await availableEvent.click({ force: true });
-  if (await waitForTimeSlots(page)) return;
-
-  // Advance one week if current week only had past slots filtered out.
-  const next = page.getByRole('button', { name: /suivant|next/i }).first();
-  if (await next.isVisible().catch(() => false)) {
-    await next.click();
-    const nextEvent = page
-      .locator('.rbc-event')
-      .filter({ hasText: /Disponible/i })
-      .first();
-    await expect(nextEvent).toBeVisible({ timeout: 20_000 });
-    await nextEvent.click({ force: true });
-  }
-
+  await page.locator('[data-testid^="service-quick-day-"]').first().click();
   await expect(page.locator('[data-testid^="time-slot-"]').first()).toBeVisible({
-    timeout: 25_000,
+    timeout: 20_000,
   });
 }
 

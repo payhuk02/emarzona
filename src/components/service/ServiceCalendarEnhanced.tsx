@@ -232,6 +232,25 @@ export const ServiceCalendarEnhanced = ({
     };
   }, []);
 
+  const upcomingAvailableDays = useMemo(() => {
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const byDay = new Map<string, Date>();
+    for (const event of calendarEvents ?? []) {
+      const status = event.resource?.status;
+      if (status !== 'available' && status !== 'limited') continue;
+      const day = new Date(event.start);
+      day.setHours(0, 0, 0, 0);
+      if (day < todayStart) continue;
+      const key = format(day, 'yyyy-MM-dd');
+      if (!byDay.has(key)) byDay.set(key, day);
+    }
+    return Array.from(byDay.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .slice(0, 8)
+      .map(([, day]) => day);
+  }, [calendarEvents]);
+
   // Handle event selection
   const handleSelectEvent = useCallback(
     (event: CalendarEvent) => {
@@ -308,6 +327,30 @@ export const ServiceCalendarEnhanced = ({
         </div>
       </CardHeader>
       <CardContent>
+        {upcomingAvailableDays.length > 0 && (
+          <div className="mb-4 space-y-2" data-testid="service-quick-days">
+            <p className="text-sm font-medium">Prochains jours disponibles</p>
+            <div className="flex flex-wrap gap-2">
+              {upcomingAvailableDays.map(day => {
+                const dayKey = format(day, 'yyyy-MM-dd');
+                const isSelected =
+                  selectedDate != null && format(selectedDate, 'yyyy-MM-dd') === dayKey;
+                return (
+                  <Button
+                    key={dayKey}
+                    type="button"
+                    size="sm"
+                    variant={isSelected ? 'default' : 'outline'}
+                    data-testid={`service-quick-day-${dayKey}`}
+                    onClick={() => onDateSelect(day)}
+                  >
+                    {format(day, 'EEE d MMM', { locale: fr })}
+                  </Button>
+                );
+              })}
+            </div>
+          </div>
+        )}
         <div className="h-[600px]">
           <LazyCalendarWrapper>
             {calendar => {

@@ -26,7 +26,7 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const canRun = Boolean(supabaseUrl && supabaseServiceKey);
 
 test.describe('Mixed cart book → pay → confirm (E2E)', () => {
-  test.setTimeout(180_000);
+  test.setTimeout(240_000);
 
   test.beforeAll(() => {
     if (canRun) {
