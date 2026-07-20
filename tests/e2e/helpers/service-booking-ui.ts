@@ -22,8 +22,11 @@ export async function selectServiceCalendarDay(page: Page, date: Date): Promise<
     .filter({ hasText: new RegExp(`^${date.getDate()}$`) })
     .first()
     .click();
-
-  await expect(page.getByText(/Choisissez un créneau/i)).toBeVisible({ timeout: 15_000 });
+  // Don't assert on the label text: the UI can re-render a bit differently in CI.
+  // Instead, wait until the time slot picker is mounted (it exposes stable testids).
+  await expect(page.locator('[data-testid^="time-slot-"]').first()).toBeVisible({
+    timeout: 20_000,
+  });
 }
 
 export async function selectFirstAvailableTimeSlot(page: Page): Promise<void> {
