@@ -111,6 +111,11 @@ $$;
 
 GRANT EXECUTE ON FUNCTION public.e2e_apply_schema_patches() TO service_role;
 
+-- Mixed-cart / logged-in service booking (bypass hanging edge function)
+GRANT EXECUTE ON FUNCTION public.reserve_service_booking(
+  UUID, UUID, UUID, DATE, TIME, TIME, TEXT, INTEGER, INTEGER, TEXT
+) TO authenticated, service_role;
+
 -- Store wizard + create flow RPCs (pg_dump --no-privileges may omit EXECUTE for authenticated).
 GRANT EXECUTE ON FUNCTION public.is_store_slug_available(text, uuid) TO authenticated, anon, service_role;
 

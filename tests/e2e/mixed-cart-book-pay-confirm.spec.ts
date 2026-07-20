@@ -76,12 +76,28 @@ test.describe('Mixed cart book → pay → confirm (E2E)', () => {
       await expect(addToCart).toBeEnabled({ timeout: 10_000 });
 
       const bookingError = page.getByText(
-        /Erreur de réservation|Réservation impossible|Authentification requise|Impossible de finaliser/i
+        /Erreur de réservation|Réservation impossible|Authentification requise|Impossible de finaliser|Délai dépassé/i
       );
+
+      const reserveRpc = page.waitForResponse(
+        response =>
+          response.url().includes('/rest/v1/rpc/reserve_service_booking') &&
+          response.request().method() === 'POST',
+        { timeout: 45_000 }
+      );
+
       await addToCart.click();
 
+      const rpcResponse = await reserveRpc.catch(() => null);
+      if (rpcResponse && (rpcResponse.status() < 200 || rpcResponse.status() >= 300)) {
+        const body = await rpcResponse.text().catch(() => '');
+        throw new Error(
+          `reserve_service_booking failed (${rpcResponse.status()}): ${body.slice(0, 400)}`
+        );
+      }
+
       const navigated = await page
-        .waitForURL(/\/cart/, { timeout: 60_000 })
+        .waitForURL(/\/cart/, { timeout: 45_000 })
         .then(() => true)
         .catch(() => false);
       if (!navigated) {

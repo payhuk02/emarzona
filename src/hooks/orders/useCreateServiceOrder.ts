@@ -466,14 +466,46 @@ export const useCreateServiceOrder = () => {
         }
       }
 
-      // 6. Créer le booking (réservation) de manière atomique via l'Edge Function
-      // Note: actualDuration, bookingDate, bookingStartTime, bookingEndTime déjà calculés plus haut
-
+      // 6. Créer le booking — RPC directe si connecté (évite edge function auth/hang) ;
+      //    edge function réservée au guest checkout.
       const { data: authData } = await supabase.auth.getUser();
+      const authenticatedUserId = authData?.user?.id ?? null;
 
-      const { data: provisionData, error: provisionError } = await supabase.functions.invoke(
-        'service-checkout-provisioning',
-        {
+      let bookingId: string;
+      let userId: string | null = authenticatedUserId;
+
+      if (authenticatedUserId) {
+        const { data: bookingResult, error: bookingError } = await supabase.rpc(
+          'reserve_service_booking',
+          {
+            p_product_id: productId,
+            p_user_id: authenticatedUserId,
+            p_staff_member_id: staffId ?? null,
+            p_scheduled_date: bookingDate,
+            p_scheduled_start_time: bookingStartTime,
+            p_scheduled_end_time: bookingEndTime,
+            p_timezone: serviceProduct.timezone || 'UTC',
+            p_duration_minutes: actualDuration,
+            p_participants_count: numberOfParticipants,
+            p_customer_notes: notes ?? null,
+          }
+        );
+
+        if (bookingError) {
+          logger.error('reserve_service_booking RPC error', { error: bookingError });
+          throw new Error(bookingError.message || 'Impossible de finaliser la réservation.');
+        }
+
+        const row = Array.isArray(bookingResult) ? bookingResult[0] : bookingResult;
+        if (row?.error_message) {
+          throw new Error(String(row.error_message));
+        }
+        if (!row?.booking_id) {
+          throw new Error('Erreur inattendue lors de la réservation');
+        }
+        bookingId = row.booking_id as string;
+      } else {
+        const invokePromise = supabase.functions.invoke('service-checkout-provisioning', {
           body: {
             email: customerEmail,
             customerName: customerName,
@@ -486,29 +518,42 @@ export const useCreateServiceOrder = () => {
             timezone: serviceProduct.timezone || 'UTC',
             numberOfParticipants: numberOfParticipants,
             notes: notes,
-            userId: authData?.user?.id || null,
+            userId: null,
           },
+        });
+
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          setTimeout(
+            () => reject(new Error('Délai dépassé lors de la réservation. Réessayez.')),
+            45_000
+          );
+        });
+
+        const { data: provisionData, error: provisionError } = await Promise.race([
+          invokePromise,
+          timeoutPromise,
+        ]);
+
+        if (provisionError) {
+          logger.error('Service checkout provisioning error', { error: provisionError });
+          throw new Error(provisionError.message || 'Impossible de finaliser la réservation.');
         }
-      );
 
-      if (provisionError) {
-        logger.error('Service checkout provisioning error', { error: provisionError });
-        throw new Error(provisionError.message || 'Impossible de finaliser la réservation.');
+        if (provisionData?.error) {
+          throw new Error(provisionData.error);
+        }
+
+        if (!provisionData?.success || !provisionData?.booking_id) {
+          throw new Error('Erreur inattendue lors de la réservation');
+        }
+
+        bookingId = provisionData.booking_id as string;
+        userId = provisionData.user_id ?? null;
       }
-
-      if (provisionData?.error) {
-        throw new Error(provisionData.error);
-      }
-
-      if (!provisionData?.success || !provisionData?.booking_id) {
-        throw new Error('Erreur inattendue lors de la réservation');
-      }
-
-      const userId = provisionData.user_id;
 
       // On simule l'objet booking pour la suite du flux (webhooks)
       const booking = {
-        id: provisionData.booking_id,
+        id: bookingId,
         scheduled_date: bookingDate,
         scheduled_start_time: bookingStartTime,
         scheduled_end_time: bookingEndTime,

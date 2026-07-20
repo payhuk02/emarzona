@@ -236,6 +236,8 @@ export const ServiceCalendarEnhanced = ({
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
     const byDay = new Map<string, Date>();
+
+    // Prefer calendar events (respects bookings / capacity).
     for (const event of calendarEvents ?? []) {
       const status = event.resource?.status;
       if (status !== 'available' && status !== 'limited') continue;
@@ -245,11 +247,56 @@ export const ServiceCalendarEnhanced = ({
       const key = format(day, 'yyyy-MM-dd');
       if (!byDay.has(key)) byDay.set(key, day);
     }
+
+    // Fallback: derive from weekly availability slots if events are empty
+    // (calendar lazy-load / event generation issues must not block booking).
+    if (byDay.size === 0 && (calendarEvents?.length ?? 0) === 0) {
+      // populated asynchronously via availabilityQuickDays below
+    }
+
     return Array.from(byDay.entries())
       .sort(([a], [b]) => a.localeCompare(b))
       .slice(0, 8)
       .map(([, day]) => day);
   }, [calendarEvents]);
+
+  // Lightweight fallback days from availability slots (no bookings join).
+  const { data: availabilityQuickDays = [] } = useQuery({
+    queryKey: ['service-availability-quick-days', serviceProduct?.id],
+    queryFn: async () => {
+      if (!serviceProduct?.id) return [] as Date[];
+      const { data: slots, error } = await supabase
+        .from('service_availability_slots')
+        .select('day_of_week, is_active')
+        .eq('service_product_id', serviceProduct.id)
+        .eq('is_active', true);
+      if (error) throw error;
+      const activeDow = new Set((slots ?? []).map(s => s.day_of_week));
+      const days: Date[] = [];
+      const cursor = new Date();
+      cursor.setHours(0, 0, 0, 0);
+      for (let i = 0; i < 21 && days.length < 8; i += 1) {
+        const day = new Date(cursor);
+        day.setDate(cursor.getDate() + i);
+        if (i === 0) continue; // start tomorrow-ish: skip today for buffer
+        if (activeDow.has(day.getDay())) days.push(day);
+      }
+      // If nothing after skipping today, include today
+      if (days.length === 0) {
+        for (let i = 0; i < 14 && days.length < 8; i += 1) {
+          const day = new Date(cursor);
+          day.setDate(cursor.getDate() + i);
+          if (activeDow.has(day.getDay())) days.push(day);
+        }
+      }
+      return days;
+    },
+    enabled: !!serviceProduct?.id,
+    staleTime: 60_000,
+  });
+
+  const quickDays =
+    upcomingAvailableDays.length > 0 ? upcomingAvailableDays : availabilityQuickDays;
 
   // Handle event selection
   const handleSelectEvent = useCallback(
@@ -269,7 +316,7 @@ export const ServiceCalendarEnhanced = ({
     [onDateSelect]
   );
 
-  if (isLoading) {
+  if (!serviceProduct && isLoading) {
     return (
       <Card>
         <CardHeader>
@@ -327,11 +374,11 @@ export const ServiceCalendarEnhanced = ({
         </div>
       </CardHeader>
       <CardContent>
-        {upcomingAvailableDays.length > 0 && (
+        {quickDays.length > 0 && (
           <div className="mb-4 space-y-2" data-testid="service-quick-days">
             <p className="text-sm font-medium">Prochains jours disponibles</p>
             <div className="flex flex-wrap gap-2">
-              {upcomingAvailableDays.map(day => {
+              {quickDays.map(day => {
                 const dayKey = format(day, 'yyyy-MM-dd');
                 const isSelected =
                   selectedDate != null && format(selectedDate, 'yyyy-MM-dd') === dayKey;
@@ -352,42 +399,46 @@ export const ServiceCalendarEnhanced = ({
           </div>
         )}
         <div className="h-[600px]">
-          <LazyCalendarWrapper>
-            {calendar => {
-              const localizer = calendar.dateFnsLocalizer({
-                format,
-                parse,
-                startOfWeek: () => startOfWeek(new Date(), { locale: fr }),
-                getDay,
-                locales: { fr: fr },
-              });
+          {isLoading ? (
+            <Skeleton className="h-full w-full" />
+          ) : (
+            <LazyCalendarWrapper>
+              {calendar => {
+                const localizer = calendar.dateFnsLocalizer({
+                  format,
+                  parse,
+                  startOfWeek: () => startOfWeek(new Date(), { locale: fr }),
+                  getDay,
+                  locales: { fr: fr },
+                });
 
-              return (
-                <calendar.Calendar
-                  localizer={localizer}
-                  events={calendarEvents || []}
-                  startAccessor="start"
-                  endAccessor="end"
-                  view={view}
-                  onView={nextView => setView(nextView as CalendarView)}
-                  date={date}
-                  onNavigate={setDate}
-                  onSelectEvent={handleSelectEvent}
-                  onSelectSlot={handleSelectSlot}
-                  selectable
-                  eventPropGetter={eventStyleGetter}
-                  messages={messages}
-                  step={30}
-                  timeslots={2}
-                  min={new Date(0, 0, 0, 8, 0, 0)}
-                  max={new Date(0, 0, 0, 20, 0, 0)}
-                  defaultDate={new Date()}
-                  popup
-                  className="rbc-calendar"
-                />
-              );
-            }}
-          </LazyCalendarWrapper>
+                return (
+                  <calendar.Calendar
+                    localizer={localizer}
+                    events={calendarEvents || []}
+                    startAccessor="start"
+                    endAccessor="end"
+                    view={view}
+                    onView={nextView => setView(nextView as CalendarView)}
+                    date={date}
+                    onNavigate={setDate}
+                    onSelectEvent={handleSelectEvent}
+                    onSelectSlot={handleSelectSlot}
+                    selectable
+                    eventPropGetter={eventStyleGetter}
+                    messages={messages}
+                    step={30}
+                    timeslots={2}
+                    min={new Date(0, 0, 0, 8, 0, 0)}
+                    max={new Date(0, 0, 0, 20, 0, 0)}
+                    defaultDate={new Date()}
+                    popup
+                    className="rbc-calendar"
+                  />
+                );
+              }}
+            </LazyCalendarWrapper>
+          )}
         </div>
 
         {/* Legend */}
