@@ -33,8 +33,19 @@ export const storeQueryKeys = {
 export async function fetchStoreById(userId: string, storeId: string): Promise<Store | null> {
   logger.debug('[store-query] fetchStoreById', { userId, storeId });
 
-  const { data, error } = await supabase
-    .from('stores')
+  // Embed store_appearance hors schéma types.ts → cast pour éviter TS2589
+  const { data, error } = await (
+    supabase.from('stores') as unknown as {
+      select: (columns: string) => {
+        eq: (
+          column: string,
+          value: string
+        ) => {
+          single: () => Promise<{ data: Record<string, unknown> | null; error: Error | null }>;
+        };
+      };
+    }
+  )
     .select(STORE_FIELDS)
     .eq('id', storeId)
     .single();
@@ -50,8 +61,25 @@ export async function fetchStoreById(userId: string, storeId: string): Promise<S
 export async function fetchFirstStoreForUser(userId: string): Promise<Store | null> {
   logger.debug('[store-query] fetchFirstStoreForUser', { userId });
 
-  const { data, error } = await supabase
-    .from('stores')
+  const { data, error } = await (
+    supabase.from('stores') as unknown as {
+      select: (columns: string) => {
+        eq: (
+          column: string,
+          value: string
+        ) => {
+          order: (
+            column: string,
+            opts: { ascending: boolean }
+          ) => {
+            limit: (
+              count: number
+            ) => Promise<{ data: Record<string, unknown>[] | null; error: Error | null }>;
+          };
+        };
+      };
+    }
+  )
     .select(STORE_FIELDS)
     .eq('user_id', userId)
     .order('created_at', { ascending: true })

@@ -190,18 +190,20 @@ export const useStore = () => {
       const verticalDefaults = buildStoreCreateDefaults(commerceType);
       const { data, error } = await supabase
         .from('stores')
-        .insert(
-          sanitizeStorePayload({
+        .insert({
+          ...sanitizeStorePayload({
             ...verticalDefaults,
-            user_id: user.id,
             name,
             slug,
             description: params.description?.trim() || null,
             commerce_type: commerceType,
             metadata: { commerce_type: commerceType },
-          })
-        )
-        .select()
+            is_active: true,
+          }),
+          // Réinjecter user_id (exclu de sanitize volontairement pour les updates)
+          user_id: user.id,
+        })
+        .select('id, name, slug, user_id, commerce_type, created_at')
         .limit(1);
 
       if (error) throw error;

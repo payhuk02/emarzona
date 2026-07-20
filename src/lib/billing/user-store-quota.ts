@@ -24,10 +24,21 @@ export function fallbackStoreQuota(ownedStoreCount: number): UserStoreQuota {
   };
 }
 
+type UntypedRpcClient = {
+  rpc: (
+    fn: string,
+    args?: Record<string, unknown>
+  ) => Promise<{ data: unknown; error: { message: string } | null }>;
+};
+
 export async function fetchUserStoreQuota(userId?: string): Promise<UserStoreQuota> {
-  const { data, error } = await supabase.rpc('get_user_store_quota', {
-    p_user_id: userId ?? undefined,
-  });
+  // RPC Sprint 4 — absente des types.ts générés tant que `supabase:types` n'est pas relancé
+  const { data, error } = await (supabase as unknown as UntypedRpcClient).rpc(
+    'get_user_store_quota',
+    {
+      p_user_id: userId ?? undefined,
+    }
+  );
 
   if (error || !data || typeof data !== 'object') {
     throw error ?? new Error('get_user_store_quota failed');

@@ -64,6 +64,7 @@ type AnyObject = Record<string, unknown>;
 
 /**
  * Nettoie un payload d'update/insert pour la table `stores`.
+ * Note: `user_id` est volontairement exclu — le réinjecter explicitement à la création.
  */
 export function sanitizeStorePayload<T extends AnyObject>(payload: T): T {
   const cleaned: AnyObject = {};

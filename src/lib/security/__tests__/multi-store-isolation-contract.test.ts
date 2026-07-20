@@ -39,6 +39,9 @@ describe('multi-store isolation contract (Phase 4.4)', () => {
   it('StoreContext exposes selectedStoreId for tenant scoping', () => {
     const source = readFileSync(join(root, 'src/contexts/StoreContext.tsx'), 'utf8');
     expect(source).toContain('selectedStoreId');
-    expect(source).toContain('MAX_STORES_PER_USER');
+    // Plan-aware quota (Sprint 4) — remplace MAX_STORES_PER_USER hardcodé
+    expect(source).toContain('storeQuota');
+    expect(source).toContain('fetchUserStoreQuota');
+    expect(source).toContain('canCreateStore');
   });
 });

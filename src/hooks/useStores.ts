@@ -27,6 +27,22 @@ import {
 type StoreInsert = Database['public']['Tables']['stores']['Insert'];
 type StoreUpdate = Database['public']['Tables']['stores']['Update'];
 
+/** Table store_appearance absente des types.ts générés — cast jusqu'à `supabase:types`. */
+type StoreAppearanceClient = {
+  from: (relation: 'store_appearance') => {
+    upsert: (
+      values: Record<string, unknown> | Record<string, unknown>[]
+    ) => Promise<{ error: { message: string } | null }>;
+  };
+};
+
+async function upsertStoreAppearance(row: Record<string, unknown>) {
+  const { error } = await (supabase as unknown as StoreAppearanceClient)
+    .from('store_appearance')
+    .upsert(row);
+  return error;
+}
+
 // Lecture : utiliser uniquement les colonnes réellement présentes en base (évite
 // « column … does not exist » quand la prod n’a pas encore toutes les migrations).
 // L’interface `Store` garde les champs optionnels pour ce qui manque.
@@ -257,8 +273,22 @@ export const useStores = () => {
         return [];
       }
 
-      const { data, error } = await supabase
-        .from('stores')
+      // Embed store_appearance hors schéma types.ts → cast pour éviter TS2589
+      const { data, error } = await (
+        supabase.from('stores') as unknown as {
+          select: (columns: string) => {
+            eq: (
+              column: string,
+              value: string
+            ) => {
+              order: (
+                column: string,
+                opts: { ascending: boolean }
+              ) => Promise<{ data: Record<string, unknown>[] | null; error: Error | null }>;
+            };
+          };
+        }
+      )
         .select(
           `id, user_id, name, slug, subdomain, description, is_active, created_at, updated_at, custom_domain, domain_status, metadata, commerce_type, ${STORE_APPEARANCE_EMBED_SELECT}`
         )
@@ -358,14 +388,23 @@ export const useStores = () => {
       });
 
       const appearancePayload = extractAppearancePayload(insertPayload);
-      const storeInsertPayload = omitAppearanceFromStoreUpdates(
-        sanitizeStorePayload(insertPayload)
-      );
+      const storeInsertPayload = {
+        ...omitAppearanceFromStoreUpdates(sanitizeStorePayload(insertPayload)),
+        // user_id n'est pas dans STORE_WRITABLE_COLUMNS (volontaire — pas d'update) :
+        // il doit être réinjecté à la création pour passer le WITH CHECK RLS.
+        user_id: authUser.id,
+        is_active: true,
+        commerce_type: commerceType,
+        metadata: { commerce_type: commerceType },
+        name: validated.name,
+        slug: validated.slug,
+        default_currency: validated.default_currency,
+      };
 
       const { data, error } = await supabase
         .from('stores')
         .insert([storeInsertPayload as unknown as StoreInsert])
-        .select()
+        .select('id, name, slug, user_id, commerce_type, created_at')
         .single();
 
       if (error) {
@@ -373,7 +412,7 @@ export const useStores = () => {
       }
 
       if (Object.keys(appearancePayload).length > 0) {
-        const { error: appearanceError } = await supabase.from('store_appearance').upsert({
+        const appearanceError = await upsertStoreAppearance({
           store_id: data.id,
           ...appearancePayload,
         });
@@ -444,7 +483,7 @@ export const useStores = () => {
       }
 
       if (Object.keys(appearancePayload).length > 0) {
-        const { error: appearanceError } = await supabase.from('store_appearance').upsert({
+        const appearanceError = await upsertStoreAppearance({
           store_id: storeId,
           ...appearancePayload,
         });
