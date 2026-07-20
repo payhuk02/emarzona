@@ -589,6 +589,7 @@ export default function ServiceDetail() {
   const serviceUrl = `${window.location.origin}/service/${serviceId}`;
 
   const maxParticipants = service?.service?.max_participants || 1;
+  const minParticipants = 1;
   const isGroup = maxParticipants > 1;
 
   return (

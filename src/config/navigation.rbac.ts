@@ -11,7 +11,10 @@ import {
   canAccessProductCreateNavPath,
 } from '@/lib/commerce/store-capability-map';
 import { requiresExpertMode } from '@/config/navigation.progressive';
-import { resolveSellerNavUrl } from '@/lib/navigation/vendor-products-nav';
+import {
+  resolveSellerNavUrl,
+  VENDOR_PRODUCTS_HUB_PATH,
+} from '@/lib/navigation/vendor-products-nav';
 
 const getNavPath = (url: string) => url.split('?')[0];
 
@@ -24,20 +27,43 @@ export function dedupeNavSectionsByResolvedHref(
   sections: NavSection[],
   commerceType?: StoreCommerceType | null
 ): NavSection[] {
-  const seen = new Set<string>();
-
   return sections
-    .map(section => ({
-      ...section,
-      items: section.items.filter(item => {
+    .map(section => {
+      type ItemRef = {
+        item: NavSection['items'][number];
+        href: string;
+        isExplicit: boolean;
+      };
+
+      const refs: ItemRef[] = section.items.map(item => {
         const href = resolveSellerNavUrl(item.url, commerceType).split('?')[0];
-        if (seen.has(href)) {
-          return false;
+        const originalPath = getNavPath(item.url);
+        return { item, href, isExplicit: originalPath === href };
+      });
+
+      const refsByHref = new Map<string, ItemRef[]>();
+      for (const ref of refs) {
+        const list = refsByHref.get(ref.href) ?? [];
+        list.push(ref);
+        refsByHref.set(ref.href, list);
+      }
+
+      const keepUrls = new Set<string>();
+      for (const dupes of refsByHref.values()) {
+        if (dupes.length === 1) {
+          keepUrls.add(dupes[0].item.url);
+          continue;
         }
-        seen.add(href);
-        return true;
-      }),
-    }))
+        const hub = dupes.find(ref => getNavPath(ref.item.url) === VENDOR_PRODUCTS_HUB_PATH);
+        const explicit = dupes.find(ref => ref.isExplicit);
+        keepUrls.add((hub ?? explicit ?? dupes[0]).item.url);
+      }
+
+      return {
+        ...section,
+        items: section.items.filter(item => keepUrls.has(item.url)),
+      };
+    })
     .filter(section => section.items.length > 0);
 }
 

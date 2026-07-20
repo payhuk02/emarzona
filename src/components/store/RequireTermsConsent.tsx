@@ -39,6 +39,13 @@ function isE2eTermsBypassEnabled(): boolean {
   return document.documentElement.dataset.e2eBypassTerms === '1';
 }
 
+function isTermsGateOpen(
+  hasConsented: boolean,
+  needsUpdate: boolean | '' | null | undefined
+): boolean {
+  return isE2eTermsBypassEnabled() || (hasConsented && !needsUpdate);
+}
+
 export const RequireTermsConsent = ({
   children,
   onAction,
@@ -54,10 +61,10 @@ export const RequireTermsConsent = ({
   const { toast } = useToast();
 
   const bypassTerms = isE2eTermsBypassEnabled();
-  const gatePassed = bypassTerms || (hasConsented && !needsUpdate);
+  const gatePassed = isTermsGateOpen(hasConsented, needsUpdate);
 
   const handleAction = async (e?: ReactMouseEvent) => {
-    if (!gatePassed) {
+    if (!isTermsGateOpen(hasConsented, needsUpdate)) {
       e?.preventDefault();
       e?.stopPropagation();
       if (showDialog) {
@@ -126,15 +133,17 @@ export const RequireTermsConsent = ({
   const gatedChild = isValidElement<{ type?: string; onClick?: unknown }>(children)
     ? cloneElement(children, {
         type: 'button',
-        onClick: undefined,
+        onClick: (e: ReactMouseEvent) => {
+          e.preventDefault();
+          e.stopPropagation();
+          void handleAction(e);
+        },
       })
     : children;
 
   return (
     <>
-      <div onClick={e => void handleAction(e)} className="cursor-pointer">
-        {gatedChild}
-      </div>
+      <div className="cursor-pointer">{gatedChild}</div>
 
       <AlertDialog open={showTermsDialog} onOpenChange={setShowTermsDialog}>
         <AlertDialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">

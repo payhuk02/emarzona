@@ -29,7 +29,7 @@ describe('filterSellerNavSectionsByAccess', () => {
     }
   });
 
-  it('dedupeNavSectionsByResolvedHref keeps first occurrence', () => {
+  it('dedupeNavSectionsByResolvedHref prefers hub over explicit vertical list in same section', () => {
     const sections = dedupeNavSectionsByResolvedHref(
       [
         {
@@ -58,8 +58,50 @@ describe('filterSellerNavSectionsByAccess', () => {
 
     expect(sections).toHaveLength(1);
     expect(sections[0]?.items).toHaveLength(1);
+    expect(sections[0]!.items[0]!.url).toBe('/dashboard/products');
     expect(resolveSellerNavUrl(sections[0]!.items[0]!.url, 'digital')).toBe(
       '/dashboard/digital-products'
+    );
+  });
+
+  it('does not dedupe hub across different sections', () => {
+    const sections = dedupeNavSectionsByResolvedHref(
+      [
+        {
+          label: 'Produits',
+          sectionKey: 'produits_cours',
+          items: [
+            {
+              title: 'Hub',
+              url: '/dashboard/products',
+              icon: () => null,
+              personas: ['seller'],
+              tier: 'primary',
+            },
+          ],
+        },
+        {
+          label: 'Logistique',
+          sectionKey: 'ventes_logistique',
+          items: [
+            {
+              title: 'Produits Physiques',
+              url: '/dashboard/physical-products',
+              icon: () => null,
+              personas: ['seller'],
+              tier: 'primary',
+            },
+          ],
+        },
+      ],
+      'physical'
+    );
+
+    expect(sections.find(s => s.sectionKey === 'produits_cours')?.items[0]?.url).toBe(
+      '/dashboard/products'
+    );
+    expect(sections.find(s => s.sectionKey === 'ventes_logistique')?.items[0]?.url).toBe(
+      '/dashboard/physical-products'
     );
   });
 });
