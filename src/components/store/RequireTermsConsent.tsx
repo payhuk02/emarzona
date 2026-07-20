@@ -119,29 +119,16 @@ export const RequireTermsConsent = ({
     return <div className="opacity-50">{children}</div>;
   }
 
-  // Gate passed (consent OK or E2E bypass): still route through onAction when provided.
-  // A bare type="submit" can miss React onSubmit in wizard footers; onAction calls handleSubmit.
   if (gatePassed) {
-    if (
-      onAction &&
-      isValidElement<{ type?: string; onClick?: (e: ReactMouseEvent) => void }>(children)
-    ) {
-      return cloneElement(children, {
-        type: 'button',
-        onClick: (e: ReactMouseEvent) => {
-          e.preventDefault();
-          e.stopPropagation();
-          void handleAction(e);
-        },
-      });
-    }
     return <>{children}</>;
   }
 
-  const gatedChild =
-    isValidElement<{ type?: string }>(children) && children.props.type === 'submit'
-      ? cloneElement(children, { type: 'button' })
-      : children;
+  const gatedChild = isValidElement<{ type?: string; onClick?: unknown }>(children)
+    ? cloneElement(children, {
+        type: 'button',
+        onClick: undefined,
+      })
+    : children;
 
   return (
     <>

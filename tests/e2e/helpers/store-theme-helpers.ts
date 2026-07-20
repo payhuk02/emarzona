@@ -193,10 +193,9 @@ export async function submitStoreWizardCreate(page: Page): Promise<void> {
     { timeout: 90_000 }
   );
 
-  const createButton = page.getByRole('button', { name: /Créer ma boutique/i });
+  const createButton = page.getByTestId('store-create-submit');
   await expect(createButton).toBeEnabled({ timeout: 15_000 });
 
-  // Prefer explicit click (RequireTermsConsent onAction → handleSubmit), then form.requestSubmit.
   await createButton.click();
   await acceptTermsDialogIfVisible(page);
 
@@ -205,17 +204,12 @@ export async function submitStoreWizardCreate(page: Page): Promise<void> {
     .isVisible()
     .catch(() => false);
   if (stillOnWizard) {
-    await page
-      .locator('form')
-      .filter({ has: createButton })
-      .evaluate(form => {
-        (form as HTMLFormElement).requestSubmit();
-      })
-      .catch(() => undefined);
+    await page.locator('#store-create-form').evaluate(form => {
+      (form as HTMLFormElement).requestSubmit();
+    });
     await acceptTermsDialogIfVisible(page);
   }
 
-  // Last resort: click again after a short settle (consent/slug race).
   const earlyResponse = await Promise.race([
     createResponsePromise.then(r => r).catch(() => null),
     new Promise<null>(resolve => setTimeout(() => resolve(null), 3_000)),
@@ -244,8 +238,11 @@ export async function submitStoreWizardCreate(page: Page): Promise<void> {
       .first()
       .innerText()
       .catch(() => null);
+    const bypass = await page
+      .evaluate(() => document.documentElement.dataset.e2eBypassTerms ?? '0')
+      .catch(() => 'unknown');
     throw new Error(
-      `Store create POST never fired — toast=${toastText?.trim() ?? 'none'} validation=${validationText?.trim() ?? 'none'} url=${page.url()} bypass=${await page.evaluate(() => document.documentElement.dataset.e2eBypassTerms ?? '0')}`
+      `Store create POST never fired — toast=${toastText?.trim() ?? 'none'} validation=${validationText?.trim() ?? 'none'} url=${page.url()} bypass=${bypass}`
     );
   }
   if (response.status() < 200 || response.status() >= 300) {

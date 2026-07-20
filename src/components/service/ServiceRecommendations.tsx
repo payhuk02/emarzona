@@ -272,9 +272,8 @@ const useServiceRecommendations = (
 
         // Trier par score et retourner les meilleurs
         return scored.sort((a, b) => b.recommendationScore - a.recommendationScore).slice(0, limit);
-      } catch (_error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        logger.error('Error fetching service recommendations', { error });
+      } catch (caughtError: unknown) {
+        logger.error('Error fetching service recommendations', { error: caughtError });
         return [];
       }
     },
@@ -481,9 +480,8 @@ export const BookedTogetherRecommendations = ({
           .eq('is_active', true);
 
         return services || [];
-      } catch (_error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        logger.error('Error fetching booked together recommendations', { error });
+      } catch (caughtError: unknown) {
+        logger.error('Error fetching booked together recommendations', { error: caughtError });
         return [];
       }
     },

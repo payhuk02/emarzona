@@ -1168,6 +1168,7 @@ export default function ServiceDetail() {
               <JoinWaitlistButton
                 serviceId={serviceId!}
                 serviceName={service.name}
+                storeId={service.store_id ?? service.store?.id}
                 disabled={!user}
               />
 

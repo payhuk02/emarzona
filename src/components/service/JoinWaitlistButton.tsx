@@ -25,12 +25,19 @@ import { format } from 'date-fns';
 interface JoinWaitlistButtonProps {
   serviceId: string;
   serviceName: string;
+  storeId?: string | null;
   disabled?: boolean;
 }
 
-export function JoinWaitlistButton({ serviceId, serviceName, disabled }: JoinWaitlistButtonProps) {
+export function JoinWaitlistButton({
+  serviceId,
+  serviceName,
+  storeId: storeIdProp,
+  disabled,
+}: JoinWaitlistButtonProps) {
   const { user } = useAuth();
   const { store } = useStore();
+  const storeId = storeIdProp ?? store?.id ?? null;
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState({
     customer_name: user?.user_metadata?.full_name || '',
@@ -46,12 +53,12 @@ export function JoinWaitlistButton({ serviceId, serviceName, disabled }: JoinWai
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!store?.id) return;
+    if (!storeId) return;
 
     try {
       await addToWaitlist.mutateAsync({
         service_id: serviceId,
-        store_id: store.id,
+        store_id: storeId,
         ...formData,
       });
       setIsOpen(false);
@@ -90,7 +97,7 @@ export function JoinWaitlistButton({ serviceId, serviceName, disabled }: JoinWai
             <Input
               id="customer_name"
               value={formData.customer_name}
-              onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })}
+              onChange={e => setFormData({ ...formData, customer_name: e.target.value })}
               required
             />
           </div>
@@ -101,7 +108,7 @@ export function JoinWaitlistButton({ serviceId, serviceName, disabled }: JoinWai
               id="customer_email"
               type="email"
               value={formData.customer_email}
-              onChange={(e) => setFormData({ ...formData, customer_email: e.target.value })}
+              onChange={e => setFormData({ ...formData, customer_email: e.target.value })}
               required
             />
           </div>
@@ -112,7 +119,7 @@ export function JoinWaitlistButton({ serviceId, serviceName, disabled }: JoinWai
               id="customer_phone"
               type="tel"
               value={formData.customer_phone}
-              onChange={(e) => setFormData({ ...formData, customer_phone: e.target.value })}
+              onChange={e => setFormData({ ...formData, customer_phone: e.target.value })}
             />
           </div>
 
@@ -123,7 +130,7 @@ export function JoinWaitlistButton({ serviceId, serviceName, disabled }: JoinWai
                 id="preferred_date"
                 type="date"
                 value={formData.preferred_date}
-                onChange={(e) => setFormData({ ...formData, preferred_date: e.target.value })}
+                onChange={e => setFormData({ ...formData, preferred_date: e.target.value })}
                 min={format(new Date(), 'yyyy-MM-dd')}
               />
             </div>
@@ -134,7 +141,7 @@ export function JoinWaitlistButton({ serviceId, serviceName, disabled }: JoinWai
                 id="preferred_time"
                 type="time"
                 value={formData.preferred_time}
-                onChange={(e) => setFormData({ ...formData, preferred_time: e.target.value })}
+                onChange={e => setFormData({ ...formData, preferred_time: e.target.value })}
               />
             </div>
           </div>
@@ -144,7 +151,7 @@ export function JoinWaitlistButton({ serviceId, serviceName, disabled }: JoinWai
             <Textarea
               id="customer_notes"
               value={formData.customer_notes}
-              onChange={(e) => setFormData({ ...formData, customer_notes: e.target.value })}
+              onChange={e => setFormData({ ...formData, customer_notes: e.target.value })}
               rows={3}
               placeholder="Informations supplémentaires..."
             />
@@ -173,10 +180,3 @@ export function JoinWaitlistButton({ serviceId, serviceName, disabled }: JoinWai
     </Dialog>
   );
 }
-
-
-
-
-
-
-

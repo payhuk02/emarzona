@@ -984,6 +984,16 @@ const StoreForm = ({
     ]
   );
 
+  const submitCreateStore = useCallback(
+    async (e?: React.MouseEvent | React.FormEvent) => {
+      e?.preventDefault();
+      await handleSubmit({
+        preventDefault() {},
+      } as React.FormEvent);
+    },
+    [handleSubmit]
+  );
+
   return (
     <Card>
       <CardHeader>
@@ -997,7 +1007,7 @@ const StoreForm = ({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
+        <form id="store-create-form" ref={formRef} onSubmit={handleSubmit} className="space-y-6">
           <Tabs
             defaultValue={wizardMode && wizardStep ? wizardStep : 'basic'}
             className="w-full"
@@ -1951,17 +1961,15 @@ const StoreForm = ({
                   !initialData ? (
                     <RequireTermsConsent
                       actionLabel={t('store.form.common.createStoreAction')}
-                      onAction={async () => {
-                        await handleSubmit({
-                          preventDefault() {},
-                        } as React.FormEvent);
-                      }}
+                      onAction={submitCreateStore}
                     >
                       <Button
-                        type="submit"
+                        type="button"
+                        data-testid="store-create-submit"
                         className="flex-1 sm:flex-none"
                         disabled={isSubmitting || slugAvailable === false}
                         size="lg"
+                        onClick={submitCreateStore}
                       >
                         {isSubmitting ? (
                           <>
@@ -2009,17 +2017,15 @@ const StoreForm = ({
                 {!initialData ? (
                   <RequireTermsConsent
                     actionLabel={t('store.form.common.createStoreAction')}
-                    onAction={async () => {
-                      await handleSubmit({
-                        preventDefault() {},
-                      } as React.FormEvent);
-                    }}
+                    onAction={submitCreateStore}
                   >
                     <Button
-                      type="submit"
+                      type="button"
+                      data-testid="store-create-submit"
                       className="w-full"
                       disabled={isSubmitting || slugAvailable === false}
                       size="lg"
+                      onClick={submitCreateStore}
                     >
                       {isSubmitting ? (
                         <>
