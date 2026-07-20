@@ -6,16 +6,20 @@ import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { resolveStoreCommerceTypeFromStore } from '@/lib/commerce/store-capability-map';
 import type { Store } from '@/hooks/useStore';
+import {
+  flattenStoreWithAppearance,
+  STORE_APPEARANCE_EMBED_SELECT,
+} from '@/lib/storefront/flatten-store-appearance';
 
-export const STORE_FIELDS =
-  'id, user_id, name, slug, subdomain, description, default_currency, custom_domain, domain_status, domain_verification_token, domain_verified_at, domain_error_message, logo_url, banner_url, info_message, info_message_color, info_message_font, metadata, commerce_type, created_at, updated_at';
+export const STORE_FIELDS = `id, user_id, name, slug, subdomain, description, default_currency, custom_domain, domain_status, domain_verification_token, domain_verified_at, domain_error_message, info_message, info_message_color, info_message_font, metadata, commerce_type, created_at, updated_at, ${STORE_APPEARANCE_EMBED_SELECT}`;
 
 export function mapStoreRow(row: Record<string, unknown> | null | undefined): Store | null {
   if (!row) return null;
+  const flattened = flattenStoreWithAppearance(row);
   return {
-    ...row,
+    ...flattened,
     commerce_type: resolveStoreCommerceTypeFromStore(
-      row as { commerce_type?: unknown; metadata?: Record<string, unknown> | null }
+      flattened as { commerce_type?: unknown; metadata?: Record<string, unknown> | null }
     ),
   } as Store;
 }

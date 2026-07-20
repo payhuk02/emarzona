@@ -48,5 +48,25 @@ export function omitAppearanceFromStoreUpdates<T extends Record<string, unknown>
   for (const key of STORE_APPEARANCE_PUBLISHED_KEYS) {
     delete result[key];
   }
+  delete result.appearance_draft;
+  delete result.appearance_published_at;
   return result as Omit<T, StoreAppearancePublishedKey>;
+}
+
+export function extractAppearancePayload(
+  payload: Record<string, unknown>
+): Record<string, unknown> {
+  const appearance: Record<string, unknown> = {};
+  for (const key of STORE_APPEARANCE_PUBLISHED_KEYS) {
+    if (payload[key] !== undefined) {
+      appearance[key] = payload[key];
+    }
+  }
+  if (payload.appearance_draft !== undefined) {
+    appearance.appearance_draft = payload.appearance_draft;
+  }
+  if (payload.appearance_published_at !== undefined) {
+    appearance.appearance_published_at = payload.appearance_published_at;
+  }
+  return appearance;
 }

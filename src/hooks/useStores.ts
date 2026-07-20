@@ -7,6 +7,14 @@ import type { Database } from '@/integrations/supabase/types';
 import type { StoreCommerceType } from '@/constants/store-commerce-types';
 import { STORE_COMMERCE_TYPES } from '@/constants/store-commerce-types';
 import { resolveStoreCommerceTypeFromStore } from '@/lib/commerce/store-capability-map';
+import {
+  extractAppearancePayload,
+  omitAppearanceFromStoreUpdates,
+} from '@/lib/storefront/store-appearance-fields';
+import {
+  flattenStoreWithAppearance,
+  STORE_APPEARANCE_EMBED_SELECT,
+} from '@/lib/storefront/flatten-store-appearance';
 import { sanitizeStorePayload } from '@/lib/store-payload-utils';
 import { assertReadyToCreateStore } from '@/lib/store/create-store-service';
 import {
@@ -253,7 +261,7 @@ export const useStores = () => {
       const { data, error } = await supabase
         .from('stores')
         .select(
-          'id, user_id, name, slug, subdomain, description, logo_url, banner_url, is_active, created_at, updated_at, custom_domain, domain_status, metadata, commerce_type, primary_color, appearance_draft, appearance_published_at'
+          `id, user_id, name, slug, subdomain, description, is_active, created_at, updated_at, custom_domain, domain_status, metadata, commerce_type, ${STORE_APPEARANCE_EMBED_SELECT}`
         )
         .eq('user_id', user.id)
         .order('created_at', { ascending: true });
@@ -262,10 +270,13 @@ export const useStores = () => {
         throw error;
       }
 
-      return ((data ?? []) as Store[]).map(store => ({
-        ...store,
-        commerce_type: resolveStoreCommerceTypeFromStore(store),
-      }));
+      return ((data ?? []) as Record<string, unknown>[]).map(row => {
+        const flattened = flattenStoreWithAppearance(row);
+        return {
+          ...flattened,
+          commerce_type: resolveStoreCommerceTypeFromStore(flattened),
+        } as Store;
+      });
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
@@ -338,14 +349,29 @@ export const useStores = () => {
         writableFields,
       });
 
+      const appearancePayload = extractAppearancePayload(insertPayload);
+      const storeInsertPayload = omitAppearanceFromStoreUpdates(
+        sanitizeStorePayload(insertPayload)
+      );
+
       const { data, error } = await supabase
         .from('stores')
-        .insert([insertPayload as unknown as StoreInsert])
+        .insert([storeInsertPayload as unknown as StoreInsert])
         .select()
         .single();
 
       if (error) {
         throw error;
+      }
+
+      if (Object.keys(appearancePayload).length > 0) {
+        const { error: appearanceError } = await supabase.from('store_appearance').upsert({
+          store_id: data.id,
+          ...appearancePayload,
+        });
+        if (appearanceError) {
+          throw appearanceError;
+        }
       }
 
       return data;
@@ -395,14 +421,28 @@ export const useStores = () => {
       }
 
       const sanitized = sanitizeStorePayload(updates as Record<string, unknown>);
+      const appearancePayload = extractAppearancePayload(sanitized);
+      const storeUpdates = omitAppearanceFromStoreUpdates(sanitized);
 
-      const { error } = await supabase
-        .from('stores')
-        .update(sanitized as unknown as StoreUpdate)
-        .eq('id', storeId);
+      if (Object.keys(storeUpdates).length > 0) {
+        const { error } = await supabase
+          .from('stores')
+          .update(storeUpdates as unknown as StoreUpdate)
+          .eq('id', storeId);
 
-      if (error) {
-        throw error;
+        if (error) {
+          throw error;
+        }
+      }
+
+      if (Object.keys(appearancePayload).length > 0) {
+        const { error: appearanceError } = await supabase.from('store_appearance').upsert({
+          store_id: storeId,
+          ...appearancePayload,
+        });
+        if (appearanceError) {
+          throw appearanceError;
+        }
       }
 
       // Fetch the updated store data separately

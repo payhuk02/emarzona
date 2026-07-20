@@ -1,7 +1,6 @@
-import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { useReducer, useMemo, useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Store } from '@/hooks/useStores';
-import type { StoreOpeningHours, StoreLegalPages, StoreMarketingContent } from '@/hooks/useStores';
 import type {
   ExtendedStore,
   StoreFormState,
@@ -15,298 +14,28 @@ import { sanitizeStorePayload } from '@/lib/store-payload-utils';
 import { validateStoreForm } from '@/lib/validation-utils';
 import { validateStoreUpdate } from '@/lib/store-validation';
 import {
-  draftRecordToAppearanceForm,
-  getStoreAppearanceDraft,
   publishStoreAppearance,
   saveStoreAppearanceDraft,
 } from '@/lib/storefront/store-appearance-publish';
 import {
+  appearanceFormFromState,
   computeHasUnpublishedAppearanceDraft,
+  initStoreFormState,
   initialHasRemoteAppearanceDraft,
   initialPublishedAppearanceBaseline,
 } from '@/lib/storefront/store-appearance-form-state';
 import type { StoreAppearanceFormDraft } from '@/lib/storefront/store-preview-draft';
-
-function initState(store: ExtendedStore): StoreFormState {
-  const base: StoreFormState = {
-    name: store.name,
-    description: store.description || '',
-    logoUrl: store.logo_url || '',
-    bannerUrl: store.banner_url || '',
-    faviconUrl: store.favicon_url || '',
-    appleTouchIconUrl: store.apple_touch_icon_url || '',
-    watermarkUrl: store.watermark_url || '',
-    placeholderImageUrl: store.placeholder_image_url || '',
-    about: store.about || '',
-    contactEmail: store.contact_email || '',
-    contactPhone: store.contact_phone || '',
-    facebookUrl: store.facebook_url || '',
-    instagramUrl: store.instagram_url || '',
-    twitterUrl: store.twitter_url || '',
-    linkedinUrl: store.linkedin_url || '',
-    youtubeUrl: store.youtube_url || '',
-    tiktokUrl: store.tiktok_url || '',
-    pinterestUrl: store.pinterest_url || '',
-    snapchatUrl: store.snapchat_url || '',
-    discordUrl: store.discord_url || '',
-    twitchUrl: store.twitch_url || '',
-    supportEmail: store.support_email || '',
-    salesEmail: store.sales_email || '',
-    pressEmail: store.press_email || '',
-    partnershipEmail: store.partnership_email || '',
-    supportPhone: store.support_phone || '',
-    salesPhone: store.sales_phone || '',
-    whatsappNumber: store.whatsapp_number || '',
-    telegramUsername: store.telegram_username || '',
-    infoMessage: store.info_message || '',
-    infoMessageColor: store.info_message_color || '#3b82f6',
-    infoMessageFont: store.info_message_font || 'Inter',
-    primaryColor: store.primary_color || '#3b82f6',
-    secondaryColor: store.secondary_color || '#8b5cf6',
-    accentColor: store.accent_color || '#f59e0b',
-    backgroundColor: store.background_color || '#ffffff',
-    textColor: store.text_color || '#1f2937',
-    textSecondaryColor: store.text_secondary_color || '#6b7280',
-    buttonPrimaryColor: store.button_primary_color || '#3b82f6',
-    buttonPrimaryText: store.button_primary_text || '#ffffff',
-    buttonSecondaryColor: store.button_secondary_color || '#e5e7eb',
-    buttonSecondaryText: store.button_secondary_text || '#1f2937',
-    linkColor: store.link_color || '#3b82f6',
-    linkHoverColor: store.link_hover_color || '#2563eb',
-    borderRadius: store.border_radius || 'md',
-    shadowIntensity: store.shadow_intensity || 'md',
-    headingFont: store.heading_font || 'Inter',
-    bodyFont: store.body_font || 'Inter',
-    fontSizeBase: store.font_size_base || '16px',
-    headingSizeH1: store.heading_size_h1 || '2.5rem',
-    headingSizeH2: store.heading_size_h2 || '2rem',
-    headingSizeH3: store.heading_size_h3 || '1.5rem',
-    lineHeight: store.line_height || '1.6',
-    letterSpacing: store.letter_spacing || 'normal',
-    headerStyle: store.header_style || 'standard',
-    footerStyle: store.footer_style || 'standard',
-    sidebarEnabled: store.sidebar_enabled || false,
-    sidebarPosition: store.sidebar_position || 'left',
-    productGridColumns: store.product_grid_columns || 3,
-    productCardStyle: store.product_card_style || 'standard',
-    navigationStyle: store.navigation_style || 'horizontal',
-    metaTitle: store.meta_title || '',
-    metaDescription: store.meta_description || '',
-    metaKeywords: store.meta_keywords || '',
-    ogTitle: store.og_title || '',
-    ogDescription: store.og_description || '',
-    ogImageUrl: store.og_image || '',
-    addressLine1: store.address_line1 || '',
-    addressLine2: store.address_line2 || '',
-    city: store.city || '',
-    stateProvince: store.state_province || '',
-    postalCode: store.postal_code || '',
-    country: store.country || '',
-    latitude: store.latitude || null,
-    longitude: store.longitude || null,
-    timezone: store.timezone || 'Africa/Ouagadougou',
-    openingHours: store.opening_hours || null,
-    legalPages: store.legal_pages || null,
-    marketingContent: store.marketing_content || null,
-    googleAnalyticsId: store.google_analytics_id || '',
-    googleAnalyticsEnabled: store.google_analytics_enabled || false,
-    facebookPixelId: store.facebook_pixel_id || '',
-    facebookPixelEnabled: store.facebook_pixel_enabled || false,
-    googleTagManagerId: store.google_tag_manager_id || '',
-    googleTagManagerEnabled: store.google_tag_manager_enabled || false,
-    tiktokPixelId: store.tiktok_pixel_id || '',
-    tiktokPixelEnabled: store.tiktok_pixel_enabled || false,
-    customTrackingScripts: store.custom_tracking_scripts || '',
-    customScriptsEnabled: store.custom_scripts_enabled || false,
-  };
-
-  const draft = getStoreAppearanceDraft(store);
-  if (!draft) return base;
-
-  const form = draftRecordToAppearanceForm(draft);
-  return {
-    ...base,
-    logoUrl: form.logoUrl ?? base.logoUrl,
-    bannerUrl: form.bannerUrl ?? base.bannerUrl,
-    faviconUrl: form.faviconUrl ?? base.faviconUrl,
-    appleTouchIconUrl: form.appleTouchIconUrl ?? base.appleTouchIconUrl,
-    watermarkUrl: form.watermarkUrl ?? base.watermarkUrl,
-    placeholderImageUrl: form.placeholderImageUrl ?? base.placeholderImageUrl,
-    primaryColor: form.primaryColor ?? base.primaryColor,
-    secondaryColor: form.secondaryColor ?? base.secondaryColor,
-    accentColor: form.accentColor ?? base.accentColor,
-    backgroundColor: form.backgroundColor ?? base.backgroundColor,
-    textColor: form.textColor ?? base.textColor,
-    textSecondaryColor: form.textSecondaryColor ?? base.textSecondaryColor,
-    buttonPrimaryColor: form.buttonPrimaryColor ?? base.buttonPrimaryColor,
-    buttonPrimaryText: form.buttonPrimaryText ?? base.buttonPrimaryText,
-    buttonSecondaryColor: form.buttonSecondaryColor ?? base.buttonSecondaryColor,
-    buttonSecondaryText: form.buttonSecondaryText ?? base.buttonSecondaryText,
-    linkColor: form.linkColor ?? base.linkColor,
-    linkHoverColor: form.linkHoverColor ?? base.linkHoverColor,
-    borderRadius: form.borderRadius ?? base.borderRadius,
-    shadowIntensity: form.shadowIntensity ?? base.shadowIntensity,
-    headingFont: form.headingFont ?? base.headingFont,
-    bodyFont: form.bodyFont ?? base.bodyFont,
-    fontSizeBase: form.fontSizeBase ?? base.fontSizeBase,
-    headingSizeH1: form.headingSizeH1 ?? base.headingSizeH1,
-    headingSizeH2: form.headingSizeH2 ?? base.headingSizeH2,
-    headingSizeH3: form.headingSizeH3 ?? base.headingSizeH3,
-    lineHeight: form.lineHeight ?? base.lineHeight,
-    letterSpacing: form.letterSpacing ?? base.letterSpacing,
-    headerStyle: form.headerStyle ?? base.headerStyle,
-    footerStyle: form.footerStyle ?? base.footerStyle,
-    sidebarEnabled: form.sidebarEnabled ?? base.sidebarEnabled,
-    sidebarPosition: form.sidebarPosition ?? base.sidebarPosition,
-    productGridColumns: form.productGridColumns ?? base.productGridColumns,
-    productCardStyle: form.productCardStyle ?? base.productCardStyle,
-    navigationStyle: form.navigationStyle ?? base.navigationStyle,
-  };
-}
+import {
+  createStoreFormSetters,
+  FIELD_MAPPINGS,
+  storeFormActions,
+  storeFormReducer,
+} from '@/hooks/store-form-reducer';
 
 export function useStoreFormState(store: ExtendedStore) {
   const { t } = useTranslation();
-  // --- All form fields as individual useState (for granular re-renders) ---
-  const [name, setName] = useState(store.name);
-  const [description, setDescription] = useState(store.description || '');
-  const [logoUrl, setLogoUrl] = useState(store.logo_url || '');
-  const [bannerUrl, setBannerUrl] = useState(store.banner_url || '');
-  const [faviconUrl, setFaviconUrl] = useState(store.favicon_url || '');
-  const [appleTouchIconUrl, setAppleTouchIconUrl] = useState(store.apple_touch_icon_url || '');
-  const [watermarkUrl, setWatermarkUrl] = useState(store.watermark_url || '');
-  const [placeholderImageUrl, setPlaceholderImageUrl] = useState(store.placeholder_image_url || '');
-  const [about, setAbout] = useState(store.about || '');
-  const [contactEmail, setContactEmail] = useState(store.contact_email || '');
-  const [contactPhone, setContactPhone] = useState(store.contact_phone || '');
-  const [facebookUrl, setFacebookUrl] = useState(store.facebook_url || '');
-  const [instagramUrl, setInstagramUrl] = useState(store.instagram_url || '');
-  const [twitterUrl, setTwitterUrl] = useState(store.twitter_url || '');
-  const [linkedinUrl, setLinkedinUrl] = useState(store.linkedin_url || '');
-  const [youtubeUrl, setYoutubeUrl] = useState(store.youtube_url || '');
-  const [tiktokUrl, setTiktokUrl] = useState(store.tiktok_url || '');
-  const [pinterestUrl, setPinterestUrl] = useState(store.pinterest_url || '');
-  const [snapchatUrl, setSnapchatUrl] = useState(store.snapchat_url || '');
-  const [discordUrl, setDiscordUrl] = useState(store.discord_url || '');
-  const [twitchUrl, setTwitchUrl] = useState(store.twitch_url || '');
-  const [supportEmail, setSupportEmail] = useState(store.support_email || '');
-  const [salesEmail, setSalesEmail] = useState(store.sales_email || '');
-  const [pressEmail, setPressEmail] = useState(store.press_email || '');
-  const [partnershipEmail, setPartnershipEmail] = useState(store.partnership_email || '');
-  const [supportPhone, setSupportPhone] = useState(store.support_phone || '');
-  const [salesPhone, setSalesPhone] = useState(store.sales_phone || '');
-  const [whatsappNumber, setWhatsappNumber] = useState(store.whatsapp_number || '');
-  const [telegramUsername, setTelegramUsername] = useState(store.telegram_username || '');
-  const [infoMessage, setInfoMessage] = useState(store.info_message || '');
-  const [infoMessageColor, setInfoMessageColor] = useState(store.info_message_color || '#3b82f6');
-  const [infoMessageFont, setInfoMessageFont] = useState(store.info_message_font || 'Inter');
-  const [primaryColor, setPrimaryColor] = useState(store.primary_color || '#3b82f6');
-  const [secondaryColor, setSecondaryColor] = useState(store.secondary_color || '#8b5cf6');
-  const [accentColor, setAccentColor] = useState(store.accent_color || '#f59e0b');
-  const [backgroundColor, setBackgroundColor] = useState(store.background_color || '#ffffff');
-  const [textColor, setTextColor] = useState(store.text_color || '#1f2937');
-  const [textSecondaryColor, setTextSecondaryColor] = useState(
-    store.text_secondary_color || '#6b7280'
-  );
-  const [buttonPrimaryColor, setButtonPrimaryColor] = useState(
-    store.button_primary_color || '#3b82f6'
-  );
-  const [buttonPrimaryText, setButtonPrimaryText] = useState(
-    store.button_primary_text || '#ffffff'
-  );
-  const [buttonSecondaryColor, setButtonSecondaryColor] = useState(
-    store.button_secondary_color || '#e5e7eb'
-  );
-  const [buttonSecondaryText, setButtonSecondaryText] = useState(
-    store.button_secondary_text || '#1f2937'
-  );
-  const [linkColor, setLinkColor] = useState(store.link_color || '#3b82f6');
-  const [linkHoverColor, setLinkHoverColor] = useState(store.link_hover_color || '#2563eb');
-  const [borderRadius, setBorderRadius] = useState<'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full'>(
-    store.border_radius || 'md'
-  );
-  const [shadowIntensity, setShadowIntensity] = useState<'none' | 'sm' | 'md' | 'lg' | 'xl'>(
-    store.shadow_intensity || 'md'
-  );
-  const [headingFont, setHeadingFont] = useState(store.heading_font || 'Inter');
-  const [bodyFont, setBodyFont] = useState(store.body_font || 'Inter');
-  const [fontSizeBase, setFontSizeBase] = useState(store.font_size_base || '16px');
-  const [headingSizeH1, setHeadingSizeH1] = useState(store.heading_size_h1 || '2.5rem');
-  const [headingSizeH2, setHeadingSizeH2] = useState(store.heading_size_h2 || '2rem');
-  const [headingSizeH3, setHeadingSizeH3] = useState(store.heading_size_h3 || '1.5rem');
-  const [lineHeight, setLineHeight] = useState(store.line_height || '1.6');
-  const [letterSpacing, setLetterSpacing] = useState(store.letter_spacing || 'normal');
-  const [headerStyle, setHeaderStyle] = useState<'minimal' | 'standard' | 'extended'>(
-    store.header_style || 'standard'
-  );
-  const [footerStyle, setFooterStyle] = useState<'minimal' | 'standard' | 'extended'>(
-    store.footer_style || 'standard'
-  );
-  const [sidebarEnabled, setSidebarEnabled] = useState(store.sidebar_enabled || false);
-  const [sidebarPosition, setSidebarPosition] = useState<'left' | 'right'>(
-    store.sidebar_position || 'left'
-  );
-  const [productGridColumns, setProductGridColumns] = useState(store.product_grid_columns || 3);
-  const [productCardStyle, setProductCardStyle] = useState<'minimal' | 'standard' | 'detailed'>(
-    store.product_card_style || 'standard'
-  );
-  const [navigationStyle, setNavigationStyle] = useState<'horizontal' | 'vertical' | 'mega'>(
-    store.navigation_style || 'horizontal'
-  );
-  const [metaTitle, setMetaTitle] = useState(store.meta_title || '');
-  const [metaDescription, setMetaDescription] = useState(store.meta_description || '');
-  const [metaKeywords, setMetaKeywords] = useState(store.meta_keywords || '');
-  const [ogTitle, setOgTitle] = useState(store.og_title || '');
-  const [ogDescription, setOgDescription] = useState(store.og_description || '');
-  const [ogImageUrl, setOgImageUrl] = useState(store.og_image || '');
-  const [addressLine1, setAddressLine1] = useState(store.address_line1 || '');
-  const [addressLine2, setAddressLine2] = useState(store.address_line2 || '');
-  const [city, setCity] = useState(store.city || '');
-  const [stateProvince, setStateProvince] = useState(store.state_province || '');
-  const [postalCode, setPostalCode] = useState(store.postal_code || '');
-  const [country, setCountry] = useState(store.country || '');
-  const [latitude, setLatitude] = useState<number | null>(store.latitude || null);
-  const [longitude, setLongitude] = useState<number | null>(store.longitude || null);
-  const [timezone, setTimezone] = useState(store.timezone || 'Africa/Ouagadougou');
-  const [openingHours, setOpeningHours] = useState<StoreOpeningHours | null>(
-    store.opening_hours || null
-  );
-  const [legalPages, setLegalPages] = useState<StoreLegalPages | null>(
-    store.legal_pages || {
-      terms_of_service: '',
-      privacy_policy: '',
-      return_policy: '',
-      shipping_policy: '',
-      refund_policy: '',
-      cookie_policy: '',
-      disclaimer: '',
-      faq_content: '',
-    }
-  );
-  const [marketingContent, setMarketingContent] = useState<StoreMarketingContent | null>(
-    store.marketing_content || null
-  );
-  const [googleAnalyticsId, setGoogleAnalyticsId] = useState(store.google_analytics_id || '');
-  const [googleAnalyticsEnabled, setGoogleAnalyticsEnabled] = useState(
-    store.google_analytics_enabled || false
-  );
-  const [facebookPixelId, setFacebookPixelId] = useState(store.facebook_pixel_id || '');
-  const [facebookPixelEnabled, setFacebookPixelEnabled] = useState(
-    store.facebook_pixel_enabled || false
-  );
-  const [googleTagManagerId, setGoogleTagManagerId] = useState(store.google_tag_manager_id || '');
-  const [googleTagManagerEnabled, setGoogleTagManagerEnabled] = useState(
-    store.google_tag_manager_enabled || false
-  );
-  const [tiktokPixelId, setTiktokPixelId] = useState(store.tiktok_pixel_id || '');
-  const [tiktokPixelEnabled, setTiktokPixelEnabled] = useState(store.tiktok_pixel_enabled || false);
-  const [customTrackingScripts, setCustomTrackingScripts] = useState(
-    store.custom_tracking_scripts || ''
-  );
-  const [customScriptsEnabled, setCustomScriptsEnabled] = useState(
-    store.custom_scripts_enabled || false
-  );
+  const [formState, dispatch] = useReducer(storeFormReducer, store, initStoreFormState);
 
-  // --- UI state ---
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
@@ -321,43 +50,10 @@ export function useStoreFormState(store: ExtendedStore) {
 
   const lastPublishedAtRef = useRef(store.appearance_published_at ?? null);
 
+  const setters = useMemo(() => createStoreFormSetters(dispatch), [dispatch]);
+
   const syncAppearanceFieldsFromStore = useCallback((source: ExtendedStore) => {
-    const initial = initState(source);
-    setLogoUrl(initial.logoUrl);
-    setBannerUrl(initial.bannerUrl);
-    setFaviconUrl(initial.faviconUrl);
-    setAppleTouchIconUrl(initial.appleTouchIconUrl);
-    setWatermarkUrl(initial.watermarkUrl);
-    setPlaceholderImageUrl(initial.placeholderImageUrl);
-    setPrimaryColor(initial.primaryColor);
-    setSecondaryColor(initial.secondaryColor);
-    setAccentColor(initial.accentColor);
-    setBackgroundColor(initial.backgroundColor);
-    setTextColor(initial.textColor);
-    setTextSecondaryColor(initial.textSecondaryColor);
-    setButtonPrimaryColor(initial.buttonPrimaryColor);
-    setButtonPrimaryText(initial.buttonPrimaryText);
-    setButtonSecondaryColor(initial.buttonSecondaryColor);
-    setButtonSecondaryText(initial.buttonSecondaryText);
-    setLinkColor(initial.linkColor);
-    setLinkHoverColor(initial.linkHoverColor);
-    setBorderRadius(initial.borderRadius);
-    setShadowIntensity(initial.shadowIntensity);
-    setHeadingFont(initial.headingFont);
-    setBodyFont(initial.bodyFont);
-    setFontSizeBase(initial.fontSizeBase);
-    setHeadingSizeH1(initial.headingSizeH1);
-    setHeadingSizeH2(initial.headingSizeH2);
-    setHeadingSizeH3(initial.headingSizeH3);
-    setLineHeight(initial.lineHeight);
-    setLetterSpacing(initial.letterSpacing);
-    setHeaderStyle(initial.headerStyle);
-    setFooterStyle(initial.footerStyle);
-    setSidebarEnabled(initial.sidebarEnabled);
-    setSidebarPosition(initial.sidebarPosition);
-    setProductGridColumns(initial.productGridColumns);
-    setProductCardStyle(initial.productCardStyle);
-    setNavigationStyle(initial.navigationStyle);
+    dispatch(storeFormActions.initFromStore(source));
     setHasRemoteAppearanceDraft(initialHasRemoteAppearanceDraft(source));
     setPublishedAppearanceBaseline(initialPublishedAppearanceBaseline(source));
   }, []);
@@ -376,232 +72,103 @@ export function useStoreFormState(store: ExtendedStore) {
 
   const storeUrl = useMemo(() => getStoreUrl(), [getStoreUrl]);
 
-  // --- Collected form state ---
-  const formState: StoreFormState = {
-    name,
-    description,
-    logoUrl,
-    bannerUrl,
-    faviconUrl,
-    appleTouchIconUrl,
-    watermarkUrl,
-    placeholderImageUrl,
-    about,
-    contactEmail,
-    contactPhone,
-    facebookUrl,
-    instagramUrl,
-    twitterUrl,
-    linkedinUrl,
-    youtubeUrl,
-    tiktokUrl,
-    pinterestUrl,
-    snapchatUrl,
-    discordUrl,
-    twitchUrl,
-    supportEmail,
-    salesEmail,
-    pressEmail,
-    partnershipEmail,
-    supportPhone,
-    salesPhone,
-    whatsappNumber,
-    telegramUsername,
-    infoMessage,
-    infoMessageColor,
-    infoMessageFont,
-    primaryColor,
-    secondaryColor,
-    accentColor,
-    backgroundColor,
-    textColor,
-    textSecondaryColor,
-    buttonPrimaryColor,
-    buttonPrimaryText,
-    buttonSecondaryColor,
-    buttonSecondaryText,
-    linkColor,
-    linkHoverColor,
-    borderRadius,
-    shadowIntensity,
-    headingFont,
-    bodyFont,
-    fontSizeBase,
-    headingSizeH1,
-    headingSizeH2,
-    headingSizeH3,
-    lineHeight,
-    letterSpacing,
-    headerStyle,
-    footerStyle,
-    sidebarEnabled,
-    sidebarPosition,
-    productGridColumns,
-    productCardStyle,
-    navigationStyle,
-    metaTitle,
-    metaDescription,
-    metaKeywords,
-    ogTitle,
-    ogDescription,
-    ogImageUrl,
-    addressLine1,
-    addressLine2,
-    city,
-    stateProvince,
-    postalCode,
-    country,
-    latitude,
-    longitude,
-    timezone,
-    openingHours,
-    legalPages,
-    marketingContent,
-    googleAnalyticsId,
-    googleAnalyticsEnabled,
-    facebookPixelId,
-    facebookPixelEnabled,
-    googleTagManagerId,
-    googleTagManagerEnabled,
-    tiktokPixelId,
-    tiktokPixelEnabled,
-    customTrackingScripts,
-    customScriptsEnabled,
-  };
-
-  const setters = {
-    setName,
-    setDescription,
-    setLogoUrl,
-    setBannerUrl,
-    setFaviconUrl,
-    setAppleTouchIconUrl,
-    setWatermarkUrl,
-    setPlaceholderImageUrl,
-    setAbout,
-    setContactEmail,
-    setContactPhone,
-    setFacebookUrl,
-    setInstagramUrl,
-    setTwitterUrl,
-    setLinkedinUrl,
-    setYoutubeUrl,
-    setTiktokUrl,
-    setPinterestUrl,
-    setSnapchatUrl,
-    setDiscordUrl,
-    setTwitchUrl,
-    setSupportEmail,
-    setSalesEmail,
-    setPressEmail,
-    setPartnershipEmail,
-    setSupportPhone,
-    setSalesPhone,
-    setWhatsappNumber,
-    setTelegramUsername,
-    setInfoMessage,
-    setInfoMessageColor,
-    setInfoMessageFont,
-    setPrimaryColor,
-    setSecondaryColor,
-    setAccentColor,
-    setBackgroundColor,
-    setTextColor,
-    setTextSecondaryColor,
-    setButtonPrimaryColor,
-    setButtonPrimaryText,
-    setButtonSecondaryColor,
-    setButtonSecondaryText,
-    setLinkColor,
-    setLinkHoverColor,
-    setBorderRadius,
-    setShadowIntensity,
-    setHeadingFont,
-    setBodyFont,
-    setFontSizeBase,
-    setHeadingSizeH1,
-    setHeadingSizeH2,
-    setHeadingSizeH3,
-    setLineHeight,
-    setLetterSpacing,
-    setHeaderStyle,
-    setFooterStyle,
-    setSidebarEnabled,
-    setSidebarPosition,
-    setProductGridColumns,
-    setProductCardStyle,
-    setNavigationStyle,
-    setMetaTitle,
-    setMetaDescription,
-    setMetaKeywords,
-    setOgTitle,
-    setOgDescription,
-    setOgImageUrl,
-    setAddressLine1,
-    setAddressLine2,
-    setCity,
-    setStateProvince,
-    setPostalCode,
-    setCountry,
-    setLatitude,
-    setLongitude,
-    setTimezone,
-    setOpeningHours,
-    setLegalPages,
-    setMarketingContent,
-    setGoogleAnalyticsId,
-    setGoogleAnalyticsEnabled,
-    setFacebookPixelId,
-    setFacebookPixelEnabled,
-    setGoogleTagManagerId,
-    setGoogleTagManagerEnabled,
-    setTiktokPixelId,
-    setTiktokPixelEnabled,
-    setCustomTrackingScripts,
-    setCustomScriptsEnabled,
-  };
-
-  // --- Apply a theme config (from template or import) ---
   const applyConfig = useCallback((config: StoreThemeConfig) => {
-    if (config.primary_color) setPrimaryColor(config.primary_color);
-    if (config.secondary_color) setSecondaryColor(config.secondary_color);
-    if (config.accent_color) setAccentColor(config.accent_color);
-    if (config.background_color) setBackgroundColor(config.background_color);
-    if (config.text_color) setTextColor(config.text_color);
-    if (config.text_secondary_color) setTextSecondaryColor(config.text_secondary_color);
-    if (config.button_primary_color) setButtonPrimaryColor(config.button_primary_color);
-    if (config.button_primary_text) setButtonPrimaryText(config.button_primary_text);
-    if (config.button_secondary_color) setButtonSecondaryColor(config.button_secondary_color);
-    if (config.button_secondary_text) setButtonSecondaryText(config.button_secondary_text);
-    if (config.link_color) setLinkColor(config.link_color);
-    if (config.link_hover_color) setLinkHoverColor(config.link_hover_color);
-    if (config.border_radius)
-      setBorderRadius(config.border_radius as 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full');
-    if (config.shadow_intensity)
-      setShadowIntensity(config.shadow_intensity as 'none' | 'sm' | 'md' | 'lg' | 'xl');
-    if (config.heading_font) setHeadingFont(config.heading_font);
-    if (config.body_font) setBodyFont(config.body_font);
-    if (config.font_size_base) setFontSizeBase(config.font_size_base);
-    if (config.heading_size_h1) setHeadingSizeH1(config.heading_size_h1);
-    if (config.heading_size_h2) setHeadingSizeH2(config.heading_size_h2);
-    if (config.heading_size_h3) setHeadingSizeH3(config.heading_size_h3);
-    if (config.line_height) setLineHeight(config.line_height);
-    if (config.letter_spacing) setLetterSpacing(config.letter_spacing);
-    if (config.header_style) setHeaderStyle(config.header_style);
-    if (config.footer_style) setFooterStyle(config.footer_style);
-    if (config.product_grid_columns) setProductGridColumns(config.product_grid_columns);
-    if (config.product_card_style) setProductCardStyle(config.product_card_style);
-    if (config.navigation_style) setNavigationStyle(config.navigation_style);
-    if (config.meta_title) setMetaTitle(config.meta_title);
-    if (config.meta_description) setMetaDescription(config.meta_description);
-    if (config.meta_keywords) setMetaKeywords(config.meta_keywords);
-    if (config.og_title) setOgTitle(config.og_title);
-    if (config.og_description) setOgDescription(config.og_description);
-    if (config.og_image) setOgImageUrl(config.og_image);
+    dispatch(storeFormActions.setTheme(config));
   }, []);
 
-  // --- Build the update payload (scoped to active tab to avoid PATCH 400) ---
   const buildUpdatePayload = useCallback((): Partial<Store> & Record<string, unknown> => {
+    const {
+      name,
+      description,
+      about,
+      infoMessage,
+      infoMessageColor,
+      infoMessageFont,
+      contactEmail,
+      contactPhone,
+      facebookUrl,
+      instagramUrl,
+      twitterUrl,
+      linkedinUrl,
+      supportEmail,
+      salesEmail,
+      pressEmail,
+      partnershipEmail,
+      supportPhone,
+      salesPhone,
+      whatsappNumber,
+      telegramUsername,
+      youtubeUrl,
+      tiktokUrl,
+      pinterestUrl,
+      snapchatUrl,
+      discordUrl,
+      twitchUrl,
+      logoUrl,
+      bannerUrl,
+      faviconUrl,
+      appleTouchIconUrl,
+      watermarkUrl,
+      placeholderImageUrl,
+      primaryColor,
+      secondaryColor,
+      accentColor,
+      backgroundColor,
+      textColor,
+      textSecondaryColor,
+      buttonPrimaryColor,
+      buttonPrimaryText,
+      buttonSecondaryColor,
+      buttonSecondaryText,
+      linkColor,
+      linkHoverColor,
+      borderRadius,
+      shadowIntensity,
+      headingFont,
+      bodyFont,
+      fontSizeBase,
+      headingSizeH1,
+      headingSizeH2,
+      headingSizeH3,
+      lineHeight,
+      letterSpacing,
+      headerStyle,
+      footerStyle,
+      sidebarEnabled,
+      sidebarPosition,
+      productGridColumns,
+      productCardStyle,
+      navigationStyle,
+      metaTitle,
+      metaDescription,
+      metaKeywords,
+      ogTitle,
+      ogDescription,
+      ogImageUrl,
+      addressLine1,
+      addressLine2,
+      city,
+      stateProvince,
+      postalCode,
+      country,
+      latitude,
+      longitude,
+      timezone,
+      openingHours,
+      legalPages,
+      marketingContent,
+      googleAnalyticsId,
+      googleAnalyticsEnabled,
+      facebookPixelId,
+      facebookPixelEnabled,
+      googleTagManagerId,
+      googleTagManagerEnabled,
+      tiktokPixelId,
+      tiktokPixelEnabled,
+      customTrackingScripts,
+      customScriptsEnabled,
+    } = formState;
+
     const settingsPayload = {
       name: name.trim(),
       description: description.trim() || null,
@@ -721,100 +288,8 @@ export function useStoreFormState(store: ExtendedStore) {
       default:
         return settingsPayload;
     }
-  }, [
-    currentTab,
-    name,
-    description,
-    about,
-    infoMessage,
-    infoMessageColor,
-    infoMessageFont,
-    contactEmail,
-    contactPhone,
-    facebookUrl,
-    instagramUrl,
-    twitterUrl,
-    linkedinUrl,
-    supportEmail,
-    salesEmail,
-    pressEmail,
-    partnershipEmail,
-    supportPhone,
-    salesPhone,
-    whatsappNumber,
-    telegramUsername,
-    youtubeUrl,
-    tiktokUrl,
-    pinterestUrl,
-    snapchatUrl,
-    discordUrl,
-    twitchUrl,
-    logoUrl,
-    bannerUrl,
-    faviconUrl,
-    appleTouchIconUrl,
-    watermarkUrl,
-    placeholderImageUrl,
-    primaryColor,
-    secondaryColor,
-    accentColor,
-    backgroundColor,
-    textColor,
-    textSecondaryColor,
-    buttonPrimaryColor,
-    buttonPrimaryText,
-    buttonSecondaryColor,
-    buttonSecondaryText,
-    linkColor,
-    linkHoverColor,
-    borderRadius,
-    shadowIntensity,
-    headingFont,
-    bodyFont,
-    fontSizeBase,
-    headingSizeH1,
-    headingSizeH2,
-    headingSizeH3,
-    lineHeight,
-    letterSpacing,
-    headerStyle,
-    footerStyle,
-    sidebarEnabled,
-    sidebarPosition,
-    productGridColumns,
-    productCardStyle,
-    navigationStyle,
-    metaTitle,
-    metaDescription,
-    metaKeywords,
-    ogTitle,
-    ogDescription,
-    ogImageUrl,
-    addressLine1,
-    addressLine2,
-    city,
-    stateProvince,
-    postalCode,
-    country,
-    latitude,
-    longitude,
-    timezone,
-    openingHours,
-    legalPages,
-    marketingContent,
-    googleAnalyticsId,
-    googleAnalyticsEnabled,
-    facebookPixelId,
-    facebookPixelEnabled,
-    googleTagManagerId,
-    googleTagManagerEnabled,
-    tiktokPixelId,
-    tiktokPixelEnabled,
-    customTrackingScripts,
-    customScriptsEnabled,
-  ]);
+  }, [currentTab, formState]);
 
-  // --- Validation ---
   const validateEmail = useCallback((email: string): string | null => {
     if (!email.trim()) return null;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -867,99 +342,23 @@ export function useStoreFormState(store: ExtendedStore) {
     [fieldTouched, validateEmail, validateUrl]
   );
 
-  // --- Submit ---
-  const buildAppearanceFormDraft = useCallback(
-    (): StoreAppearanceFormDraft => ({
-      logoUrl,
-      bannerUrl,
-      faviconUrl,
-      appleTouchIconUrl,
-      watermarkUrl,
-      placeholderImageUrl,
-      primaryColor,
-      secondaryColor,
-      accentColor,
-      backgroundColor,
-      textColor,
-      textSecondaryColor,
-      buttonPrimaryColor,
-      buttonPrimaryText,
-      buttonSecondaryColor,
-      buttonSecondaryText,
-      linkColor,
-      linkHoverColor,
-      borderRadius,
-      shadowIntensity,
-      headingFont,
-      bodyFont,
-      fontSizeBase,
-      headingSizeH1,
-      headingSizeH2,
-      headingSizeH3,
-      lineHeight,
-      letterSpacing,
-      headerStyle,
-      footerStyle,
-      sidebarEnabled,
-      sidebarPosition,
-      productGridColumns,
-      productCardStyle,
-      navigationStyle,
-    }),
-    [
-      logoUrl,
-      bannerUrl,
-      faviconUrl,
-      appleTouchIconUrl,
-      watermarkUrl,
-      placeholderImageUrl,
-      primaryColor,
-      secondaryColor,
-      accentColor,
-      backgroundColor,
-      textColor,
-      textSecondaryColor,
-      buttonPrimaryColor,
-      buttonPrimaryText,
-      buttonSecondaryColor,
-      buttonSecondaryText,
-      linkColor,
-      linkHoverColor,
-      borderRadius,
-      shadowIntensity,
-      headingFont,
-      bodyFont,
-      fontSizeBase,
-      headingSizeH1,
-      headingSizeH2,
-      headingSizeH3,
-      lineHeight,
-      letterSpacing,
-      headerStyle,
-      footerStyle,
-      sidebarEnabled,
-      sidebarPosition,
-      productGridColumns,
-      productCardStyle,
-      navigationStyle,
-    ]
-  );
+  const appearanceFormDraft = useMemo(() => appearanceFormFromState(formState), [formState]);
 
   const hasUnpublishedAppearanceDraft = useMemo(
     () =>
       computeHasUnpublishedAppearanceDraft({
         store,
-        form: buildAppearanceFormDraft(),
+        form: appearanceFormDraft,
         hasRemoteDraft: hasRemoteAppearanceDraft,
         publishedBaseline: publishedAppearanceBaseline,
       }),
-    [hasRemoteAppearanceDraft, store, publishedAppearanceBaseline, buildAppearanceFormDraft]
+    [hasRemoteAppearanceDraft, store, publishedAppearanceBaseline, appearanceFormDraft]
   );
 
   const handleSaveAppearanceDraft = useCallback(async () => {
     setIsSubmitting(true);
     try {
-      await saveStoreAppearanceDraft(store.id, buildAppearanceFormDraft());
+      await saveStoreAppearanceDraft(store.id, appearanceFormDraft);
       await refreshStores().catch(() => {});
       setHasRemoteAppearanceDraft(true);
       setLastSaved(new Date());
@@ -977,16 +376,16 @@ export function useStoreFormState(store: ExtendedStore) {
     } finally {
       setIsSubmitting(false);
     }
-  }, [store.id, buildAppearanceFormDraft, refreshStores, toast, t]);
+  }, [store.id, appearanceFormDraft, refreshStores, toast, t]);
 
   const handlePublishAppearance = useCallback(async () => {
     setIsSubmitting(true);
     try {
-      await saveStoreAppearanceDraft(store.id, buildAppearanceFormDraft());
+      await saveStoreAppearanceDraft(store.id, appearanceFormDraft);
       await publishStoreAppearance(store.id);
       await refreshStores().catch(() => {});
       setHasRemoteAppearanceDraft(false);
-      setPublishedAppearanceBaseline(buildAppearanceFormDraft());
+      setPublishedAppearanceBaseline(appearanceFormDraft);
       setLastSaved(new Date());
       toast({
         title: t('store.appearance.publishedTitle'),
@@ -1002,7 +401,7 @@ export function useStoreFormState(store: ExtendedStore) {
     } finally {
       setIsSubmitting(false);
     }
-  }, [store.id, buildAppearanceFormDraft, refreshStores, toast, t]);
+  }, [store.id, appearanceFormDraft, refreshStores, toast, t]);
 
   const handleAppearanceRestored = useCallback(async () => {
     await refreshStores().catch(() => {});
@@ -1023,14 +422,14 @@ export function useStoreFormState(store: ExtendedStore) {
       }
 
       const formData = {
-        name: name.trim(),
-        description: description.trim() || undefined,
-        contact_email: contactEmail.trim() || undefined,
-        contact_phone: contactPhone.trim() || undefined,
-        facebook_url: facebookUrl.trim() || undefined,
-        instagram_url: instagramUrl.trim() || undefined,
-        twitter_url: twitterUrl.trim() || undefined,
-        linkedin_url: linkedinUrl.trim() || undefined,
+        name: formState.name.trim(),
+        description: formState.description.trim() || undefined,
+        contact_email: formState.contactEmail.trim() || undefined,
+        contact_phone: formState.contactPhone.trim() || undefined,
+        facebook_url: formState.facebookUrl.trim() || undefined,
+        instagram_url: formState.instagramUrl.trim() || undefined,
+        twitter_url: formState.twitterUrl.trim() || undefined,
+        linkedin_url: formState.linkedinUrl.trim() || undefined,
       };
 
       const zodValidation = validateStoreUpdate(formData);
@@ -1068,14 +467,7 @@ export function useStoreFormState(store: ExtendedStore) {
     [
       currentTab,
       handleSaveAppearanceDraft,
-      name,
-      description,
-      contactEmail,
-      contactPhone,
-      facebookUrl,
-      instagramUrl,
-      twitterUrl,
-      linkedinUrl,
+      formState,
       buildUpdatePayload,
       updateStoreById,
       store.id,
@@ -1085,27 +477,30 @@ export function useStoreFormState(store: ExtendedStore) {
     ]
   );
 
-  // --- Cancel ---
   const resetForm = useCallback(() => {
-    const initial = initState(store);
-    setName(initial.name);
-    setDescription(initial.description);
-    setLogoUrl(initial.logoUrl);
-    setBannerUrl(initial.bannerUrl);
-    setFaviconUrl(initial.faviconUrl);
-    setAppleTouchIconUrl(initial.appleTouchIconUrl);
-    setWatermarkUrl(initial.watermarkUrl);
-    setPlaceholderImageUrl(initial.placeholderImageUrl);
-    setAbout(initial.about);
-    setContactEmail(initial.contactEmail);
-    setContactPhone(initial.contactPhone);
-    setFacebookUrl(initial.facebookUrl);
-    setInstagramUrl(initial.instagramUrl);
-    setTwitterUrl(initial.twitterUrl);
-    setLinkedinUrl(initial.linkedinUrl);
-    setInfoMessage(initial.infoMessage);
-    setInfoMessageColor(initial.infoMessageColor);
-    setInfoMessageFont(initial.infoMessageFont);
+    const initial = initStoreFormState(store);
+    dispatch(
+      storeFormActions.setFields({
+        name: initial.name,
+        description: initial.description,
+        logoUrl: initial.logoUrl,
+        bannerUrl: initial.bannerUrl,
+        faviconUrl: initial.faviconUrl,
+        appleTouchIconUrl: initial.appleTouchIconUrl,
+        watermarkUrl: initial.watermarkUrl,
+        placeholderImageUrl: initial.placeholderImageUrl,
+        about: initial.about,
+        contactEmail: initial.contactEmail,
+        contactPhone: initial.contactPhone,
+        facebookUrl: initial.facebookUrl,
+        instagramUrl: initial.instagramUrl,
+        twitterUrl: initial.twitterUrl,
+        linkedinUrl: initial.linkedinUrl,
+        infoMessage: initial.infoMessage,
+        infoMessageColor: initial.infoMessageColor,
+        infoMessageFont: initial.infoMessageFont,
+      })
+    );
     setIsEditing(false);
     setFieldTouched({});
     setShowCancelConfirm(false);
@@ -1113,17 +508,17 @@ export function useStoreFormState(store: ExtendedStore) {
 
   const handleCancel = useCallback(() => {
     const hasChanges =
-      name !== store.name ||
-      description !== (store.description || '') ||
-      contactEmail !== (store.contact_email || '') ||
-      logoUrl !== (store.logo_url || '');
+      formState.name !== store.name ||
+      formState.description !== (store.description || '') ||
+      formState.contactEmail !== (store.contact_email || '') ||
+      formState.logoUrl !== (store.logo_url || '');
 
     if (hasChanges && isEditing) {
       setShowCancelConfirm(true);
       return;
     }
     resetForm();
-  }, [name, store, description, contactEmail, logoUrl, isEditing, resetForm]);
+  }, [formState, store, isEditing, resetForm]);
 
   const handleCopyUrl = useCallback(() => {
     navigator.clipboard.writeText(storeUrl);
@@ -1142,83 +537,41 @@ export function useStoreFormState(store: ExtendedStore) {
     [updateStoreById, store.id]
   );
 
-  // --- Color/Typography/Layout change handlers ---
-  const handleColorChange = useCallback((field: string, value: string) => {
-    const map: Record<string, (v: string) => void> = {
-      primary_color: setPrimaryColor,
-      secondary_color: setSecondaryColor,
-      accent_color: setAccentColor,
-      background_color: setBackgroundColor,
-      text_color: setTextColor,
-      text_secondary_color: setTextSecondaryColor,
-      button_primary_color: setButtonPrimaryColor,
-      button_primary_text: setButtonPrimaryText,
-      button_secondary_color: setButtonSecondaryColor,
-      button_secondary_text: setButtonSecondaryText,
-      link_color: setLinkColor,
-      link_hover_color: setLinkHoverColor,
-      border_radius: v => setBorderRadius(v as 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full'),
-      shadow_intensity: v => setShadowIntensity(v as 'none' | 'sm' | 'md' | 'lg' | 'xl'),
-    };
-    map[field]?.(value);
+  const dispatchFieldChange = useCallback((field: string, value: string | number | boolean) => {
+    const mapped = FIELD_MAPPINGS[field];
+    if (mapped) {
+      dispatch(storeFormActions.setField(mapped, value));
+    }
   }, []);
 
-  const handleTypographyChange = useCallback((field: string, value: string) => {
-    const map: Record<string, (v: string) => void> = {
-      heading_font: setHeadingFont,
-      body_font: setBodyFont,
-      font_size_base: setFontSizeBase,
-      heading_size_h1: setHeadingSizeH1,
-      heading_size_h2: setHeadingSizeH2,
-      heading_size_h3: setHeadingSizeH3,
-      line_height: setLineHeight,
-      letter_spacing: setLetterSpacing,
-    };
-    map[field]?.(value);
-  }, []);
+  const handleColorChange = useCallback(
+    (field: string, value: string) => dispatchFieldChange(field, value),
+    [dispatchFieldChange]
+  );
 
-  const handleLayoutChange = useCallback((field: string, value: string | number | boolean) => {
-    const map: Record<string, (v: string | number | boolean) => void> = {
-      header_style: v => setHeaderStyle(v as 'minimal' | 'standard' | 'extended'),
-      footer_style: v => setFooterStyle(v as 'minimal' | 'standard' | 'extended'),
-      sidebar_enabled: v => setSidebarEnabled(Boolean(v)),
-      sidebar_position: v => setSidebarPosition(v as 'left' | 'right'),
-      product_grid_columns: v => setProductGridColumns(Number(v)),
-      product_card_style: v => setProductCardStyle(v as 'minimal' | 'standard' | 'detailed'),
-      navigation_style: v => setNavigationStyle(v as 'horizontal' | 'vertical' | 'mega'),
-    };
-    map[field]?.(value);
-  }, []);
+  const handleTypographyChange = useCallback(
+    (field: string, value: string) => dispatchFieldChange(field, value),
+    [dispatchFieldChange]
+  );
 
-  const handleSeoChange = useCallback((field: string, value: string) => {
-    const map: Record<string, (v: string) => void> = {
-      meta_title: setMetaTitle,
-      meta_description: setMetaDescription,
-      meta_keywords: setMetaKeywords,
-      og_title: setOgTitle,
-      og_description: setOgDescription,
-      og_image_url: setOgImageUrl,
-    };
-    map[field]?.(value);
-  }, []);
+  const handleLayoutChange = useCallback(
+    (field: string, value: string | number | boolean) => dispatchFieldChange(field, value),
+    [dispatchFieldChange]
+  );
 
-  const handleAddressChange = useCallback((field: string, value: string) => {
-    const map: Record<string, (v: string) => void> = {
-      address_line1: setAddressLine1,
-      address_line2: setAddressLine2,
-      city: setCity,
-      state_province: setStateProvince,
-      postal_code: setPostalCode,
-      country: setCountry,
-    };
-    map[field]?.(value);
-  }, []);
+  const handleSeoChange = useCallback(
+    (field: string, value: string) => dispatchFieldChange(field, value),
+    [dispatchFieldChange]
+  );
+
+  const handleAddressChange = useCallback(
+    (field: string, value: string) => dispatchFieldChange(field, value),
+    [dispatchFieldChange]
+  );
 
   return {
-    // Form state
     formState,
     setters,
-    // UI state
     isEditing,
     setIsEditing,
     isSubmitting,
@@ -1229,11 +582,9 @@ export function useStoreFormState(store: ExtendedStore) {
     setCurrentTab,
     fieldTouched,
     hasUnpublishedAppearanceDraft,
-    // Store utilities
     storeUrl,
     checkSlugAvailability,
     toast,
-    // Handlers
     handleSubmit,
     handleSaveAppearanceDraft,
     handlePublishAppearance,

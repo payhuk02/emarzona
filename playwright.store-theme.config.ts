@@ -18,6 +18,7 @@ export default defineConfig({
     '**/store-create-theme.spec.ts',
     '**/store-express-create.spec.ts',
     '**/store-publish-banner.spec.ts',
+    '**/store-appearance-revisions.spec.ts',
   ],
   fullyParallel: false,
   forbidOnly: !!process.env.CI,

@@ -188,9 +188,9 @@ export async function assertStorePrimaryColorInDb(
   expectedHex: string
 ): Promise<void> {
   const { data, error } = await admin
-    .from('stores')
+    .from('store_appearance')
     .select('primary_color, appearance_draft')
-    .eq('id', storeId)
+    .eq('store_id', storeId)
     .maybeSingle();
 
   expect(error).toBeNull();
