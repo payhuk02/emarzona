@@ -30,7 +30,9 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   workers: 1,
-  reporter: process.env.CI ? [['html'], ['github']] : 'html',
+  // Fail fast so a hung marketplace search cannot burn the full 60m job budget.
+  maxFailures: process.env.CI ? 5 : 0,
+  reporter: process.env.CI ? [['list'], ['html'], ['github']] : 'html',
   timeout: 180_000,
   use: {
     baseURL: 'http://localhost:8080',

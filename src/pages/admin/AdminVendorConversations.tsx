@@ -115,7 +115,7 @@ interface VendorMessage {
 }
 
 const VENDOR_CONVERSATION_FIELDS =
-  'id, store_id, product_id, customer_user_id, store_user_id, subject, status, last_message_at, admin_intervention, admin_user_id, created_at, updated_at, store:stores (id, name, slug, logo_url), product:products (id, name, slug, image_url)';
+  'id, store_id, product_id, customer_user_id, store_user_id, subject, status, last_message_at, admin_intervention, admin_user_id, created_at, updated_at, store:stores (id, name, slug), product:products (id, name, slug, image_url)';
 const VENDOR_MESSAGE_FIELDS =
   'id, conversation_id, sender_id, sender_type, content, message_type, created_at';
 

@@ -49,7 +49,7 @@ export function TypeSpecificSection({
         setLoading(true);
         setError(null);
 
-        let  query= supabase
+        let query = supabase
           .from('products')
           .select(
             `
@@ -58,7 +58,6 @@ export function TypeSpecificSection({
               id,
               name,
               slug,
-              logo_url,
               created_at
             ),
             product_affiliate_settings!left (
@@ -141,7 +140,7 @@ export function TypeSpecificSection({
   }
 
   // Couleurs et styles selon le type
-  const  typeStyles: Record<ProductType, { bg: string; iconColor: string; buttonGradient: string }> =
+  const typeStyles: Record<ProductType, { bg: string; iconColor: string; buttonGradient: string }> =
     {
       digital: {
         bg: 'from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20',
@@ -209,7 +208,11 @@ export function TypeSpecificSection({
                   showActions={true}
                   onAction={(action, prod) => {
                     if (action === 'view') {
-                      window.location.href = generateProductUrl(product.stores?.slug || '', product.slug, product.stores?.subdomain);
+                      window.location.href = generateProductUrl(
+                        product.stores?.slug || '',
+                        product.slug,
+                        product.stores?.subdomain
+                      );
                     } else if (action === 'buy') {
                       const checkoutParams = new URLSearchParams({
                         productId: prod.id,
@@ -243,9 +246,3 @@ export function TypeSpecificSection({
     </section>
   );
 }
-
-
-
-
-
-

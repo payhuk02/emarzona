@@ -276,7 +276,8 @@ export async function fetchMarketplaceProducts({
   ].join(',');
 
   // Construire la requête avec les jointures nécessaires selon le type
-  let selectQuery = `${baseColumns},stores!inner(id,name,slug,logo_url,created_at),product_affiliate_settings!left(commission_rate,affiliate_enabled)`;
+  // logo_url lives on store_appearance / stores_public (dropped from stores in Sprint 3)
+  let selectQuery = `${baseColumns},stores!inner(id,name,slug,created_at),product_affiliate_settings!left(commission_rate,affiliate_enabled)`;
 
   // Ajouter les jointures selon le type de produit et les filtres
   if (filters.productType === 'digital' && filters.digitalSubType) {

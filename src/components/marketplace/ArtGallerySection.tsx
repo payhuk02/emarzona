@@ -39,7 +39,6 @@ export function ArtGallerySection() {
               id,
               name,
               slug,
-              logo_url,
               created_at
             ),
             product_affiliate_settings!left (
@@ -148,7 +147,11 @@ export function ArtGallerySection() {
                   variant="marketplace"
                   onAction={(action, product) => {
                     if (action === 'view') {
-                      window.location.href = generateProductUrl(artwork.stores?.slug || '', artwork.slug, artwork.stores?.subdomain);
+                      window.location.href = generateProductUrl(
+                        artwork.stores?.slug || '',
+                        artwork.slug,
+                        artwork.stores?.subdomain
+                      );
                     } else if (action === 'buy') {
                       // Logique d'achat - rediriger vers checkout
                       const checkoutParams = new URLSearchParams({
@@ -183,9 +186,3 @@ export function ArtGallerySection() {
     </section>
   );
 }
-
-
-
-
-
-

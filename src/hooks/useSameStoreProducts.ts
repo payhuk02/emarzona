@@ -23,7 +23,7 @@ export type SameStoreProduct = {
 
 const SAME_STORE_SELECT = `
   id, store_id, name, slug, image_url, price, promotional_price, currency, category, product_type, created_at,
-  stores!inner (id, name, slug, logo_url)
+  stores!inner (id, name, slug)
 `;
 
 /**

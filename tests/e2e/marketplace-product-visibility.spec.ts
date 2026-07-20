@@ -89,7 +89,7 @@ async function fetchLatestPublishedProduct(
 }
 
 test.describe('Marketplace — product visibility after wizard publish (E2E)', () => {
-  test.setTimeout(300_000);
+  test.setTimeout(180_000);
 
   test.beforeAll(() => {
     if (canRun) {

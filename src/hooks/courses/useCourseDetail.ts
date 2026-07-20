@@ -95,10 +95,10 @@ export const useCourseDetail = (slug: string) => {
 
       // 6. Récupérer le store (pour afficher l'instructeur)
       const { data: store } = await supabase
-        .from('stores')
+        .from('stores_public')
         .select('id, name, slug, logo_url')
         .eq('id', product.store_id)
-        .single();
+        .maybeSingle();
 
       // 7. Vérifier si l'utilisateur est inscrit et récupérer la progression
       let isEnrolled = false;

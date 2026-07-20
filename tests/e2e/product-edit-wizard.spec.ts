@@ -93,7 +93,7 @@ async function fetchLatestProductId(
 }
 
 test.describe('Edit product wizards — smoke (E2E)', () => {
-  test.setTimeout(300_000);
+  test.setTimeout(180_000);
 
   test.beforeAll(() => {
     if (canRun) {

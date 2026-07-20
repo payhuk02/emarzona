@@ -16,8 +16,9 @@ const QUERY_KEY = ['landing', 'platform-stores'] as const;
 const LANDING_STORES_REFETCH_MS = 120_000;
 
 async function fetchActiveStores(): Promise<LandingPlatformStore[]> {
+  // logo_url is on stores_public (store_appearance), not public.stores after Sprint 3
   const { data, error } = await supabase
-    .from('stores')
+    .from('stores_public')
     .select('id, name, slug, subdomain, logo_url')
     .eq('is_active', true)
     .order('created_at', { ascending: false });

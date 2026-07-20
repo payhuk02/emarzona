@@ -41,7 +41,7 @@ const supabaseServiceKey = requiredEnv('SUPABASE_SERVICE_ROLE_KEY');
 const canRun = Boolean(supabaseUrl && supabaseServiceKey);
 
 test.describe('Marketplace — wizard publish to guest checkout (E2E)', () => {
-  test.setTimeout(300_000);
+  test.setTimeout(180_000);
 
   test.beforeAll(() => {
     if (canRun) {

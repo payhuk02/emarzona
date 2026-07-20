@@ -115,7 +115,7 @@ export const useVendorMessaging = (
         .select(
           `
           *,
-          store:stores (name, slug, logo_url),
+          store:stores (name, slug),
           product:products (name, slug, image_url)
         `,
           { count: 'exact' }
@@ -400,7 +400,7 @@ export const useVendorMessaging = (
           .select(
             `
             *,
-            store:stores (name, slug, logo_url),
+            store:stores (name, slug),
             product:products (name, slug, image_url)
           `
           )
@@ -432,7 +432,7 @@ export const useVendorMessaging = (
         .select(
           `
           *,
-          store:stores (name, slug, logo_url),
+          store:stores (name, slug),
           product:products (name, slug, image_url)
         `
         )
@@ -489,7 +489,7 @@ export const useVendorMessaging = (
         .select(
           `
           *,
-          store:stores (name, slug, logo_url),
+          store:stores (name, slug),
           product:products (name, slug, image_url)
         `
         )
@@ -769,7 +769,7 @@ export const useVendorMessaging = (
           .select(
             `
           *,
-          store:stores (name, slug, logo_url),
+          store:stores (name, slug),
           product:products (name, slug, image_url)
         `
           )

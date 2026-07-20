@@ -43,10 +43,10 @@ export async function assertMarketplaceGuestBuyCta(
 ): Promise<void> {
   const root = appLocator(page);
   const card = root.getByTestId('product-card').filter({ hasText: productName }).first();
-  await expect(card).toBeVisible({ timeout: 30_000 });
+  await expect(card).toBeVisible({ timeout: 20_000 });
 
   const buyButton = card.locator('button[data-action="primary"]');
-  await expect(buyButton).toBeVisible({ timeout: 15_000 });
+  await expect(buyButton).toBeVisible({ timeout: 10_000 });
   await expect(buyButton).toHaveText(buyLabelPattern);
 }
 
