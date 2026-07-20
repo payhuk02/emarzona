@@ -4,7 +4,7 @@
  * Phase 2 - Fonctionnalités avancées
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { MessageSquare, Star, Plus, X, Trash2, Edit2, Save, ChevronRight } from 'lucide-react';
 import { useSpaceInputFix } from '@/hooks/useSpaceInputFix';
 import { StoreMarketingContent } from '@/hooks/useStores';
+import { StoreMarketingQualityChecklist } from '@/components/store/StoreMarketingQualityChecklist';
 
 interface StoreMarketingContentProps {
   marketingContent: StoreMarketingContent | null;
@@ -121,6 +122,29 @@ export const StoreMarketingContentComponent: React.FC<StoreMarketingContentProps
       onCompleteSubSteps();
     }
   };
+
+  const marketingDraft = useMemo(
+    () => ({
+      welcome_message: welcomeMessage,
+      mission_statement: missionStatement,
+      vision_statement: visionStatement,
+      values,
+      story,
+      team_section: teamSection,
+      testimonials,
+      certifications,
+    }),
+    [
+      welcomeMessage,
+      missionStatement,
+      visionStatement,
+      values,
+      story,
+      teamSection,
+      testimonials,
+      certifications,
+    ]
+  );
 
   const renderSaveFooter = () => (
     <div className="flex justify-end pt-4 border-t">
@@ -270,7 +294,8 @@ export const StoreMarketingContentComponent: React.FC<StoreMarketingContentProps
         </CardTitle>
         <CardDescription>{t('store.form.marketing.description')}</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
+        <StoreMarketingQualityChecklist content={marketingDraft} />
         <Tabs value={currentTab} onValueChange={onTabChange} className="w-full">
           <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1 sm:gap-2">
             {MARKETING_TABS.map(tab => (

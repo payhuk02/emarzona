@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   isMarketingContentMeaningful,
   buildAppearanceQualityChecks,
+  buildMarketingQualityChecks,
   isAppearanceStepComplete,
 } from '@/lib/storefront/store-quality-checklist';
 import type { Store } from '@/hooks/useStores';
@@ -54,6 +55,17 @@ describe('store quality checklist', () => {
     });
     expect(checks.find(c => c.id === 'logo')?.ok).toBe(false);
     expect(checks.find(c => c.id === 'textContrast')?.ok).toBe(true);
+  });
+  it('flags missing marketing welcome in quality checks', () => {
+    const empty = buildMarketingQualityChecks({});
+    expect(empty.find(c => c.id === 'welcome')?.ok).toBe(false);
+
+    const filled = buildMarketingQualityChecks({
+      welcome_message: 'Bienvenue dans notre boutique artisanale depuis 2010.',
+      mission_statement: 'Créer des objets durables et beaux pour le quotidien.',
+    });
+    expect(filled.find(c => c.id === 'welcome')?.ok).toBe(true);
+    expect(filled.find(c => c.id === 'missionOrStory')?.ok).toBe(true);
   });
 });
 

@@ -1723,7 +1723,14 @@
       "logoRequired": "Logo boutique renseigné",
       "textContrast": "Contraste texte / fond (WCAG AA)",
       "buttonContrast": "Contraste bouton principal (WCAG AA)",
-      "linkContrast": "Contraste liens / fond (WCAG AA)"
+      "linkContrast": "Contraste liens / fond (WCAG AA)",
+      "marketingChecklistTitle": "Checklist qualité marketing",
+      "marketingWelcome": "Message de bienvenue (20+ caractères)",
+      "marketingMissionOrStory": "Mission ou histoire de la boutique",
+      "marketingSocialProof": "Preuve sociale (témoignage ou équipe)",
+      "quotaUnlimited": "Boutiques illimitées sur votre plan",
+      "quotaRemaining": "{{used}} / {{max}} boutiques utilisées · {{remaining}} restante(s)",
+      "quotaReached": "Limite de boutiques atteinte pour votre plan ({{used}} / {{max}})"
     },
     "appearance": {
       "previewTitle": "Prévisualisation",

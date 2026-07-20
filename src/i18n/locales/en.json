@@ -1575,7 +1575,14 @@
       "logoRequired": "Store logo provided",
       "textContrast": "Text / background contrast (WCAG AA)",
       "buttonContrast": "Primary button contrast (WCAG AA)",
-      "linkContrast": "Link / background contrast (WCAG AA)"
+      "linkContrast": "Link / background contrast (WCAG AA)",
+      "marketingChecklistTitle": "Marketing quality checklist",
+      "marketingWelcome": "Welcome message (20+ characters)",
+      "marketingMissionOrStory": "Store mission or story",
+      "marketingSocialProof": "Social proof (testimonial or team)",
+      "quotaUnlimited": "Unlimited stores on your plan",
+      "quotaRemaining": "{{used}} / {{max}} stores used · {{remaining}} remaining",
+      "quotaReached": "Store limit reached for your plan ({{used}} / {{max}})"
     },
     "appearance": {
       "previewTitle": "Preview",

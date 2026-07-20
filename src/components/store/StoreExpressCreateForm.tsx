@@ -62,8 +62,8 @@ export function StoreExpressCreateForm({
   const { t } = useTranslation();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { createStore, canCreateStore } = useStores();
-  const { refreshStores } = useStoreContext();
+  const { createStore } = useStores();
+  const { refreshStores, canCreateStore, storeQuota } = useStoreContext();
   const { trackEvent } = useAnalytics();
 
   const [name, setName] = useState('');
@@ -72,6 +72,25 @@ export function StoreExpressCreateForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCheckingSlug, setIsCheckingSlug] = useState(false);
   const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null);
+
+  const quotaBlocked = storeQuota != null && !storeQuota.can_create;
+  const quotaHint = useMemo(() => {
+    if (!storeQuota) return null;
+    if (storeQuota.max_stores == null) {
+      return t('store.quality.quotaUnlimited');
+    }
+    if (!storeQuota.can_create) {
+      return t('store.quality.quotaReached', {
+        used: storeQuota.used_stores,
+        max: storeQuota.max_stores,
+      });
+    }
+    return t('store.quality.quotaRemaining', {
+      used: storeQuota.used_stores,
+      max: storeQuota.max_stores,
+      remaining: storeQuota.remaining_stores ?? 0,
+    });
+  }, [storeQuota, t]);
 
   const slugPreview = useMemo(() => normalizeExpressSlugPreview(name), [name]);
   const verticalProfile = useMemo(() => getStoreVerticalProfile(commerceType), [commerceType]);
@@ -117,7 +136,13 @@ export function StoreExpressCreateForm({
       if (!canCreateStore()) {
         toast({
           title: t('store.form.common.limitReachedTitle'),
-          description: t('store.form.common.limitReachedDescription'),
+          description:
+            storeQuota && storeQuota.max_stores != null
+              ? t('store.quality.quotaReached', {
+                  used: storeQuota.used_stores,
+                  max: storeQuota.max_stores,
+                })
+              : t('store.form.common.limitReachedDescription'),
           variant: 'destructive',
         });
         return;
@@ -204,6 +229,7 @@ export function StoreExpressCreateForm({
       onSuccess,
       refreshStores,
       slugAvailable,
+      storeQuota,
       t,
       themeTemplateId,
       toast,
@@ -217,7 +243,8 @@ export function StoreExpressCreateForm({
     slugPreview.length >= 2 &&
     slugAvailable !== false &&
     !isSubmitting &&
-    !isCheckingSlug;
+    !isCheckingSlug &&
+    !quotaBlocked;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6" data-testid="store-express-create-form">
@@ -227,6 +254,14 @@ export function StoreExpressCreateForm({
           <CardDescription>{t('store.express.subtitle')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          {quotaHint && (
+            <Alert
+              variant={quotaBlocked ? 'destructive' : 'default'}
+              data-testid="store-quota-hint"
+            >
+              <AlertDescription>{quotaHint}</AlertDescription>
+            </Alert>
+          )}
           <div className="space-y-2">
             <Label htmlFor="express-store-name">{t('store.form.basicInfo.storeName')}</Label>
             <Input

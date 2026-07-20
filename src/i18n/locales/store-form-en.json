@@ -20,7 +20,7 @@
       "mustBeLoggedIn": "You must be logged in",
       "unknownError": "Unknown error",
       "limitReachedTitle": "Limit reached",
-      "limitReachedDescription": "Limit of 3 stores per user reached. You must delete an existing store before creating a new one.",
+      "limitReachedDescription": "Store limit reached for your plan. Upgrade your plan or delete an existing store before creating a new one.",
       "slugTaken": "This store name is already in use",
       "slugTakenChooseOther": "This store name is already taken. Please choose another one.",
       "slugReserved": "The name \"{{slug}}\" is reserved and cannot be used as a store subdomain",

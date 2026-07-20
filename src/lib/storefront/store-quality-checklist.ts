@@ -39,6 +39,12 @@ export function isMarketingContentMeaningful(
   return false;
 }
 
+export function contrastRatioLabel(foreground: string, background: string): string {
+  const ratio = getContrastRatio(foreground, background);
+  if (!Number.isFinite(ratio)) return '—';
+  return `${ratio.toFixed(1)}:1`;
+}
+
 export function isAppearanceStepComplete(store: Store): boolean {
   if (store.appearance_draft && typeof store.appearance_draft === 'object') {
     return false;
@@ -93,8 +99,33 @@ export function buildAppearanceQualityChecks(form: StoreAppearanceFormDraft): Qu
   ];
 }
 
-export function contrastRatioLabel(fg: string, bg: string): string {
-  const ratio = getContrastRatio(fg, bg);
-  if (!Number.isFinite(ratio)) return '—';
-  return `${ratio.toFixed(1)}:1`;
+export function buildMarketingQualityChecks(
+  content: StoreMarketingContent | null | undefined
+): QualityCheck[] {
+  const hasText = (value?: string | null, min = 20) => Boolean(value && value.trim().length >= min);
+
+  return [
+    {
+      id: 'welcome',
+      ok: hasText(content?.welcome_message),
+      labelKey: 'store.quality.marketingWelcome',
+      level: 'required',
+    },
+    {
+      id: 'missionOrStory',
+      ok: hasText(content?.mission_statement) || hasText(content?.story),
+      labelKey: 'store.quality.marketingMissionOrStory',
+      level: 'recommended',
+    },
+    {
+      id: 'socialProof',
+      ok:
+        (Array.isArray(content?.testimonials) &&
+          content!.testimonials!.some(t => hasText(t.content))) ||
+        (Array.isArray(content?.team_section) &&
+          content!.team_section!.some(m => Boolean(m.name?.trim()))),
+      labelKey: 'store.quality.marketingSocialProof',
+      level: 'recommended',
+    },
+  ];
 }

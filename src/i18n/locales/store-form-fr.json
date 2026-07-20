@@ -20,7 +20,7 @@
       "mustBeLoggedIn": "Vous devez être connecté",
       "unknownError": "Erreur inconnue",
       "limitReachedTitle": "Limite atteinte",
-      "limitReachedDescription": "Limite de 3 boutiques par utilisateur atteinte. Vous devez supprimer une boutique existante avant d'en créer une nouvelle.",
+      "limitReachedDescription": "Limite de boutiques atteinte pour votre plan. Passez à un plan supérieur ou supprimez une boutique existante.",
       "slugTaken": "Ce nom de boutique est déjà utilisé",
       "slugTakenChooseOther": "Ce nom de boutique est déjà pris. Veuillez en choisir un autre.",
       "slugReserved": "Le nom \"{{slug}}\" est réservé et ne peut pas être utilisé comme sous-domaine de boutique",

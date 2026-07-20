@@ -505,7 +505,7 @@ export const useStores = () => {
   });
 
   const canCreateStore = () => {
-    // Optimistic client check — DB trigger remains authoritative
+    // Optimistic client check — DB trigger + createStore RPC remain authoritative
     return fallbackStoreQuota(stores.length).can_create;
   };
 

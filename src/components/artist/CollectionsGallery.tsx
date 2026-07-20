@@ -3,6 +3,7 @@
  * Mode boutique (store) ou marketplace globale
  */
 
+import type { ReactNode } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -16,6 +17,7 @@ import { Link } from 'react-router-dom';
 import { ImageIcon, Package, Store } from 'lucide-react';
 import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import { isArtistCollectionId } from '@/lib/artist-collection-resolve';
+import { buildTenantCollectionUrl } from '@/lib/storefront/collection-tenant-redirect';
 
 interface CollectionsGalleryBaseProps {
   showPrivate?: boolean;
@@ -53,13 +55,37 @@ function collectionHref(
   mode: 'store' | 'marketplace',
   storeSlug?: string
 ): string {
-  if (mode === 'marketplace' || isArtistCollectionId(collection.collection_slug)) {
-    return `/collections/${collection.id}`;
+  const publicCollection = collection as PublicArtistCollection;
+  const resolvedSlug = storeSlug || publicCollection.store?.slug || null;
+  const slugPath = collection.collection_slug;
+
+  if (mode === 'store' && resolvedSlug && slugPath && !isArtistCollectionId(slugPath)) {
+    return `/collections/${slugPath}`;
   }
-  if (storeSlug) {
-    return `/collections/${collection.collection_slug}?store=${encodeURIComponent(storeSlug)}`;
+
+  if (resolvedSlug && slugPath && !isArtistCollectionId(slugPath)) {
+    return buildTenantCollectionUrl({
+      storeSlug: resolvedSlug,
+      collectionSlug: slugPath,
+    });
   }
+
   return `/collections/${collection.id}`;
+}
+
+function CollectionCardLink({ href, children }: { href: string; children: ReactNode }) {
+  if (href.startsWith('http')) {
+    return (
+      <a href={href} className="block">
+        {children}
+      </a>
+    );
+  }
+  return (
+    <Link to={href} className="block">
+      {children}
+    </Link>
+  );
 }
 
 function CollectionsGrid({
@@ -82,7 +108,7 @@ function CollectionsGrid({
             key={collection.id}
             className="overflow-hidden hover:shadow-lg transition-shadow group"
           >
-            <Link to={collectionHref(collection, mode, storeSlug)}>
+            <CollectionCardLink href={collectionHref(collection, mode, storeSlug)}>
               <div className="relative aspect-video overflow-hidden bg-muted">
                 {collection.cover_image_url ? (
                   <OptimizedImage
@@ -126,7 +152,7 @@ function CollectionsGrid({
                   )}
                 </div>
               </CardHeader>
-            </Link>
+            </CollectionCardLink>
           </Card>
         );
       })}
