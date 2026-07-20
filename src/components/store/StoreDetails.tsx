@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,6 +16,7 @@ import {
 import { Copy, ExternalLink, Save, X, Settings } from 'lucide-react';
 import type { Store } from '@/hooks/useStores';
 import type { StoreLegalPages } from '@/hooks/useStores';
+import { useAuth } from '@/contexts/AuthContext';
 import { generateStoreUrl } from '@/lib/store-utils';
 import type { ExtendedStore } from './types/store-form';
 import { resolveStoreCommerceTypeFromStore } from '@/lib/commerce/store-capability-map';
@@ -24,6 +26,7 @@ import {
 } from '@/lib/commerce/store-customization-steps';
 import { useStoreFormStateRefactored as useStoreFormState } from '@/hooks/useStoreFormStateRefactored';
 import { useStores } from '@/hooks/useStores';
+import { fetchStoreById } from '@/lib/store/store-query';
 import { StoreCustomizationWizard } from './StoreCustomizationWizard';
 import { StoreLegalPagesComponent, DEFAULT_LEGAL_TAB } from './StoreLegalPages';
 import { StoreMarketingContentComponent, DEFAULT_MARKETING_TAB } from './StoreMarketingContent';
@@ -44,13 +47,23 @@ interface StoreDetailsProps {
 
 const StoreDetails = ({ store: initialStore }: StoreDetailsProps) => {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const { stores } = useStores();
-  const store = useMemo(
-    () =>
+  const { data: detailedStore } = useQuery({
+    queryKey: ['store-customization-detail', initialStore.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      return fetchStoreById(user.id, initialStore.id);
+    },
+    enabled: Boolean(user?.id && initialStore.id),
+    staleTime: 30_000,
+  });
+  const store = useMemo(() => {
+    const fromList =
       (stores.find(entry => entry.id === initialStore.id) as ExtendedStore | undefined) ??
-      initialStore,
-    [stores, initialStore]
-  );
+      initialStore;
+    return (detailedStore as ExtendedStore | null | undefined) ?? fromList;
+  }, [stores, initialStore, detailedStore]);
   const form = useStoreFormState(store);
 
   const {

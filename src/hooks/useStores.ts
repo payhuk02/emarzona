@@ -298,7 +298,7 @@ export const useStores = () => {
         }
       )
         .select(
-          `id, user_id, name, slug, subdomain, description, is_active, created_at, updated_at, custom_domain, domain_status, metadata, commerce_type, marketing_content, legal_pages, meta_title, meta_description, meta_keywords, og_title, og_description, og_image, seo_draft, marketing_content_draft, legal_pages_draft, seo_published_at, marketing_published_at, legal_published_at, ${STORE_APPEARANCE_EMBED_SELECT}`
+          `id, user_id, name, slug, subdomain, description, is_active, created_at, updated_at, custom_domain, domain_status, metadata, commerce_type, ${STORE_APPEARANCE_EMBED_SELECT}`
         )
         .eq('user_id', user.id)
         .order('created_at', { ascending: true });

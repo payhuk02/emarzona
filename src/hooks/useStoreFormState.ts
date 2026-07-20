@@ -1,4 +1,5 @@
 import { useReducer, useMemo, useCallback, useEffect, useRef, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import type { Store } from '@/hooks/useStores';
 import type {
@@ -41,6 +42,7 @@ import {
 
 export function useStoreFormState(store: ExtendedStore) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const [formState, dispatch] = useReducer(storeFormReducer, store, initStoreFormState);
 
   const [isEditing, setIsEditing] = useState(false);
@@ -399,6 +401,9 @@ export function useStoreFormState(store: ExtendedStore) {
     try {
       await saveStoreContentDraft(store.id, payload.domain, payload.draft);
       await refreshStores().catch(() => {});
+      await queryClient.invalidateQueries({
+        queryKey: ['store-customization-detail', store.id],
+      });
       setLastSaved(new Date());
       toast({
         title: t('store.content.draftSavedTitle'),
@@ -414,7 +419,7 @@ export function useStoreFormState(store: ExtendedStore) {
     } finally {
       setIsSubmitting(false);
     }
-  }, [buildContentDraftPayload, store.id, refreshStores, toast, t]);
+  }, [buildContentDraftPayload, store.id, refreshStores, queryClient, toast, t]);
 
   const handlePublishContent = useCallback(async () => {
     const payload = buildContentDraftPayload();
@@ -425,6 +430,9 @@ export function useStoreFormState(store: ExtendedStore) {
       await saveStoreContentDraft(store.id, payload.domain, payload.draft);
       await publishStoreContent(store.id, payload.domain);
       await refreshStores().catch(() => {});
+      await queryClient.invalidateQueries({
+        queryKey: ['store-customization-detail', store.id],
+      });
       setLastSaved(new Date());
       toast({
         title: t('store.content.publishedTitle'),
@@ -440,7 +448,7 @@ export function useStoreFormState(store: ExtendedStore) {
     } finally {
       setIsSubmitting(false);
     }
-  }, [buildContentDraftPayload, store.id, refreshStores, toast, t]);
+  }, [buildContentDraftPayload, store.id, refreshStores, queryClient, toast, t]);
 
   const handleSaveAppearanceDraft = useCallback(async () => {
     setIsSubmitting(true);

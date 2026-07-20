@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useQueries } from '@tanstack/react-query';
 import { useStores } from '@/hooks/useStores';
 import { useStoreContext } from '@/contexts/StoreContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -66,10 +67,15 @@ export const StoreSettings = ({
     updateStore,
     deleteStore: _deleteStore,
     refetch,
+  } = useStores();
+  const {
+    refreshStores,
     canCreateStore,
     getRemainingStores,
-  } = useStores();
-  const { refreshStores } = useStoreContext();
+    storeQuota,
+    loading: storeContextLoading,
+  } = useStoreContext();
+  const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
@@ -78,6 +84,10 @@ export const StoreSettings = ({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [storeToDelete, setStoreToDelete] = useState<{ id: string; name: string } | null>(null);
   const [commerceTypeDraft, setCommerceTypeDraft] = useState<Record<string, StoreCommerceType>>({});
+
+  const createAllowed = Boolean(user?.id) && canCreateStore();
+  const createGateLoading =
+    action === 'create' && (authLoading || storeContextLoading) && !user?.id;
   const [pendingCommerceChange, setPendingCommerceChange] = useState<{
     storeId: string;
     storeName: string;
@@ -286,7 +296,7 @@ export const StoreSettings = ({
     });
   };
 
-  if (storesLoading) {
+  if (storesLoading && action !== 'create') {
     return (
       <div className="flex items-center justify-center py-8">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -310,7 +320,11 @@ export const StoreSettings = ({
       {/* Onglets */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList
-          className={canCreateStore() ? 'grid w-full grid-cols-2' : 'grid w-full grid-cols-1'}
+          className={
+            createAllowed || createGateLoading
+              ? 'grid w-full grid-cols-2'
+              : 'grid w-full grid-cols-1'
+          }
         >
           <TabsTrigger value="list">
             {stores.length === 1
@@ -319,10 +333,11 @@ export const StoreSettings = ({
                 ? `Mes boutiques (${stores.length})`
                 : 'Liste'}
           </TabsTrigger>
-          {canCreateStore() && (
+          {(createAllowed || createGateLoading || action === 'create') && (
             <TabsTrigger value="create">
               Créer{' '}
-              {getRemainingStores() > 0 &&
+              {Number.isFinite(getRemainingStores()) &&
+                getRemainingStores() > 0 &&
                 `(${getRemainingStores()} restante${getRemainingStores() > 1 ? 's' : ''})`}
             </TabsTrigger>
           )}
@@ -492,12 +507,18 @@ export const StoreSettings = ({
 
         {/* Création de boutique */}
         <TabsContent value="create" className="space-y-4">
-          {!canCreateStore() ? (
-            <Alert variant="destructive">
+          {createGateLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin" />
+              <span className="ml-2">Préparation de la création...</span>
+            </div>
+          ) : !createAllowed ? (
+            <Alert variant="destructive" data-testid="store-create-limit-reached">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                Limite de 3 boutiques par utilisateur atteinte. Vous devez supprimer une boutique
-                existante avant d'en créer une nouvelle.
+                {storeQuota?.max_stores == null
+                  ? 'Impossible de créer une boutique pour le moment.'
+                  : `Limite de ${storeQuota.max_stores} boutique(s) atteinte pour votre plan. Supprimez une boutique ou passez à un plan supérieur.`}
               </AlertDescription>
             </Alert>
           ) : createMode === 'advanced' ? (

@@ -11,7 +11,7 @@ import {
   STORE_APPEARANCE_EMBED_SELECT,
 } from '@/lib/storefront/flatten-store-appearance';
 
-export const STORE_FIELDS = `id, user_id, name, slug, subdomain, description, default_currency, custom_domain, domain_status, domain_verification_token, domain_verified_at, domain_error_message, info_message, info_message_color, info_message_font, metadata, commerce_type, created_at, updated_at, ${STORE_APPEARANCE_EMBED_SELECT}`;
+export const STORE_FIELDS = `id, user_id, name, slug, subdomain, description, default_currency, custom_domain, domain_status, domain_verification_token, domain_verified_at, domain_error_message, info_message, info_message_color, info_message_font, metadata, commerce_type, created_at, updated_at, marketing_content, legal_pages, meta_title, meta_description, meta_keywords, og_title, og_description, og_image, seo_draft, marketing_content_draft, legal_pages_draft, seo_published_at, marketing_published_at, legal_published_at, ${STORE_APPEARANCE_EMBED_SELECT}`;
 
 export function mapStoreRow(row: Record<string, unknown> | null | undefined): Store | null {
   if (!row) return null;

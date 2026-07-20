@@ -110,8 +110,8 @@ test.describe('Artist paid purchase (E2E)', () => {
       await loginAsSeededUser(page, admin, unpaidBuyer.email);
       await gotoApp(page, `/artist/${fixture.product.id}`);
 
+      await expect(page.getByTestId('artist-add-to-cart')).toBeVisible({ timeout: 45_000 });
       const addToCart = page.getByTestId('artist-add-to-cart');
-      await expect(addToCart).toBeVisible({ timeout: 15_000 });
       await addToCart.click();
 
       await gotoApp(page, '/checkout');

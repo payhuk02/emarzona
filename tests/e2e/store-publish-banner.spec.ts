@@ -110,11 +110,13 @@ test.describe('Store publish banner (E2E)', () => {
     await setPrimaryColorField(page, E2E_THEME_PRIMARY_ON_CREATE);
     await saveAppearanceDraft(page);
 
+    // Digital : pas d'onglet Localisation → l'étape 3 est SEO (draft/publish Sprint 5)
     await page.getByRole('tab', { name: /Étape 3\s*:/i }).click();
     await expect(page.getByTestId('storefront-publish-banner-unpublished')).toBeVisible({
       timeout: 15_000,
     });
     await expect(page.getByTestId('storefront-publish-banner-immediate')).toBeHidden();
+    await expect(page.getByTestId('storefront-publish-banner-draft-hint')).toBeHidden();
 
     await publishStoreAppearanceFromUi(page);
     await page
@@ -132,7 +134,11 @@ test.describe('Store publish banner (E2E)', () => {
     await expect(page.getByTestId('storefront-publish-banner-unpublished')).toBeHidden({
       timeout: 15_000,
     });
-    await expect(page.getByTestId('storefront-publish-banner-immediate')).toBeVisible();
+    // SEO = draft_and_publish → hint brouillon (plus « immédiat »)
+    await expect(page.getByTestId('storefront-publish-banner-draft-hint')).toBeVisible({
+      timeout: 10_000,
+    });
+    await expect(page.getByTestId('storefront-publish-banner-immediate')).toBeHidden();
 
     try {
       await admin.from('stores').delete().eq('id', storeId!);

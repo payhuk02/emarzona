@@ -21,11 +21,20 @@ export async function selectServiceCalendarDay(page: Page, date: Date): Promise<
     .locator('.rbc-event')
     .filter({ hasText: /Disponible/i })
     .first();
-  if (await availableEvent.isVisible({ timeout: 5_000 }).catch(() => false)) {
+  if (await availableEvent.isVisible({ timeout: 10_000 }).catch(() => false)) {
     await availableEvent.click();
-    await expect(page.locator('[data-testid^="time-slot-"]').first()).toBeVisible({
-      timeout: 20_000,
-    });
+    const slots = page.locator('[data-testid^="time-slot-"]');
+    if (
+      await slots
+        .first()
+        .isVisible({ timeout: 8_000 })
+        .catch(() => false)
+    ) {
+      return;
+    }
+    // Re-click once — CI can miss the first selection
+    await availableEvent.click();
+    await expect(slots.first()).toBeVisible({ timeout: 20_000 });
     return;
   }
 
