@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ArrowLeft, AlertCircle } from 'lucide-react';
+import { ArrowLeft, AlertCircle, Lock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { safeRedirect } from '@/lib/url-validator';
 import { logger } from '@/lib/logger';
@@ -813,8 +813,16 @@ const Checkout = () => {
                 </Link>
               </Button>
             </nav>
-            <h1 className="text-2xl sm:text-3xl font-bold">Finaliser votre commande</h1>
-            <p className="text-muted-foreground mt-2">
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                Finaliser votre commande
+              </h1>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+                <Lock className="h-3 w-3" aria-hidden="true" />
+                Paiement sécurisé
+              </span>
+            </div>
+            <p className="text-muted-foreground mt-2 max-w-2xl">
               {isPhysicalCod
                 ? 'Complétez vos informations pour confirmer votre commande (paiement à la livraison)'
                 : isGuestBuyer
