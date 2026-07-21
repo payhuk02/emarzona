@@ -19,8 +19,11 @@ import {
   selectFirstAvailableTimeSlot,
   selectServiceCalendarDay,
 } from './helpers/service-booking-ui';
-import { dismissCookieBannerIfVisible } from './helpers/store-theme-helpers';
-import { gotoApp, loginAsSeededUser, waitForVendorStoreReady } from './shared/e2e-test-config';
+import {
+  dismissCookieBannerIfVisible,
+  dismissPersonaOnboardingIfVisible,
+} from './helpers/store-theme-helpers';
+import { gotoApp, loginAsSeededUser } from './shared/e2e-test-config';
 
 const supabaseUrl = resolveE2ESupabaseUrl() || undefined;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -57,7 +60,6 @@ test.describe('Mixed cart book → pay → confirm (E2E)', () => {
         '/dashboard',
         fixture.buyer.password
       );
-      await waitForVendorStoreReady(page);
       await gotoApp(page, `/service/${fixture.serviceProduct.id}`);
 
       await expect(page.getByText(/Service non trouvé/i)).toHaveCount(0, { timeout: 5_000 });
@@ -78,9 +80,13 @@ test.describe('Mixed cart book → pay → confirm (E2E)', () => {
       await expect(addToCart).toBeEnabled({ timeout: 20_000 });
       await dismissCookieBannerIfVisible(page);
 
-      const bookingError = page.getByText(
-        /Erreur de réservation|Réservation impossible|Authentification requise|Impossible de finaliser|Délai dépassé|Date invalide|Sélection incomplète|Compléments manquants|créneau n'est pas disponible|identifiant de créneau|ajouter au panier|Produit non trouvé/i
-      );
+      const bookingError = page
+        .locator('[role="alert"], [role="status"], [data-sonner-toast]')
+        .filter({
+          hasText:
+            /Erreur de réservation|Réservation impossible|Authentification requise|Impossible de finaliser|Délai dépassé|Date invalide|Sélection incomplète|Compléments manquants|créneau n'est pas disponible|identifiant de créneau|Produit non trouvé/i,
+        })
+        .first();
 
       const reserveRpc = page.waitForResponse(
         response =>
@@ -109,6 +115,10 @@ test.describe('Mixed cart book → pay → confirm (E2E)', () => {
       }
 
       const cartResponse = await cartInsert.catch(() => null);
+      if (!cartResponse) {
+        const errText = (await bookingError.textContent().catch(() => null)) ?? '';
+        throw new Error(`cart_items insert was not called. toast=${errText || '(none)'}`);
+      }
       if (cartResponse && (cartResponse.status() < 200 || cartResponse.status() >= 300)) {
         const body = await cartResponse.text().catch(() => '');
         throw new Error(
@@ -144,6 +154,7 @@ test.describe('Mixed cart book → pay → confirm (E2E)', () => {
       await expect(page.getByText(fixture.serviceProduct.name)).toBeVisible({ timeout: 10_000 });
 
       await gotoApp(page, `/physical/${fixture.physicalProduct.id}`);
+      await dismissPersonaOnboardingIfVisible(page);
       await expect(page.getByRole('heading', { level: 1 })).toContainText(
         fixture.physicalProduct.name,
         { timeout: 15_000 }
@@ -151,10 +162,30 @@ test.describe('Mixed cart book → pay → confirm (E2E)', () => {
 
       const addPhysical = page.getByRole('button', { name: /ajouter au panier/i });
       await expect(addPhysical).toBeEnabled({ timeout: 10_000 });
+      await dismissCookieBannerIfVisible(page);
+
+      const physicalCartInsert = page.waitForResponse(
+        response =>
+          response.url().includes('/rest/v1/cart_items') && response.request().method() === 'POST',
+        { timeout: 30_000 }
+      );
       await addPhysical.click();
 
+      const physicalCartResponse = await physicalCartInsert.catch(() => null);
+      if (!physicalCartResponse) {
+        throw new Error('cart_items insert was not called after adding physical product');
+      }
+      if (physicalCartResponse.status() < 200 || physicalCartResponse.status() >= 300) {
+        const body = await physicalCartResponse.text().catch(() => '');
+        throw new Error(
+          `physical cart_items insert failed (${physicalCartResponse.status()}): ${body.slice(0, 400)}`
+        );
+      }
+
       await gotoApp(page, '/cart');
-      await expect(page.getByText(fixture.physicalProduct.name)).toBeVisible({ timeout: 10_000 });
+      await dismissPersonaOnboardingIfVisible(page);
+      await expect(page.getByText(fixture.serviceProduct.name)).toBeVisible({ timeout: 15_000 });
+      await expect(page.getByText(fixture.physicalProduct.name)).toBeVisible({ timeout: 15_000 });
 
       await page
         .getByRole('link', { name: /passer au paiement|checkout|commander/i })

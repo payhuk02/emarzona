@@ -55,6 +55,10 @@ function getCartScope(user: User | null, sessionId: string) {
   return user ? { userId: user.id } : { sessionId };
 }
 
+function getCartScopeKey(user: User | null, sessionId: string): string {
+  return user ? `user:${user.id}` : `session:${sessionId}`;
+}
+
 /**
  * Hook principal useCart
  */
@@ -63,12 +67,16 @@ export function useCart() {
   const queryClient = useQueryClient();
   const [sessionId] = useState(() => getSessionId());
   const [user, setUser] = useState<User | null>(null);
+  const [authReady, setAuthReady] = useState(false);
+  const cartScopeKey = getCartScopeKey(user, sessionId);
 
   useEffect(() => {
     let active = true;
 
     supabase.auth.getUser().then(({ data: { user: initialUser } }) => {
-      if (active) setUser(initialUser);
+      if (!active) return;
+      setUser(initialUser);
+      setAuthReady(true);
     });
 
     const {
@@ -85,10 +93,10 @@ export function useCart() {
 
   const {
     data: items = [],
-    isLoading,
+    isLoading: isQueryLoading,
     error,
   } = useQuery({
-    queryKey: CART_QUERY_KEY,
+    queryKey: [...CART_QUERY_KEY, cartScopeKey],
     queryFn: async (): Promise<CartItem[]> => {
       try {
         return await fetchCartItems(getCartScope(user, sessionId));
@@ -97,9 +105,11 @@ export function useCart() {
         throw err;
       }
     },
-    enabled: true,
+    enabled: authReady,
     staleTime: 1000 * 60,
   });
+
+  const isLoading = !authReady || isQueryLoading;
 
   const subtotal = items.reduce((sum, item) => {
     const itemPrice = (item.unit_price - (item.discount_amount || 0)) * item.quantity;

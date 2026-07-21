@@ -67,7 +67,6 @@ import type { Store } from '@/hooks/useStore';
 import { generateStoreUrl, generateProductUrl } from '@/lib/store-utils';
 import { toUserErrorMessage } from '@/lib/user-error-message';
 import { sanitizeProductDescription } from '@/lib/html-sanitizer';
-import { PhysicalQuickOrderDialog } from '@/components/physical/PhysicalQuickOrderDialog';
 import { parsePhysicalCheckoutOptions } from '@/lib/physical/physical-checkout-display';
 import { StoreThemeProvider } from '@/components/storefront/StoreThemeProvider';
 import { STOREFRONT_STORE_PUBLIC_SELECT } from '@/lib/storefront/store-public-fields';
@@ -150,7 +149,6 @@ const ProductDetails = () => {
   const [selectedVariantPrice, setSelectedVariantPrice] = useState<number | null>(null);
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
   const [isPurchasing, setIsPurchasing] = useState(false);
-  const [quickOrderOpen, setQuickOrderOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const { toast } = useToast();
   const { user } = useAuth();
@@ -349,9 +347,8 @@ const ProductDetails = () => {
   );
 
   const physicalBuyLabel = physicalCheckout?.cta_button_label ?? 'Commander';
-  const physicalUnitPrice = selectedVariantPrice ?? displayPriceInfo?.price ?? product?.price ?? 0;
 
-  // Handler pour l'achat — dialog rapide (physique) ou checkout buy-now (autres types)
+  // Handler pour l'achat — checkout canonique (COD ou paiement en ligne pour le physique)
   const handleBuyNow = useCallback(async () => {
     if (!product || !store) {
       toast({
@@ -362,12 +359,6 @@ const ProductDetails = () => {
       return;
     }
 
-    if (product.product_type === 'physical') {
-      setQuickOrderOpen(true);
-      return;
-    }
-
-    // Utiliser store.id si product.store_id n'est pas disponible
     const storeId = product.store_id || store.id;
 
     if (!storeId || !product.id) {
@@ -1462,22 +1453,6 @@ const ProductDetails = () => {
             twitter_url={(store as Store & { twitter_url?: string | null }).twitter_url}
             linkedin_url={(store as Store & { linkedin_url?: string | null }).linkedin_url}
           />
-
-          {product.product_type === 'physical' && product.store_id && (
-            <PhysicalQuickOrderDialog
-              open={quickOrderOpen}
-              onOpenChange={setQuickOrderOpen}
-              product={{
-                productId: product.id,
-                storeId: product.store_id,
-                name: product.name,
-                price: physicalUnitPrice,
-                currency: product.currency || 'XOF',
-                variantId: selectedVariantId ?? undefined,
-                payment_options: product.payment_options,
-              }}
-            />
-          )}
         </div>
       </StoreThemeProvider>
     </>

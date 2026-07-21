@@ -1,5 +1,5 @@
 import type { TFunction } from 'i18next';
-import { ShoppingCart, User } from 'lucide-react';
+import { User } from 'lucide-react';
 import type { StoreCommerceType } from '@/constants/store-commerce-types';
 import {
   enrichNavSections,
@@ -46,13 +46,6 @@ export const BOTTOM_NAV_SPECS: BottomNavSpec[] = [
   { path: '/dashboard/store', fromMenu: true },
   { path: '/dashboard/products', fromMenu: true },
   {
-    path: '/cart',
-    fromMenu: false,
-    titleKey: 'sidebar.chrome.bottomNavCart',
-    defaultTitle: 'Panier',
-    icon: ShoppingCart,
-  },
-  {
     path: '/account',
     fromMenu: false,
     titleKey: 'sidebar.chrome.bottomNavAccount',
@@ -71,13 +64,6 @@ export const BUYER_BOTTOM_NAV_SPECS: BottomNavSpec[] = [
     icon: User,
   },
   { path: '/marketplace', fromMenu: true },
-  {
-    path: '/cart',
-    fromMenu: false,
-    titleKey: 'sidebar.chrome.bottomNavCart',
-    defaultTitle: 'Panier',
-    icon: ShoppingCart,
-  },
   { path: '/account/orders', fromMenu: true },
   { path: '/notifications', fromMenu: true },
 ];

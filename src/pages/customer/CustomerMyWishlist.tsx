@@ -32,7 +32,7 @@ import { useNavigate } from 'react-router-dom';
 import { generateProductUrl } from '@/lib/store-utils';
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useMarketplaceFavorites } from '@/hooks/useMarketplaceFavorites';
-import { useCart } from '@/hooks/cart/useCart';
+import { buildCheckoutUrl } from '@/lib/checkout/checkout-route';
 import { usePagination } from '@/hooks/usePagination';
 import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import {
@@ -77,7 +77,6 @@ import { useToast } from '@/hooks/use-toast';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useDebounce } from '@/hooks/useDebounce';
 import { logger } from '@/lib/logger';
-import { ProductType } from '@/types/cart';
 import { htmlToPlainText } from '@/lib/html-sanitizer';
 
 interface FavoriteProduct {
@@ -108,7 +107,6 @@ export default function CustomerMyWishlist() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { favorites, toggleFavorite, loading: favoritesLoading } = useMarketplaceFavorites();
-  const { addItem } = useCart();
   const [searchInput, setSearchInput] = useState('');
   const debouncedSearch = useDebounce(searchInput, 300);
   const [activeTab, setActiveTab] = useState<
@@ -364,43 +362,28 @@ export default function CustomerMyWishlist() {
   // Gérer l'ajout au panier - Style Inventaire
   const handleAddToCart = useCallback(
     async (product: FavoriteProduct) => {
-      setIsAddingToCart(true);
-      try {
-        await addItem({
-          product_id: product.id,
-          product_type: product.product_type as ProductType,
-          quantity: 1,
-        });
-
-        toast({
-          title: 'Ajouté au panier',
-          description: `${htmlToPlainText(product.name)} a été ajouté à votre panier`,
-        });
-        logger.info('Produit ajouté au panier depuis wishlist', { productId: product.id });
-      } catch (_error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
+      if (!product.store_id) {
         toast({
           title: 'Erreur',
-          description: errorMessage || "Impossible d'ajouter au panier",
+          description: 'Boutique non disponible',
           variant: 'destructive',
         });
-        logger.error(error instanceof Error ? error : 'Erreur ajout au panier depuis wishlist', {
-          error,
-          productId: product.id,
-        });
-      } finally {
-        setIsAddingToCart(false);
+        return;
       }
+      navigate(
+        buildCheckoutUrl({
+          productId: product.id,
+          storeId: product.store_id,
+        })
+      );
     },
-    [addItem, toast]
+    [navigate, toast]
   );
 
-  // Gérer l'achat direct - Ajoute au panier et redirige vers checkout
   const handleBuyProduct = useCallback(
     async (product: FavoriteProduct) => {
       setIsAddingToCart(true);
       try {
-        // Vérifier l'authentification
         const {
           data: { user },
         } = await supabase.auth.getUser();
@@ -415,40 +398,33 @@ export default function CustomerMyWishlist() {
           return;
         }
 
-        // Ajouter le produit au panier
-        await addItem({
-          product_id: product.id,
-          product_type: product.product_type as ProductType,
-          quantity: 1,
-        });
+        if (!product.store_id) {
+          toast({
+            title: 'Erreur',
+            description: 'Boutique non disponible',
+            variant: 'destructive',
+          });
+          return;
+        }
 
-        // Rediriger vers le checkout avec les paramètres du produit
-        const checkoutParams = new URLSearchParams({
-          productId: product.id,
-          storeId: product.store_id,
-        });
-
-        navigate(`/checkout?${checkoutParams.toString()}`);
-        logger.info('Redirection vers checkout depuis wishlist', {
-          productId: product.id,
-          storeId: product.store_id,
-        });
+        navigate(
+          buildCheckoutUrl({
+            productId: product.id,
+            storeId: product.store_id,
+          })
+        );
       } catch (_error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorMessage = _error instanceof Error ? _error.message : String(_error);
         toast({
           title: 'Erreur',
           description: errorMessage || "Impossible de procéder à l'achat",
           variant: 'destructive',
         });
-        logger.error(error instanceof Error ? error : 'Erreur achat depuis wishlist', {
-          error,
-          productId: product.id,
-        });
       } finally {
         setIsAddingToCart(false);
       }
     },
-    [addItem, navigate, toast]
+    [navigate, toast]
   );
 
   // Gérer la suppression des favoris - Style Inventaire
@@ -474,34 +450,31 @@ export default function CustomerMyWishlist() {
 
   // Actions en masse
   const handleBulkAddToCart = useCallback(async () => {
-    if (selectedProducts.size === 0) return;
-    setIsAddingToCart(true);
-    try {
-      const productsToAdd = filteredAndSortedProducts.filter(p => selectedProducts.has(p.id));
-      for (const product of productsToAdd) {
-        await addItem({
-          product_id: product.id,
-          product_type: product.product_type as ProductType,
-          quantity: 1,
-        });
-      }
+    if (selectedProducts.size !== 1) {
       toast({
-        title: 'Ajouté au panier',
-        description: `${selectedProducts.size} produit(s) ajouté(s) à votre panier`,
-      });
-      setSelectedProducts(new Set());
-      logger.info('Produits ajoutés au panier en masse', { count: selectedProducts.size });
-    } catch (_error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      toast({
-        title: 'Erreur',
-        description: errorMessage || "Impossible d'ajouter au panier",
+        title: 'Un produit à la fois',
+        description: 'Sélectionnez un seul produit pour acheter.',
         variant: 'destructive',
       });
-    } finally {
-      setIsAddingToCart(false);
+      return;
     }
-  }, [selectedProducts, filteredAndSortedProducts, addItem, toast]);
+    const product = filteredAndSortedProducts.find(p => selectedProducts.has(p.id));
+    if (!product?.store_id) {
+      toast({
+        title: 'Erreur',
+        description: 'Boutique non disponible',
+        variant: 'destructive',
+      });
+      return;
+    }
+    navigate(
+      buildCheckoutUrl({
+        productId: product.id,
+        storeId: product.store_id,
+      })
+    );
+    setSelectedProducts(new Set());
+  }, [selectedProducts, filteredAndSortedProducts, navigate, toast]);
 
   const handleBulkRemove = useCallback(async () => {
     if (selectedProducts.size === 0) return;

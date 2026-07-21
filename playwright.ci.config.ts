@@ -13,7 +13,6 @@ export default defineConfig({
     '**/physical-subscription-renewal.spec.ts',
     '**/checkout-multi-psp.spec.ts',
     '**/paypal-commerce-flow.spec.ts',
-    '**/mixed-cart-service-product.spec.ts',
     '**/referral-c1.spec.ts',
     '**/payment-v2-rollout.spec.ts',
     '**/course-enrollment-flow.spec.ts',

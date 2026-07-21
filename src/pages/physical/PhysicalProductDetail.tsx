@@ -45,7 +45,8 @@ import { ProductReviewsSummary } from '@/components/reviews/ProductReviewsSummar
 import { ReviewsList } from '@/components/reviews/ReviewsList';
 import { ReviewForm } from '@/components/reviews/ReviewForm';
 import { AdvancedProductImages } from '@/components/physical/AdvancedProductImages';
-import { useCart } from '@/hooks/cart/useCart';
+import { buildCheckoutUrl } from '@/lib/checkout/checkout-route';
+import { parsePhysicalCheckoutOptions } from '@/lib/physical/physical-checkout-display';
 import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
 import { useAnalyticsTracking } from '@/hooks/useProductAnalytics';
@@ -92,10 +93,9 @@ export default function PhysicalProductDetail() {
   const { i18n } = useTranslation();
   const { toast } = useToast();
   const { user } = useAuth();
-  const { addItem } = useCart();
   const [selectedVariant, setSelectedVariant] = useState<PhysicalProductVariant | null>(null);
   const [quantity, setQuantity] = useState(1);
-  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [isBuying, setIsBuying] = useState(false);
   const [activeTab, setActiveTab] = useState('description');
 
   // Utiliser le hook unifié pour la wishlist
@@ -202,7 +202,7 @@ export default function PhysicalProductDetail() {
     }
   };
 
-  const handleAddToCart = async () => {
+  const handleBuyNow = async () => {
     if (!product) {
       toast({
         title: '❌ Erreur',
@@ -212,7 +212,6 @@ export default function PhysicalProductDetail() {
       return;
     }
 
-    // Vérifier le stock
     const availableStock = getPhysicalSellableQuantity(
       product?.inventory as PhysicalInventoryRow[] | undefined,
       selectedVariant?.id,
@@ -228,7 +227,6 @@ export default function PhysicalProductDetail() {
       return;
     }
 
-    // Vérifier si un variant est requis mais non sélectionné
     if (product.variants && product.variants.length > 0 && !selectedVariant) {
       toast({
         title: '⚠️ Variante requise',
@@ -238,40 +236,19 @@ export default function PhysicalProductDetail() {
       return;
     }
 
-    setIsAddingToCart(true);
-
+    // Invité autorisé : le checkout canonique collecte email + adresse (COD ou en ligne).
+    setIsBuying(true);
     try {
-      await addItem({
-        product_id: productId!,
-        product_type: 'physical',
-        quantity,
-        variant_id: selectedVariant?.id || undefined,
-        variant_name: selectedVariant?.name || undefined,
-        metadata: {
-          store_id: product.store_id,
-          physical_product_id: product.physical?.id,
-          selected_at: new Date().toISOString(),
-        },
-      });
-
-      logger.info('Produit ajouté au panier', {
-        productId,
-        variantId: selectedVariant?.id,
-        quantity,
-      });
-
-      // Optionnel : Rediriger vers le panier ou réinitialiser la quantité
-      setQuantity(1);
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error("Erreur lors de l'ajout au panier", error);
-      toast({
-        title: '❌ Erreur',
-        description: errorMessage || "Impossible d'ajouter au panier",
-        variant: 'destructive',
-      });
+      navigate(
+        buildCheckoutUrl({
+          productId: productId!,
+          storeId: product.store_id,
+          variantId: selectedVariant?.id,
+          quantity,
+        })
+      );
     } finally {
-      setIsAddingToCart(false);
+      setIsBuying(false);
     }
   };
 
@@ -320,6 +297,9 @@ export default function PhysicalProductDetail() {
     selectedVariant?.id,
     product?.stock
   );
+  const physicalCheckout = parsePhysicalCheckoutOptions(product?.payment_options);
+  const buyLabel = physicalCheckout.cta_button_label;
+  const isCod = physicalCheckout.checkout_method === 'cash_on_delivery';
   const physicalWeightLabel = formatPhysicalWeight(product?.physical);
   const physicalDimensionsLabel = formatPhysicalDimensions(product?.physical);
   const availability = stockQuantity > 0 ? 'instock' : 'outofstock';
@@ -514,23 +494,28 @@ export default function PhysicalProductDetail() {
             />
 
             <Button
-              onClick={handleAddToCart}
+              onClick={handleBuyNow}
               className="w-full"
               size="lg"
-              disabled={stockQuantity === 0 || isAddingToCart}
+              disabled={stockQuantity === 0 || isBuying}
             >
-              {isAddingToCart ? (
+              {isBuying ? (
                 <>
                   <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                  Ajout en cours...
+                  Redirection…
                 </>
               ) : (
                 <>
                   <ShoppingCart className="h-5 w-5 mr-2" />
-                  {stockQuantity === 0 ? 'Rupture de stock' : 'Ajouter au panier'}
+                  {stockQuantity === 0 ? 'Rupture de stock' : buyLabel}
                 </>
               )}
             </Button>
+            <p className="text-xs text-muted-foreground text-center">
+              {isCod
+                ? 'Paiement à la livraison — aucun paiement en ligne requis'
+                : 'Paiement en ligne à la commande'}
+            </p>
 
             <div className="grid grid-cols-2 gap-2">
               <Button

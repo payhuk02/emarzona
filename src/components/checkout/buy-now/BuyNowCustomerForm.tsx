@@ -11,6 +11,8 @@ export interface BuyNowCustomerFormProps {
   formErrors: Partial<Record<keyof CheckoutFormData, string>>;
   onFieldChange: (field: keyof CheckoutFormData, value: string) => void;
   onSubmit: (e: FormEvent) => void;
+  /** Requis pour produits physiques et œuvres (livraison / COD). */
+  requireShippingAddress?: boolean;
 }
 
 export default function BuyNowCustomerForm({
@@ -18,6 +20,7 @@ export default function BuyNowCustomerForm({
   formErrors,
   onFieldChange,
   onSubmit,
+  requireShippingAddress = false,
 }: BuyNowCustomerFormProps) {
   return (
     <Card>
@@ -27,7 +30,9 @@ export default function BuyNowCustomerForm({
           Informations client
         </CardTitle>
         <CardDescription className="text-sm">
-          Vos informations de contact pour la commande
+          {requireShippingAddress
+            ? 'Coordonnées et adresse de livraison pour la commande'
+            : 'Vos informations de contact pour la commande'}
         </CardDescription>
       </CardHeader>
       <CardContent className="p-4 sm:p-6">
@@ -55,8 +60,6 @@ export default function BuyNowCustomerForm({
               </Label>
               <Input
                 id="lastName"
-                name="lastName"
-                data-testid="checkout-lastname"
                 value={formData.lastName}
                 onChange={e => onFieldChange('lastName', e.target.value)}
                 placeholder="Votre nom"
@@ -75,12 +78,10 @@ export default function BuyNowCustomerForm({
             </Label>
             <Input
               id="email"
-              name="email"
               type="email"
-              data-testid="checkout-email"
               value={formData.email}
               onChange={e => onFieldChange('email', e.target.value)}
-              placeholder="votre@email.com"
+              placeholder="vous@exemple.com"
               className={`min-h-[44px] text-base ${formErrors.email ? 'border-destructive' : ''}`}
               required
             />
@@ -93,9 +94,6 @@ export default function BuyNowCustomerForm({
             </Label>
             <Input
               id="phone"
-              name="phone"
-              type="tel"
-              data-testid="checkout-phone"
               value={formData.phone}
               onChange={e => onFieldChange('phone', e.target.value)}
               placeholder="+226 XX XX XX XX"
@@ -108,26 +106,36 @@ export default function BuyNowCustomerForm({
           <Separator />
 
           <div className="space-y-2">
-            <Label htmlFor="address">Adresse</Label>
+            <Label htmlFor="address">
+              Adresse
+              {requireShippingAddress ? <span className="text-destructive"> *</span> : null}
+            </Label>
             <Input
               id="address"
               value={formData.address}
               onChange={e => onFieldChange('address', e.target.value)}
               placeholder="123 Rue Example"
-              className="min-h-[44px] text-base"
+              className={`min-h-[44px] text-base ${formErrors.address ? 'border-destructive' : ''}`}
+              required={requireShippingAddress}
             />
+            {formErrors.address && <p className="text-sm text-destructive">{formErrors.address}</p>}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="city">Ville</Label>
+              <Label htmlFor="city">
+                Ville
+                {requireShippingAddress ? <span className="text-destructive"> *</span> : null}
+              </Label>
               <Input
                 id="city"
                 value={formData.city}
                 onChange={e => onFieldChange('city', e.target.value)}
                 placeholder="Ouagadougou"
-                className="min-h-[44px] text-base"
+                className={`min-h-[44px] text-base ${formErrors.city ? 'border-destructive' : ''}`}
+                required={requireShippingAddress}
               />
+              {formErrors.city && <p className="text-sm text-destructive">{formErrors.city}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="postalCode">Code postal</Label>
@@ -142,14 +150,19 @@ export default function BuyNowCustomerForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="country">Pays</Label>
+            <Label htmlFor="country">
+              Pays
+              {requireShippingAddress ? <span className="text-destructive"> *</span> : null}
+            </Label>
             <Input
               id="country"
               value={formData.country}
               onChange={e => onFieldChange('country', e.target.value)}
               placeholder="Burkina Faso"
-              className="min-h-[44px] text-base"
+              className={`min-h-[44px] text-base ${formErrors.country ? 'border-destructive' : ''}`}
+              required={requireShippingAddress}
             />
+            {formErrors.country && <p className="text-sm text-destructive">{formErrors.country}</p>}
           </div>
         </form>
       </CardContent>

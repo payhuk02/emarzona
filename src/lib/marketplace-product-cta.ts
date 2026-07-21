@@ -23,7 +23,7 @@ export function getMarketplaceProductCTA(
   if (productType === 'physical') {
     const parsed = parsePhysicalCheckoutOptions(paymentOptions);
     return {
-      action: 'physical_quick_order',
+      action: 'checkout',
       buyLabel: parsed.cta_button_label,
       buyAriaVerb: parsed.cta_button_label,
       showAddToCart: false,
@@ -53,7 +53,7 @@ export function getMarketplaceProductCTA(
         action: 'checkout',
         buyLabel: 'Acheter',
         buyAriaVerb: 'Acheter',
-        showAddToCart: true,
+        showAddToCart: false,
         showPhysicalCheckoutBadge: false,
       };
     default:
@@ -61,7 +61,7 @@ export function getMarketplaceProductCTA(
         action: 'checkout',
         buyLabel: 'Acheter',
         buyAriaVerb: 'Acheter',
-        showAddToCart: true,
+        showAddToCart: false,
         showPhysicalCheckoutBadge: false,
       };
   }

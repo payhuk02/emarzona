@@ -19,9 +19,6 @@ const PriceStockAlerts = lazyPage(() => import('@/pages/customer/PriceStockAlert
 const CustomerWarranties = lazyPage(() => import('@/pages/customer/CustomerWarranties'));
 const CustomerMyBookings = lazyPage(() => import('@/pages/customer/CustomerMyBookings'));
 const CustomerArtistPortal = lazyPage(() => import('@/pages/customer/CustomerArtistPortal'));
-const MultiStoreCheckoutTracking = lazyPage(
-  () => import('@/pages/checkout/MultiStoreCheckoutTracking')
-);
 const CreateProtectClaimPage = lazyPage(() => import('@/pages/disputes/CreateProtectClaimPage'));
 
 const protectedRoute = (
@@ -58,6 +55,5 @@ export const customerRoutes = (
     {protectedRoute('/account/loyalty', CustomerLoyaltyPage)}
     {protectedRoute('/account/gift-cards', CustomerMyGiftCardsPage)}
     {protectedRoute('/disputes/create', CreateProtectClaimPage)}
-    {protectedRoute('/checkout/multi-store-tracking', MultiStoreCheckoutTracking)}
   </>
 );

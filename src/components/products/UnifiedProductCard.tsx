@@ -80,7 +80,6 @@ import {
 } from '@/components/products/ArtistInfoBadges';
 import { PhysicalCheckoutMethodBadge } from '@/components/products/PhysicalCheckoutMethodBadge';
 import { PhysicalSizeChartBadge } from '@/components/products/PhysicalInfoBadges';
-import { PhysicalQuickOrderDialog } from '@/components/physical/PhysicalQuickOrderDialog';
 import { parsePhysicalCheckoutOptions } from '@/lib/physical/physical-checkout-display';
 import {
   ServicePricingTypeBadge,
@@ -117,7 +116,6 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
   const { favorites, toggleFavorite } = useMarketplaceFavorites();
   const isFavorite = favorites.has(product.id);
   const [isZoomOpen, setIsZoomOpen] = useState(false);
-  const [quickOrderOpen, setQuickOrderOpen] = useState(false);
 
   const isDigital = product.type === 'digital';
   const isArtist = product.type === 'artist';
@@ -998,10 +996,6 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
                 e.preventDefault();
                 e.stopPropagation();
                 if (product.type === 'physical' && product.stock === 0) return;
-                if (product.type === 'physical') {
-                  setQuickOrderOpen(true);
-                  return;
-                }
                 void marketplaceBuy.handleBuyClick();
               }}
             />
@@ -1019,21 +1013,6 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
         loading={marketplaceBuy.loading}
         onGuestConfirm={marketplaceBuy.proceedWithCustomer}
       />
-
-      {product.type === 'physical' && product.store_id && (
-        <PhysicalQuickOrderDialog
-          open={quickOrderOpen}
-          onOpenChange={setQuickOrderOpen}
-          product={{
-            productId: product.id,
-            storeId: product.store_id,
-            name: product.name,
-            price: priceInfo.price,
-            currency: product.currency || 'XOF',
-            payment_options: product.payment_options,
-          }}
-        />
-      )}
     </Card>
   );
 };

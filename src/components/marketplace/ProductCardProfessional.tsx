@@ -26,7 +26,6 @@ import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { useMarketplaceFavorites } from '@/hooks/useMarketplaceFavorites';
-import { useCart } from '@/hooks/cart/useCart';
 import { PriceStockAlertButton } from '@/components/marketplace/PriceStockAlertButton';
 import { PaymentOptionsBadge, getPaymentOptions } from '@/components/products/PaymentOptionsBadge';
 import { PricingModelBadge } from '@/components/products/PricingModelBadge';
@@ -84,7 +83,6 @@ const ProductCardProfessionalComponent = ({
 }: ProductCardProfessionalProps) => {
   const [_userId, setUserId] = useState<string | null>(null);
   const { toast } = useToast();
-  const { addItem } = useCart();
 
   // Hook centralisé pour favoris synchronisés
   const { favorites, toggleFavorite } = useMarketplaceFavorites();
@@ -151,38 +149,6 @@ const ProductCardProfessionalComponent = ({
 
   const handleBuyNow = () => {
     void marketplaceBuy.handleBuyClick();
-  };
-
-  const handleAddToCart = async () => {
-    if (!cta.showAddToCart) return;
-
-    if (!product.store_id) {
-      toast({
-        title: 'Erreur',
-        description: 'Boutique non disponible',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    try {
-      await addItem({
-        product_id: product.id,
-        product_type: (product.product_type || 'digital') as
-          | 'digital'
-          | 'physical'
-          | 'service'
-          | 'course',
-        quantity: 1,
-      });
-    } catch (_error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue';
-      logger.error("Erreur lors de l'ajout au panier:", {
-        error: errorMessage,
-        productId: product.id,
-      });
-      // Error already handled in hook
-    }
   };
 
   const handleFavorite = async (e: React.MouseEvent) => {
@@ -576,18 +542,6 @@ const ProductCardProfessionalComponent = ({
                 <span className="lg:hidden truncate text-white">Voir</span>
               </Link>
             </Button>
-
-            {cta.showAddToCart ? (
-              <Button
-                onClick={handleAddToCart}
-                size="sm"
-                variant="outline"
-                className="product-action-button min-h-[44px] h-11 px-3 text-sm border-purple-300 dark:border-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:border-purple-400 dark:hover:border-purple-500 transition-all duration-200 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50"
-                aria-label={`Ajouter ${product.name} au panier`}
-              >
-                <ShoppingBag className="h-4 w-4" aria-hidden="true" />
-              </Button>
-            ) : null}
           </div>
 
           <Button

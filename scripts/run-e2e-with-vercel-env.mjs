@@ -10,6 +10,7 @@
  *   npm run test:e2e:vertical-paid:local
  *   node scripts/run-e2e-with-vercel-env.mjs commerce-gating
  *   node scripts/run-e2e-with-vercel-env.mjs vertical-paid
+ *   node scripts/run-e2e-with-vercel-env.mjs mixed-cart
  */
 import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
@@ -24,6 +25,7 @@ const scripts = {
   'artist-wizard': 'test:e2e:artist-wizard',
   'product-wizards': 'test:e2e:product-wizards',
   'vertical-paid': 'test:e2e:vertical-paid',
+  'mixed-cart': 'test:e2e:mixed-cart',
 };
 
 const npmScript = scripts[target];

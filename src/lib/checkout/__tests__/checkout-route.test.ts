@@ -5,10 +5,10 @@ import {
   CHECKOUT_LEGACY_REDIRECTS,
 } from '../checkout-route';
 
-describe('checkout-route (Epic 3.6)', () => {
-  it('cart mode when no product params', () => {
-    expect(resolveCheckoutMode(new URLSearchParams())).toBe('cart');
-    expect(buildCheckoutUrl()).toBe('/checkout');
+describe('checkout-route', () => {
+  it('invalid mode when no product params', () => {
+    expect(resolveCheckoutMode(new URLSearchParams())).toBe('invalid');
+    expect(buildCheckoutUrl()).toBe('/marketplace');
   });
 
   it('buy_now mode with productId', () => {
@@ -16,6 +16,19 @@ describe('checkout-route (Epic 3.6)', () => {
     expect(resolveCheckoutMode(sp)).toBe('buy_now');
     expect(buildCheckoutUrl({ productId: 'p1', storeId: 's1' })).toBe(
       '/checkout?productId=p1&storeId=s1'
+    );
+  });
+
+  it('supports service scheduling params', () => {
+    expect(
+      buildCheckoutUrl({
+        productId: 'p1',
+        storeId: 's1',
+        scheduledAt: '2026-07-21T10:00:00.000Z',
+        participants: 2,
+      })
+    ).toBe(
+      '/checkout?productId=p1&storeId=s1&scheduledAt=2026-07-21T10%3A00%3A00.000Z&participants=2'
     );
   });
 
@@ -27,7 +40,8 @@ describe('checkout-route (Epic 3.6)', () => {
     );
   });
 
-  it('legacy paths map to canonical checkout', () => {
-    expect(CHECKOUT_LEGACY_REDIRECTS['/checkout/cart']).toBe('/checkout');
+  it('legacy paths map to marketplace', () => {
+    expect(CHECKOUT_LEGACY_REDIRECTS['/checkout/cart']).toBe('/marketplace');
+    expect(CHECKOUT_LEGACY_REDIRECTS['/cart']).toBe('/marketplace');
   });
 });

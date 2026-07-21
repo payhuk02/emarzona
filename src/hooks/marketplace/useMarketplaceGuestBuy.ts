@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { getMarketplaceProductCTA } from '@/lib/marketplace-product-cta';
+import { buildCheckoutUrl } from '@/lib/checkout/checkout-route';
 import type { GuestCustomerInfo } from '@/components/checkout/GuestPurchaseDialog';
 import type { PhysicalProductPaymentOptions } from '@/types/physical-product';
 
@@ -31,7 +32,6 @@ export function useMarketplaceGuestBuy({
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [guestOpen, setGuestOpen] = useState(false);
-  const [physicalOpen, setPhysicalOpen] = useState(false);
 
   const cta = getMarketplaceProductCTA(product.product_type, product.payment_options);
 
@@ -62,18 +62,16 @@ export function useMarketplaceGuestBuy({
           return;
         }
 
-        const checkoutParams = new URLSearchParams({
-          productId: product.id,
-          storeId: product.store_id,
-          guestEmail: customer.email,
-        });
-        if (customer.fullName) checkoutParams.set('guestName', customer.fullName);
-        if (customer.phone) checkoutParams.set('guestPhone', customer.phone);
-
-        if (cta.action === 'checkout') {
-          navigate(`/checkout?${checkoutParams.toString()}`);
-          return;
-        }
+        // physical (COD ou en ligne), digital, artist → checkout canonique
+        navigate(
+          buildCheckoutUrl({
+            productId: product.id,
+            storeId: product.store_id,
+            guestEmail: customer.email,
+            guestName: customer.fullName,
+            guestPhone: customer.phone,
+          })
+        );
       } catch (e: unknown) {
         toast({
           title: 'Erreur',
@@ -98,11 +96,6 @@ export function useMarketplaceGuestBuy({
       return;
     }
 
-    if (cta.action === 'physical_quick_order') {
-      setPhysicalOpen(true);
-      return;
-    }
-
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -116,7 +109,7 @@ export function useMarketplaceGuestBuy({
     }
 
     setGuestOpen(true);
-  }, [cta.action, proceedWithCustomer, product.store_id, toast]);
+  }, [proceedWithCustomer, product.store_id, toast]);
 
   return {
     product,
@@ -124,8 +117,9 @@ export function useMarketplaceGuestBuy({
     loading,
     guestOpen,
     setGuestOpen,
-    physicalOpen,
-    setPhysicalOpen,
+    /** @deprecated Panier rapide physique retiré — toujours fermé */
+    physicalOpen: false as boolean,
+    setPhysicalOpen: (_open: boolean) => undefined,
     handleBuyClick,
     proceedWithCustomer,
   };

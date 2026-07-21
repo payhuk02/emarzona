@@ -39,10 +39,16 @@ import { calculateBuyNowPrice } from '@/pages/checkout/buy-now/checkout-buy-now-
 import { htmlToPlainText } from '@/lib/html-sanitizer';
 import { isSupportedCurrency, type Currency } from '@/lib/currency-converter';
 import { useCreatePhysicalOrder } from '@/hooks/orders/useCreatePhysicalOrder';
+import { useCreateServiceOrder } from '@/hooks/orders/useCreateServiceOrder';
 import { parsePhysicalCheckoutOptions } from '@/lib/physical/physical-checkout-display';
 import { notifyPhysicalOrderPlaced } from '@/lib/notifications/physical-order-notification';
 import { buildGuestOrderConfirmationPath } from '@/lib/physical/guest-order-confirmation';
 import { useCreateOrder } from '@/hooks/orders/useCreateOrder';
+import { persistArtistDedication } from '@/lib/checkout/artist-dedications';
+import {
+  clearCheckoutDedication,
+  readCheckoutDedication,
+} from '@/lib/checkout/checkout-dedication-storage';
 import { StoreThemeProvider } from '@/components/storefront/StoreThemeProvider';
 import { STOREFRONT_STORE_PUBLIC_SELECT } from '@/lib/storefront/store-public-fields';
 import type { Store as ThemedStore } from '@/hooks/useStores';
@@ -103,6 +109,11 @@ const Checkout = () => {
   const productId = searchParams.get('productId');
   const storeId = searchParams.get('storeId');
   const variantId = searchParams.get('variantId');
+  const quantityParam = searchParams.get('quantity');
+  const checkoutQuantity = Math.max(1, Number.parseInt(quantityParam ?? '1', 10) || 1);
+  const scheduledAt = searchParams.get('scheduledAt');
+  const participantsParam = searchParams.get('participants');
+  const serviceParticipants = Math.max(1, Number.parseInt(participantsParam ?? '1', 10) || 1);
   const guestEmail = searchParams.get('guestEmail');
   const guestName = searchParams.get('guestName');
   const guestPhone = searchParams.get('guestPhone');
@@ -144,6 +155,7 @@ const Checkout = () => {
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof CheckoutFormData, string>>>({});
 
   const { mutateAsync: createPhysicalOrder } = useCreatePhysicalOrder();
+  const { mutateAsync: createServiceOrder } = useCreateServiceOrder();
   const { mutateAsync: createOrder } = useCreateOrder();
 
   const isGuestBuyer = !user;
@@ -341,10 +353,12 @@ const Checkout = () => {
    * - Retourne true uniquement si aucune erreur
    */
   const validateForm = useCallback((): boolean => {
-    const errors = validateBuyNowForm(formData);
+    const requireShippingAddress =
+      product?.product_type === 'physical' || product?.product_type === 'artist';
+    const errors = validateBuyNowForm(formData, { requireShippingAddress });
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
-  }, [formData]);
+  }, [formData, product?.product_type]);
 
   const handleCouponApply = useCallback(
     (couponId: string, discountAmount: number, code: string) => {
@@ -441,6 +455,7 @@ const Checkout = () => {
         const customerPhone = normalizePhoneForPayment(formData.phone, formData.country);
 
         if (isPhysical) {
+          const checkoutMethod = physicalCheckout?.checkout_method ?? 'online';
           const result = await createPhysicalOrder({
             physicalProductId: '',
             productId: product.id,
@@ -448,9 +463,10 @@ const Checkout = () => {
             customerEmail: formData.email,
             customerName,
             customerPhone,
-            quantity: 1,
+            quantity: checkoutQuantity,
             variantId: selectedVariant?.id,
             guestCheckout: isGuestBuyer,
+            checkoutMethod,
             shippingAddress: {
               street: formData.address,
               city: formData.city,
@@ -465,16 +481,17 @@ const Checkout = () => {
             productName: product.name ? htmlToPlainText(product.name) : 'Produit',
             orderNumber: result.orderNumber ?? result.orderId.slice(0, 8),
             orderId: result.orderId,
-            quantity: 1,
+            quantity: checkoutQuantity,
             totalAmount: finalPrice,
             currency: finalCurrency,
-            checkoutMethod: physicalCheckout?.checkout_method ?? 'online',
+            checkoutMethod,
             customerName,
             customerPhone,
             shippingSummary: `${formData.address}, ${formData.city}`,
           });
 
-          if (result.cashOnDelivery || !result.checkoutUrl) {
+          // COD uniquement : confirmation sans PSP. Paiement en ligne exige checkoutUrl.
+          if (result.cashOnDelivery) {
             const orderNumber = result.orderNumber ?? result.orderId.slice(0, 8);
             if (user) {
               navigate('/account/orders', { replace: true });
@@ -492,6 +509,10 @@ const Checkout = () => {
             }
             setSubmitting(false);
             return;
+          }
+
+          if (!result.checkoutUrl) {
+            throw new Error('URL de paiement non reçue pour le paiement en ligne');
           }
 
           try {
@@ -523,16 +544,63 @@ const Checkout = () => {
           return;
         }
 
-        // Services : réservation requise avant paiement
+        // Service : créneau transmis depuis la fiche service
         if (product.product_type === 'service') {
-          const params = new URLSearchParams({ guestEmail: formData.email });
-          if (customerName) params.set('guestName', customerName);
-          if (customerPhone) params.set('guestPhone', customerPhone);
-          navigate(`/service/${product.id}?${params.toString()}`);
-          setSubmitting(false);
+          if (!scheduledAt) {
+            const params = new URLSearchParams({ guestEmail: formData.email });
+            if (customerName) params.set('guestName', customerName);
+            if (customerPhone) params.set('guestPhone', customerPhone);
+            navigate(`/service/${product.id}?${params.toString()}`);
+            setSubmitting(false);
+            return;
+          }
+
+          const { data: serviceProductRow } = await supabase
+            .from('service_products')
+            .select('id, duration_minutes')
+            .eq('product_id', product.id)
+            .maybeSingle();
+
+          if (!serviceProductRow?.id) {
+            throw new Error('Service introuvable');
+          }
+
+          const serviceResult = await createServiceOrder({
+            serviceProductId: serviceProductRow.id,
+            productId: product.id,
+            storeId: store.id,
+            customerEmail: formData.email,
+            customerName,
+            customerPhone,
+            bookingDateTime: scheduledAt,
+            numberOfParticipants: serviceParticipants,
+            durationMinutes: serviceProductRow.duration_minutes ?? undefined,
+            notes: 'Réservation via checkout direct',
+            checkoutMode: 'immediate',
+          });
+
+          if (!serviceResult.checkoutUrl) {
+            toast({
+              title: 'Réservation confirmée',
+              description: 'Votre réservation a été enregistrée.',
+            });
+            navigate('/account/bookings', { replace: true });
+            setSubmitting(false);
+            return;
+          }
+
+          safeRedirect(serviceResult.checkoutUrl, () => {
+            toast({
+              title: 'Erreur de paiement',
+              description: 'URL de paiement invalide. Veuillez réessayer.',
+              variant: 'destructive',
+            });
+            setSubmitting(false);
+          });
           return;
         }
 
+        const dedication = readCheckoutDedication(product.id);
         const orderResult = await createOrder({
           productId: product.id,
           storeId: store.id,
@@ -540,6 +608,7 @@ const Checkout = () => {
           customerName,
           customerPhone,
           guestCheckout: isGuestBuyer,
+          quantity: checkoutQuantity,
           digitalOptions: appliedCouponCode
             ? {
                 couponCode: appliedCouponCode.code,
@@ -555,9 +624,26 @@ const Checkout = () => {
                     postal_code: formData.postalCode || '—',
                     country: formData.country,
                   },
+                  quantity: checkoutQuantity,
                 }
               : undefined,
         });
+
+        if (product.product_type === 'artist' && dedication && orderResult.orderId) {
+          const { data: artistRow } = await supabase
+            .from('artist_products')
+            .select('id')
+            .eq('product_id', product.id)
+            .maybeSingle();
+          if (artistRow?.id) {
+            await persistArtistDedication(orderResult.orderId, {
+              artistProductId: artistRow.id,
+              productId: product.id,
+              dedication,
+            });
+            clearCheckoutDedication(product.id);
+          }
+        }
 
         if (!orderResult.checkoutUrl) {
           throw new Error('URL de paiement non reçue');
@@ -636,11 +722,15 @@ const Checkout = () => {
       toast,
       validateForm,
       createPhysicalOrder,
+      createServiceOrder,
       createOrder,
       navigate,
       physicalCheckout,
       isGuestBuyer,
       appliedCouponCode,
+      checkoutQuantity,
+      scheduledAt,
+      serviceParticipants,
     ]
   );
 
@@ -768,6 +858,9 @@ const Checkout = () => {
                   formErrors={formErrors}
                   onFieldChange={handleFieldChange}
                   onSubmit={handleSubmit}
+                  requireShippingAddress={
+                    product.product_type === 'physical' || product.product_type === 'artist'
+                  }
                 />
               </Suspense>
             </div>

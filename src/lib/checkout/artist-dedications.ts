@@ -59,6 +59,35 @@ function readArtistProductId(item: CartItem): string | null {
   return typeof artistProductId === 'string' ? artistProductId : null;
 }
 
+export async function persistArtistDedication(
+  orderId: string,
+  params: {
+    artistProductId: string;
+    productId: string;
+    dedication: CartDedicationPayload;
+  }
+): Promise<void> {
+  const { error } = await supabase.from('artist_product_dedications').insert({
+    artist_product_id: params.artistProductId,
+    product_id: params.productId,
+    order_id: orderId,
+    dedication_text: params.dedication.dedication_text,
+    recipient_name: params.dedication.recipient_name ?? null,
+    font_style: params.dedication.font_style ?? 'standard',
+    text_position: params.dedication.text_position ?? 'center',
+    notes: params.dedication.notes ?? null,
+    status: 'pending',
+  });
+
+  if (error) {
+    logger.error('Failed to persist artist dedication', {
+      orderId,
+      productId: params.productId,
+      error,
+    });
+  }
+}
+
 export async function persistArtistDedicationsFromCartItems(
   orderId: string,
   items: CartItem[]

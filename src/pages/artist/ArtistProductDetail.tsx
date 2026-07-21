@@ -56,7 +56,8 @@ const ArtworkProvenanceDisplay = lazy(() =>
 );
 
 import { ProductImages } from '@/components/shared';
-import { useCart } from '@/hooks/cart/useCart';
+import { buildCheckoutUrl } from '@/lib/checkout/checkout-route';
+import { storeCheckoutDedication } from '@/lib/checkout/checkout-dedication-storage';
 import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
 import { useAnalyticsTracking } from '@/hooks/useProductAnalytics';
@@ -87,9 +88,8 @@ const ArtistProductDetail = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
-  const { addItem } = useCart();
   const [quantity, setQuantity] = useState(1);
-  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [isBuying, setIsBuying] = useState(false);
   const [showDedicationForm, setShowDedicationForm] = useState(false);
   const [pendingDedication, setPendingDedication] = useState<CartDedicationPayload | null>(null);
 
@@ -259,7 +259,7 @@ const ArtistProductDetail = () => {
     }
   };
 
-  const handleAddToCart = async () => {
+  const handleBuyNow = async () => {
     if (!product) {
       toast({
         title: '❌ Erreur',
@@ -269,36 +269,38 @@ const ArtistProductDetail = () => {
       return;
     }
 
-    setIsAddingToCart(true);
+    if (!user) {
+      toast({
+        title: 'Authentification requise',
+        description: 'Veuillez vous connecter pour acheter',
+        variant: 'destructive',
+      });
+      navigate('/login');
+      return;
+    }
+
+    setIsBuying(true);
 
     try {
-      await addItem({
-        product_id: productId!,
-        product_type: 'artist',
-        quantity,
-        metadata: {
-          store_id: product.store_id,
-          artist_product_id: product.artist?.id,
-          selected_at: new Date().toISOString(),
-          ...(pendingDedication ? { dedication: pendingDedication } : {}),
-        },
-      });
-
-      logger.info('Produit ajouté au panier', {
-        productId,
-        quantity,
-      });
-
-      setQuantity(1);
+      if (pendingDedication) {
+        storeCheckoutDedication(productId!, pendingDedication);
+      }
+      navigate(
+        buildCheckoutUrl({
+          productId: productId!,
+          storeId: product.store_id,
+          quantity,
+        })
+      );
     } catch (error) {
-      logger.error("Erreur lors de l'ajout au panier", error);
+      logger.error("Erreur lors de l'achat", error);
       toast({
         title: '❌ Erreur',
-        description: error.message || "Impossible d'ajouter au panier",
+        description: error instanceof Error ? error.message : "Impossible d'acheter",
         variant: 'destructive',
       });
     } finally {
-      setIsAddingToCart(false);
+      setIsBuying(false);
     }
   };
 
@@ -639,23 +641,23 @@ const ArtistProductDetail = () => {
           {/* Actions */}
           <div className="space-y-3">
             <Button
-              data-testid="artist-add-to-cart"
-              onClick={handleAddToCart}
+              data-testid="artist-buy-now"
+              onClick={handleBuyNow}
               className="w-full"
               size="lg"
-              disabled={!product?.is_active || isAddingToCart}
-              aria-label={!product?.is_active ? 'Produit non disponible' : 'Ajouter au panier'}
+              disabled={!product?.is_active || isBuying}
+              aria-label={!product?.is_active ? 'Produit non disponible' : 'Acheter maintenant'}
               aria-describedby="product-title"
             >
-              {isAddingToCart ? (
+              {isBuying ? (
                 <>
                   <Loader2 className="h-5 w-5 mr-2 animate-spin" aria-hidden="true" />
-                  <span aria-live="polite">Ajout en cours...</span>
+                  <span aria-live="polite">Redirection…</span>
                 </>
               ) : (
                 <>
                   <ShoppingCart className="h-5 w-5 mr-2" aria-hidden="true" />
-                  {!product?.is_active ? 'Non disponible' : 'Ajouter au panier'}
+                  {!product?.is_active ? 'Non disponible' : 'Acheter maintenant'}
                 </>
               )}
             </Button>

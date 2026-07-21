@@ -1,7 +1,7 @@
 /**
  * Composant OneClickUpsell - Popup d'upsell après achat
  * Date: 26 Janvier 2025
- * 
+ *
  * Fonctionnalités:
  * - Popup après achat réussi
  * - Suggestions produits complémentaires
@@ -23,8 +23,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { X, ShoppingBag, TrendingDown, Sparkles, Check } from '@/components/icons';
-import { useCart } from '@/hooks/cart/useCart';
-import { useToast } from '@/hooks/use-toast';
+import { buildCheckoutUrl } from '@/lib/checkout/checkout-route';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
@@ -39,6 +38,7 @@ interface UpsellProduct {
   currency: string;
   slug: string;
   store_slug: string;
+  store_id?: string;
   discount_percentage?: number;
 }
 
@@ -60,7 +60,6 @@ export function OneClickUpsell({
   const [suggestedProducts, setSuggestedProducts] = useState<UpsellProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<UpsellProduct | null>(null);
-  const { addItem } = useCart();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -78,7 +77,8 @@ export function OneClickUpsell({
       // Stratégie 1: Produits de la même catégorie
       const { data: categoryProducts } = await supabase
         .from('products')
-        .select(`
+        .select(
+          `
           id,
           name,
           description,
@@ -87,8 +87,10 @@ export function OneClickUpsell({
           currency,
           slug,
           category,
+          store_id,
           stores!inner (slug)
-        `)
+        `
+        )
         .eq('product_type', purchasedProductType)
         .neq('id', purchasedProductId)
         .eq('is_active', true)
@@ -98,7 +100,8 @@ export function OneClickUpsell({
       // Stratégie 2: Bundles contenant ce produit
       const { data: bundles } = await supabase
         .from('digital_bundles')
-        .select(`
+        .select(
+          `
           id,
           name,
           short_description,
@@ -108,16 +111,42 @@ export function OneClickUpsell({
           savings_percentage,
           slug,
           stores!inner (slug)
-        `)
+        `
+        )
         .eq('status', 'active')
         .eq('is_available', true)
         .limit(2);
 
+      type CategoryProductRow = {
+        id: string;
+        name: string;
+        description: string | null;
+        image_url: string | null;
+        price: number;
+        currency: string | null;
+        slug: string;
+        store_id: string;
+        stores: { slug: string };
+      };
+
+      type BundleRow = {
+        id: string;
+        name: string;
+        short_description: string | null;
+        image_url: string | null;
+        bundle_price: number;
+        original_price: number | null;
+        savings_percentage: number | null;
+        slug: string;
+        store_id?: string;
+        stores: { slug: string };
+      };
+
       // Mapper les résultats
-      const  mappedProducts: UpsellProduct[] = [];
+      const mappedProducts: UpsellProduct[] = [];
 
       if (categoryProducts) {
-        categoryProducts.forEach((product: any) => {
+        categoryProducts.forEach((product: CategoryProductRow) => {
           mappedProducts.push({
             id: product.id,
             name: product.name,
@@ -127,12 +156,13 @@ export function OneClickUpsell({
             currency: product.currency || 'XOF',
             slug: product.slug,
             store_slug: product.stores.slug,
+            store_id: product.store_id,
           });
         });
       }
 
       if (bundles) {
-        bundles.forEach((bundle: any) => {
+        bundles.forEach((bundle: BundleRow) => {
           mappedProducts.push({
             id: bundle.id,
             name: bundle.name,
@@ -143,6 +173,7 @@ export function OneClickUpsell({
             currency: 'XOF',
             slug: bundle.slug,
             store_slug: bundle.stores.slug,
+            store_id: bundle.store_id,
             discount_percentage: bundle.savings_percentage,
           });
         });
@@ -162,42 +193,32 @@ export function OneClickUpsell({
     try {
       setSelectedProduct(product);
 
-      // Déterminer le type de produit
-      const productType = product.discount_percentage ? 'digital' : purchasedProductType;
+      if (!product.store_id) {
+        throw new Error('Boutique non disponible');
+      }
 
-      await addItem.mutateAsync({
-        productId: product.id,
-        productType: productType as any,
-        quantity: 1,
-        price: product.price,
-        metadata: {
-          is_upsell: true,
-          original_purchase: purchasedProductId,
-        },
-      });
-
-      // Tracking
       try {
         await supabase.from('upsell_tracking').insert({
           original_product_id: purchasedProductId,
           upsell_product_id: product.id,
-          action: 'added_to_cart',
+          action: 'checkout_redirect',
         });
-      } catch (trackError) {
+      } catch {
         // Ignore tracking errors
       }
 
-      toast({
-        title: '✅ Ajouté au panier',
-        description: `${product.name} a été ajouté à votre panier`,
-      });
-
       onClose();
-      navigate('/cart');
-    } catch ( _error: any) {
+      navigate(
+        buildCheckoutUrl({
+          productId: product.id,
+          storeId: product.store_id,
+        })
+      );
+      onPurchase?.(product.id);
+    } catch (_error: unknown) {
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible d\'ajouter au panier',
+        description: _error instanceof Error ? _error.message : "Impossible d'ouvrir le checkout",
         variant: 'destructive',
       });
     } finally {
@@ -225,14 +246,19 @@ export function OneClickUpsell({
                 Complétez votre achat avec ces produits complémentaires à prix réduit
               </DialogDescription>
             </div>
-            <Button variant="ghost" size="icon" onClick={onClose} aria-label="Fermer l'offre complémentaire">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              aria-label="Fermer l'offre complémentaire"
+            >
               <X className="h-4 w-4" />
             </Button>
           </div>
         </DialogHeader>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 my-4">
-          {suggestedProducts.map((product) => (
+          {suggestedProducts.map(product => (
             <Card key={product.id} className="hover:shadow-lg transition-shadow">
               <div className="relative">
                 {product.image_url ? (
@@ -309,10 +335,3 @@ export function OneClickUpsell({
     </Dialog>
   );
 }
-
-
-
-
-
-
-

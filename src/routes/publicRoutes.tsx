@@ -33,19 +33,7 @@ const HistoryBasedRecommendations = lazyPage(() => import('@/pages/HistoryBasedR
 const Discover = lazyPage(() => import('@/pages/Discover'));
 const Trending = lazyPage(() => import('@/pages/Trending'));
 const CommunityPage = lazyPage(() => import('@/pages/community/CommunityPage'));
-const Cart = lazyPage(() => import('@/pages/Cart'));
-const CartEnhanced = lazyPage(() => import('@/pages/CartEnhanced'));
 const Checkout = lazyPage(() => import('@/pages/checkout/CheckoutPage'));
-const CheckoutLegacyRedirect = lazyPage(() =>
-  import('@/pages/checkout/CheckoutLegacyRedirect').then(m => ({
-    default: () => <m.CheckoutLegacyRedirect legacyPath="/checkout/cart" />,
-  }))
-);
-const CartCheckoutLegacyRedirect = lazyPage(() =>
-  import('@/pages/checkout/CheckoutLegacyRedirect').then(m => ({
-    default: () => <m.CheckoutLegacyRedirect legacyPath="/cart/checkout" />,
-  }))
-);
 const NotFound = lazyPage(() => import('@/pages/NotFound'));
 const StatusPage = lazyPage(() => import('@/pages/StatusPage'));
 const CourseDetail = lazyPage(() => import('@/pages/courses/CourseDetail'));
@@ -218,11 +206,11 @@ export const publicRoutes = (
     <Route path="/personalization/quiz" element={<StyleQuizPage />} />
     <Route path="/personalization/recommendations" element={<PersonalizedRecommendationsPage />} />
     <Route path="/community" element={<CommunityPage />} />
-    <Route path="/cart" element={<CartEnhanced />} />
-    <Route path="/cart-old" element={<Navigate to="/cart" replace />} />
+    <Route path="/cart" element={<Navigate to="/marketplace" replace />} />
+    <Route path="/cart-old" element={<Navigate to="/marketplace" replace />} />
     <Route path="/checkout" element={<Checkout />} />
-    <Route path="/checkout/cart" element={<CheckoutLegacyRedirect />} />
-    <Route path="/cart/checkout" element={<CartCheckoutLegacyRedirect />} />
+    <Route path="/checkout/cart" element={<Navigate to="/marketplace" replace />} />
+    <Route path="/cart/checkout" element={<Navigate to="/marketplace" replace />} />
 
     {/* Storefront — Redirection vers sous-domaine myemarzona.shop */}
     <Route path="/store/:slug/product/:productSlug" element={<OldProductRouteRedirect />} />

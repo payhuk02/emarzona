@@ -31,7 +31,7 @@ import {
 } from '@/components/ui/table';
 import { Layers, Plus, ShoppingCart, Trash2, Package, Loader2, Sparkles } from 'lucide-react';
 import { useStore } from '@/hooks/useStore';
-import { useCart } from '@/hooks/cart/useCart';
+import { useToast } from '@/hooks/use-toast';
 import {
   useCreateCrossTypeBundle,
   useCrossTypeBundles,
@@ -39,10 +39,6 @@ import {
   useStoreProductsForBundlePicker,
   useToggleCrossTypeBundleActive,
 } from '@/hooks/bundles/useCrossTypeBundles';
-import {
-  buildCartItemFromCrossTypeBundle,
-  fetchCrossTypeBundleWithItems,
-} from '@/lib/bundles/cross-type-bundle-store';
 import { validateCrossTypeBundleLines } from '@/lib/checkout/cross-type-bundle';
 import { hasMultiTypeCatalog } from '@/lib/commerce/cross-type-bundle-access';
 import { getCartProductTypeLabel } from '@/lib/cart/cart-product-type';
@@ -59,7 +55,7 @@ function listPrice(product: StoreProductForBundlePicker): number {
 export function CrossTypeBundleManager() {
   const navigate = useNavigate();
   const { store } = useStore();
-  const { addCrossTypeBundle } = useCart();
+  const { toast } = useToast();
   const storeId = store?.id ?? null;
 
   const { data: bundles, isLoading } = useCrossTypeBundles(storeId);
@@ -73,7 +69,6 @@ export function CrossTypeBundleManager() {
   const [description, setDescription] = useState('');
   const [bundlePrice, setBundlePrice] = useState(0);
   const [selected, setSelected] = useState<SelectedLine[]>([]);
-  const [addingId, setAddingId] = useState<string | null>(null);
 
   const originalPrice = useMemo(
     () => selected.reduce((sum, line) => sum + line.list_price * line.quantity, 0),
@@ -129,16 +124,13 @@ export function CrossTypeBundleManager() {
     resetForm();
   };
 
-  const handleAddToCart = async (bundleId: string) => {
-    setAddingId(bundleId);
-    try {
-      const bundle = await fetchCrossTypeBundleWithItems(bundleId);
-      if (!bundle) throw new Error('Pack introuvable');
-      const cartItem = buildCartItemFromCrossTypeBundle(bundle, store?.currency ?? 'XOF');
-      await addCrossTypeBundle(cartItem);
-    } finally {
-      setAddingId(null);
-    }
+  const handleAddToCart = async (_bundleId: string) => {
+    toast({
+      title: 'Achat pack indisponible',
+      description:
+        'Les packs multi-produits ne sont plus disponibles. Achetez chaque produit séparément.',
+      variant: 'destructive',
+    });
   };
 
   if (!storeId) {
@@ -239,17 +231,11 @@ export function CrossTypeBundleManager() {
                         <Button
                           size="sm"
                           variant="outline"
-                          disabled={!bundle.is_active || addingId === bundle.id}
+                          disabled={!bundle.is_active}
                           onClick={() => handleAddToCart(bundle.id)}
                         >
-                          {addingId === bundle.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <>
-                              <ShoppingCart className="h-4 w-4 mr-1" />
-                              Panier
-                            </>
-                          )}
+                          <ShoppingCart className="h-4 w-4 mr-1" />
+                          Panier
                         </Button>
                         <Button
                           size="sm"
@@ -372,7 +358,7 @@ export function CrossTypeBundleManager() {
           </div>
 
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => navigate('/cart')}>
+            <Button variant="outline" onClick={() => navigate('/marketplace')}>
               Voir le panier
             </Button>
             <Button

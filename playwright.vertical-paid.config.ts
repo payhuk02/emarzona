@@ -17,7 +17,7 @@ export default defineConfig({
   testMatch: [
     '**/course-paid-enrollment.spec.ts',
     '**/artist-paid-purchase.spec.ts',
-    '**/mixed-cart-book-pay-confirm.spec.ts',
+    '**/direct-checkout-route.spec.ts',
   ],
   fullyParallel: false,
   forbidOnly: !!process.env.CI,

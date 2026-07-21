@@ -1,15 +1,13 @@
 /**
- * Composant BundleCard - Carte bundle pour le marketplace
- * Date: 26 Janvier 2025
+ * BundleCard — achat direct via checkout mono-produit.
  */
-
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Package, ShoppingBag, TrendingDown, Star } from '@/components/icons';
-import { useCart } from '@/hooks/cart/useCart';
+import { buildCheckoutUrl } from '@/lib/checkout/checkout-route';
 import { useToast } from '@/hooks/use-toast';
 import type { DigitalProductBundle } from '@/hooks/digital/useDigitalBundles';
 
@@ -19,38 +17,29 @@ interface BundleCardProps {
 }
 
 const BundleCardComponent = ({ bundle, storeSlug: _storeSlug }: BundleCardProps) => {
-  const { addItem } = useCart();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
-  const handleAddToCart = async (e: React.MouseEvent) => {
+  const handleBuyNow = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
-    try {
-      await addItem.mutateAsync({
-        productId: bundle.id,
-        productType: 'digital' as const,
-        quantity: 1,
-        price: bundle.bundle_price,
-        metadata: {
-          is_bundle: true,
-          bundle_id: bundle.id,
-        },
-      });
-
-      toast({
-        title: 'Bundle ajouté au panier',
-        description: `${bundle.name} a été ajouté à votre panier`,
-      });
-    } catch ( _error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Impossible d'ajouter au panier";
+    const productId = bundle.product_id || bundle.id;
+    if (!bundle.store_id || !productId) {
       toast({
         title: 'Erreur',
-        description: errorMessage,
+        description: 'Bundle non disponible',
         variant: 'destructive',
       });
+      return;
     }
+
+    navigate(
+      buildCheckoutUrl({
+        productId,
+        storeId: bundle.store_id,
+      })
+    );
   };
 
   const formatPrice = (price: number) => {
@@ -84,126 +73,64 @@ const BundleCardComponent = ({ bundle, storeSlug: _storeSlug }: BundleCardProps)
           </div>
         )}
 
-      {/* Image */}
-      <Link to={`/bundles/${bundle.id}`}>
-        <div className="relative w-full h-48 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900 dark:to-pink-900 overflow-hidden">
+      <Link to={`/bundles/${bundle.slug}`} className="block">
+        <div className="relative aspect-[4/3] overflow-hidden bg-muted">
           {bundle.image_url ? (
             <img
               src={bundle.image_url}
               alt={bundle.name}
-              className="w-full h-full object-contain object-center"
-              onError={e => {
-                (e.target as HTMLImageElement).style.display = 'none';
-              }}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              loading="lazy"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <Package className="h-16 w-16 text-purple-400" />
+              <Package className="h-16 w-16 text-muted-foreground" />
             </div>
           )}
-
-          {/* Overlay au hover */}
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
         </div>
-      </Link>
 
-      <CardContent className="p-4 space-y-3">
-        {/* Nom et description */}
-        <div>
-          <Link to={`/bundles/${bundle.id}`}>
-            <h3 className="font-semibold text-lg line-clamp-2 group-hover:text-primary transition-colors mb-1">
+        <CardContent className="p-4 space-y-3">
+          <div>
+            <h3 className="font-semibold text-lg line-clamp-2 group-hover:text-primary transition-colors">
               {bundle.name}
             </h3>
-          </Link>
-          {bundle.short_description && (
-            <p className="text-sm text-muted-foreground line-clamp-2">{bundle.short_description}</p>
-          )}
-        </div>
-
-        {/* Nombre de produits */}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Package className="h-4 w-4" />
-          <span>
-            {bundle.bundle_items?.length || 0} produit{bundle.bundle_items?.length !== 1 ? 's' : ''}
-          </span>
-        </div>
-
-        {/* Prix */}
-        <div className="flex items-baseline gap-2">
-          {bundle.original_price > bundle.bundle_price && (
-            <span className="text-sm text-muted-foreground line-through">
-              {formatPrice(bundle.original_price)} XOF
-            </span>
-          )}
-          <span className="text-2xl font-bold text-primary">
-            {formatPrice(bundle.bundle_price)} XOF
-          </span>
-        </div>
-
-        {/* Économie */}
-        {bundle.savings > 0 && (
-          <div className="flex items-center gap-2 text-sm text-green-600 font-medium">
-            <TrendingDown className="h-4 w-4" />
-            <span>Économisez {formatPrice(bundle.savings)} XOF</span>
-          </div>
-        )}
-
-        {/* Rating (si disponible) */}
-        {bundle.average_rating && bundle.average_rating > 0 && (
-          <div className="flex items-center gap-1">
-            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-            <span className="text-sm font-medium">{bundle.average_rating.toFixed(1)}</span>
-            {bundle.reviews_count && bundle.reviews_count > 0 && (
-              <span className="text-xs text-muted-foreground">({bundle.reviews_count})</span>
+            {bundle.short_description && (
+              <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                {bundle.short_description}
+              </p>
             )}
           </div>
-        )}
 
-        {/* Boutons d'action */}
-        <div className="flex gap-2 pt-2">
-          <Button asChild variant="outline" className="flex-1">
-            <Link to={`/bundles/${bundle.id}`}>Voir détails</Link>
-          </Button>
-          <Button
-            onClick={handleAddToCart}
-            disabled={addItem.isPending || !bundle.is_available}
-            className="flex-1"
-          >
-            {addItem.isPending ? (
-              <>
-                <div className="h-4 w-4 mr-2 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                Ajout...
-              </>
-            ) : (
-              <>
-                <ShoppingBag className="h-4 w-4 mr-2" />
-                Ajouter
-              </>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-2xl font-bold text-primary">
+                {formatPrice(bundle.bundle_price)} {bundle.currency || 'XOF'}
+              </p>
+              {bundle.original_price && bundle.original_price > bundle.bundle_price && (
+                <p className="text-sm text-muted-foreground line-through">
+                  {formatPrice(bundle.original_price)} {bundle.currency || 'XOF'}
+                </p>
+              )}
+            </div>
+            {bundle.is_featured && (
+              <Badge variant="secondary" className="flex items-center gap-1">
+                <Star className="h-3 w-3" />
+                Populaire
+              </Badge>
             )}
-          </Button>
-        </div>
-      </CardContent>
+          </div>
+        </CardContent>
+      </Link>
+
+      <div className="px-4 pb-4">
+        <Button onClick={handleBuyNow} className="w-full" size="sm">
+          <ShoppingBag className="h-4 w-4 mr-2" />
+          Acheter
+        </Button>
+      </div>
     </Card>
   );
 };
 
-// Optimisation avec React.memo pour éviter les re-renders inutiles
-export const BundleCard = React.memo(BundleCardComponent, (prevProps, nextProps) => {
-  return (
-    prevProps.bundle.id === nextProps.bundle.id &&
-    prevProps.bundle.name === nextProps.bundle.name &&
-    prevProps.bundle.bundle_price === nextProps.bundle.bundle_price &&
-    prevProps.bundle.savings_percentage === nextProps.bundle.savings_percentage &&
-    prevProps.bundle.discount_percentage === nextProps.bundle.discount_percentage &&
-    prevProps.bundle.image_url === nextProps.bundle.image_url &&
-    prevProps.storeSlug === nextProps.storeSlug
-  );
-});
-
-BundleCard.displayName = 'BundleCard';
-
-
-
-
-
-
+export const BundleCard = React.memo(BundleCardComponent);
+export default BundleCard;

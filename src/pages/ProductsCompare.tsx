@@ -48,7 +48,8 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useCart } from '@/hooks/cart/useCart';
+import { buildCheckoutUrl } from '@/lib/checkout/checkout-route';
+import { useNavigate } from 'react-router-dom';
 import { useMarketplaceFavorites } from '@/hooks/useMarketplaceFavorites';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
@@ -91,7 +92,6 @@ export default function ProductsCompare() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
-  const { addItem } = useCart();
   const { toggleFavorite } = useMarketplaceFavorites();
 
   // Charger les produits depuis les paramètres URL ou localStorage
@@ -669,24 +669,20 @@ export default function ProductsCompare() {
                               size="sm"
                               className="flex-1"
                               onClick={() => {
-                                addItem({
-                                  product_id: product.id,
-                                  product_type: product.product_type as
-                                    | 'digital'
-                                    | 'physical'
-                                    | 'service'
-                                    | 'course'
-                                    | 'artist',
-                                  product_name: product.name,
-                                  product_image_url: product.image_url || '',
-                                  quantity: 1,
-                                  unit_price: product.promotional_price || product.price,
-                                  currency: product.currency,
-                                });
-                                toast({
-                                  title: 'Ajouté au panier',
-                                  description: `${product.name} a été ajouté à votre panier`,
-                                });
+                                if (!product.store_id) {
+                                  toast({
+                                    title: 'Erreur',
+                                    description: 'Boutique non disponible',
+                                    variant: 'destructive',
+                                  });
+                                  return;
+                                }
+                                navigate(
+                                  buildCheckoutUrl({
+                                    productId: product.id,
+                                    storeId: product.store_id,
+                                  })
+                                );
                               }}
                             >
                               <ShoppingCart className="h-4 w-4 mr-1" />

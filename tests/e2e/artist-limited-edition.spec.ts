@@ -24,7 +24,7 @@ test.describe('Artist limited edition', () => {
 
     await expect(page.getByTestId('edition-limited-badge')).toBeVisible({ timeout: 20_000 });
     await expect(page.getByText(/édition limitée/i)).toBeVisible();
-    await expect(page.getByTestId('artist-add-to-cart')).toBeVisible();
+    await expect(page.getByTestId('artist-buy-now')).toBeVisible();
   });
 
   test('checkout triggers edition reservation RPC for artist cart', async ({ page }) => {
@@ -55,7 +55,7 @@ test.describe('Artist limited edition', () => {
     await loginAs(page, E2E_TEST_CONFIG.buyerEmail, E2E_TEST_CONFIG.buyerPassword);
 
     await gotoApp(page, `/artist/${LIMITED_PRODUCT_ID}`);
-    await page.getByTestId('artist-add-to-cart').click();
+    await page.getByTestId('artist-buy-now').click();
 
     await gotoApp(page, '/checkout');
     await expect(page).toHaveURL(/\/checkout/, { timeout: 15_000 });

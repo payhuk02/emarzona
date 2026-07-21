@@ -60,7 +60,7 @@ describe('resolveNavItems', () => {
     });
 
     const paths = items.map(i => i.path);
-    expect(paths).toContain('/cart');
+    expect(paths).not.toContain('/cart');
     expect(paths).toContain('/account');
     for (const spec of BOTTOM_NAV_SPECS) {
       if (spec.fromMenu) {
@@ -79,9 +79,9 @@ describe('resolveNavItems', () => {
       t: mockT,
     });
 
-    const cart = items.find(i => i.path === '/cart');
-    expect(cart?.title).toBe('Panier');
-    expect(cart?.locked).toBe(false);
+    const account = items.find(i => i.path === '/account');
+    expect(account?.title).toBe('Compte');
+    expect(account?.locked).toBe(false);
   });
 
   it('resolves buyer bottom nav with account hub', () => {
@@ -95,7 +95,6 @@ describe('resolveNavItems', () => {
     expect(items.map(i => i.path)).toEqual([
       '/account',
       '/marketplace',
-      '/cart',
       '/account/orders',
       '/notifications',
     ]);

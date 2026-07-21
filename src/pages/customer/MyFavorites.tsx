@@ -32,8 +32,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate, Link } from 'react-router-dom';
 import { generateProductUrl } from '@/lib/store-utils';
 import { useMarketplaceFavorites } from '@/hooks/useMarketplaceFavorites';
-import { useCart } from '@/hooks/cart/useCart';
-import type { ProductType } from '@/types/cart';
+import { buildCheckoutUrl } from '@/lib/checkout/checkout-route';
 import {
   Heart,
   Search,
@@ -83,7 +82,6 @@ export default function MyFavorites() {
   const queryClient = useQueryClient();
   const { favorites, toggleFavorite, clearAllFavorites, favoritesCount } =
     useMarketplaceFavorites();
-  const { addItem } = useCart();
   const [user, setUser] = useState<User | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<ProductType>('all');
@@ -183,17 +181,15 @@ export default function MyFavorites() {
   };
 
   const handleAddToCart = async (
-    product: FavoriteProduct['product'] & { id: string; product_type: string }
+    product: FavoriteProduct['product'] & { id: string; product_type: string; store_id?: string }
   ) => {
-    try {
-      await addItem({
-        product_id: product.id,
-        product_type: product.product_type as ProductType,
-        quantity: 1,
-      });
-    } catch (error) {
-      // Error handled in hook
-    }
+    if (!product.store_id) return;
+    navigate(
+      buildCheckoutUrl({
+        productId: product.id,
+        storeId: product.store_id,
+      })
+    );
   };
 
   const handleRemoveFavorite = async (productId: string) => {

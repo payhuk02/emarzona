@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import { useDigitalBundle } from '@/hooks/digital/useDigitalBundles';
-import { useCart } from '@/hooks/cart/useCart';
+import { buildCheckoutUrl } from '@/lib/checkout/checkout-route';
 import { useToast } from '@/hooks/use-toast';
 import {
   Package,
@@ -30,35 +30,15 @@ export default function BundleDetail() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { data: bundle, isLoading } = useDigitalBundle(bundleId || '');
-  const { addItem } = useCart();
-
-  const handleAddToCart = async () => {
-    if (!bundle) return;
-
-    try {
-      await addItem.mutateAsync({
-        productId: bundle.id,
-        productType: 'digital',
-        quantity: 1,
-        price: bundle.bundle_price,
-        metadata: {
-          is_bundle: true,
-          bundle_id: bundle.id,
-        },
-      });
-
-      toast({
-        title: 'Bundle ajouté au panier',
-        description: `${bundle.name} a été ajouté à votre panier`,
-      });
-    } catch (_error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      toast({
-        title: 'Erreur',
-        description: errorMessage || "Impossible d'ajouter au panier",
-        variant: 'destructive',
-      });
-    }
+  const handleBuyNow = () => {
+    if (!bundle?.store_id) return;
+    const productId = bundle.product_id || bundle.id;
+    navigate(
+      buildCheckoutUrl({
+        productId,
+        storeId: bundle.store_id,
+      })
+    );
   };
 
   const formatPrice = (price: number) => {
@@ -227,20 +207,13 @@ export default function BundleDetail() {
               <Button
                 size="lg"
                 className="w-full mt-4"
-                onClick={handleAddToCart}
-                disabled={addItem.isPending || !bundle.is_available}
+                onClick={handleBuyNow}
+                disabled={!bundle.is_available}
               >
-                {addItem.isPending ? (
-                  <>
-                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                    Ajout en cours...
-                  </>
-                ) : (
-                  <>
-                    <ShoppingBag className="h-5 w-5 mr-2" />
-                    Ajouter au panier
-                  </>
-                )}
+                <>
+                  <ShoppingBag className="h-5 w-5 mr-2" />
+                  Acheter maintenant
+                </>
               </Button>
             </div>
 

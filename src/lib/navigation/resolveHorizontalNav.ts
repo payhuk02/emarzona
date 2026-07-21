@@ -22,7 +22,6 @@ import {
   resolveSellerNavUrl,
   isSellerNavItemActive,
 } from '@/lib/navigation/vendor-products-nav';
-import { ShoppingCart } from 'lucide-react';
 import type { ContextSidebarGroupConfig } from '@/config/navigation.context.types';
 
 export type HorizontalNavLink = {
@@ -163,18 +162,8 @@ function collectBuyerItemsByPaths(
   return items;
 }
 
-function appendBuyerCartLink(items: HorizontalNavLink[], t: TFunction): HorizontalNavLink[] {
-  if (items.some(i => i.path === '/cart')) return items;
-  return [
-    ...items,
-    {
-      title: t('sidebar.chrome.bottomNavCart', { defaultValue: 'Panier' }),
-      url: '/cart',
-      path: '/cart',
-      icon: ShoppingCart,
-      locked: false,
-    },
-  ];
+function appendBuyerCartLink(items: HorizontalNavLink[], _t: TFunction): HorizontalNavLink[] {
+  return items;
 }
 
 function resolveSellerHorizontalNavDomains(

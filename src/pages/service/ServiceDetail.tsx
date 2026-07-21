@@ -10,7 +10,6 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { safeRedirect } from '@/lib/url-validator';
 import { SafeHTML } from '@/components/security/SafeHTML';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -38,7 +37,6 @@ import {
   CheckCircle2,
   Shield,
   TrendingUp,
-  ShoppingBag,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
@@ -51,13 +49,7 @@ import { ReviewForm } from '@/components/reviews/ReviewForm';
 import { StaffCard } from '@/components/shared';
 import { ProductImages } from '@/components/shared';
 import type { StaffMember } from '@/hooks/service/useAvailability';
-import { useCreateServiceOrder } from '@/hooks/orders/useCreateServiceOrder';
-import { useCart } from '@/hooks/cart/useCart';
-import {
-  buildServiceCartMetadata,
-  buildServiceAddonCartMetadata,
-} from '@/lib/cart/service-cart-policy';
-import { validateServiceAddonSelection } from '@/lib/service/service-product-addons';
+import { buildCheckoutUrl } from '@/lib/checkout/checkout-route';
 import { useServiceProductAddons } from '@/hooks/service/useServiceProductAddons';
 import { ServiceProductAddonsPicker } from '@/components/service/ServiceProductAddonsPicker';
 import {
@@ -106,8 +98,6 @@ export default function ServiceDetail() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
-  const createServiceOrder = useCreateServiceOrder();
-  const { addItem } = useCart();
   // Type pour le créneau horaire sélectionné
   interface TimeSlot {
     time: string;
@@ -123,7 +113,7 @@ export default function ServiceDetail() {
   const [selectedAddonProductIds, setSelectedAddonProductIds] = useState<string[]>([]);
 
   // Hooks de validation
-  const validateBooking = useValidateServiceBooking();
+  const { mutateAsync: validateBooking } = useValidateServiceBooking();
   const quickAvailabilityCheck = useQuickAvailabilityCheck();
 
   // Utiliser le hook unifié pour la wishlist
@@ -314,7 +304,7 @@ export default function ServiceDetail() {
         endDate.setMinutes(endDate.getMinutes() + durationMinutes);
 
         // Utiliser product_id (serviceId est le product_id)
-        const result = await validateBooking.mutateAsync({
+        const result = await validateBooking({
           productId: serviceId!, // serviceId est le product_id
           scheduledDate: [
             selectedDate.getFullYear(),
@@ -340,9 +330,9 @@ export default function ServiceDetail() {
     // Debounce validation pour éviter trop de requêtes
     const timeoutId = setTimeout(validateSelection, 500);
     return () => clearTimeout(timeoutId);
-  }, [selectedDate, selectedSlot, participants, service?.service, serviceId, validateBooking]);
+  }, [selectedDate, selectedSlot, service?.service, serviceId, validateBooking]);
 
-  const handleBooking = async (mode: 'pay' | 'cart' = 'pay') => {
+  const handleBooking = async () => {
     if (!selectedDate || !selectedSlot) {
       toast({
         title: '⚠️ Sélection incomplète',
@@ -374,7 +364,6 @@ export default function ServiceDetail() {
     const checkoutEmail = user?.email || guestEmail!;
     const checkoutName = user?.user_metadata?.full_name || guestName || checkoutEmail.split('@')[0];
 
-    // Validation finale avant réservation
     if (validationError) {
       toast({
         title: '❌ Réservation impossible',
@@ -387,25 +376,12 @@ export default function ServiceDetail() {
     setIsBooking(true);
     setValidationError(null);
 
-    const addonValidation = validateServiceAddonSelection(serviceAddons, selectedAddonProductIds);
-    if (!addonValidation.ok) {
-      toast({
-        title: '❌ Compléments manquants',
-        description: addonValidation.message,
-        variant: 'destructive',
-      });
-      setIsBooking(false);
-      return;
-    }
-
     try {
-      // Construire le bookingDateTime
       const bookingDate = new Date(selectedDate);
       const [hours, minutes] = selectedSlot.time.split(':').map(Number);
       bookingDate.setHours(hours, minutes, 0, 0);
       const bookingDateTime = bookingDate.toISOString();
 
-      // Vérifier que la date n'est pas dans le passé
       if (bookingDate < new Date()) {
         toast({
           title: '❌ Date invalide',
@@ -416,12 +392,11 @@ export default function ServiceDetail() {
         return;
       }
 
-      // Validation complète avant création
       const durationMinutes = service.service.duration_minutes || 60;
       const endDate = new Date(bookingDate);
       endDate.setMinutes(endDate.getMinutes() + durationMinutes);
 
-      const validationResult = await validateBooking.mutateAsync({
+      const validationResult = await validateBooking({
         productId: serviceId!,
         scheduledDate: [
           selectedDate.getFullYear(),
@@ -444,98 +419,21 @@ export default function ServiceDetail() {
         return;
       }
 
-      // Récupérer le store_id du produit
       const storeId = service.store_id;
       if (!storeId) {
         throw new Error('Store ID manquant');
       }
 
-      // Créer la commande et la réservation
-      const result = await createServiceOrder.mutateAsync({
-        serviceProductId: service.service.id,
-        productId: serviceId!,
-        storeId,
-        customerEmail: checkoutEmail,
-        customerName: checkoutName,
-        bookingDateTime,
-        numberOfParticipants: participants,
-        durationMinutes: service.service.duration_minutes,
-        notes: `Réservation via ServiceDetail - ${selectedDate.toLocaleDateString('fr-FR')}`,
-        checkoutMode: mode === 'cart' ? 'cart' : 'immediate',
-      });
-
-      logger.info('Réservation créée avec succès', {
-        bookingId: result.bookingId,
-        transactionId: result.transactionId,
-        mode,
-      });
-
-      if (mode === 'cart') {
-        if (!result.bookingId?.trim()) {
-          throw new Error('Réservation créée sans identifiant de créneau.');
-        }
-
-        // Ensure auth session is hydrated before cart persistence (useCart reads user once on mount).
-        await supabase.auth.getSession();
-
-        await addItem.mutateAsync({
-          product_id: serviceId!,
-          product_type: 'service',
-          quantity: 1,
-          metadata: buildServiceCartMetadata({
-            storeId,
-            bookingId: result.bookingId,
-            serviceProductId: service.service.id,
-            scheduledAt: bookingDateTime,
-            numberOfParticipants: participants,
-          }),
-        });
-
-        for (const row of serviceAddons) {
-          if (!selectedAddonProductIds.includes(row.addon_product_id)) continue;
-          await addItem.mutateAsync({
-            product_id: row.addon_product_id,
-            product_type: row.addon.product_type,
-            quantity: row.quantity,
-            metadata: buildServiceAddonCartMetadata({
-              storeId,
-              linkedBookingId: result.bookingId,
-              linkedServiceProductId: service.service.id,
-              addonProductId: row.addon_product_id,
-              quantity: row.quantity,
-            }),
-          });
-        }
-
-        toast({
-          title: '✅ Service ajouté au panier',
-          description:
-            selectedAddonProductIds.length > 0
-              ? 'Service et produits complémentaires ajoutés. Passez au panier pour payer.'
-              : 'Vous pouvez ajouter d’autres produits de la même boutique avant de payer.',
-        });
-        navigate('/cart');
-        return;
-      }
-
-      // Rediriger vers GeniusPay pour le paiement
-      if (result.checkoutUrl) {
-        safeRedirect(result.checkoutUrl, error => {
-          toast({
-            title: 'Erreur de redirection',
-            description: error,
-            variant: 'destructive',
-          });
-        });
-      } else {
-        // Si pas de paiement requis (service gratuit)
-        toast({
-          title: '✅ Réservation confirmée !',
-          description: `Votre réservation pour ${service.name} a été confirmée`,
-        });
-        // Rediriger vers la page de confirmation ou les réservations
-        navigate('/account/bookings');
-      }
+      navigate(
+        buildCheckoutUrl({
+          productId: serviceId!,
+          storeId,
+          scheduledAt: bookingDateTime,
+          participants,
+          guestEmail: checkoutEmail,
+          guestName: checkoutName,
+        })
+      );
     } catch (_error: unknown) {
       const errorMessage = _error instanceof Error ? _error.message : String(_error);
       logger.error('Erreur lors de la réservation', _error);
@@ -1150,9 +1048,8 @@ export default function ServiceDetail() {
                 />
               )}
 
-              {/* Book Button */}
               <Button
-                onClick={() => void handleBooking('pay')}
+                onClick={() => void handleBooking()}
                 className="w-full"
                 size="lg"
                 disabled={
@@ -1162,27 +1059,13 @@ export default function ServiceDetail() {
                 {isBooking ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Création de la réservation...
+                    Redirection vers le paiement...
                   </>
                 ) : !selectedDate || !selectedSlot ? (
                   'Sélectionnez une date et un créneau'
                 ) : (
-                  'Payer maintenant'
+                  'Réserver et payer'
                 )}
-              </Button>
-
-              <Button
-                variant="outline"
-                onClick={() => void handleBooking('cart')}
-                className="w-full"
-                size="lg"
-                data-testid="service-add-to-cart"
-                disabled={
-                  !selectedDate || !selectedSlot || isBooking || isValidating || !!validationError
-                }
-              >
-                <ShoppingBag className="h-4 w-4 mr-2" />
-                Ajouter au panier
               </Button>
 
               <Separator />

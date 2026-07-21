@@ -114,9 +114,9 @@ test.describe('Artist paid purchase (E2E)', () => {
       await expect(page.getByRole('heading', { level: 1 })).toContainText(fixture.product.name, {
         timeout: 45_000,
       });
-      await expect(page.getByTestId('artist-add-to-cart')).toBeVisible({ timeout: 15_000 });
-      const addToCart = page.getByTestId('artist-add-to-cart');
-      await addToCart.click();
+      await expect(page.getByTestId('artist-buy-now')).toBeVisible({ timeout: 15_000 });
+      const buyNow = page.getByTestId('artist-buy-now');
+      await buyNow.click();
 
       await gotoApp(page, '/checkout');
       await expect(page).toHaveURL(/\/checkout/, { timeout: 15_000 });

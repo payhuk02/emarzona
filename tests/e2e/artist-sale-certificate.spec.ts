@@ -31,9 +31,9 @@ test.describe('Epic 3.5.1 — artiste vente & certificat', () => {
     await loginAs(page, E2E_TEST_CONFIG.buyerEmail, E2E_TEST_CONFIG.buyerPassword);
     await gotoApp(page, `/artist/${productId}`);
 
-    const addToCart = appLocator(page).getByTestId('artist-add-to-cart');
-    if (!(await addToCart.isVisible({ timeout: 10_000 }).catch(() => false))) {
-      test.skip(true, 'Pas de CTA ajouter au panier (artist-add-to-cart)');
+    const buyNow = appLocator(page).getByTestId('artist-buy-now');
+    if (!(await buyNow.isVisible({ timeout: 10_000 }).catch(() => false))) {
+      test.skip(true, 'Pas de CTA acheter (artist-buy-now)');
       return;
     }
 
