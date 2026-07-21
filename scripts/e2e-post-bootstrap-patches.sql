@@ -543,7 +543,31 @@ $$;
 COMMENT ON FUNCTION public.auto_enroll_course_on_payment() IS
   'Auto-enroll on paid; resolve user via customers.id/metadata before auth.users email scan.';
 
-\ir ../supabase/migrations/20260721154500__fix_artist_product_optional_validation.sql
+-- Apply artist RPC optional-field fix (path relative to CWD = repo root in CI).
+\i supabase/migrations/20260721154500__fix_artist_product_optional_validation.sql
+
+-- Hard-fail if the old year coercion (NULL → 0) is still present in the live function.
+DO $$
+DECLARE
+  v_src TEXT;
+BEGIN
+  SELECT pg_get_functiondef(p.oid) INTO v_src
+  FROM pg_proc p
+  JOIN pg_namespace n ON n.oid = p.pronamespace
+  WHERE n.nspname = 'public'
+    AND p.proname = 'create_artist_product_tx'
+  LIMIT 1;
+
+  IF v_src IS NULL THEN
+    RAISE EXCEPTION 'create_artist_product_tx missing after artist optional-field patch';
+  END IF;
+
+  IF v_src LIKE '%COALESCE((p_artist%artwork_year%)::INTEGER, 0)%'
+     OR position('COALESCE((p_artist->>''artwork_year'')::INTEGER, 0)' in v_src) > 0 THEN
+    RAISE EXCEPTION 'create_artist_product_tx still coerces artwork_year to 0';
+  END IF;
+END;
+$$;
 
 NOTIFY pgrst, 'reload schema';
 

@@ -24,7 +24,10 @@ type SellerRoutePermissionGuardProps = {
 
 function GuardLoadingFallback() {
   return (
-    <div className="flex min-h-[40vh] items-center justify-center">
+    <div
+      className="flex min-h-[40vh] items-center justify-center"
+      data-testid="seller-route-guard-loading"
+    >
       <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent" />
     </div>
   );

@@ -82,10 +82,11 @@ export const useStore = () => {
     placeholderData: keepPreviousData,
   });
 
+  // Empty stores after StoreContext settles is a terminal state (first-store create).
+  // Do not keep loading=true forever when the user has zero boutiques.
   const loading =
     authLoading ||
     contextLoading ||
-    (!!user?.id && !hasKnownStore && stores.length === 0 && !queryError) ||
     (hasKnownStore && !store && (queryLoading || queryFetching) && !queryError);
 
   const generateSlug = (name: string): string => {

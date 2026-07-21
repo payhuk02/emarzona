@@ -79,7 +79,7 @@ export const StoreSettings = ({
   const { toast } = useToast();
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState('list');
+  const [activeTab, setActiveTab] = useState(() => (action === 'create' ? 'create' : 'list'));
   const [selectedStore, setSelectedStore] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [storeToDelete, setStoreToDelete] = useState<{ id: string; name: string } | null>(null);
@@ -95,7 +95,9 @@ export const StoreSettings = ({
     from: StoreCommerceType;
     to: StoreCommerceType;
   } | null>(null);
-  const [createMode, setCreateMode] = useState<'express' | 'advanced'>('express');
+  const [createMode, setCreateMode] = useState<'express' | 'advanced'>(() =>
+    createModeFromUrl === 'advanced' ? 'advanced' : 'express'
+  );
 
   const commerceTypeGuardQueries = useQueries({
     queries: stores.map(store => ({
@@ -509,7 +511,10 @@ export const StoreSettings = ({
         {/* Création de boutique */}
         <TabsContent value="create" className="space-y-4">
           {createGateLoading ? (
-            <div className="flex items-center justify-center py-8">
+            <div
+              className="flex items-center justify-center py-8"
+              data-testid="store-create-gate-loading"
+            >
               <Loader2 className="h-8 w-8 animate-spin" />
               <span className="ml-2">Préparation de la création...</span>
             </div>

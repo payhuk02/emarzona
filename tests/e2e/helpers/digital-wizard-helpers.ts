@@ -1,6 +1,9 @@
 import { expect, type Page } from '@playwright/test';
 import { E2E_ARTWORK_PNG } from './artist-wizard-helpers';
-import { dismissCookieBannerIfVisible } from './store-theme-helpers';
+import {
+  dismissCookieBannerIfVisible,
+  dismissPersonaOnboardingIfVisible,
+} from './store-theme-helpers';
 import { goToWizardStep } from './vendor-e2e-helpers';
 import { waitForReactApp } from '../shared/e2e-test-config';
 
@@ -16,6 +19,7 @@ export async function openDigitalCreateWizard(page: Page): Promise<void> {
   await page.goto('/dashboard/products/new/digital', { waitUntil: 'domcontentloaded' });
   await waitForReactApp(page);
   await dismissCookieBannerIfVisible(page);
+  await dismissPersonaOnboardingIfVisible(page);
   await expect(page.locator('#name')).toBeVisible({ timeout: 60_000 });
 }
 

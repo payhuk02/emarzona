@@ -1,5 +1,8 @@
 import { expect, type Page } from '@playwright/test';
-import { dismissCookieBannerIfVisible } from './store-theme-helpers';
+import {
+  dismissCookieBannerIfVisible,
+  dismissPersonaOnboardingIfVisible,
+} from './store-theme-helpers';
 import { clickWizardNext, goToWizardStep } from './vendor-e2e-helpers';
 import { waitForReactApp } from '../shared/e2e-test-config';
 
@@ -15,6 +18,7 @@ export async function openCourseCreateWizard(page: Page): Promise<void> {
   await page.goto('/dashboard/courses/new', { waitUntil: 'domcontentloaded' });
   await waitForReactApp(page);
   await dismissCookieBannerIfVisible(page);
+  await dismissPersonaOnboardingIfVisible(page);
   await expect(page.getByText(/Aucune boutique trouvée/i)).toHaveCount(0, { timeout: 5_000 });
   await expect(page.locator('#title')).toBeVisible({ timeout: 60_000 });
 }

@@ -138,14 +138,17 @@ test.describe('Artist vendor — redirect & RPC create', () => {
     await page.getByRole('button', { name: /brouillon/i }).click();
 
     const successToast = page.getByText(/brouillon sauvegardé|succès/i).first();
-    const errorToast = page.getByText(/erreur|error/i).first();
+    const errorToast = page
+      .locator('[role="status"], [role="alert"], li')
+      .filter({ hasText: /❌\s*Erreur|erreur/i })
+      .first();
     await Promise.race([
       successToast.waitFor({ state: 'visible', timeout: 45_000 }),
       errorToast.waitFor({ state: 'visible', timeout: 45_000 }),
     ]).catch(() => undefined);
 
     if (await errorToast.isVisible().catch(() => false)) {
-      const copy = (await errorToast.innerText().catch(() => '')).slice(0, 400);
+      const copy = (await errorToast.innerText().catch(() => '')).slice(0, 800);
       throw new Error(`Artist draft save failed in UI: ${copy}`);
     }
 

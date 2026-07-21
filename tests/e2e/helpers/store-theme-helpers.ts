@@ -499,8 +499,11 @@ export async function waitForStoreExpressCreateForm(page: Page): Promise<void> {
 
   const form = page.getByTestId('store-express-create-form');
   const limit = page.getByTestId('store-create-limit-reached');
+  const gateLoading = page.getByTestId('store-create-gate-loading');
+  const guardLoading = page.getByTestId('seller-route-guard-loading');
   const loginGate = page.locator('input[name="email-login"], #password-login');
 
+  // Gate/guard spinners are transitional — wait until a terminal signal appears.
   await expect(form.or(limit).or(loginGate).first()).toBeVisible({ timeout: 60_000 });
 
   if (
@@ -514,6 +517,19 @@ export async function waitForStoreExpressCreateForm(page: Page): Promise<void> {
   if (await limit.isVisible().catch(() => false)) {
     const copy = (await limit.innerText().catch(() => '')).slice(0, 300);
     throw new Error(`Store create blocked by quota gate — url=${page.url()} copy=${copy}`);
+  }
+  if (
+    (await guardLoading.isVisible().catch(() => false)) ||
+    (await gateLoading.isVisible().catch(() => false))
+  ) {
+    throw new Error(
+      `Store create still blocked by loading gate after wait — url=${page.url()} body=${(
+        await page
+          .locator('body')
+          .innerText()
+          .catch(() => '')
+      ).slice(0, 240)}`
+    );
   }
 
   await expect(form).toBeVisible({ timeout: 10_000 });

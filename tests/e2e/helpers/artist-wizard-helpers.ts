@@ -171,6 +171,11 @@ export async function fillArtistBasicInfoStep(
   await page.locator('#artwork_title').fill(artworkTitle);
   await page.locator('#artwork_medium').fill(medium);
   await page.locator('#price').fill(price);
+  // Defense-in-depth: optional year avoids legacy RPC coercion of null → 0.
+  const yearInput = page.locator('#artwork_year');
+  if (await yearInput.isVisible({ timeout: 2_000 }).catch(() => false)) {
+    await yearInput.fill(String(new Date().getFullYear()));
+  }
 
   if (editionType && editionType !== 'original') {
     await page.locator('#edition_type').click();
@@ -200,7 +205,9 @@ export async function uploadArtworkImage(page: Page): Promise<void> {
   });
 
   const successToast = page.getByText(/Images uploadées|image\(s\) uploadée\(s\)/i).first();
-  const previewImage = page.locator('img[src*="placehold.co"], img[src*="product-images"]').first();
+  const previewImage = page
+    .locator('img[alt^="Œuvre"], img[src*="placehold.co"], img[src*="product-images"]')
+    .first();
 
   await Promise.race([
     expect(successToast).toBeVisible({ timeout: 45_000 }),
@@ -242,8 +249,24 @@ export async function advanceArtistWizardToPublishStep(page: Page): Promise<void
 
 export async function publishArtistWizard(page: Page): Promise<void> {
   await dismissCookieBannerIfVisible(page);
+  const errorToast = page.getByText(/❌\s*Erreur|erreur/i).first();
+  const successToast = page.getByText(/créé avec succès|brouillon sauvegardé|✅\s*Succès/i).first();
+
   await page.getByRole('button', { name: /^Publier(?: le produit)?$/i }).click({ timeout: 20_000 });
-  await expect(page.getByText(/créé avec succès|succès/i).first()).toBeVisible({
-    timeout: 45_000,
-  });
+
+  await Promise.race([
+    successToast.waitFor({ state: 'visible', timeout: 45_000 }),
+    errorToast.waitFor({ state: 'visible', timeout: 45_000 }),
+    page.waitForURL(/\/dashboard\/artist-products/, { timeout: 45_000 }),
+  ]).catch(() => undefined);
+
+  if (await errorToast.isVisible().catch(() => false)) {
+    const copy = (await errorToast.innerText().catch(() => '')).slice(0, 400);
+    throw new Error(`Artist publish failed in UI: ${copy}`);
+  }
+
+  // Prefer redirect; toast is soft because portals can be flaky in CI.
+  if (!(await page.url().includes('/dashboard/artist-products'))) {
+    await expect(page).toHaveURL(/\/dashboard\/artist-products/, { timeout: 30_000 });
+  }
 }

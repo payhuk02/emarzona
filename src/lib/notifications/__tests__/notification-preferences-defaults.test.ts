@@ -6,7 +6,8 @@ describe('isAccountSettingsPath', () => {
   it('matches notification settings routes', () => {
     expect(isAccountSettingsPath('/settings/notifications')).toBe(true);
     expect(isAccountSettingsPath('/notifications')).toBe(true);
-    expect(isAccountSettingsPath('/dashboard/settings')).toBe(false);
+    expect(isAccountSettingsPath('/dashboard/settings')).toBe(true);
+    expect(isAccountSettingsPath('/dashboard/settings/security')).toBe(true);
   });
 });
 

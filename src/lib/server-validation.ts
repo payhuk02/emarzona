@@ -318,7 +318,7 @@ export async function validateArtistProductRpc(data: {
       p_total_editions: data.total_editions ?? null,
       p_requires_shipping: data.requires_shipping ?? false,
       p_artwork_link_url: data.artwork_link_url?.trim() ? data.artwork_link_url.trim() : null,
-      p_shipping_handling_time: data.shipping_handling_time ?? 0,
+      p_shipping_handling_time: data.shipping_handling_time ?? null,
       p_shipping_insurance_amount: data.shipping_insurance_amount ?? 0,
     });
 

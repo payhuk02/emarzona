@@ -513,9 +513,10 @@ const CreateArtistProductWizardComponent = ({
       }
     } catch (error) {
       logger.error('Error saving artist product', { error });
+      const message = error instanceof Error ? error.message : 'Une erreur est survenue';
       toast({
         title: '❌ Erreur',
-        description: error instanceof Error ? error.message : 'Une erreur est survenue',
+        description: message,
         variant: 'destructive',
       });
     } finally {
