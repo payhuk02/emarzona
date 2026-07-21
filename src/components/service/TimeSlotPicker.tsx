@@ -126,22 +126,8 @@ export const TimeSlotPicker = ({
       const endDate = new Date(bookingDate);
       endDate.setMinutes(endDate.getMinutes() + (durationMinutes || 60));
 
-      // Note: productId attendu est le product_id, pas service_product_id
-      // Si on a serviceProductId, il faut récupérer le product_id correspondant
-      let productIdForValidation = normalizedServiceProductId;
-
-      // Si c'est un serviceProductId, récupérer le product_id
-      if (serviceProductId && !serviceId) {
-        const { data: serviceProduct } = await supabase
-          .from('service_products')
-          .select('product_id')
-          .eq('id', serviceProductId)
-          .single();
-
-        if (serviceProduct) {
-          productIdForValidation = serviceProduct.product_id;
-        }
-      }
+      // product_id for conflict RPCs (not service_products.id)
+      const productIdForValidation = serviceId || normalizedServiceProductId;
 
       await quickCheck.mutateAsync({
         productId: productIdForValidation,

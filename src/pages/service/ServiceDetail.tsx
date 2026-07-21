@@ -316,7 +316,11 @@ export default function ServiceDetail() {
         // Utiliser product_id (serviceId est le product_id)
         const result = await validateBooking.mutateAsync({
           productId: serviceId!, // serviceId est le product_id
-          scheduledDate: selectedDate.toISOString().split('T')[0],
+          scheduledDate: [
+            selectedDate.getFullYear(),
+            String(selectedDate.getMonth() + 1).padStart(2, '0'),
+            String(selectedDate.getDate()).padStart(2, '0'),
+          ].join('-'),
           scheduledStartTime: bookingDate.toTimeString().slice(0, 8),
           scheduledEndTime: endDate.toTimeString().slice(0, 8),
           staffMemberId: undefined, // À améliorer si staff spécifique
@@ -419,7 +423,11 @@ export default function ServiceDetail() {
 
       const validationResult = await validateBooking.mutateAsync({
         productId: serviceId!,
-        scheduledDate: selectedDate.toISOString().split('T')[0],
+        scheduledDate: [
+          selectedDate.getFullYear(),
+          String(selectedDate.getMonth() + 1).padStart(2, '0'),
+          String(selectedDate.getDate()).padStart(2, '0'),
+        ].join('-'),
         scheduledStartTime: bookingDate.toTimeString().slice(0, 8),
         scheduledEndTime: endDate.toTimeString().slice(0, 8),
       });
@@ -1161,6 +1169,7 @@ export default function ServiceDetail() {
                 onClick={() => void handleBooking('cart')}
                 className="w-full"
                 size="lg"
+                data-testid="service-add-to-cart"
                 disabled={
                   !selectedDate || !selectedSlot || isBooking || isValidating || !!validationError
                 }

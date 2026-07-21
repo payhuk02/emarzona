@@ -29,6 +29,8 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:8080',
     trace: 'on-first-retry',
+    // Prevent disabled-button clicks from burning the full test timeout.
+    actionTimeout: 20_000,
   },
   projects: [
     {

@@ -899,7 +899,11 @@ const CourseDetail = ({ learnMode = false }: CourseDetailProps) => {
 
                 {/* CTA Button */}
                 {isEnrolled ? (
-                  <Button className="w-full bg-green-600 hover:bg-green-700" size="lg">
+                  <Button
+                    className="w-full bg-green-600 hover:bg-green-700"
+                    size="lg"
+                    data-testid="course-enroll-cta"
+                  >
                     <CheckCircle2 className="w-5 h-5 mr-2" />
                     Déjà inscrit - Continuer
                   </Button>
@@ -909,6 +913,7 @@ const CourseDetail = ({ learnMode = false }: CourseDetailProps) => {
                     size="lg"
                     onClick={handleEnroll}
                     disabled={isEnrolling}
+                    data-testid="course-enroll-cta"
                   >
                     {isFreeCourse(product) ? (
                       <Gift className="w-5 h-5 mr-2" />

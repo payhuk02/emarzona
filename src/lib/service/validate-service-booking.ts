@@ -20,6 +20,25 @@ export interface BookingValidationOptions {
   excludeBookingId?: string;
 }
 
+const RPC_TIMEOUT_MS = 12_000;
+
+async function rpcWithTimeout<T>(
+  label: string,
+  run: () => PromiseLike<{ data: T; error: { message?: string } | null }>
+): Promise<{ data: T; error: { message?: string } | null }> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      Promise.resolve(run()),
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => reject(new Error(`${label} timeout`)), RPC_TIMEOUT_MS);
+      }),
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
 export async function validateServiceBooking(
   options: BookingValidationOptions
 ): Promise<BookingValidationResult> {
@@ -27,25 +46,27 @@ export async function validateServiceBooking(
   const warnings: string[] = [];
 
   try {
-    const { data: advanceCheck, error: advanceError } = await supabase.rpc(
+    const { data: advanceCheck, error: advanceError } = await rpcWithTimeout(
       'check_advance_booking_days',
-      {
-        p_product_id: options.productId,
-        p_scheduled_date: options.scheduledDate,
-      }
+      () =>
+        supabase.rpc('check_advance_booking_days', {
+          p_product_id: options.productId,
+          p_scheduled_date: options.scheduledDate,
+        })
     );
 
     if (!advanceError && advanceCheck && advanceCheck.length > 0 && !advanceCheck[0].is_valid) {
       errors.push(advanceCheck[0].message || 'Date de réservation invalide');
     }
 
-    const { data: maxBookingsCheck, error: maxBookingsError } = await supabase.rpc(
+    const { data: maxBookingsCheck, error: maxBookingsError } = await rpcWithTimeout(
       'check_max_bookings_per_day',
-      {
-        p_product_id: options.productId,
-        p_scheduled_date: options.scheduledDate,
-        p_exclude_booking_id: options.excludeBookingId || null,
-      }
+      () =>
+        supabase.rpc('check_max_bookings_per_day', {
+          p_product_id: options.productId,
+          p_scheduled_date: options.scheduledDate,
+          p_exclude_booking_id: options.excludeBookingId || null,
+        })
     );
 
     if (
@@ -57,16 +78,17 @@ export async function validateServiceBooking(
       errors.push(maxBookingsCheck[0].message || 'Limite quotidienne atteinte');
     }
 
-    const { data: conflictCheck, error: conflictError } = await supabase.rpc(
+    const { data: conflictCheck, error: conflictError } = await rpcWithTimeout(
       'check_booking_conflicts',
-      {
-        p_product_id: options.productId,
-        p_scheduled_date: options.scheduledDate,
-        p_scheduled_start_time: options.scheduledStartTime,
-        p_scheduled_end_time: options.scheduledEndTime,
-        p_staff_member_id: options.staffMemberId || null,
-        p_exclude_booking_id: options.excludeBookingId || null,
-      }
+      () =>
+        supabase.rpc('check_booking_conflicts', {
+          p_product_id: options.productId,
+          p_scheduled_date: options.scheduledDate,
+          p_scheduled_start_time: options.scheduledStartTime,
+          p_scheduled_end_time: options.scheduledEndTime,
+          p_staff_member_id: options.staffMemberId || null,
+          p_exclude_booking_id: options.excludeBookingId || null,
+        })
     );
 
     if (
@@ -78,26 +100,32 @@ export async function validateServiceBooking(
       errors.push(conflictCheck[0].conflict_message || 'Conflit de réservation détecté');
     }
 
-    // Epic 3.3.4 — conflits calendrier externe (Google Calendar busy)
-    const startIso = `${options.scheduledDate}T${options.scheduledStartTime}`;
-    const endIso = `${options.scheduledDate}T${options.scheduledEndTime}`;
-    const { data: calendarConflicts, error: calendarError } = await supabase.rpc(
-      'detect_calendar_conflicts',
-      {
-        p_service_id: options.productId,
-        p_start_time: startIso,
-        p_end_time: endIso,
-        p_exclude_booking_id: options.excludeBookingId || null,
-      }
-    );
-
-    if (!calendarError && calendarConflicts && calendarConflicts.length > 0) {
-      const external = calendarConflicts.find(
-        (c: { conflict_type: string }) => c.conflict_type === 'calendar_event'
+    // Optional Google Calendar busy check — never block booking on timeout/missing RPC.
+    try {
+      const startIso = `${options.scheduledDate}T${options.scheduledStartTime}`;
+      const endIso = `${options.scheduledDate}T${options.scheduledEndTime}`;
+      const { data: calendarConflicts, error: calendarError } = await rpcWithTimeout(
+        'detect_calendar_conflicts',
+        () =>
+          supabase.rpc('detect_calendar_conflicts', {
+            p_service_id: options.productId,
+            p_start_time: startIso,
+            p_end_time: endIso,
+            p_exclude_booking_id: options.excludeBookingId || null,
+          })
       );
-      if (external) {
-        errors.push('Créneau occupé sur votre calendrier Google connecté');
+
+      if (!calendarError && calendarConflicts && calendarConflicts.length > 0) {
+        const external = calendarConflicts.find(
+          (c: { conflict_type: string }) => c.conflict_type === 'calendar_event'
+        );
+        if (external) {
+          errors.push('Créneau occupé sur votre calendrier Google connecté');
+        }
       }
+    } catch (calendarTimeout) {
+      logger.warn('detect_calendar_conflicts skipped', { error: calendarTimeout });
+      warnings.push('Vérification calendrier externe indisponible');
     }
 
     if (errors.length > 0) {

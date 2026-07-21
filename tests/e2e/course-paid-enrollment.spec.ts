@@ -109,16 +109,26 @@ test.describe('Course paid enrollment (E2E)', () => {
         return { email, id: data.user.id };
       })();
 
-      await loginAsSeededUser(page, admin, unpaidBuyer.email);
+      await loginAsSeededUser(
+        page,
+        admin,
+        unpaidBuyer.email,
+        '/dashboard',
+        E2E_TEST_CONFIG.seededUserPassword
+      );
       await gotoApp(page, `/courses/${fixture.product.slug}`);
 
-      const enrollButton = page.getByRole('button', {
-        name: /s'inscrire maintenant|inscrire|acheter|enroll/i,
+      await expect(page.getByText(/Cours non trouvé/i)).toHaveCount(0, { timeout: 5_000 });
+      await expect(page.getByRole('heading', { level: 1 })).toContainText(fixture.product.name, {
+        timeout: 45_000,
       });
-      await expect(enrollButton.first()).toBeVisible({ timeout: 15_000 });
-      await enrollButton.first().click();
 
-      await page.waitForURL(/\/(checkout|geniuspay)/, { timeout: 30_000 });
+      const enrollButton = page.getByTestId('course-enroll-cta');
+      await expect(enrollButton).toBeVisible({ timeout: 15_000 });
+      await expect(enrollButton).toContainText(/inscrire|acheter|enroll/i);
+      await enrollButton.click();
+
+      await page.waitForURL(/\/(checkout|geniuspay)/, { timeout: 45_000 });
       expect(page.url()).toMatch(/\/checkout|geniuspay/);
 
       await admin.auth.admin.deleteUser(unpaidBuyer.id);

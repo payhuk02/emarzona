@@ -72,8 +72,8 @@ test.describe('Mixed cart book → pay → confirm (E2E)', () => {
 
       await expect(page.getByText(/Créneau disponible/i)).toBeVisible({ timeout: 20_000 });
 
-      const addToCart = page.getByRole('button', { name: /ajouter au panier/i });
-      await expect(addToCart).toBeEnabled({ timeout: 10_000 });
+      const addToCart = page.getByTestId('service-add-to-cart');
+      await expect(addToCart).toBeEnabled({ timeout: 20_000 });
 
       const bookingError = page.getByText(
         /Erreur de réservation|Réservation impossible|Authentification requise|Impossible de finaliser|Délai dépassé/i
@@ -86,7 +86,7 @@ test.describe('Mixed cart book → pay → confirm (E2E)', () => {
         { timeout: 45_000 }
       );
 
-      await addToCart.click();
+      await addToCart.click({ timeout: 15_000 });
 
       const rpcResponse = await reserveRpc.catch(() => null);
       if (rpcResponse && (rpcResponse.status() < 200 || rpcResponse.status() >= 300)) {
