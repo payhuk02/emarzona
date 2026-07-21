@@ -8,10 +8,14 @@ import type { PaymentProviderCode, StorePaymentOption } from '@/types/store-paym
 import { logger } from '@/lib/logger';
 
 /** Valeur utilisée par le checkout (legacy geniuspay + codes orchestrateur) */
-export type CheckoutPaymentProvider = 'geniuspay' | Exclude<PaymentProviderCode, 'geniuspay_platform'>;
+export type CheckoutPaymentProvider =
+  | 'geniuspay'
+  | 'moneyfusion'
+  | Exclude<PaymentProviderCode, 'geniuspay_platform' | 'moneyfusion'>;
 
 export function rpcProviderToCheckout(provider: string): CheckoutPaymentProvider {
   if (provider === 'geniuspay_platform') return 'geniuspay';
+  if (provider === 'moneyfusion') return 'moneyfusion';
   if (
     provider === 'stripe_connect' ||
     provider === 'paypal_commerce' ||

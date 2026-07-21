@@ -8,7 +8,11 @@ import {
 } from './geniuspay-payment';
 import { logger } from './logger';
 import { isSupportedCurrency, type Currency } from './currency-converter';
-import { isPaymentOrchestrationV2EnabledForStore, createOrchestratedPayment } from './payments';
+import {
+  createOrchestratedPayment,
+  isMoneyFusionOnlyEnabled,
+  isPaymentOrchestrationV2EnabledForStore,
+} from './payments';
 import { buildPspFallbackUserMessage } from './payments/psp-fallback-messages';
 import type { PaymentProviderCode } from '@/types/store-payment-connection';
 import { toast } from '@/hooks/use-toast';
@@ -41,6 +45,13 @@ export interface PaymentOptions {
   cancelUrl?: string;
   /** Facturation plateforme : rail GeniusPay Emarzona uniquement */
   forcePlatformPayments?: boolean;
+  /**
+   * Méthode GeniusPay (`payment_method`). Défaut: pawapay.
+   * Passer `null` pour la page checkout GeniusPay (choix client).
+   */
+  paymentMethod?: import('./geniuspay-types').GeniusPayPaymentMethod | null;
+  /** Code opérateur MMO PawaPay (optionnel) */
+  mmoProvider?: string;
 }
 
 export interface PaymentResult {
@@ -59,11 +70,15 @@ function toOrchestratorPreferred(provider?: PaymentProvider): PaymentProviderCod
   if (provider === 'geniuspay_platform') {
     return 'geniuspay_platform';
   }
+  if (provider === 'moneyfusion') {
+    return 'moneyfusion';
+  }
   return provider as PaymentProviderCode;
 }
 
 function toCheckoutProvider(provider: PaymentProviderCode): PaymentProvider {
-  return provider === 'geniuspay_platform' ? 'geniuspay' : provider;
+  if (provider === 'geniuspay_platform') return 'geniuspay';
+  return provider;
 }
 
 /**
@@ -125,6 +140,47 @@ async function resolvePaymentContext(options: PaymentOptions): Promise<PaymentOp
   };
 }
 
+async function initiateMoneyFusionOnly(options: PaymentOptions): Promise<PaymentResult> {
+  try {
+    const { createMoneyFusionPayment } = await import('./payments/adapters/moneyfusion-adapter');
+    const result = await createMoneyFusionPayment({
+      storeId: options.storeId,
+      productId: options.productId,
+      orderId: options.orderId,
+      customerId: options.customerId,
+      amount: options.amount,
+      currency: options.currency,
+      description: options.description,
+      customerEmail: options.customerEmail,
+      customerName: options.customerName,
+      customerPhone: options.customerPhone,
+      metadata: options.metadata,
+      returnUrl: options.returnUrl,
+      cancelUrl: options.cancelUrl,
+    });
+
+    return {
+      success: result.success && !!result.checkout_url,
+      transaction_id: result.transaction_id,
+      checkout_url: result.checkout_url ?? '',
+      provider: 'moneyfusion',
+      provider_transaction_id: result.provider_transaction_id,
+      error: result.error,
+    };
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Impossible d'initialiser le paiement MoneyFusion";
+    logger.error('MoneyFusion initiation failed', { error });
+    return {
+      success: false,
+      transaction_id: '',
+      checkout_url: '',
+      provider: 'moneyfusion',
+      error: message,
+    };
+  }
+}
+
 export const initiatePayment = async (options: PaymentOptions): Promise<PaymentResult> => {
   const { supabase } = await import('@/integrations/supabase/client');
   const {
@@ -156,6 +212,12 @@ export const initiatePayment = async (options: PaymentOptions): Promise<PaymentR
     };
   }
 
+  // Mode temporaire : tous les checkouts passent exclusivement par MoneyFusion.
+  // En cas d'échec, retourner l'erreur au lieu de basculer vers GeniusPay.
+  if (isMoneyFusionOnlyEnabled()) {
+    return initiateMoneyFusionOnly({ ...resolvedOptions, provider: 'moneyfusion' });
+  }
+
   if (isPaymentOrchestrationV2EnabledForStore(resolvedOptions.storeId)) {
     try {
       const orchestrated = await createOrchestratedPayment({
@@ -174,6 +236,8 @@ export const initiatePayment = async (options: PaymentOptions): Promise<PaymentR
         cancelUrl: resolvedOptions.cancelUrl,
         forcePlatformPayments: resolvedOptions.forcePlatformPayments,
         preferredProvider: toOrchestratorPreferred(resolvedOptions.provider),
+        paymentMethod: resolvedOptions.paymentMethod,
+        mmoProvider: resolvedOptions.mmoProvider,
       });
 
       if (orchestrated.success && orchestrated.checkout_url) {
@@ -218,6 +282,15 @@ export const initiatePayment = async (options: PaymentOptions): Promise<PaymentR
     }
   }
 
+  // MoneyFusion explicite même si V2 est désactivé pour la boutique
+  if (resolvedOptions.provider === 'moneyfusion') {
+    const mf = await initiateMoneyFusionOnly(resolvedOptions);
+    if (mf.success) {
+      return mf;
+    }
+    logger.warn('MoneyFusion failed, falling back to GeniusPay', { error: mf.error });
+  }
+
   try {
     logger.log('Initiating GeniusPay payment', { orderId: options.orderId });
     const currency: Currency | undefined =
@@ -228,6 +301,8 @@ export const initiatePayment = async (options: PaymentOptions): Promise<PaymentR
       currency,
       returnUrl: resolvedOptions.returnUrl,
       cancelUrl: resolvedOptions.cancelUrl,
+      paymentMethod: resolvedOptions.paymentMethod,
+      mmoProvider: resolvedOptions.mmoProvider,
     });
 
     return {

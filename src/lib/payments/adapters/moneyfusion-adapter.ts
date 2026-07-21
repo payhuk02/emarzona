@@ -1,18 +1,17 @@
 /**
- * Adapter GeniusPay (rail plateforme) — implémentation actuelle de production
+ * Adapter MoneyFusion (rail plateforme)
  */
-
-import { initiateGeniusPayPayment } from '@/lib/geniuspay-payment';
+import { initiateMoneyFusionPayment } from '@/lib/moneyfusion-payment';
 import { isSupportedCurrency, type Currency } from '@/lib/currency-converter';
 import type { OrchestratedPaymentRequest, OrchestratedPaymentResult } from '../types';
 
-export async function createGeniusPayPlatformPayment(
+export async function createMoneyFusionPayment(
   request: OrchestratedPaymentRequest
 ): Promise<OrchestratedPaymentResult> {
   const currency: Currency =
     request.currency && isSupportedCurrency(request.currency) ? request.currency : 'XOF';
 
-  const result = await initiateGeniusPayPayment({
+  const result = await initiateMoneyFusionPayment({
     storeId: request.storeId,
     productId: request.productId,
     orderId: request.orderId,
@@ -25,20 +24,18 @@ export async function createGeniusPayPlatformPayment(
     customerPhone: request.customerPhone,
     returnUrl: request.returnUrl,
     cancelUrl: request.cancelUrl,
-    paymentMethod: request.paymentMethod,
-    mmoProvider: request.mmoProvider,
     metadata: {
       ...request.metadata,
-      payment_orchestration_provider: 'geniuspay_platform',
+      payment_orchestration_provider: 'moneyfusion',
     },
   });
 
   return {
     success: result.success,
-    transaction_id: result.transaction_id,
+    transaction_id: result.transaction_id || '',
     checkout_url: result.checkout_url,
-    provider: 'geniuspay_platform',
-    provider_transaction_id: result.geniuspay_id,
-    connection_id: request.connections?.find(c => c.provider === 'geniuspay_platform')?.id ?? null,
+    provider: 'moneyfusion',
+    provider_transaction_id: result.moneyfusion_token || undefined,
+    connection_id: request.connections?.find(c => c.provider === 'moneyfusion')?.id ?? null,
   };
 }

@@ -7,6 +7,8 @@ export function getPaymentProviderLabel(provider: string | null | undefined): st
     case 'geniuspay_platform':
     case 'geniuspay':
       return 'GeniusPay';
+    case 'moneyfusion':
+      return 'MoneyFusion';
     case 'flutterwave_connect':
       return 'Flutterwave';
     default:

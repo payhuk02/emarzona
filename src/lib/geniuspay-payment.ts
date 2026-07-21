@@ -9,7 +9,8 @@ import {
   GeniusPayAPIError,
 } from './geniuspay-errors';
 import { Currency, isSupportedCurrency } from './currency-converter';
-import { GeniusPayCheckoutResponse } from './geniuspay-types';
+import { GeniusPayCheckoutResponse, GeniusPayPaymentMethod } from './geniuspay-types';
+import { GENIUSPAY_DEFAULT_PAYMENT_METHOD, isGeniusPayPaymentMethod } from './geniuspay-config';
 import { validateAmount } from './geniuspay-amount-validator';
 import { normalizePhoneForPayment } from './validation';
 import {
@@ -37,6 +38,22 @@ export interface PaymentOptions {
    */
   returnUrl?: string;
   cancelUrl?: string;
+  /**
+   * Méthode GeniusPay (`payment_method`). Défaut: pawapay.
+   * Passer `null` pour laisser le client choisir sur la page checkout GeniusPay.
+   */
+  paymentMethod?: GeniusPayPaymentMethod | null;
+  /** Code opérateur MMO PawaPay (optionnel, auto-routing recommandé) */
+  mmoProvider?: string;
+}
+
+/** Extrait l'URL de paiement GeniusPay (checkout hébergé OU gateway direct). */
+function extractGeniusPayRedirectUrl(
+  data: GeniusPayCheckoutResponse['data'] | undefined
+): string | undefined {
+  if (!data) return undefined;
+  const url = data.payment_url || data.checkout_url || data.url;
+  return typeof url === 'string' && url.length > 0 ? url : undefined;
 }
 
 const GENIUSPAY_METADATA_MAX_ITEMS = 10;
@@ -147,7 +164,16 @@ export const initiateGeniusPayPayment = async (options: PaymentOptions) => {
     metadata = {},
     returnUrl,
     cancelUrl,
+    paymentMethod = GENIUSPAY_DEFAULT_PAYMENT_METHOD,
+    mmoProvider,
   } = options;
+
+  const resolvedPaymentMethod =
+    paymentMethod === null
+      ? undefined
+      : isGeniusPayPaymentMethod(paymentMethod)
+        ? paymentMethod
+        : GENIUSPAY_DEFAULT_PAYMENT_METHOD;
 
   // Valider la devise
   const currency: Currency = isSupportedCurrency(requestedCurrency) ? requestedCurrency : 'XOF';
@@ -213,11 +239,15 @@ export const initiateGeniusPayPayment = async (options: PaymentOptions) => {
       userId: currentUserId,
     });
 
+    const customerCountry =
+      typeof metadata.customerCountry === 'string'
+        ? metadata.customerCountry
+        : typeof metadata.customer_country === 'string'
+          ? metadata.customer_country
+          : undefined;
+
     const normalizedPhone = customerPhone
-      ? normalizePhoneForPayment(
-          customerPhone,
-          typeof metadata.customerCountry === 'string' ? metadata.customerCountry : undefined
-        )
+      ? normalizePhoneForPayment(customerPhone, customerCountry)
       : undefined;
 
     const checkoutData: GeniusPayCheckoutData = {
@@ -227,9 +257,12 @@ export const initiateGeniusPayPayment = async (options: PaymentOptions) => {
       customer_email: customerEmail,
       customer_name: customerName,
       customer_phone: normalizedPhone,
+      ...(customerCountry ? { customer_country: customerCountry } : {}),
       return_url: returnUrl || `${window.location.origin}/payment/success`,
       cancel_url: cancelUrl || `${window.location.origin}/checkout/cancel`,
       metadata: cleanMetadata,
+      ...(resolvedPaymentMethod ? { payment_method: resolvedPaymentMethod } : {}),
+      ...(mmoProvider ? { mmo_provider: mmoProvider } : {}),
     };
 
     // Ajouter productId et storeId directement dans data pour que l'Edge Function puisse les extraire
@@ -283,16 +316,20 @@ export const initiateGeniusPayPayment = async (options: PaymentOptions) => {
       );
     }
 
-    const checkoutUrl = geniuspayData.checkout_url;
-    const geniuspayTransactionId = geniuspayData.id || geniuspayData.transaction_id;
+    // Avec payment_method → payment_url ; sans → checkout_url (page GeniusPay)
+    const checkoutUrl = extractGeniusPayRedirectUrl(geniuspayData);
+    const geniuspayTransactionId =
+      geniuspayData.id != null
+        ? String(geniuspayData.id)
+        : geniuspayData.transaction_id || geniuspayData.reference;
     // La transaction locale a été insérée par l'Edge Function et son ID est retourné ici
     const localTransactionId = (geniuspayResponse as Record<string, unknown>)
       ._local_transaction_id as string | undefined;
 
     if (!checkoutUrl) {
-      logger.error('GeniusPay response missing checkout_url:', geniuspayResponse);
+      logger.error('GeniusPay response missing payment/checkout URL:', geniuspayResponse);
       throw new GeniusPayAPIError(
-        "La réponse GeniusPay ne contient pas d'URL de checkout. Vérifiez les logs Supabase pour plus de détails.",
+        "La réponse GeniusPay ne contient pas d'URL de paiement (payment_url / checkout_url). Vérifiez les logs Supabase pour plus de détails.",
         500,
         geniuspayResponse
       );

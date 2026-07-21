@@ -5,6 +5,7 @@ const PROVIDER_LABELS: Partial<Record<PaymentProviderCode, string>> = {
   paypal_commerce: 'PayPal',
   flutterwave_connect: 'Flutterwave',
   geniuspay_platform: 'GeniusPay',
+  moneyfusion: 'MoneyFusion',
 };
 
 export function buildPspFallbackUserMessage(

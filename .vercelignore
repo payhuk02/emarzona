@@ -1,0 +1,7 @@
+supabase/
+playwright-report/
+test-results/
+coverage/
+tmp-*
+error_output.txt
+push_error.txt

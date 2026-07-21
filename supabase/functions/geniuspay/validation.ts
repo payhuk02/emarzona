@@ -18,7 +18,11 @@ export interface CreateCheckoutData {
   productId?: string;
   storeId?: string;
   metadata?: Record<string, unknown>;
+  /** @deprecated Prefer payment_method */
   methods?: string[];
+  payment_method?: string;
+  mmo_provider?: string;
+  customer_country?: string;
 }
 
 export interface RefundPaymentData {
@@ -191,6 +195,13 @@ export function validateCreateCheckout(data: unknown): {
     return { valid: false, error: 'metadata doit être un objet' };
   }
 
+  const paymentMethodRaw =
+    typeof d.payment_method === 'string'
+      ? d.payment_method
+      : Array.isArray(d.methods) && d.methods.length > 0
+        ? String(d.methods[0])
+        : undefined;
+
   return {
     valid: true,
     validated: {
@@ -206,6 +217,13 @@ export function validateCreateCheckout(data: unknown): {
       storeId: d.storeId ? String(d.storeId) : undefined,
       metadata: d.metadata as Record<string, unknown> | undefined,
       methods: Array.isArray(d.methods) ? d.methods.map(String) : undefined,
+      payment_method: paymentMethodRaw ? String(paymentMethodRaw).substring(0, 32) : undefined,
+      mmo_provider:
+        typeof d.mmo_provider === 'string' ? d.mmo_provider.trim().substring(0, 64) : undefined,
+      customer_country:
+        typeof d.customer_country === 'string'
+          ? d.customer_country.trim().substring(0, 64)
+          : undefined,
     },
   };
 }

@@ -126,4 +126,83 @@ describe('resolvePaymentProvider', () => {
     expect(result.provider).toBe('paypal_commerce');
     expect(result.connectionId).toBe('c-p');
   });
+
+  it('choisit moneyfusion en préférence acheteur XOF sans connexion boutique (rail plateforme)', () => {
+    const connections = [baseConnection({ id: 'c-m', provider: 'geniuspay_platform' })];
+
+    const result = resolvePaymentProvider({
+      storeId: 'store-1',
+      amount: 10_000,
+      currency: 'XOF',
+      connections,
+      buyerPreferredProvider: 'moneyfusion',
+    });
+
+    expect(result.provider).toBe('moneyfusion');
+    expect(result.connectionId).toBeNull();
+    expect(result.reason).toBe('buyer_preference');
+  });
+
+  it('ignore la préférence moneyfusion si devise non supportée (EUR → routage normal)', () => {
+    const connections = [baseConnection({ id: 'c-m', provider: 'geniuspay_platform' })];
+
+    const result = resolvePaymentProvider({
+      storeId: 'store-1',
+      amount: 100,
+      currency: 'EUR',
+      connections,
+      buyerPreferredProvider: 'moneyfusion',
+    });
+
+    expect(result.provider).toBe('geniuspay_platform');
+  });
+
+  it('utilise la connexion moneyfusion active si présente (préférence acheteur)', () => {
+    const connections = [
+      baseConnection({ id: 'c-m', provider: 'geniuspay_platform' }),
+      baseConnection({ id: 'c-mf', provider: 'moneyfusion' }),
+    ];
+
+    const result = resolvePaymentProvider({
+      storeId: 'store-1',
+      amount: 7500,
+      currency: 'XOF',
+      connections,
+      buyerPreferredProvider: 'moneyfusion',
+    });
+
+    expect(result.provider).toBe('moneyfusion');
+    expect(result.connectionId).toBe('c-mf');
+  });
+
+  it('route automatiquement vers moneyfusion seulement si connexion active existe', () => {
+    const connections = [
+      baseConnection({ id: 'c-mf', provider: 'moneyfusion' }),
+      baseConnection({ id: 'c-m', provider: 'geniuspay_platform' }),
+    ];
+
+    const result = resolvePaymentProvider({
+      storeId: 'store-1',
+      amount: 12_000,
+      currency: 'XOF',
+      connections,
+    });
+
+    expect(result.provider).toBe('moneyfusion');
+    expect(result.connectionId).toBe('c-mf');
+    expect(result.reason).toBe('auto_routing_moneyfusion');
+  });
+
+  it("pas d'auto-routage moneyfusion sans connexion — fallback geniuspay", () => {
+    const connections = [baseConnection({ id: 'c-m', provider: 'geniuspay_platform' })];
+
+    const result = resolvePaymentProvider({
+      storeId: 'store-1',
+      amount: 12_000,
+      currency: 'XOF',
+      connections,
+    });
+
+    expect(result.provider).toBe('geniuspay_platform');
+  });
 });

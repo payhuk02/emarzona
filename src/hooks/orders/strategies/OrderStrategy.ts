@@ -42,6 +42,9 @@ export interface OrderStrategyContext {
 
   /** Achat invité sans session auth */
   guestCheckout?: boolean;
+
+  /** Provider de paiement préféré (ex. moneyfusion, geniuspay) */
+  preferredProvider?: string;
 }
 
 export interface OrderCreationResult {

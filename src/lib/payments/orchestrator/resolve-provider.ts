@@ -1,10 +1,7 @@
-/**
- * Résolution du PSP optimal pour une commande (logique pure, testable)
- */
-
 import {
   FLUTTERWAVE_CONNECT_CURRENCIES,
   GENIUSPAY_PLATFORM_CURRENCIES,
+  MONEYFUSION_CURRENCIES,
   PAYPAL_COMMERCE_CURRENCIES,
   PROVIDER_PRIORITY,
   STRIPE_CONNECT_CURRENCIES,
@@ -38,6 +35,8 @@ function isProviderCompatible(
       return PAYPAL_COMMERCE_CURRENCIES.has(currency);
     case 'flutterwave_connect':
       return FLUTTERWAVE_CONNECT_CURRENCIES.has(currency);
+    case 'moneyfusion':
+      return MONEYFUSION_CURRENCIES.has(currency);
     case 'geniuspay_platform':
       return GENIUSPAY_PLATFORM_CURRENCIES.has(currency) || currency.length > 0;
     default:
@@ -63,6 +62,16 @@ export function resolvePaymentProvider(input: ResolveProviderInput): ResolvedPay
   }
 
   if (input.buyerPreferredProvider) {
+    // MoneyFusion = rail plateforme (pas de connexion boutique obligatoire)
+    if (input.buyerPreferredProvider === 'moneyfusion' && MONEYFUSION_CURRENCIES.has(currency)) {
+      const mfConn = findConnection(activeConnections, 'moneyfusion');
+      return {
+        provider: 'moneyfusion',
+        connectionId: mfConn?.id ?? null,
+        reason: 'buyer_preference',
+      };
+    }
+
     const preferred = findConnection(activeConnections, input.buyerPreferredProvider);
     if (preferred && isProviderCompatible(input.buyerPreferredProvider, currency, preferred)) {
       return {
@@ -74,6 +83,8 @@ export function resolvePaymentProvider(input: ResolveProviderInput): ResolvedPay
   }
 
   for (const provider of PROVIDER_PRIORITY) {
+    // MoneyFusion n'est sélectionné automatiquement que si une connexion active existe
+    // (sinon uniquement via préférence acheteur / UI).
     const connection = findConnection(activeConnections, provider);
     if (!connection) continue;
     if (!isProviderCompatible(provider, currency, connection)) continue;

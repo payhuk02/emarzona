@@ -82,3 +82,29 @@ export function isPaymentOrchestrationV2EnabledForStore(storeId?: string | null)
   const bucket = fnv1aHash(storeId) % 100;
   return bucket < rollout;
 }
+
+/**
+ * MoneyFusion (FusionPay) — option sélectionnable au checkout.
+ * `VITE_MONEYFUSION_ENABLED=true` pour activer (défaut: true en preview/dev, sinon false).
+ */
+export function isMoneyFusionEnabled(): boolean {
+  const env = viteEnv('VITE_MONEYFUSION_ENABLED');
+  if (env !== undefined && env !== '') {
+    const normalized = String(env).toLowerCase();
+    if (FALSE_VALUES.has(normalized)) return false;
+    return TRUE_VALUES.has(normalized);
+  }
+  return viteEnv('VITE_VERCEL_ENV') === 'preview' || import.meta.env.DEV === true;
+}
+
+/**
+ * Mode temporaire MoneyFusion uniquement.
+ * Masque tous les autres PSP et interdit le fallback GeniusPay.
+ */
+export function isMoneyFusionOnlyEnabled(): boolean {
+  const env = viteEnv('VITE_MONEYFUSION_ONLY');
+  if (env === undefined || env === '') return false;
+  const normalized = String(env).toLowerCase();
+  if (FALSE_VALUES.has(normalized)) return false;
+  return TRUE_VALUES.has(normalized);
+}

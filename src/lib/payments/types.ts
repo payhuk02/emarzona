@@ -44,6 +44,12 @@ export interface OrchestratedPaymentRequest {
   connections?: StorePaymentConnection[];
   /** Abonnements plateforme : toujours GeniusPay plateforme, jamais Stripe/PayPal vendeur */
   forcePlatformPayments?: boolean;
+  /**
+   * Méthode GeniusPay (`payment_method`). Défaut pawapay côté adapter.
+   * `null` = page checkout GeniusPay (choix client).
+   */
+  paymentMethod?: import('@/lib/geniuspay-types').GeniusPayPaymentMethod | null;
+  mmoProvider?: string;
 }
 
 export interface PspFallbackInfo {

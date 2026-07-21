@@ -18,7 +18,12 @@ import {
   checkoutProviderToRpc,
   type CheckoutPaymentProvider,
 } from '@/hooks/payments/useStorePaymentOptions';
-import { isPaymentOrchestrationV2Enabled } from '@/lib/payments/feature-flags';
+import {
+  isMoneyFusionEnabled,
+  isMoneyFusionOnlyEnabled,
+  isPaymentOrchestrationV2Enabled,
+} from '@/lib/payments/feature-flags';
+import { MONEYFUSION_CURRENCIES, normalizeCurrency } from '@/lib/payments/constants';
 
 export type PaymentProvider = CheckoutPaymentProvider;
 
@@ -36,10 +41,16 @@ const PROVIDER_META: Record<
   Omit<PaymentProviderOption, 'value' | 'available'>
 > = {
   geniuspay: {
-    label: 'GeniusPay',
-    description: 'Mobile money et paiements locaux (XOF, Afrique)',
+    label: 'GeniusPay (PawaPay)',
+    description: 'Mobile money via PawaPay — Orange, MTN, Moov, Wave (XOF / Afrique)',
     icon: <Wallet className="h-5 w-5" />,
-    features: ['Mobile Money', 'XOF / XAF', 'Paiement local'],
+    features: ['PawaPay', 'Mobile Money', 'XOF / XAF', 'Paiement local'],
+  },
+  moneyfusion: {
+    label: 'MoneyFusion',
+    description: 'Mobile Money Afrique de l’Ouest via MoneyFusion / FusionPay',
+    icon: <Wallet className="h-5 w-5" />,
+    features: ['Mobile Money', 'XOF', 'Orange / MTN / Moov / Wave'],
   },
   stripe_connect: {
     label: 'Carte bancaire (Stripe)',
@@ -93,18 +104,33 @@ export function PaymentProviderSelector({
   });
 
   const providers = useMemo((): PaymentProviderOption[] => {
+    const currencyNorm = normalizeCurrency(currency);
+    const moneyfusionOk = isMoneyFusionEnabled() && MONEYFUSION_CURRENCIES.has(currencyNorm);
+
+    const moneyfusionOption: PaymentProviderOption = {
+      value: 'moneyfusion',
+      ...PROVIDER_META.moneyfusion,
+      available: true,
+    };
+
+    if (isMoneyFusionOnlyEnabled()) {
+      return moneyfusionOk ? [moneyfusionOption] : [];
+    }
+
     if (!orchestrationV2 || !storeId) {
-      return [
+      const list: PaymentProviderOption[] = [
         {
           value: 'geniuspay',
           ...PROVIDER_META.geniuspay,
           available: true,
         },
       ];
+      if (moneyfusionOk) list.push(moneyfusionOption);
+      return list;
     }
 
     const source = (rpcOptions ?? []).filter(opt => opt.provider !== 'flutterwave_connect');
-    return source.map(opt => {
+    const mapped = source.map(opt => {
       const checkoutValue = rpcProviderToCheckout(opt.provider);
       const meta = PROVIDER_META[checkoutValue] ?? PROVIDER_META.geniuspay;
       return {
@@ -116,7 +142,14 @@ export function PaymentProviderSelector({
         available: true,
       };
     });
-  }, [orchestrationV2, storeId, rpcOptions]);
+
+    // Rail plateforme MoneyFusion (indépendant du RPC boutique)
+    if (moneyfusionOk && !mapped.some(p => p.value === 'moneyfusion')) {
+      mapped.push(moneyfusionOption);
+    }
+
+    return mapped;
+  }, [orchestrationV2, storeId, rpcOptions, currency]);
 
   useEffect(() => {
     const loadUserPreference = async () => {
@@ -134,11 +167,13 @@ export function PaymentProviderSelector({
         const checkoutPref: CheckoutPaymentProvider =
           pref === 'geniuspay' || pref === 'geniuspay_platform'
             ? 'geniuspay'
-            : pref === 'stripe_connect' ||
-                pref === 'paypal_commerce' ||
-                pref === 'flutterwave_connect'
-              ? pref
-              : 'geniuspay';
+            : pref === 'moneyfusion'
+              ? 'moneyfusion'
+              : pref === 'stripe_connect' ||
+                  pref === 'paypal_commerce' ||
+                  pref === 'flutterwave_connect'
+                ? pref
+                : 'geniuspay';
 
         const match = providers.find(p => p.value === checkoutPref);
         if (match) onChange(match.value);

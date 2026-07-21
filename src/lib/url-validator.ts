@@ -17,6 +17,11 @@ import { logger } from './logger';
 const ALLOWED_PAYMENT_DOMAINS = [
   'geniuspay.io',
   'geniuspay.ci',
+  'pawapay.io',
+  'pay.pawapay.io',
+  'moneyfusion.net',
+  'pay.moneyfusion.net',
+  'payin.moneyfusion.net',
   'emarzona.com',
   'myemarzona.shop', // Domaine dédié aux boutiques
   'emarzona.vercel.app',

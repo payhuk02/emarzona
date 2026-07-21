@@ -39,7 +39,41 @@ interface CreateCheckoutData {
   storeId?: string;
   orderId?: string;
   metadata?: Record<string, unknown>;
+  /** @deprecated Prefer payment_method (GeniusPay API officiel) */
   methods?: string[];
+  /** Code API GeniusPay: pawapay | wave | orange_money | ... */
+  payment_method?: string;
+  /** Code opérateur MMO PawaPay (ex: ORANGE_CIV) */
+  mmo_provider?: string;
+  /** Code pays ISO2 pour PawaPay (ex: CI, SN) */
+  customer_country?: string;
+}
+
+const GENIUSPAY_PAYMENT_METHODS = [
+  'pawapay',
+  'wave',
+  'orange_money',
+  'mtn_money',
+  'moov_money',
+  'airtel_money',
+  'paystack',
+  'card',
+] as const;
+
+/** Défaut checkout Emarzona = PawaPay via GeniusPay */
+const DEFAULT_GENIUSPAY_PAYMENT_METHOD =
+  (Deno.env.get('GENIUSPAY_DEFAULT_PAYMENT_METHOD') || 'pawapay').trim().toLowerCase();
+
+function resolveGeniusPayPaymentMethod(raw?: string | null): string | undefined {
+  if (raw === '' || raw === 'omit' || raw === 'checkout') {
+    // Mode page checkout GeniusPay (choix client)
+    return undefined;
+  }
+  const value = (raw || DEFAULT_GENIUSPAY_PAYMENT_METHOD).trim().toLowerCase();
+  if ((GENIUSPAY_PAYMENT_METHODS as readonly string[]).includes(value)) {
+    return value;
+  }
+  return 'pawapay';
 }
 
 interface RefundPaymentData {
@@ -147,6 +181,56 @@ const COUNTRY_DIAL_CODES: Record<string, string> = {
   cameroun: '237',
   cameroon: '237',
 };
+
+/** Mapping nom pays / ISO2 → ISO2 pour le routage PawaPay */
+const COUNTRY_ISO2: Record<string, string> = {
+  'burkina faso': 'BF',
+  burkina: 'BF',
+  bf: 'BF',
+  "côte d'ivoire": 'CI',
+  "cote d'ivoire": 'CI',
+  'ivory coast': 'CI',
+  ci: 'CI',
+  civ: 'CI',
+  senegal: 'SN',
+  sn: 'SN',
+  mali: 'ML',
+  ml: 'ML',
+  benin: 'BJ',
+  bj: 'BJ',
+  togo: 'TG',
+  tg: 'TG',
+  niger: 'NE',
+  ne: 'NE',
+  ghana: 'GH',
+  gh: 'GH',
+  nigeria: 'NG',
+  ng: 'NG',
+  cameroun: 'CM',
+  cameroon: 'CM',
+  cm: 'CM',
+  'rd congo': 'CD',
+  congo: 'CD',
+  cd: 'CD',
+  kenya: 'KE',
+  ke: 'KE',
+  rwanda: 'RW',
+  rw: 'RW',
+  ouganda: 'UG',
+  uganda: 'UG',
+  ug: 'UG',
+  gabon: 'GA',
+  ga: 'GA',
+};
+
+function resolveCountryIso2(country?: string | null): string | undefined {
+  if (!country) return undefined;
+  const key = country.trim().toLowerCase();
+  if (/^[a-z]{2}$/i.test(key)) {
+    return key.toUpperCase();
+  }
+  return COUNTRY_ISO2[key];
+}
 
 function normalizePhoneForGeniusPay(phone: string, country?: string): string {
   const cleaned = phone.trim().replace(/\s/g, '');
@@ -318,6 +402,25 @@ function validateCreateCheckout(data: unknown): {
     return { valid: false, error: 'metadata doit être un objet' };
   }
 
+  const paymentMethodRaw =
+    typeof d.payment_method === 'string'
+      ? d.payment_method
+      : Array.isArray(d.methods) && d.methods.length > 0
+        ? String(d.methods[0])
+        : undefined;
+
+  const mmoProvider =
+    typeof d.mmo_provider === 'string' ? d.mmo_provider.trim().substring(0, 64) : undefined;
+
+  const customerCountryRaw =
+    typeof d.customer_country === 'string'
+      ? d.customer_country
+      : typeof (d.metadata as Record<string, unknown> | undefined)?.customerCountry === 'string'
+        ? String((d.metadata as Record<string, unknown>).customerCountry)
+        : typeof (d.metadata as Record<string, unknown> | undefined)?.customer_country === 'string'
+          ? String((d.metadata as Record<string, unknown>).customer_country)
+          : undefined;
+
   return {
     valid: true,
     validated: {
@@ -334,6 +437,11 @@ function validateCreateCheckout(data: unknown): {
       orderId: d.orderId ? String(d.orderId) : undefined,
       metadata: d.metadata as Record<string, unknown> | undefined,
       methods: Array.isArray(d.methods) ? d.methods.map(String) : undefined,
+      payment_method: paymentMethodRaw ? String(paymentMethodRaw).substring(0, 32) : undefined,
+      mmo_provider: mmoProvider || undefined,
+      customer_country: customerCountryRaw
+        ? String(customerCountryRaw).substring(0, 64)
+        : undefined,
     },
   };
 }
@@ -1161,13 +1269,51 @@ serve(async req => {
           }
         }
 
-        const customerCountry =
+        const customerCountryRaw =
+          validatedData.customer_country ||
           (validatedData.metadata?.customerCountry as string | undefined) ||
           (validatedData.metadata?.customer_country as string | undefined);
+        const customerCountryIso2 = resolveCountryIso2(customerCountryRaw);
         const customerPhone = validatedData.customer_phone
-          ? normalizePhoneForGeniusPay(validatedData.customer_phone, customerCountry)
+          ? normalizePhoneForGeniusPay(validatedData.customer_phone, customerCountryRaw)
           : undefined;
 
+        let paymentMethod = resolveGeniusPayPaymentMethod(validatedData.payment_method);
+        const mmoProvider = validatedData.mmo_provider?.trim() || undefined;
+
+        // PawaPay ne couvre que 12 pays (indicatifs ci-dessous). Pour les autres
+        // (ex: Burkina Faso +226), on omet payment_method → page checkout GeniusPay.
+        // Docs: https://geniuspay.ci/docs/api (BJ, CM, CI, CD, GA, KE, CG, RW, SN, SL, UG, ZM)
+        const PAWAPAY_DIAL_CODES = [
+          '229', // Bénin
+          '237', // Cameroun
+          '225', // Côte d'Ivoire
+          '243', // RD Congo
+          '241', // Gabon
+          '254', // Kenya
+          '242', // Congo
+          '250', // Rwanda
+          '221', // Sénégal
+          '232', // Sierra Leone
+          '256', // Ouganda
+          '260', // Zambie
+        ];
+        if (paymentMethod === 'pawapay') {
+          const phoneDigits = (customerPhone || '').replace(/\D/g, '');
+          const pawapaySupported =
+            phoneDigits.length > 0 &&
+            PAWAPAY_DIAL_CODES.some(code => phoneDigits.startsWith(code));
+          if (!pawapaySupported) {
+            console.log(
+              '[GeniusPay Edge Function] Phone not covered by PawaPay, using GeniusPay checkout page',
+              { phoneDialCode: phoneDigits.slice(0, 3) || null }
+            );
+            paymentMethod = undefined;
+          }
+        }
+
+        // Docs GeniusPay: success_url / error_url. On envoie aussi return_url / cancel_url
+        // pour compatibilité avec d'éventuels alias d'API.
         body = {
           amount: amount, // Déjà validé et arrondi
           currency: currency,
@@ -1176,14 +1322,24 @@ serve(async req => {
             email: validatedData.customer_email,
             first_name: firstName,
             last_name: lastName,
+            name: `${firstName} ${lastName}`.trim(),
             ...(customerPhone && { phone: customerPhone }),
+            ...(customerCountryIso2 && { country: customerCountryIso2 }),
           },
+          success_url: returnUrlStr,
           return_url: returnUrlStr,
-          ...(cancelUrlStr && { cancel_url: cancelUrlStr }),
+          ...(cancelUrlStr && { error_url: cancelUrlStr, cancel_url: cancelUrlStr }),
           metadata: metadata,
-          // methods est optionnel
-          ...(validatedData.methods && { methods: validatedData.methods }),
+          ...(paymentMethod && { payment_method: paymentMethod }),
+          ...(mmoProvider && { mmo_provider: mmoProvider }),
         };
+
+        console.log('[GeniusPay Edge Function] Payment method routing:', {
+          payment_method: paymentMethod ?? 'checkout_page',
+          hasMmoProvider: !!mmoProvider,
+          customerCountry: customerCountryIso2 ?? null,
+          hasPhone: !!customerPhone,
+        });
         break;
       }
 
@@ -1407,6 +1563,77 @@ serve(async req => {
       );
     }
 
+    // PawaPay ne couvre pas tous les pays (ex: Burkina Faso +226) et peut échouer
+    // à prédire l'opérateur. Dans ce cas, on réessaie SANS payment_method pour
+    // obtenir la page de checkout GeniusPay hébergée (le client choisit sa méthode).
+    if (!geniuspayResponse.ok && action === 'create_checkout') {
+      const routingErrorMessage = String(
+        responseData?.message ??
+          (typeof responseData?.error === 'object' && responseData?.error !== null
+            ? (responseData.error as { message?: unknown }).message
+            : responseData?.error) ??
+          ''
+      );
+      const bodyHasPaymentMethod =
+        body && typeof body === 'object' && 'payment_method' in (body as Record<string, unknown>);
+      const isProviderRoutingError =
+        bodyHasPaymentMethod &&
+        /unable to predict provider|provide a provider code|country_not_supported|country not supported/i.test(
+          routingErrorMessage
+        );
+
+      if (isProviderRoutingError) {
+        console.warn(
+          '[GeniusPay Edge Function] PawaPay routing failed, retrying via GeniusPay checkout page',
+          { message: routingErrorMessage.slice(0, 200) }
+        );
+
+        const fallbackBody: Record<string, unknown> = { ...(body as Record<string, unknown>) };
+        delete fallbackBody.payment_method;
+        delete fallbackBody.mmo_provider;
+
+        try {
+          const fallbackResponse = await fetch(geniuspayApiUrl, {
+            method,
+            headers: {
+              Authorization: `Bearer ${geniuspayApiKey}`,
+              'X-API-Key': geniuspayApiKey,
+              'Content-Type': 'application/json',
+              Accept: 'application/json',
+            },
+            body: JSON.stringify(fallbackBody),
+          });
+
+          const fallbackText = await fallbackResponse.text();
+          let fallbackData: Record<string, unknown> | undefined;
+          try {
+            fallbackData = fallbackText ? JSON.parse(fallbackText) : undefined;
+          } catch {
+            fallbackData = undefined;
+          }
+
+          if (fallbackResponse.ok && fallbackData) {
+            console.log(
+              '[GeniusPay Edge Function] Fallback to GeniusPay checkout page succeeded'
+            );
+            geniuspayResponse = fallbackResponse;
+            responseData = fallbackData;
+          } else {
+            console.error('[GeniusPay Edge Function] Checkout page fallback also failed', {
+              status: fallbackResponse.status,
+            });
+            if (fallbackData) {
+              responseData = fallbackData;
+            }
+          }
+        } catch (fallbackError) {
+          console.error('[GeniusPay Edge Function] Checkout page fallback fetch error', {
+            error: fallbackError instanceof Error ? fallbackError.message : String(fallbackError),
+          });
+        }
+      }
+    }
+
     if (!geniuspayResponse.ok) {
       if (localTxId && action === 'create_checkout') {
         const supabaseUrlTx = Deno.env.get('SUPABASE_URL') ?? '';
@@ -1447,8 +1674,21 @@ serve(async req => {
     console.log('GeniusPay response success:', { action, status: geniuspayResponse.status });
 
     if (action === 'create_checkout' && localTxId && responseData) {
-      const gpId = responseData.data?.id || responseData.id || responseData.data?.transaction_id;
-      const gpUrl = responseData.data?.checkout_url || responseData.checkout_url || responseData.data?.url;
+      const gpPayload =
+        responseData.data && typeof responseData.data === 'object' ? responseData.data : responseData;
+      const gpId =
+        gpPayload?.id ||
+        gpPayload?.transaction_id ||
+        gpPayload?.reference ||
+        responseData.id ||
+        responseData.transaction_id;
+      // Avec payment_method → payment_url ; sans → checkout_url
+      const gpUrl =
+        gpPayload?.payment_url ||
+        gpPayload?.checkout_url ||
+        gpPayload?.url ||
+        responseData.payment_url ||
+        responseData.checkout_url;
       
       const supabaseUrlTx = Deno.env.get('SUPABASE_URL') ?? '';
       const serviceKeyTx = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';

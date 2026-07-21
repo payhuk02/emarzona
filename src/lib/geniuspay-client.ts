@@ -44,9 +44,18 @@ export interface GeniusPayCheckoutData {
   customer_email?: string;
   customer_name?: string;
   customer_phone?: string;
+  /** Code pays ISO2 pour le routage PawaPay (ex: CI, SN, BF) */
+  customer_country?: string;
   return_url: string;
   cancel_url?: string;
   metadata?: Record<string, unknown>;
+  /**
+   * Méthode GeniusPay (`payment_method`). Défaut côté serveur: pawapay.
+   * @see https://geniuspay.ci/docs/api
+   */
+  payment_method?: string;
+  /** Code opérateur MMO PawaPay explicite (ex: ORANGE_CIV) — optionnel */
+  mmo_provider?: string;
   // Champs additionnels passés directement dans data pour l'Edge Function
   productId?: string; // L'Edge Function l'extraira et l'ajoutera à metadata.product_id
   storeId?: string; // L'Edge Function l'extraira et l'ajoutera à metadata.store_id

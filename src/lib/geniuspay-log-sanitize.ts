@@ -28,6 +28,8 @@ export function sanitizeGeniusPayCheckoutLog(data: {
   customer_name?: string;
   return_url?: string;
   cancel_url?: string;
+  payment_method?: string;
+  mmo_provider?: string;
   metadata?: Record<string, unknown>;
   productId?: string;
   storeId?: string;
@@ -41,6 +43,8 @@ export function sanitizeGeniusPayCheckoutLog(data: {
     hasCustomerName: !!data.customer_name,
     hasReturnUrl: !!data.return_url,
     hasCancelUrl: !!data.cancel_url,
+    paymentMethod: data.payment_method ?? null,
+    hasMmoProvider: !!data.mmo_provider,
     metadataKeys: data.metadata ? Object.keys(data.metadata) : [],
     hasProductId: !!data.productId,
     hasStoreId: !!data.storeId,
@@ -56,8 +60,9 @@ export function sanitizeGeniusPayApiResponse(response: unknown): Record<string, 
   const nested = r.data as Record<string, unknown> | undefined;
   return {
     hasData: !!nested,
-    transactionId: nested?.id ?? nested?.transaction_id ?? null,
+    transactionId: nested?.id ?? nested?.transaction_id ?? nested?.reference ?? null,
     hasCheckoutUrl: !!(nested?.checkout_url ?? r.checkout_url),
+    hasPaymentUrl: !!(nested?.payment_url ?? r.payment_url),
     message: typeof r.message === 'string' ? r.message.slice(0, 120) : undefined,
   };
 }

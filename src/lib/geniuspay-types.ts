@@ -3,20 +3,42 @@
  * Remplace tous les `any` par des types explicites
  */
 
+/** Codes `payment_method` acceptés par l'API GeniusPay */
+export type GeniusPayPaymentMethod =
+  | 'pawapay'
+  | 'wave'
+  | 'orange_money'
+  | 'mtn_money'
+  | 'moov_money'
+  | 'airtel_money'
+  | 'paystack'
+  | 'card';
+
 /**
- * Réponse de l'API GeniusPay pour un checkout
+ * Réponse de l'API GeniusPay pour un checkout / paiement direct
+ * - Sans `payment_method` → `checkout_url` (page GeniusPay)
+ * - Avec `payment_method` → `payment_url` (gateway, ex. PawaPay)
  */
 export interface GeniusPayCheckoutResponse {
-  message: string;
+  message?: string;
+  success?: boolean;
   data: {
-    id: string;
-    checkout_url: string;
+    id: string | number;
+    reference?: string;
+    checkout_url?: string;
+    payment_url?: string;
+    url?: string;
     transaction_id?: string;
+    status?: string;
+    gateway?: string;
+    payment_method?: string;
   };
-  errors: null | Array<{
+  errors?: null | Array<{
     field: string;
     message: string;
   }>;
+  /** Injecté par notre Edge Function */
+  _local_transaction_id?: string;
 }
 
 /**
@@ -120,6 +142,8 @@ export interface GeniusPayConfig {
   maxRetries: number;
   retryBackoff: number;
   apiUrl: string;
+  /** Méthode de paiement envoyée à GeniusPay (défaut: pawapay) */
+  defaultPaymentMethod: GeniusPayPaymentMethod;
 }
 
 /**

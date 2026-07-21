@@ -4,6 +4,7 @@
 
 import { logger } from '@/lib/logger';
 import { createGeniusPayPlatformPayment } from '../adapters/geniuspay-adapter';
+import { createMoneyFusionPayment } from '../adapters/moneyfusion-adapter';
 import { createStripeConnectPayment } from '../adapters/stripe-connect-adapter';
 import { createPayPalCommercePayment } from '../adapters/paypal-commerce-adapter';
 import type {
@@ -23,6 +24,9 @@ async function executeProviderPayment(
   switch (provider) {
     case 'geniuspay_platform':
       return createGeniusPayPlatformPayment({ ...request, connections: request.connections });
+
+    case 'moneyfusion':
+      return createMoneyFusionPayment({ ...request, connections: request.connections });
 
     case 'stripe_connect':
       return createStripeConnectPayment(request);

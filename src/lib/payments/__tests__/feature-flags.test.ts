@@ -1,6 +1,8 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import {
   getPaymentOrchestrationV2RolloutPercent,
+  isMoneyFusionEnabled,
+  isMoneyFusionOnlyEnabled,
   isPaymentOrchestrationV2Enabled,
   isPaymentOrchestrationV2EnabledForStore,
 } from '../feature-flags';
@@ -115,5 +117,49 @@ describe('isPaymentOrchestrationV2Enabled', () => {
     vi.stubEnv('VITE_PAYMENT_ORCHESTRATION_V2', 'false');
     vi.stubEnv('VITE_PAYMENT_ORCHESTRATION_V2_ROLLOUT', '100');
     expect(isPaymentOrchestrationV2EnabledForStore('store-abc')).toBe(false);
+  });
+});
+
+describe('isMoneyFusionEnabled', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('returns true when VITE_MONEYFUSION_ENABLED=true', () => {
+    vi.stubEnv('VITE_MONEYFUSION_ENABLED', 'true');
+    expect(isMoneyFusionEnabled()).toBe(true);
+  });
+
+  it('returns false when explicitly disabled', () => {
+    vi.stubEnv('VITE_MONEYFUSION_ENABLED', 'false');
+    vi.stubEnv('VITE_VERCEL_ENV', 'preview');
+    expect(isMoneyFusionEnabled()).toBe(false);
+  });
+
+  it('defaults to true on Vercel preview when unset', () => {
+    vi.unstubAllEnvs();
+    vi.stubEnv('VITE_VERCEL_ENV', 'preview');
+    expect(isMoneyFusionEnabled()).toBe(true);
+  });
+});
+
+describe('isMoneyFusionOnlyEnabled', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('is disabled by default', () => {
+    vi.stubEnv('VITE_MONEYFUSION_ONLY', '');
+    expect(isMoneyFusionOnlyEnabled()).toBe(false);
+  });
+
+  it('enables exclusive MoneyFusion mode explicitly', () => {
+    vi.stubEnv('VITE_MONEYFUSION_ONLY', 'true');
+    expect(isMoneyFusionOnlyEnabled()).toBe(true);
+  });
+
+  it('can be disabled explicitly', () => {
+    vi.stubEnv('VITE_MONEYFUSION_ONLY', 'false');
+    expect(isMoneyFusionOnlyEnabled()).toBe(false);
   });
 });

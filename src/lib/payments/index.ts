@@ -1,5 +1,7 @@
 import {
   getPaymentOrchestrationV2RolloutPercent,
+  isMoneyFusionEnabled,
+  isMoneyFusionOnlyEnabled,
   isPaymentOrchestrationV2Enabled,
   isPaymentOrchestrationV2EnabledForStore,
 } from './feature-flags';
@@ -26,6 +28,8 @@ void paymentsBarrelLoaded;
 export {
   isPaymentOrchestrationV2Enabled,
   isPaymentOrchestrationV2EnabledForStore,
+  isMoneyFusionEnabled,
+  isMoneyFusionOnlyEnabled,
   getPaymentOrchestrationV2RolloutPercent,
   createOrchestratedPayment,
   resolvePaymentProvider,

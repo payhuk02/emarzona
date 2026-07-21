@@ -40,10 +40,14 @@ export const FLUTTERWAVE_CONNECT_CURRENCIES = new Set([
 
 export const GENIUSPAY_PLATFORM_CURRENCIES = new Set(['XOF', 'XAF', 'EUR', 'USD']);
 
+/** MoneyFusion (FusionPay) — Mobile Money Afrique de l'Ouest (XOF) */
+export const MONEYFUSION_CURRENCIES = new Set(['XOF']);
+
 /** Flutterwave retiré du routage actif (Epic 2.2.6 Option B) — phase 4+ si réactivation */
 export const PROVIDER_PRIORITY: PaymentProviderCode[] = [
   'stripe_connect',
   'paypal_commerce',
+  'moneyfusion',
   'geniuspay_platform',
 ];
 
