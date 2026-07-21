@@ -566,6 +566,10 @@ BEGIN
      OR position('COALESCE((p_artist->>''artwork_year'')::INTEGER, 0)' in v_src) > 0 THEN
     RAISE EXCEPTION 'create_artist_product_tx still coerces artwork_year to 0';
   END IF;
+
+  IF position('COALESCE(p_product->''tags'', ''[]''::jsonb)' in v_src) > 0 THEN
+    RAISE EXCEPTION 'create_artist_product_tx still passes JSONB to products.tags TEXT[]';
+  END IF;
 END;
 $$;
 

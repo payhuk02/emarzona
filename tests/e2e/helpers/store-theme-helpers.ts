@@ -230,9 +230,19 @@ export async function assertStorePrimaryColorInDb(
 }
 
 export async function dismissPersonaOnboardingIfVisible(page: Page): Promise<void> {
+  // Persist the preference first so route changes cannot reopen the coach.
+  await page.evaluate(() => {
+    localStorage.setItem('sidebarPersonaOnboarded', 'true');
+    Object.keys(localStorage)
+      .filter(key => key.startsWith('sidebarPersonaOnboarded:'))
+      .forEach(key => localStorage.setItem(key, 'true'));
+  });
+
   const dismiss = page.getByRole('button', { name: /^Compris$/i });
   if (await dismiss.isVisible().catch(() => false)) {
-    await dismiss.click();
+    // Radix can report the button as visible while its anchored popover sits
+    // outside a narrow CI viewport. A forced click still exercises dismiss().
+    await dismiss.click({ force: true });
     await expect(dismiss)
       .toBeHidden({ timeout: 10_000 })
       .catch(() => undefined);

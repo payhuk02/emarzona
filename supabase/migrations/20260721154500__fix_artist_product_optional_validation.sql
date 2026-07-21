@@ -57,7 +57,11 @@ BEGIN
     NULLIF(p_product->>'category_id', '')::UUID,
     p_product->>'image_url',
     COALESCE(p_product->'images', '[]'::jsonb),
-    COALESCE(p_product->'tags', '[]'::jsonb),
+    CASE
+      WHEN jsonb_typeof(p_product->'tags') = 'array' THEN
+        ARRAY(SELECT jsonb_array_elements_text(p_product->'tags'))
+      ELSE ARRAY[]::TEXT[]
+    END,
     p_product->>'meta_title',
     p_product->>'meta_description',
     p_product->>'og_image',
@@ -179,7 +183,12 @@ BEGIN
     END,
     image_url = COALESCE(p_product->>'image_url', image_url),
     images = COALESCE(p_product->'images', images),
-    tags = COALESCE(p_product->'tags', tags),
+    tags = CASE
+      WHEN jsonb_typeof(p_product->'tags') = 'array' THEN
+        ARRAY(SELECT jsonb_array_elements_text(p_product->'tags'))
+      WHEN p_product ? 'tags' THEN ARRAY[]::TEXT[]
+      ELSE tags
+    END,
     meta_title = COALESCE(p_product->>'meta_title', meta_title),
     meta_description = COALESCE(p_product->>'meta_description', meta_description),
     og_image = COALESCE(p_product->>'og_image', og_image),

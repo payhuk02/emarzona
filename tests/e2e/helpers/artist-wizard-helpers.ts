@@ -129,10 +129,14 @@ export async function openArtistCreateWizard(page: Page): Promise<void> {
   await waitForReactApp(page);
   await dismissCookieBannerIfVisible(page);
   await dismissPersonaOnboardingIfVisible(page);
+  await expect(page).toHaveURL(/\/dashboard\/products\/new\/artist/, { timeout: 30_000 });
+  await expect(page.getByRole('heading', { name: /Type d'artiste/i })).toBeVisible({
+    timeout: 60_000,
+  });
 }
 
 export async function selectArtistTypeVisual(page: Page): Promise<void> {
-  await page.getByText('Artiste Visuel', { exact: false }).first().click();
+  await page.getByText('Artiste Visuel', { exact: true }).click({ timeout: 20_000 });
 }
 
 export async function clickArtistWizardNext(page: Page, times = 1): Promise<void> {
