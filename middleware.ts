@@ -619,9 +619,10 @@ export default async function middleware(req: Request): Promise<Response | undef
     if (!ct.includes('text/html')) return res;
     const html = await res.text();
 
-    // Ajout du SWR Caching Mondial (Edge Computing)
+    // Keep HTML edge cache short so hashed /assets/* from a previous deploy
+    // cannot outlive the deployment that published them.
     return buildCspHtmlResponse(html, res, {
-      'cache-control': 'public, max-age=0, s-maxage=3600, stale-while-revalidate=86400',
+      'cache-control': 'public, max-age=0, s-maxage=60, stale-while-revalidate=300',
       'x-edge-caching': 'swr-enabled',
     });
   }

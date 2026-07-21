@@ -28,7 +28,10 @@
       "has": [{ "type": "host", "value": "myemarzona\\.shop" }],
       "destination": "/api/store-robots?slug=myemarzona.shop"
     },
-    { "source": "/((?!api|supabase).*)", "destination": "/index.html" }
+    {
+      "source": "/((?!api/|supabase/|assets/|fonts/).*)",
+      "destination": "/index.html"
+    }
   ],
   "headers": [
     {
@@ -45,6 +48,15 @@
         {
           "key": "Strict-Transport-Security",
           "value": "max-age=63072000; includeSubDomains; preload"
+        }
+      ]
+    },
+    {
+      "source": "/index.html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, s-maxage=60, stale-while-revalidate=300"
         }
       ]
     },
