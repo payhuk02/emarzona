@@ -18,7 +18,7 @@ export function registerServiceWorker() {
             registration.update();
           }, 60000); // Toutes les minutes
 
-          // Écouter les mises à jour
+          // Écouter les mises à jour — activation silencieuse, sans popup.
           registration.addEventListener('updatefound', () => {
             const newWorker = registration.installing;
             if (newWorker) {
@@ -26,9 +26,6 @@ export function registerServiceWorker() {
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                   logger.info('Nouveau Service Worker disponible');
                   newWorker.postMessage({ type: 'SKIP_WAITING' });
-                  if (confirm('Une nouvelle version est disponible. Recharger la page ?')) {
-                    window.location.reload();
-                  }
                 }
               });
             }

@@ -24,7 +24,8 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
 
       logger.info('Service Worker registered', { scope: registration.scope });
 
-      // Vérifier les mises à jour
+      // Vérifier les mises à jour — activation silencieuse, sans popup.
+      // La nouvelle version prend effet au prochain rechargement (géré dans main.tsx).
       registration.addEventListener('updatefound', () => {
         const newWorker = registration.installing;
         if (newWorker) {
@@ -32,7 +33,6 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
               logger.info('Service Worker new version available');
               newWorker.postMessage({ type: 'SKIP_WAITING' });
-              notifyNewVersion();
             }
           });
         }
@@ -46,17 +46,6 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
   }
 
   return null;
-}
-
-/**
- * Notifier l'utilisateur d'une nouvelle version
- */
-function notifyNewVersion() {
-  if (
-    window.confirm("Une nouvelle version de l'application est disponible. Recharger maintenant ?")
-  ) {
-    window.location.reload();
-  }
 }
 
 /**
