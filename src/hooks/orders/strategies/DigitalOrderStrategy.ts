@@ -203,25 +203,6 @@ export class DigitalOrderStrategy implements OrderStrategy {
 
     const checkoutToken = extractCheckoutToken(order.metadata);
 
-    // #region agent log
-    fetch('http://127.0.0.1:7740/ingest/c21af8ec-02ef-48c9-95f8-23aa8fa2c366', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'fed886' },
-      body: JSON.stringify({
-        sessionId: 'fed886',
-        hypothesisId: 'H2-digital-checkout-token',
-        location: 'DigitalOrderStrategy.ts:createOrder',
-        message: 'Digital order created before payment',
-        data: {
-          orderId: order.id,
-          guestCheckout: !!guestCheckout,
-          hasCheckoutToken: !!checkoutToken,
-        },
-        timestamp: Date.now(),
-      }),
-    }).catch(() => {});
-    // #endregion
-
     if (giftCardId && giftCardAmount > 0) {
       try {
         await supabase.rpc('redeem_gift_card', {

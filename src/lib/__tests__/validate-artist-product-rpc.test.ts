@@ -43,7 +43,7 @@ describe('validateArtistProductRpc', () => {
       p_total_editions: null,
       p_requires_shipping: true,
       p_artwork_link_url: null,
-      p_shipping_handling_time: 0,
+      p_shipping_handling_time: null,
       p_shipping_insurance_amount: 0,
     });
   });

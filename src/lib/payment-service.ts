@@ -97,26 +97,6 @@ async function resolvePaymentContext(options: PaymentOptions): Promise<PaymentOp
     checkoutToken = extractCheckoutToken(order?.metadata);
   }
 
-  // #region agent log
-  fetch('http://127.0.0.1:7740/ingest/c21af8ec-02ef-48c9-95f8-23aa8fa2c366', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'fed886' },
-    body: JSON.stringify({
-      sessionId: 'fed886',
-      hypothesisId: 'H4-digital-payment-auth',
-      location: 'payment-service.ts:resolvePaymentContext',
-      message: 'Payment context resolved',
-      data: {
-        orderId: options.orderId ?? null,
-        hasCheckoutToken: !!checkoutToken,
-        tokenFromOptions: !!options.checkoutToken,
-        tokenFromMetadata: !!extractCheckoutToken(options.metadata),
-      },
-      timestamp: Date.now(),
-    }),
-  }).catch(() => {});
-  // #endregion
-
   return {
     ...options,
     metadata: withCheckoutTokenMetadata(options.metadata, checkoutToken),

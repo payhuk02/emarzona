@@ -166,29 +166,6 @@ class GeniusPayClient {
           hasErrorBody: !!errorBody,
         });
 
-        // #region agent log
-        fetch('http://127.0.0.1:7740/ingest/c21af8ec-02ef-48c9-95f8-23aa8fa2c366', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'fed886' },
-          body: JSON.stringify({
-            sessionId: 'fed886',
-            hypothesisId: 'H4-digital-payment-auth',
-            location: 'geniuspay-client.ts:callFunction',
-            message: 'GeniusPay edge function error',
-            data: {
-              action,
-              status: supabaseError?.context?.status ?? supabaseError?.status ?? null,
-              errorMessage: errorMessage.slice(0, 200),
-              errorBodyMessage:
-                typeof errorBody === 'object' && errorBody && 'message' in errorBody
-                  ? String((errorBody as { message?: unknown }).message ?? '').slice(0, 200)
-                  : null,
-            },
-            timestamp: Date.now(),
-          }),
-        }).catch(() => {});
-        // #endregion
-
         // Gérer l'erreur "Failed to fetch" spécifiquement
         if (
           errorMessage.includes('Failed to fetch') ||
