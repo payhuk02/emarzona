@@ -8,6 +8,7 @@ import {
   extractStoreIdFromUrl,
   seedTermsConsent,
   submitStoreExpressCreate,
+  waitForStoreExpressCreateForm,
 } from './helpers/store-theme-helpers';
 import { prepareSellerDashboardChrome } from './helpers/seller-dashboard-setup';
 import { gotoApp, loginAsSeededUser, waitForReactApp } from './shared/e2e-test-config';
@@ -83,7 +84,7 @@ test.describe('Store express create (E2E)', () => {
     await dismissPersonaOnboardingIfVisible(page);
     await acceptTermsDialogIfVisible(page);
 
-    await expect(page.getByTestId('store-express-create-form')).toBeVisible({ timeout: 60_000 });
+    await waitForStoreExpressCreateForm(page);
     await expect(
       page.getByText(/Créer votre boutique en quelques secondes|Create your store in seconds/i)
     ).toBeVisible();

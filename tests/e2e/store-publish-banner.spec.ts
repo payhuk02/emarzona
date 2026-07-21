@@ -12,6 +12,7 @@ import {
   seedTermsConsent,
   setPrimaryColorField,
   submitStoreExpressCreate,
+  waitForStoreExpressCreateForm,
 } from './helpers/store-theme-helpers';
 import { prepareSellerDashboardChrome } from './helpers/seller-dashboard-setup';
 import { gotoApp, loginAsSeededUser, waitForReactApp } from './shared/e2e-test-config';
@@ -84,7 +85,7 @@ test.describe('Store publish banner (E2E)', () => {
     await acceptTermsDialogIfVisible(page);
 
     await gotoApp(page, STORE_CREATE_PATH);
-    await expect(page.getByTestId('store-express-create-form')).toBeVisible({ timeout: 60_000 });
+    await waitForStoreExpressCreateForm(page);
     await page.getByTestId('store-express-name').fill(storeName);
     await expect(page.getByText(new RegExp(`${storeSlug}\\.myemarzona\\.shop`, 'i'))).toBeVisible({
       timeout: 15_000,

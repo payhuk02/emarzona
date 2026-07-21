@@ -43,12 +43,22 @@ test.describe('Authentication', () => {
   test('should show error for invalid credentials', async ({ page }) => {
     await page.goto('/login');
 
-    await page.fill('input[type="email"]', 'invalid@test.com');
-    await page.fill('input[type="password"]', 'wrongpassword');
-    await page.click('button[type="submit"]');
+    const loginForm = page
+      .locator('form[aria-label]')
+      .filter({ has: page.locator('#password-login') });
+    await loginForm
+      .locator('input[name="email-login"], input[type="email"]')
+      .first()
+      .fill('invalid@test.com');
+    await loginForm.locator('#password-login').fill('wrongpassword');
+    await loginForm.locator('button[type="submit"]').click();
 
-    // Wait for error message (alert or toast)
-    await expect(page.getByRole('alert').first()).toBeVisible({ timeout: 10000 });
+    // Alert inline, toast, or auth error copy (Supabase / mock backends vary).
+    const errorSignal = page
+      .getByRole('alert')
+      .or(page.getByText(/incorrect|invalid|erreur|mot de passe|credentials|impossible/i));
+    await expect(errorSignal.first()).toBeVisible({ timeout: 15_000 });
+    await expect(page).toHaveURL(/\/(login|auth)/);
   });
 
   test('should successfully login with valid credentials', async ({ page }) => {

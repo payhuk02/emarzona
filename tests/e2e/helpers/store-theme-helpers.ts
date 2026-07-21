@@ -494,6 +494,31 @@ export async function submitStoreExpressCreate(page: Page): Promise<void> {
   await onboardingUrl;
 }
 
+export async function waitForStoreExpressCreateForm(page: Page): Promise<void> {
+  await expect(page).toHaveURL(/\/dashboard\/settings\?.*tab=store/, { timeout: 30_000 });
+
+  const form = page.getByTestId('store-express-create-form');
+  const limit = page.getByTestId('store-create-limit-reached');
+  const loginGate = page.locator('input[name="email-login"], #password-login');
+
+  await expect(form.or(limit).or(loginGate).first()).toBeVisible({ timeout: 60_000 });
+
+  if (
+    await loginGate
+      .first()
+      .isVisible()
+      .catch(() => false)
+  ) {
+    throw new Error(`Expected store create form but landed on auth — url=${page.url()}`);
+  }
+  if (await limit.isVisible().catch(() => false)) {
+    const copy = (await limit.innerText().catch(() => '')).slice(0, 300);
+    throw new Error(`Store create blocked by quota gate — url=${page.url()} copy=${copy}`);
+  }
+
+  await expect(form).toBeVisible({ timeout: 10_000 });
+}
+
 export async function expectDestructiveToast(page: Page): Promise<string | null> {
   const toast = page.locator('[role="status"], [role="alert"]').filter({
     hasText: /erreur|error|validation|invalid/i,

@@ -15,6 +15,7 @@ import {
   selectArtistTypeVisual,
   clickArtistWizardNext,
 } from './helpers/artist-wizard-helpers';
+import { retryOnTransientPostgrest } from './helpers/supabase-schema-cache-retry';
 import { gotoApp, waitForReactApp } from './shared/e2e-test-config';
 
 function requiredEnv(name: string): string | null {
@@ -69,19 +70,21 @@ test.describe('Artist vendor — redirect & RPC create', () => {
     expect(userError).toBeNull();
     const userId = createdUser.user!.id;
 
-    const { data: storeData, error: storeError } = await admin
-      .from('stores')
-      .insert({
-        user_id: userId,
-        name: `E2E Artist ${runId}`,
-        slug: slugify(`e2e-artist-${runId}`),
-        description: 'E2E artist redirect',
-        is_active: true,
-        commerce_type: 'artist',
-        metadata: { commerce_type: 'artist' },
-      })
-      .select('id')
-      .single();
+    const { data: storeData, error: storeError } = await retryOnTransientPostgrest(() =>
+      admin
+        .from('stores')
+        .insert({
+          user_id: userId,
+          name: `E2E Artist ${runId}`,
+          slug: slugify(`e2e-artist-${runId}`),
+          description: 'E2E artist redirect',
+          is_active: true,
+          commerce_type: 'artist',
+          metadata: { commerce_type: 'artist' },
+        })
+        .select('id')
+        .single()
+    );
     expect(storeError).toBeNull();
     const storeId = (storeData as { id: string }).id;
 
@@ -134,9 +137,34 @@ test.describe('Artist vendor — redirect & RPC create', () => {
 
     await page.getByRole('button', { name: /brouillon/i }).click();
 
-    await expect(page.getByText(/brouillon sauvegardé|succès/i).first()).toBeVisible({
-      timeout: 30_000,
-    });
+    const successToast = page.getByText(/brouillon sauvegardé|succès/i).first();
+    const errorToast = page.getByText(/erreur|error/i).first();
+    await Promise.race([
+      successToast.waitFor({ state: 'visible', timeout: 45_000 }),
+      errorToast.waitFor({ state: 'visible', timeout: 45_000 }),
+    ]).catch(() => undefined);
+
+    if (await errorToast.isVisible().catch(() => false)) {
+      const copy = (await errorToast.innerText().catch(() => '')).slice(0, 400);
+      throw new Error(`Artist draft save failed in UI: ${copy}`);
+    }
+
+    // Primary contract: draft row exists even if toast is flaky/portal-hidden.
+    await expect
+      .poll(
+        async () => {
+          const { data } = await admin
+            .from('products')
+            .select('id')
+            .eq('store_id', ctx.storeId)
+            .eq('product_type', 'artist')
+            .eq('is_draft', true)
+            .limit(1);
+          return data?.length ?? 0;
+        },
+        { timeout: 45_000 }
+      )
+      .toBeGreaterThan(0);
 
     const { data: rows, error: queryError } = await admin
       .from('products')

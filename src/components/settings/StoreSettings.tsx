@@ -86,8 +86,9 @@ export const StoreSettings = ({
   const [commerceTypeDraft, setCommerceTypeDraft] = useState<Record<string, StoreCommerceType>>({});
 
   const createAllowed = Boolean(user?.id) && canCreateStore();
+  // Wait for auth + store context before deciding quota — avoid a false "limit reached" flash.
   const createGateLoading =
-    action === 'create' && (authLoading || storeContextLoading) && !user?.id;
+    action === 'create' && (authLoading || storeContextLoading || !user?.id);
   const [pendingCommerceChange, setPendingCommerceChange] = useState<{
     storeId: string;
     storeName: string;

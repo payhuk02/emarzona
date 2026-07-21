@@ -15,7 +15,6 @@ export default defineConfig({
   globalSetup: './tests/e2e/global-setup-e2e-guard.ts',
   testDir: './tests/e2e',
   testMatch: [
-    '**/artist-product-create-rpc.spec.ts',
     '**/artist-product-publish.spec.ts',
     '**/digital-product-publish.spec.ts',
     '**/course-product-publish.spec.ts',
@@ -25,14 +24,15 @@ export default defineConfig({
     '**/marketplace-wizard-checkout.spec.ts',
     '**/product-edit-wizard.spec.ts',
     '**/product-update-rpc.spec.ts',
+    '**/artist-product-create-rpc.spec.ts',
   ],
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   workers: 1,
-  // Stop the suite after the first failed test (after its retry). A broken
-  // shared setup must not consume the full workflow budget across every wizard.
-  maxFailures: process.env.CI ? 1 : 0,
+  // Fail fast on systemic setup failures, but allow a couple of vertical flakes
+  // without burning the whole product-wizards budget.
+  maxFailures: process.env.CI ? 3 : 0,
   reporter: process.env.CI ? [['list'], ['html'], ['github']] : 'html',
   timeout: 180_000,
   use: {

@@ -18,22 +18,16 @@ import { Settings as SettingsIcon } from 'lucide-react';
 const Settings = () => {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
-  const [activeTab, setActiveTab] = useState('profile');
+  // Initialize from URL so /dashboard/settings?tab=store&action=create paints the store tab immediately.
+  const [activeTab, setActiveTab] = useState(() => searchParams.get('tab') || 'profile');
 
   // Refs for animations
   const headerRef = useScrollAnimation<HTMLDivElement>();
 
   useEffect(() => {
     const tab = searchParams.get('tab');
-    const action = searchParams.get('action');
-
     if (tab) {
       setActiveTab(tab);
-    }
-
-    // Si on vient de la page Boutique avec action=create, on passe l'info au composant StoreSettings
-    if (tab === 'store' && action === 'create') {
-      // L'action sera gérée par le composant StoreSettings
     }
   }, [searchParams]);
 
