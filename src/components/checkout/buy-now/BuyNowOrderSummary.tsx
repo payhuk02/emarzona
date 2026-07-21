@@ -14,7 +14,7 @@ import type {
   CheckoutUser,
   CheckoutVariant,
 } from '@/pages/checkout/buy-now/checkout-buy-now-types';
-import { ShoppingBag, Loader2, ShieldCheck, Lock, Tag, Truck, ArrowRight } from 'lucide-react';
+import { ShoppingBag, Loader2, Lock, Tag, Truck, ArrowRight } from 'lucide-react';
 
 const PRODUCT_TYPE_LABELS: Record<string, string> = {
   digital: 'Produit digital',
@@ -140,20 +140,6 @@ export default function BuyNowOrderSummary({
             <span className="text-muted-foreground">Sous-total</span>
             <span className="font-medium tabular-nums">{formatPrice(basePrice, currency)}</span>
           </div>
-          {hasPromo && (
-            <>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Prix original</span>
-                <span className="text-muted-foreground line-through tabular-nums">
-                  {formatPrice(originalPrice, currency)}
-                </span>
-              </div>
-              <div className="flex justify-between text-sm text-emerald-600 dark:text-emerald-400">
-                <span>Économie</span>
-                <span className="font-medium tabular-nums">−{formatPrice(savings, currency)}</span>
-              </div>
-            </>
-          )}
           {appliedCouponCode && appliedCouponCode.discountAmount > 0 && (
             <div className="flex justify-between text-sm text-emerald-600 dark:text-emerald-400">
               <span>Code promo ({appliedCouponCode.code})</span>
@@ -200,28 +186,15 @@ export default function BuyNowOrderSummary({
           )}
         </Button>
 
-        {/* Réassurance */}
-        <div className="flex items-start justify-center gap-2 text-xs text-muted-foreground pt-1">
-          {isCashOnDelivery ? (
-            <>
-              <Truck className="h-4 w-4 mt-0.5 flex-shrink-0" aria-hidden="true" />
-              <p className="text-center">
-                Paiement à la livraison — aucun paiement en ligne requis, vous réglez à la
-                réception.
-              </p>
-            </>
-          ) : (
-            <>
-              <ShieldCheck
-                className="h-4 w-4 mt-0.5 flex-shrink-0 text-emerald-600 dark:text-emerald-400"
-                aria-hidden="true"
-              />
-              <p className="text-center">
-                Paiement 100&nbsp;% sécurisé et chiffré. Vos informations sont protégées.
-              </p>
-            </>
-          )}
-        </div>
+        {/* Note paiement à la livraison uniquement */}
+        {isCashOnDelivery && (
+          <div className="flex items-start justify-center gap-2 text-xs text-muted-foreground pt-1">
+            <Truck className="h-4 w-4 mt-0.5 flex-shrink-0" aria-hidden="true" />
+            <p className="text-center">
+              Paiement à la livraison — aucun paiement en ligne requis, vous réglez à la réception.
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

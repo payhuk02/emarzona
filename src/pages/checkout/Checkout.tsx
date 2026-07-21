@@ -749,7 +749,7 @@ const Checkout = () => {
         aria-busy="true"
         aria-live="polite"
       >
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <div className="sr-only" role="status" aria-live="polite">
             Chargement des informations de paiement...
           </div>
@@ -770,7 +770,7 @@ const Checkout = () => {
   if (error || !product || !store) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-8 px-4 sm:px-6 lg:px-8 pb-16 md:pb-0">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>{error || 'Produit ou boutique introuvable'}</AlertDescription>
@@ -795,7 +795,7 @@ const Checkout = () => {
         role="main"
         aria-label="Page de finalisation de commande"
       >
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           {/* Header */}
           <header className="mb-6 sm:mb-8">
             <nav aria-label="Navigation de la page de paiement">
@@ -831,10 +831,10 @@ const Checkout = () => {
             </p>
           </header>
 
-          <div className="flex flex-col lg:grid lg:grid-cols-3 gap-6 lg:gap-8">
+          <div className="flex flex-col lg:grid lg:grid-cols-5 lg:items-start gap-6 lg:gap-8">
             {/* Résumé de la commande - En haut sur mobile, à droite sur desktop */}
             <aside
-              className="order-2 lg:order-2 lg:col-span-1"
+              className="order-2 lg:order-2 lg:col-span-2"
               role="complementary"
               aria-label="Résumé de la commande"
             >
@@ -859,7 +859,7 @@ const Checkout = () => {
             </aside>
 
             {/* Formulaire principal - En bas sur mobile, à gauche sur desktop */}
-            <div className="order-1 lg:order-1 lg:col-span-2 space-y-6">
+            <div className="order-1 lg:order-1 lg:col-span-3 space-y-6">
               <Suspense fallback={<BuyNowSectionFallback />}>
                 <BuyNowCustomerForm
                   formData={formData}

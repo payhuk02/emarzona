@@ -163,7 +163,8 @@ export default function BuyNowCustomerForm({
               <Label htmlFor="phone" className="text-sm font-medium text-foreground/90">
                 <span className="inline-flex items-center gap-1.5">
                   <Phone className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
-                  Téléphone
+                  Téléphone{' '}
+                  <span className="font-normal text-muted-foreground">(WhatsApp recommandé)</span>
                   <span className="text-destructive" aria-hidden="true">
                     *
                   </span>
