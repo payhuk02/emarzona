@@ -1,4 +1,4 @@
-supabase/
+/supabase/
 playwright-report/
 test-results/
 coverage/
