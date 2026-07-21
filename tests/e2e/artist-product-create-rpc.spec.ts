@@ -94,13 +94,18 @@ test.describe('Artist vendor — redirect & RPC create', () => {
 
   test('landing homepage exposes multilingual hreflang alternates', async ({ page }) => {
     await gotoApp(page, '/');
-    const hreflangs = page.locator('link[rel="alternate"][hreflang]');
-    await expect(hreflangs).toHaveCount(6, { timeout: 10_000 });
-    await expect(page.locator('link[hreflang="en"]')).toHaveAttribute('href', /lang=en/);
-    await expect(page.locator('link[hreflang="fr-FR"]')).toHaveAttribute(
+    // index.html + SEOMeta may briefly coexist; assert required locales rather than brittle total count.
+    await expect(page.locator('link[hreflang="en"]').first()).toHaveAttribute('href', /lang=en/, {
+      timeout: 10_000,
+    });
+    await expect(page.locator('link[hreflang="fr-FR"]').first()).toHaveAttribute(
       'href',
       /https?:\/\/[^/]+\/?$/
     );
+    await expect(page.locator('link[hreflang="es"]').first()).toBeAttached();
+    await expect(page.locator('link[hreflang="de"]').first()).toBeAttached();
+    await expect(page.locator('link[hreflang="pt-BR"]').first()).toBeAttached();
+    await expect(page.locator('link[hreflang="x-default"]').first()).toBeAttached();
   });
 
   test('artist wizard draft save creates product + artist_products via RPC', async ({
@@ -147,7 +152,9 @@ test.describe('Artist vendor — redirect & RPC create', () => {
     await waitForReactApp(page);
 
     await page.getByText('Artiste Visuel', { exact: false }).first().click();
-    await page.getByRole('button', { name: /suivant/i }).click();
+    await page
+      .getByRole('button', { name: /Aller à l'étape suivante|Étape suivante|^Suivant$/i })
+      .click();
 
     await page.locator('#artist_name').fill('Artiste E2E');
     await page.locator('#artwork_title').fill(artworkTitle);

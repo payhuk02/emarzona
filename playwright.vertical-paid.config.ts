@@ -31,6 +31,8 @@ export default defineConfig({
     trace: 'on-first-retry',
     // Prevent disabled-button clicks from burning the full test timeout.
     actionTimeout: 20_000,
+    // Prevent cookie banner fixed footer from intercepting booking CTAs.
+    storageState: 'tests/e2e/.auth/cookie-consent.json',
   },
   projects: [
     {

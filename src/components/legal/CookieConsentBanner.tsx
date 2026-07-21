@@ -46,6 +46,8 @@ export const CookieConsentBanner = () => {
     if (hasCookieConsentGiven() || currentPreferences) return;
 
     const timer = setTimeout(() => {
+      // Re-check at fire time: E2E (and late consent writes) may seed after mount.
+      if (hasCookieConsentGiven()) return;
       setShowBanner(true);
     }, 2000);
     return () => clearTimeout(timer);

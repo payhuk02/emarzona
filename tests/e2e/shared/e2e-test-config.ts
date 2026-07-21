@@ -23,6 +23,27 @@ type PlaywrightPage = import('@playwright/test').Page;
 
 /** Attend que React ait monté dans #root (évite le faux positif sur #seo-fallback). */
 export async function waitForReactApp(page: PlaywrightPage): Promise<void> {
+  // Seed consent before the cookie banner's 2s timer can show the fixed footer overlay.
+  await page
+    .evaluate(() => {
+      try {
+        document.cookie = 'emarzona_consent=true; path=/; max-age=31536000; SameSite=Lax';
+        localStorage.setItem('cookieConsentGiven', 'true');
+        localStorage.setItem(
+          'cookiePreferences',
+          JSON.stringify({
+            necessary: true,
+            functional: true,
+            analytics: true,
+            marketing: true,
+          })
+        );
+      } catch {
+        /* ignore */
+      }
+    })
+    .catch(() => undefined);
+
   await page.waitForFunction(
     () => {
       const root = document.getElementById('root');

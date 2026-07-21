@@ -37,6 +37,8 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:8080',
     trace: 'on-first-retry',
+    // Prevent cookie banner fixed footer from intercepting wizard "Suivant" clicks.
+    storageState: 'tests/e2e/.auth/cookie-consent.json',
   },
   projects: [
     {

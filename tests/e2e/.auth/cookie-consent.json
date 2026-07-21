@@ -1,0 +1,29 @@
+{
+  "cookies": [
+    {
+      "name": "emarzona_consent",
+      "value": "true",
+      "domain": "localhost",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    }
+  ],
+  "origins": [
+    {
+      "origin": "http://localhost:8080",
+      "localStorage": [
+        {
+          "name": "cookieConsentGiven",
+          "value": "true"
+        },
+        {
+          "name": "cookiePreferences",
+          "value": "{\"necessary\":true,\"functional\":true,\"analytics\":true,\"marketing\":true}"
+        }
+      ]
+    }
+  ]
+}

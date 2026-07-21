@@ -118,7 +118,10 @@ export async function loginE2EVendor(page: Page, email: string, password: string
 export async function clickWizardNext(page: Page, times = 1): Promise<void> {
   for (let i = 0; i < times; i += 1) {
     await dismissCookieBannerIfVisible(page);
-    await page.getByRole('button', { name: /^Suivant$/i }).click();
+    // Wizards use aria-label "Étape suivante" / "Aller à l'étape suivante" more often than bare "Suivant".
+    await page
+      .getByRole('button', { name: /Aller à l'étape suivante|Étape suivante|^Suivant$|^Suiv\.$/i })
+      .click({ timeout: 20_000 });
   }
 }
 

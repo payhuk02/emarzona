@@ -1,5 +1,7 @@
 import { expect, type Page } from '@playwright/test';
+import { dismissCookieBannerIfVisible } from './store-theme-helpers';
 import { clickWizardNext, goToWizardStep } from './vendor-e2e-helpers';
+import { waitForReactApp } from '../shared/e2e-test-config';
 
 export type FillCourseBasicInfoOptions = {
   title: string;
@@ -11,6 +13,9 @@ export type FillCourseBasicInfoOptions = {
 
 export async function openCourseCreateWizard(page: Page): Promise<void> {
   await page.goto('/dashboard/courses/new', { waitUntil: 'domcontentloaded' });
+  await waitForReactApp(page);
+  await dismissCookieBannerIfVisible(page);
+  await expect(page.locator('#title')).toBeVisible({ timeout: 60_000 });
 }
 
 export async function fillCourseBasicInfoStep(

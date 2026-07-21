@@ -1,15 +1,5 @@
 import { expect, type Page } from '@playwright/test';
-
-async function dismissCookieBannerIfVisible(page: Page): Promise<void> {
-  await page.evaluate(() => {
-    document.cookie = 'emarzona_consent=true; path=/; max-age=31536000; SameSite=Lax';
-    localStorage.setItem('cookieConsentGiven', 'true');
-  });
-  const acceptAll = page.getByRole('button', { name: /Tout accepter/i });
-  if (await acceptAll.isVisible().catch(() => false)) {
-    await acceptAll.click();
-  }
-}
+import { dismissCookieBannerIfVisible } from './store-theme-helpers';
 
 function localDayKey(date: Date): string {
   const y = date.getFullYear();
@@ -45,6 +35,7 @@ export async function selectServiceCalendarDay(page: Page, date?: Date): Promise
 }
 
 export async function selectFirstAvailableTimeSlot(page: Page): Promise<void> {
+  await dismissCookieBannerIfVisible(page);
   const slot = page.locator('[data-testid^="time-slot-"]').first();
   await expect(slot).toBeVisible({ timeout: 15_000 });
   await slot.click();

@@ -243,14 +243,22 @@ export async function dismissCookieBannerIfVisible(page: Page): Promise<void> {
   await page.evaluate(() => {
     document.cookie = 'emarzona_consent=true; path=/; max-age=31536000; SameSite=Lax';
     localStorage.setItem('cookieConsentGiven', 'true');
+    localStorage.setItem(
+      'cookiePreferences',
+      JSON.stringify({
+        necessary: true,
+        functional: true,
+        analytics: true,
+        marketing: true,
+      })
+    );
   });
 
+  const banner = page.getByText(/Nous utilisons des cookies/i);
   const acceptAll = page.getByRole('button', { name: /Tout accepter/i });
-  if (await acceptAll.isVisible().catch(() => false)) {
-    await acceptAll.click();
-    await expect(page.getByText(/Nous utilisons des cookies/i))
-      .toBeHidden({ timeout: 5_000 })
-      .catch(() => undefined);
+  if (await banner.isVisible().catch(() => false)) {
+    await acceptAll.click({ force: true }).catch(() => undefined);
+    await banner.waitFor({ state: 'hidden', timeout: 5_000 }).catch(() => undefined);
   }
 }
 
@@ -307,7 +315,9 @@ export async function setPrimaryColorField(page: Page, hex: string): Promise<voi
 export async function clickWizardNext(page: Page, times = 1): Promise<void> {
   for (let i = 0; i < times; i += 1) {
     await dismissCookieBannerIfVisible(page);
-    await page.getByRole('button', { name: /^Suivant$/i }).click();
+    await page
+      .getByRole('button', { name: /Aller à l'étape suivante|Étape suivante|^Suivant$|^Suiv\.$/i })
+      .click({ timeout: 20_000 });
   }
 }
 

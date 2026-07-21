@@ -134,7 +134,10 @@ export async function selectArtistTypeVisual(page: Page): Promise<void> {
 export async function clickArtistWizardNext(page: Page, times = 1): Promise<void> {
   for (let i = 0; i < times; i += 1) {
     await dismissCookieBannerIfVisible(page);
-    await page.getByRole('button', { name: /^Suivant$/i }).click();
+    // Accessible name is often the aria-label ("Aller à l'étape suivante"), not visible "Suivant".
+    await page
+      .getByRole('button', { name: /Aller à l'étape suivante|Étape suivante|^Suivant$/i })
+      .click({ timeout: 20_000 });
   }
 }
 

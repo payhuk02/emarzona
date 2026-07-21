@@ -19,6 +19,7 @@ import {
   selectFirstAvailableTimeSlot,
   selectServiceCalendarDay,
 } from './helpers/service-booking-ui';
+import { dismissCookieBannerIfVisible } from './helpers/store-theme-helpers';
 import { gotoApp, loginAsSeededUser } from './shared/e2e-test-config';
 
 const supabaseUrl = resolveE2ESupabaseUrl() || undefined;
@@ -74,9 +75,10 @@ test.describe('Mixed cart book → pay → confirm (E2E)', () => {
 
       const addToCart = page.getByTestId('service-add-to-cart');
       await expect(addToCart).toBeEnabled({ timeout: 20_000 });
+      await dismissCookieBannerIfVisible(page);
 
       const bookingError = page.getByText(
-        /Erreur de réservation|Réservation impossible|Authentification requise|Impossible de finaliser|Délai dépassé/i
+        /Erreur de réservation|Réservation impossible|Authentification requise|Impossible de finaliser|Délai dépassé|Date invalide|Sélection incomplète|Compléments manquants|créneau n'est pas disponible/i
       );
 
       const reserveRpc = page.waitForResponse(
@@ -94,6 +96,10 @@ test.describe('Mixed cart book → pay → confirm (E2E)', () => {
         throw new Error(
           `reserve_service_booking failed (${rpcResponse.status()}): ${body.slice(0, 400)}`
         );
+      }
+      if (!rpcResponse) {
+        const errText = (await bookingError.textContent().catch(() => null)) ?? '';
+        throw new Error(`reserve_service_booking RPC was not called. toast=${errText || '(none)'}`);
       }
 
       const navigated = await page

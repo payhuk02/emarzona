@@ -252,7 +252,12 @@ export const useCreateServiceOrder = () => {
       const actualDuration = durationMinutes || serviceProduct.duration_minutes;
       const bookingStartDateTime = new Date(bookingDateTime);
       const bookingEndDateTime = new Date(bookingStartDateTime.getTime() + actualDuration * 60000);
-      const bookingDate = bookingStartDateTime.toISOString().split('T')[0];
+      // Use local calendar date (not UTC from toISOString) so it matches availability + UI selection.
+      const bookingDate = [
+        bookingStartDateTime.getFullYear(),
+        String(bookingStartDateTime.getMonth() + 1).padStart(2, '0'),
+        String(bookingStartDateTime.getDate()).padStart(2, '0'),
+      ].join('-');
       const bookingStartTime = bookingStartDateTime.toTimeString().slice(0, 8); // HH:MM:SS
       const bookingEndTime = bookingEndDateTime.toTimeString().slice(0, 8);
 
