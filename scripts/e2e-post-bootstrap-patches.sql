@@ -546,6 +546,10 @@ COMMENT ON FUNCTION public.auto_enroll_course_on_payment() IS
 -- Apply artist RPC optional-field fix (path relative to CWD = repo root in CI).
 \i supabase/migrations/20260721154500__fix_artist_product_optional_validation.sql
 
+-- Apply web analytics tables/RPCs without colliding with the existing
+-- account-security public.user_sessions table.
+\i supabase/scripts/apply-web-analytics-prod.sql
+
 -- Hard-fail if the old year coercion (NULL → 0) is still present in the live function.
 DO $$
 DECLARE

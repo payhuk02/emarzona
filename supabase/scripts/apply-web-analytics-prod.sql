@@ -1,6 +1,6 @@
 -- =============================================================================
 -- Déploiement prod : objets web analytics manquants (constatés en 404 via PostgREST)
---   - Tables  : public.analytics_events, public.user_sessions
+--   - Tables  : public.analytics_events, public.store_analytics_sessions
 --   - RPCs    : public.get_store_web_metrics, public.get_store_dashboard_stats_aggregated
 -- Sources    : migrations 20250122000001 (tables) et 20260717170000 (RPCs)
 -- Idempotent : exécutable plusieurs fois sans effet de bord.
@@ -38,7 +38,9 @@ CREATE TABLE IF NOT EXISTS public.analytics_events (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
-CREATE TABLE IF NOT EXISTS public.user_sessions (
+-- Do not use public.user_sessions: production already uses that name for
+-- account/security sessions with an incompatible schema.
+CREATE TABLE IF NOT EXISTS public.store_analytics_sessions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   session_id TEXT NOT NULL UNIQUE,
   product_id UUID NOT NULL REFERENCES public.products(id) ON DELETE CASCADE,
@@ -65,26 +67,18 @@ CREATE TABLE IF NOT EXISTS public.user_sessions (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
--- Si une variante ancienne de user_sessions existe déjà (400 observé côté client),
--- s'assurer que les colonnes lues par le dashboard sont présentes.
-ALTER TABLE public.user_sessions ADD COLUMN IF NOT EXISTS store_id UUID REFERENCES public.stores(id) ON DELETE CASCADE;
-ALTER TABLE public.user_sessions ADD COLUMN IF NOT EXISTS start_time TIMESTAMP WITH TIME ZONE;
-ALTER TABLE public.user_sessions ADD COLUMN IF NOT EXISTS duration INTEGER DEFAULT 0;
-ALTER TABLE public.user_sessions ADD COLUMN IF NOT EXISTS page_views INTEGER DEFAULT 0;
-ALTER TABLE public.user_sessions ADD COLUMN IF NOT EXISTS clicks INTEGER DEFAULT 0;
-
 CREATE INDEX IF NOT EXISTS idx_analytics_events_product_id ON public.analytics_events(product_id);
 CREATE INDEX IF NOT EXISTS idx_analytics_events_event_type ON public.analytics_events(event_type);
 CREATE INDEX IF NOT EXISTS idx_analytics_events_created_at ON public.analytics_events(created_at);
 CREATE INDEX IF NOT EXISTS idx_analytics_events_session_id ON public.analytics_events(session_id);
 CREATE INDEX IF NOT EXISTS idx_analytics_events_store_id ON public.analytics_events(store_id);
-CREATE INDEX IF NOT EXISTS idx_user_sessions_product_id ON public.user_sessions(product_id);
-CREATE INDEX IF NOT EXISTS idx_user_sessions_session_id ON public.user_sessions(session_id);
-CREATE INDEX IF NOT EXISTS idx_user_sessions_start_time ON public.user_sessions(start_time);
-CREATE INDEX IF NOT EXISTS idx_user_sessions_store_id ON public.user_sessions(store_id);
+CREATE INDEX IF NOT EXISTS idx_store_analytics_sessions_product_id ON public.store_analytics_sessions(product_id);
+CREATE INDEX IF NOT EXISTS idx_store_analytics_sessions_session_id ON public.store_analytics_sessions(session_id);
+CREATE INDEX IF NOT EXISTS idx_store_analytics_sessions_start_time ON public.store_analytics_sessions(start_time);
+CREATE INDEX IF NOT EXISTS idx_store_analytics_sessions_store_id ON public.store_analytics_sessions(store_id);
 
 ALTER TABLE public.analytics_events ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.user_sessions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.store_analytics_sessions ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Users can view events for their own products" ON public.analytics_events;
 CREATE POLICY "Users can view events for their own products"
@@ -102,20 +96,20 @@ CREATE POLICY "Anyone can insert analytics events"
   ON public.analytics_events FOR INSERT
   WITH CHECK (true);
 
-DROP POLICY IF EXISTS "Users can view sessions for their own products" ON public.user_sessions;
+DROP POLICY IF EXISTS "Users can view sessions for their own products" ON public.store_analytics_sessions;
 CREATE POLICY "Users can view sessions for their own products"
-  ON public.user_sessions FOR SELECT
+  ON public.store_analytics_sessions FOR SELECT
   USING (
     EXISTS (
       SELECT 1 FROM public.stores s
-      WHERE s.id = user_sessions.store_id
+      WHERE s.id = store_analytics_sessions.store_id
         AND s.user_id = auth.uid()
     )
   );
 
-DROP POLICY IF EXISTS "System can manage user sessions" ON public.user_sessions;
+DROP POLICY IF EXISTS "System can manage user sessions" ON public.store_analytics_sessions;
 CREATE POLICY "System can manage user sessions"
-  ON public.user_sessions FOR ALL
+  ON public.store_analytics_sessions FOR ALL
   WITH CHECK (true);
 
 -- -----------------------------------------------------------------------------
@@ -209,7 +203,7 @@ BEGIN
     END,
     COALESCE(AVG(NULLIF(us.duration, 0)), 0)
   INTO v_session_count, v_bounce_rate, v_session_duration
-  FROM public.user_sessions us
+  FROM public.store_analytics_sessions us
   WHERE us.store_id = p_store_id
     AND us.start_time >= p_period_start
     AND us.start_time <= p_period_end;
@@ -623,6 +617,6 @@ NOTIFY pgrst, 'reload schema';
 
 -- Vérification rapide (à exécuter après le COMMIT) :
 --   SELECT to_regclass('public.analytics_events'),
---          to_regclass('public.user_sessions'),
+--          to_regclass('public.store_analytics_sessions'),
 --          to_regprocedure('public.get_store_web_metrics(uuid,timestamptz,timestamptz,timestamptz)'),
 --          to_regprocedure('public.get_store_dashboard_stats_aggregated(uuid,timestamptz,timestamptz,text)');
