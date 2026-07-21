@@ -543,7 +543,7 @@ $$;
 COMMENT ON FUNCTION public.auto_enroll_course_on_payment() IS
   'Auto-enroll on paid; resolve user via customers.id/metadata before auth.users email scan.';
 
-NOTIFY pgrst, 'reload schema';
+\ir ../supabase/migrations/20260721154500__fix_artist_product_optional_validation.sql
 
 NOTIFY pgrst, 'reload schema';
 
