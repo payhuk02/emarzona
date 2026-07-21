@@ -119,12 +119,10 @@ test.describe('Flux inscription aux cours', () => {
     expect(page.url()).toMatch(/\/checkout|geniuspay/);
   });
 
-  test('page checkout répond sans erreur serveur', async ({ page }) => {
+  test('page checkout sans productId redirige vers marketplace', async ({ page }) => {
     const response = await gotoApp(page, '/checkout');
     expect(response?.status()).toBeLessThan(500);
-    await expect(page.locator('body')).toBeVisible();
-    const html = await page.content();
-    expect(html.toLowerCase()).not.toContain('internal server error');
+    await expect(page).toHaveURL(/\/marketplace/, { timeout: 15_000 });
   });
 
   test('route /learn/:slug répond sans crash', async ({ page }) => {

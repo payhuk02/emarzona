@@ -10,7 +10,6 @@ export function detectPersonaFromPath(pathname: string, isAdmin: boolean): Sideb
   if (pathname.startsWith('/admin') && isAdmin) return 'admin';
   if (
     pathname.startsWith('/account') ||
-    pathname.startsWith('/checkout/multi-store') ||
     pathname.startsWith('/cart') ||
     isBuyerDiscoveryPath(pathname)
   ) {

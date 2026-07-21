@@ -10,7 +10,6 @@ describe('detectPersonaFromPath', () => {
     expect(detectPersonaFromPath('/auctions', false)).toBe('buyer');
     expect(detectPersonaFromPath('/auctions/lot-1', false)).toBe('buyer');
     expect(detectPersonaFromPath('/recommendations', false)).toBe('buyer');
-    expect(detectPersonaFromPath('/checkout/multi-store-tracking', false)).toBe('buyer');
   });
 
   it('detects seller on dashboard routes', () => {

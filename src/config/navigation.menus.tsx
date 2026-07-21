@@ -163,11 +163,6 @@ export const userMenuSections = [
         icon: Gift,
       },
       {
-        title: 'Suivi Multi-boutiques',
-        url: '/checkout/multi-store-tracking',
-        icon: Truck,
-      },
-      {
         title: 'Ma Liste de Souhaits',
         url: '/account/wishlist',
         icon: Heart,

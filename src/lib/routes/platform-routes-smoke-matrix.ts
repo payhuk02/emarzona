@@ -25,9 +25,9 @@ export const LEGACY_REDIRECT_SMOKE: readonly {
   expectUrl: RegExp;
   auth?: 'guest' | 'vendor';
 }[] = [
-  { from: '/cart-old', expectUrl: /\/cart(?:\?|$|\/)/, auth: 'guest' },
-  { from: '/checkout/cart', expectUrl: /\/checkout(?:\?|$|\/)/, auth: 'guest' },
-  { from: '/cart/checkout', expectUrl: /\/checkout(?:\?|$|\/)/, auth: 'guest' },
+  { from: '/cart-old', expectUrl: /\/marketplace(?:\?|$|\/)/, auth: 'guest' },
+  { from: '/checkout/cart', expectUrl: /\/marketplace(?:\?|$|\/)/, auth: 'guest' },
+  { from: '/cart/checkout', expectUrl: /\/marketplace(?:\?|$|\/)/, auth: 'guest' },
   { from: '/connexion', expectUrl: /\/login(?:\?|$|\/)/, auth: 'guest' },
   { from: '/faqs', expectUrl: /\/faq(?:\?|$|\/)/, auth: 'guest' },
   {

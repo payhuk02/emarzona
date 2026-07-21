@@ -31,25 +31,11 @@ test.describe('Checkout multi-PSP — routage smoke', () => {
     await expect(page.locator('body')).toBeVisible();
   });
 
-  test('checkout panier unifié : finaliser ou garde vide/auth', async ({ page }) => {
+  test('checkout sans productId redirige vers marketplace', async ({ page }) => {
     test.setTimeout(90_000);
     const response = await gotoApp(page, '/checkout');
     expect(response?.status()).toBeLessThan(500);
-
-    const root = appLocator(page);
-    const settled = await Promise.race([
-      root
-        .getByText(/finaliser (la commande|votre commande)/i)
-        .waitFor({ timeout: 60_000 })
-        .then(() => 'checkout'),
-      root
-        .getByText(/votre panier est vide/i)
-        .waitFor({ timeout: 60_000 })
-        .then(() => 'empty'),
-      page.waitForURL(/\/(login|auth)/, { timeout: 60_000 }).then(() => 'auth'),
-    ]).catch(() => 'timeout');
-
-    expect(['checkout', 'empty', 'auth', 'timeout']).toContain(settled);
+    await expect(page).toHaveURL(/\/marketplace/, { timeout: 15_000 });
   });
 });
 
@@ -93,7 +79,7 @@ test.describe('Checkout multi-PSP — legacy GeniusPay', () => {
   test('sans V2 : pas de crash, pas de clés live exposées', async ({ page }) => {
     test.skip(orchestrationV2, 'Test legacy — ne pas exécuter quand V2 est activé');
 
-    await gotoApp(page, '/checkout');
+    await gotoApp(page, '/checkout?productId=00000000-0000-0000-0000-000000000001');
     const html = await page.content();
     expect(html).not.toMatch(/sk_live_/);
     expect(html.toLowerCase()).not.toContain('internal server error');
@@ -128,14 +114,11 @@ test.describe('Checkout multi-PSP — acheteur authentifié', () => {
     expect(html).not.toContain('internal server error');
   });
 
-  test('checkout authentifié charge sans erreur fatale', async ({ page }) => {
+  test('checkout authentifié sans productId redirige vers marketplace', async ({ page }) => {
     test.setTimeout(90_000);
     const response = await gotoApp(page, '/checkout');
     expect(response?.status()).toBeLessThan(500);
-
-    await expect(page.locator('body')).toBeVisible();
-    const html = (await page.content()).toLowerCase();
-    expect(html).not.toContain('internal server error');
+    await expect(page).toHaveURL(/\/marketplace/, { timeout: 15_000 });
   });
 
   test('retour annulation paiement avec transaction_id', async ({ page }) => {

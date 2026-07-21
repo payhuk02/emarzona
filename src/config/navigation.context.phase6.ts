@@ -385,7 +385,6 @@ export const PHASE6_CONTEXT_CONFIGS = {
       '/account/bookings',
       '/account/artist',
       '/account/loyalty',
-      '/checkout/multi-store-tracking',
     ],
     groups: [
       {
@@ -412,12 +411,7 @@ export const PHASE6_CONTEXT_CONFIGS = {
       {
         groupKey: 'services_fidelite',
         defaultLabel: 'Services & fidélité',
-        paths: [
-          '/account/bookings',
-          '/account/artist',
-          '/account/loyalty',
-          '/checkout/multi-store-tracking',
-        ],
+        paths: ['/account/bookings', '/account/artist', '/account/loyalty'],
       },
     ],
   },

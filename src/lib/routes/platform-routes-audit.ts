@@ -31,7 +31,11 @@ export const DOCUMENTED_VENDOR_LINKS: readonly string[] = ['/dashboard/smart-not
 
 /** Routes legacy — à supprimer ou rediriger (audit debt). */
 export const LEGACY_ROUTE_DEBT: readonly { path: string; replacement: string; reason: string }[] = [
-  { path: '/cart-old', replacement: '/cart', reason: 'Panier legacy remplacé par CartEnhanced' },
+  {
+    path: '/cart-old',
+    replacement: '/marketplace',
+    reason: 'Panier retiré — redirection marketplace',
+  },
   {
     path: '/dashboard/physical-lots-old',
     replacement: '/dashboard/physical-lots',
@@ -42,8 +46,16 @@ export const LEGACY_ROUTE_DEBT: readonly { path: string; replacement: string; re
     replacement: '/dashboard/advanced-orders',
     reason: 'Surface de test exposée en production',
   },
-  { path: '/checkout/cart', replacement: '/checkout', reason: 'Redirect legacy checkout' },
-  { path: '/cart/checkout', replacement: '/checkout', reason: 'Redirect legacy checkout' },
+  {
+    path: '/checkout/cart',
+    replacement: '/marketplace',
+    reason: 'Panier retiré — redirection marketplace',
+  },
+  {
+    path: '/cart/checkout',
+    replacement: '/marketplace',
+    reason: 'Panier retiré — redirection marketplace',
+  },
 ];
 
 /** Pages seller extraites du namespace admin — programmes & logistique (P2). */

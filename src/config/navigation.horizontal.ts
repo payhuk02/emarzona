@@ -328,7 +328,6 @@ export function shouldShowSellerHorizontalNav(pathname: string): boolean {
 export function shouldShowBuyerHorizontalNav(pathname: string): boolean {
   if (matchesNavPath(pathname, '/account')) return true;
   if (matchesNavPath(pathname, '/cart')) return true;
-  if (pathname.startsWith('/checkout/multi-store')) return true;
   if (isBuyerDiscoveryPath(pathname)) return true;
   return false;
 }
@@ -339,7 +338,6 @@ const BOTTOM_NAV_AUTH_PATHS = new Set(['/login', '/register', '/auth']);
 export function shouldShowBottomNavigation(pathname: string): boolean {
   if (pathname === '/') return false;
   if (BOTTOM_NAV_AUTH_PATHS.has(pathname)) return false;
-  if (matchesNavPath(pathname, '/checkout/multi-store-tracking')) return true;
   if (matchesNavPath(pathname, '/checkout')) return false;
   if (matchesNavPath(pathname, '/admin')) return false;
   return true;

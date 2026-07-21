@@ -18,7 +18,6 @@ describe('navigation.horizontal visibility', () => {
   it('shows buyer horizontal nav on account routes', () => {
     expect(shouldShowBuyerHorizontalNav('/account')).toBe(true);
     expect(shouldShowBuyerHorizontalNav('/account/orders')).toBe(true);
-    expect(shouldShowBuyerHorizontalNav('/checkout/multi-store-tracking')).toBe(true);
     expect(shouldShowBuyerHorizontalNav('/cart')).toBe(true);
     expect(shouldShowBuyerHorizontalNav('/dashboard')).toBe(false);
   });
@@ -35,7 +34,6 @@ describe('navigation.horizontal visibility', () => {
   it('hides bottom nav on checkout and admin routes', () => {
     expect(shouldShowBottomNavigation('/checkout')).toBe(false);
     expect(shouldShowBottomNavigation('/checkout/payment')).toBe(false);
-    expect(shouldShowBottomNavigation('/checkout/multi-store-tracking')).toBe(true);
     expect(shouldShowBottomNavigation('/admin')).toBe(false);
     expect(shouldShowBottomNavigation('/admin/users')).toBe(false);
     expect(shouldShowBottomNavigation('/account')).toBe(true);
