@@ -148,9 +148,9 @@ describe('isMoneyFusionOnlyEnabled', () => {
     vi.unstubAllEnvs();
   });
 
-  it('is disabled by default', () => {
+  it('is enabled by default (GeniusPay retiré temporairement)', () => {
     vi.stubEnv('VITE_MONEYFUSION_ONLY', '');
-    expect(isMoneyFusionOnlyEnabled()).toBe(false);
+    expect(isMoneyFusionOnlyEnabled()).toBe(true);
   });
 
   it('enables exclusive MoneyFusion mode explicitly', () => {

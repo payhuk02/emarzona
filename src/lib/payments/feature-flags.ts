@@ -100,10 +100,12 @@ export function isMoneyFusionEnabled(): boolean {
 /**
  * Mode temporaire MoneyFusion uniquement.
  * Masque tous les autres PSP et interdit le fallback GeniusPay.
+ * Actif par défaut (GeniusPay retiré pour le moment) — opt-out explicite via
+ * `VITE_MONEYFUSION_ONLY=false`.
  */
 export function isMoneyFusionOnlyEnabled(): boolean {
   const env = viteEnv('VITE_MONEYFUSION_ONLY');
-  if (env === undefined || env === '') return false;
+  if (env === undefined || env === '') return true;
   const normalized = String(env).toLowerCase();
   if (FALSE_VALUES.has(normalized)) return false;
   return TRUE_VALUES.has(normalized);

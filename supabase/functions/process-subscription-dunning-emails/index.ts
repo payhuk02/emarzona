@@ -50,8 +50,9 @@ function formatAmount(amount: number | string): string {
 function buildEmailPayload(target: DunningEmailTarget, billingUrl: string) {
   const periodEnd = formatPeriodEnd(target.current_period_end);
   const amount = formatAmount(target.amount);
-  const actionUrl =
-    target.checkout_url && target.dunning_type === 'auto_renew' ? target.checkout_url : billingUrl;
+  // GeniusPay retiré : ne plus pointer vers d'anciens checkouts pré-créés,
+  // toujours renvoyer vers l'espace facturation (renouvellement MoneyFusion).
+  const actionUrl = billingUrl;
 
   const titles: Record<string, string> = {
     'j-7': 'Renouvellement dans 7 jours',
@@ -60,12 +61,12 @@ function buildEmailPayload(target: DunningEmailTarget, billingUrl: string) {
     'j+3': '3 jours sans paiement',
     'j+7': 'Dernier jour de grâce',
     expired: 'Abonnement expiré — produits suspendus',
-    auto_renew: 'Confirmez votre renouvellement GeniusPay',
+    auto_renew: 'Confirmez votre renouvellement',
   };
 
   const messages: Record<string, string> = {
     'j-7':
-      'Le renouvellement automatique sera initié si votre profil GeniusPay est enregistré. Sinon, régularisez depuis votre espace facturation.',
+      'Renouvelez votre abonnement depuis votre espace facturation (paiement mobile money MoneyFusion).',
     'j-1': 'Dernière chance avant suspension de vos produits physiques.',
     past_due: 'Vos produits physiques seront suspendus si le paiement n’est pas reçu sous 7 jours.',
     'j+3':
@@ -75,7 +76,7 @@ function buildEmailPayload(target: DunningEmailTarget, billingUrl: string) {
     expired:
       'Vos produits physiques sont suspendus. Réactivez votre abonnement pour reprendre les ventes.',
     auto_renew:
-      'Un checkout GeniusPay a été préparé avec votre profil enregistré. Une confirmation mobile money suffit.',
+      'Votre abonnement arrive à échéance. Confirmez le renouvellement par mobile money depuis votre espace facturation.',
   };
 
   const actionLabels: Record<string, string> = {
@@ -85,7 +86,7 @@ function buildEmailPayload(target: DunningEmailTarget, billingUrl: string) {
     'j+3': 'Régulariser le paiement',
     'j+7': 'Payer maintenant',
     expired: 'Réactiver mon abonnement',
-    auto_renew: 'Confirmer sur GeniusPay',
+    auto_renew: 'Confirmer le renouvellement',
   };
 
   return {

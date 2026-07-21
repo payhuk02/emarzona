@@ -45,7 +45,8 @@ export default function StorePhysicalBilling() {
   const [autoRenewUpdating, setAutoRenewUpdating] = useState(false);
 
   const autoRenewEnabled = billingMandate?.mandate?.auto_renew_enabled ?? false;
-  const pendingCheckoutUrl = billingMandate?.pendingCheckout?.checkout_url ?? null;
+  // GeniusPay retiré temporairement : on n'expose plus les checkouts pré-créés
+  // GeniusPay — le renouvellement passe par le bouton manuel (MoneyFusion).
 
   useEffect(() => {
     // Message contextuel en cas de redirection depuis un guard de route
@@ -157,8 +158,8 @@ export default function StorePhysicalBilling() {
             <CardHeader className="pb-2">
               <CardTitle className="text-base">Renouvellement automatique</CardTitle>
               <CardDescription>
-                Profil GeniusPay enregistré — un checkout pré-rempli sera généré avant chaque échéance
-                (confirmation mobile money requise).
+                Un rappel de paiement mobile money (MoneyFusion) sera envoyé avant chaque échéance —
+                confirmation requise sur votre téléphone.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -215,56 +216,41 @@ export default function StorePhysicalBilling() {
             <CardDescription>Factures d&apos;abonnement produits physiques</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            {pendingCheckoutUrl && (
-              <div className="rounded-md border border-primary/30 bg-primary/5 p-3 space-y-2">
-                <p className="text-sm font-medium">Paiement de renouvellement en attente</p>
-                <p className="text-xs text-muted-foreground">
-                  Un checkout GeniusPay a été préparé automatiquement. Confirmez le paiement pour
-                  prolonger votre abonnement.
-                </p>
-                <Button asChild size="sm">
-                  <a href={pendingCheckoutUrl}>Confirmer le paiement GeniusPay</a>
-                </Button>
-              </div>
+            {(access.status === 'past_due' || access.status === 'active') && access.planSlug && (
+              <Button
+                disabled={renewing}
+                onClick={async () => {
+                  setRenewing(true);
+                  try {
+                    const {
+                      data: { user },
+                    } = await supabase.auth.getUser();
+                    if (!user?.email) throw new Error('Email requis');
+                    const url = await initiateSubscriptionRenewalCheckout(
+                      store.id,
+                      access.planSlug!,
+                      user.email,
+                      (user.user_metadata?.full_name as string | undefined) ?? undefined
+                    );
+                    window.location.href = url;
+                  } catch (e: unknown) {
+                    toast({
+                      title: 'Erreur',
+                      description: e instanceof Error ? e.message : 'Paiement impossible',
+                      variant: 'destructive',
+                    });
+                  } finally {
+                    setRenewing(false);
+                  }
+                }}
+              >
+                {renewing
+                  ? 'Redirection…'
+                  : access.status === 'past_due'
+                    ? 'Régulariser le paiement'
+                    : 'Renouveler maintenant'}
+              </Button>
             )}
-
-            {(access.status === 'past_due' || access.status === 'active') &&
-              access.planSlug &&
-              !pendingCheckoutUrl && (
-                <Button
-                  disabled={renewing}
-                  onClick={async () => {
-                    setRenewing(true);
-                    try {
-                      const {
-                        data: { user },
-                      } = await supabase.auth.getUser();
-                      if (!user?.email) throw new Error('Email requis');
-                      const url = await initiateSubscriptionRenewalCheckout(
-                        store.id,
-                        access.planSlug!,
-                        user.email,
-                        (user.user_metadata?.full_name as string | undefined) ?? undefined
-                      );
-                      window.location.href = url;
-                    } catch (e: unknown) {
-                      toast({
-                        title: 'Erreur',
-                        description: e instanceof Error ? e.message : 'Paiement impossible',
-                        variant: 'destructive',
-                      });
-                    } finally {
-                      setRenewing(false);
-                    }
-                  }}
-                >
-                  {renewing
-                    ? 'Redirection…'
-                    : access.status === 'past_due'
-                      ? 'Régulariser le paiement'
-                      : 'Renouveler maintenant'}
-                </Button>
-              )}
 
             {invoicesLoading ? (
               <p className="text-sm text-muted-foreground">Chargement…</p>
@@ -303,7 +289,7 @@ export default function StorePhysicalBilling() {
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Tentatives de paiement</CardTitle>
-              <CardDescription>Historique des prélèvements GeniusPay</CardDescription>
+              <CardDescription>Historique des prélèvements d&apos;abonnement</CardDescription>
             </CardHeader>
             <CardContent>
               {attemptsLoading ? (

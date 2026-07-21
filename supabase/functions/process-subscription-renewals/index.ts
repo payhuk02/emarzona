@@ -17,6 +17,18 @@ import { initializeGeniusPayPayment } from '../_shared/geniuspay-init-payment.ts
 const SITE_URL = (Deno.env.get('SITE_URL') || 'https://www.emarzona.com').replace(/\/$/, '');
 const GENIUSPAY_API_URL = Deno.env.get('GENIUSPAY_API_URL') || 'https://geniuspay.ci/api/v1/merchant';
 
+/**
+ * Mode temporaire MoneyFusion uniquement (GeniusPay retiré) : actif par défaut.
+ * Ne pré-créer aucun checkout GeniusPay — le vendeur renouvelle manuellement
+ * via MoneyFusion depuis /dashboard/billing/physical.
+ * Opt-out explicite : MONEYFUSION_ONLY=false.
+ */
+function isMoneyFusionOnly(): boolean {
+  const env = (Deno.env.get('MONEYFUSION_ONLY') || '').toLowerCase();
+  if (['false', '0', 'no'].includes(env)) return false;
+  return true;
+}
+
 interface AutoRenewalRow {
   subscription_id: string;
   store_id: string;
@@ -82,6 +94,18 @@ serve(async req => {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
+    }
+
+    if (isMoneyFusionOnly()) {
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message:
+            'MoneyFusion-only mode: GeniusPay auto-renew checkouts disabled (manual MoneyFusion renewal)',
+          processed: 0,
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
