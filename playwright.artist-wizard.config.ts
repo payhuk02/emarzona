@@ -30,13 +30,16 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   workers: 1,
-  // Fail fast so a hung marketplace search cannot burn the full 60m job budget.
-  maxFailures: process.env.CI ? 5 : 0,
+  // Stop the suite after the first failed test (after its retry). A broken
+  // shared setup must not consume the full workflow budget across every wizard.
+  maxFailures: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [['list'], ['html'], ['github']] : 'html',
   timeout: 180_000,
   use: {
     baseURL: 'http://localhost:8080',
     trace: 'on-first-retry',
+    actionTimeout: 20_000,
+    navigationTimeout: 30_000,
     // Prevent cookie banner fixed footer from intercepting wizard "Suivant" clicks.
     storageState: 'tests/e2e/.auth/cookie-consent.json',
   },

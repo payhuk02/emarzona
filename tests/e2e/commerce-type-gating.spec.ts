@@ -9,6 +9,7 @@ import {
   waitForCommerceSidebarGating,
 } from './helpers/seller-dashboard-setup';
 import { seedStorePhysicalSubscriptionTrial } from './helpers/seed-physical-subscription';
+import { retryOnTransientPostgrest } from './helpers/supabase-schema-cache-retry';
 
 type StoreCommerceType = 'physical' | 'digital' | 'service' | 'course' | 'artist';
 
@@ -145,19 +146,21 @@ test.describe('Commerce type gating (E2E minimal)', () => {
       expect(createdUser.user?.id, 'created user id').toBeTruthy();
       const userId = createdUser.user!.id;
 
-      const { data: storeData, error: storeError } = await admin
-        .from('stores')
-        .insert({
-          user_id: userId,
-          name: storeName,
-          slug: storeSlug,
-          description: `E2E store for ${commerceType}`,
-          is_active: true,
-          commerce_type: commerceType,
-          metadata: { commerce_type: commerceType },
-        })
-        .select('id')
-        .single();
+      const { data: storeData, error: storeError } = await retryOnTransientPostgrest(() =>
+        admin
+          .from('stores')
+          .insert({
+            user_id: userId,
+            name: storeName,
+            slug: storeSlug,
+            description: `E2E store for ${commerceType}`,
+            is_active: true,
+            commerce_type: commerceType,
+            metadata: { commerce_type: commerceType },
+          })
+          .select('id')
+          .single()
+      );
 
       expect(storeError, 'insert store should succeed').toBeNull();
       const storeId = (storeData as { id: string } | null)?.id;

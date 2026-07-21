@@ -7,6 +7,7 @@ import {
   seedTermsConsent,
 } from './store-theme-helpers';
 import { waitForReactApp, waitForVendorStoreReady } from '../shared/e2e-test-config';
+import { retryOnTransientPostgrest } from './supabase-schema-cache-retry';
 
 export type CommerceType = 'artist' | 'digital' | 'course' | 'physical' | 'service';
 
@@ -51,19 +52,21 @@ export async function createE2EVendor(
   const userId = createdUser.user.id;
   await seedTermsConsent(admin, userId);
 
-  const { data: storeData, error: storeError } = await admin
-    .from('stores')
-    .insert({
-      user_id: userId,
-      name: `E2E ${commerceType} ${runId}`,
-      slug: slugifyE2E(`e2e-${commerceType}-${runId}`),
-      description: `E2E ${commerceType} wizard`,
-      is_active: true,
-      commerce_type: commerceType,
-      metadata: { commerce_type: commerceType },
-    })
-    .select('id')
-    .single();
+  const { data: storeData, error: storeError } = await retryOnTransientPostgrest(() =>
+    admin
+      .from('stores')
+      .insert({
+        user_id: userId,
+        name: `E2E ${commerceType} ${runId}`,
+        slug: slugifyE2E(`e2e-${commerceType}-${runId}`),
+        description: `E2E ${commerceType} wizard`,
+        is_active: true,
+        commerce_type: commerceType,
+        metadata: { commerce_type: commerceType },
+      })
+      .select('id')
+      .single()
+  );
 
   if (storeError || !storeData) {
     throw storeError ?? new Error('store insert failed');

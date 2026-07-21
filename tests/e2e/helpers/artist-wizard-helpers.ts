@@ -7,6 +7,7 @@ import {
   seedTermsConsent,
 } from './store-theme-helpers';
 import { waitForReactApp, waitForVendorStoreReady } from '../shared/e2e-test-config';
+import { retryOnTransientPostgrest } from './supabase-schema-cache-retry';
 
 /** 1×1 PNG valide pour upload catalogue. */
 export const E2E_ARTWORK_PNG = Buffer.from(
@@ -53,19 +54,21 @@ export async function createArtistE2EVendor(
   const userId = createdUser.user.id;
   await seedTermsConsent(admin, userId);
 
-  const { data: storeData, error: storeError } = await admin
-    .from('stores')
-    .insert({
-      user_id: userId,
-      name: `E2E Artist ${runId}`,
-      slug: slugifyArtistE2E(`e2e-artist-${runId}`),
-      description: 'E2E artist wizard',
-      is_active: true,
-      commerce_type: 'artist',
-      metadata: { commerce_type: 'artist' },
-    })
-    .select('id')
-    .single();
+  const { data: storeData, error: storeError } = await retryOnTransientPostgrest(() =>
+    admin
+      .from('stores')
+      .insert({
+        user_id: userId,
+        name: `E2E Artist ${runId}`,
+        slug: slugifyArtistE2E(`e2e-artist-${runId}`),
+        description: 'E2E artist wizard',
+        is_active: true,
+        commerce_type: 'artist',
+        metadata: { commerce_type: 'artist' },
+      })
+      .select('id')
+      .single()
+  );
 
   if (storeError || !storeData) {
     throw storeError ?? new Error('store insert failed');
@@ -239,7 +242,7 @@ export async function advanceArtistWizardToPublishStep(page: Page): Promise<void
 
 export async function publishArtistWizard(page: Page): Promise<void> {
   await dismissCookieBannerIfVisible(page);
-  await page.getByRole('button', { name: /^Publier$/i }).click();
+  await page.getByRole('button', { name: /^Publier(?: le produit)?$/i }).click({ timeout: 20_000 });
   await expect(page.getByText(/créé avec succès|succès/i).first()).toBeVisible({
     timeout: 45_000,
   });

@@ -3,330 +3,313 @@ name: Playwright Tests
 on:
   workflow_dispatch:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
 
 jobs:
   test:
     timeout-minutes: 45
     runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
-    
-    - name: Install dependencies
-      run: npm ci
-    
-    - name: Install Playwright Browsers
-      run: npx playwright install --with-deps
-    
-    - name: Setup environment variables
-      run: |
-        echo "VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL || 'https://mock.supabase.co' }}" >> $GITHUB_ENV
-        echo "VITE_SUPABASE_PUBLISHABLE_KEY=${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'mock-key' }}" >> $GITHUB_ENV
-    
-    - name: Verify Supabase publishable key format
-      run: npm run verify:supabase-keys
-      env:
-        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_ci_mock' }}
-        VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_ci_mock' }}
 
-    - name: Run Playwright tests
-      run: npm run test:e2e:ci
-      env:
-        CI: true
-        VITE_PAYMENT_ORCHESTRATION_V2: 'true'
-        VITE_PAYMENT_ORCHESTRATION_V2_ROLLOUT: '100'
-        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || 'https://mock.supabase.co' }}
-        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_ci_mock' }}
-        VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_ci_mock' }}
-      # ✅ ACTIVÉ: Les tests bloquent maintenant les PR si ils échouent
-      # Retirer continue-on-error pour activer les tests en CI/CD
-    
-    - name: Upload test results
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: playwright-report
-        path: playwright-report/
-        retention-days: 30
-    
-    - name: Upload test videos
-      if: failure()
-      uses: actions/upload-artifact@v4
-      with:
-        name: test-videos
-        path: test-results/
-        retention-days: 7
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Setup environment variables
+        run: |
+          echo "VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL || 'https://mock.supabase.co' }}" >> $GITHUB_ENV
+          echo "VITE_SUPABASE_PUBLISHABLE_KEY=${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'mock-key' }}" >> $GITHUB_ENV
+
+      - name: Verify Supabase publishable key format
+        run: npm run verify:supabase-keys
+        env:
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_ci_mock' }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_ci_mock' }}
+
+      - name: Run Playwright tests
+        run: npm run test:e2e:ci
+        env:
+          CI: true
+          VITE_PAYMENT_ORCHESTRATION_V2: 'true'
+          VITE_PAYMENT_ORCHESTRATION_V2_ROLLOUT: '100'
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || 'https://mock.supabase.co' }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_ci_mock' }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_ci_mock' }}
+        # ✅ ACTIVÉ: Les tests bloquent maintenant les PR si ils échouent
+        # Retirer continue-on-error pour activer les tests en CI/CD
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+
+      - name: Upload test videos
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-videos
+          path: test-results/
+          retention-days: 7
+
+  prepare-e2e-schema:
+    name: Prepare shared E2E schema
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Apply E2E schema patches (idempotent)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+          bash scripts/apply-e2e-post-bootstrap-patches-ci.sh
+        env:
+          E2E_REF: ufbztturuwwazfcvhvuu
+          POOLER_HOST: aws-1-eu-west-2.pooler.supabase.com
+          E2E_SUPABASE_DB_PASSWORD: ${{ secrets.E2E_SUPABASE_DB_PASSWORD }}
 
   test-commerce-type-gating:
     name: Commerce type gating E2E (5 types)
     timeout-minutes: 25
     runs-on: ubuntu-latest
+    needs: prepare-e2e-schema
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
 
-    - name: Install dependencies
-      run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Apply E2E schema patches (idempotent)
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y postgresql-client
-        bash scripts/apply-e2e-post-bootstrap-patches-ci.sh
-      env:
-        E2E_REF: ufbztturuwwazfcvhvuu
-        POOLER_HOST: aws-1-eu-west-2.pooler.supabase.com
-        E2E_SUPABASE_DB_PASSWORD: ${{ secrets.E2E_SUPABASE_DB_PASSWORD }}
+      - name: Validate commerce E2E secrets
+        id: commerce_e2e_secrets
+        run: node scripts/verify-commerce-e2e-secrets.mjs
+        env:
+          CI: true
+          VITE_SUPABASE_TEST_URL: ${{ secrets.VITE_SUPABASE_TEST_URL }}
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_TEST_URL || secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_TEST_SERVICE_ROLE_KEY }}
 
-    - name: Validate commerce E2E secrets
-      id: commerce_e2e_secrets
-      run: node scripts/verify-commerce-e2e-secrets.mjs
-      env:
-        CI: true
-        VITE_SUPABASE_TEST_URL: ${{ secrets.VITE_SUPABASE_TEST_URL }}
-        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_TEST_URL || secrets.VITE_SUPABASE_URL }}
-        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-        VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-        SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_TEST_SERVICE_ROLE_KEY }}
+      - name: Install Playwright Browsers
+        if: steps.commerce_e2e_secrets.outputs.skipped != 'true'
+        run: npx playwright install --with-deps chromium
 
-    - name: Install Playwright Browsers
-      if: steps.commerce_e2e_secrets.outputs.skipped != 'true'
-      run: npx playwright install --with-deps chromium
+      - name: Run commerce type gating E2E
+        if: steps.commerce_e2e_secrets.outputs.skipped != 'true'
+        run: npm run test:e2e:commerce-gating
+        env:
+          CI: true
+          VITE_SUPABASE_TEST_URL: ${{ secrets.VITE_SUPABASE_TEST_URL }}
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_TEST_URL || secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_TEST_SERVICE_ROLE_KEY }}
 
-    - name: Run commerce type gating E2E
-      if: steps.commerce_e2e_secrets.outputs.skipped != 'true'
-      run: npm run test:e2e:commerce-gating
-      env:
-        CI: true
-        VITE_SUPABASE_TEST_URL: ${{ secrets.VITE_SUPABASE_TEST_URL }}
-        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_TEST_URL || secrets.VITE_SUPABASE_URL }}
-        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-        VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-        SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_TEST_SERVICE_ROLE_KEY }}
+      - name: Run commerce gating contract tests (E2E skipped)
+        if: steps.commerce_e2e_secrets.outputs.skipped == 'true'
+        run: npm run test:commerce-gating
+        env:
+          CI: true
 
-    - name: Run commerce gating contract tests (E2E skipped)
-      if: steps.commerce_e2e_secrets.outputs.skipped == 'true'
-      run: npm run test:commerce-gating
-      env:
-        CI: true
-
-    - name: Upload commerce gating report
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: playwright-commerce-gating-report
-        path: playwright-report/
-        retention-days: 14
+      - name: Upload commerce gating report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-commerce-gating-report
+          path: playwright-report/
+          retention-days: 14
 
   test-store-theme:
     name: Store create & theme E2E
     timeout-minutes: 25
     runs-on: ubuntu-latest
+    needs: prepare-e2e-schema
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
 
-    - name: Install dependencies
-      run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Apply E2E schema patches (idempotent)
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y postgresql-client
-        bash scripts/apply-e2e-post-bootstrap-patches-ci.sh
-      env:
-        E2E_REF: ufbztturuwwazfcvhvuu
-        POOLER_HOST: aws-1-eu-west-2.pooler.supabase.com
-        E2E_SUPABASE_DB_PASSWORD: ${{ secrets.E2E_SUPABASE_DB_PASSWORD }}
+      - name: Validate commerce E2E secrets
+        id: commerce_e2e_secrets
+        run: node scripts/verify-commerce-e2e-secrets.mjs
+        env:
+          CI: true
+          VITE_SUPABASE_TEST_URL: ${{ secrets.VITE_SUPABASE_TEST_URL }}
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_TEST_URL || secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_TEST_SERVICE_ROLE_KEY }}
 
-    - name: Validate commerce E2E secrets
-      id: commerce_e2e_secrets
-      run: node scripts/verify-commerce-e2e-secrets.mjs
-      env:
-        CI: true
-        VITE_SUPABASE_TEST_URL: ${{ secrets.VITE_SUPABASE_TEST_URL }}
-        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_TEST_URL || secrets.VITE_SUPABASE_URL }}
-        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-        VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-        SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_TEST_SERVICE_ROLE_KEY }}
+      - name: Install Playwright Browsers
+        if: steps.commerce_e2e_secrets.outputs.skipped != 'true'
+        run: npx playwright install --with-deps chromium
 
-    - name: Install Playwright Browsers
-      if: steps.commerce_e2e_secrets.outputs.skipped != 'true'
-      run: npx playwright install --with-deps chromium
+      - name: Run store theme E2E
+        if: steps.commerce_e2e_secrets.outputs.skipped != 'true'
+        run: npm run test:e2e:store-theme
+        env:
+          CI: true
+          VITE_SUPABASE_TEST_URL: ${{ secrets.VITE_SUPABASE_TEST_URL }}
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_TEST_URL || secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_TEST_SERVICE_ROLE_KEY }}
 
-    - name: Run store theme E2E
-      if: steps.commerce_e2e_secrets.outputs.skipped != 'true'
-      run: npm run test:e2e:store-theme
-      env:
-        CI: true
-        VITE_SUPABASE_TEST_URL: ${{ secrets.VITE_SUPABASE_TEST_URL }}
-        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_TEST_URL || secrets.VITE_SUPABASE_URL }}
-        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-        VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-        SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_TEST_SERVICE_ROLE_KEY }}
-
-    - name: Upload store theme report
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: playwright-store-theme-report
-        path: playwright-report/
-        retention-days: 14
+      - name: Upload store theme report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-store-theme-report
+          path: playwright-report/
+          retention-days: 14
 
   test-artist-wizard:
     name: Product wizards publish E2E
-    timeout-minutes: 60
+    timeout-minutes: 35
     runs-on: ubuntu-latest
+    needs: prepare-e2e-schema
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
 
-    - name: Install dependencies
-      run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Apply E2E schema patches (idempotent)
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y postgresql-client
-        bash scripts/apply-e2e-post-bootstrap-patches-ci.sh
-      env:
-        E2E_REF: ufbztturuwwazfcvhvuu
-        POOLER_HOST: aws-1-eu-west-2.pooler.supabase.com
-        E2E_SUPABASE_DB_PASSWORD: ${{ secrets.E2E_SUPABASE_DB_PASSWORD }}
+      - name: Validate commerce E2E secrets
+        id: commerce_e2e_secrets
+        run: node scripts/verify-commerce-e2e-secrets.mjs
+        env:
+          CI: true
+          COMMERCE_E2E_REQUIRED: '1'
+          VITE_SUPABASE_TEST_URL: ${{ secrets.VITE_SUPABASE_TEST_URL }}
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_TEST_URL || secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_TEST_SERVICE_ROLE_KEY }}
 
-    - name: Validate commerce E2E secrets
-      id: commerce_e2e_secrets
-      run: node scripts/verify-commerce-e2e-secrets.mjs
-      env:
-        CI: true
-        COMMERCE_E2E_REQUIRED: '1'
-        VITE_SUPABASE_TEST_URL: ${{ secrets.VITE_SUPABASE_TEST_URL }}
-        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_TEST_URL || secrets.VITE_SUPABASE_URL }}
-        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-        VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-        SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_TEST_SERVICE_ROLE_KEY }}
+      - name: Install Playwright Browsers
+        if: steps.commerce_e2e_secrets.outputs.skipped != 'true'
+        run: npx playwright install --with-deps chromium
 
-    - name: Install Playwright Browsers
-      if: steps.commerce_e2e_secrets.outputs.skipped != 'true'
-      run: npx playwright install --with-deps chromium
+      - name: Run product wizards E2E
+        if: steps.commerce_e2e_secrets.outputs.skipped != 'true'
+        run: npm run test:e2e:product-wizards
+        env:
+          CI: true
+          VITE_SUPABASE_TEST_URL: ${{ secrets.VITE_SUPABASE_TEST_URL }}
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_TEST_URL || secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_TEST_SERVICE_ROLE_KEY }}
 
-    - name: Run product wizards E2E
-      if: steps.commerce_e2e_secrets.outputs.skipped != 'true'
-      run: npm run test:e2e:product-wizards
-      env:
-        CI: true
-        VITE_SUPABASE_TEST_URL: ${{ secrets.VITE_SUPABASE_TEST_URL }}
-        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_TEST_URL || secrets.VITE_SUPABASE_URL }}
-        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-        VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-        SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_TEST_SERVICE_ROLE_KEY }}
-
-    - name: Upload artist wizard report
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: playwright-product-wizards-report
-        path: playwright-report/
-        retention-days: 14
+      - name: Upload artist wizard report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-product-wizards-report
+          path: playwright-report/
+          retention-days: 14
 
   test-vertical-paid:
     name: Vertical paid E2E (course + artist)
     timeout-minutes: 30
     runs-on: ubuntu-latest
+    needs: prepare-e2e-schema
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
 
-    - name: Install dependencies
-      run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Apply E2E schema patches (idempotent)
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y postgresql-client
-        bash scripts/apply-e2e-post-bootstrap-patches-ci.sh
-      env:
-        E2E_REF: ufbztturuwwazfcvhvuu
-        POOLER_HOST: aws-1-eu-west-2.pooler.supabase.com
-        E2E_SUPABASE_DB_PASSWORD: ${{ secrets.E2E_SUPABASE_DB_PASSWORD }}
+      - name: Validate commerce E2E secrets
+        id: commerce_e2e_secrets
+        run: node scripts/verify-commerce-e2e-secrets.mjs
+        env:
+          CI: true
+          VITE_SUPABASE_TEST_URL: ${{ secrets.VITE_SUPABASE_TEST_URL }}
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_TEST_URL || secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_TEST_SERVICE_ROLE_KEY }}
 
-    - name: Validate commerce E2E secrets
-      id: commerce_e2e_secrets
-      run: node scripts/verify-commerce-e2e-secrets.mjs
-      env:
-        CI: true
-        VITE_SUPABASE_TEST_URL: ${{ secrets.VITE_SUPABASE_TEST_URL }}
-        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_TEST_URL || secrets.VITE_SUPABASE_URL }}
-        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-        VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-        SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_TEST_SERVICE_ROLE_KEY }}
+      - name: Install Playwright Browsers
+        if: steps.commerce_e2e_secrets.outputs.skipped != 'true'
+        run: npx playwright install --with-deps chromium
 
-    - name: Install Playwright Browsers
-      if: steps.commerce_e2e_secrets.outputs.skipped != 'true'
-      run: npx playwright install --with-deps chromium
+      - name: Run vertical paid E2E
+        if: steps.commerce_e2e_secrets.outputs.skipped != 'true'
+        run: npm run test:e2e:vertical-paid
+        env:
+          CI: true
+          VITE_SUPABASE_TEST_URL: ${{ secrets.VITE_SUPABASE_TEST_URL }}
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_TEST_URL || secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_TEST_SERVICE_ROLE_KEY }}
 
-    - name: Run vertical paid E2E
-      if: steps.commerce_e2e_secrets.outputs.skipped != 'true'
-      run: npm run test:e2e:vertical-paid
-      env:
-        CI: true
-        VITE_SUPABASE_TEST_URL: ${{ secrets.VITE_SUPABASE_TEST_URL }}
-        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_TEST_URL || secrets.VITE_SUPABASE_URL }}
-        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-        VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-        SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_TEST_SERVICE_ROLE_KEY }}
+      - name: Run vertical paid contract tests (E2E skipped)
+        if: steps.commerce_e2e_secrets.outputs.skipped == 'true'
+        run: npm run test:vertical-paid-contracts
+        env:
+          CI: true
 
-    - name: Run vertical paid contract tests (E2E skipped)
-      if: steps.commerce_e2e_secrets.outputs.skipped == 'true'
-      run: npm run test:vertical-paid-contracts
-      env:
-        CI: true
-
-    - name: Upload vertical paid report
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: playwright-vertical-paid-report
-        path: playwright-report/
-        retention-days: 14
+      - name: Upload vertical paid report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-vertical-paid-report
+          path: playwright-report/
+          retention-days: 14
 
   test-checkout-multi-psp:
     name: Checkout multi-PSP E2E
@@ -334,108 +317,107 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
 
-    - name: Install dependencies
-      run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Install Playwright Browsers
-      run: npx playwright install --with-deps chromium
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
 
-    - name: Run checkout multi-PSP E2E
-      run: npm run test:e2e:checkout
-      env:
-        CI: true
-        VITE_PAYMENT_ORCHESTRATION_V2: 'true'
-        VITE_PAYMENT_ORCHESTRATION_V2_ROLLOUT: '100'
-        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_TEST_URL || secrets.VITE_SUPABASE_URL || 'https://mock.supabase.co' }}
-        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_ci_mock' }}
-        VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_ci_mock' }}
+      - name: Run checkout multi-PSP E2E
+        run: npm run test:e2e:checkout
+        env:
+          CI: true
+          VITE_PAYMENT_ORCHESTRATION_V2: 'true'
+          VITE_PAYMENT_ORCHESTRATION_V2_ROLLOUT: '100'
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_TEST_URL || secrets.VITE_SUPABASE_URL || 'https://mock.supabase.co' }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_ci_mock' }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_ci_mock' }}
 
-    - name: Upload checkout E2E report
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: playwright-checkout-report
-        path: playwright-report/
-        retention-days: 14
+      - name: Upload checkout E2E report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-checkout-report
+          path: playwright-report/
+          retention-days: 14
 
   test-products:
     timeout-minutes: 25
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
-    
-    - name: Install dependencies
-      run: npm ci
-    
-    - name: Install Playwright
-      run: npx playwright install --with-deps
-    
-    - name: Setup environment variables
-      run: |
-        echo "VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_TEST_URL || secrets.VITE_SUPABASE_URL || 'https://mock.supabase.co' }}" >> $GITHUB_ENV
-        echo "VITE_SUPABASE_PUBLISHABLE_KEY=${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'mock-key' }}" >> $GITHUB_ENV
-    
-    - name: Run Product Tests
-      run: npm run test:e2e:products
-      env:
-        CI: true
-        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_TEST_URL || secrets.VITE_SUPABASE_URL || 'https://mock.supabase.co' }}
-        VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'mock-key' }}
-        E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
-        E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
-      # ✅ ACTIVÉ: Les tests bloquent maintenant les PR si ils échouent
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright
+        run: npx playwright install --with-deps
+
+      - name: Setup environment variables
+        run: |
+          echo "VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_TEST_URL || secrets.VITE_SUPABASE_URL || 'https://mock.supabase.co' }}" >> $GITHUB_ENV
+          echo "VITE_SUPABASE_PUBLISHABLE_KEY=${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'mock-key' }}" >> $GITHUB_ENV
+
+      - name: Run Product Tests
+        run: npm run test:e2e:products
+        env:
+          CI: true
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_TEST_URL || secrets.VITE_SUPABASE_URL || 'https://mock.supabase.co' }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'mock-key' }}
+          E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
+          E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
+        # ✅ ACTIVÉ: Les tests bloquent maintenant les PR si ils échouent
 
   test-auth:
     timeout-minutes: 15
     runs-on: ubuntu-latest
     # ✅ ACTIVÉ: Les tests d'auth s'exécutent maintenant sur les PR aussi
     # if: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
-    
-    - name: Install dependencies
-      run: npm ci
-    
-    - name: Install Playwright
-      run: npx playwright install --with-deps
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup environment variables
-      run: |
-        echo "VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_TEST_URL || secrets.VITE_SUPABASE_URL || 'https://mock.supabase.co' }}" >> $GITHUB_ENV
-        echo "VITE_SUPABASE_PUBLISHABLE_KEY=${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'mock-key' }}" >> $GITHUB_ENV
-    
-    - name: Run Auth Tests
-      run: npm run test:e2e:auth
-      env:
-        CI: true
-        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_TEST_URL || secrets.VITE_SUPABASE_URL || 'https://mock.supabase.co' }}
-        VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'mock-key' }}
-        E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
-        E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
-      # ✅ ACTIVÉ: Les tests bloquent maintenant les PR si ils échouent
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
 
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright
+        run: npx playwright install --with-deps
+
+      - name: Setup environment variables
+        run: |
+          echo "VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_TEST_URL || secrets.VITE_SUPABASE_URL || 'https://mock.supabase.co' }}" >> $GITHUB_ENV
+          echo "VITE_SUPABASE_PUBLISHABLE_KEY=${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'mock-key' }}" >> $GITHUB_ENV
+
+      - name: Run Auth Tests
+        run: npm run test:e2e:auth
+        env:
+          CI: true
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_TEST_URL || secrets.VITE_SUPABASE_URL || 'https://mock.supabase.co' }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_TEST_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'mock-key' }}
+          E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
+          E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
+        # ✅ ACTIVÉ: Les tests bloquent maintenant les PR si ils échouent
