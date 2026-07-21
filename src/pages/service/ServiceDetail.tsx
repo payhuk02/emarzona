@@ -471,6 +471,13 @@ export default function ServiceDetail() {
       });
 
       if (mode === 'cart') {
+        if (!result.bookingId?.trim()) {
+          throw new Error('Réservation créée sans identifiant de créneau.');
+        }
+
+        // Ensure auth session is hydrated before cart persistence (useCart reads user once on mount).
+        await supabase.auth.getSession();
+
         await addItem.mutateAsync({
           product_id: serviceId!,
           product_type: 'service',

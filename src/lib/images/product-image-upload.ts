@@ -34,6 +34,20 @@ const PATH_PREFIX: Record<CatalogImagePath, string> = {
   enhanced: 'enhanced',
 };
 
+function isE2eUploadStubEnabled(): boolean {
+  return import.meta.env.DEV && import.meta.env.VITE_E2E_UPLOAD_STUB === 'true';
+}
+
+function buildE2eStubUploadResult(catalogPath: CatalogImagePath): UploadResult {
+  const path = `${PATH_PREFIX[catalogPath]}/e2e-stub-${Date.now()}.png`;
+  return {
+    success: true,
+    url: `https://placehold.co/1536x1024/png?text=e2e-${catalogPath}`,
+    path,
+    error: null,
+  };
+}
+
 const FILE_PREFIX: Record<CatalogImagePath, string> = {
   products: 'product',
   services: 'service',
@@ -65,6 +79,11 @@ export async function uploadCatalogImage(
 ): Promise<UploadResult> {
   const { normalizeToCatalogFormat = true, filePrefix, onProgress, maxSizeBytes } = options;
 
+  if (isE2eUploadStubEnabled()) {
+    options.onProgress?.(100);
+    return buildE2eStubUploadResult(catalogPath);
+  }
+
   const prepared = normalizeToCatalogFormat ? await resizeToCatalogProduct(file, file.name) : file;
 
   const storagePath = PATH_PREFIX[catalogPath];
@@ -84,6 +103,14 @@ export async function uploadCatalogImages(
   catalogPath: CatalogImagePath,
   options: UploadCatalogImageOptions = {}
 ): Promise<{ urls: string[]; errors: Error[] }> {
+  if (isE2eUploadStubEnabled()) {
+    options.onProgress?.(100);
+    return {
+      urls: files.map(() => buildE2eStubUploadResult(catalogPath).url!),
+      errors: [],
+    };
+  }
+
   const urls: string[] = [];
   const errors: Error[] = [];
   const total = files.length;

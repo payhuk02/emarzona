@@ -57,6 +57,8 @@ export default defineConfig({
       VITE_SUPABASE_ANON_KEY: supabaseAnonKey,
       VITE_SUPABASE_PUBLISHABLE_KEY: supabaseAnonKey,
       VITE_E2E_PAYMENT_STUB: process.env.VITE_E2E_PAYMENT_STUB ?? 'true',
+      VITE_E2E_BYPASS_TERMS: process.env.VITE_E2E_BYPASS_TERMS ?? 'true',
+      VITE_E2E_UPLOAD_STUB: process.env.VITE_E2E_UPLOAD_STUB ?? 'true',
     },
   },
 });

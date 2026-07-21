@@ -15,6 +15,7 @@ export async function openCourseCreateWizard(page: Page): Promise<void> {
   await page.goto('/dashboard/courses/new', { waitUntil: 'domcontentloaded' });
   await waitForReactApp(page);
   await dismissCookieBannerIfVisible(page);
+  await expect(page.getByText(/Aucune boutique trouvée/i)).toHaveCount(0, { timeout: 5_000 });
   await expect(page.locator('#title')).toBeVisible({ timeout: 60_000 });
 }
 

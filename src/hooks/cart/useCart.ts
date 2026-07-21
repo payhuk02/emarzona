@@ -65,9 +65,22 @@ export function useCart() {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user);
+    let active = true;
+
+    supabase.auth.getUser().then(({ data: { user: initialUser } }) => {
+      if (active) setUser(initialUser);
     });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (active) setUser(session?.user ?? null);
+    });
+
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const {

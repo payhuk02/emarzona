@@ -6,6 +6,15 @@
 import { test, expect } from '@playwright/test';
 import { createNodeSupabaseClient } from './helpers/create-node-supabase-client';
 import { assertSafeE2ESupabaseUrl, resolveE2ESupabaseUrl } from './helpers/e2e-supabase-guard';
+import {
+  cleanupArtistE2EVendor,
+  createArtistE2EVendor,
+  fillArtistBasicInfoStep,
+  loginArtistVendor,
+  openArtistCreateWizard,
+  selectArtistTypeVisual,
+  clickArtistWizardNext,
+} from './helpers/artist-wizard-helpers';
 import { gotoApp, waitForReactApp } from './shared/e2e-test-config';
 
 function requiredEnv(name: string): string | null {
@@ -112,62 +121,16 @@ test.describe('Artist vendor — redirect & RPC create', () => {
     page,
   }, testInfo) => {
     const admin = createNodeSupabaseClient(supabaseUrl!, supabaseServiceKey!);
-    const runId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-    const email = `e2e-artist-rpc-${runId}@example.com`;
-    const password = `E2E!${runId}aA1`;
-    const artworkTitle = `Œuvre E2E ${runId}`;
+    const ctx = await createArtistE2EVendor(admin, 'e2e-artist-rpc');
+    const artworkTitle = `Œuvre E2E ${ctx.runId}`;
 
-    const { data: createdUser, error: userError } = await admin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-    });
-    expect(userError).toBeNull();
-    const userId = createdUser.user!.id;
+    await loginArtistVendor(page, ctx.email, ctx.password);
+    await openArtistCreateWizard(page);
 
-    const { data: storeData, error: storeError } = await admin
-      .from('stores')
-      .insert({
-        user_id: userId,
-        name: `E2E Artist RPC ${runId}`,
-        slug: slugify(`e2e-artist-rpc-${runId}`),
-        description: 'E2E artist RPC create',
-        is_active: true,
-        commerce_type: 'artist',
-        metadata: { commerce_type: 'artist' },
-      })
-      .select('id')
-      .single();
-    expect(storeError).toBeNull();
-    const storeId = (storeData as { id: string }).id;
+    await selectArtistTypeVisual(page);
+    await clickArtistWizardNext(page, 1);
 
-    await page.goto('/login', { waitUntil: 'domcontentloaded' });
-    await page.fill('input[type="email"]', email);
-    await page.fill('input[type="password"]', password);
-    await page.click('button[type="submit"]');
-    await expect(page).toHaveURL('/dashboard', { timeout: 20_000 });
-    await waitForReactApp(page);
-
-    await page.goto('/dashboard/products/new/artist', { waitUntil: 'domcontentloaded' });
-    await waitForReactApp(page);
-
-    await page.getByText('Artiste Visuel', { exact: false }).first().click();
-    await page
-      .getByRole('button', { name: /Aller à l'étape suivante|Étape suivante|^Suivant$/i })
-      .click();
-
-    await page.locator('#artist_name').fill('Artiste E2E');
-    await page.locator('#artwork_title').fill(artworkTitle);
-    await page.locator('#artwork_medium').fill('Huile sur toile');
-    await page.locator('#price').fill('75000');
-
-    const editor = page.locator('[contenteditable="true"]').first();
-    if (await editor.isVisible({ timeout: 5_000 }).catch(() => false)) {
-      await editor.click();
-      await editor.fill(
-        'Description complète de l’œuvre pour le test E2E avec plus de dix caractères.'
-      );
-    }
+    await fillArtistBasicInfoStep(page, { artworkTitle, price: '75000' });
 
     await page.getByRole('button', { name: /brouillon/i }).click();
 
@@ -190,7 +153,7 @@ test.describe('Artist vendor — redirect & RPC create', () => {
         )
       `
       )
-      .eq('store_id', storeId)
+      .eq('store_id', ctx.storeId)
       .eq('product_type', 'artist')
       .order('created_at', { ascending: false })
       .limit(1);
@@ -222,9 +185,7 @@ test.describe('Artist vendor — redirect & RPC create', () => {
     });
 
     try {
-      await admin.from('products').delete().eq('id', product.id);
-      await admin.from('stores').delete().eq('id', storeId);
-      await admin.auth.admin.deleteUser(userId);
+      await cleanupArtistE2EVendor(admin, ctx, [product.id]);
     } catch {
       // cleanup best-effort
     }

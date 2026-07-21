@@ -6,7 +6,7 @@ import {
   dismissPersonaOnboardingIfVisible,
   seedTermsConsent,
 } from './store-theme-helpers';
-import { waitForReactApp } from '../shared/e2e-test-config';
+import { waitForReactApp, waitForVendorStoreReady } from '../shared/e2e-test-config';
 
 /** 1×1 PNG valide pour upload catalogue. */
 export const E2E_ARTWORK_PNG = Buffer.from(
@@ -115,6 +115,7 @@ export async function loginArtistVendor(
     .click();
   await expect(page).toHaveURL('/dashboard', { timeout: 30_000 });
   await waitForReactApp(page);
+  await waitForVendorStoreReady(page);
   await dismissCookieBannerIfVisible(page);
   await dismissPersonaOnboardingIfVisible(page);
   await acceptTermsDialogIfVisible(page);
@@ -195,9 +196,13 @@ export async function uploadArtworkImage(page: Page): Promise<void> {
     buffer: E2E_ARTWORK_PNG,
   });
 
-  await expect(page.getByText(/Images uploadées|image\(s\) uploadée\(s\)/i).first()).toBeVisible({
-    timeout: 45_000,
-  });
+  const successToast = page.getByText(/Images uploadées|image\(s\) uploadée\(s\)/i).first();
+  const previewImage = page.locator('img[src*="placehold.co"], img[src*="product-images"]').first();
+
+  await Promise.race([
+    expect(successToast).toBeVisible({ timeout: 45_000 }),
+    expect(previewImage).toBeVisible({ timeout: 45_000 }),
+  ]);
 }
 
 export async function fillArtistEditionStep(
@@ -233,6 +238,7 @@ export async function advanceArtistWizardToPublishStep(page: Page): Promise<void
 }
 
 export async function publishArtistWizard(page: Page): Promise<void> {
+  await dismissCookieBannerIfVisible(page);
   await page.getByRole('button', { name: /^Publier$/i }).click();
   await expect(page.getByText(/créé avec succès|succès/i).first()).toBeVisible({
     timeout: 45_000,

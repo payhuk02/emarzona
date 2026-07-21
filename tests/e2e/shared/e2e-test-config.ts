@@ -59,6 +59,23 @@ export async function waitForReactApp(page: PlaywrightPage): Promise<void> {
     .catch(() => undefined);
 }
 
+/** Wait until StoreContext has selected a vendor store (wizard pages need it). */
+export async function waitForVendorStoreReady(page: PlaywrightPage): Promise<void> {
+  await page
+    .waitForFunction(
+      () => {
+        const selected = localStorage.getItem('selectedStoreId');
+        if (selected?.trim()) return true;
+        return Object.keys(localStorage).some(key => {
+          if (!key.startsWith('sb-') || !key.endsWith('-auth-token')) return false;
+          return Boolean(localStorage.getItem(key));
+        });
+      },
+      { timeout: E2E_TEST_CONFIG.appReadyTimeout }
+    )
+    .catch(() => undefined);
+}
+
 export async function gotoApp(
   page: PlaywrightPage,
   path: string

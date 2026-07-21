@@ -85,6 +85,7 @@ export const useStore = () => {
   const loading =
     authLoading ||
     contextLoading ||
+    (!!user?.id && !hasKnownStore && stores.length === 0 && !queryError) ||
     (hasKnownStore && !store && (queryLoading || queryFetching) && !queryError);
 
   const generateSlug = (name: string): string => {

@@ -1,6 +1,8 @@
 import { expect, type Page } from '@playwright/test';
 import { E2E_ARTWORK_PNG } from './artist-wizard-helpers';
+import { dismissCookieBannerIfVisible } from './store-theme-helpers';
 import { clickWizardNext, goToWizardStep } from './vendor-e2e-helpers';
+import { waitForReactApp } from '../shared/e2e-test-config';
 
 export const E2E_DIGITAL_MAIN_FILE_URL = 'https://example.com/e2e-digital-product.pdf';
 
@@ -12,6 +14,9 @@ export type FillDigitalBasicInfoOptions = {
 
 export async function openDigitalCreateWizard(page: Page): Promise<void> {
   await page.goto('/dashboard/products/new/digital', { waitUntil: 'domcontentloaded' });
+  await waitForReactApp(page);
+  await dismissCookieBannerIfVisible(page);
+  await expect(page.locator('#name')).toBeVisible({ timeout: 60_000 });
 }
 
 export async function fillDigitalBasicInfoStep(
@@ -48,6 +53,7 @@ export async function advanceDigitalWizardToPublishStep(page: Page): Promise<voi
 }
 
 export async function publishDigitalWizard(page: Page): Promise<void> {
+  await dismissCookieBannerIfVisible(page);
   await page.getByRole('button', { name: /^Publier$/i }).click();
   await expect(page.getByText(/publié|succès/i).first()).toBeVisible({ timeout: 45_000 });
 }

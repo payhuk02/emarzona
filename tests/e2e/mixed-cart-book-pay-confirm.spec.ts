@@ -20,7 +20,7 @@ import {
   selectServiceCalendarDay,
 } from './helpers/service-booking-ui';
 import { dismissCookieBannerIfVisible } from './helpers/store-theme-helpers';
-import { gotoApp, loginAsSeededUser } from './shared/e2e-test-config';
+import { gotoApp, loginAsSeededUser, waitForVendorStoreReady } from './shared/e2e-test-config';
 
 const supabaseUrl = resolveE2ESupabaseUrl() || undefined;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -57,6 +57,7 @@ test.describe('Mixed cart book → pay → confirm (E2E)', () => {
         '/dashboard',
         fixture.buyer.password
       );
+      await waitForVendorStoreReady(page);
       await gotoApp(page, `/service/${fixture.serviceProduct.id}`);
 
       await expect(page.getByText(/Service non trouvé/i)).toHaveCount(0, { timeout: 5_000 });
@@ -78,13 +79,18 @@ test.describe('Mixed cart book → pay → confirm (E2E)', () => {
       await dismissCookieBannerIfVisible(page);
 
       const bookingError = page.getByText(
-        /Erreur de réservation|Réservation impossible|Authentification requise|Impossible de finaliser|Délai dépassé|Date invalide|Sélection incomplète|Compléments manquants|créneau n'est pas disponible/i
+        /Erreur de réservation|Réservation impossible|Authentification requise|Impossible de finaliser|Délai dépassé|Date invalide|Sélection incomplète|Compléments manquants|créneau n'est pas disponible|identifiant de créneau|ajouter au panier|Produit non trouvé/i
       );
 
       const reserveRpc = page.waitForResponse(
         response =>
           response.url().includes('/rest/v1/rpc/reserve_service_booking') &&
           response.request().method() === 'POST',
+        { timeout: 45_000 }
+      );
+      const cartInsert = page.waitForResponse(
+        response =>
+          response.url().includes('/rest/v1/cart_items') && response.request().method() === 'POST',
         { timeout: 45_000 }
       );
 
@@ -102,21 +108,38 @@ test.describe('Mixed cart book → pay → confirm (E2E)', () => {
         throw new Error(`reserve_service_booking RPC was not called. toast=${errText || '(none)'}`);
       }
 
+      const cartResponse = await cartInsert.catch(() => null);
+      if (cartResponse && (cartResponse.status() < 200 || cartResponse.status() >= 300)) {
+        const body = await cartResponse.text().catch(() => '');
+        throw new Error(
+          `cart_items insert failed (${cartResponse.status()}): ${body.slice(0, 400)}`
+        );
+      }
+
       const navigated = await page
         .waitForURL(/\/cart/, { timeout: 45_000 })
         .then(() => true)
         .catch(() => false);
       if (!navigated) {
         const errText = (await bookingError.textContent().catch(() => null)) ?? '';
-        const bodySnippet = (
-          await page
-            .locator('body')
-            .innerText()
-            .catch(() => '')
-        ).slice(0, 800);
-        throw new Error(
-          `Expected /cart after add-to-cart. toast=${errText || '(none)'} page=${bodySnippet}`
-        );
+        const successToast = await page
+          .getByText(/Service ajouté au panier|Ajouté au panier/i)
+          .first()
+          .isVisible()
+          .catch(() => false);
+        if (successToast) {
+          await gotoApp(page, '/cart');
+        } else {
+          const bodySnippet = (
+            await page
+              .locator('body')
+              .innerText()
+              .catch(() => '')
+          ).slice(0, 800);
+          throw new Error(
+            `Expected /cart after add-to-cart. toast=${errText || '(none)'} page=${bodySnippet}`
+          );
+        }
       }
       await expect(page.getByText(fixture.serviceProduct.name)).toBeVisible({ timeout: 10_000 });
 

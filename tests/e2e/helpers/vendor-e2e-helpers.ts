@@ -6,7 +6,7 @@ import {
   dismissPersonaOnboardingIfVisible,
   seedTermsConsent,
 } from './store-theme-helpers';
-import { waitForReactApp } from '../shared/e2e-test-config';
+import { waitForReactApp, waitForVendorStoreReady } from '../shared/e2e-test-config';
 
 export type CommerceType = 'artist' | 'digital' | 'course' | 'physical' | 'service';
 
@@ -110,6 +110,7 @@ export async function loginE2EVendor(page: Page, email: string, password: string
     .click();
   await expect(page).toHaveURL('/dashboard', { timeout: 30_000 });
   await waitForReactApp(page);
+  await waitForVendorStoreReady(page);
   await dismissCookieBannerIfVisible(page);
   await dismissPersonaOnboardingIfVisible(page);
   await acceptTermsDialogIfVisible(page);
