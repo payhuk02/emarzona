@@ -478,6 +478,29 @@ export async function runPostOrderPaymentFulfillment(
   orderId: string,
   transactionId: string
 ): Promise<void> {
+  // S4: sync payments + facture paid (idempotent; even on re-delivery)
+  try {
+    const { error: paySyncErr } = await supabase.rpc('sync_payment_row_from_transaction', {
+      p_transaction_id: transactionId,
+    });
+    if (paySyncErr) {
+      console.error('sync_payment_row_from_transaction failed', paySyncErr);
+    }
+  } catch (e) {
+    console.error('sync_payment_row_from_transaction exception', e);
+  }
+
+  try {
+    const { error: invErr } = await supabase.rpc('ensure_order_invoice_paid', {
+      p_order_id: orderId,
+    });
+    if (invErr) {
+      console.error('ensure_order_invoice_paid failed', invErr);
+    }
+  } catch (e) {
+    console.error('ensure_order_invoice_paid exception', e);
+  }
+
   const { data: order, error: orderError } = await supabase
     .from('orders')
     .select(ORDER_SELECT)

@@ -141,6 +141,13 @@ export class CourseOrderStrategy implements OrderStrategy {
     const customerId = orderData.customer_id;
     const finalAmountToPay = Number(orderData.total_amount) || 0;
 
+    const { error: invoiceError } = await supabase.rpc('create_invoice_from_order', {
+      p_order_id: orderId,
+    });
+    if (invoiceError) {
+      logger.error('Error creating invoice for course order', { error: invoiceError, orderId });
+    }
+
     import('@/lib/webhooks').then(({ triggerOrderCreatedWebhook }) => {
       triggerOrderCreatedWebhook(orderId, {
         store_id: storeId,

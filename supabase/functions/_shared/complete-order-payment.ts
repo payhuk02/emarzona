@@ -172,6 +172,18 @@ export async function completeTransactionAndOrder(
       .eq('id', orderId);
   }
 
+  // Best-effort accounting sync (also done in post-order fulfillment)
+  try {
+    await supabase.rpc('sync_payment_row_from_transaction', {
+      p_transaction_id: transactionId,
+    });
+    if (orderId) {
+      await supabase.rpc('ensure_order_invoice_paid', { p_order_id: orderId });
+    }
+  } catch (syncErr) {
+    console.error('post-complete accounting sync failed', syncErr);
+  }
+
   return { orderId, alreadyCompleted: false };
 }
 

@@ -123,9 +123,14 @@ export class DigitalOrderStrategy implements OrderStrategy {
     const checkoutToken = orderData.checkout_token || undefined;
 
     try {
-      await supabase.rpc('create_invoice_from_order', { p_order_id: orderId });
-    } catch (_invoiceErr) {
-      /* ignore */
+      const { error: invoiceError } = await supabase.rpc('create_invoice_from_order', {
+        p_order_id: orderId,
+      });
+      if (invoiceError) {
+        logger.error('Error creating invoice for digital order', { error: invoiceError, orderId });
+      }
+    } catch (invoiceErr) {
+      logger.error('Error creating invoice for digital order', { error: invoiceErr, orderId });
     }
 
     import('@/lib/webhooks').then(({ triggerOrderCreatedWebhook }) => {

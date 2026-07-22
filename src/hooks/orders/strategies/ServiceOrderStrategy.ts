@@ -3,16 +3,12 @@ import { initiatePayment } from '@/lib/payment-service';
 import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
 import { logger } from '@/lib/logger';
 import { findOrCreateStoreCustomer } from '@/lib/orders/customers-data';
-import { generateOrderNumber } from '@/lib/orders/orders-data';
 import {
   asOptionalString,
   asOrderProduct,
-  asOrdersInsert,
   parsePaymentOptions,
   parseStrategyOptions,
-  resolveUnitPrice,
 } from '@/lib/orders/order-strategy-utils';
-import { insertOrderItem } from '@/lib/orders/order-items-client';
 import { OrderStrategy, OrderStrategyContext, OrderCreationResult } from './OrderStrategy';
 
 const SERVICE_PRODUCT_FIELDS =
@@ -384,111 +380,85 @@ export class ServiceOrderStrategy implements OrderStrategy {
       ).catch(err => logger.error('Error in tracking', { error: err }));
     });
 
-    // 7. Calculer le prix
-    let totalPrice = resolveUnitPrice(productData);
-    if (serviceProduct.pricing_type === 'per_participant') totalPrice *= numberOfParticipants;
-    if (serviceProduct.pricing_type === 'per_hour') {
-      const hours = actualDuration / 60;
-      totalPrice *= hours;
-    }
-
-    let amountToPay = totalPrice;
-    let percentagePaid = 0;
-    let remainingAmount = 0;
-
-    if (paymentType === 'percentage') {
-      amountToPay = Math.round((totalPrice * percentageRate) / 100);
-      percentagePaid = amountToPay;
-      remainingAmount = totalPrice - amountToPay;
-    } else if (paymentType === 'delivery_secured') {
-      amountToPay = totalPrice;
-    }
-
-    const finalAmountToPay = Math.max(0, amountToPay - (giftCardAmount || 0));
-    const orderNumber = await generateOrderNumber();
+    // 7. Créer la commande via RPC sécurisée (frais 2%+100, booking_id, RLS-safe)
     const affiliateTrackingCookie = getAffiliateTrackingCookie();
+    const serviceMetadata = {
+      booking_date: bookingDateTime,
+      duration_minutes: actualDuration,
+      number_of_participants: numberOfParticipants,
+      staff_id: staffId,
+      notes,
+      booking_id: booking.id,
+    };
 
-    const { data: order, error: orderError } = await supabase
-      .from('orders')
-      .insert(
-        asOrdersInsert({
-          store_id: storeId,
-          customer_id: customerId,
-          order_number: orderNumber,
-          total_amount: totalPrice - (giftCardAmount || 0),
-          currency: productData.currency,
-          payment_status: 'pending',
-          status: 'pending',
-          payment_type: paymentType,
-          percentage_paid: percentagePaid,
-          remaining_amount: remainingAmount,
-          affiliate_tracking_cookie: affiliateTrackingCookie,
-          metadata: guestCheckout ? { guest_checkout: true } : undefined,
-        })
-      )
-      .select(
-        'id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at'
-      )
-      .single();
-
-    if (orderError || !order) {
-      await supabase.from('service_bookings').update({ status: 'cancelled' }).eq('id', booking.id);
-      throw new Error('Erreur lors de la création de la commande');
-    }
-
-    // Rédimer la carte cadeau
-    if (giftCardId && giftCardAmount > 0) {
-      try {
-        await supabase.rpc('redeem_gift_card', {
-          p_gift_card_id: giftCardId,
-          p_order_id: order.id,
-          p_amount: giftCardAmount,
-        });
-      } catch (giftCardError) {
-        logger.error('Error in gift card redemption:', giftCardError);
+    const { data: rpcResult, error: orderError } = await supabase.rpc(
+      // @ts-expect-error: RPC type not yet updated in supabase types
+      'create_public_service_order',
+      {
+        p_product_id: productId,
+        p_store_id: storeId,
+        p_customer_email: customerEmail,
+        p_customer_name: customerName || customerEmail.split('@')[0],
+        p_customer_phone: customerPhone ?? null,
+        p_service_metadata: serviceMetadata,
+        p_gift_card_id: giftCardId ?? null,
+        p_gift_card_amount_requested: giftCardAmount || 0,
+        p_coupon_code: null,
+        p_affiliate_tracking_cookie: affiliateTrackingCookie,
+        p_guest_checkout: guestCheckout ?? !authenticatedUserId,
+        p_booking_id: booking.id,
       }
+    );
+
+    if (orderError || !rpcResult) {
+      await supabase.from('service_bookings').update({ status: 'cancelled' }).eq('id', booking.id);
+      logger.error('create_public_service_order failed', { error: orderError });
+      throw new Error(
+        `Erreur lors de la création de la commande: ${orderError?.message || 'Inconnue'}`
+      );
     }
 
-    // Créer la facture
-    try {
-      await supabase.rpc('create_invoice_from_order', { p_order_id: order.id });
-    } catch (_invoiceErr) {
-      /* ignore */
+    const orderData = rpcResult as unknown as {
+      order_id: string;
+      order_item_id: string;
+      order_number: string;
+      customer_id: string;
+      total_amount: number;
+    };
+
+    const orderId = orderData.order_id;
+    const orderItemId = orderData.order_item_id;
+    const rpcCustomerId = orderData.customer_id || customerId;
+    const finalAmountToPay = Number(orderData.total_amount) || 0;
+
+    const { data: invoiceId, error: invoiceError } = await supabase.rpc(
+      'create_invoice_from_order',
+      { p_order_id: orderId }
+    );
+    if (invoiceError) {
+      logger.error('Error creating invoice for service order', { error: invoiceError, orderId });
+    } else {
+      logger.info(`Invoice created: ${invoiceId}`);
     }
 
     import('@/lib/webhooks').then(({ triggerOrderCreatedWebhook }) => {
-      triggerOrderCreatedWebhook(order.id, order).catch(() => {});
+      triggerOrderCreatedWebhook(orderId, {
+        store_id: storeId,
+        customer_id: rpcCustomerId,
+        order_number: orderData.order_number,
+        status: 'pending',
+        total_amount: finalAmountToPay,
+        currency: productData.currency,
+        payment_status: 'pending',
+        created_at: new Date().toISOString(),
+      }).catch(() => {});
     });
-
-    const { data: orderItem, error: orderItemError } = await insertOrderItem({
-      order_id: order.id,
-      product_id: productId,
-      product_type: 'service',
-      service_product_id: resolvedServiceProductId,
-      booking_id: booking.id,
-      product_name: productData.name,
-      quantity: 1,
-      unit_price: totalPrice,
-      total_price: totalPrice,
-      item_metadata: {
-        booking_date: bookingDateTime,
-        duration_minutes: actualDuration,
-        number_of_participants: numberOfParticipants,
-        staff_id: staffId,
-        notes,
-      },
-    });
-
-    if (orderItemError || !orderItem) {
-      await supabase.from('service_bookings').update({ status: 'cancelled' }).eq('id', booking.id);
-      throw new Error("Erreur lors de la création de l'élément de commande");
-    }
 
     if (paymentType === 'delivery_secured') {
       await supabase.from('secured_payments').insert({
-        order_id: order.id,
-        total_amount: totalPrice,
-        held_amount: amountToPay,
+        order_id: orderId,
+        total_amount: finalAmountToPay,
+        held_amount: finalAmountToPay,
         status: 'held',
         hold_reason: 'service_completion',
         release_conditions: { requires_service_completion: true, auto_release_days: 3 },
@@ -513,8 +483,8 @@ export class ServiceOrderStrategy implements OrderStrategy {
     const paymentResult = await initiatePayment({
       storeId,
       productId,
-      orderId: order.id,
-      customerId,
+      orderId,
+      customerId: rpcCustomerId,
       amount: finalAmountToPay,
       currency: product.currency,
       description: paymentDescription,
@@ -530,12 +500,12 @@ export class ServiceOrderStrategy implements OrderStrategy {
         booking_date: bookingDateTime,
         duration_minutes: actualDuration,
         number_of_participants: numberOfParticipants,
-        order_item_id: orderItem.id,
+        order_item_id: orderItemId,
         payment_type: paymentType,
         percentage_rate: paymentType === 'percentage' ? percentageRate : null,
-        total_price: totalPrice,
-        amount_paid: amountToPay,
-        remaining_amount: remainingAmount,
+        total_price: finalAmountToPay,
+        amount_paid: finalAmountToPay,
+        remaining_amount: 0,
         ...(guestCheckout ? { guest_checkout: true } : {}),
       },
     });
@@ -546,8 +516,8 @@ export class ServiceOrderStrategy implements OrderStrategy {
     }
 
     return {
-      orderId: order.id,
-      orderItemId: orderItem.id,
+      orderId,
+      orderItemId,
       bookingId: booking.id,
       checkoutUrl: paymentResult.checkout_url,
       transactionId: paymentResult.transaction_id,
