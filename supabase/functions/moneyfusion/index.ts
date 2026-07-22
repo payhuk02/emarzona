@@ -606,10 +606,12 @@ serve(async req => {
       );
     }
 
-    await supabase
+    const { error: persistError } = await supabase
       .from('transactions')
       .update({
         payment_id: token || null,
+        provider_payment_intent_id: token || null,
+        reference: token || null,
         status: 'processing',
         metadata: {
           ...rawMetadata,
@@ -624,6 +626,39 @@ serve(async req => {
         },
       })
       .eq('id', localTxId);
+
+    if (persistError) {
+      console.error('[MoneyFusion] Failed to persist PSP token on transaction', {
+        localTxId,
+        message: persistError.message,
+        code: persistError.code,
+      });
+      await supabase
+        .from('transactions')
+        .update({
+          status: 'failed',
+          metadata: {
+            ...rawMetadata,
+            payment_provider: 'moneyfusion',
+            moneyfusion_error: {
+              message: 'persist_payment_id_failed',
+              detail: persistError.message,
+              token_prefix: token ? token.slice(0, 8) : null,
+              checkout_url: checkoutUrl,
+            },
+          },
+        })
+        .eq('id', localTxId);
+      return new Response(
+        JSON.stringify({
+          error: 'Erreur persistance transaction',
+          message:
+            'Le paiement MoneyFusion a été initié mais la transaction locale n’a pas pu être synchronisée. Réessayez.',
+          details: { code: persistError.code, message: persistError.message },
+        }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     return new Response(
       JSON.stringify({

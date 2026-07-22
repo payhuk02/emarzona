@@ -89,18 +89,22 @@ export async function cleanupArtistE2EVendor(
   productIds: string[] = []
 ): Promise<void> {
   for (const productId of productIds) {
-    await admin
-      .from('products')
-      .delete()
-      .eq('id', productId)
-      .catch(() => undefined);
+    try {
+      await admin.from('products').delete().eq('id', productId);
+    } catch {
+      /* best-effort cleanup */
+    }
   }
-  await admin
-    .from('stores')
-    .delete()
-    .eq('id', ctx.storeId)
-    .catch(() => undefined);
-  await admin.auth.admin.deleteUser(ctx.userId).catch(() => undefined);
+  try {
+    await admin.from('stores').delete().eq('id', ctx.storeId);
+  } catch {
+    /* best-effort cleanup */
+  }
+  try {
+    await admin.auth.admin.deleteUser(ctx.userId);
+  } catch {
+    /* best-effort cleanup */
+  }
 }
 
 export async function loginArtistVendor(

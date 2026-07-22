@@ -11,8 +11,8 @@ vi.mock('../orchestrator/load-connections', () => ({
   loadStoreForcePlatformPayments: vi.fn(),
 }));
 
-vi.mock('../adapters/geniuspay-adapter', () => ({
-  createGeniusPayPlatformPayment: vi.fn(),
+vi.mock('../adapters/moneyfusion-adapter', () => ({
+  createMoneyFusionPayment: vi.fn(),
 }));
 
 vi.mock('../adapters/stripe-connect-adapter', () => ({
@@ -27,14 +27,14 @@ import {
   loadStorePaymentConnections,
   loadStoreForcePlatformPayments,
 } from '../orchestrator/load-connections';
-import { createGeniusPayPlatformPayment } from '../adapters/geniuspay-adapter';
+import { createMoneyFusionPayment } from '../adapters/moneyfusion-adapter';
 import { createStripeConnectPayment } from '../adapters/stripe-connect-adapter';
 import { createPayPalCommercePayment } from '../adapters/paypal-commerce-adapter';
 
 const baseConnection = (overrides: Partial<StorePaymentConnection>): StorePaymentConnection => ({
   id: 'conn-1',
   store_id: 'store-1',
-  provider: 'geniuspay_platform',
+  provider: 'moneyfusion',
   connection_mode: 'platform_default',
   external_account_id: null,
   external_account_status: 'active',
@@ -52,7 +52,7 @@ describe('createOrchestratedPayment', () => {
 
   it('délègue à Stripe Connect quand EUR et connexion active', async () => {
     const connections = [
-      baseConnection({ id: 'c-m', provider: 'geniuspay_platform' }),
+      baseConnection({ id: 'c-m', provider: 'moneyfusion' }),
       baseConnection({
         id: 'c-s',
         provider: 'stripe_connect',
@@ -80,26 +80,26 @@ describe('createOrchestratedPayment', () => {
     });
 
     expect(createStripeConnectPayment).toHaveBeenCalledOnce();
-    expect(createGeniusPayPlatformPayment).not.toHaveBeenCalled();
+    expect(createMoneyFusionPayment).not.toHaveBeenCalled();
     expect(result.provider).toBe('stripe_connect');
     expect(result.checkout_url).toContain('stripe.com');
   });
 
-  it('respecte preferredProvider geniuspay_platform', async () => {
+  it('migre preferredProvider geniuspay_platform vers MoneyFusion', async () => {
     const connections = [
       baseConnection({
         id: 'c-s',
         provider: 'stripe_connect',
         capabilities: { card_payments: true },
       }),
-      baseConnection({ id: 'c-m', provider: 'geniuspay_platform' }),
+      baseConnection({ id: 'c-m', provider: 'moneyfusion' }),
     ];
     vi.mocked(loadStorePaymentConnections).mockResolvedValue(connections);
-    vi.mocked(createGeniusPayPlatformPayment).mockResolvedValue({
+    vi.mocked(createMoneyFusionPayment).mockResolvedValue({
       success: true,
       transaction_id: 'tx-m',
-      checkout_url: 'https://pay.geniuspay.io/x',
-      provider: 'geniuspay_platform',
+      checkout_url: 'https://payin.moneyfusion.net/x',
+      provider: 'moneyfusion',
     });
 
     const result = await createOrchestratedPayment({
@@ -109,20 +109,21 @@ describe('createOrchestratedPayment', () => {
       currency: 'XOF',
       description: 'XOF order',
       customerEmail: 'buyer@example.com',
+      customerPhone: '75591378',
       successUrl: 'https://example.com/success',
       cancelUrl: 'https://example.com/cancel',
       preferredProvider: 'geniuspay_platform',
       connections,
     });
 
-    expect(createGeniusPayPlatformPayment).toHaveBeenCalledOnce();
+    expect(createMoneyFusionPayment).toHaveBeenCalledOnce();
     expect(createStripeConnectPayment).not.toHaveBeenCalled();
-    expect(result.provider).toBe('geniuspay_platform');
+    expect(result.provider).toBe('moneyfusion');
   });
 
   it('honore preferredProvider via resolve (PayPal si compatible)', async () => {
     const connections = [
-      baseConnection({ id: 'c-m', provider: 'geniuspay_platform' }),
+      baseConnection({ id: 'c-m', provider: 'moneyfusion' }),
       baseConnection({
         id: 'c-p',
         provider: 'paypal_commerce',
@@ -159,41 +160,9 @@ describe('createOrchestratedPayment', () => {
     expect(result.provider).toBe('paypal_commerce');
   });
 
-  it('ajoute psp_fallback adapter_redirect quand un adapter retourne GeniusPay', async () => {
+  it('fallback MoneyFusion sur erreur Stripe explicite', async () => {
     const connections = [
-      baseConnection({ id: 'c-m', provider: 'geniuspay_platform' }),
-      baseConnection({
-        id: 'c-s',
-        provider: 'stripe_connect',
-        external_account_id: 'acct_1',
-        capabilities: { card_payments: true },
-      }),
-    ];
-    vi.mocked(loadStorePaymentConnections).mockResolvedValue(connections);
-    vi.mocked(createStripeConnectPayment).mockResolvedValue({
-      success: true,
-      transaction_id: 'tx-redirect',
-      checkout_url: 'https://pay.geniuspay.io/fallback',
-      provider: 'geniuspay_platform',
-    });
-
-    const result = await createOrchestratedPayment({
-      storeId: 'store-1',
-      orderId: 'order-redirect',
-      amount: 40,
-      currency: 'EUR',
-      description: 'Adapter redirect',
-      customerEmail: 'buyer@example.com',
-    });
-
-    expect(result.provider).toBe('geniuspay_platform');
-    expect(result.psp_fallback?.from_provider).toBe('stripe_connect');
-    expect(result.psp_fallback?.reason).toBe('adapter_redirect');
-  });
-
-  it('fallback GeniusPay sur erreur Stripe explicite', async () => {
-    const connections = [
-      baseConnection({ id: 'c-m', provider: 'geniuspay_platform' }),
+      baseConnection({ id: 'c-m', provider: 'moneyfusion' }),
       baseConnection({
         id: 'c-s',
         provider: 'stripe_connect',
@@ -203,11 +172,11 @@ describe('createOrchestratedPayment', () => {
     ];
     vi.mocked(loadStorePaymentConnections).mockResolvedValue(connections);
     vi.mocked(createStripeConnectPayment).mockRejectedValue(new Error('Stripe API unavailable'));
-    vi.mocked(createGeniusPayPlatformPayment).mockResolvedValue({
+    vi.mocked(createMoneyFusionPayment).mockResolvedValue({
       success: true,
       transaction_id: 'tx-fallback',
-      checkout_url: 'https://pay.geniuspay.io/fallback',
-      provider: 'geniuspay_platform',
+      checkout_url: 'https://payin.moneyfusion.net/fallback',
+      provider: 'moneyfusion',
     });
 
     const result = await createOrchestratedPayment({
@@ -217,17 +186,19 @@ describe('createOrchestratedPayment', () => {
       currency: 'EUR',
       description: 'Stripe error',
       customerEmail: 'buyer@example.com',
+      customerPhone: '75591378',
     });
 
-    expect(createGeniusPayPlatformPayment).toHaveBeenCalled();
-    expect(result.provider).toBe('geniuspay_platform');
+    expect(createMoneyFusionPayment).toHaveBeenCalled();
+    expect(result.provider).toBe('moneyfusion');
     expect(result.psp_fallback?.from_provider).toBe('stripe_connect');
+    expect(result.psp_fallback?.to_provider).toBe('moneyfusion');
     expect(result.psp_fallback?.reason).toBe('provider_error');
   });
 
-  it('fallback GeniusPay sur erreur générique quand provider résolu non GeniusPay', async () => {
+  it('fallback MoneyFusion sur erreur générique quand provider résolu non MoneyFusion', async () => {
     const connections = [
-      baseConnection({ id: 'c-m', provider: 'geniuspay_platform' }),
+      baseConnection({ id: 'c-m', provider: 'moneyfusion' }),
       baseConnection({
         id: 'c-p',
         provider: 'paypal_commerce',
@@ -236,11 +207,11 @@ describe('createOrchestratedPayment', () => {
     ];
     vi.mocked(loadStorePaymentConnections).mockResolvedValue(connections);
     vi.mocked(createPayPalCommercePayment).mockRejectedValue(new Error('PayPal timeout'));
-    vi.mocked(createGeniusPayPlatformPayment).mockResolvedValue({
+    vi.mocked(createMoneyFusionPayment).mockResolvedValue({
       success: true,
       transaction_id: 'tx-generic-fallback',
-      checkout_url: 'https://pay.geniuspay.io/fallback-2',
-      provider: 'geniuspay_platform',
+      checkout_url: 'https://payin.moneyfusion.net/fallback-2',
+      provider: 'moneyfusion',
     });
 
     const result = await createOrchestratedPayment({
@@ -250,18 +221,19 @@ describe('createOrchestratedPayment', () => {
       currency: 'USD',
       description: 'Generic error',
       customerEmail: 'buyer@example.com',
+      customerPhone: '75591378',
       preferredProvider: 'paypal_commerce',
       connections,
     });
 
-    expect(createGeniusPayPlatformPayment).toHaveBeenCalled();
+    expect(createMoneyFusionPayment).toHaveBeenCalled();
     expect(result.psp_fallback?.from_provider).toBe('paypal_commerce');
     expect(result.psp_fallback?.reason).toBe('provider_error');
   });
 
-  it('retourne un échec standard si fallback GeniusPay échoue aussi', async () => {
+  it('retourne un échec standard si fallback MoneyFusion échoue aussi', async () => {
     const connections = [
-      baseConnection({ id: 'c-m', provider: 'geniuspay_platform' }),
+      baseConnection({ id: 'c-m', provider: 'moneyfusion' }),
       baseConnection({
         id: 'c-p',
         provider: 'paypal_commerce',
@@ -270,7 +242,7 @@ describe('createOrchestratedPayment', () => {
     ];
     vi.mocked(loadStorePaymentConnections).mockResolvedValue(connections);
     vi.mocked(createPayPalCommercePayment).mockRejectedValue(new Error('PayPal down'));
-    vi.mocked(createGeniusPayPlatformPayment).mockRejectedValue(new Error('GeniusPay down'));
+    vi.mocked(createMoneyFusionPayment).mockRejectedValue(new Error('MoneyFusion down'));
 
     const result = await createOrchestratedPayment({
       storeId: 'store-1',
@@ -284,25 +256,25 @@ describe('createOrchestratedPayment', () => {
     });
 
     expect(result.success).toBe(false);
-    expect(result.provider).toBe('geniuspay_platform');
+    expect(result.provider).toBe('moneyfusion');
     expect(result.error).toContain('PayPal down');
   });
 
-  it('fallback GeniusPay explicite si provider non prêt (Flutterwave)', async () => {
+  it('fallback MoneyFusion explicite si provider non prêt (Flutterwave)', async () => {
     const connections = [
       baseConnection({
         id: 'c-f',
         provider: 'flutterwave_connect',
         external_account_id: 'flw_1',
       }),
-      baseConnection({ id: 'c-m', provider: 'geniuspay_platform' }),
+      baseConnection({ id: 'c-m', provider: 'moneyfusion' }),
     ];
     vi.mocked(loadStorePaymentConnections).mockResolvedValue(connections);
-    vi.mocked(createGeniusPayPlatformPayment).mockResolvedValue({
+    vi.mocked(createMoneyFusionPayment).mockResolvedValue({
       success: true,
       transaction_id: 'tx-fallback',
-      checkout_url: 'https://pay.geniuspay.io/fallback',
-      provider: 'geniuspay_platform',
+      checkout_url: 'https://payin.moneyfusion.net/fallback',
+      provider: 'moneyfusion',
     });
 
     const result = await createOrchestratedPayment({
@@ -312,12 +284,13 @@ describe('createOrchestratedPayment', () => {
       currency: 'NGN',
       description: 'Fallback test',
       customerEmail: 'buyer@example.com',
+      customerPhone: '75591378',
       preferredProvider: 'flutterwave_connect',
       connections,
     });
 
-    expect(createGeniusPayPlatformPayment).toHaveBeenCalled();
-    expect(result.provider).toBe('geniuspay_platform');
+    expect(createMoneyFusionPayment).toHaveBeenCalled();
+    expect(result.provider).toBe('moneyfusion');
     expect(result.psp_fallback?.from_provider).toBe('flutterwave_connect');
     expect(result.psp_fallback?.reason).toBe('provider_not_ready');
   });

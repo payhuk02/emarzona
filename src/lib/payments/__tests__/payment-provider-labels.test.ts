@@ -6,8 +6,9 @@ describe('getPaymentProviderLabel', () => {
     expect(getPaymentProviderLabel('stripe_connect')).toBe('Stripe');
     expect(getPaymentProviderLabel('paypal_commerce')).toBe('PayPal');
     expect(getPaymentProviderLabel('flutterwave_connect')).toBe('Flutterwave');
-    expect(getPaymentProviderLabel('geniuspay_platform')).toBe('GeniusPay');
-    expect(getPaymentProviderLabel('geniuspay')).toBe('GeniusPay');
+    expect(getPaymentProviderLabel('geniuspay_platform')).toBe('MoneyFusion');
+    expect(getPaymentProviderLabel('geniuspay')).toBe('MoneyFusion');
+    expect(getPaymentProviderLabel('moneyfusion')).toBe('MoneyFusion');
   });
 
   it('returns Inconnu when provider is missing', () => {

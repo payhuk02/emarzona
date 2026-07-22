@@ -54,7 +54,8 @@ export interface OrchestratedPaymentRequest {
 
 export interface PspFallbackInfo {
   from_provider: PaymentProviderCode;
-  to_provider: 'geniuspay_platform';
+  /** Rail de secours plateforme (MoneyFusion ; geniuspay_platform = legacy) */
+  to_provider: 'moneyfusion' | 'geniuspay_platform';
   reason: string;
 }
 
@@ -66,7 +67,7 @@ export interface OrchestratedPaymentResult {
   provider_transaction_id?: string;
   connection_id?: string | null;
   error?: string;
-  /** Présent si le PSP initial a été remplacé par GeniusPay (Epic 2.2.7) */
+  /** Présent si le PSP initial a été remplacé par MoneyFusion (legacy: GeniusPay) */
   psp_fallback?: PspFallbackInfo;
 }
 
