@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  getStoreCustomizationPath,
   getStoreOnboardingPath,
   getStoreOnboardingSteps,
   getStoreVerticalProfile,
@@ -8,6 +9,13 @@ import {
 const STORE_ID = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee';
 
 describe('store-vertical-config', () => {
+  it('returns the store customization path', () => {
+    expect(getStoreCustomizationPath(STORE_ID)).toBe(`/dashboard/store?storeId=${STORE_ID}`);
+    expect(getStoreCustomizationPath(STORE_ID, 'seo')).toBe(
+      `/dashboard/store?storeId=${STORE_ID}&tab=seo`
+    );
+  });
+
   it('returns vertical-specific onboarding paths', () => {
     expect(getStoreOnboardingPath(STORE_ID, 'physical')).toBe(
       `/dashboard/onboarding/physical-subscription?storeId=${STORE_ID}`

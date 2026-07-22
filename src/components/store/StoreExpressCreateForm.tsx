@@ -34,7 +34,7 @@ import {
   type StoreCommerceType,
 } from '@/constants/store-commerce-types';
 import {
-  getStoreOnboardingPath,
+  getStoreCustomizationPath,
   getStoreVerticalProfile,
 } from '@/lib/commerce/store-vertical-config';
 import { getRecommendedThemeTemplates, type StoreThemeTemplate } from '@/lib/store-theme-templates';
@@ -65,7 +65,7 @@ export function StoreExpressCreateForm({
   const { toast } = useToast();
   const navigate = useNavigate();
   const { createStore } = useStores();
-  const { refreshStores, canCreateStore, storeQuota } = useStoreContext();
+  const { refreshStores, canCreateStore, storeQuota, setSelectedStoreId } = useStoreContext();
   const { trackEvent } = useAnalytics();
 
   const [name, setName] = useState('');
@@ -225,8 +225,8 @@ export function StoreExpressCreateForm({
           },
         });
 
-        const redirectTarget = getStoreOnboardingPath(createdStore.id, commerceType);
-        navigate(redirectTarget, { replace: true });
+        setSelectedStoreId(createdStore.id);
+        navigate(getStoreCustomizationPath(createdStore.id), { replace: true });
         onSuccess?.();
       } catch (error: unknown) {
         const message = toUserErrorMessage(error) || t('store.form.common.unknownError');
@@ -247,6 +247,7 @@ export function StoreExpressCreateForm({
       navigate,
       onSuccess,
       refreshStores,
+      setSelectedStoreId,
       slug,
       slugAvailable,
       slugReserved,

@@ -57,7 +57,7 @@ import {
 } from '@/constants/store-commerce-types';
 import { resolveStoreCommerceTypeFromStore } from '@/lib/commerce/store-capability-map';
 import { useStoreCommerceTypeGuard } from '@/hooks/useStoreCommerceTypeGuard';
-import { getStoreOnboardingPath } from '@/lib/commerce/store-vertical-config';
+import { getStoreCustomizationPath } from '@/lib/commerce/store-vertical-config';
 import { isStoreSlugAvailable } from '@/lib/store/create-store-service';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
@@ -373,7 +373,7 @@ const StoreForm = ({
   const [advancedMode] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { refreshStores, canCreateStore } = useStoreContext();
+  const { refreshStores, canCreateStore, setSelectedStoreId } = useStoreContext();
   const { createStore, updateStore } = useStores();
   const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
   const isEditing = Boolean(initialData?.id);
@@ -859,8 +859,8 @@ const StoreForm = ({
           );
 
           await refreshStores();
-          const redirectTarget = getStoreOnboardingPath(createdStore.id, commerceType);
-          navigate(redirectTarget, { replace: true });
+          setSelectedStoreId(createdStore.id);
+          navigate(getStoreCustomizationPath(createdStore.id), { replace: true });
         }
 
         onSuccess();
@@ -979,6 +979,7 @@ const StoreForm = ({
       initialData,
       onSuccess,
       refreshStores,
+      setSelectedStoreId,
       createStore,
       updateStore,
       canCreateStore,

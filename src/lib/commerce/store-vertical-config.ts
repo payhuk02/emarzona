@@ -21,12 +21,18 @@ export interface StoreVerticalProfile {
   showLocationTab: boolean;
 }
 
+/** Page de personnalisation boutique (logo, thème, identité). */
+export function getStoreCustomizationPath(storeId: string, tab?: 'seo'): string {
+  const base = `/dashboard/store?storeId=${encodeURIComponent(storeId)}`;
+  return tab === 'seo' ? `${base}&tab=seo` : base;
+}
+
 const BASE_ONBOARDING = {
   customize: (storeId: string): StoreOnboardingStep => ({
     id: 'customize',
     title: 'Personnaliser la boutique',
     description: 'Logo, couleurs et identité visuelle',
-    href: `/dashboard/store?storeId=${encodeURIComponent(storeId)}`,
+    href: getStoreCustomizationPath(storeId),
   }),
   payments: {
     id: 'payments',
@@ -38,7 +44,7 @@ const BASE_ONBOARDING = {
     id: 'seo',
     title: 'Optimiser le référencement',
     description: 'Meta title, description et URL publique',
-    href: `/dashboard/store?storeId=${encodeURIComponent(storeId)}&tab=seo`,
+    href: getStoreCustomizationPath(storeId, 'seo'),
     optional: true,
   }),
 };
@@ -196,10 +202,10 @@ export function getStoreOnboardingSteps(
       href = productCreatePath;
     }
     if (step.id === 'customize') {
-      href = `/dashboard/store?storeId=${encodeURIComponent(storeId)}`;
+      href = getStoreCustomizationPath(storeId);
     }
     if (step.id === 'seo') {
-      href = `/dashboard/store?storeId=${encodeURIComponent(storeId)}&tab=seo`;
+      href = getStoreCustomizationPath(storeId, 'seo');
     }
     if (step.id === 'subscription' && commerceType === 'physical') {
       href = `/dashboard/onboarding/physical-subscription?storeId=${encodeURIComponent(storeId)}`;
