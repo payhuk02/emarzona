@@ -3,6 +3,10 @@
  */
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from './logger';
+import { extractErrorDetails } from './geniuspay-error-extractor';
+
+/** MoneyFusion API: « Montant doit etre supérieur a 200 F » */
+export const MONEYFUSION_MIN_AMOUNT_XOF = 201;
 
 export interface MoneyFusionCheckoutData {
   amount: number;
@@ -29,6 +33,15 @@ export interface MoneyFusionCheckoutResult {
   _local_transaction_id?: string;
 }
 
+function assertMoneyFusionMinAmount(amount: number, currency?: string): void {
+  const code = (currency || 'XOF').toUpperCase();
+  if ((code === 'XOF' || code === 'XAF') && amount < MONEYFUSION_MIN_AMOUNT_XOF) {
+    throw new Error(
+      `Montant trop bas pour MoneyFusion (minimum ${MONEYFUSION_MIN_AMOUNT_XOF} XOF). Total actuel : ${Math.round(amount)} XOF.`
+    );
+  }
+}
+
 class MoneyFusionClient {
   private async callFunction(action: string, data: object): Promise<unknown> {
     const payload = data as Record<string, unknown>;
@@ -48,14 +61,28 @@ class MoneyFusionClient {
     );
 
     if (error) {
+      const details = await extractErrorDetails(error, error.message);
+      const detail =
+        (typeof details.message === 'string' && details.message) ||
+        (response &&
+        typeof response === 'object' &&
+        'message' in response &&
+        typeof (response as { message?: unknown }).message === 'string'
+          ? String((response as { message: string }).message)
+          : null) ||
+        error.message;
+
       logger.error('[MoneyFusionClient] Edge function error', {
         action,
-        message: error.message,
+        message: detail,
       });
-      const detail =
-        response && typeof response === 'object' && 'message' in response
-          ? String((response as { message?: unknown }).message)
-          : error.message;
+
+      // Éviter le message générique supabase-js
+      if (detail.includes('Edge Function returned') || detail.includes('non-2xx')) {
+        throw new Error(
+          'Le paiement MoneyFusion a été refusé. Vérifiez que le montant est d’au moins 201 XOF.'
+        );
+      }
       throw new Error(detail || 'Erreur MoneyFusion');
     }
 
@@ -73,6 +100,7 @@ class MoneyFusionClient {
   }
 
   async createCheckout(checkoutData: MoneyFusionCheckoutData): Promise<MoneyFusionCheckoutResult> {
+    assertMoneyFusionMinAmount(checkoutData.amount, checkoutData.currency);
     return (await this.callFunction('create_checkout', checkoutData)) as MoneyFusionCheckoutResult;
   }
 

@@ -14,7 +14,8 @@ import type {
   CheckoutUser,
   CheckoutVariant,
 } from '@/pages/checkout/buy-now/checkout-buy-now-types';
-import { ShoppingBag, Loader2, Lock, Tag, Truck, ArrowRight } from 'lucide-react';
+import { ShoppingBag, Loader2, Lock, Tag, Truck, ArrowRight, AlertTriangle } from 'lucide-react';
+import { MONEYFUSION_MIN_AMOUNT_XOF } from '@/lib/moneyfusion-client';
 
 const PRODUCT_TYPE_LABELS: Record<string, string> = {
   digital: 'Produit digital',
@@ -62,6 +63,11 @@ export default function BuyNowOrderSummary({
   const originalPrice = Number(product?.price) || 0;
   const hasPromo = promoPrice && Number(promoPrice) < originalPrice && Number(promoPrice) > 0;
   const savings = hasPromo ? originalPrice - Number(promoPrice) : 0;
+  const totalAmount = Number(displayPrice) || 0;
+  const belowMoneyFusionMin =
+    !isCashOnDelivery &&
+    (currency || 'XOF').toUpperCase() === 'XOF' &&
+    totalAmount < MONEYFUSION_MIN_AMOUNT_XOF;
 
   return (
     <Card className="lg:sticky lg:top-4 rounded-2xl border-border/50 shadow-none sm:shadow-sm overflow-hidden bg-card">
@@ -161,9 +167,19 @@ export default function BuyNowOrderSummary({
         <div className="flex items-baseline justify-between gap-3">
           <span className="font-semibold text-sm sm:text-base text-foreground">Total</span>
           <span className="font-bold text-xl sm:text-2xl tracking-tight tabular-nums text-foreground">
-            {formatPrice(Number(displayPrice) || 0, currency)}
+            {formatPrice(totalAmount, currency)}
           </span>
         </div>
+
+        {belowMoneyFusionMin && (
+          <div className="flex items-start gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-xs sm:text-sm text-amber-900 dark:text-amber-200">
+            <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" aria-hidden="true" />
+            <p className="leading-snug">
+              Montant minimum MoneyFusion : {MONEYFUSION_MIN_AMOUNT_XOF} XOF. Augmentez le prix du
+              produit pour pouvoir payer en ligne.
+            </p>
+          </div>
+        )}
 
         {/* CTA — sticky on mobile at bottom of card flow */}
         <div className="pt-1 sm:pt-0">
@@ -172,7 +188,7 @@ export default function BuyNowOrderSummary({
             form="checkout-form"
             size="lg"
             className="w-full min-h-12 sm:min-h-[50px] text-[15px] sm:text-base font-semibold rounded-xl shadow-sm transition-opacity hover:opacity-95 active:scale-[0.99]"
-            disabled={submitting}
+            disabled={submitting || belowMoneyFusionMin}
           >
             {submitting ? (
               <>

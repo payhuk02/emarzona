@@ -414,6 +414,22 @@ serve(async req => {
       );
     }
 
+    // MoneyFusion refuse les montants ≤ 200 F (XOF/XAF)
+    const currencyUpper = validated.currency.toUpperCase();
+    if (
+      (currencyUpper === 'XOF' || currencyUpper === 'XAF') &&
+      validated.amount <= 200
+    ) {
+      return new Response(
+        JSON.stringify({
+          error: 'Montant trop bas',
+          message:
+            'Le montant minimum pour MoneyFusion est de 201 XOF. Augmentez le prix du produit (le total inclut déjà les frais de service).',
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const authHeader = req.headers.get('Authorization');
     let userId: string | null = null;
     if (authHeader) {
