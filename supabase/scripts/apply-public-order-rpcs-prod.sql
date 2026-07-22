@@ -53,6 +53,27 @@ GRANT EXECUTE ON FUNCTION public.apply_checkout_platform_fee(NUMERIC, TEXT) TO a
 -- ---------------------------------------------------------------------------
 -- 1. DIGITAL
 -- ---------------------------------------------------------------------------
+-- Drop all overloads (idempotent CI / pooler) so GRANT is unambiguous.
+DO $$
+DECLARE
+  r RECORD;
+BEGIN
+  FOR r IN
+    SELECT p.oid::regprocedure AS sig
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname IN (
+        'create_public_digital_order',
+        'create_public_course_order',
+        'create_public_artist_order'
+      )
+  LOOP
+    EXECUTE 'DROP FUNCTION IF EXISTS ' || r.sig || ' CASCADE';
+  END LOOP;
+END;
+$$;
+
 CREATE OR REPLACE FUNCTION public.create_public_digital_order(
   p_product_id UUID,
   p_store_id UUID,
@@ -251,7 +272,9 @@ BEGIN
 END;
 $$;
 
-GRANT EXECUTE ON FUNCTION public.create_public_digital_order TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.create_public_digital_order(
+  UUID, UUID, TEXT, TEXT, TEXT, BOOLEAN, TEXT, INTEGER, INTEGER, UUID, NUMERIC, TEXT, TEXT, BOOLEAN
+) TO anon, authenticated;
 
 -- ---------------------------------------------------------------------------
 -- 2. COURSE
@@ -397,7 +420,9 @@ BEGIN
 END;
 $$;
 
-GRANT EXECUTE ON FUNCTION public.create_public_course_order TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.create_public_course_order(
+  UUID, UUID, TEXT, TEXT, TEXT, UUID, NUMERIC, TEXT, TEXT, BOOLEAN
+) TO anon, authenticated;
 
 -- ---------------------------------------------------------------------------
 -- 3. ARTIST
@@ -498,7 +523,9 @@ BEGIN
 END;
 $$;
 
-GRANT EXECUTE ON FUNCTION public.create_public_artist_order TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.create_public_artist_order(
+  UUID, UUID, TEXT, TEXT, TEXT, UUID, NUMERIC, TEXT, TEXT, BOOLEAN
+) TO anon, authenticated;
 
 -- ---------------------------------------------------------------------------
 -- 4. Hardening RLS : pas d'INSERT orders pour les acheteurs (RPC only)

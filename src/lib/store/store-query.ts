@@ -30,12 +30,14 @@ export const storeQueryKeys = {
   firstForUser: (userId: string) => [...storeQueryKeys.all, userId, '__first__'] as const,
 };
 
-const fetchWithTimeout = async <T>(promise: Promise<T>, ms: number = 8000): Promise<T> => {
+const fetchWithTimeout = async <T>(promise: PromiseLike<T>, ms: number = 8000): Promise<T> => {
   let timeoutId: ReturnType<typeof setTimeout>;
   const timeoutPromise = new Promise<never>((_, reject) => {
     timeoutId = setTimeout(() => reject(new Error('Supabase request timeout')), ms);
   });
-  return Promise.race([promise, timeoutPromise]).finally(() => clearTimeout(timeoutId));
+  return Promise.race([Promise.resolve(promise), timeoutPromise]).finally(() =>
+    clearTimeout(timeoutId)
+  );
 };
 
 export async function fetchStoreById(userId: string, storeId: string): Promise<Store | null> {
