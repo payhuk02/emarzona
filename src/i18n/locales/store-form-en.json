@@ -21,9 +21,9 @@
       "unknownError": "Unknown error",
       "limitReachedTitle": "Limit reached",
       "limitReachedDescription": "Store limit reached for your plan. Upgrade your plan or delete an existing store before creating a new one.",
-      "slugTaken": "This store name is already in use",
-      "slugTakenChooseOther": "This store name is already taken. Please choose another one.",
-      "slugReserved": "The name \"{{slug}}\" is reserved and cannot be used as a store subdomain",
+      "slugTaken": "This store URL is already in use",
+      "slugTakenChooseOther": "This URL is already taken. Edit the URL slug below or change the store name.",
+      "slugReserved": "The name \"{{slug}}\" is reserved or protected and cannot be used as a store URL",
       "createStore": "Create my store",
       "creating": "Creating...",
       "update": "Update",
@@ -77,7 +77,8 @@
       "aboutOptional": "About (optional)",
       "aboutTabHint": "Detailed text that will appear in the \"About\" tab of your store",
       "currencyDefaultHint": "This currency will be used by default for your new products",
-      "newSlug": "New slug: {{slug}}"
+      "newSlug": "New slug: {{slug}}",
+      "nameChangeUrlHint": "The displayed name will update everywhere. The store URL does not change automatically — edit it in the URL tab if needed."
     },
     "infoMessage": {
       "label": "Info message (optional)",
@@ -567,6 +568,7 @@
     "subtitle": "Name, business type, and theme — configure the rest later.",
     "nameRequired": "Store name is required.",
     "urlPreview": "https://{{slug}}.myemarzona.shop",
+    "slugHint": "Auto-generated from the name. Protected words are blocked (api, app, web, whatsapp, police, help…). You can edit it; changing the name regenerates the URL.",
     "themeLabel": "Visual theme",
     "deferHint": "Logo, SEO, legal pages, and analytics can be configured after creation via the activation checklist.",
     "advancedSetup": "Advanced setup (8 steps)"

@@ -1,14 +1,15 @@
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Copy, ExternalLink, Edit, Check, X, Globe, AlertCircle } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Copy, ExternalLink, Edit, Check, X, Globe, AlertCircle } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import { generateStoreUrl } from '@/lib/store-utils';
-import { useDebounce } from "@/hooks/useDebounce";
-import { logger } from "@/lib/logger";
+import { isReservedStoreSlug } from '@/lib/store/reserved-store-slugs';
+import { useDebounce } from '@/hooks/useDebounce';
+import { logger } from '@/lib/logger';
 
 interface StoreSlugEditorProps {
   currentSlug: string;
@@ -17,14 +18,19 @@ interface StoreSlugEditorProps {
   storeId: string;
 }
 
-const StoreSlugEditor = ({ currentSlug, onSlugChange, onCheckAvailability, storeId }: StoreSlugEditorProps) => {
+const StoreSlugEditor = ({
+  currentSlug,
+  onSlugChange,
+  onCheckAvailability,
+  storeId,
+}: StoreSlugEditorProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [newSlug, setNewSlug] = useState(currentSlug);
   const [isChecking, setIsChecking] = useState(false);
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const { toast } = useToast();
-  
+
   // Debounce le slug pour éviter trop d'appels API
   const debouncedSlug = useDebounce(newSlug, 500);
 
@@ -59,12 +65,17 @@ const StoreSlugEditor = ({ currentSlug, onSlugChange, onCheckAvailability, store
       return;
     }
 
+    if (isReservedStoreSlug(slug)) {
+      setIsAvailable(false);
+      return;
+    }
+
     setIsChecking(true);
     try {
       const available = await onCheckAvailability(slug, storeId);
       setIsAvailable(available);
     } catch (error) {
-      logger.error("Error checking slug availability", { error, slug, storeId });
+      logger.error('Error checking slug availability', { error, slug, storeId });
       setIsAvailable(false);
     } finally {
       setIsChecking(false);
@@ -83,16 +94,16 @@ const StoreSlugEditor = ({ currentSlug, onSlugChange, onCheckAvailability, store
       if (success) {
         setIsEditing(false);
         toast({
-          title: "Slug mis à jour",
-          description: "Le lien de votre boutique a été mis à jour avec succès."
+          title: 'Slug mis à jour',
+          description: 'Le lien de votre boutique a été mis à jour avec succès.',
         });
       }
     } catch (error) {
-      logger.error("Error updating slug", { error, newSlug, storeId });
+      logger.error('Error updating slug', { error, newSlug, storeId });
       toast({
-        title: "Erreur",
-        description: "Impossible de mettre à jour le lien de votre boutique.",
-        variant: "destructive"
+        title: 'Erreur',
+        description: 'Impossible de mettre à jour le lien de votre boutique.',
+        variant: 'destructive',
       });
     } finally {
       setIsUpdating(false);
@@ -112,15 +123,15 @@ const StoreSlugEditor = ({ currentSlug, onSlugChange, onCheckAvailability, store
   const handleCopyUrl = () => {
     navigator.clipboard.writeText(getStoreUrl(currentSlug));
     toast({
-      title: "Lien copié !",
-      description: "Le lien de votre boutique a été copié dans le presse-papiers."
+      title: 'Lien copié !',
+      description: 'Le lien de votre boutique a été copié dans le presse-papiers.',
     });
   };
 
   const getAvailabilityStatus = () => {
-    if (isChecking) return { text: "Vérification...", variant: "secondary" as const };
-    if (isAvailable === true) return { text: "Disponible", variant: "default" as const };
-    if (isAvailable === false) return { text: "Indisponible", variant: "destructive" as const };
+    if (isChecking) return { text: 'Vérification...', variant: 'secondary' as const };
+    if (isAvailable === true) return { text: 'Disponible', variant: 'default' as const };
+    if (isAvailable === false) return { text: 'Indisponible', variant: 'destructive' as const };
     return null;
   };
 
@@ -160,7 +171,7 @@ const StoreSlugEditor = ({ currentSlug, onSlugChange, onCheckAvailability, store
                   <Input
                     id="slug-input"
                     value={newSlug}
-                    onChange={(e) => handleSlugChange(e.target.value)}
+                    onChange={e => handleSlugChange(e.target.value)}
                     placeholder="mon-slug-personnalise"
                     disabled={isUpdating}
                   />
@@ -172,7 +183,10 @@ const StoreSlugEditor = ({ currentSlug, onSlugChange, onCheckAvailability, store
                 )}
               </div>
               <div className="text-xs text-muted-foreground">
-                <p>URL complète : <code className="bg-muted px-1 rounded">{getStoreUrl(newSlug)}</code></p>
+                <p>
+                  URL complète :{' '}
+                  <code className="bg-muted px-1 rounded">{getStoreUrl(newSlug)}</code>
+                </p>
                 <p className="mt-1">
                   Le slug ne peut contenir que des lettres minuscules, des chiffres et des tirets.
                 </p>
@@ -198,12 +212,7 @@ const StoreSlugEditor = ({ currentSlug, onSlugChange, onCheckAvailability, store
                   </>
                 )}
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleCancel}
-                disabled={isUpdating}
-              >
+              <Button variant="outline" size="sm" onClick={handleCancel} disabled={isUpdating}>
                 <X className="h-3 w-3 mr-1" />
                 Annuler
               </Button>
@@ -250,7 +259,8 @@ const StoreSlugEditor = ({ currentSlug, onSlugChange, onCheckAvailability, store
                     <li>Utilisez des mots-clés liés à votre activité</li>
                     <li>Évitez les caractères spéciaux et les espaces</li>
                     <li>Gardez-le court et mémorable</li>
-                    <li>Le slug ne peut pas être modifié après la création</li>
+                    <li>Changer le lien met à jour l’URL publique (sous-domaine) de la boutique</li>
+                    <li>Les mots protégés (api, app, web, police…) sont interdits</li>
                   </ul>
                 </div>
               </div>
@@ -263,9 +273,3 @@ const StoreSlugEditor = ({ currentSlug, onSlugChange, onCheckAvailability, store
 };
 
 export default StoreSlugEditor;
-
-
-
-
-
-

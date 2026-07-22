@@ -3,13 +3,17 @@
  * Avec sanitization et messages d'erreur en français
  */
 
+import { RESERVED_STORE_SLUGS } from '@/lib/store/reserved-store-slugs';
+
 // ==================== REGEX PATTERNS ====================
 
 // Email : RFC 5322 simplifié
-const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+const EMAIL_REGEX =
+  /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
 
 // URL : HTTP/HTTPS avec domaine valide
-const URL_REGEX = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/;
+const URL_REGEX =
+  /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/;
 
 // Téléphone international (avec ou sans +)
 const PHONE_REGEX = /^\+?[1-9]\d{1,14}$/;
@@ -73,13 +77,13 @@ export const sanitizeEmail = (email: string): string => {
  * Nettoie une URL
  */
 export const sanitizeURL = (url: string): string => {
-  let  cleaned= url.trim();
-  
+  let cleaned = url.trim();
+
   // Ajouter https:// si pas de protocole
   if (!/^https?:\/\//i.test(cleaned)) {
     cleaned = `https://${cleaned}`;
   }
-  
+
   return cleaned;
 };
 
@@ -119,7 +123,7 @@ export const validateEmail = (
   // Champ vide
   if (!email || !email.trim()) {
     if (required) {
-      return { valid: false, error: 'L\'email est requis' };
+      return { valid: false, error: "L'email est requis" };
     }
     return { valid: true, sanitized: '' };
   }
@@ -128,7 +132,7 @@ export const validateEmail = (
 
   // Format email
   if (!EMAIL_REGEX.test(sanitized)) {
-    return { valid: false, error: 'Format d\'email invalide' };
+    return { valid: false, error: "Format d'email invalide" };
   }
 
   const domain = sanitized.split('@')[1];
@@ -138,7 +142,7 @@ export const validateEmail = (
     if (!allowedDomains.includes(domain)) {
       return {
         valid: false,
-        error: `Seuls les domaines suivants sont autorisés : ${allowedDomains.join(', ')}`
+        error: `Seuls les domaines suivants sont autorisés : ${allowedDomains.join(', ')}`,
       };
     }
   }
@@ -147,7 +151,7 @@ export const validateEmail = (
   if (blockedDomains && blockedDomains.includes(domain)) {
     return {
       valid: false,
-      error: 'Ce domaine email n\'est pas autorisé'
+      error: "Ce domaine email n'est pas autorisé",
     };
   }
 
@@ -157,16 +161,13 @@ export const validateEmail = (
 /**
  * Valide une URL
  */
-export const validateURL = (
-  url: string,
-  options: URLValidationOptions = {}
-): ValidationResult => {
+export const validateURL = (url: string, options: URLValidationOptions = {}): ValidationResult => {
   const { required = false, protocols = ['http', 'https'], allowedDomains } = options;
 
   // Champ vide
   if (!url || !url.trim()) {
     if (required) {
-      return { valid: false, error: 'L\'URL est requise' };
+      return { valid: false, error: "L'URL est requise" };
     }
     return { valid: true, sanitized: '' };
   }
@@ -175,7 +176,7 @@ export const validateURL = (
 
   // Format URL
   if (!URL_REGEX.test(sanitized)) {
-    return { valid: false, error: 'Format d\'URL invalide (ex: https://example.com)' };
+    return { valid: false, error: "Format d'URL invalide (ex: https://example.com)" };
   }
 
   try {
@@ -186,19 +187,19 @@ export const validateURL = (
     if (!protocols.includes(protocol)) {
       return {
         valid: false,
-        error: `Seuls les protocoles ${protocols.join(', ')} sont autorisés`
+        error: `Seuls les protocoles ${protocols.join(', ')} sont autorisés`,
       };
     }
 
     // Domaines autorisés
     if (allowedDomains && allowedDomains.length > 0) {
       const hostname = urlObj.hostname.replace('www.', '');
-      const isAllowed = allowedDomains.some((domain) => hostname.includes(domain));
-      
+      const isAllowed = allowedDomains.some(domain => hostname.includes(domain));
+
       if (!isAllowed) {
         return {
           valid: false,
-          error: `Seuls les domaines ${allowedDomains.join(', ')} sont autorisés`
+          error: `Seuls les domaines ${allowedDomains.join(', ')} sont autorisés`,
         };
       }
     }
@@ -232,18 +233,18 @@ export const validatePhone = (
   if (!PHONE_REGEX.test(sanitized)) {
     return {
       valid: false,
-      error: 'Format de téléphone invalide (ex: +226XXXXXXXX)'
+      error: 'Format de téléphone invalide (ex: +226XXXXXXXX)',
     };
   }
 
   // Indicatifs pays autorisés
   if (countryCodes && countryCodes.length > 0) {
-    const hasValidCode = countryCodes.some((code) => sanitized.startsWith(code));
-    
+    const hasValidCode = countryCodes.some(code => sanitized.startsWith(code));
+
     if (!hasValidCode) {
       return {
         valid: false,
-        error: `Indicatif pays autorisé : ${countryCodes.join(', ')}`
+        error: `Indicatif pays autorisé : ${countryCodes.join(', ')}`,
       };
     }
   }
@@ -262,7 +263,7 @@ export const validateSlug = (
     required = false,
     minLength = 3,
     maxLength = 50,
-    reserved = ['admin', 'api', 'app', 'www', 'mail', 'static', 'assets', 'public']
+    reserved = [...RESERVED_STORE_SLUGS],
   } = options;
 
   // Champ vide
@@ -279,7 +280,7 @@ export const validateSlug = (
   if (sanitized.length < minLength) {
     return {
       valid: false,
-      error: `Le slug doit contenir au moins ${minLength} caractères`
+      error: `Le slug doit contenir au moins ${minLength} caractères`,
     };
   }
 
@@ -287,7 +288,7 @@ export const validateSlug = (
   if (sanitized.length > maxLength) {
     return {
       valid: false,
-      error: `Le slug ne peut pas dépasser ${maxLength} caractères`
+      error: `Le slug ne peut pas dépasser ${maxLength} caractères`,
     };
   }
 
@@ -295,7 +296,7 @@ export const validateSlug = (
   if (!SLUG_REGEX.test(sanitized)) {
     return {
       valid: false,
-      error: 'Le slug ne peut contenir que des lettres minuscules, chiffres et tirets'
+      error: 'Le slug ne peut contenir que des lettres minuscules, chiffres et tirets',
     };
   }
 
@@ -303,7 +304,7 @@ export const validateSlug = (
   if (reserved.includes(sanitized)) {
     return {
       valid: false,
-      error: 'Ce slug est réservé et ne peut pas être utilisé'
+      error: 'Ce slug est réservé et ne peut pas être utilisé',
     };
   }
 
@@ -319,12 +320,12 @@ export const validateSocialURLs = (urls: {
   twitter?: string;
   linkedin?: string;
 }): { valid: boolean; errors: Record<string, string> } => {
-  const  errors: Record<string, string> = {};
+  const errors: Record<string, string> = {};
 
   // Facebook
   if (urls.facebook) {
     const result = validateURL(urls.facebook, {
-      allowedDomains: ['facebook.com', 'fb.com']
+      allowedDomains: ['facebook.com', 'fb.com'],
     });
     if (!result.valid) {
       errors.facebook = result.error || 'URL Facebook invalide';
@@ -334,7 +335,7 @@ export const validateSocialURLs = (urls: {
   // Instagram
   if (urls.instagram) {
     const result = validateURL(urls.instagram, {
-      allowedDomains: ['instagram.com']
+      allowedDomains: ['instagram.com'],
     });
     if (!result.valid) {
       errors.instagram = result.error || 'URL Instagram invalide';
@@ -344,7 +345,7 @@ export const validateSocialURLs = (urls: {
   // Twitter/X
   if (urls.twitter) {
     const result = validateURL(urls.twitter, {
-      allowedDomains: ['twitter.com', 'x.com']
+      allowedDomains: ['twitter.com', 'x.com'],
     });
     if (!result.valid) {
       errors.twitter = result.error || 'URL Twitter invalide';
@@ -354,7 +355,7 @@ export const validateSocialURLs = (urls: {
   // LinkedIn
   if (urls.linkedin) {
     const result = validateURL(urls.linkedin, {
-      allowedDomains: ['linkedin.com']
+      allowedDomains: ['linkedin.com'],
     });
     if (!result.valid) {
       errors.linkedin = result.error || 'URL LinkedIn invalide';
@@ -363,7 +364,7 @@ export const validateSocialURLs = (urls: {
 
   return {
     valid: Object.keys(errors).length === 0,
-    errors
+    errors,
   };
 };
 
@@ -393,7 +394,7 @@ export interface StoreFormData {
 export const validateStoreForm = (
   data: StoreFormData
 ): { valid: boolean; errors: Record<string, string> } => {
-  const  errors: Record<string, string> = {};
+  const errors: Record<string, string> = {};
 
   // Nom requis
   if (!data.name || !data.name.trim()) {
@@ -411,7 +412,7 @@ export const validateStoreForm = (
   // Téléphone
   if (data.contact_phone) {
     const phoneResult = validatePhone(data.contact_phone, {
-      countryCodes: ['+226', '+33', '+1', '+221', '+237', '+226', '+223']
+      countryCodes: ['+226', '+33', '+1', '+221', '+237', '+226', '+223'],
     });
     if (!phoneResult.valid) {
       errors.contact_phone = phoneResult.error || 'Téléphone invalide';
@@ -423,7 +424,7 @@ export const validateStoreForm = (
     facebook: data.facebook_url,
     instagram: data.instagram_url,
     twitter: data.twitter_url,
-    linkedin: data.linkedin_url
+    linkedin: data.linkedin_url,
   });
 
   if (!socialResult.valid) {
@@ -432,13 +433,6 @@ export const validateStoreForm = (
 
   return {
     valid: Object.keys(errors).length === 0,
-    errors
+    errors,
   };
 };
-
-
-
-
-
-
-

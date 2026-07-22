@@ -254,22 +254,9 @@ export const useStore = () => {
       const sanitizedUpdates = sanitizeStorePayload(updates as Record<string, unknown>);
       const updateData: Record<string, unknown> = { ...sanitizedUpdates };
 
-      // Si le nom change, regénérer le slug
-      if (updates.name && updates.name !== store.name) {
-        const newSlug = generateSlug(updates.name);
-        const isAvailable = await checkSlugAvailability(newSlug, store.id);
-
-        if (!isAvailable) {
-          toast({
-            title: 'Nom indisponible',
-            description: 'Ce nom de boutique est déjà utilisé.',
-            variant: 'destructive',
-          });
-          return false;
-        }
-
-        updateData.slug = newSlug;
-      }
+      // Ne jamais régénérer le slug depuis le nom à l'édition :
+      // le lien boutique se change uniquement via le champ slug / onglet URL.
+      // (Sinon le subdomain resterait désynchronisé et les URLs cassées.)
 
       const { error } = await supabase
         .from('stores')
@@ -283,6 +270,10 @@ export const useStore = () => {
           queryKey: storeQueryKeys.detail(user.id, store.id),
         });
       }
+      await queryClient.invalidateQueries({ queryKey: ['stores'] });
+      await queryClient.invalidateQueries({
+        queryKey: ['store-customization-detail', store.id],
+      });
       toast({
         title: 'Boutique mise à jour',
         description: 'Les modifications ont été enregistrées.',

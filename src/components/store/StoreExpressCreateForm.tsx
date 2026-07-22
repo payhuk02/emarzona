@@ -40,6 +40,7 @@ import {
 import { getRecommendedThemeTemplates, type StoreThemeTemplate } from '@/lib/store-theme-templates';
 import { isStoreSlugAvailable } from '@/lib/store/create-store-service';
 import { normalizeExpressSlugPreview } from '@/lib/store/store-express-create-schema';
+import { generateSlug } from '@/lib/store-utils';
 import { isSubdomainReserved } from '@/lib/subdomain-detector';
 import { cn } from '@/lib/utils';
 
@@ -68,11 +69,13 @@ export function StoreExpressCreateForm({
   const { trackEvent } = useAnalytics();
 
   const [name, setName] = useState('');
+  const [slug, setSlug] = useState('');
   const [commerceType, setCommerceType] = useState<StoreCommerceType>('physical');
   const [themeTemplateId, setThemeTemplateId] = useState<string | undefined>(undefined);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCheckingSlug, setIsCheckingSlug] = useState(false);
   const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null);
+  const [slugReserved, setSlugReserved] = useState(false);
 
   const quotaBlocked = storeQuota != null && !storeQuota.can_create;
   const quotaHint = useMemo(() => {
@@ -93,32 +96,45 @@ export function StoreExpressCreateForm({
     });
   }, [storeQuota, t]);
 
-  const slugPreview = useMemo(() => normalizeExpressSlugPreview(name), [name]);
   const verticalProfile = useMemo(() => getStoreVerticalProfile(commerceType), [commerceType]);
   const recommendedTemplates = useMemo(
     () => getRecommendedThemeTemplates(commerceType).slice(0, 3),
     [commerceType]
   );
 
+  const handleNameChange = useCallback((value: string) => {
+    setName(value);
+    // Modifier le nom régénère toujours le lien boutique (modifiable ensuite).
+    setSlug(normalizeExpressSlugPreview(value));
+  }, []);
+
+  const handleSlugChange = useCallback((value: string) => {
+    setSlug(generateSlug(value));
+  }, []);
+
   useEffect(() => {
     setThemeTemplateId(verticalProfile.defaultThemeTemplateId);
   }, [commerceType, verticalProfile.defaultThemeTemplateId]);
 
   useEffect(() => {
-    if (!slugPreview || slugPreview.length < 2) {
+    if (!slug || slug.length < 2) {
       setSlugAvailable(null);
+      setSlugReserved(false);
       return;
     }
 
-    if (isSubdomainReserved(slugPreview)) {
+    if (isSubdomainReserved(slug)) {
       setSlugAvailable(false);
+      setSlugReserved(true);
       return;
     }
+
+    setSlugReserved(false);
 
     const timer = window.setTimeout(async () => {
       setIsCheckingSlug(true);
       try {
-        const available = await isStoreSlugAvailable(slugPreview);
+        const available = await isStoreSlugAvailable(slug);
         setSlugAvailable(available);
       } catch {
         setSlugAvailable(null);
@@ -128,7 +144,7 @@ export function StoreExpressCreateForm({
     }, 400);
 
     return () => window.clearTimeout(timer);
-  }, [slugPreview]);
+  }, [slug]);
 
   const handleSubmit = useCallback(
     async (event: React.FormEvent) => {
@@ -162,7 +178,9 @@ export function StoreExpressCreateForm({
       if (slugAvailable === false) {
         toast({
           title: t('store.form.common.error'),
-          description: t('store.form.common.slugTakenChooseOther'),
+          description: slugReserved
+            ? t('store.form.common.slugReserved', { slug })
+            : t('store.form.common.slugTakenChooseOther'),
           variant: 'destructive',
         });
         return;
@@ -175,6 +193,7 @@ export function StoreExpressCreateForm({
         const createdStore = await createStore(
           {
             name: trimmedName,
+            slug: slug.trim() || undefined,
             commerce_type: commerceType,
           },
           {
@@ -228,7 +247,9 @@ export function StoreExpressCreateForm({
       navigate,
       onSuccess,
       refreshStores,
+      slug,
       slugAvailable,
+      slugReserved,
       storeQuota,
       t,
       themeTemplateId,
@@ -240,7 +261,7 @@ export function StoreExpressCreateForm({
 
   const canSubmit =
     name.trim().length > 0 &&
-    slugPreview.length >= 2 &&
+    slug.length >= 2 &&
     slugAvailable !== false &&
     !isSubmitting &&
     !isCheckingSlug &&
@@ -268,27 +289,52 @@ export function StoreExpressCreateForm({
               id="express-store-name"
               data-testid="store-express-name"
               value={name}
-              onChange={e => setName(e.target.value)}
+              onChange={e => handleNameChange(e.target.value)}
               placeholder={t('store.form.basicInfo.namePlaceholder')}
               autoComplete="organization"
               maxLength={100}
               disabled={isSubmitting}
             />
-            {slugPreview.length >= 2 && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span>{t('store.express.urlPreview', { slug: slugPreview })}</span>
-                {isCheckingSlug && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                {!isCheckingSlug && slugAvailable === true && (
-                  <CheckCircle2 className="h-3.5 w-3.5 text-green-600" aria-hidden />
-                )}
-                {!isCheckingSlug && slugAvailable === false && (
-                  <XCircle className="h-3.5 w-3.5 text-destructive" aria-hidden />
-                )}
-              </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="express-store-slug">
+              {t('store.form.basicInfo.urlSlug')}
+              {isCheckingSlug && (
+                <Loader2 className="inline-block ml-2 h-3.5 w-3.5 animate-spin" aria-hidden />
+              )}
+              {!isCheckingSlug && slugAvailable === true && slug.length >= 2 && (
+                <CheckCircle2
+                  className="inline-block ml-2 h-3.5 w-3.5 text-green-600"
+                  aria-hidden
+                />
+              )}
+              {!isCheckingSlug && slugAvailable === false && (
+                <XCircle className="inline-block ml-2 h-3.5 w-3.5 text-destructive" aria-hidden />
+              )}
+            </Label>
+            <Input
+              id="express-store-slug"
+              data-testid="store-express-slug"
+              value={slug}
+              onChange={e => handleSlugChange(e.target.value)}
+              placeholder={t('store.form.basicInfo.urlSlugPlaceholder')}
+              autoComplete="off"
+              maxLength={63}
+              disabled={isSubmitting}
+              aria-describedby="express-store-slug-hint"
+            />
+            {slug.length >= 2 && (
+              <p id="express-store-slug-hint" className="text-sm text-muted-foreground">
+                {t('store.express.urlPreview', { slug })}
+              </p>
             )}
+            <p className="text-xs text-muted-foreground">{t('store.express.slugHint')}</p>
             {slugAvailable === false && (
               <p className="text-sm text-destructive">
-                {t('store.form.common.slugTakenChooseOther')}
+                {slugReserved
+                  ? t('store.form.common.slugReserved', { slug })
+                  : t('store.form.common.slugTakenChooseOther')}
               </p>
             )}
           </div>

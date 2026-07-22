@@ -565,6 +565,9 @@ export function useStoreFormState(store: ExtendedStore) {
         const updates = sanitizeStorePayload(buildUpdatePayload());
         await updateStoreById({ storeId: store.id, updates });
         await refreshStores().catch(() => {});
+        await queryClient.invalidateQueries({
+          queryKey: ['store-customization-detail', store.id],
+        });
 
         setIsEditing(false);
         setFieldTouched({});
@@ -642,11 +645,18 @@ export function useStoreFormState(store: ExtendedStore) {
 
   const handleSlugUpdate = useCallback(
     async (newSlug: string): Promise<boolean> => {
-      return await updateStoreById({ storeId: store.id, updates: { slug: newSlug } })
-        .then(() => true)
-        .catch(() => false);
+      try {
+        await updateStoreById({ storeId: store.id, updates: { slug: newSlug } });
+        await queryClient.invalidateQueries({
+          queryKey: ['store-customization-detail', store.id],
+        });
+        await refreshStores();
+        return true;
+      } catch {
+        return false;
+      }
     },
-    [updateStoreById, store.id]
+    [updateStoreById, store.id, queryClient, refreshStores]
   );
 
   const dispatchFieldChange = useCallback((field: string, value: string | number | boolean) => {

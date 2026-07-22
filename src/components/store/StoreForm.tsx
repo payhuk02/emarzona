@@ -421,13 +421,16 @@ const StoreForm = ({
   const handleNameChange = useCallback(
     (value: string) => {
       setName(value);
-      const generatedSlug = generateSlug(value);
-      setSlug(generatedSlug);
-      if (generatedSlug) {
-        checkSlugAvailability(generatedSlug);
+      // En création uniquement : le lien suit le nom (modifiable ensuite dans le champ slug).
+      if (!isEditing) {
+        const generatedSlug = generateSlug(value);
+        setSlug(generatedSlug);
+        if (generatedSlug) {
+          checkSlugAvailability(generatedSlug);
+        }
       }
     },
-    [checkSlugAvailability]
+    [checkSlugAvailability, isEditing]
   );
 
   const handleSlugChange = useCallback(

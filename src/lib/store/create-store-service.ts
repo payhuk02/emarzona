@@ -5,7 +5,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { STORE_COMMERCE_TYPES, type StoreCommerceType } from '@/constants/store-commerce-types';
 import { generateSlug } from '@/lib/store-utils';
-import { isSubdomainReserved } from '@/lib/subdomain-detector';
+import { isReservedStoreSlug } from '@/lib/store/reserved-store-slugs';
 import { validateStoreCreate } from '@/lib/store-validation';
 import { z } from 'zod';
 
@@ -53,7 +53,7 @@ export async function isStoreSlugAvailable(
     return false;
   }
 
-  if (isSubdomainReserved(cleanSlug)) {
+  if (isReservedStoreSlug(cleanSlug)) {
     return false;
   }
 

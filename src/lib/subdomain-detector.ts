@@ -7,6 +7,8 @@
  * Date: 1 Février 2025
  */
 
+import { RESERVED_STORE_SLUGS, isReservedStoreSlug } from '@/lib/store/reserved-store-slugs';
+
 export interface SubdomainInfo {
   subdomain: string | null;
   baseDomain: string;
@@ -17,6 +19,12 @@ export interface SubdomainInfo {
   isCustomDomain: boolean; // true si on est sur un domaine personnalisé
   customDomain: string | null; // le domaine personnalisé complet
 }
+
+/**
+ * Sous-domaines réservés qui ne doivent pas être utilisés comme boutiques.
+ * Source de vérité partagée : `reserved-store-slugs.ts` (+ SQL `is_slug_reserved`).
+ */
+export const RESERVED_SUBDOMAINS = [...RESERVED_STORE_SLUGS];
 
 /**
  * Domaines de base configurés
@@ -35,94 +43,6 @@ const PLATFORM_DOMAINS = [
 
 const STORE_DOMAINS = [
   'myemarzona.shop', // Domaine dédié aux boutiques des utilisateurs
-];
-
-/**
- * Sous-domaines réservés qui ne doivent pas être utilisés comme boutiques
- */
-export const RESERVED_SUBDOMAINS = [
-  'www',
-  'admin',
-  'api',
-  'app',
-  'support',
-  'help',
-  'my',
-  'mail',
-  'ftp',
-  'smtp',
-  'pop',
-  'imap',
-  'blog',
-  'shop',
-  'store',
-  'marketplace',
-  'dashboard',
-  'account',
-  'accounts',
-  'auth',
-  'login',
-  'signup',
-  'register',
-  'password',
-  'reset',
-  'verify',
-  'confirm',
-  'settings',
-  'profile',
-  'billing',
-  'payment',
-  'checkout',
-  'cart',
-  'order',
-  'orders',
-  'product',
-  'products',
-  'category',
-  'categories',
-  'search',
-  'filter',
-  'filters',
-  'about',
-  'contact',
-  'terms',
-  'privacy',
-  'legal',
-  'faq',
-  'docs',
-  'documentation',
-  'status',
-  'health',
-  'ping',
-  'test',
-  'staging',
-  'dev',
-  'cdn',
-  'assets',
-  'static',
-  'media',
-  'images',
-  'files',
-  'api-docs',
-  'swagger',
-  'graphql',
-  'webhook',
-  'webhooks',
-  'admin-panel',
-  'cpanel',
-  'phpmyadmin',
-  'wp-admin',
-  'email',
-  'mx',
-  'ns1',
-  'ns2',
-  'dns',
-  'domain',
-  'subdomain',
-  'wildcard',
-  'catch-all',
-  'default',
-  'fallback',
 ];
 
 /**
@@ -280,7 +200,7 @@ export function detectSubdomain(): SubdomainInfo {
  * Vérifie si un sous-domaine est réservé
  */
 export function isSubdomainReserved(subdomain: string): boolean {
-  return RESERVED_SUBDOMAINS.includes(subdomain.toLowerCase().trim());
+  return isReservedStoreSlug(subdomain);
 }
 
 /**

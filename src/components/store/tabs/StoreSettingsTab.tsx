@@ -152,13 +152,7 @@ export const StoreSettingsTab = ({
                 />
                 {name !== store.name && (
                   <p className="text-xs text-muted-foreground">
-                    {t('store.form.basicInfo.newSlug', {
-                      slug: name
-                        .toLowerCase()
-                        .trim()
-                        .replace(/[^a-z0-9\s-]/g, '')
-                        .replace(/\s+/g, '-'),
-                    })}
+                    {t('store.form.basicInfo.nameChangeUrlHint')}
                   </p>
                 )}
               </div>

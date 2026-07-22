@@ -25,6 +25,7 @@ import {
   type CreateStoreOptions,
 } from '@/lib/store/store-express-create-schema';
 import { toUserErrorMessage } from '@/lib/user-error-message';
+import { storeQueryKeys } from '@/lib/store/store-query';
 
 type StoreInsert = Database['public']['Tables']['stores']['Insert'];
 type StoreUpdate = Database['public']['Tables']['stores']['Update'];
@@ -513,7 +514,7 @@ export const useStores = () => {
       // Fetch the updated store data separately
       const { data: updatedData } = await supabase
         .from('stores')
-        .select('id, name, slug')
+        .select('id, name, slug, subdomain')
         .eq('id', storeId)
         .single();
 
@@ -521,6 +522,12 @@ export const useStores = () => {
     },
     onSuccess: updatedStore => {
       queryClient.invalidateQueries({ queryKey: ['stores'] });
+      if (updatedStore?.id) {
+        queryClient.invalidateQueries({
+          queryKey: ['store-customization-detail', updatedStore.id],
+        });
+        queryClient.invalidateQueries({ queryKey: storeQueryKeys.all });
+      }
       toast({
         title: 'Boutique mise à jour',
         description: `La boutique "${updatedStore.name}" a été mise à jour`,
