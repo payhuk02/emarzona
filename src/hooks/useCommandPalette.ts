@@ -1,5 +1,7 @@
 /**
- * État Cmd+K — léger, sans importer la config navigation (chunk CommandPalette différé).
+ * État Cmd+K — léger.
+ * Le raccourci clavier est géré uniquement par SidebarNavCommandPalette (capture).
+ * Ce hook sert aux surfaces qui ouvrent la palette via event / état local.
  */
 
 import { useEffect, useState } from 'react';
@@ -9,20 +11,9 @@ export function useCommandPalette() {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        setOpen(prev => !prev);
-      }
-    };
-
     const handleOpenEvent = () => setOpen(true);
-
-    document.addEventListener('keydown', handleKeyDown);
     window.addEventListener(OPEN_COMMAND_PALETTE_EVENT, handleOpenEvent);
-
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener(OPEN_COMMAND_PALETTE_EVENT, handleOpenEvent);
     };
   }, []);

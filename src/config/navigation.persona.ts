@@ -41,17 +41,23 @@ function isSellerZone(pathname: string): boolean {
   );
 }
 
-function isBuyerZone(pathname: string): boolean {
-  return pathname.startsWith('/account') || isBuyerDiscoveryPath(pathname);
-}
-
 export function resolveNavPersona(
   pathname: string,
   isAdmin: boolean,
   pinnedPersona: SidebarPersona | null = null
 ): SidebarPersona {
   if (pathname.startsWith('/admin') && isAdmin) return 'admin';
-  if (isBuyerZone(pathname)) return 'buyer';
+
+  // Compte acheteur reste exclusif buyer (pin vendeur n'y change rien).
+  if (pathname.startsWith('/account')) return 'buyer';
+
+  // Marketplace / découverte : garder le chrome Vendre si l'utilisateur a épinglé seller
+  // (lien Marketplace du rail vendeur ne doit plus forcer Acheter).
+  if (isBuyerDiscoveryPath(pathname)) {
+    if (pinnedPersona === 'seller') return 'seller';
+    return 'buyer';
+  }
+
   if (isSellerZone(pathname)) return 'seller';
 
   if (pinnedPersona === 'admin')

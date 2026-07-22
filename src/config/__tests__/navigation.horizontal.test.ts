@@ -51,12 +51,15 @@ describe('navigation.horizontal visibility', () => {
   it('resolves persona from pathname', () => {
     expect(resolveHorizontalNavPersona('/account/digital')).toBe('buyer');
     expect(resolveHorizontalNavPersona('/dashboard/orders')).toBe('seller');
-    expect(resolveHorizontalNavPersona('/marketplace')).toBe('buyer');
-    expect(resolveHorizontalNavPersona('/recommendations')).toBe('buyer');
+    // default preferredPersona is seller → marketplace keeps seller chrome
+    expect(resolveHorizontalNavPersona('/marketplace')).toBe('seller');
+    expect(resolveHorizontalNavPersona('/marketplace', 'buyer')).toBe('buyer');
+    expect(resolveHorizontalNavPersona('/recommendations', 'buyer')).toBe('buyer');
   });
 
-  it('path zones override pinned persona', () => {
-    expect(resolveHorizontalNavPersona('/marketplace', 'seller')).toBe('buyer');
+  it('keeps seller chrome on marketplace when seller is pinned', () => {
+    expect(resolveHorizontalNavPersona('/marketplace', 'seller')).toBe('seller');
+    expect(resolveHorizontalNavPersona('/auctions', 'seller')).toBe('seller');
     expect(resolveHorizontalNavPersona('/dashboard', 'buyer')).toBe('seller');
     expect(resolveHorizontalNavPersona('/account/orders', 'seller')).toBe('buyer');
   });

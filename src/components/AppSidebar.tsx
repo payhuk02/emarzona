@@ -206,7 +206,7 @@ export function AppSidebar() {
       },
       {
         title: t('command.inventory', 'Inventaire'),
-        url: '/dashboard/physical/inventory',
+        url: '/dashboard/inventory',
         icon: Package,
         sectionLabel: t('command.quickActions', 'Actions rapides'),
       },
@@ -267,7 +267,7 @@ export function AppSidebar() {
         commerceType
       )
     );
-  }, [prefsHydrated, activeSections, location.pathname, location.search, userId]);
+  }, [prefsHydrated, activeSections, location.pathname, location.search, commerceType, userId]);
 
   useEffect(() => {
     if (!prefsHydrated) return;
@@ -277,13 +277,13 @@ export function AppSidebar() {
 
   useEffect(() => {
     const activeKey = activeSections.find(s =>
-      sectionContainsPath(s, location.pathname, location.search)
+      sectionContainsPath(s, location.pathname, location.search, commerceType)
     )?.sectionKey;
     if (!activeKey) return;
     setCollapsedSections(prev =>
       prev.includes(activeKey) ? prev.filter(k => k !== activeKey) : prev
     );
-  }, [location.pathname, location.search, activeSections]);
+  }, [location.pathname, location.search, activeSections, commerceType]);
 
   useEffect(() => {
     if (!prefsHydrated) return;
@@ -324,6 +324,7 @@ export function AppSidebar() {
         quickActions={vendorQuickActions}
         open={commandOpen}
         onOpenChange={setCommandOpen}
+        commerceType={commerceType}
       />
 
       {/* En-tête compact : logo + palette */}
@@ -407,6 +408,12 @@ export function AppSidebar() {
                 label={section.label}
                 isOpen={isCollapsed || !collapsedSections.includes(section.sectionKey)}
                 onToggle={() => toggleSectionCollapse(section.sectionKey)}
+                containsActiveRoute={sectionContainsPath(
+                  section,
+                  location.pathname,
+                  location.search,
+                  commerceType
+                )}
                 hideHeader={isCollapsed}
               >
                 <SidebarGroupContent>
@@ -658,6 +665,11 @@ export function AppSidebar() {
                 label={section.label}
                 isOpen={isCollapsed || !collapsedSections.includes(section.sectionKey)}
                 onToggle={() => toggleSectionCollapse(section.sectionKey)}
+                containsActiveRoute={sectionContainsPath(
+                  section,
+                  location.pathname,
+                  location.search
+                )}
                 hideHeader={isCollapsed}
               >
                 <SidebarGroupContent>

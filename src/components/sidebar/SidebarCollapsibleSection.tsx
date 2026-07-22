@@ -9,6 +9,8 @@ interface SidebarCollapsibleSectionProps {
   label: string;
   isOpen: boolean;
   onToggle: () => void;
+  /** True when a child route is active — drives the blue accent bar (not mere expanded). */
+  containsActiveRoute?: boolean;
   /** Mode rail icône : masquer l'en-tête accordéon */
   hideHeader?: boolean;
   children: ReactNode;
@@ -20,6 +22,7 @@ export function SidebarCollapsibleSection({
   label,
   isOpen,
   onToggle,
+  containsActiveRoute = false,
   hideHeader = false,
   children,
   className,
@@ -35,6 +38,7 @@ export function SidebarCollapsibleSection({
             className="app-sidebar-section-header w-full flex items-center justify-between gap-2 rounded-md px-2 py-2 text-left transition-colors duration-200"
             aria-expanded={isOpen}
             aria-controls={panelId}
+            data-active={containsActiveRoute ? 'true' : undefined}
           >
             <span className="text-[10px] uppercase tracking-[0.14em] font-bold text-muted-foreground">
               {label}

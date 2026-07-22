@@ -1,7 +1,7 @@
 /**
  * AppPageShell — shell dashboard unifié
  * AppSidebar compact + barre horizontale contextuelle (mega-menu) + UtilityBar + main
- * Enterprise-grade avec CommandPalette intégrée
+ * Ctrl+K : palette gated dans AppSidebar (SidebarNavCommandPalette) — pas de double palette.
  */
 
 import { lazy, ReactNode, Suspense, useEffect } from 'react';
@@ -14,14 +14,7 @@ import { shouldShowHorizontalNav } from '@/config/navigation.horizontal';
 import { detectLayoutType } from '@/config/layoutTypeDetection';
 import type { LayoutType } from '@/components/layout/layout.types';
 import { cn } from '@/lib/utils';
-import { useCommandPalette } from '@/hooks/useCommandPalette';
 import { useDeferHorizontalContextNav } from '@/hooks/useDeferHorizontalContextNav';
-
-const CommandPalette = lazy(() =>
-  import('@/components/navigation/CommandPalette').then(m => ({
-    default: m.CommandPalette,
-  }))
-);
 
 const HorizontalContextNav = lazy(() =>
   import('@/components/layout/HorizontalContextNav').then(m => ({
@@ -63,12 +56,10 @@ export function AppPageShell({
   void (layoutType ?? detectLayoutType(location.pathname));
   const showHorizontalNav = shouldShowHorizontalNav(location.pathname);
   const showDeferredHorizontalNav = useDeferHorizontalContextNav(location.pathname);
-  const { open, setOpen } = useCommandPalette();
 
   // Prefetch chunks non critiques pendant l'idle
   useEffect(() => {
     const prefetch = () => {
-      void import('@/components/navigation/CommandPalette');
       if (showHorizontalNav) {
         void import('@/components/layout/HorizontalContextNav');
       }
@@ -83,11 +74,6 @@ export function AppPageShell({
 
   return (
     <SidebarProvider>
-      {open && (
-        <Suspense fallback={null}>
-          <CommandPalette open={open} onOpenChange={setOpen} />
-        </Suspense>
-      )}
       <div
         className={cn('flex min-h-screen w-full bg-background overflow-x-hidden', shellClassName)}
       >

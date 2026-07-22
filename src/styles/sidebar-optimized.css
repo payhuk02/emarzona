@@ -182,13 +182,17 @@
   border-left: 2px solid transparent;
 }
 
-[data-sidebar='sidebar'] .app-sidebar-section-header:hover,
-[data-sidebar='sidebar'] .app-sidebar-section-header[aria-expanded='true'] {
+[data-sidebar='sidebar'] .app-sidebar-section-header:hover {
+  background: hsl(var(--sidebar-accent));
+}
+
+/* Accent blue only when the section contains the active route — not merely expanded */
+[data-sidebar='sidebar'] .app-sidebar-section-header[data-active='true'] {
   border-left-color: hsl(var(--sidebar-primary));
   background: hsl(var(--sidebar-accent));
 }
 
-[data-sidebar='sidebar'] .app-sidebar-section-header[aria-expanded='true'] span {
+[data-sidebar='sidebar'] .app-sidebar-section-header[data-active='true'] span {
   color: hsl(var(--sidebar-foreground));
 }
 

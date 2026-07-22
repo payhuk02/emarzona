@@ -6,11 +6,20 @@ import {
 } from '@/config/navigation.persona';
 
 describe('resolveNavPersona', () => {
-  it('buyer/seller/admin zones follow path over pin', () => {
-    expect(resolveNavPersona('/marketplace', false, 'seller')).toBe('buyer');
+  it('keeps seller chrome on marketplace when seller is pinned', () => {
+    expect(resolveNavPersona('/marketplace', false, 'seller')).toBe('seller');
+    expect(resolveNavPersona('/auctions', false, 'seller')).toBe('seller');
+  });
+
+  it('forces buyer on account; seller zone overrides buyer pin', () => {
     expect(resolveNavPersona('/account', false, 'seller')).toBe('buyer');
     expect(resolveNavPersona('/dashboard', false, 'buyer')).toBe('seller');
     expect(resolveNavPersona('/admin', true, 'buyer')).toBe('admin');
+  });
+
+  it('discovery without seller pin defaults to buyer', () => {
+    expect(resolveNavPersona('/marketplace', false, null)).toBe('buyer');
+    expect(resolveNavPersona('/marketplace', false, 'buyer')).toBe('buyer');
   });
 
   it('shared routes use pin when present', () => {
