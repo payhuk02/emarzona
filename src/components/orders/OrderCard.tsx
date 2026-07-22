@@ -211,8 +211,11 @@ const OrderCardComponent = ({ order, onUpdate, storeId }: OrderCardProps) => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="pending">En attente</SelectItem>
+                  <SelectItem value="cod_pending">Paiement à la livraison</SelectItem>
                   <SelectItem value="paid">Payée</SelectItem>
+                  <SelectItem value="partially_refunded">Partiellement remboursée</SelectItem>
                   <SelectItem value="failed">Échouée</SelectItem>
+                  <SelectItem value="completed">Terminé</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -227,7 +230,9 @@ const OrderCardComponent = ({ order, onUpdate, storeId }: OrderCardProps) => {
                 <SelectContent>
                   <SelectItem value="pending">En attente</SelectItem>
                   <SelectItem value="processing">En cours</SelectItem>
+                  <SelectItem value="confirmed">Confirmée</SelectItem>
                   <SelectItem value="completed">Terminée</SelectItem>
+                  <SelectItem value="delivered">Livrée</SelectItem>
                   <SelectItem value="cancelled">Annulée</SelectItem>
                 </SelectContent>
               </Select>

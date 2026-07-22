@@ -15,6 +15,10 @@ import {
 } from '@/lib/dashboard/fetch-dashboard-stats-rpc';
 import { fetchWebMetricsFromRpc, ZERO_WEB_METRICS } from '@/lib/dashboard/fetch-web-metrics';
 import { transformOptimizedData } from '@/services/dashboardStatsTransform';
+import {
+  isOrderEligibleForRevenue,
+  orderNetRevenueAmount,
+} from '@/lib/orders/order-revenue-eligibility';
 
 export type { DashboardStats, UseDashboardStatsOptions } from '@/types/dashboard-stats';
 import type {
@@ -147,7 +151,9 @@ async function fetchOperationalCounts(storeId: string): Promise<DashboardOperati
 type OrderRow = {
   id: string;
   status: string;
+  payment_status: string | null;
   total_amount: number | null;
+  refunded_amount: number | null;
   created_at: string;
   customer_id: string | null;
   order_number: string | null;
@@ -361,7 +367,7 @@ async function fetchDashboardStatsFromTables(
     supabase
       .from('orders')
       .select(
-        'id, status, total_amount, created_at, customer_id, order_number, customers(name, email)'
+        'id, status, payment_status, total_amount, refunded_amount, created_at, customer_id, order_number, customers(name, email)'
       )
       .eq('store_id', storeId)
       .gte('created_at', compareStart.toISOString())
@@ -393,11 +399,21 @@ async function fetchDashboardStatsFromTables(
       !isInRange(o.created_at, range.start, range.end)
   );
 
-  const completedInPeriod = periodOrders.filter(o => o.status === 'completed');
-  const completedPrevious = previousOrders.filter(o => o.status === 'completed');
+  const completedInPeriod = periodOrders.filter(o =>
+    isOrderEligibleForRevenue(o.status, o.payment_status)
+  );
+  const completedPrevious = previousOrders.filter(o =>
+    isOrderEligibleForRevenue(o.status, o.payment_status)
+  );
 
-  const periodRevenue = completedInPeriod.reduce((s, o) => s + (o.total_amount || 0), 0);
-  const previousRevenue = completedPrevious.reduce((s, o) => s + (o.total_amount || 0), 0);
+  const periodRevenue = completedInPeriod.reduce(
+    (s, o) => s + orderNetRevenueAmount(o.total_amount, o.refunded_amount),
+    0
+  );
+  const previousRevenue = completedPrevious.reduce(
+    (s, o) => s + orderNetRevenueAmount(o.total_amount, o.refunded_amount),
+    0
+  );
 
   const newCustomersInPeriod = customers.filter(c =>
     isInRange(c.created_at, range.start, range.end)

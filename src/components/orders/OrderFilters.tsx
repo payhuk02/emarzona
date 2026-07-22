@@ -58,7 +58,9 @@ const OrderFiltersComponent = ({
             <SelectItem value="all">Tous les statuts</SelectItem>
             <SelectItem value="pending">En attente</SelectItem>
             <SelectItem value="processing">En cours</SelectItem>
+            <SelectItem value="confirmed">Confirmée</SelectItem>
             <SelectItem value="completed">Terminée</SelectItem>
+            <SelectItem value="delivered">Livrée</SelectItem>
             <SelectItem value="cancelled">Annulée</SelectItem>
           </SelectContent>
         </Select>
@@ -70,8 +72,11 @@ const OrderFiltersComponent = ({
           <SelectContent>
             <SelectItem value="all">Tous les paiements</SelectItem>
             <SelectItem value="pending">En attente</SelectItem>
+            <SelectItem value="cod_pending">Paiement à la livraison</SelectItem>
             <SelectItem value="paid">Payée</SelectItem>
+            <SelectItem value="partially_refunded">Partiellement remboursée</SelectItem>
             <SelectItem value="failed">Échouée</SelectItem>
+            <SelectItem value="completed">Terminé</SelectItem>
           </SelectContent>
         </Select>
       </div>

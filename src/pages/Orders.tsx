@@ -47,6 +47,10 @@ import { SellerPushOptInBanner } from '@/components/notifications/SellerPushOptI
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useDebounce } from '@/hooks/useDebounce';
 import {
+  isOrderEligibleForRevenue,
+  orderNetRevenueAmount,
+} from '@/lib/orders/order-revenue-eligibility';
+import {
   Sheet,
   SheetContent,
   SheetDescription,
@@ -99,16 +103,21 @@ const Orders = () => {
   const filtersRef = useScrollAnimation<HTMLDivElement>();
   const ordersRef = useScrollAnimation<HTMLDivElement>();
 
-  // Calculate statistics
+  // Calculate statistics — revenu aligné wallet (is_order_eligible_for_revenue)
   const stats = useMemo(() => {
-    if (!orders) return { total: 0, pending: 0, completed: 0, totalRevenue: 0 };
+    if (!orders) {
+      return { total: 0, pending: 0, completed: 0, totalRevenue: 0 };
+    }
 
     const total = orders.length;
     const pending = orders.filter(o => o.status === 'pending' || o.status === 'processing').length;
     const completed = orders.filter(
       o => o.status === 'completed' || o.status === 'delivered'
     ).length;
-    const totalRevenue = orders.reduce((sum, o) => sum + (o.total_amount || 0), 0);
+    const totalRevenue = orders.reduce((sum, o) => {
+      if (!isOrderEligibleForRevenue(o.status, o.payment_status)) return sum;
+      return sum + orderNetRevenueAmount(o.total_amount, o.refunded_amount);
+    }, 0);
 
     return { total, pending, completed, totalRevenue };
   }, [orders]);
