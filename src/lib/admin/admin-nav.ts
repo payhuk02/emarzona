@@ -216,6 +216,12 @@ export const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
         permissions: ['payments.manage', 'analytics.view'],
       },
       {
+        icon: Percent,
+        label: 'Frais checkout 2%+100',
+        path: '/admin/checkout-fees',
+        permissions: ['payments.manage', 'analytics.view'],
+      },
+      {
         icon: CreditCard,
         label: 'Paiements',
         path: '/admin/payments',

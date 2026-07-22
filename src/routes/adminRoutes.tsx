@@ -112,6 +112,7 @@ const AdminApiKeys = lazyPage(() => import('@/pages/admin/AdminApiKeys'));
 const AdminSubscriptions = lazyPage(() => import('@/pages/admin/AdminSubscriptions'));
 const AdminVendorBilling = lazyPage(() => import('@/pages/admin/AdminVendorBilling'));
 const PlatformRevenue = lazyPage(() => import('@/pages/PlatformRevenue'));
+const AdminCheckoutFees = lazyPage(() => import('@/pages/admin/AdminCheckoutFees'));
 const AdminKYC = lazyPage(() => import('@/pages/AdminKYC'));
 const MarketingAutomationDashboard = lazyPage(() =>
   import('@/components/marketing/MarketingAutomationDashboard').then(m => ({
@@ -140,6 +141,7 @@ export const adminRoutes = (
     {pr('/admin/transaction-monitoring', TransactionMonitoring)}
     {pr('/admin/notifications', AdminNotifications)}
     {pr('/admin/revenue', PlatformRevenue)}
+    {pr('/admin/checkout-fees', AdminCheckoutFees)}
     {pr('/admin/kyc', AdminKYC)}
     {pr('/admin/disputes', AdminDisputes)}
     {pr('/admin/affiliates', AdminAffiliates)}

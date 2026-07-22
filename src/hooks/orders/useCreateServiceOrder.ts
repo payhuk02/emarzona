@@ -623,6 +623,7 @@ export const useCreateServiceOrder = () => {
         number_of_participants: numberOfParticipants,
         staff_id: staffId,
         notes,
+        booking_id: booking.id,
       };
 
       const { data: rpcResult, error: orderError } = await supabase.rpc(
@@ -637,9 +638,10 @@ export const useCreateServiceOrder = () => {
           p_service_metadata: serviceMetadata,
           p_gift_card_id: giftCardId,
           p_gift_card_amount_requested: giftCardAmount || 0,
-          p_coupon_code: undefined, // Pas de support couponCode direct dans les options
+          p_coupon_code: undefined,
           p_affiliate_tracking_cookie: affiliateTrackingCookie,
           p_guest_checkout: !authData?.user?.id,
+          p_booking_id: booking.id,
         }
       );
 

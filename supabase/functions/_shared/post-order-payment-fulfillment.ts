@@ -108,36 +108,67 @@ async function confirmServiceBookings(
   const orderId = order.id as string;
   const storeId = order.store_id as string;
   const orderNumber = order.order_number;
+  const orderMeta =
+    order.metadata && typeof order.metadata === 'object' && !Array.isArray(order.metadata)
+      ? (order.metadata as Record<string, unknown>)
+      : {};
 
   const { data: serviceOrderItems, error } = await supabase
     .from('order_items')
-    .select('id, booking_id, product_type')
+    .select('id, booking_id, product_type, item_metadata')
     .eq('order_id', orderId)
-    .eq('product_type', 'service')
-    .not('booking_id', 'is', null);
+    .eq('product_type', 'service');
 
-  if (error || !serviceOrderItems?.length) return;
+  if (error) {
+    console.error('confirmServiceBookings: failed to load order_items', error);
+    return;
+  }
 
-  for (const item of serviceOrderItems) {
-    if (!item.booking_id) continue;
+  const bookingIds = new Set<string>();
 
+  for (const item of serviceOrderItems || []) {
+    if (item.booking_id) bookingIds.add(String(item.booking_id));
+    const itemMeta =
+      item.item_metadata && typeof item.item_metadata === 'object'
+        ? (item.item_metadata as Record<string, unknown>)
+        : {};
+    if (typeof itemMeta.booking_id === 'string' && itemMeta.booking_id) {
+      bookingIds.add(itemMeta.booking_id);
+    }
+  }
+
+  if (typeof orderMeta.booking_id === 'string' && orderMeta.booking_id) {
+    bookingIds.add(orderMeta.booking_id);
+  }
+
+  if (bookingIds.size === 0) return;
+
+  for (const bookingId of bookingIds) {
     const { error: bookingUpdateError } = await supabase
       .from('service_bookings')
       .update({ status: 'confirmed', updated_at: new Date().toISOString() })
-      .eq('id', item.booking_id)
+      .eq('id', bookingId)
       .eq('status', 'pending');
 
     if (bookingUpdateError) {
-      console.error(`Error confirming booking ${item.booking_id}:`, bookingUpdateError);
+      console.error(`Error confirming booking ${bookingId}:`, bookingUpdateError);
       continue;
     }
+
+    // Rattrapage : lier order_items.booking_id si manquant
+    await supabase
+      .from('order_items')
+      .update({ booking_id: bookingId })
+      .eq('order_id', orderId)
+      .eq('product_type', 'service')
+      .is('booking_id', null);
 
     await supabase
       .rpc('trigger_webhook', {
         p_store_id: storeId,
         p_event_type: 'service.booking_confirmed',
         p_payload: {
-          booking_id: item.booking_id,
+          booking_id: bookingId,
           order_id: orderId,
           order_number: orderNumber,
           status: 'confirmed',

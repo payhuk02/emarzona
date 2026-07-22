@@ -217,10 +217,35 @@ serve(async req => {
     }
 
     if (!transaction) {
-      console.warn('[MoneyFusion webhook] Transaction not found', { token: token.slice(0, 8) });
+      console.error('[MoneyFusion webhook] Transaction not found — orphan PSP payment risk', {
+        tokenPrefix: token.slice(0, 8),
+        mappedStatus,
+        verifiedAmount: verified.amount,
+      });
+      try {
+        await supabase.from('payment_webhook_events').insert({
+          provider: 'moneyfusion',
+          external_event_id: `moneyfusion:orphan:${token}:${mappedStatus}`,
+          event_type: eventType,
+          payload: {
+            ...safePayload,
+            orphan: true,
+            verified_statut: verified.statut,
+            verified_amount: verified.amount ?? null,
+          },
+          processing_error: 'transaction_not_found',
+        });
+      } catch (orphanErr) {
+        console.error('[MoneyFusion webhook] Failed to record orphan event', orphanErr);
+      }
+      // 404 → MoneyFusion peut retenter ; l'événement orphan est visible admin/ops
       return new Response(
-        JSON.stringify({ success: true, message: 'Transaction not found (ignored)' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({
+          error: 'Transaction not found',
+          orphan: true,
+          message: 'Paiement reçu sans transaction locale — à réconcilier',
+        }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -263,38 +288,79 @@ serve(async req => {
       });
     }
 
-    // completed — valider montant
-    const verifyAmount =
-      verified.amount != null && !Number.isNaN(verified.amount)
-        ? verified.amount
-        : Number(transaction.amount);
+    // completed — valider le montant réellement payé côté MoneyFusion (PSP),
+    // pas seulement le montant local de la transaction.
+    const pspAmount =
+      verified.amount != null && !Number.isNaN(verified.amount) ? Number(verified.amount) : null;
+    const localAmount = Number(transaction.amount);
+    const txCurrency =
+      typeof transaction.currency === 'string' ? transaction.currency : null;
 
-    if (orderId && verifyAmount != null) {
-      // MoneyFusion peut renvoyer Montant net (hors frais). On tolère écart = frais
-      // en validant d'abord contre le montant commande attendu.
+    if (orderId) {
+      const amountToValidate = pspAmount != null ? pspAmount : localAmount;
       const paymentCheck = await validateOrderPaymentAmount(
         supabase,
         orderId,
-        Number(transaction.amount),
-        typeof transaction.currency === 'string' ? transaction.currency : null
+        amountToValidate,
+        txCurrency
       );
       if (!paymentCheck.valid) {
         console.error('[MoneyFusion webhook] Amount validation failed', {
           transactionId,
           orderId,
+          pspAmount,
+          localAmount,
+          expected: paymentCheck.orderAmount,
           reason: paymentCheck.reason,
         });
         await supabase.from('payment_webhook_events').insert({
           provider: 'moneyfusion',
           external_event_id: externalEventId,
           event_type: eventType,
-          payload: safePayload,
+          payload: {
+            ...safePayload,
+            psp_amount: pspAmount,
+            local_amount: localAmount,
+          },
           processing_error: paymentCheck.reason ?? 'payment_validation_failed',
           transaction_id: transactionId,
           order_id: orderId,
         });
         return new Response(
-          JSON.stringify({ error: 'Payment validation failed', reason: paymentCheck.reason }),
+          JSON.stringify({
+            error: 'Payment validation failed',
+            reason: paymentCheck.reason,
+            pspAmount,
+            localAmount,
+            expected: paymentCheck.orderAmount,
+          }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Écart PSP vs montant initié localement (sous/sur-paiement)
+      if (pspAmount != null && Math.abs(pspAmount - localAmount) > 1) {
+        console.error('[MoneyFusion webhook] PSP vs local amount mismatch', {
+          transactionId,
+          pspAmount,
+          localAmount,
+        });
+        await supabase.from('payment_webhook_events').insert({
+          provider: 'moneyfusion',
+          external_event_id: `${externalEventId}:psp_local_mismatch`,
+          event_type: eventType,
+          payload: { ...safePayload, psp_amount: pspAmount, local_amount: localAmount },
+          processing_error: 'psp_local_amount_mismatch',
+          transaction_id: transactionId,
+          order_id: orderId,
+        });
+        return new Response(
+          JSON.stringify({
+            error: 'Payment validation failed',
+            reason: 'psp_local_amount_mismatch',
+            pspAmount,
+            localAmount,
+          }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
