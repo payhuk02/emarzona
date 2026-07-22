@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
+import { cn } from '@/lib/utils';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useStorefrontProducts } from '@/hooks/useProducts';
@@ -514,9 +515,16 @@ const Storefront = ({ previewMode = false, storeOverride = null }: StorefrontPro
             />
           )}
 
-          <main ref={headerRef} className="flex-1 bg-background overflow-x-hidden pb-16 md:pb-0">
+          <main
+            ref={headerRef}
+            className={cn(
+              'flex-1 bg-background overflow-x-hidden',
+              previewMode ? 'pb-0' : 'pb-16 md:pb-0'
+            )}
+          >
             <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
               <StoreTabs
+                previewMode={previewMode}
                 store={store}
                 productsContent={
                   <>

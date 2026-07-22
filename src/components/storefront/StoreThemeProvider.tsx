@@ -209,17 +209,20 @@ const generateThemeCSS = (theme: StoreTheme): string => {
       box-shadow: var(--store-shadow);
     }
 
-    /* Header personnalisé selon le style */
+    /* Header — padding haut uniquement (le spacer LOGO_OVERLAP gère la zone logo) */
     .store-theme-active .store-header-minimal {
-      padding: 1rem 0;
+      padding-top: 0.5rem;
+      padding-bottom: 0;
     }
 
     .store-theme-active .store-header-standard {
-      padding: 2rem 0;
+      padding-top: 1rem;
+      padding-bottom: 0;
     }
 
     .store-theme-active .store-header-extended {
-      padding: 3rem 0;
+      padding-top: 1.5rem;
+      padding-bottom: 0;
     }
 
     /* Footer personnalisé selon le style */

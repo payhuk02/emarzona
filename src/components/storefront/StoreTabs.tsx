@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { cn } from '@/lib/utils';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { useTranslation } from 'react-i18next';
@@ -15,6 +16,8 @@ interface StoreTabsProps {
   reviewsContent?: React.ReactNode;
   contactContent?: React.ReactNode;
   store?: Store | null;
+  /** Décale la barre d’onglets sous la bannière de prévisualisation vendeur. */
+  previewMode?: boolean;
 }
 
 const StoreTabs = ({
@@ -23,6 +26,7 @@ const StoreTabs = ({
   reviewsContent,
   contactContent,
   store,
+  previewMode = false,
 }: StoreTabsProps) => {
   const { t } = useTranslation();
   const theme = useStoreTheme(store);
@@ -37,7 +41,11 @@ const StoreTabs = ({
   return (
     <Tabs defaultValue="products" className="w-full">
       <div
-        className={`sticky top-0 z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b ${navigationStyleClass}`}
+        className={cn(
+          'sticky z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b',
+          previewMode ? 'top-9' : 'top-0',
+          navigationStyleClass
+        )}
         style={{
           backgroundColor: theme.backgroundColor + 'F5',
           borderColor: theme.textSecondaryColor + '40',

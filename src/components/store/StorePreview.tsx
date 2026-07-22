@@ -25,9 +25,23 @@ type DevicePreset = 'desktop' | 'tablet' | 'mobile';
 
 const DEVICE_WIDTH: Record<DevicePreset, string> = {
   desktop: '100%',
-  tablet: '768px',
+  tablet: '820px',
   mobile: '390px',
 };
+
+const IFRAME_MIN_HEIGHT: Record<DevicePreset, string> = {
+  desktop: 'min-h-[520px]',
+  tablet: 'min-h-[560px]',
+  mobile: 'min-h-[640px]',
+};
+
+function resolveDefaultDevice(): DevicePreset {
+  if (typeof window === 'undefined') return 'desktop';
+  const width = window.innerWidth;
+  if (width < 640) return 'mobile';
+  if (width < 1280) return 'tablet';
+  return 'desktop';
+}
 
 interface StorePreviewProps {
   store: Store | null;
@@ -46,8 +60,12 @@ export const StorePreview: React.FC<StorePreviewProps> = ({
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [iframeKey, setIframeKey] = useState(0);
-  const [device, setDevice] = useState<DevicePreset>('desktop');
+  const [device, setDevice] = useState<DevicePreset>(() => resolveDefaultDevice());
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    setDevice(resolveDefaultDevice());
+  }, [inline]);
 
   const previewDraft = useMemo(() => appearanceFormToPreviewDraft(formDraft), [formDraft]);
 
@@ -123,18 +141,20 @@ export const StorePreview: React.FC<StorePreviewProps> = ({
   );
 
   const iframeFrame = (
-    <div className="flex-1 min-h-0 border-t bg-muted/40 flex justify-center overflow-auto">
+    <div className="flex-1 min-h-0 border-t bg-muted/40 flex justify-center overflow-auto p-2 sm:p-3">
       <div
         className={cn(
           'h-full bg-background shadow-sm transition-[width] duration-200',
-          device !== 'desktop' && 'border-x'
+          device === 'mobile' && 'rounded-[1.75rem] border shadow-md overflow-hidden',
+          device === 'tablet' && 'rounded-xl border-x shadow-md overflow-hidden',
+          device === 'desktop' && 'w-full'
         )}
         style={{ width: DEVICE_WIDTH[device], maxWidth: '100%' }}
       >
         <iframe
           key={iframeKey}
           src={previewUrl}
-          className="h-full w-full border-0 bg-background min-h-[480px]"
+          className={cn('h-full w-full border-0 bg-background', IFRAME_MIN_HEIGHT[device])}
           title={t('store.preview.iframeTitle', { name: store.name })}
         />
       </div>
@@ -144,15 +164,15 @@ export const StorePreview: React.FC<StorePreviewProps> = ({
   if (inline) {
     return (
       <div
-        className="flex flex-col rounded-lg border overflow-hidden min-h-[520px] h-[70vh]"
+        className="flex flex-col rounded-lg border overflow-hidden min-h-[480px] sm:min-h-[560px] h-[min(75vh,780px)]"
         data-testid="store-preview-inline"
       >
-        <div className="flex items-center justify-between gap-2 p-2 border-b bg-card">
-          <div className="flex items-center gap-2 text-sm font-medium">
-            <Eye className="h-4 w-4" />
-            {t('store.preview.liveTitle')}
+        <div className="flex items-center justify-between gap-2 p-2 border-b bg-card flex-wrap sm:flex-nowrap">
+          <div className="flex items-center gap-2 text-sm font-medium min-w-0">
+            <Eye className="h-4 w-4 shrink-0" />
+            <span className="truncate">{t('store.preview.liveTitle')}</span>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 shrink-0 ml-auto">
             {deviceToggle}
             <Button type="button" variant="ghost" size="icon" onClick={handleRefreshPreview}>
               <RefreshCw className="h-4 w-4" />

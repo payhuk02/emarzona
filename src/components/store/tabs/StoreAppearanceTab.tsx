@@ -195,7 +195,7 @@ export const StoreAppearanceTab = ({
       )}
 
       {isEditing && (
-        <Card>
+        <Card className="xl:sticky xl:top-4 xl:z-10">
           <CardHeader>
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div>
