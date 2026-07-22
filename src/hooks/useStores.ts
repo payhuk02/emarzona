@@ -21,8 +21,10 @@ import { assertReadyToCreateStore } from '@/lib/store/create-store-service';
 import {
   buildCreateStoreInsertPayload,
   CREATE_STORE_ALLOWED_CLIENT_KEYS,
+  toMinimalStoreCreateInsert,
   type CreateStoreOptions,
 } from '@/lib/store/store-express-create-schema';
+import { toUserErrorMessage } from '@/lib/user-error-message';
 
 type StoreInsert = Database['public']['Tables']['stores']['Insert'];
 type StoreUpdate = Database['public']['Tables']['stores']['Update'];
@@ -396,7 +398,7 @@ export const useStores = () => {
       });
 
       const appearancePayload = extractAppearancePayload(insertPayload);
-      const storeInsertPayload = {
+      const storeInsertPayload = toMinimalStoreCreateInsert({
         ...omitAppearanceFromStoreUpdates(sanitizeStorePayload(insertPayload)),
         // user_id n'est pas dans STORE_WRITABLE_COLUMNS (volontaire — pas d'update) :
         // il doit être réinjecté à la création pour passer le WITH CHECK RLS.
@@ -407,7 +409,9 @@ export const useStores = () => {
         name: validated.name,
         slug: validated.slug,
         default_currency: validated.default_currency,
-      };
+        description:
+          typeof insertPayload.description === 'string' ? insertPayload.description : null,
+      });
 
       const { data, error } = await supabase
         .from('stores')
@@ -416,7 +420,14 @@ export const useStores = () => {
         .single();
 
       if (error) {
-        throw error;
+        logger.error('Erreur create store (PostgREST)', {
+          code: (error as { code?: string }).code,
+          message: error.message,
+          details: (error as { details?: string }).details,
+          hint: (error as { hint?: string }).hint,
+          columns: Object.keys(storeInsertPayload),
+        });
+        throw new Error(toUserErrorMessage(error) || 'Impossible de créer la boutique');
       }
 
       if (Object.keys(appearancePayload).length > 0) {
@@ -425,7 +436,10 @@ export const useStores = () => {
           ...appearancePayload,
         });
         if (appearanceError) {
-          throw appearanceError;
+          throw new Error(
+            toUserErrorMessage(appearanceError) ||
+              "Boutique créée mais le thème n'a pas pu être enregistré"
+          );
         }
       }
 
@@ -439,12 +453,8 @@ export const useStores = () => {
       });
     },
     onError: (error: Error) => {
+      // Les callers (express/wizard) affichent déjà le toast — éviter le doublon.
       logger.error('Erreur lors de la création de la boutique:', error);
-      toast({
-        title: 'Erreur',
-        description: error.message || 'Impossible de créer la boutique',
-        variant: 'destructive',
-      });
     },
   });
 

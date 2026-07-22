@@ -110,6 +110,34 @@ export function buildCreateStoreInsertPayload(params: {
   };
 }
 
+/**
+ * Colonnes minimales pour INSERT public.stores — évite PGRST204 404
+ * quand PostgREST reçoit des extras (timezone, opening_hours, etc.) hors cache schéma.
+ * Thème / apparence → store_appearance (extrait avant via extractAppearancePayload).
+ */
+export const MINIMAL_STORE_CREATE_INSERT_KEYS = [
+  'user_id',
+  'name',
+  'slug',
+  'description',
+  'default_currency',
+  'commerce_type',
+  'metadata',
+  'is_active',
+] as const;
+
+export function toMinimalStoreCreateInsert(
+  payload: Record<string, unknown>
+): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const key of MINIMAL_STORE_CREATE_INSERT_KEYS) {
+    if (payload[key] !== undefined) {
+      out[key] = payload[key];
+    }
+  }
+  return out;
+}
+
 export function normalizeExpressSlugPreview(name: string): string {
   const parsed = storeExpressCreateSchema.safeParse({ name, commerce_type: 'physical' });
   if (!parsed.success) return '';

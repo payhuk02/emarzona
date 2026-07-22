@@ -27,6 +27,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { useStores } from '@/hooks/useStores';
 import { useStoreContext } from '@/contexts/StoreContext';
+import { toUserErrorMessage } from '@/lib/user-error-message';
 import {
   STORE_COMMERCE_TYPES,
   STORE_COMMERCE_TYPE_LABELS,
@@ -209,8 +210,7 @@ export function StoreExpressCreateForm({
         navigate(redirectTarget, { replace: true });
         onSuccess?.();
       } catch (error: unknown) {
-        const message =
-          error instanceof Error ? error.message : t('store.form.common.unknownError');
+        const message = toUserErrorMessage(error) || t('store.form.common.unknownError');
         toast({
           title: t('store.form.common.error'),
           description: message,

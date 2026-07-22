@@ -20,6 +20,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { generateSlug, generateStoreUrl } from '@/lib/store-utils';
 import { isSubdomainReserved } from '@/lib/subdomain-detector';
 import { logger } from '@/lib/logger';
+import { toUserErrorMessage } from '@/lib/user-error-message';
 import { useStoreContext } from '@/contexts/StoreContext';
 import { validateStoreCreate, validateStoreUpdate, getFieldHelp } from '@/lib/store-validation';
 import { Loader2, Check, X, Globe, Phone, Info } from '@/components/icons';
@@ -407,7 +408,7 @@ const StoreForm = ({
         const available = await isStoreSlugAvailable(slugToCheck, initialData?.id);
         setSlugAvailable(available);
       } catch (_error: unknown) {
-        const errorMessage = _error instanceof Error ? _error.message : 'Erreur inconnue';
+        const errorMessage = toUserErrorMessage(_error) || 'Erreur inconnue';
         logger.error('Error checking slug', { error: errorMessage, slug: slugToCheck });
         setSlugAvailable(null);
       } finally {
@@ -861,8 +862,7 @@ const StoreForm = ({
 
         onSuccess();
       } catch (_error: unknown) {
-        const errorMessage =
-          _error instanceof Error ? _error.message : t('store.form.common.unknownError');
+        const errorMessage = toUserErrorMessage(_error) || t('store.form.common.unknownError');
         toast({
           title: t('store.form.common.error'),
           description: errorMessage,
