@@ -204,12 +204,21 @@ export async function getMaxAmountTolerance(supabase: SupabaseClient): Promise<n
   return 1.0;
 }
 
-export async function validateOrderPaymentAmount(
+/**
+ * Montant PSP attendu pour une commande :
+ * - acompte (`payment_type=percentage`) → `percentage_paid`
+ * - sinon → `total_amount`
+ * - moins les rédemptions carte cadeau (montants stockés négatifs).
+ */
+export async function resolveOrderExpectedPayableAmount(
   supabase: SupabaseClient,
-  orderId: string,
-  paidAmount: number,
-  paidCurrency?: string | null
-): Promise<{ valid: boolean; orderAmount?: number; difference?: number; reason?: string }> {
+  orderId: string
+): Promise<{
+  valid: boolean;
+  expectedAmount?: number;
+  currency?: string;
+  reason?: string;
+}> {
   const { data: orderData } = await supabase
     .from('orders')
     .select('total_amount, currency, payment_type, percentage_paid')
@@ -220,29 +229,60 @@ export async function validateOrderPaymentAmount(
     return { valid: false, reason: 'order_not_found' };
   }
 
-  const orderCurrency = String(orderData.currency ?? '').toUpperCase();
+  const orderAmount =
+    typeof orderData.total_amount === 'string'
+      ? parseFloat(orderData.total_amount)
+      : Number(orderData.total_amount);
+
+  let baseAmount = Number.isFinite(orderAmount) ? orderAmount : 0;
+  if (orderData.payment_type === 'percentage') {
+    const percentageAmount =
+      typeof orderData.percentage_paid === 'string'
+        ? parseFloat(orderData.percentage_paid)
+        : Number(orderData.percentage_paid || 0);
+    if (Number.isFinite(percentageAmount) && percentageAmount > 0) {
+      baseAmount = percentageAmount;
+    }
+  }
+
+  const { data: giftRows } = await supabase
+    .from('gift_card_transactions')
+    .select('amount')
+    .eq('order_id', orderId)
+    .eq('transaction_type', 'redemption');
+
+  const giftRedeemed = (giftRows ?? []).reduce((sum, row) => {
+    const amt =
+      typeof row.amount === 'string' ? parseFloat(row.amount) : Number(row.amount ?? 0);
+    return sum + Math.abs(Number.isFinite(amt) ? amt : 0);
+  }, 0);
+
+  return {
+    valid: true,
+    expectedAmount: Math.max(0, baseAmount - giftRedeemed),
+    currency: orderData.currency != null ? String(orderData.currency) : undefined,
+  };
+}
+
+export async function validateOrderPaymentAmount(
+  supabase: SupabaseClient,
+  orderId: string,
+  paidAmount: number,
+  paidCurrency?: string | null
+): Promise<{ valid: boolean; orderAmount?: number; difference?: number; reason?: string }> {
+  const expected = await resolveOrderExpectedPayableAmount(supabase, orderId);
+  if (!expected.valid || expected.expectedAmount == null) {
+    return { valid: false, reason: expected.reason ?? 'order_not_found' };
+  }
+
+  const orderCurrency = String(expected.currency ?? '').toUpperCase();
   const webhookCurrency = paidCurrency ? String(paidCurrency).toUpperCase() : orderCurrency;
 
   if (orderCurrency && webhookCurrency && orderCurrency !== webhookCurrency) {
     return { valid: false, reason: 'currency_mismatch' };
   }
 
-  const orderAmount =
-    typeof orderData.total_amount === 'string'
-      ? parseFloat(orderData.total_amount)
-      : Number(orderData.total_amount);
-
-  let expectedAmount = orderAmount;
-  if (orderData.payment_type === 'percentage') {
-    const percentageAmount =
-      typeof orderData.percentage_paid === 'string'
-        ? parseFloat(orderData.percentage_paid)
-        : Number(orderData.percentage_paid || 0);
-    if (percentageAmount > 0) {
-      expectedAmount = percentageAmount;
-    }
-  }
-
+  const expectedAmount = expected.expectedAmount;
   const tolerance = await getMaxAmountTolerance(supabase);
   const difference = Math.abs(paidAmount - expectedAmount);
 

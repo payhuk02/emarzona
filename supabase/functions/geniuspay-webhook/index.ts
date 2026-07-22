@@ -406,7 +406,7 @@ serve(async req => {
       // Commande : même pipeline que Stripe/PayPal (statut paid + fulfillment unifié)
       let order: Record<string, unknown> | null = null;
       if (transaction.order_id) {
-        const { orderId, alreadyCompleted } = await completeTransactionAndOrder(
+        const { orderId } = await completeTransactionAndOrder(
           supabase,
           transaction.id,
           {
@@ -418,9 +418,7 @@ serve(async req => {
         );
 
         if (orderId) {
-          if (!alreadyCompleted) {
-            await runPostOrderPaymentFulfillment(supabase, orderId, transaction.id);
-          }
+          await runPostOrderPaymentFulfillment(supabase, orderId, transaction.id);
 
           const { data: orderData, error: orderError } = await supabase
             .from('orders')

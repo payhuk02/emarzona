@@ -737,7 +737,7 @@ async function resolveAuthorizedPaymentAmount(
   if (orderIdFromMeta && isValidUUID(String(orderIdFromMeta))) {
     const { data: order, error } = await supabase
       .from('orders')
-      .select('id, total_amount, currency, store_id, payment_status')
+      .select('id, currency, store_id, payment_status')
       .eq('id', orderIdFromMeta)
       .single();
 
@@ -749,7 +749,15 @@ async function resolveAuthorizedPaymentAmount(
       return { valid: false, error: 'La boutique ne correspond pas à la commande' };
     }
 
-    const expected = Math.round(Number(order.total_amount));
+    const { resolveOrderExpectedPayableAmount } = await import(
+      '../_shared/complete-order-payment.ts'
+    );
+    const payable = await resolveOrderExpectedPayableAmount(supabase, String(orderIdFromMeta));
+    if (!payable.valid || payable.expectedAmount == null) {
+      return { valid: false, error: 'Commande introuvable' };
+    }
+
+    const expected = Math.round(payable.expectedAmount);
     if (Math.round(validated.amount) !== expected) {
       console.warn('[GeniusPay] Order amount mismatch', {
         clientAmount: validated.amount,
@@ -762,7 +770,7 @@ async function resolveAuthorizedPaymentAmount(
     return {
       valid: true,
       amount: expected,
-      currency: (order.currency as string) || validated.currency,
+      currency: (order.currency as string) || payable.currency || validated.currency,
     };
   }
 

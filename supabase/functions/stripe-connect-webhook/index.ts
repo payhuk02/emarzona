@@ -277,7 +277,7 @@ serve(async (req) => {
               },
             );
 
-          if (orderId && !alreadyCompleted) {
+          if (orderId) {
             await runPostOrderPaymentFulfillment(
               supabase,
               orderId,

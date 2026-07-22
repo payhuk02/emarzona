@@ -1,4 +1,5 @@
 import type { SupabaseClient } from 'npm:@supabase/supabase-js@2.58.0';
+import { resolveOrderExpectedPayableAmount } from './complete-order-payment.ts';
 import { createSupabaseUserClient } from './supabase-admin.ts';
 
 const TERMINAL_PAYMENT_STATUSES = new Set(['paid', 'completed', 'refunded', 'cancelled']);
@@ -54,21 +55,13 @@ export async function loadCheckoutOrder(
 
   if (error || !order) return null;
 
+  const payable = await resolveOrderExpectedPayableAmount(supabase, orderId);
   const totalAmount =
     typeof order.total_amount === 'string'
       ? parseFloat(order.total_amount)
       : Number(order.total_amount);
-
-  let amount = totalAmount;
-  if (order.payment_type === 'percentage') {
-    const percentageAmount =
-      typeof order.percentage_paid === 'string'
-        ? parseFloat(order.percentage_paid)
-        : Number(order.percentage_paid || 0);
-    if (percentageAmount > 0) {
-      amount = percentageAmount;
-    }
-  }
+  const amount =
+    payable.valid && payable.expectedAmount != null ? payable.expectedAmount : totalAmount;
 
   const metadata =
     order.metadata && typeof order.metadata === 'object' && !Array.isArray(order.metadata)

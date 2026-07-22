@@ -378,10 +378,18 @@ serve(async req => {
       }
     );
 
-    if (!alreadyCompleted && completedOrderId) {
-      await runPostOrderPaymentFulfillment(supabase, completedOrderId, transactionId).catch(err =>
+    // Toujours sync payments/facture (idempotent) ; le reste du fulfillment
+    // court-circuite via post_payment_fulfillment_at si déjà fait.
+    const fulfillmentOrderId = completedOrderId || orderId;
+    if (fulfillmentOrderId) {
+      await runPostOrderPaymentFulfillment(supabase, fulfillmentOrderId, transactionId).catch(err =>
         console.error('[MoneyFusion webhook] post-order fulfillment failed', err)
       );
+    } else if (alreadyCompleted) {
+      console.log('[MoneyFusion webhook] replay ignored (no order_id)', {
+        transactionId,
+        externalEventId,
+      });
     }
 
     // Abonnements physiques (sans order_id) — même pattern que GeniusPay

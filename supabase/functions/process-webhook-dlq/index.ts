@@ -95,7 +95,7 @@ serve(async () => {
             const transactionId = payload.metadata?.transaction_id;
             if (!transactionId) throw new Error('Missing transaction_id in metadata');
 
-            const { orderId, alreadyCompleted } = await completeTransactionAndOrder(
+            const { orderId } = await completeTransactionAndOrder(
               supabase,
               transactionId,
               {
@@ -109,7 +109,7 @@ serve(async () => {
               }
             );
 
-            if (orderId && !alreadyCompleted) {
+            if (orderId) {
               await runPostOrderPaymentFulfillment(supabase, orderId, transactionId);
             }
           }

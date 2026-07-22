@@ -50,7 +50,7 @@ async function completePayPalPayment(
     eventType: extras.eventType,
   });
 
-  if (orderId && !alreadyCompleted) {
+  if (orderId) {
     await runPostOrderPaymentFulfillment(supabase, orderId, transactionId);
   } else if (alreadyCompleted) {
     console.log('PayPal payment webhook replay ignored (idempotent)', {

@@ -8,6 +8,7 @@
  */
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'npm:@supabase/supabase-js@2.58.0';
+import { resolveOrderExpectedPayableAmount } from '../_shared/complete-order-payment.ts';
 import { authorizeCheckoutOrder } from '../_shared/order-checkout-auth.ts';
 import { enforceRateLimit, getClientIp, RATE_LIMIT_PRESETS } from '../_shared/rate-limit.ts';
 
@@ -149,7 +150,7 @@ async function resolveAuthorizedAmount(
   if (orderId && isValidUUID(orderId)) {
     const { data: order, error } = await supabase
       .from('orders')
-      .select('id, total_amount, currency, store_id')
+      .select('id, currency, store_id')
       .eq('id', orderId)
       .single();
 
@@ -159,14 +160,18 @@ async function resolveAuthorizedAmount(
     if (validated.storeId && order.store_id !== validated.storeId) {
       return { valid: false, error: 'La boutique ne correspond pas à la commande' };
     }
-    const expected = Math.round(Number(order.total_amount));
+    const payable = await resolveOrderExpectedPayableAmount(supabase, orderId);
+    if (!payable.valid || payable.expectedAmount == null) {
+      return { valid: false, error: 'Commande introuvable' };
+    }
+    const expected = Math.round(payable.expectedAmount);
     if (Math.round(validated.amount) !== expected) {
       return { valid: false, error: 'Montant invalide pour cette commande' };
     }
     return {
       valid: true,
       amount: expected,
-      currency: (order.currency as string) || validated.currency,
+      currency: (order.currency as string) || payable.currency || validated.currency,
     };
   }
 
