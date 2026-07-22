@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -8,24 +8,24 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { 
-  AlertTriangle, 
-  Package, 
-  ShoppingCart, 
-  Users, 
+} from '@/components/ui/alert-dialog';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import {
+  AlertTriangle,
+  Package,
+  ShoppingCart,
+  Users,
   DollarSign,
   Loader2,
   XCircle,
-  Archive
-} from "lucide-react";
-import { checkStoreDeleteProtection, StoreDependencies } from "@/lib/store-delete-protection";
-import { Button } from "@/components/ui/button";
-import { logger } from "@/lib/logger";
+  Archive,
+} from 'lucide-react';
+import { checkStoreDeleteProtection, StoreDependencies } from '@/lib/store-delete-protection';
+import { Button } from '@/components/ui/button';
+import { logger } from '@/lib/logger';
 
 interface DeleteStoreDialogProps {
   open: boolean;
@@ -42,7 +42,7 @@ const DeleteStoreDialogComponent = ({
   storeId,
   storeName,
   onConfirmDelete,
-  onConfirmArchive
+  onConfirmArchive,
 }: DeleteStoreDialogProps) => {
   const [checking, setChecking] = useState(true);
   const [canDelete, setCanDelete] = useState(false);
@@ -95,7 +95,7 @@ const DeleteStoreDialogComponent = ({
 
   const handleArchive = useCallback(async () => {
     if (!onConfirmArchive) return;
-    
+
     setArchiving(true);
     try {
       await onConfirmArchive();
@@ -123,22 +123,21 @@ const DeleteStoreDialogComponent = ({
               </div>
             ) : (
               <div className="space-y-4">
-                {/* Erreurs bloquantes */}
                 {errors.length > 0 && (
                   <Alert variant="destructive">
                     <XCircle className="h-4 w-4" />
                     <AlertDescription>
                       <div className="space-y-2">
-                        <p className="font-semibold">Suppression impossible :</p>
                         {errors.map((error, index) => (
-                          <p key={index} className="text-sm">• {error}</p>
+                          <p key={index} className="text-sm">
+                            • {error}
+                          </p>
                         ))}
                       </div>
                     </AlertDescription>
                   </Alert>
                 )}
 
-                {/* Statistiques de la boutique */}
                 {dependencies && (
                   <div className="grid grid-cols-2 gap-3 py-4">
                     <div className="flex items-center gap-3 p-3 border rounded-lg bg-muted/30">
@@ -181,7 +180,6 @@ const DeleteStoreDialogComponent = ({
                   </div>
                 )}
 
-                {/* Avertissements */}
                 {warnings.length > 0 && (
                   <Alert>
                     <AlertTriangle className="h-4 w-4" />
@@ -189,59 +187,54 @@ const DeleteStoreDialogComponent = ({
                       <div className="space-y-2">
                         <p className="font-semibold">Attention :</p>
                         {warnings.map((warning, index) => (
-                          <p key={index} className="text-sm">• {warning}</p>
+                          <p key={index} className="text-sm">
+                            • {warning}
+                          </p>
                         ))}
                       </div>
                     </AlertDescription>
                   </Alert>
                 )}
 
-                {/* Confirmation si suppression possible */}
-                {canDelete && (
-                  <div className="space-y-4 pt-4">
-                    <Alert variant="destructive">
-                      <AlertTriangle className="h-4 w-4" />
-                      <AlertDescription>
-                        <p className="font-semibold mb-2">⚠️ Cette action est IRRÉVERSIBLE</p>
-                        <p className="text-sm">
-                          Toutes les données de cette boutique seront définitivement supprimées :
-                        </p>
-                        <ul className="text-sm mt-2 space-y-1 list-disc list-inside">
-                          <li>Tous les produits et leurs images</li>
-                          <li>L'historique des commandes</li>
-                          <li>Les informations clients</li>
-                          <li>Les statistiques et analytics</li>
-                        </ul>
-                      </AlertDescription>
-                    </Alert>
+                <div className="space-y-4 pt-4">
+                  <Alert variant="destructive">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertDescription>
+                      <p className="font-semibold mb-2">Cette action est irréversible</p>
+                      <p className="text-sm">
+                        Toutes les données de cette boutique seront définitivement supprimées :
+                      </p>
+                      <ul className="text-sm mt-2 space-y-1 list-disc list-inside">
+                        <li>Tous les produits et leurs images</li>
+                        <li>L&apos;historique des commandes (y compris en cours)</li>
+                        <li>Les informations clients</li>
+                        <li>Les statistiques, apparence et paramètres</li>
+                      </ul>
+                    </AlertDescription>
+                  </Alert>
 
-                    <div className="flex items-start gap-2 p-4 border-2 border-destructive/50 rounded-lg bg-destructive/5">
-                      <Checkbox
-                        id="confirm-delete"
-                        checked={confirmChecked}
-                        onCheckedChange={(checked) => setConfirmChecked(checked as boolean)}
-                      />
-                      <Label
-                        htmlFor="confirm-delete"
-                        className="text-sm font-medium cursor-pointer"
-                      >
-                        Je comprends que cette action est irréversible et je souhaite supprimer définitivement la boutique "{storeName}"
-                      </Label>
-                    </div>
+                  <div className="flex items-start gap-2 p-4 border-2 border-destructive/50 rounded-lg bg-destructive/5">
+                    <Checkbox
+                      id="confirm-delete"
+                      checked={confirmChecked}
+                      onCheckedChange={checked => setConfirmChecked(checked as boolean)}
+                    />
+                    <Label htmlFor="confirm-delete" className="text-sm font-medium cursor-pointer">
+                      Je comprends que cette action est irréversible et je souhaite supprimer
+                      définitivement la boutique &quot;{storeName}&quot;
+                    </Label>
                   </div>
-                )}
+                </div>
 
-                {/* Alternative : Archivage */}
-                {!canDelete && onConfirmArchive && (
-                  <div className="space-y-3 pt-4">
-                    <p className="text-sm font-medium">Alternative recommandée :</p>
+                {onConfirmArchive && (
+                  <div className="space-y-3 pt-2">
+                    <p className="text-sm font-medium">Alternative :</p>
                     <Alert>
                       <Archive className="h-4 w-4" />
                       <AlertDescription>
                         <p className="font-semibold mb-1">Archiver la boutique</p>
                         <p className="text-sm">
-                          Au lieu de supprimer, vous pouvez archiver cette boutique. Elle sera désactivée 
-                          mais toutes les données seront conservées.
+                          Désactive la boutique tout en conservant les données.
                         </p>
                       </AlertDescription>
                     </Alert>
@@ -255,11 +248,9 @@ const DeleteStoreDialogComponent = ({
         <AlertDialogFooter>
           {!checking && (
             <>
-              <AlertDialogCancel disabled={deleting || archiving}>
-                Annuler
-              </AlertDialogCancel>
+              <AlertDialogCancel disabled={deleting || archiving}>Annuler</AlertDialogCancel>
 
-              {!canDelete && onConfirmArchive && (
+              {onConfirmArchive && (
                 <Button
                   onClick={handleArchive}
                   disabled={archiving || deleting}
@@ -279,25 +270,23 @@ const DeleteStoreDialogComponent = ({
                 </Button>
               )}
 
-              {canDelete && (
-                <Button
-                  onClick={handleDelete}
-                  disabled={!confirmChecked || deleting || archiving}
-                  variant="destructive"
-                >
-                  {deleting ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Suppression...
-                    </>
-                  ) : (
-                    <>
-                      <XCircle className="h-4 w-4 mr-2" />
-                      Supprimer définitivement
-                    </>
-                  )}
-                </Button>
-              )}
+              <Button
+                onClick={handleDelete}
+                disabled={!canDelete || !confirmChecked || deleting || archiving}
+                variant="destructive"
+              >
+                {deleting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Suppression...
+                  </>
+                ) : (
+                  <>
+                    <XCircle className="h-4 w-4 mr-2" />
+                    Supprimer définitivement
+                  </>
+                )}
+              </Button>
             </>
           )}
         </AlertDialogFooter>
@@ -321,10 +310,3 @@ export const DeleteStoreDialog = React.memo(DeleteStoreDialogComponent, (prevPro
 });
 
 DeleteStoreDialog.displayName = 'DeleteStoreDialog';
-
-
-
-
-
-
-

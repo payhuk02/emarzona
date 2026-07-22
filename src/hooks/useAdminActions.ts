@@ -119,9 +119,15 @@ export const useAdminActions = () => {
     try {
       await logAction('DELETE_STORE', 'store', storeId);
 
-      const { error } = await supabase.from('stores').delete().eq('id', storeId);
+      const { data, error } = await supabase.rpc('delete_store_completely', {
+        p_store_id: storeId,
+      });
 
       if (error) throw error;
+      const result = data as { success?: boolean; error?: string } | null;
+      if (!result?.success) {
+        throw new Error(result?.error || 'Impossible de supprimer la boutique');
+      }
 
       toast({
         title: 'Boutique supprimée',

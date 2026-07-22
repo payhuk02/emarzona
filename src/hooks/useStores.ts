@@ -543,12 +543,18 @@ export const useStores = () => {
     },
   });
 
-  // Mutation pour supprimer une boutique
+  // Mutation pour supprimer une boutique (suppression complète via RPC)
   const deleteStoreMutation = useMutation({
     mutationFn: async (storeId: string) => {
-      const { error } = await supabase.from('stores').delete().eq('id', storeId);
+      const { data, error } = await supabase.rpc('delete_store_completely', {
+        p_store_id: storeId,
+      });
       if (error) {
         throw error;
+      }
+      const result = data as { success?: boolean; error?: string } | null;
+      if (!result?.success) {
+        throw new Error(result?.error || 'Impossible de supprimer la boutique');
       }
     },
     onSuccess: () => {

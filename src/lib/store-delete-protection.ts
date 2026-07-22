@@ -1,6 +1,5 @@
 /**
- * Système de protection avant suppression de boutique
- * Vérifie les dépendances (produits, commandes, clients)
+ * Protection et suppression complète d'une boutique
  */
 
 import { supabase } from '@/integrations/supabase/client';
@@ -23,23 +22,23 @@ export interface DeleteProtectionResult {
 }
 
 /**
- * Vérifie si une boutique peut être supprimée en toute sécurité
+ * Vérifie les dépendances avant suppression (avertissements uniquement — la suppression
+ * complète reste possible avec confirmation forte côté UI).
  */
 export const checkStoreDeleteProtection = async (
   storeId: string
 ): Promise<DeleteProtectionResult> => {
   try {
-    const  warnings: string[] = [];
-    const  errors: string[] = [];
+    const warnings: string[] = [];
+    const errors: string[] = [];
 
-    // 1. Vérifier les produits
     const { data: productsData, error: productsError } = await supabase
       .from('products')
-      .select('id, is_active', { count: 'exact' })
+      .select('id, is_active')
       .eq('store_id', storeId);
 
     if (productsError) {
-      errors.push('Impossible de vérifier les produits');
+      warnings.push('Impossible de vérifier les produits (la suppression reste possible)');
     }
 
     const productsCount = productsData?.length || 0;
@@ -47,26 +46,24 @@ export const checkStoreDeleteProtection = async (
 
     if (productsCount > 0) {
       warnings.push(
-        `Cette boutique contient ${productsCount} produit(s) ${
-          activeProductsCount > 0 ? `dont ${activeProductsCount} actif(s)` : ''
+        `Cette boutique contient ${productsCount} produit(s)${
+          activeProductsCount > 0 ? ` dont ${activeProductsCount} actif(s)` : ''
         }`
       );
     }
 
-    // 2. Vérifier les commandes
     const { data: ordersData, error: ordersError } = await supabase
       .from('orders')
-      .select('id, status, total_amount', { count: 'exact' })
+      .select('id, status, total_amount')
       .eq('store_id', storeId);
 
     if (ordersError) {
-      errors.push('Impossible de vérifier les commandes');
+      warnings.push('Impossible de vérifier les commandes (la suppression reste possible)');
     }
 
     const ordersCount = ordersData?.length || 0;
-    const pendingOrders = ordersData?.filter(
-      (o) => o.status === 'pending' || o.status === 'processing'
-    ) || [];
+    const pendingOrders =
+      ordersData?.filter(o => o.status === 'pending' || o.status === 'processing') || [];
     const pendingOrdersCount = pendingOrders.length;
 
     if (ordersCount > 0) {
@@ -74,16 +71,16 @@ export const checkStoreDeleteProtection = async (
     }
 
     if (pendingOrdersCount > 0) {
-      errors.push(
-        `⚠️ ATTENTION : ${pendingOrdersCount} commande(s) en cours ou en attente ! Vous devez d'abord traiter ces commandes.`
+      warnings.push(
+        `${pendingOrdersCount} commande(s) encore en cours ou en attente seront également supprimées`
       );
     }
 
-    // 3. Calculer le revenu total
-    const totalRevenue = ordersData?.reduce(
-      (sum, order) => sum + parseFloat(order.total_amount?.toString() || '0'),
-      0
-    ) || 0;
+    const totalRevenue =
+      ordersData?.reduce(
+        (sum, order) => sum + parseFloat(order.total_amount?.toString() || '0'),
+        0
+      ) || 0;
 
     if (totalRevenue > 0) {
       warnings.push(
@@ -91,103 +88,91 @@ export const checkStoreDeleteProtection = async (
       );
     }
 
-    // 4. Vérifier les clients
     const { count: customersCount, error: customersError } = await supabase
       .from('customers')
       .select('id', { count: 'exact', head: true })
       .eq('store_id', storeId);
 
     if (customersError) {
-      errors.push('Impossible de vérifier les clients');
+      warnings.push('Impossible de vérifier les clients (la suppression reste possible)');
     }
 
     if ((customersCount || 0) > 0) {
       warnings.push(`Cette boutique a ${customersCount} client(s) enregistré(s)`);
     }
 
-    // Déterminer si la suppression est possible
-    const canDelete = errors.length === 0 && pendingOrdersCount === 0;
-
     return {
-      canDelete,
+      canDelete: true,
       dependencies: {
         productsCount,
         ordersCount,
         customersCount: customersCount || 0,
         pendingOrdersCount,
         activeProductsCount,
-        totalRevenue
+        totalRevenue,
       },
       warnings,
-      errors: errors.length > 0 ? errors : undefined
+      errors: errors.length > 0 ? errors : undefined,
     };
-  } catch ( _error: any) {
+  } catch (error: unknown) {
     logger.error('Error checking delete protection', { error });
     return {
-      canDelete: false,
+      canDelete: true,
       dependencies: {
         productsCount: 0,
         ordersCount: 0,
         customersCount: 0,
         pendingOrdersCount: 0,
         activeProductsCount: 0,
-        totalRevenue: 0
+        totalRevenue: 0,
       },
-      warnings: [],
-      errors: ['Une erreur est survenue lors de la vérification. Veuillez réessayer.']
+      warnings: [
+        'La vérification des dépendances a échoué. Vous pouvez tout de même confirmer la suppression.',
+      ],
     };
   }
 };
 
 /**
- * Supprime une boutique avec toutes ses dépendances (CASCADE)
- * À utiliser avec PRÉCAUTION
+ * Supprime complètement une boutique et ses données associées (RPC SECURITY DEFINER).
  */
 export const deleteStoreWithDependencies = async (
   storeId: string
 ): Promise<{ success: boolean; error?: string }> => {
   try {
-    // Vérifier d'abord les protections
-    const protection = await checkStoreDeleteProtection(storeId);
+    const { data, error } = await supabase.rpc('delete_store_completely', {
+      p_store_id: storeId,
+    });
 
-    if (!protection.canDelete) {
+    if (error) {
+      logger.error('Delete store RPC error', { error, storeId });
       return {
         success: false,
-        error: protection.errors?.join('\n') || 'Impossible de supprimer cette boutique'
+        error: error.message || 'Erreur lors de la suppression',
       };
     }
 
-    // Supprimer dans l'ordre : produits > commandes > clients > boutique
-    // Note: Si les foreign keys sont configurées avec ON DELETE CASCADE dans Supabase,
-    // la suppression de la boutique supprimera automatiquement tout.
-    // Sinon, il faut supprimer manuellement dans l'ordre.
-
-    const { error: deleteError } = await supabase
-      .from('stores')
-      .delete()
-      .eq('id', storeId);
-
-    if (deleteError) {
-      logger.error('Delete error', { error: deleteError });
+    const result = data as { success?: boolean; error?: string } | null;
+    if (!result?.success) {
       return {
         success: false,
-        error: `Erreur lors de la suppression : ${deleteError.message}`
+        error: result?.error || 'Impossible de supprimer cette boutique',
       };
     }
 
     return { success: true };
-  } catch ( _error: any) {
-    logger.error('Unexpected delete error', { error });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Une erreur inattendue est survenue';
+    logger.error('Unexpected delete error', { error, storeId });
     return {
       success: false,
-      error: error.message || 'Une erreur inattendue est survenue'
+      error: message,
     };
   }
 };
 
 /**
  * Archive une boutique au lieu de la supprimer
- * Alternative plus sûre
  */
 export const archiveStore = async (
   storeId: string
@@ -197,29 +182,24 @@ export const archiveStore = async (
       .from('stores')
       .update({
         is_active: false,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       })
       .eq('id', storeId);
 
     if (error) {
       return {
         success: false,
-        error: `Erreur lors de l'archivage : ${error.message}`
+        error: `Erreur lors de l'archivage : ${error.message}`,
       };
     }
 
     return { success: true };
-  } catch ( _error: any) {
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Une erreur est survenue lors de l'archivage";
     return {
       success: false,
-      error: error.message || 'Une erreur est survenue lors de l\'archivage'
+      error: message,
     };
   }
 };
-
-
-
-
-
-
-

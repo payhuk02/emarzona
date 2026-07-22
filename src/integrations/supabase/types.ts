@@ -47715,6 +47715,10 @@ export type Database = {
         Args: { check_slug: string; exclude_store_id?: string };
         Returns: boolean;
       };
+      delete_store_completely: {
+        Args: { p_store_id: string };
+        Returns: Json;
+      };
       is_subdomain_available: {
         Args: { check_subdomain: string; exclude_store_id?: string };
         Returns: boolean;
