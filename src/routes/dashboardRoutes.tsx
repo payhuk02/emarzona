@@ -291,7 +291,7 @@ export const dashboardRoutes = (
     {/* Core Dashboard */}
     {pr('/dashboard', Dashboard)}
     {pr('/dashboard/store', Store)}
-    {pr('/dashboard/store/preview', StorefrontPreviewPage)}
+    {prAuth('/dashboard/store/preview', StorefrontPreviewPage)}
     {pr('/dashboard/store/team', StoreTeamManagement)}
     {pr('/dashboard/tasks', MyTasks)}
     {pr('/dashboard/products', VendorProductsListGate)}

@@ -1,5 +1,5 @@
 /**
- * Brouillon de prévisualisation storefront (sessionStorage, synchronisé iframe ↔ wizard).
+ * Brouillon de prévisualisation storefront (localStorage, synchronisé iframe ↔ wizard ↔ nouvel onglet).
  */
 
 import type { Store } from '@/hooks/useStores';
@@ -86,6 +86,26 @@ export type StoreAppearanceFormDraft = {
 };
 
 const draftKey = (storeId: string) => `emarzona:store-preview:${storeId}`;
+
+export function buildStorePreviewUrl(storeId: string, slug: string): string {
+  const params = new URLSearchParams({
+    storeId,
+    slug,
+  });
+  return `/store-preview?${params.toString()}`;
+}
+
+function readDraftFromStorage(storage: Storage, storeId: string): StorePreviewDraft | null {
+  try {
+    const raw = storage.getItem(draftKey(storeId));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as StorePreviewDraft & { _updatedAt?: number };
+    const { _updatedAt: _ignored, ...draft } = parsed;
+    return draft;
+  } catch {
+    return null;
+  }
+}
 
 export function appearanceFormToPreviewDraft(form: StoreAppearanceFormDraft): StorePreviewDraft {
   return {
@@ -193,7 +213,12 @@ export const STORE_PREVIEW_CHANNEL = 'emarzona-store-preview';
 
 export function writeStorePreviewDraft(storeId: string, draft: StorePreviewDraft): void {
   if (typeof window === 'undefined') return;
-  sessionStorage.setItem(draftKey(storeId), JSON.stringify({ ...draft, _updatedAt: Date.now() }));
+  localStorage.setItem(draftKey(storeId), JSON.stringify({ ...draft, _updatedAt: Date.now() }));
+  try {
+    sessionStorage.removeItem(draftKey(storeId));
+  } catch {
+    // ignore
+  }
   try {
     const channel = new BroadcastChannel(STORE_PREVIEW_CHANNEL);
     channel.postMessage({ type: 'draft-updated', storeId });
@@ -205,15 +230,17 @@ export function writeStorePreviewDraft(storeId: string, draft: StorePreviewDraft
 
 export function readStorePreviewDraft(storeId: string): StorePreviewDraft | null {
   if (typeof window === 'undefined') return null;
-  try {
-    const raw = sessionStorage.getItem(draftKey(storeId));
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as StorePreviewDraft & { _updatedAt?: number };
-    const { _updatedAt: _ignored, ...draft } = parsed;
-    return draft;
-  } catch {
-    return null;
+
+  const fromLocal = readDraftFromStorage(localStorage, storeId);
+  if (fromLocal) return fromLocal;
+
+  const legacySession = readDraftFromStorage(sessionStorage, storeId);
+  if (legacySession) {
+    writeStorePreviewDraft(storeId, legacySession);
+    return legacySession;
   }
+
+  return null;
 }
 
 export function mergeStorePreviewDraft(store: Store, draft: StorePreviewDraft | null): Store {

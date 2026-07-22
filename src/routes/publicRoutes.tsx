@@ -35,6 +35,9 @@ const Trending = lazyPage(() => import('@/pages/Trending'));
 const CommunityPage = lazyPage(() => import('@/pages/community/CommunityPage'));
 const Checkout = lazyPage(() => import('@/pages/checkout/CheckoutPage'));
 const NotFound = lazyPage(() => import('@/pages/NotFound'));
+const StoreAppearancePublicPreviewPage = lazyPage(
+  () => import('@/pages/StoreAppearancePublicPreviewPage')
+);
 const StatusPage = lazyPage(() => import('@/pages/StatusPage'));
 const CourseDetail = lazyPage(() => import('@/pages/courses/CourseDetail'));
 const CoursesCatalog = lazyPage(() => import('@/pages/courses/CoursesCatalog'));
@@ -285,6 +288,9 @@ export const publicRoutes = (
 
     {/* Epic 5.3 — Status plateforme */}
     <Route path="/status" element={<StatusPage />} />
+
+    {/* Aperçu apparence boutique (localStorage, sans connexion) */}
+    <Route path="/store-preview" element={<StoreAppearancePublicPreviewPage />} />
 
     {/* Test i18n (dev only) */}
     {import.meta.env.DEV && <Route path="/i18n-test" element={<I18nTest />} />}

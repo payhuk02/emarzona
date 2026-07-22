@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import type { Store } from '@/hooks/useStores';
 import {
   appearanceFormToPreviewDraft,
+  buildStorePreviewUrl,
   writeStorePreviewDraft,
   type StoreAppearanceFormDraft,
 } from '@/lib/storefront/store-preview-draft';
@@ -74,9 +75,7 @@ export const StorePreview: React.FC<StorePreviewProps> = ({
     writeStorePreviewDraft(store.id, previewDraft);
   }, [store?.id, previewDraft]);
 
-  const previewUrl = store?.id
-    ? `/dashboard/store/preview?storeId=${encodeURIComponent(store.id)}`
-    : '';
+  const previewUrl = store?.id && store.slug ? buildStorePreviewUrl(store.id, store.slug) : '';
 
   const handleOpenPreview = () => {
     syncPreviewDraft();
