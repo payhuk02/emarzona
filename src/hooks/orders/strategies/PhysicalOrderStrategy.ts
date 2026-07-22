@@ -1,27 +1,22 @@
 import { supabase } from '@/integrations/supabase/client';
 import { initiatePayment } from '@/lib/payment-service';
-import {
-  releasePhysicalInventoryForOrder,
-  reservePhysicalInventoryForOrder,
-} from '@/lib/physical-inventory';
+import { releasePhysicalInventoryForOrder } from '@/lib/physical-inventory';
 import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
 import { logger } from '@/lib/logger';
-import { findOrCreateStoreCustomer } from '@/lib/orders/customers-data';
-import { generateOrderNumber } from '@/lib/orders/orders-data';
+import { createPublicPhysicalOrder } from '@/lib/orders/create-public-physical-order';
 import { parsePhysicalCheckoutOptions } from '@/lib/physical/physical-checkout-display';
 import {
   asOrderProduct,
-  asOrdersInsert,
   parsePaymentOptions,
   parseShippingAddress,
   parseStrategyOptions,
-  resolveUnitPrice,
 } from '@/lib/orders/order-strategy-utils';
-import { fetchOrderItemExtended, insertOrderItem } from '@/lib/orders/order-items-client';
 import { OrderStrategy, OrderStrategyContext, OrderCreationResult } from './OrderStrategy';
 
-const PHYSICAL_PRODUCT_VARIANT_FIELDS = 'id, price, is_available';
-
+/**
+ * Checkout physique via RPC SECURITY DEFINER (`create_public_physical_order`).
+ * Les INSERT directs sur `orders` sont bloqués par RLS pour les acheteurs.
+ */
 export class PhysicalOrderStrategy implements OrderStrategy {
   async createOrder(context: OrderStrategyContext): Promise<OrderCreationResult> {
     const {
@@ -46,7 +41,6 @@ export class PhysicalOrderStrategy implements OrderStrategy {
     const opts = parseStrategyOptions(options);
     const {
       variantId,
-      inventoryLocationId,
       giftCardId,
       giftCardAmount = 0,
       checkoutMethod: checkoutMethodOverride,
@@ -63,7 +57,6 @@ export class PhysicalOrderStrategy implements OrderStrategy {
     const checkoutMethod = checkoutMethodOverride ?? parsedCheckout.checkout_method;
     const isCashOnDelivery = checkoutMethod === 'cash_on_delivery';
 
-    // 1. Récupérer l'ID spécifique physique
     const { data: physicalRow } = await supabase
       .from('physical_products')
       .select('id')
@@ -71,7 +64,6 @@ export class PhysicalOrderStrategy implements OrderStrategy {
       .maybeSingle();
 
     const resolvedPhysicalProductId = physicalRow?.id;
-
     if (!resolvedPhysicalProductId) {
       throw new Error('Produit physique non trouvé');
     }
@@ -81,174 +73,77 @@ export class PhysicalOrderStrategy implements OrderStrategy {
     );
     const paymentType = isCashOnDelivery ? 'full' : paymentTypeRaw;
 
-    // 3. Récupérer la variante si spécifiée
-    let variantPrice = 0;
-    if (variantId) {
-      const { data: variant, error: variantError } = await supabase
-        .from('physical_product_variants')
-        .select(PHYSICAL_PRODUCT_VARIANT_FIELDS)
-        .eq('id', variantId)
-        .single();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const isGuest = guestCheckout ?? !user;
+    const affiliateTrackingCookie = getAffiliateTrackingCookie();
 
-      if (variantError || !variant) {
-        throw new Error('Variante non trouvée');
-      }
-
-      if (variant.is_available === false) {
-        throw new Error("Cette variante n'est pas disponible");
-      }
-
-      variantPrice = Number(variant.price ?? 0) - resolveUnitPrice(productData);
-    }
-
-    const customerId = await findOrCreateStoreCustomer({
+    const rpcResult = await createPublicPhysicalOrder({
+      productId,
       storeId,
-      email: customerEmail,
-      name: customerName || customerEmail.split('@')[0],
-      phone: customerPhone,
-      address: `${shippingAddress.street}, ${shippingAddress.city}, ${shippingAddress.postal_code}`,
-      city: shippingAddress.city,
-      country: shippingAddress.country,
+      customerEmail,
+      customerName: customerName || customerEmail.split('@')[0],
+      customerPhone,
+      quantity,
+      variantId,
+      checkoutMethod,
+      shippingAddress,
+      affiliateTrackingCookie,
+      guestCheckout: isGuest,
     });
 
-    // 6. Calculer le prix total
-    const baseUnitPrice = resolveUnitPrice(productData);
-    const unitPrice = variantId ? baseUnitPrice + variantPrice : baseUnitPrice;
-    const totalPrice = unitPrice * quantity;
+    const orderId = rpcResult.order_id;
+    const orderItemId = rpcResult.order_item_id;
+    const customerId = rpcResult.customer_id;
+    const totalPrice = rpcResult.total_amount;
+    const inventoryId = rpcResult.inventory_id ?? '';
+    const currency = rpcResult.currency || productData.currency;
 
-    // Calculer le montant à payer selon le type de paiement
     let amountToPay = totalPrice;
-    let percentagePaid = 0;
     let remainingAmount = 0;
 
     if (paymentType === 'percentage') {
       amountToPay = Math.round((totalPrice * percentageRate) / 100);
-      percentagePaid = amountToPay;
       remainingAmount = totalPrice - amountToPay;
-    } else if (paymentType === 'delivery_secured') {
-      amountToPay = totalPrice;
     }
 
     const finalAmountToPay = Math.max(0, amountToPay - (giftCardAmount || 0));
 
-    // 7. Générer un numéro de commande
-    const orderNumber = await generateOrderNumber();
-
-    // 8. Créer la commande
-    const affiliateTrackingCookie = getAffiliateTrackingCookie();
-
-    const { data: order, error: orderError } = await supabase
-      .from('orders')
-      .insert(
-        asOrdersInsert({
-          store_id: storeId,
-          customer_id: customerId,
-          order_number: orderNumber,
-          total_amount: totalPrice - (giftCardAmount || 0),
-          currency: productData.currency,
-          payment_status: isCashOnDelivery ? 'cod_pending' : 'pending',
-          status: isCashOnDelivery ? 'confirmed' : 'pending',
-          delivery_status: 'pending',
-          payment_type: paymentType,
-          percentage_paid: percentagePaid,
-          remaining_amount: remainingAmount,
-          affiliate_tracking_cookie: affiliateTrackingCookie,
-          metadata: {
-            checkout_method: checkoutMethod,
-            guest_checkout: guestCheckout ?? true,
-          },
-        })
-      )
-      .select(
-        'id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at'
-      )
-      .single();
-
-    if (orderError || !order) {
-      throw new Error('Erreur lors de la création de la commande');
-    }
-
-    // 8a. Rédimer la carte cadeau
     if (giftCardId && giftCardAmount > 0) {
       try {
-        const { data: redeemResult, error: redeemError } = await supabase.rpc('redeem_gift_card', {
+        await supabase.rpc('redeem_gift_card', {
           p_gift_card_id: giftCardId,
-          p_order_id: order.id,
+          p_order_id: orderId,
           p_amount: giftCardAmount,
         });
-        if (redeemError) {
-          logger.error('Error redeeming gift card:', redeemError);
-        } else if (redeemResult && redeemResult.length > 0 && !redeemResult[0].success) {
-          logger.error('Gift card redemption failed:', redeemResult[0].message);
-        }
       } catch (giftCardError) {
         logger.error('Error in gift card redemption:', giftCardError);
       }
     }
 
-    // 9. Créer automatiquement la facture
     try {
-      const { data: invoiceId, error: invoiceError } = await supabase.rpc(
-        'create_invoice_from_order',
-        { p_order_id: order.id }
-      );
-      if (invoiceError) {
-        logger.error('Error creating invoice:', invoiceError);
-      } else {
-        logger.info(`Invoice created: ${invoiceId}`);
-      }
-    } catch (invoiceErr) {
-      logger.error('Error in invoice creation:', invoiceErr);
+      await supabase.rpc('create_invoice_from_order', { p_order_id: orderId });
+    } catch (_invoiceErr) {
+      /* ignore */
     }
 
-    // 10. Webhook (asynchrone)
     import('@/lib/webhooks').then(({ triggerOrderCreatedWebhook }) => {
-      triggerOrderCreatedWebhook(order.id, order).catch(err => {
-        logger.error('Error in analytics tracking', { error: err, orderId: order.id });
-      });
+      triggerOrderCreatedWebhook(orderId, {
+        store_id: storeId,
+        customer_id: customerId,
+        order_number: rpcResult.order_number,
+        status: isCashOnDelivery || rpcResult.cash_on_delivery ? 'confirmed' : 'pending',
+        total_amount: totalPrice - (giftCardAmount || 0),
+        currency,
+        payment_status: isCashOnDelivery || rpcResult.cash_on_delivery ? 'cod_pending' : 'pending',
+        created_at: new Date().toISOString(),
+      }).catch(() => {});
     });
 
-    // 11. Créer l'order_item
-    const { data: orderItem, error: orderItemError } = await insertOrderItem({
-      order_id: order.id,
-      product_id: productId,
-      product_type: 'physical',
-      physical_product_id: resolvedPhysicalProductId,
-      variant_id: variantId,
-      product_name: productData.name,
-      quantity,
-      unit_price: unitPrice,
-      total_price: totalPrice,
-      item_metadata: {
-        variant_price_adjustment: variantPrice,
-        shipping_address: shippingAddress,
-        ...(inventoryLocationId ? { preferred_inventory_id: inventoryLocationId } : {}),
-      },
-    });
-
-    if (orderItemError || !orderItem) {
-      throw new Error("Erreur lors de la création de l'élément de commande");
-    }
-
-    try {
-      await reservePhysicalInventoryForOrder(order.id);
-    } catch (stockErr) {
-      throw stockErr instanceof Error ? stockErr : new Error('Stock insuffisant');
-    }
-
-    const reservedItem = await fetchOrderItemExtended(orderItem.id);
-    const reservedMeta = reservedItem?.item_metadata ?? {};
-    const inventoryId =
-      typeof reservedMeta.inventory_id === 'string' ? reservedMeta.inventory_id : '';
-    const inventoryLocation =
-      typeof reservedMeta.inventory_location === 'string'
-        ? reservedMeta.inventory_location
-        : undefined;
-
-    // Secured payment
     if (paymentType === 'delivery_secured') {
       await supabase.from('secured_payments').insert({
-        order_id: order.id,
+        order_id: orderId,
         total_amount: totalPrice,
         held_amount: amountToPay,
         status: 'held',
@@ -260,18 +155,16 @@ export class PhysicalOrderStrategy implements OrderStrategy {
       });
     }
 
-    // COD
-    if (isCashOnDelivery) {
+    if (isCashOnDelivery || rpcResult.cash_on_delivery) {
       return {
-        orderId: order.id,
-        orderItemId: orderItem.id,
+        orderId,
+        orderItemId,
         inventoryId,
         cashOnDelivery: true,
-        orderNumber: order.order_number,
+        orderNumber: rpcResult.order_number,
       };
     }
 
-    // Payment init
     const paymentDescription =
       paymentType === 'percentage'
         ? `Acompte ${percentageRate}%: ${productData.name} x${quantity}`
@@ -282,10 +175,10 @@ export class PhysicalOrderStrategy implements OrderStrategy {
     const paymentResult = await initiatePayment({
       storeId,
       productId,
-      orderId: order.id,
+      orderId,
       customerId,
       amount: finalAmountToPay,
-      currency: productData.currency,
+      currency,
       description: paymentDescription,
       customerEmail,
       customerName: customerName || customerEmail.split('@')[0],
@@ -297,31 +190,30 @@ export class PhysicalOrderStrategy implements OrderStrategy {
         physical_product_id: resolvedPhysicalProductId,
         variant_id: variantId,
         inventory_id: inventoryId || undefined,
-        inventory_location: inventoryLocation,
         quantity,
-        order_item_id: orderItem.id,
+        order_item_id: orderItemId,
         shipping_address: shippingAddress,
         payment_type: paymentType,
         percentage_rate: paymentType === 'percentage' ? percentageRate : null,
         total_price: totalPrice,
         amount_paid: amountToPay,
         remaining_amount: remainingAmount,
-        ...(guestCheckout ? { guest_checkout: true } : {}),
+        ...(isGuest ? { guest_checkout: true } : {}),
       },
     });
 
     if (!paymentResult.success || !paymentResult.checkout_url) {
-      await releasePhysicalInventoryForOrder(order.id);
+      await releasePhysicalInventoryForOrder(orderId);
       throw new Error("Erreur lors de l'initialisation du paiement");
     }
 
     return {
-      orderId: order.id,
-      orderItemId: orderItem.id,
+      orderId,
+      orderItemId,
       inventoryId,
       checkoutUrl: paymentResult.checkout_url,
       transactionId: paymentResult.transaction_id,
-      orderNumber: order.order_number,
+      orderNumber: rpcResult.order_number,
     };
   }
 }

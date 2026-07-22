@@ -1,16 +1,11 @@
 import { supabase } from '@/integrations/supabase/client';
 import { initiatePayment } from '@/lib/payment-service';
 import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
-// import { logger } from '@/lib/logger';
-import { findOrCreateStoreCustomer } from '@/lib/orders/customers-data';
-import { generateOrderNumber } from '@/lib/orders/orders-data';
+import { logger } from '@/lib/logger';
 import {
   asOptionalString,
   asOrderProduct,
-  asOrdersInsert,
-  parsePaymentOptions,
   parseStrategyOptions,
-  resolveUnitPrice,
 } from '@/lib/orders/order-strategy-utils';
 import { OrderStrategy, OrderStrategyContext, OrderCreationResult } from './OrderStrategy';
 
@@ -24,7 +19,6 @@ export class CourseOrderStrategy implements OrderStrategy {
       customerEmail,
       customerName,
       customerPhone,
-      quantity = 1,
       productRecord,
       options,
       returnUrl,
@@ -70,10 +64,6 @@ export class CourseOrderStrategy implements OrderStrategy {
       };
     }
 
-    const { payment_type: paymentType, percentage_rate: percentageRate } = parsePaymentOptions(
-      product.payment_options
-    );
-
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -109,99 +99,59 @@ export class CourseOrderStrategy implements OrderStrategy {
       _finalUserId = provisionData?.user_id;
     }
 
-    const customerId = await findOrCreateStoreCustomer({
-      storeId,
-      email: customerEmail,
-      name: customerName || customerEmail.split('@')[0],
-      phone: customerPhone,
-    });
-
-    const basePrice = resolveUnitPrice(product);
-    const totalPrice = basePrice * quantity;
-
-    let amountToPay = totalPrice;
-    let percentagePaid = 0;
-    let remainingAmount = 0;
-
-    if (paymentType === 'percentage') {
-      amountToPay = Math.round((totalPrice * percentageRate) / 100);
-      percentagePaid = amountToPay;
-      remainingAmount = totalPrice - amountToPay;
-    } else if (paymentType === 'delivery_secured') {
-      amountToPay = totalPrice;
-    }
-
-    const finalAmountToPay = Math.max(0, amountToPay - (giftCardAmount || 0));
-    const orderNumber = await generateOrderNumber();
+    // Création commande via RPC SECURITY DEFINER : les acheteurs n'ont pas le
+    // droit d'INSERT direct sur orders (RLS).
     const affiliateTrackingCookie = getAffiliateTrackingCookie();
 
-    const { data: order, error: orderError } = await supabase
-      .from('orders')
-      .insert(
-        asOrdersInsert({
-          store_id: storeId,
-          customer_id: customerId,
-          order_number: orderNumber,
-          total_amount: totalPrice - (giftCardAmount || 0),
-          currency: product.currency,
-          payment_status: 'pending',
-          status: 'pending',
-          payment_type: paymentType,
-          percentage_paid: percentagePaid,
-          remaining_amount: remainingAmount,
-          affiliate_tracking_cookie: affiliateTrackingCookie,
-          metadata: {
-            course_id: resolvedCourseId,
-            course_name: product.name,
-            auto_enroll: true,
-            ...(guestCheckout ? { guest_checkout: true } : {}),
-          },
-        })
-      )
-      .select(
-        'id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at'
-      )
-      .single();
+    const { data: rpcResult, error: orderError } = await supabase.rpc(
+      // @ts-expect-error: RPC type not yet updated in supabase types
+      'create_public_course_order',
+      {
+        p_product_id: productId,
+        p_store_id: storeId,
+        p_customer_email: customerEmail,
+        p_customer_name: customerName || customerEmail.split('@')[0],
+        p_customer_phone: customerPhone ?? null,
+        p_gift_card_id: giftCardId ?? null,
+        p_gift_card_amount_requested: giftCardAmount || 0,
+        p_coupon_code: null,
+        p_affiliate_tracking_cookie: affiliateTrackingCookie,
+        p_guest_checkout: guestCheckout ?? !user,
+      }
+    );
 
-    if (orderError || !order) {
-      throw new Error('Erreur lors de la création de la commande');
-    }
-
-    const { data: orderItem, error: orderItemError } = await supabase
-      .from('order_items')
-      .insert({
-        order_id: order.id,
-        product_id: productId,
-        product_type: 'course',
-        product_name: product.name,
-        quantity,
-        unit_price: basePrice,
-        total_price: totalPrice - (giftCardAmount || 0),
-      })
-      .select('id')
-      .single();
-
-    if (orderItemError || !orderItem) {
-      await supabase.from('orders').delete().eq('id', order.id);
+    if (orderError || !rpcResult) {
+      logger.error('create_public_course_order failed', { error: orderError });
       throw new Error(
-        `Erreur lors de la création de l'élément de commande: ${orderItemError.message}`
+        `Erreur lors de la création de la commande: ${orderError?.message || 'Inconnue'}`
       );
     }
 
-    if (giftCardId && giftCardAmount > 0) {
-      try {
-        await supabase.rpc('redeem_gift_card', {
-          p_gift_card_id: giftCardId,
-          p_order_id: order.id,
-          p_amount: giftCardAmount,
-        });
-      } catch (_giftCardErr) {
-        /* ignore */
-      }
-    }
+    const orderData = rpcResult as unknown as {
+      order_id: string;
+      order_item_id: string;
+      order_number: string;
+      customer_id: string;
+      course_id: string;
+      total_amount: number;
+    };
+
+    const orderId = orderData.order_id;
+    const orderItemId = orderData.order_item_id;
+    const customerId = orderData.customer_id;
+    const finalAmountToPay = Number(orderData.total_amount) || 0;
 
     import('@/lib/webhooks').then(({ triggerOrderCreatedWebhook }) => {
-      triggerOrderCreatedWebhook(order.id, order).catch(() => {});
+      triggerOrderCreatedWebhook(orderId, {
+        store_id: storeId,
+        customer_id: customerId,
+        order_number: orderData.order_number,
+        status: 'pending',
+        total_amount: finalAmountToPay,
+        currency: product.currency,
+        payment_status: 'pending',
+        created_at: new Date().toISOString(),
+      }).catch(() => {});
     });
 
     const { isSupportedCurrency } = await import('@/lib/currency-converter');
@@ -213,7 +163,7 @@ export class CourseOrderStrategy implements OrderStrategy {
     const paymentResult = await initiatePayment({
       storeId,
       productId,
-      orderId: order.id,
+      orderId,
       customerId,
       amount: finalAmountToPay,
       currency: paymentCurrency,
@@ -225,7 +175,7 @@ export class CourseOrderStrategy implements OrderStrategy {
       cancelUrl,
       metadata: {
         product_type: 'course',
-        order_item_id: orderItem.id,
+        order_item_id: orderItemId,
         course_id: resolvedCourseId,
         auto_enroll: true,
         ...(guestCheckout ? { guest_checkout: true } : {}),
@@ -233,14 +183,12 @@ export class CourseOrderStrategy implements OrderStrategy {
     });
 
     if (!paymentResult.success || !paymentResult.checkout_url) {
-      await supabase.from('order_items').delete().eq('id', orderItem.id);
-      await supabase.from('orders').delete().eq('id', order.id);
       throw new Error("Erreur lors de l'initialisation du paiement");
     }
 
     return {
-      orderId: order.id,
-      orderItemId: orderItem.id,
+      orderId,
+      orderItemId,
       checkoutUrl: paymentResult.checkout_url,
       transactionId: paymentResult.transaction_id,
     };

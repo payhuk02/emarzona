@@ -3,31 +3,21 @@ import { initiatePayment } from '@/lib/payment-service';
 import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
 import { logger } from '@/lib/logger';
 import { isSupportedCurrency, type Currency } from '@/lib/currency-converter';
-import { validateCheckoutPromotion } from '@/lib/checkout/promotion';
-import { findOrCreateStoreCustomer } from '@/lib/orders/customers-data';
-import { generateOrderNumber } from '@/lib/orders/orders-data';
 import {
   asOptionalString,
   asOrderProduct,
-  asOrdersInsert,
   parseStrategyOptions,
-  resolveUnitPrice,
 } from '@/lib/orders/order-strategy-utils';
-import { insertOrderItem } from '@/lib/orders/order-items-client';
-import { extractCheckoutToken } from '@/lib/checkout/checkout-access';
 import { OrderStrategy, OrderStrategyContext, OrderCreationResult } from './OrderStrategy';
 
 const PRODUCT_FIELDS = 'id, name, price, promotional_price, currency';
 
-async function generateLicenseKeyViaRpc(): Promise<string> {
-  const { data, error } = await supabase.rpc('generate_license_key');
-  if (error || !data) {
-    logger.error('generate_license_key RPC failed', { error });
-    throw new Error('Erreur lors de la génération de la clé de licence');
-  }
-  return data as string;
-}
-
+/**
+ * Checkout digital via RPC SECURITY DEFINER (`create_public_digital_order`).
+ * Les INSERT directs sur `orders` sont bloqués par RLS pour les acheteurs
+ * (invités ou connectés) — la RPC calcule le montant côté serveur.
+ * Les licences sont générées au paiement (trigger fulfill_digital_order_items_on_paid).
+ */
 export class DigitalOrderStrategy implements OrderStrategy {
   async createOrder(context: OrderStrategyContext): Promise<OrderCreationResult> {
     const {
@@ -63,8 +53,6 @@ export class DigitalOrderStrategy implements OrderStrategy {
       giftCardId,
       giftCardAmount = 0,
       couponCode,
-      couponDiscountAmount = 0,
-      promotionId,
     } = opts;
 
     let resolvedDigitalProductId = asOptionalString(opts.digitalProductId);
@@ -81,181 +69,77 @@ export class DigitalOrderStrategy implements OrderStrategy {
       throw new Error('Produit digital non trouvé');
     }
 
-    const customerId = await findOrCreateStoreCustomer({
-      storeId,
-      email: customerEmail,
-      name: customerName || customerEmail.split('@')[0],
-      phone: customerPhone,
-    });
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const isGuest = guestCheckout ?? !user;
 
-    let licenseId: string | undefined;
-    if (generateLicense) {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (user?.id) {
-        const expiresAt = licenseExpiryDays
-          ? new Date(Date.now() + licenseExpiryDays * 24 * 60 * 60 * 1000).toISOString()
-          : null;
-
-        const { data: license, error: licenseError } = await supabase
-          .from('digital_licenses')
-          .insert({
-            digital_product_id: resolvedDigitalProductId,
-            user_id: user.id,
-            license_key: await generateLicenseKeyViaRpc(),
-            license_type: licenseType,
-            max_activations: licenseType === 'unlimited' ? -1 : maxActivations,
-            current_activations: 0,
-            expires_at: expiresAt,
-            status: 'pending',
-            customer_email: customerEmail,
-            customer_name: customerName || customerEmail.split('@')[0],
-          })
-          .select('id')
-          .single();
-
-        if (licenseError || !license) {
-          logger.error('License creation error', { error: licenseError, resolvedDigitalProductId });
-          throw new Error('Erreur lors de la génération de la licence');
-        }
-        licenseId = license.id;
-      } else {
-        const { data, error: functionError } = await supabase.functions.invoke(
-          'guest-checkout-provisioning',
-          {
-            body: {
-              email: customerEmail,
-              customerName: customerName,
-              digitalProductId: resolvedDigitalProductId,
-              licenseType: licenseType,
-              maxActivations: maxActivations,
-              licenseExpiryDays: licenseExpiryDays,
-            },
-          }
-        );
-
-        if (functionError) {
-          logger.error('Guest checkout provisioning error', { error: functionError });
-          throw new Error(
-            functionError.message || "Impossible de générer la licence pour l'invité"
-          );
-        }
-        if (data?.error) throw new Error(data.error);
-        if (!data?.success || !data?.license_id)
-          throw new Error("Erreur inattendue lors de l'auto-provisioning");
-        licenseId = data.license_id;
-      }
-    }
-
-    const baseAmount = resolveUnitPrice(product);
-    let promoDiscount = Math.max(0, couponDiscountAmount || 0);
-    let resolvedPromotionId = promotionId;
-
-    if (couponCode?.trim() && promoDiscount <= 0) {
-      const validation = await validateCheckoutPromotion({
-        code: couponCode,
-        storeId,
-        productIds: [productId],
-        orderAmount: baseAmount,
-        customerId,
-      });
-      if (validation.valid === false) {
-        throw new Error(validation.message);
-      }
-      promoDiscount = validation.promotion.discountAmount;
-      resolvedPromotionId = validation.promotion.promotionId;
-    }
-
-    const finalAmount = Math.max(0, baseAmount - promoDiscount - (giftCardAmount || 0));
-    const orderNumber = await generateOrderNumber();
     const affiliateTrackingCookie = getAffiliateTrackingCookie();
 
-    const { data: order, error: orderError } = await supabase
-      .from('orders')
-      .insert(
-        asOrdersInsert({
-          store_id: storeId,
-          customer_id: customerId,
-          order_number: orderNumber,
-          total_amount: finalAmount,
-          currency: product.currency,
-          payment_status: 'pending',
-          status: 'pending',
-          affiliate_tracking_cookie: affiliateTrackingCookie,
-          metadata: guestCheckout
-            ? { guest_checkout: true, customer_email: customerEmail }
-            : { customer_email: customerEmail },
-        })
-      )
-      .select(
-        'id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at, metadata'
-      )
-      .single();
+    // Signature compatible avec la RPC prod actuelle (sans p_license_id).
+    // Les licences sont créées au paiement par le trigger SQL.
+    const { data: rpcResult, error: orderError } = await supabase.rpc(
+      // @ts-expect-error: RPC type not yet updated in supabase types
+      'create_public_digital_order',
+      {
+        p_product_id: productId,
+        p_store_id: storeId,
+        p_customer_email: customerEmail,
+        p_customer_name: customerName || customerEmail.split('@')[0],
+        p_customer_phone: customerPhone ?? null,
+        p_generate_license: generateLicense,
+        p_license_type: licenseType,
+        p_max_activations: maxActivations,
+        p_license_expiry_days: licenseExpiryDays ?? null,
+        p_gift_card_id: giftCardId ?? null,
+        p_gift_card_amount_requested: giftCardAmount || 0,
+        p_coupon_code: couponCode?.trim() || null,
+        p_affiliate_tracking_cookie: affiliateTrackingCookie,
+        p_guest_checkout: isGuest,
+      }
+    );
 
-    if (orderError || !order) {
-      console.error('DEBUG_ORDER_ERROR', orderError);
+    if (orderError || !rpcResult) {
+      logger.error('create_public_digital_order failed', { error: orderError });
       throw new Error(
         `Erreur lors de la création de la commande: ${orderError?.message || 'Inconnue'}`
       );
     }
 
-    const checkoutToken = extractCheckoutToken(order.metadata);
+    const orderData = rpcResult as unknown as {
+      order_id: string;
+      order_item_id: string;
+      order_number: string;
+      customer_id: string;
+      digital_product_id: string;
+      total_amount: number;
+      checkout_token?: string | null;
+    };
 
-    if (giftCardId && giftCardAmount > 0) {
-      try {
-        await supabase.rpc('redeem_gift_card', {
-          p_gift_card_id: giftCardId,
-          p_order_id: order.id,
-          p_amount: giftCardAmount,
-        });
-      } catch (giftCardError) {
-        logger.error('Error in gift card redemption:', { error: giftCardError });
-      }
-    }
+    const orderId = orderData.order_id;
+    const orderItemId = orderData.order_item_id;
+    const customerId = orderData.customer_id;
+    const finalAmount = Number(orderData.total_amount) || 0;
+    const checkoutToken = orderData.checkout_token || undefined;
 
     try {
-      await supabase.rpc('create_invoice_from_order', { p_order_id: order.id });
+      await supabase.rpc('create_invoice_from_order', { p_order_id: orderId });
     } catch (_invoiceErr) {
       /* ignore */
     }
 
     import('@/lib/webhooks').then(({ triggerOrderCreatedWebhook }) => {
-      triggerOrderCreatedWebhook(order.id, order).catch(() => {});
-    });
-
-    const unitPrice = resolveUnitPrice(product);
-    const { data: orderItem, error: orderItemError } = await insertOrderItem({
-      order_id: order.id,
-      product_id: productId,
-      product_type: 'digital',
-      digital_product_id: resolvedDigitalProductId,
-      license_id: licenseId,
-      product_name: product.name,
-      quantity: 1,
-      unit_price: unitPrice,
-      total_price: unitPrice,
-      item_metadata: {
-        license_generated: !!licenseId,
-        license_type: licenseType,
-      },
-    });
-
-    if (orderItemError || !orderItem) {
-      throw new Error("Erreur lors de la création de l'élément de commande");
-    }
-
-    if (promoDiscount > 0 && resolvedPromotionId) {
-      await supabase.from('promotion_usage').insert({
-        promotion_id: resolvedPromotionId,
-        order_id: order.id,
+      triggerOrderCreatedWebhook(orderId, {
+        store_id: storeId,
         customer_id: customerId,
-        discount_amount: promoDiscount,
-        order_total_before_discount: baseAmount,
-        order_total_after_discount: finalAmount,
-      });
-    }
+        order_number: orderData.order_number,
+        status: 'pending',
+        total_amount: finalAmount,
+        currency: product.currency,
+        payment_status: 'pending',
+        created_at: new Date().toISOString(),
+      }).catch(() => {});
+    });
 
     const paymentCurrency: Currency = isSupportedCurrency(product.currency)
       ? (product.currency as Currency)
@@ -264,7 +148,7 @@ export class DigitalOrderStrategy implements OrderStrategy {
     const paymentResult = await initiatePayment({
       storeId,
       productId,
-      orderId: order.id,
+      orderId,
       customerId,
       amount: finalAmount,
       currency: paymentCurrency,
@@ -276,13 +160,12 @@ export class DigitalOrderStrategy implements OrderStrategy {
       cancelUrl,
       metadata: {
         product_type: 'digital',
-        order_id: order.id,
-        order_number: order.order_number,
-        digital_product_id: resolvedDigitalProductId,
-        license_id: licenseId,
-        order_item_id: orderItem.id,
+        order_id: orderId,
+        order_number: orderData.order_number,
+        digital_product_id: orderData.digital_product_id || resolvedDigitalProductId,
+        order_item_id: orderItemId,
         ...(checkoutToken ? { checkout_token: checkoutToken } : {}),
-        ...(guestCheckout ? { guest_checkout: true } : {}),
+        ...(isGuest ? { guest_checkout: true } : {}),
       },
       checkoutToken,
     });
@@ -292,9 +175,9 @@ export class DigitalOrderStrategy implements OrderStrategy {
     }
 
     return {
-      orderId: order.id,
-      orderItemId: orderItem.id,
-      licenseId,
+      orderId,
+      orderItemId,
+      licenseId: undefined,
       checkoutUrl: paymentResult.checkout_url,
       transactionId: paymentResult.transaction_id,
     };

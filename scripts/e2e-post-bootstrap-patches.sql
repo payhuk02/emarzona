@@ -550,6 +550,12 @@ COMMENT ON FUNCTION public.auto_enroll_course_on_payment() IS
 -- account-security public.user_sessions table.
 \i supabase/scripts/apply-web-analytics-prod.sql
 
+-- Ensure public checkout RPCs exist (SECURITY DEFINER — bypass RLS buyer insert).
+\i supabase/scripts/apply-public-order-rpcs-prod.sql
+
+-- Optional: digital order RPC with p_license_id (compatible, defaults NULL).
+\i supabase/migrations/20260721190000__digital_order_rpc_license_link.sql
+
 -- Hard-fail if the old year coercion (NULL → 0) is still present in the live function.
 DO $$
 DECLARE
