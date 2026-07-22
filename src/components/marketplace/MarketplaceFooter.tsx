@@ -109,28 +109,28 @@ const MarketplaceFooter = () => {
             <h3 className="font-bold mb-3 sm:mb-4 text-sm sm:text-base">Support</h3>
             <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
               <li>
-                <a
-                  href="#faq"
+                <Link
+                  to="/faq"
                   className="text-muted-foreground hover:text-primary transition-colors touch-manipulation block py-1"
                 >
                   FAQ
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#terms"
+                <Link
+                  to="/legal/cgv"
                   className="text-muted-foreground hover:text-primary transition-colors touch-manipulation block py-1"
                 >
-                  CGU
-                </a>
+                  CGU / CGV
+                </Link>
               </li>
               <li>
-                <a
-                  href="#privacy"
+                <Link
+                  to="/legal/privacy"
                   className="text-muted-foreground hover:text-primary transition-colors touch-manipulation block py-1"
                 >
                   Confidentialité
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

@@ -9,28 +9,17 @@ import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 
 export const usePageCustomization = (onChange?: () => void) => {
-  const { customizationData, save } = usePlatformCustomization();
+  const { customizationData, save, setCustomizationData } = usePlatformCustomization();
   const { toast } = useToast();
   const [pageValues, setPageValues] = useState<Record<string, Record<string, unknown>>>({});
   const [uploadingImages, setUploadingImages] = useState<Record<string, boolean>>({});
   const [isSyncing, setIsSyncing] = useState(false);
-
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const pendingChangesRef = useRef<Record<string, Record<string, unknown>>>({});
 
   useEffect(() => {
     if (customizationData?.pages) {
       setPageValues(customizationData.pages);
     }
   }, [customizationData]);
-
-  useEffect(() => {
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-    };
-  }, []);
 
   const handleElementChange = useCallback(
     (pageId: string, elementKey: string, value: unknown) => {
@@ -40,16 +29,13 @@ export const usePageCustomization = (onChange?: () => void) => {
           [pageId]: { ...prev[pageId], [elementKey]: value },
         };
 
-        pendingChangesRef.current = {
-          ...pendingChangesRef.current,
-          [pageId]: { ...pendingChangesRef.current[pageId], [elementKey]: value },
-        };
-
         const currentData = customizationData || {};
         const updatedData = {
           ...currentData,
           pages: { ...currentData.pages, ...updated },
         };
+
+        setCustomizationData(updatedData);
 
         window.dispatchEvent(
           new CustomEvent('platform-customization-updated', {
@@ -57,33 +43,12 @@ export const usePageCustomization = (onChange?: () => void) => {
           })
         );
 
-        if (saveTimeoutRef.current) {
-          clearTimeout(saveTimeoutRef.current);
-        }
-
-        saveTimeoutRef.current = setTimeout(async () => {
-          const changesToSave = pendingChangesRef.current;
-          if (Object.keys(changesToSave).length > 0) {
-            setIsSyncing(true);
-            try {
-              const currentPages = customizationData?.pages || {};
-              const mergedPages = { ...currentPages, ...changesToSave };
-              await save('pages', mergedPages).catch(error => {
-                logger.error('Error saving page customization', { error, pageId, elementKey });
-              });
-              pendingChangesRef.current = {};
-            } finally {
-              setIsSyncing(false);
-            }
-          }
-        }, 500);
-
         return updated;
       });
 
       if (onChange) onChange();
     },
-    [save, onChange, customizationData]
+    [onChange, customizationData, setCustomizationData]
   );
 
   const handleImageUpload = useCallback(
@@ -125,7 +90,11 @@ export const usePageCustomization = (onChange?: () => void) => {
   const getElementValue = useCallback(
     (pageId: string, elementKey: string, defaultValue?: string): string | number | boolean => {
       const rawValue = pageValues[pageId]?.[elementKey];
-      if (typeof rawValue === 'string' || typeof rawValue === 'number' || typeof rawValue === 'boolean') {
+      if (
+        typeof rawValue === 'string' ||
+        typeof rawValue === 'number' ||
+        typeof rawValue === 'boolean'
+      ) {
         return rawValue;
       }
       return defaultValue ?? '';

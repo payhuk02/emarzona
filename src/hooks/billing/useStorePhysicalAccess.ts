@@ -48,6 +48,14 @@ function daysUntil(iso: string | null): number | null {
   return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
 }
 
+const fetchWithTimeout = async <T>(promise: Promise<T>, ms: number = 8000): Promise<T> => {
+  let timeoutId: ReturnType<typeof setTimeout>;
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error('Supabase request timeout')), ms);
+  });
+  return Promise.race([promise, timeoutPromise]).finally(() => clearTimeout(timeoutId));
+};
+
 export function useStorePhysicalAccess(storeId?: string | null): StorePhysicalAccessState {
   const [state, setState] = useState(defaultState);
   const [fetchedStoreId, setFetchedStoreId] = useState<string | null | undefined>(undefined);
@@ -62,7 +70,7 @@ export function useStorePhysicalAccess(storeId?: string | null): StorePhysicalAc
     setState(prev => ({ ...prev, loading: true }));
 
     try {
-      const { data, error } = await supabase
+      const query = supabase
         .from('store_platform_subscriptions' as never)
         .select(
           `
@@ -75,6 +83,8 @@ export function useStorePhysicalAccess(storeId?: string | null): StorePhysicalAc
         )
         .eq('store_id', storeId)
         .maybeSingle();
+
+      const { data, error } = await fetchWithTimeout(query, 8000);
 
       if (error) throw error;
 

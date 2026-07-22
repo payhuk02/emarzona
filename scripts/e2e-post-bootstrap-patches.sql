@@ -551,10 +551,11 @@ COMMENT ON FUNCTION public.auto_enroll_course_on_payment() IS
 \i supabase/scripts/apply-web-analytics-prod.sql
 
 -- Ensure public checkout RPCs exist (SECURITY DEFINER — bypass RLS buyer insert).
+-- Includes platform fee 2% + 100 XOF on digital/course/artist.
 \i supabase/scripts/apply-public-order-rpcs-prod.sql
 
--- Optional: digital order RPC with p_license_id (compatible, defaults NULL).
-\i supabase/migrations/20260721190000__digital_order_rpc_license_link.sql
+-- Platform fee on physical checkout RPC (+ apply_checkout_platform_fee helper).
+\i supabase/migrations/20260722023000__checkout_platform_fee.sql
 
 -- Hard-fail if the old year coercion (NULL → 0) is still present in the live function.
 DO $$

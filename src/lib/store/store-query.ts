@@ -30,66 +30,88 @@ export const storeQueryKeys = {
   firstForUser: (userId: string) => [...storeQueryKeys.all, userId, '__first__'] as const,
 };
 
+const fetchWithTimeout = async <T>(promise: Promise<T>, ms: number = 8000): Promise<T> => {
+  let timeoutId: ReturnType<typeof setTimeout>;
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error('Supabase request timeout')), ms);
+  });
+  return Promise.race([promise, timeoutPromise]).finally(() => clearTimeout(timeoutId));
+};
+
 export async function fetchStoreById(userId: string, storeId: string): Promise<Store | null> {
   logger.debug('[store-query] fetchStoreById', { userId, storeId });
 
-  // Embed store_appearance hors schéma types.ts → cast pour éviter TS2589
-  const { data, error } = await (
-    supabase.from('stores') as unknown as {
-      select: (columns: string) => {
-        eq: (
-          column: string,
-          value: string
-        ) => {
-          single: () => Promise<{ data: Record<string, unknown> | null; error: Error | null }>;
+  try {
+    // Embed store_appearance hors schéma types.ts → cast pour éviter TS2589
+    const query = (
+      supabase.from('stores') as unknown as {
+        select: (columns: string) => {
+          eq: (
+            column: string,
+            value: string
+          ) => {
+            single: () => Promise<{ data: Record<string, unknown> | null; error: Error | null }>;
+          };
         };
-      };
+      }
+    )
+      .select(STORE_FIELDS)
+      .eq('id', storeId)
+      .single();
+
+    const { data, error } = await fetchWithTimeout(query, 8000);
+
+    if (error) {
+      logger.error('[store-query] fetchStoreById failed', { storeId, error });
+      throw error;
     }
-  )
-    .select(STORE_FIELDS)
-    .eq('id', storeId)
-    .single();
 
-  if (error) {
-    logger.error('[store-query] fetchStoreById failed', { storeId, error });
-    throw error;
+    return mapStoreRow(data);
+  } catch (err) {
+    logger.error('[store-query] fetchStoreById exception', { storeId, err });
+    throw err;
   }
-
-  return mapStoreRow(data);
 }
 
 export async function fetchFirstStoreForUser(userId: string): Promise<Store | null> {
   logger.debug('[store-query] fetchFirstStoreForUser', { userId });
 
-  const { data, error } = await (
-    supabase.from('stores') as unknown as {
-      select: (columns: string) => {
-        eq: (
-          column: string,
-          value: string
-        ) => {
-          order: (
+  try {
+    const query = (
+      supabase.from('stores') as unknown as {
+        select: (columns: string) => {
+          eq: (
             column: string,
-            opts: { ascending: boolean }
+            value: string
           ) => {
-            limit: (
-              count: number
-            ) => Promise<{ data: Record<string, unknown>[] | null; error: Error | null }>;
+            order: (
+              column: string,
+              opts: { ascending: boolean }
+            ) => {
+              limit: (
+                count: number
+              ) => Promise<{ data: Record<string, unknown>[] | null; error: Error | null }>;
+            };
           };
         };
-      };
+      }
+    )
+      .select(STORE_FIELDS)
+      .eq('user_id', userId)
+      .order('created_at', { ascending: true })
+      .limit(1);
+
+    const { data, error } = await fetchWithTimeout(query, 8000);
+
+    if (error) {
+      logger.error('[store-query] fetchFirstStoreForUser failed', { error });
+      throw error;
     }
-  )
-    .select(STORE_FIELDS)
-    .eq('user_id', userId)
-    .order('created_at', { ascending: true })
-    .limit(1);
 
-  if (error) {
-    logger.error('[store-query] fetchFirstStoreForUser failed', { error });
-    throw error;
+    if (!data?.length) return null;
+    return mapStoreRow(data[0]);
+  } catch (err) {
+    logger.error('[store-query] fetchFirstStoreForUser exception', { err });
+    throw err;
   }
-
-  if (!data?.length) return null;
-  return mapStoreRow(data[0]);
 }

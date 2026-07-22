@@ -743,22 +743,22 @@ const Checkout = () => {
   if (loading) {
     return (
       <div
-        className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-8 px-4 sm:px-6 lg:px-8"
+        className="min-h-screen bg-gradient-to-b from-muted/40 via-background to-background py-4 px-3 sm:py-8 sm:px-6 lg:px-8"
         role="main"
         aria-label="Page de paiement"
         aria-busy="true"
         aria-live="polite"
       >
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <div className="sr-only" role="status" aria-live="polite">
             Chargement des informations de paiement...
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-            <div className="lg:col-span-2 space-y-6" aria-label="Informations de commande">
-              <Skeleton className="h-12 w-64" aria-hidden="true" />
-              <Skeleton className="h-96" aria-hidden="true" />
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:gap-8">
+            <div className="lg:col-span-3 space-y-4" aria-label="Informations de commande">
+              <Skeleton className="h-10 w-48 sm:w-64" aria-hidden="true" />
+              <Skeleton className="h-72 sm:h-96" aria-hidden="true" />
             </div>
-            <div className="space-y-6" aria-label="Résumé de commande">
+            <div className="lg:col-span-2 space-y-4" aria-label="Résumé de commande">
               <Skeleton className="h-64" aria-hidden="true" />
             </div>
           </div>
@@ -769,8 +769,8 @@ const Checkout = () => {
 
   if (error || !product || !store) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-8 px-4 sm:px-6 lg:px-8 pb-16 md:pb-0">
-        <div className="max-w-6xl mx-auto">
+      <div className="min-h-screen bg-gradient-to-b from-muted/40 via-background to-background py-4 px-3 sm:py-8 sm:px-6 lg:px-8 pb-16 md:pb-8">
+        <div className="max-w-5xl mx-auto">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>{error || 'Produit ou boutique introuvable'}</AlertDescription>
@@ -791,15 +791,19 @@ const Checkout = () => {
   return (
     <StoreThemeProvider store={store as ThemedStore}>
       <div
-        className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-8 px-4 sm:px-6 lg:px-8 pb-16 md:pb-0 store-theme-active"
+        className="min-h-screen bg-gradient-to-b from-muted/40 via-background to-background py-4 px-3 sm:py-8 sm:px-6 lg:px-8 pb-[max(5rem,env(safe-area-inset-bottom))] md:pb-8 store-theme-active"
         role="main"
         aria-label="Page de finalisation de commande"
       >
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           {/* Header */}
-          <header className="mb-6 sm:mb-8">
+          <header className="mb-4 sm:mb-8">
             <nav aria-label="Navigation de la page de paiement">
-              <Button asChild variant="ghost" className="mb-4 min-h-[44px]">
+              <Button
+                asChild
+                variant="ghost"
+                className="mb-3 sm:mb-4 -ml-2 min-h-11 px-2 sm:px-3 text-foreground/80 hover:text-foreground"
+              >
                 <Link
                   to={
                     product && store
@@ -808,21 +812,21 @@ const Checkout = () => {
                   }
                   aria-label="Retour à la page précédente"
                 >
-                  <ArrowLeft className="mr-2 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
+                  <ArrowLeft className="mr-1.5 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
                   <span className="text-sm sm:text-base">Retour</span>
                 </Link>
               </Button>
             </nav>
-            <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
+              <h1 className="text-xl sm:text-3xl font-bold tracking-tight text-foreground leading-tight">
                 Finaliser votre commande
               </h1>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+              <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/[0.08] px-2.5 py-1 text-[11px] sm:text-xs font-medium text-emerald-800 dark:text-emerald-400">
                 <Lock className="h-3 w-3" aria-hidden="true" />
                 Paiement sécurisé
               </span>
             </div>
-            <p className="text-muted-foreground mt-2 max-w-2xl">
+            <p className="text-muted-foreground mt-1.5 sm:mt-2 text-sm sm:text-base max-w-2xl leading-relaxed">
               {isPhysicalCod
                 ? 'Complétez vos informations pour confirmer votre commande (paiement à la livraison)'
                 : isGuestBuyer
@@ -831,10 +835,24 @@ const Checkout = () => {
             </p>
           </header>
 
-          <div className="flex flex-col lg:grid lg:grid-cols-5 lg:items-start gap-6 lg:gap-8">
-            {/* Résumé de la commande - En haut sur mobile, à droite sur desktop */}
+          {/* Mobile-first: formulaire d’abord, résumé ensuite ; desktop: 3/2 côte à côte */}
+          <div className="flex flex-col gap-4 sm:gap-6 lg:grid lg:grid-cols-5 lg:items-start lg:gap-8">
+            <div className="order-1 lg:col-span-3 min-w-0">
+              <Suspense fallback={<BuyNowSectionFallback />}>
+                <BuyNowCustomerForm
+                  formData={formData}
+                  formErrors={formErrors}
+                  onFieldChange={handleFieldChange}
+                  onSubmit={handleSubmit}
+                  requireShippingAddress={
+                    product.product_type === 'physical' || product.product_type === 'artist'
+                  }
+                />
+              </Suspense>
+            </div>
+
             <aside
-              className="order-2 lg:order-2 lg:col-span-2"
+              className="order-2 lg:col-span-2 min-w-0"
               role="complementary"
               aria-label="Résumé de la commande"
             >
@@ -857,21 +875,6 @@ const Checkout = () => {
                 />
               </Suspense>
             </aside>
-
-            {/* Formulaire principal - En bas sur mobile, à gauche sur desktop */}
-            <div className="order-1 lg:order-1 lg:col-span-3 space-y-6">
-              <Suspense fallback={<BuyNowSectionFallback />}>
-                <BuyNowCustomerForm
-                  formData={formData}
-                  formErrors={formErrors}
-                  onFieldChange={handleFieldChange}
-                  onSubmit={handleSubmit}
-                  requireShippingAddress={
-                    product.product_type === 'physical' || product.product_type === 'artist'
-                  }
-                />
-              </Suspense>
-            </div>
           </div>
         </div>
       </div>

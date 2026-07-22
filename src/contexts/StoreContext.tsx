@@ -164,12 +164,24 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       }
       setError(null);
 
+      const fetchWithTimeout = async <T,>(promise: Promise<T>, ms: number = 8000): Promise<T> => {
+        let timeoutId: ReturnType<typeof setTimeout>;
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          timeoutId = setTimeout(() => reject(new Error('Supabase request timeout')), ms);
+        });
+        return Promise.race([promise, timeoutPromise]).finally(() => clearTimeout(timeoutId));
+      };
+
       // 1. Récupérer les IDs des boutiques où l'utilisateur est membre actif
-      const { data: memberStores } = await supabase
+      const memberStoresQuery = supabase
         .from('store_members')
         .select('store_id')
         .eq('user_id', user.id)
         .eq('status', 'active');
+
+      const { data: memberStores } = await fetchWithTimeout(memberStoresQuery, 8000).catch(() => ({
+        data: [],
+      }));
 
       const memberStoreIds = memberStores?.map(m => m.store_id) || [];
 
@@ -185,7 +197,10 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
         query = query.eq('user_id', user.id);
       }
 
-      const { data, error: fetchError } = await query.order('created_at', { ascending: true });
+      const { data, error: fetchError } = await fetchWithTimeout(
+        query.order('created_at', { ascending: true }),
+        8000
+      );
 
       if (fetchError) {
         throw fetchError;

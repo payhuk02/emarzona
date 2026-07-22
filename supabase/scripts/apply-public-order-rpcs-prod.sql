@@ -1,12 +1,54 @@
 -- =============================================================================
 -- Prod hotfix : RPCs checkout public (digital / course / artist / service)
 -- Contourne RLS orders pour les acheteurs (invités + connectés).
+-- Inclut frais plateforme : 2 % + 100 FCFA (XOF).
 -- Idempotent. À coller dans Supabase SQL Editor (projet hbdnzajbyjakdhuavrvb).
--- Source : supabase/migrations/20260716100000_secure_order_creation_rpcs.sql
---          + 20260721190000__digital_order_rpc_license_link.sql (optionnel)
 -- =============================================================================
 
 BEGIN;
+
+-- ---------------------------------------------------------------------------
+-- 0. Frais plateforme checkout (2 % + 100 XOF)
+-- ---------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.apply_checkout_platform_fee(
+  p_amount NUMERIC,
+  p_currency TEXT DEFAULT 'XOF'
+)
+RETURNS NUMERIC
+LANGUAGE plpgsql
+IMMUTABLE
+SET search_path = public
+AS $$
+DECLARE
+  v_base NUMERIC := GREATEST(0, COALESCE(p_amount, 0));
+  v_code TEXT := upper(COALESCE(NULLIF(trim(p_currency), ''), 'XOF'));
+  v_fixed NUMERIC;
+  v_fee NUMERIC;
+BEGIN
+  IF v_base <= 0 THEN
+    RETURN 0;
+  END IF;
+
+  IF v_code IN ('XOF', 'XAF') THEN
+    v_fixed := 100;
+  ELSIF v_code = 'EUR' THEN
+    v_fixed := ROUND((100.0 / 655.957)::NUMERIC, 2);
+  ELSIF v_code = 'USD' THEN
+    v_fixed := ROUND((100.0 / 599.04)::NUMERIC, 2);
+  ELSE
+    -- Autres devises : forfait ~100 XOF converti grossièrement via EUR
+    v_fixed := ROUND((100.0 / 655.957)::NUMERIC, 2);
+  END IF;
+
+  v_fee := ROUND(v_base * 0.02) + v_fixed;
+  IF v_code IN ('XOF', 'XAF', 'XPF', 'JPY', 'KRW', 'VND', 'CLP', 'UGX', 'RWF') THEN
+    RETURN ROUND(v_base + v_fee);
+  END IF;
+  RETURN ROUND(v_base + v_fee, 2);
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.apply_checkout_platform_fee(NUMERIC, TEXT) TO anon, authenticated, service_role;
 
 -- ---------------------------------------------------------------------------
 -- 1. DIGITAL
@@ -43,11 +85,14 @@ DECLARE
   v_base_price NUMERIC(12, 2);
   v_promo_discount NUMERIC(12, 2) := 0;
   v_gift_card_discount NUMERIC(12, 2) := 0;
+  v_subtotal NUMERIC(12, 2);
   v_final_amount NUMERIC(12, 2);
+  v_platform_fee NUMERIC(12, 2) := 0;
   v_promotion_id UUID;
   v_promo_validation RECORD;
   v_gift_card_validation RECORD;
   v_item_meta JSONB;
+  v_currency TEXT;
 BEGIN
   v_email := lower(trim(p_customer_email));
   IF v_email IS NULL OR v_email !~* '^[^@]+@[^@]+\.[^@]+$' THEN
@@ -76,6 +121,7 @@ BEGIN
   END IF;
 
   v_base_price := COALESCE(NULLIF(v_product.promotional_price, 0), v_product.price, 0);
+  v_currency := COALESCE(v_product.currency, 'XOF');
 
   SELECT c.id INTO v_customer_id
   FROM public.customers c
@@ -133,7 +179,9 @@ BEGIN
     END;
   END IF;
 
-  v_final_amount := GREATEST(0, v_base_price - v_promo_discount - v_gift_card_discount);
+  v_subtotal := GREATEST(0, v_base_price - v_promo_discount - v_gift_card_discount);
+  v_final_amount := public.apply_checkout_platform_fee(v_subtotal, v_currency);
+  v_platform_fee := GREATEST(0, v_final_amount - v_subtotal);
 
   SELECT public.generate_order_number() INTO v_order_number;
   IF v_order_number IS NULL OR trim(v_order_number) = '' THEN
@@ -144,11 +192,14 @@ BEGIN
     store_id, customer_id, order_number, total_amount, currency,
     payment_status, status, affiliate_tracking_cookie, metadata
   ) VALUES (
-    p_store_id, v_customer_id, v_order_number, v_final_amount, COALESCE(v_product.currency, 'XOF'),
+    p_store_id, v_customer_id, v_order_number, v_final_amount, v_currency,
     'pending', 'pending', p_affiliate_tracking_cookie,
     jsonb_build_object(
       'customer_email', v_email,
-      'guest_checkout', COALESCE(p_guest_checkout, true)
+      'guest_checkout', COALESCE(p_guest_checkout, true),
+      'subtotal', v_subtotal,
+      'platform_fee', v_platform_fee,
+      'platform_fee_rule', '2pct_plus_100_xof'
     )
   ) RETURNING id INTO v_order_id;
 
@@ -191,6 +242,8 @@ BEGIN
     'customer_id', v_customer_id,
     'digital_product_id', v_digital_id,
     'total_amount', v_final_amount,
+    'subtotal', v_subtotal,
+    'platform_fee', v_platform_fee,
     'checkout_token', (
       SELECT o.metadata->>'checkout_token' FROM public.orders o WHERE o.id = v_order_id
     )
@@ -292,6 +345,7 @@ BEGIN
   END IF;
 
   v_final_amount := GREATEST(0, v_base_price - v_promo_discount - v_gift_card_discount);
+  v_final_amount := public.apply_checkout_platform_fee(v_final_amount, COALESCE(v_product.currency, 'XOF'));
 
   SELECT public.generate_order_number() INTO v_order_number;
   IF v_order_number IS NULL OR trim(v_order_number) = '' THEN
@@ -304,7 +358,11 @@ BEGIN
   ) VALUES (
     p_store_id, v_customer_id, v_order_number, v_final_amount, COALESCE(v_product.currency, 'XOF'),
     'pending', 'pending', p_affiliate_tracking_cookie,
-    jsonb_build_object('customer_email', v_email, 'guest_checkout', COALESCE(p_guest_checkout, true))
+    jsonb_build_object(
+      'customer_email', v_email,
+      'guest_checkout', COALESCE(p_guest_checkout, true),
+      'platform_fee_rule', '2pct_plus_100_xof'
+    )
   ) RETURNING id INTO v_order_id;
 
   INSERT INTO public.order_items (
@@ -417,11 +475,12 @@ BEGIN
   END IF;
 
   v_final_amount := GREATEST(0, v_base_price - v_promo_discount - v_gift_card_discount);
+  v_final_amount := public.apply_checkout_platform_fee(v_final_amount, COALESCE(v_product.currency, 'XOF'));
   SELECT public.generate_order_number() INTO v_order_number;
   IF v_order_number IS NULL OR trim(v_order_number) = '' THEN v_order_number := 'ORD-' || to_char(now(), 'YYYYMMDDHH24MISS'); END IF;
 
   INSERT INTO public.orders (store_id, customer_id, order_number, total_amount, currency, payment_status, status, affiliate_tracking_cookie, metadata)
-  VALUES (p_store_id, v_customer_id, v_order_number, v_final_amount, COALESCE(v_product.currency, 'XOF'), 'pending', 'pending', p_affiliate_tracking_cookie, jsonb_build_object('customer_email', v_email, 'guest_checkout', COALESCE(p_guest_checkout, true))) RETURNING id INTO v_order_id;
+  VALUES (p_store_id, v_customer_id, v_order_number, v_final_amount, COALESCE(v_product.currency, 'XOF'), 'pending', 'pending', p_affiliate_tracking_cookie, jsonb_build_object('customer_email', v_email, 'guest_checkout', COALESCE(p_guest_checkout, true), 'platform_fee_rule', '2pct_plus_100_xof')) RETURNING id INTO v_order_id;
 
   INSERT INTO public.order_items (order_id, product_id, product_type, artist_product_id, product_name, quantity, unit_price, total_price)
   VALUES (v_order_id, p_product_id, 'artist', v_artist_id, v_product.name, 1, v_base_price, v_base_price) RETURNING id INTO v_order_item_id;

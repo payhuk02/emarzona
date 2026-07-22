@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import type { PhysicalCheckoutMethod } from '@/constants/physical-checkout-options';
 import { initiatePayment } from '@/lib/payment-service';
 import { releasePhysicalInventoryForOrder } from '@/lib/physical-inventory';
 import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
@@ -87,7 +88,7 @@ export class PhysicalOrderStrategy implements OrderStrategy {
       customerPhone,
       quantity,
       variantId,
-      checkoutMethod,
+      checkoutMethod: checkoutMethod as PhysicalCheckoutMethod,
       shippingAddress,
       affiliateTrackingCookie,
       guestCheckout: isGuest,

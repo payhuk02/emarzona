@@ -3,6 +3,7 @@ import type {
   CheckoutProduct,
   CheckoutVariant,
 } from '@/pages/checkout/buy-now/checkout-buy-now-types';
+import { applyCheckoutPlatformFee, getCheckoutPlatformFee } from '@/lib/checkout/platform-fee';
 
 export function getBuyNowBasePrice(
   product: CheckoutProduct,
@@ -19,7 +20,8 @@ export function getBuyNowBasePrice(
   return normalPrice;
 }
 
-export function calculateBuyNowPrice(
+/** Sous-total après coupon, avant frais plateforme. */
+export function calculateBuyNowSubtotal(
   product: CheckoutProduct,
   selectedVariant: CheckoutVariant,
   appliedCoupon: AppliedBuyNowCoupon | null
@@ -27,4 +29,29 @@ export function calculateBuyNowPrice(
   const base = getBuyNowBasePrice(product, selectedVariant);
   const couponDiscount = appliedCoupon?.discountAmount || 0;
   return Math.max(0, base - couponDiscount);
+}
+
+export function calculateBuyNowPlatformFee(
+  product: CheckoutProduct,
+  selectedVariant: CheckoutVariant,
+  appliedCoupon: AppliedBuyNowCoupon | null
+): number {
+  const currency = product?.currency || 'XOF';
+  return getCheckoutPlatformFee(
+    calculateBuyNowSubtotal(product, selectedVariant, appliedCoupon),
+    currency
+  );
+}
+
+/** Prix final checkout : sous-total + 2 % + 100 FCFA (XOF). */
+export function calculateBuyNowPrice(
+  product: CheckoutProduct,
+  selectedVariant: CheckoutVariant,
+  appliedCoupon: AppliedBuyNowCoupon | null
+): number {
+  const currency = product?.currency || 'XOF';
+  return applyCheckoutPlatformFee(
+    calculateBuyNowSubtotal(product, selectedVariant, appliedCoupon),
+    currency
+  );
 }
