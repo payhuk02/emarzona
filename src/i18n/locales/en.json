@@ -1633,7 +1633,7 @@
       "logoLabel": "Store logo",
       "logoHint": "Square format recommended (e.g. 500×500px)",
       "bannerLabel": "Store banner",
-      "bannerHint": "Landscape format recommended (e.g. 1920×640px)",
+      "bannerHint": "Recommended size: 1920 × 620 px (3.1:1 ratio). Keep key content centered — the store logo overlaps the bottom-left.",
       "extraImagesTitle": "Additional images",
       "faviconLabel": "Favicon",
       "faviconHint": "Square format recommended (16×16, 32×32, 48×48px)",

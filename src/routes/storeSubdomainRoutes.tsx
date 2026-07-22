@@ -8,12 +8,10 @@
 
 import React, { Suspense } from 'react';
 import { lazyPage } from '@/routes/lazyPage';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { StoreSlugProvider } from '@/contexts/StoreSlugContext';
-import { StoreSubdomainNav } from '@/components/storefront/StoreSubdomainNav';
 import { RedirectToPlatformAuth } from '@/components/auth/RedirectToPlatformAuth';
 import { RedirectToPlatformVendorMessaging } from '@/components/auth/RedirectToPlatformVendorMessaging';
-import type { StoreCommerceType } from '@/constants/store-commerce-types';
 
 const Storefront = lazyPage(() => import('@/pages/Storefront'));
 const ProductDetail = lazyPage(() => import('@/pages/ProductDetail'));
@@ -35,16 +33,6 @@ const ArtistPortfolioPage = lazyPage(() => import('@/pages/artist/ArtistPortfoli
 
 interface StoreSubdomainRoutesProps {
   storeSlug: string;
-  storeName?: string;
-  logoUrl?: string | null;
-  storeThemeColors?: {
-    primaryColor?: string;
-    secondaryColor?: string;
-    accentColor?: string;
-    backgroundColor?: string;
-    textColor?: string;
-  };
-  commerceType?: StoreCommerceType | null;
 }
 
 const LoadingFallback = () => (
@@ -56,26 +44,9 @@ const LoadingFallback = () => (
   </div>
 );
 
-export function StoreSubdomainRoutes({
-  storeSlug,
-  storeName,
-  logoUrl,
-  storeThemeColors,
-  commerceType,
-}: StoreSubdomainRoutesProps) {
-  const location = useLocation();
-  const isProductDetail = location.pathname.startsWith('/products/');
-
+export function StoreSubdomainRoutes({ storeSlug }: StoreSubdomainRoutesProps) {
   return (
     <StoreSlugProvider slug={storeSlug}>
-      {!isProductDetail && (
-        <StoreSubdomainNav
-          storeName={storeName}
-          logoUrl={logoUrl || undefined}
-          themeColors={storeThemeColors}
-          commerceType={commerceType}
-        />
-      )}
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
           {/* Root = Storefront de la boutique */}

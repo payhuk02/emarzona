@@ -5,6 +5,7 @@ import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { useStoreTheme } from '@/hooks/useStoreTheme';
 import { cn } from '@/lib/utils';
 import { resolveStoreProductPlaceholderUrl } from '@/lib/storefront/store-media-fallbacks';
+import { STORE_HERO_BANNER_CLASS } from '@/lib/storefront/store-hero-banner';
 
 interface StoreHeaderProps {
   store: Store & {
@@ -46,14 +47,7 @@ const StoreHeader = ({ store }: StoreHeaderProps) => {
     >
       <div className="relative w-full">
         <div
-          className={cn(
-            'relative w-full overflow-hidden',
-            'aspect-[2.15/1] min-h-[8.75rem] max-h-[12.5rem]',
-            'sm:aspect-[2.45/1] sm:min-h-[10rem] sm:max-h-[16rem]',
-            'md:aspect-[2.85/1] md:min-h-[11.5rem] md:max-h-[20rem]',
-            'lg:aspect-[3.1/1] lg:max-h-[24rem]',
-            'xl:max-h-[28rem]'
-          )}
+          className={cn('relative w-full overflow-hidden', STORE_HERO_BANNER_CLASS)}
           style={{
             background: displayBannerUrl
               ? undefined

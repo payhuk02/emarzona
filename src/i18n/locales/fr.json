@@ -1781,7 +1781,7 @@
       "logoLabel": "Logo de la boutique",
       "logoHint": "Format carré recommandé (ex: 500x500px)",
       "bannerLabel": "Bannière de la boutique",
-      "bannerHint": "Format paysage recommandé (ex: 1920x640px)",
+      "bannerHint": "Format recommandé : 1920 × 620 px (ratio 3,1:1). Zone sûre au centre — le logo chevauche le bas gauche.",
       "extraImagesTitle": "Images supplémentaires",
       "faviconLabel": "Favicon",
       "faviconHint": "Format carré recommandé (16×16, 32×32, 48×48px)",

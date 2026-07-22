@@ -200,7 +200,7 @@ const StoreImageUpload = ({
           <TooltipContent align="start">
             <div className="max-w-[260px] text-xs">
               {aspectRatio === 'banner'
-                ? 'Recommandé: 1280×720 (16:9) – WebP/JPEG'
+                ? 'Recommandé : 1920 × 620 px (3,1:1) – WebP/JPEG'
                 : aspectRatio === 'square'
                   ? 'Recommandé: 500×500 (carré) – WebP/PNG'
                   : 'Utilisez des images optimisées (WebP)'}
@@ -309,7 +309,7 @@ const StoreImageUpload = ({
       {!description && (
         <p className="text-xs text-muted-foreground">
           {aspectRatio === 'banner'
-            ? 'Format recommandé: 1280×720 (16:9) – idéal pour les bannières.'
+            ? 'Format recommandé : 1920 × 620 px (ratio 3,1:1) – idéal pour les bannières hero.'
             : aspectRatio === 'square'
               ? 'Format recommandé: 500×500 (ratio 1:1) pour les logos.'
               : 'Préférez des images en WebP, taille ≤ ' + maxSize + 'MB.'}

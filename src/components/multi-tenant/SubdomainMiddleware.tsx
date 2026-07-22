@@ -10,7 +10,6 @@
 
 import { useEffect, ReactNode } from 'react';
 import { useCurrentStoreBySubdomain } from '@/hooks/useStoreBySubdomain';
-import type { StoreCommerceType } from '@/constants/store-commerce-types';
 import { detectSubdomain, RESERVED_SUBDOMAINS } from '@/lib/subdomain-detector';
 import { logger } from '@/lib/logger';
 import { useStoreContext } from '@/contexts/StoreContext';
@@ -118,21 +117,7 @@ export function SubdomainMiddleware({ children }: SubdomainMiddlewareProps) {
     }
 
     // ✅ Store trouvée : afficher les routes de boutique au lieu des routes plateforme
-    return (
-      <StoreSubdomainRoutes
-        storeSlug={storeSlug}
-        storeName={store.name}
-        logoUrl={store.logo_url}
-        commerceType={store.commerce_type as StoreCommerceType}
-        storeThemeColors={{
-          primaryColor: store.primary_color,
-          secondaryColor: store.secondary_color,
-          accentColor: store.accent_color,
-          backgroundColor: store.background_color,
-          textColor: store.text_color,
-        }}
-      />
-    );
+    return <StoreSubdomainRoutes storeSlug={storeSlug} />;
   }
 
   // Domaine plateforme : afficher les routes normales
