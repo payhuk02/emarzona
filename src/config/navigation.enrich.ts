@@ -104,11 +104,7 @@ export const SELLER_EXCLUDED_PATHS = new Set([
 function resolvePersonas(url: string, sectionLabel: string): SidebarPersona[] {
   const path = url.split('?')[0];
 
-  if (
-    sectionLabel === 'Mon Compte' ||
-    path.startsWith('/account') ||
-    path.startsWith('/checkout/multi-store')
-  ) {
+  if (sectionLabel === 'Mon Compte' || path.startsWith('/account')) {
     return ['buyer'];
   }
 

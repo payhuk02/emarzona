@@ -211,6 +211,10 @@ export const publicRoutes = (
     <Route path="/checkout" element={<Checkout />} />
     <Route path="/checkout/cart" element={<Navigate to="/marketplace" replace />} />
     <Route path="/cart/checkout" element={<Navigate to="/marketplace" replace />} />
+    <Route
+      path="/checkout/multi-store-tracking"
+      element={<Navigate to="/account/orders" replace />}
+    />
 
     {/* Storefront — Redirection vers sous-domaine myemarzona.shop */}
     <Route path="/store/:slug/product/:productSlug" element={<OldProductRouteRedirect />} />

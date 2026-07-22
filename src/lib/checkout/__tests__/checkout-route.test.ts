@@ -40,8 +40,9 @@ describe('checkout-route', () => {
     );
   });
 
-  it('legacy paths map to marketplace', () => {
+  it('legacy paths map to marketplace or account', () => {
     expect(CHECKOUT_LEGACY_REDIRECTS['/checkout/cart']).toBe('/marketplace');
     expect(CHECKOUT_LEGACY_REDIRECTS['/cart']).toBe('/marketplace');
+    expect(CHECKOUT_LEGACY_REDIRECTS['/checkout/multi-store-tracking']).toBe('/account/orders');
   });
 });

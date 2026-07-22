@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 import { useResolvedNavItems } from '@/hooks/useResolvedNavItems';
 import { usePlanLockNavAction } from '@/hooks/usePlanLockNavAction';
 import { isNavItemActive } from '@/config/navigation.helpers';
-import { resolveHorizontalNavPersona } from '@/config/navigation.horizontal';
+import { toCommerceNavPersona } from '@/config/navigation.persona';
 import { useSidebarPersona } from '@/hooks/useSidebarPersona';
 import { useAdmin } from '@/hooks/useAdmin';
 
@@ -24,7 +24,7 @@ export const BottomNavigation = React.memo<BottomNavigationProps>(({ position = 
   const { t } = useTranslation();
   const { isAdmin } = useAdmin();
   const { persona: sidebarPersona } = useSidebarPersona(isAdmin);
-  const navPersona = resolveHorizontalNavPersona(location.pathname, sidebarPersona);
+  const navPersona = toCommerceNavPersona(sidebarPersona);
   const navItems = useResolvedNavItems({ surface: 'bottomnav', persona: navPersona });
   const handlePlanLockedNav = usePlanLockNavAction();
   const isTop = position === 'top';

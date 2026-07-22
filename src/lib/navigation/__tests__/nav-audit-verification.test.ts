@@ -74,6 +74,8 @@ describe('NAV audit verification (NAV-001 → NAV-010)', () => {
         'components/layout/BaseContextSidebar.tsx',
         'components/layout/ContextSidebarNavItem.tsx',
         'hooks/useContextSidebarNavigation.ts',
+        'components/navigation/ContextSidebar.tsx',
+        'pages/checkout/MultiStoreCheckoutTracking.tsx',
       ];
       for (const file of removed) {
         expect(existsSync(resolve(root, 'src', file))).toBe(false);

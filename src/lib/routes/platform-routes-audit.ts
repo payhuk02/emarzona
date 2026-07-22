@@ -56,6 +56,11 @@ export const LEGACY_ROUTE_DEBT: readonly { path: string; replacement: string; re
     replacement: '/marketplace',
     reason: 'Panier retiré — redirection marketplace',
   },
+  {
+    path: '/checkout/multi-store-tracking',
+    replacement: '/account/orders',
+    reason: 'Suivi multi-store orphelin — redirection commandes compte',
+  },
 ];
 
 /** Pages seller extraites du namespace admin — programmes & logistique (P2). */

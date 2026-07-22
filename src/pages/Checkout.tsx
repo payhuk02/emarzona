@@ -879,9 +879,9 @@ export default function Checkout() {
       logger.warn('Failed to mark cart as recovered', { error: recoveryError });
     }
 
-    // Rediriger vers la page de suivi multi-stores
+    // Suivi multi-store retiré — commandes visibles dans le compte
     const orderIds = createdOrders.map(o => o.orderId).join(',');
-    navigate(`/checkout/multi-store-tracking?orders=${orderIds}`);
+    navigate(`/account/orders${orderIds ? `?orders=${orderIds}` : ''}`);
   };
 
   const validateForm = (): boolean => {
@@ -954,7 +954,7 @@ export default function Checkout() {
 
     if (items.length === 0) {
       showCheckoutBlockedToast(toast, 'Votre panier est vide');
-      navigate('/cart');
+      navigate('/marketplace');
       return;
     }
 
@@ -1384,7 +1384,7 @@ export default function Checkout() {
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
               Votre panier est vide.{' '}
-              <Button variant="link" onClick={() => navigate('/cart')}>
+              <Button variant="link" onClick={() => navigate('/marketplace')}>
                 Retour au panier
               </Button>
             </AlertDescription>

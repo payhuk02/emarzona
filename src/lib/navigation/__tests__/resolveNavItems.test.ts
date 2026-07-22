@@ -51,7 +51,7 @@ describe('resolveNavItems', () => {
     expect(paths).not.toContain('/admin');
   });
 
-  it('includes bottom nav fallbacks for cart and account', () => {
+  it('includes bottom nav fallbacks for account (no cart)', () => {
     const items = resolveNavItems({
       surface: 'bottomnav',
       persona: 'seller',

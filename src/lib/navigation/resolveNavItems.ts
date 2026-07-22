@@ -40,7 +40,7 @@ type BottomNavSpec =
       icon: NavItem['icon'];
     };
 
-/** Mobile bottom nav — menu-backed + fixed shortcuts (cart, account). */
+/** Mobile bottom nav — menu-backed + fixed shortcuts (account). */
 export const BOTTOM_NAV_SPECS: BottomNavSpec[] = [
   { path: '/dashboard', fromMenu: true },
   { path: '/dashboard/store', fromMenu: true },

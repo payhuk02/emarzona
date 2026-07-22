@@ -5,7 +5,15 @@
 
 import { PHASE6_CONTEXT_CONFIGS } from '@/config/navigation.context.phase6';
 import type { ContextSidebarGroupConfig } from '@/config/navigation.context.types';
+import {
+  BUYER_DISCOVERY_PATHS,
+  isBuyerDiscoveryPath,
+  resolveNavPersona,
+  toCommerceNavPersona,
+} from '@/config/navigation.persona';
 import type { SidebarPersona } from '@/config/navigation.types';
+
+export { BUYER_DISCOVERY_PATHS, isBuyerDiscoveryPath };
 
 export type HorizontalNavSectionSpec = {
   /** Identifiant stable pour clés React (peut différer de sectionKey côté acheteur) */
@@ -22,18 +30,6 @@ export type HorizontalNavSectionSpec = {
   /** Sections menu à parcourir avec includePaths */
   sourceSectionKeys?: string[];
 };
-
-/** Découverte & shopping public — barre horizontale acheteur */
-export const BUYER_DISCOVERY_PATHS = [
-  '/marketplace',
-  '/auctions',
-  '/recommendations',
-  '/discover',
-  '/trending',
-  '/recommendations/history-based',
-  '/personalization/quiz',
-  '/personalization/recommendations',
-] as const;
 
 /** Ordre des domaines dans la barre horizontale vendeur */
 export const SELLER_HORIZONTAL_NAV_SECTIONS: HorizontalNavSectionSpec[] = [
@@ -281,7 +277,7 @@ export const BUYER_HORIZONTAL_MEGA_SUBGROUPS: Partial<
     {
       groupKey: 'commandes',
       defaultLabel: 'Commandes',
-      paths: ['/account/orders', '/account/returns', '/cart'],
+      paths: ['/account/orders', '/account/returns'],
     },
     {
       groupKey: 'facturation',
@@ -314,11 +310,6 @@ function matchesNavPath(pathname: string, base: string): boolean {
   return pathname === base || pathname.startsWith(`${base}/`);
 }
 
-/** Routes publiques « Découvrir » (marketplace, enchères, recommandations IA). */
-export function isBuyerDiscoveryPath(pathname: string): boolean {
-  return BUYER_DISCOVERY_PATHS.some(path => matchesNavPath(pathname, path));
-}
-
 export function shouldShowSellerHorizontalNav(pathname: string): boolean {
   return SELLER_HORIZONTAL_PREFIXES.some(
     prefix => pathname === prefix || pathname.startsWith(`${prefix}/`)
@@ -327,7 +318,6 @@ export function shouldShowSellerHorizontalNav(pathname: string): boolean {
 
 export function shouldShowBuyerHorizontalNav(pathname: string): boolean {
   if (matchesNavPath(pathname, '/account')) return true;
-  if (matchesNavPath(pathname, '/cart')) return true;
   if (isBuyerDiscoveryPath(pathname)) return true;
   return false;
 }
@@ -347,20 +337,14 @@ export function shouldShowHorizontalNav(pathname: string): boolean {
   return shouldShowSellerHorizontalNav(pathname) || shouldShowBuyerHorizontalNav(pathname);
 }
 
+/**
+ * Persona horizontale/bottom — alignée sur resolveNavPersona (zones path + pin).
+ * `preferredPersona` = pin sidebar (ou persona déjà résolue sur routes soft).
+ */
 export function resolveHorizontalNavPersona(
   pathname: string,
-  preferredPersona: SidebarPersona = 'seller'
+  preferredPersona: SidebarPersona = 'seller',
+  isAdmin = preferredPersona === 'admin'
 ): 'seller' | 'buyer' {
-  const isNotificationPath =
-    pathname === '/notifications' ||
-    pathname.startsWith('/notifications/') ||
-    pathname === '/settings/notifications' ||
-    pathname.startsWith('/settings/notifications/');
-
-  if (isNotificationPath) {
-    return preferredPersona === 'buyer' ? 'buyer' : 'seller';
-  }
-
-  if (shouldShowBuyerHorizontalNav(pathname)) return 'buyer';
-  return 'seller';
+  return toCommerceNavPersona(resolveNavPersona(pathname, isAdmin, preferredPersona));
 }

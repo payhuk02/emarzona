@@ -323,7 +323,7 @@ export function OneClickUpsell({
           <Button variant="outline" onClick={onClose} className="flex-1">
             Non merci, continuer
           </Button>
-          <Button onClick={() => navigate('/cart')} className="flex-1">
+          <Button onClick={() => navigate('/marketplace')} className="flex-1">
             Voir mon panier
           </Button>
         </DialogFooter>

@@ -62,4 +62,5 @@ export const CHECKOUT_LEGACY_REDIRECTS: Record<string, string> = {
   '/cart/checkout': '/marketplace',
   '/cart': '/marketplace',
   '/cart-old': '/marketplace',
+  '/checkout/multi-store-tracking': '/account/orders',
 };

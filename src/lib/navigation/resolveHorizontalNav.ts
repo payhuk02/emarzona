@@ -162,10 +162,6 @@ function collectBuyerItemsByPaths(
   return items;
 }
 
-function appendBuyerCartLink(items: HorizontalNavLink[], _t: TFunction): HorizontalNavLink[] {
-  return items;
-}
-
 function resolveSellerHorizontalNavDomains(
   input: {
     isPlatformAdmin: boolean;
@@ -259,15 +255,11 @@ function resolveBuyerHorizontalNavDomains(input: {
       );
     }
 
-    if (spec.domainKey === 'achats') {
-      items = appendBuyerCartLink(items, input.t);
-    }
-
     if (items.length === 0) continue;
 
-    const isActive =
-      items.some(item => isNavItemActive(item.url, input.pathname, input.search, 'prefix')) ||
-      (spec.domainKey === 'achats' && input.pathname === '/cart');
+    const isActive = items.some(item =>
+      isNavItemActive(item.url, input.pathname, input.search, 'prefix')
+    );
 
     const shortLabel = spec.shortLabelKey
       ? input.t(spec.shortLabelKey, { defaultValue: spec.shortLabel })

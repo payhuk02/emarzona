@@ -682,4 +682,6 @@ export const CONTEXT_SIDEBAR_MAPPING: Record<string, RawNavSection[]> = {
   '/dashboard/payments': PAYMENTS_CONTEXT_SIDEBAR,
   '/dashboard/settings': SETTINGS_CONTEXT_SIDEBAR,
   '/dashboard/integrations': SETTINGS_CONTEXT_SIDEBAR,
+  '/dashboard/ai-chatbot': AI_CONTEXT_SIDEBAR,
+  '/dashboard/image-studio': AI_CONTEXT_SIDEBAR,
 };

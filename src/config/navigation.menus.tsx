@@ -983,11 +983,6 @@ export const adminMenuSections = [
         url: '/admin/warehouses',
         icon: Building2,
       },
-      {
-        title: 'Gestion des Affiliés',
-        url: '/admin/affiliates',
-        icon: TrendingUp,
-      },
     ],
   },
   {
@@ -1024,12 +1019,12 @@ export const adminMenuSections = [
         icon: GitCompare,
       },
       {
-        title: 'Statistiques GeniusPay',
+        title: 'Statistiques paiements',
         url: '/admin/geniuspay-analytics',
         icon: BarChart3,
       },
       {
-        title: 'Réconciliation GeniusPay',
+        title: 'Réconciliation paiements',
         url: '/admin/geniuspay-reconciliation',
         icon: RotateCcw,
       },

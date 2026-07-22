@@ -74,12 +74,7 @@ import {
 import { isSellerNavItemActive, resolveSellerNavUrl } from '@/lib/navigation/vendor-products-nav';
 import { logger } from '@/lib/logger';
 import { LogoImageWithFallback } from '@/components/sidebar/LogoImageWithFallback';
-import {
-  ContextSidebar,
-  useContextSidebar,
-  ContextSidebarTrigger,
-} from '@/components/navigation/ContextSidebar';
-import { MegaMenuDropdown, MegaMenuTrigger } from '@/components/navigation/MegaMenuDropdown';
+import { MegaMenuDropdown } from '@/components/navigation/MegaMenuDropdown';
 import { CONTEXT_SIDEBAR_MAPPING } from '@/config/navigation.context.extended';
 
 const isNavItemPlanLocked = (
@@ -138,12 +133,8 @@ export function AppSidebar() {
   const isCollapsed = state === 'collapsed' && !isMobile;
   const { persona, setPersona, needsPersonaOnboarding } = useSidebarPersona(isAdmin);
   const [commandOpen, setCommandOpen] = useState(false);
-  const {
-    isOpen: contextSidebarOpen,
-    open: openContextSidebar,
-    close: closeContextSidebar,
-  } = useContextSidebar();
-  const [megaMenuOpen, setMegaMenuOpen] = useState(false);
+  /** Which hub mega-menu is open (per-url); a shared boolean opened every hub at once. */
+  const [openMegaMenuUrl, setOpenMegaMenuUrl] = useState<string | null>(null);
 
   const [collapsedSections, setCollapsedSections] = useState<string[]>([]);
   const [prefsHydrated, setPrefsHydrated] = useState(false);
@@ -592,8 +583,8 @@ export function AppSidebar() {
                                 </SidebarMenuButton>
                               }
                               sections={getContextSectionsForItem(item.url)}
-                              isOpen={megaMenuOpen}
-                              onOpenChange={setMegaMenuOpen}
+                              isOpen={openMegaMenuUrl === item.url}
+                              onOpenChange={open => setOpenMegaMenuUrl(open ? item.url : null)}
                             />
                           ) : (
                             <SidebarMenuButton asChild tooltip={item.title}>
@@ -709,9 +700,6 @@ export function AppSidebar() {
             </React.Fragment>
           ))}
       </SidebarContent>
-
-      {/* Context Sidebar - Enterprise-grade domain-specific navigation */}
-      <ContextSidebar isOpen={contextSidebarOpen} onClose={closeContextSidebar} />
     </Sidebar>
   );
 }

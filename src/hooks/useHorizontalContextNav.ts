@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { resolveHorizontalNavDomains } from '@/lib/navigation/resolveHorizontalNav';
-import { resolveHorizontalNavPersona } from '@/config/navigation.horizontal';
+import { toCommerceNavPersona } from '@/config/navigation.persona';
 import { useAdmin } from '@/hooks/useAdmin';
 import { useStoreContext } from '@/contexts/StoreContext';
 import { useStorePhysicalAccess } from '@/hooks/billing/useStorePhysicalAccess';
@@ -18,7 +18,7 @@ export function useHorizontalContextNav() {
   const { planSlug } = useStorePhysicalAccess(selectedStoreId);
   const commerceType = selectedStore?.commerce_type;
   const storeMetadata = selectedStore?.metadata ?? null;
-  const persona = resolveHorizontalNavPersona(location.pathname, sidebarPersona);
+  const persona = toCommerceNavPersona(sidebarPersona);
   const { isExpertMode } = useProgressiveUX();
 
   return useMemo(

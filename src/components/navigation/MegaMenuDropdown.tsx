@@ -7,6 +7,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Search, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -37,6 +38,7 @@ export function MegaMenuDropdown({
   onOpenChange,
   className,
 }: MegaMenuDropdownProps) {
+  const { t } = useTranslation();
   const [internalOpen, setInternalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -45,7 +47,6 @@ export function MegaMenuDropdown({
   const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = onOpenChange || setInternalOpen;
 
-  // Close on escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
@@ -56,8 +57,8 @@ export function MegaMenuDropdown({
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isOpen, setOpen]);
 
-  // Close on click outside
   useEffect(() => {
+    if (!isOpen) return;
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setOpen(false);
@@ -65,9 +66,8 @@ export function MegaMenuDropdown({
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [setOpen]);
+  }, [isOpen, setOpen]);
 
-  // Filter sections based on search
   const filteredSections = useCallback(() => {
     if (!searchQuery.trim()) return sections;
     const query = searchQuery.toLowerCase();
@@ -89,13 +89,33 @@ export function MegaMenuDropdown({
     setSearchQuery('');
   };
 
+  const toggleOpen = () => setOpen(!isOpen);
+
   return (
     <div className={cn('relative', className)} ref={dropdownRef}>
-      <div onClick={() => setOpen(!isOpen)}>{trigger}</div>
+      <div
+        role="button"
+        tabIndex={0}
+        aria-expanded={isOpen}
+        aria-haspopup="dialog"
+        onClick={toggleOpen}
+        onKeyDown={e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            toggleOpen();
+          }
+        }}
+      >
+        {trigger}
+      </div>
 
       <AnimatePresence>
         {isOpen && (
           <motion.div
+            role="dialog"
+            aria-label={t('sidebar.chrome.megaMenuDialogLabel', {
+              defaultValue: 'Navigation menu',
+            })}
             initial={{ opacity: 0, y: -10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
@@ -103,11 +123,12 @@ export function MegaMenuDropdown({
             className="absolute left-0 top-full z-50 mt-2 w-screen max-w-4xl rounded-xl border border-border/50 bg-background/95 backdrop-blur-sm shadow-2xl"
           >
             <div className="p-4">
-              {/* Search Bar */}
               <div className="relative mb-4">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder="Rechercher dans le menu..."
+                  placeholder={t('sidebar.chrome.megaMenuSearchPlaceholder', {
+                    defaultValue: 'Search in menu…',
+                  })}
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   className="pl-10 pr-10"
@@ -115,25 +136,27 @@ export function MegaMenuDropdown({
                 />
                 {searchQuery && (
                   <button
+                    type="button"
                     onClick={() => setSearchQuery('')}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    aria-label={t('sidebar.chrome.megaMenuClearSearch', {
+                      defaultValue: 'Clear search',
+                    })}
                   >
                     <X className="h-4 w-4" />
                   </button>
                 )}
               </div>
 
-              {/* Menu Sections */}
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {filteredSections().map((section, sectionIndex) => (
                   <div key={sectionIndex} className="space-y-3">
-                    <h3 className="text-sm font-semibold text-foreground/90">
-                      {section.label}
-                    </h3>
+                    <h3 className="text-sm font-semibold text-foreground/90">{section.label}</h3>
                     <div className="space-y-1">
                       {section.items.map((item, itemIndex) => (
                         <button
                           key={itemIndex}
+                          type="button"
                           onClick={() => handleItemClick(item.url)}
                           className="flex w-full items-start gap-3 rounded-lg p-2 text-left text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
                         >
@@ -155,26 +178,25 @@ export function MegaMenuDropdown({
                 ))}
               </div>
 
-              {/* No Results */}
               {filteredSections().length === 0 && (
                 <div className="py-8 text-center text-sm text-muted-foreground">
-                  Aucun résultat trouvé pour "{searchQuery}"
+                  {t('sidebar.chrome.megaMenuNoResults', {
+                    query: searchQuery,
+                    defaultValue: `No results found for "${searchQuery}"`,
+                  })}
                 </div>
               )}
             </div>
 
-            {/* Footer */}
             <div className="flex items-center justify-between border-t border-border/50 px-4 py-3">
               <div className="text-xs text-muted-foreground">
-                Utilisez <kbd className="rounded bg-muted px-1.5 py-0.5">Esc</kbd> pour fermer
+                {t('sidebar.chrome.megaMenuCloseHint', {
+                  key: 'Esc',
+                  defaultValue: 'Press {{key}} to close',
+                })}
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setOpen(false)}
-                className="text-xs"
-              >
-                Fermer
+              <Button variant="ghost" size="sm" onClick={() => setOpen(false)} className="text-xs">
+                {t('sidebar.chrome.megaMenuClose', { defaultValue: 'Close' })}
               </Button>
             </div>
           </motion.div>
@@ -197,12 +219,11 @@ export function MegaMenuTrigger({
       variant="ghost"
       size="sm"
       className={cn('gap-2', isOpen && 'bg-accent')}
+      aria-expanded={isOpen}
       {...props}
     >
       {children}
-      <ChevronDown
-        className={cn('h-4 w-4 transition-transform', isOpen && 'rotate-180')}
-      />
+      <ChevronDown className={cn('h-4 w-4 transition-transform', isOpen && 'rotate-180')} />
     </Button>
   );
 }

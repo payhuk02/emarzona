@@ -18,7 +18,7 @@ describe('navigation.horizontal visibility', () => {
   it('shows buyer horizontal nav on account routes', () => {
     expect(shouldShowBuyerHorizontalNav('/account')).toBe(true);
     expect(shouldShowBuyerHorizontalNav('/account/orders')).toBe(true);
-    expect(shouldShowBuyerHorizontalNav('/cart')).toBe(true);
+    expect(shouldShowBuyerHorizontalNav('/cart')).toBe(false);
     expect(shouldShowBuyerHorizontalNav('/dashboard')).toBe(false);
   });
 
@@ -53,6 +53,12 @@ describe('navigation.horizontal visibility', () => {
     expect(resolveHorizontalNavPersona('/dashboard/orders')).toBe('seller');
     expect(resolveHorizontalNavPersona('/marketplace')).toBe('buyer');
     expect(resolveHorizontalNavPersona('/recommendations')).toBe('buyer');
+  });
+
+  it('path zones override pinned persona', () => {
+    expect(resolveHorizontalNavPersona('/marketplace', 'seller')).toBe('buyer');
+    expect(resolveHorizontalNavPersona('/dashboard', 'buyer')).toBe('seller');
+    expect(resolveHorizontalNavPersona('/account/orders', 'seller')).toBe('buyer');
   });
 
   it('uses preferred persona on shared notification routes', () => {

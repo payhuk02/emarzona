@@ -23,7 +23,7 @@ import { useHorizontalContextNav } from '@/hooks/useHorizontalContextNav';
 import type { HorizontalNavDomain, HorizontalNavLink } from '@/lib/navigation/resolveHorizontalNav';
 import { usePlanLockNavAction } from '@/hooks/usePlanLockNavAction';
 import { isNavItemActive } from '@/config/navigation.helpers';
-import { resolveHorizontalNavPersona } from '@/config/navigation.horizontal';
+import { toCommerceNavPersona } from '@/config/navigation.persona';
 import { useSidebarPersona } from '@/hooks/useSidebarPersona';
 import { useAdmin } from '@/hooks/useAdmin';
 
@@ -261,7 +261,7 @@ export function HorizontalContextNav() {
   const { persona: sidebarPersona } = useSidebarPersona(isAdmin);
   const handlePlanLockedNav = usePlanLockNavAction();
   const domains = useHorizontalContextNav();
-  const isBuyerNav = resolveHorizontalNavPersona(location.pathname, sidebarPersona) === 'buyer';
+  const isBuyerNav = toCommerceNavPersona(sidebarPersona) === 'buyer';
   const navAriaLabel = isBuyerNav
     ? t('sidebar.chrome.horizontalContextNavBuyer', { defaultValue: 'Navigation acheteur' })
     : t('sidebar.chrome.horizontalContextNav', { defaultValue: 'Navigation par domaine' });
@@ -281,7 +281,7 @@ export function HorizontalContextNav() {
 
   return (
     <div
-      className="sticky top-11 sm:top-12 z-20 shrink-0 border-b border-border/50 bg-background/95 backdrop-blur-md shadow-[0_1px_0_0_hsl(var(--border)/0.4)]"
+      className="z-20 shrink-0 border-b border-border/50 bg-background/95 backdrop-blur-md shadow-[0_1px_0_0_hsl(var(--border)/0.4)] md:sticky md:top-12"
       data-testid="horizontal-context-nav"
     >
       <div className="hidden md:block px-3 lg:px-6">

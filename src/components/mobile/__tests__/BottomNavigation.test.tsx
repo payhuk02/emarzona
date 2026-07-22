@@ -3,7 +3,7 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { BottomNavigation } from '@/components/mobile/BottomNavigation';
-import { ShoppingCart, User } from 'lucide-react';
+import { Bell, ShoppingBag, User } from 'lucide-react';
 
 const mockHandlePlanLock = vi.fn();
 
@@ -16,17 +16,24 @@ const buyerNavItems = [
     locked: false,
   },
   {
-    title: 'Panier',
-    url: '/cart',
-    path: '/cart',
-    icon: ShoppingCart,
+    title: 'Marketplace',
+    url: '/marketplace',
+    path: '/marketplace',
+    icon: ShoppingBag,
+    locked: false,
+  },
+  {
+    title: 'Notifications',
+    url: '/notifications',
+    path: '/notifications',
+    icon: Bell,
     locked: false,
   },
   {
     title: 'Campagnes email',
     url: '/dashboard/emails/campaigns',
     path: '/dashboard/emails/campaigns',
-    icon: ShoppingCart,
+    icon: Bell,
     locked: true,
   },
 ];
@@ -65,17 +72,24 @@ describe('BottomNavigation', () => {
 
     expect(screen.getByRole('navigation')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Compte' })).toHaveAttribute('href', '/account');
-    expect(screen.getByRole('link', { name: 'Panier' })).toHaveAttribute('href', '/cart');
+    expect(screen.getByRole('link', { name: 'Marketplace' })).toHaveAttribute(
+      'href',
+      '/marketplace'
+    );
+    expect(screen.queryByRole('link', { name: 'Panier' })).not.toBeInTheDocument();
   });
 
   it('marks the active route with aria-current', () => {
     render(
-      <MemoryRouter initialEntries={['/cart']}>
+      <MemoryRouter initialEntries={['/marketplace']}>
         <BottomNavigation />
       </MemoryRouter>
     );
 
-    expect(screen.getByRole('link', { name: 'Panier' })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('link', { name: 'Marketplace' })).toHaveAttribute(
+      'aria-current',
+      'page'
+    );
   });
 
   it('opens plan-lock modal instead of navigating for locked items', async () => {

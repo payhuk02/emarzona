@@ -46,7 +46,7 @@ describe('buyer navigation gap audit', () => {
     expect(allPaths.has('/recommendations')).toBe(true);
     expect(allPaths.has('/account/orders')).toBe(true);
     expect(allPaths.has('/account/digital')).toBe(true);
-    expect(allPaths.has('/cart')).toBe(true);
+    expect(allPaths.has('/cart')).toBe(false);
     expect(allPaths.has('/dashboard/gamification')).toBe(false);
     expect(allPaths.has('/notifications')).toBe(true);
     expect(allPaths.has('/settings/notifications')).toBe(true);
@@ -71,14 +71,26 @@ describe('buyer navigation gap audit', () => {
     );
   });
 
-  it('marque Achats actif sur /cart', () => {
+  it('marque Achats actif sur /account/orders', () => {
     const domains = resolveHorizontalNavDomains({
       persona: 'buyer',
       isPlatformAdmin: false,
-      pathname: '/cart',
+      pathname: '/account/orders',
       search: '',
       t: mockT as never,
     });
     expect(domains.find(d => d.domainKey === 'achats')?.isActive).toBe(true);
+  });
+
+  it('ne résout pas /cart dans la nav acheteur', () => {
+    const domains = resolveHorizontalNavDomains({
+      persona: 'buyer',
+      isPlatformAdmin: false,
+      pathname: '/marketplace',
+      search: '',
+      t: mockT as never,
+    });
+    const allPaths = domains.flatMap(d => d.items.map(i => i.path));
+    expect(allPaths).not.toContain('/cart');
   });
 });

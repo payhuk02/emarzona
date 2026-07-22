@@ -98,7 +98,13 @@
       "buyerNavServices": "Services",
       "buyerNavDecouvrir": "Entdecken",
       "buyerNavNotifications": "Benachrichtigungen",
-      "mainContentAriaLabel": "Hauptinhalt"
+      "mainContentAriaLabel": "Hauptinhalt",
+      "megaMenuSearchPlaceholder": "Im Menü suchen…",
+      "megaMenuNoResults": "Keine Ergebnisse für „{{query}}“",
+      "megaMenuCloseHint": "Mit {{key}} schließen",
+      "megaMenuClose": "Schließen",
+      "megaMenuDialogLabel": "Navigationsmenü",
+      "megaMenuClearSearch": "Suche löschen"
     },
     "notifications": {
       "title": "Benachrichtigungen",
