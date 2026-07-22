@@ -247,6 +247,18 @@ export const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
         permissions: ['payments.manage'],
       },
       {
+        icon: BarChart3,
+        label: 'Stats paiements (MF)',
+        path: '/admin/payment-analytics',
+        permissions: ['payments.manage', 'analytics.view'],
+      },
+      {
+        icon: Scale,
+        label: 'Réconcilier PSP',
+        path: '/admin/payment-reconciliation',
+        permissions: ['payments.manage'],
+      },
+      {
         icon: Repeat,
         label: 'Abonnements',
         path: '/admin/subscriptions',

@@ -137,7 +137,9 @@ export const adminRoutes = (
     {pr('/admin/platform-blog', AdminPlatformBlog)}
     {pr('/admin/newsletter-subscribers', AdminNewsletterSubscribers)}
     {pr('/admin/geniuspay-analytics', GeniusPayAnalytics)}
+    {pr('/admin/payment-analytics', GeniusPayAnalytics)}
     {pr('/admin/geniuspay-reconciliation', GeniusPayReconciliation)}
+    {pr('/admin/payment-reconciliation', GeniusPayReconciliation)}
     {pr('/admin/transaction-monitoring', TransactionMonitoring)}
     {pr('/admin/notifications', AdminNotifications)}
     {pr('/admin/revenue', PlatformRevenue)}

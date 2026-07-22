@@ -200,7 +200,8 @@ export default function AdminTransactionReconciliation() {
       'Currency',
       'Status',
       'Payment Provider',
-      'GeniusPay Transaction ID',
+      'Payment ID (PSP)',
+      'Legacy GeniusPay ID',
       'Created At',
       'Updated At',
     ];
@@ -213,6 +214,7 @@ export default function AdminTransactionReconciliation() {
       t.currency,
       t.status,
       t.payment_provider,
+      t.payment_id || t.geniuspay_transaction_id || '',
       t.geniuspay_transaction_id || '',
       t.created_at,
       t.updated_at,
@@ -527,7 +529,15 @@ export default function AdminTransactionReconciliation() {
                             </TableCell>
                             <TableCell>{getStatusBadge(transaction.status)}</TableCell>
                             <TableCell>
-                              <Badge variant="outline">{transaction.payment_provider}</Badge>
+                              <div className="space-y-1">
+                                <Badge variant="outline">{transaction.payment_provider}</Badge>
+                                {(transaction.payment_id ||
+                                  transaction.geniuspay_transaction_id) && (
+                                  <div className="text-[10px] font-mono text-muted-foreground truncate max-w-[120px]">
+                                    {transaction.payment_id || transaction.geniuspay_transaction_id}
+                                  </div>
+                                )}
+                              </div>
                             </TableCell>
                             <TableCell>
                               <div className={`text-xs ${getAgeColor(transaction.created_at)}`}>

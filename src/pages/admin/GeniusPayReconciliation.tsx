@@ -8,7 +8,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useReconcileTransaction, useReconcileTransactions, useGenerateReconciliationReport } from '@/hooks/useGeniusPayReconciliation';
+import {
+  useReconcileTransaction,
+  useReconcileTransactions,
+  useGenerateReconciliationReport,
+} from '@/hooks/useGeniusPayReconciliation';
+import type { ReconciliationReport, ReconciliationResult } from '@/lib/geniuspay-reconciliation';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Loader2, CheckCircle, XCircle, AlertCircle, RefreshCw, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -16,7 +21,9 @@ import { useToast } from '@/hooks/use-toast';
 export default function GeniusPayReconciliation() {
   const { toast } = useToast();
   const [transactionId, setTransactionId] = useState('');
-  const [reconciliationResult, setReconciliationResult] = useState<Record<string, any> | null>(null);
+  const [reconciliationResult, setReconciliationResult] = useState<
+    ReconciliationResult | ReconciliationReport | null
+  >(null);
 
   const reconcileTransactionMutation = useReconcileTransaction();
   const reconcileTransactionsMutation = useReconcileTransactions();
@@ -35,16 +42,16 @@ export default function GeniusPayReconciliation() {
     try {
       const result = await reconcileTransactionMutation.mutateAsync(transactionId);
       setReconciliationResult(result);
-      
+
       if (result.status === 'matched') {
         toast({
           title: '✅ Réconciliation réussie',
-          description: 'La transaction correspond parfaitement avec GeniusPay',
+          description: 'La transaction correspond parfaitement avec le PSP',
         });
       } else if (result.status === 'mismatched') {
         toast({
           title: '⚠️ Divergences détectées',
-          description: 'La transaction a été mise à jour avec les données GeniusPay',
+          description: 'La transaction a été mise à jour avec les données PSP',
           variant: 'default',
         });
       } else {
@@ -68,12 +75,12 @@ export default function GeniusPayReconciliation() {
       const report = await reconcileTransactionsMutation.mutateAsync({
         limit: 100,
       });
-      
+
       toast({
         title: '✅ Réconciliation terminée',
         description: `${report.matched} transactions correspondantes, ${report.mismatched} divergences corrigées`,
       });
-      
+
       setReconciliationResult(report);
     } catch (error) {
       toast({
@@ -87,12 +94,12 @@ export default function GeniusPayReconciliation() {
   const handleGenerateReport = async () => {
     try {
       const report = await generateReportMutation.mutateAsync({});
-      
+
       toast({
         title: '✅ Rapport généré',
         description: `Rapport de réconciliation généré avec succès`,
       });
-      
+
       setReconciliationResult(report);
     } catch (error) {
       toast({
@@ -107,9 +114,10 @@ export default function GeniusPayReconciliation() {
     <AdminLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">Réconciliation GeniusPay</h1>
+          <h1 className="text-3xl font-bold">Réconciliation paiements</h1>
           <p className="text-muted-foreground">
-            Compare les transactions avec GeniusPay pour détecter les divergences
+            Compare les transactions avec MoneyFusion (et historique GeniusPay) pour détecter les
+            divergences
           </p>
         </div>
 
@@ -117,9 +125,7 @@ export default function GeniusPayReconciliation() {
         <Card>
           <CardHeader>
             <CardTitle>Réconcilier une transaction</CardTitle>
-            <CardDescription>
-              Vérifier et corriger une transaction spécifique
-            </CardDescription>
+            <CardDescription>Vérifier et corriger une transaction spécifique</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex gap-2">
@@ -127,7 +133,7 @@ export default function GeniusPayReconciliation() {
                 type="text"
                 placeholder="ID de transaction"
                 value={transactionId}
-                onChange={(e) => setTransactionId(e.target.value)}
+                onChange={e => setTransactionId(e.target.value)}
                 className="flex-1 min-h-[44px]"
               />
               <Button
@@ -149,46 +155,50 @@ export default function GeniusPayReconciliation() {
               </Button>
             </div>
 
-            {reconciliationResult && typeof reconciliationResult === 'object' && 'status' in reconciliationResult && (
-              <Alert>
-                <AlertDescription>
-                  <div className="flex items-center gap-2">
-                    {reconciliationResult.status === 'matched' ? (
-                      <CheckCircle className="h-4 w-4 text-green-600" />
-                    ) : reconciliationResult.status === 'mismatched' ? (
-                      <AlertCircle className="h-4 w-4 text-yellow-600" />
-                    ) : (
-                      <XCircle className="h-4 w-4 text-red-600" />
-                    )}
-                    <div>
-                      <p className="font-medium">Statut: {reconciliationResult.status}</p>
-                      {reconciliationResult.discrepancies && (
-                        <div className="mt-2 text-sm">
-                          <p>Divergences détectées:</p>
-                          <ul className="list-disc list-inside">
-                            {reconciliationResult.discrepancies.amount && (
-                              <li>
-                                Montant: DB={reconciliationResult.discrepancies.amount.db}, 
-                                GeniusPay={reconciliationResult.discrepancies.amount.geniuspay}
-                              </li>
-                            )}
-                            {reconciliationResult.discrepancies.status && (
-                              <li>
-                                Statut: DB={reconciliationResult.discrepancies.status.db}, 
-                                GeniusPay={reconciliationResult.discrepancies.status.geniuspay}
-                              </li>
-                            )}
-                          </ul>
-                        </div>
+            {reconciliationResult &&
+              typeof reconciliationResult === 'object' &&
+              'status' in reconciliationResult && (
+                <Alert>
+                  <AlertDescription>
+                    <div className="flex items-center gap-2">
+                      {reconciliationResult.status === 'matched' ? (
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                      ) : reconciliationResult.status === 'mismatched' ? (
+                        <AlertCircle className="h-4 w-4 text-yellow-600" />
+                      ) : (
+                        <XCircle className="h-4 w-4 text-red-600" />
                       )}
-                      {reconciliationResult.error && (
-                        <p className="text-red-600 mt-2">{reconciliationResult.error}</p>
-                      )}
+                      <div>
+                        <p className="font-medium">Statut: {reconciliationResult.status}</p>
+                        {reconciliationResult.discrepancies && (
+                          <div className="mt-2 text-sm">
+                            <p>Divergences détectées:</p>
+                            <ul className="list-disc list-inside">
+                              {reconciliationResult.discrepancies.amount && (
+                                <li>
+                                  Montant: DB={reconciliationResult.discrepancies.amount.db}, PSP=
+                                  {reconciliationResult.discrepancies.amount.provider ??
+                                    reconciliationResult.discrepancies.amount.geniuspay}
+                                </li>
+                              )}
+                              {reconciliationResult.discrepancies.status && (
+                                <li>
+                                  Statut: DB={reconciliationResult.discrepancies.status.db}, PSP=
+                                  {reconciliationResult.discrepancies.status.provider ??
+                                    reconciliationResult.discrepancies.status.geniuspay}
+                                </li>
+                              )}
+                            </ul>
+                          </div>
+                        )}
+                        {reconciliationResult.error && (
+                          <p className="text-red-600 mt-2">{reconciliationResult.error}</p>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </AlertDescription>
-              </Alert>
-            )}
+                  </AlertDescription>
+                </Alert>
+              )}
           </CardContent>
         </Card>
 
@@ -220,32 +230,32 @@ export default function GeniusPayReconciliation() {
               )}
             </Button>
 
-            {reconciliationResult && typeof reconciliationResult === 'object' && 'totalTransactions' in reconciliationResult && (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span>Total de transactions:</span>
-                  <Badge>{reconciliationResult.totalTransactions}</Badge>
+            {reconciliationResult &&
+              typeof reconciliationResult === 'object' &&
+              'totalTransactions' in reconciliationResult && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span>Total de transactions:</span>
+                    <Badge>{reconciliationResult.totalTransactions}</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Correspondantes:</span>
+                    <Badge variant="default" className="bg-green-600">
+                      {reconciliationResult.matched}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Divergences corrigées:</span>
+                    <Badge variant="default" className="bg-yellow-600">
+                      {reconciliationResult.mismatched}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Erreurs:</span>
+                    <Badge variant="destructive">{reconciliationResult.errors}</Badge>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span>Correspondantes:</span>
-                  <Badge variant="default" className="bg-green-600">
-                    {reconciliationResult.matched}
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span>Divergences corrigées:</span>
-                  <Badge variant="default" className="bg-yellow-600">
-                    {reconciliationResult.mismatched}
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span>Erreurs:</span>
-                  <Badge variant="destructive">
-                    {reconciliationResult.errors}
-                  </Badge>
-                </div>
-              </div>
-            )}
+              )}
           </CardContent>
         </Card>
 
@@ -253,9 +263,7 @@ export default function GeniusPayReconciliation() {
         <Card>
           <CardHeader>
             <CardTitle>Générer un rapport</CardTitle>
-            <CardDescription>
-              Générer un rapport de réconciliation complet
-            </CardDescription>
+            <CardDescription>Générer un rapport de réconciliation complet</CardDescription>
           </CardHeader>
           <CardContent>
             <Button
@@ -282,10 +290,3 @@ export default function GeniusPayReconciliation() {
     </AdminLayout>
   );
 }
-
-
-
-
-
-
-

@@ -45,66 +45,123 @@ const DEFAULT_RETRY_CONFIG: RetryConfig = {
 // Note: La logique de shouldRetry est maintenant gérée par la fonction SQL get_pending_transaction_retries()
 // qui utilise la table transaction_retries avec next_retry_at et les stratégies de backoff
 
+const STATUS_MAP: Record<string, string> = {
+  completed: 'completed',
+  success: 'completed',
+  paid: 'completed',
+  failed: 'failed',
+  failure: 'failed',
+  pending: 'processing',
+  processing: 'processing',
+  cancelled: 'cancelled',
+  canceled: 'cancelled',
+  'no paid': 'cancelled',
+  expired: 'cancelled',
+  refunded: 'refunded',
+};
+
+function resolveExternalPaymentId(transaction: {
+  payment_provider?: string | null;
+  payment_id?: string | null;
+  geniuspay_transaction_id?: string | null;
+}): string | null {
+  const provider = String(transaction.payment_provider || '').toLowerCase();
+  if (provider === 'moneyfusion') {
+    return String(transaction.payment_id || transaction.geniuspay_transaction_id || '').trim() || null;
+  }
+  if (provider === 'geniuspay') {
+    return String(transaction.geniuspay_transaction_id || transaction.payment_id || '').trim() || null;
+  }
+  return String(transaction.payment_id || transaction.geniuspay_transaction_id || '').trim() || null;
+}
+
 /**
- * Vérifie le statut d'une transaction auprès du provider
+ * Vérifie le statut d'une transaction auprès du provider (MoneyFusion ou GeniusPay).
  */
 async function verifyTransactionWithProvider(
-  supabase: any,
-  transaction: any
+  _supabase: unknown,
+  transaction: {
+    payment_provider?: string | null;
+    payment_id?: string | null;
+    geniuspay_transaction_id?: string | null;
+  }
 ): Promise<{ success: boolean; newStatus?: string; error?: string }> {
   try {
-      if (transaction.payment_provider === 'geniuspay' && transaction.geniuspay_transaction_id) {
-        // Appeler l'Edge Function geniuspay pour vérifier le statut
-        const geniuspayUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/geniuspay`;
-        const response = await fetch(geniuspayUrl, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            action: 'get_payment',
-            data: {
-              paymentId: transaction.geniuspay_transaction_id,
-            },
-          }),
-        });
+    const provider = String(transaction.payment_provider || '').toLowerCase();
+    const externalId = resolveExternalPaymentId(transaction);
+    if (!externalId) {
+      return { success: false, error: 'Identifiant PSP manquant' };
+    }
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          return { success: false, error: `GeniusPay API error: ${response.status} - ${errorText}` };
-        }
+    if (provider === 'moneyfusion') {
+      const moneyfusionUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/moneyfusion`;
+      const response = await fetch(moneyfusionUrl, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'verify_payment',
+          data: { paymentId: externalId, token: externalId },
+        }),
+      });
 
-        const responseData = await response.json();
-        
-        // La réponse GeniusPay peut être dans data.data ou directement dans data
-        const paymentData = responseData.data?.data || responseData.data || responseData;
-        
-        // Mapper le statut GeniusPay vers notre statut
-        const statusMap: Record<string, string> = {
-          'completed': 'completed',
-          'success': 'completed',
-          'paid': 'completed',
-          'failed': 'failed',
-          'pending': 'processing',
-          'cancelled': 'cancelled',
-          'expired': 'cancelled',
-        };
-
-        const geniuspayStatus = paymentData.status?.toLowerCase() || paymentData.payment_status?.toLowerCase() || 'processing';
-        const newStatus = statusMap[geniuspayStatus] || 'processing';
-
-        return { 
-          success: true, 
-          newStatus,
+      if (!response.ok) {
+        const errorText = await response.text();
+        return {
+          success: false,
+          error: `MoneyFusion API error: ${response.status} - ${errorText}`,
         };
       }
 
-    // Pour PayDunya, on pourrait ajouter la logique ici
-    // Pour l'instant, on retourne une erreur
-    return { success: false, error: 'Provider not supported for automatic retry' };
-  } catch (error: any) {
-    return { success: false, error: error.message || 'Unknown error' };
+      const responseData = await response.json();
+      const outer = responseData.data || responseData;
+      const paymentData =
+        outer?.data && typeof outer.data === 'object' ? outer.data : outer;
+      const rawStatus = String(
+        paymentData.statut || paymentData.status || paymentData.payment_status || 'processing'
+      ).toLowerCase();
+      const newStatus = STATUS_MAP[rawStatus] || 'processing';
+      return { success: true, newStatus };
+    }
+
+    if (provider === 'geniuspay') {
+      const geniuspayUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/geniuspay`;
+      const response = await fetch(geniuspayUrl, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'get_payment',
+          data: { paymentId: externalId },
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        return {
+          success: false,
+          error: `GeniusPay API error: ${response.status} - ${errorText}`,
+        };
+      }
+
+      const responseData = await response.json();
+      const paymentData = responseData.data?.data || responseData.data || responseData;
+      const geniuspayStatus =
+        paymentData.status?.toLowerCase() ||
+        paymentData.payment_status?.toLowerCase() ||
+        'processing';
+      const newStatus = STATUS_MAP[geniuspayStatus] || 'processing';
+      return { success: true, newStatus };
+    }
+
+    return { success: false, error: `Provider not supported for automatic retry: ${provider || 'unknown'}` };
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return { success: false, error: message };
   }
 }
 

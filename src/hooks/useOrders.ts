@@ -18,6 +18,7 @@ export interface ShippingAddress {
 export interface OrderTransaction {
   id: string;
   geniuspay_transaction_id: string | null;
+  payment_id: string | null;
   amount: number;
   currency: string;
   status: string;
@@ -233,7 +234,7 @@ export const useOrders = (storeId?: string, options: UseOrdersOptions = {}) => {
       const { data, error: transactionsError } = await supabase
         .from('transactions')
         .select(
-          'id, geniuspay_transaction_id, amount, currency, status, geniuspay_payment_method, created_at, completed_at'
+          'id, geniuspay_transaction_id, payment_id, amount, currency, status, payment_provider, geniuspay_payment_method, created_at, completed_at'
         )
         .eq('order_id', orderId)
         .order('created_at', { ascending: false });
@@ -249,11 +250,13 @@ export const useOrders = (storeId?: string, options: UseOrdersOptions = {}) => {
       return (data || []).map(t => ({
         id: t.id,
         geniuspay_transaction_id: t.geniuspay_transaction_id,
+        payment_id: (t as { payment_id?: string | null }).payment_id ?? null,
         amount: Number(t.amount || 0),
         currency: t.currency || 'XOF',
         status: t.status || 'pending',
         payment_method: t.geniuspay_payment_method,
-        payment_provider: (t as { payment_provider?: string | null }).payment_provider ?? 'geniuspay',
+        payment_provider:
+          (t as { payment_provider?: string | null }).payment_provider ?? 'moneyfusion',
         created_at: t.created_at,
         completed_at: t.completed_at,
       }));

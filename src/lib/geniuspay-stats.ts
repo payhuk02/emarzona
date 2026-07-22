@@ -3,7 +3,7 @@
  * Fournit des statistiques détaillées sur les paiements GeniusPay
  */
 
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from '@/integrations/supabase/client';
 import { logger } from './logger';
 import { Currency } from './currency-converter';
 import { geniuspayStatsCache, generateStatsCacheKey } from './geniuspay-cache';
@@ -67,61 +67,61 @@ export async function getPaymentStats(
   storeId?: string
 ): Promise<PaymentStats> {
   const cacheKey = generateStatsCacheKey('payments', startDate, endDate, storeId);
-  
+
   return geniuspayStatsCache.getOrSet(cacheKey, async () => {
     try {
-      let  query= supabase
+      let query = supabase
         .from('transactions')
         .select('status')
-        .eq('payment_provider', 'geniuspay');
+        .in('payment_provider', ['moneyfusion', 'geniuspay']);
 
-    if (storeId) {
-      query = query.eq('store_id', storeId);
-    }
+      if (storeId) {
+        query = query.eq('store_id', storeId);
+      }
 
-    if (startDate) {
-      query = query.gte('created_at', startDate.toISOString());
-    }
+      if (startDate) {
+        query = query.gte('created_at', startDate.toISOString());
+      }
 
-    if (endDate) {
-      query = query.lte('created_at', endDate.toISOString());
-    }
+      if (endDate) {
+        query = query.lte('created_at', endDate.toISOString());
+      }
 
-    const { data: transactions, error } = await query;
+      const { data: transactions, error } = await query;
 
-    if (error) {
-      throw new Error(`Error fetching payment stats: ${error.message}`);
-    }
+      if (error) {
+        throw new Error(`Error fetching payment stats: ${error.message}`);
+      }
 
-    if (!transactions || transactions.length === 0) {
-      return {
-        total: 0,
-        successful: 0,
-        failed: 0,
-        pending: 0,
-        cancelled: 0,
-        refunded: 0,
+      if (!transactions || transactions.length === 0) {
+        return {
+          total: 0,
+          successful: 0,
+          failed: 0,
+          pending: 0,
+          cancelled: 0,
+          refunded: 0,
+          successRate: 0,
+          failureRate: 0,
+        };
+      }
+
+      const stats = {
+        total: transactions.length,
+        successful: transactions.filter(t => t.status === 'completed').length,
+        failed: transactions.filter(t => t.status === 'failed').length,
+        pending: transactions.filter(t => ['pending', 'processing'].includes(t.status)).length,
+        cancelled: transactions.filter(t => t.status === 'cancelled').length,
+        refunded: transactions.filter(t => t.status === 'refunded').length,
         successRate: 0,
         failureRate: 0,
       };
-    }
 
-    const stats = {
-      total: transactions.length,
-      successful: transactions.filter(t => t.status === 'completed').length,
-      failed: transactions.filter(t => t.status === 'failed').length,
-      pending: transactions.filter(t => ['pending', 'processing'].includes(t.status)).length,
-      cancelled: transactions.filter(t => t.status === 'cancelled').length,
-      refunded: transactions.filter(t => t.status === 'refunded').length,
-      successRate: 0,
-      failureRate: 0,
-    };
-
-    const finalized = stats.successful + stats.failed;
-    if (finalized > 0) {
-      stats.successRate = (stats.successful / finalized) * 100;
-      stats.failureRate = (stats.failed / finalized) * 100;
-    }
+      const finalized = stats.successful + stats.failed;
+      if (finalized > 0) {
+        stats.successRate = (stats.successful / finalized) * 100;
+        stats.failureRate = (stats.failed / finalized) * 100;
+      }
 
       return stats;
     } catch (error) {
@@ -140,63 +140,63 @@ export async function getRevenueStats(
   storeId?: string
 ): Promise<RevenueStats> {
   const cacheKey = generateStatsCacheKey('revenue', startDate, endDate, storeId);
-  
+
   return geniuspayStatsCache.getOrSet(cacheKey, async () => {
     try {
-      let  query= supabase
+      let query = supabase
         .from('transactions')
         .select('amount, currency, status')
-        .eq('payment_provider', 'geniuspay')
+        .in('payment_provider', ['moneyfusion', 'geniuspay'])
         .in('status', ['completed', 'refunded']);
 
-    if (storeId) {
-      query = query.eq('store_id', storeId);
-    }
-
-    if (startDate) {
-      query = query.gte('created_at', startDate.toISOString());
-    }
-
-    if (endDate) {
-      query = query.lte('created_at', endDate.toISOString());
-    }
-
-    const { data: transactions, error } = await query;
-
-    if (error) {
-      throw new Error(`Error fetching revenue stats: ${error.message}`);
-    }
-
-    if (!transactions || transactions.length === 0) {
-      return {
-        total: 0,
-        successful: 0,
-        refunded: 0,
-        net: 0,
-        currency: 'XOF',
-        byCurrency: {} as Record<Currency, number>,
-      };
-    }
-
-    let  total= 0;
-    let  successful= 0;
-    let  refunded= 0;
-    const  byCurrency: Record<string, number> = {};
-
-    for (const transaction of transactions) {
-      const amount = parseFloat(transaction.amount.toString());
-      const currency = (transaction.currency || 'XOF') as Currency;
-
-      total += amount;
-
-      if (transaction.status === 'completed') {
-        successful += amount;
-      } else if (transaction.status === 'refunded') {
-        refunded += amount;
+      if (storeId) {
+        query = query.eq('store_id', storeId);
       }
 
-      byCurrency[currency] = (byCurrency[currency] || 0) + amount;
-    }
+      if (startDate) {
+        query = query.gte('created_at', startDate.toISOString());
+      }
+
+      if (endDate) {
+        query = query.lte('created_at', endDate.toISOString());
+      }
+
+      const { data: transactions, error } = await query;
+
+      if (error) {
+        throw new Error(`Error fetching revenue stats: ${error.message}`);
+      }
+
+      if (!transactions || transactions.length === 0) {
+        return {
+          total: 0,
+          successful: 0,
+          refunded: 0,
+          net: 0,
+          currency: 'XOF',
+          byCurrency: {} as Record<Currency, number>,
+        };
+      }
+
+      let total = 0;
+      let successful = 0;
+      let refunded = 0;
+      const byCurrency: Record<string, number> = {};
+
+      for (const transaction of transactions) {
+        const amount = parseFloat(transaction.amount.toString());
+        const currency = (transaction.currency || 'XOF') as Currency;
+
+        total += amount;
+
+        if (transaction.status === 'completed') {
+          successful += amount;
+        } else if (transaction.status === 'refunded') {
+          refunded += amount;
+        }
+
+        byCurrency[currency] = (byCurrency[currency] || 0) + amount;
+      }
 
       return {
         total,
@@ -222,74 +222,74 @@ export async function getTimeStats(
   storeId?: string
 ): Promise<TimeStats> {
   const cacheKey = generateStatsCacheKey('time', startDate, endDate, storeId);
-  
+
   return geniuspayStatsCache.getOrSet(cacheKey, async () => {
     try {
-      let  query= supabase
+      let query = supabase
         .from('transactions')
         .select('created_at, completed_at, failed_at')
-        .eq('payment_provider', 'geniuspay')
+        .in('payment_provider', ['moneyfusion', 'geniuspay'])
         .in('status', ['completed', 'failed'])
         .not('completed_at', 'is', null);
 
-    if (storeId) {
-      query = query.eq('store_id', storeId);
-    }
-
-    if (startDate) {
-      query = query.gte('created_at', startDate.toISOString());
-    }
-
-    if (endDate) {
-      query = query.lte('created_at', endDate.toISOString());
-    }
-
-    const { data: transactions, error } = await query;
-
-    if (error) {
-      throw new Error(`Error fetching time stats: ${error.message}`);
-    }
-
-    if (!transactions || transactions.length === 0) {
-      return {
-        averageProcessingTime: 0,
-        fastestPayment: 0,
-        slowestPayment: 0,
-        medianProcessingTime: 0,
-      };
-    }
-
-    const  processingTimes: number[] = [];
-
-    for (const transaction of transactions) {
-      const startTime = new Date(transaction.created_at).getTime();
-      const endTime = transaction.completed_at
-        ? new Date(transaction.completed_at).getTime()
-        : transaction.failed_at
-        ? new Date(transaction.failed_at).getTime()
-        : null;
-
-      if (endTime) {
-        const duration = (endTime - startTime) / (1000 * 60); // en minutes
-        processingTimes.push(duration);
+      if (storeId) {
+        query = query.eq('store_id', storeId);
       }
-    }
 
-    if (processingTimes.length === 0) {
-      return {
-        averageProcessingTime: 0,
-        fastestPayment: 0,
-        slowestPayment: 0,
-        medianProcessingTime: 0,
-      };
-    }
+      if (startDate) {
+        query = query.gte('created_at', startDate.toISOString());
+      }
 
-    processingTimes.sort((a, b) => a - b);
+      if (endDate) {
+        query = query.lte('created_at', endDate.toISOString());
+      }
 
-    const average = processingTimes.reduce((a, b) => a + b, 0) / processingTimes.length;
-    const fastest = processingTimes[0];
-    const slowest = processingTimes[processingTimes.length - 1];
-    const median = processingTimes[Math.floor(processingTimes.length / 2)];
+      const { data: transactions, error } = await query;
+
+      if (error) {
+        throw new Error(`Error fetching time stats: ${error.message}`);
+      }
+
+      if (!transactions || transactions.length === 0) {
+        return {
+          averageProcessingTime: 0,
+          fastestPayment: 0,
+          slowestPayment: 0,
+          medianProcessingTime: 0,
+        };
+      }
+
+      const processingTimes: number[] = [];
+
+      for (const transaction of transactions) {
+        const startTime = new Date(transaction.created_at).getTime();
+        const endTime = transaction.completed_at
+          ? new Date(transaction.completed_at).getTime()
+          : transaction.failed_at
+            ? new Date(transaction.failed_at).getTime()
+            : null;
+
+        if (endTime) {
+          const duration = (endTime - startTime) / (1000 * 60); // en minutes
+          processingTimes.push(duration);
+        }
+      }
+
+      if (processingTimes.length === 0) {
+        return {
+          averageProcessingTime: 0,
+          fastestPayment: 0,
+          slowestPayment: 0,
+          medianProcessingTime: 0,
+        };
+      }
+
+      processingTimes.sort((a, b) => a - b);
+
+      const average = processingTimes.reduce((a, b) => a + b, 0) / processingTimes.length;
+      const fastest = processingTimes[0];
+      const slowest = processingTimes[processingTimes.length - 1];
+      const median = processingTimes[Math.floor(processingTimes.length / 2)];
 
       return {
         averageProcessingTime: Math.round(average * 100) / 100,
@@ -313,62 +313,65 @@ export async function getPaymentMethodStats(
   storeId?: string
 ): Promise<PaymentMethodStats[]> {
   const cacheKey = generateStatsCacheKey('methods', startDate, endDate, storeId);
-  
+
   return geniuspayStatsCache.getOrSet(cacheKey, async () => {
     try {
-      let  query= supabase
+      let query = supabase
         .from('transactions')
         .select('geniuspay_payment_method, status, amount')
-        .eq('payment_provider', 'geniuspay')
+        .in('payment_provider', ['moneyfusion', 'geniuspay'])
         .not('geniuspay_payment_method', 'is', null);
 
-    if (storeId) {
-      query = query.eq('store_id', storeId);
-    }
-
-    if (startDate) {
-      query = query.gte('created_at', startDate.toISOString());
-    }
-
-    if (endDate) {
-      query = query.lte('created_at', endDate.toISOString());
-    }
-
-    const { data: transactions, error } = await query;
-
-    if (error) {
-      throw new Error(`Error fetching payment method stats: ${error.message}`);
-    }
-
-    if (!transactions || transactions.length === 0) {
-      return [];
-    }
-
-    const  methodStats: Record<string, {
-      count: number;
-      successful: number;
-      totalAmount: number;
-    }> = {};
-
-    for (const transaction of transactions) {
-      const method = transaction.geniuspay_payment_method || 'unknown';
-      const amount = parseFloat(transaction.amount.toString());
-
-      if (!methodStats[method]) {
-        methodStats[method] = {
-          count: 0,
-          successful: 0,
-          totalAmount: 0,
-        };
+      if (storeId) {
+        query = query.eq('store_id', storeId);
       }
 
-      methodStats[method].count++;
-      methodStats[method].totalAmount += amount;
-
-      if (transaction.status === 'completed') {
-        methodStats[method].successful++;
+      if (startDate) {
+        query = query.gte('created_at', startDate.toISOString());
       }
-    }
+
+      if (endDate) {
+        query = query.lte('created_at', endDate.toISOString());
+      }
+
+      const { data: transactions, error } = await query;
+
+      if (error) {
+        throw new Error(`Error fetching payment method stats: ${error.message}`);
+      }
+
+      if (!transactions || transactions.length === 0) {
+        return [];
+      }
+
+      const methodStats: Record<
+        string,
+        {
+          count: number;
+          successful: number;
+          totalAmount: number;
+        }
+      > = {};
+
+      for (const transaction of transactions) {
+        const method = transaction.geniuspay_payment_method || 'unknown';
+        const amount = parseFloat(transaction.amount.toString());
+
+        if (!methodStats[method]) {
+          methodStats[method] = {
+            count: 0,
+            successful: 0,
+            totalAmount: 0,
+          };
+        }
+
+        methodStats[method].count++;
+        methodStats[method].totalAmount += amount;
+
+        if (transaction.status === 'completed') {
+          methodStats[method].successful++;
+        }
+      }
 
       return Object.entries(methodStats).map(([method, stats]) => ({
         method,
@@ -392,57 +395,57 @@ export async function getStatsByDate(
   storeId?: string
 ): Promise<Array<{ date: string; count: number; amount: number }>> {
   const cacheKey = generateStatsCacheKey('byDate', startDate, endDate, storeId);
-  
+
   return geniuspayStatsCache.getOrSet(cacheKey, async () => {
     try {
-      let  query= supabase
+      let query = supabase
         .from('transactions')
         .select('created_at, amount, status')
-        .eq('payment_provider', 'geniuspay')
+        .in('payment_provider', ['moneyfusion', 'geniuspay'])
         .eq('status', 'completed');
 
-    if (storeId) {
-      query = query.eq('store_id', storeId);
-    }
-
-    if (startDate) {
-      query = query.gte('created_at', startDate.toISOString());
-    }
-
-    if (endDate) {
-      query = query.lte('created_at', endDate.toISOString());
-    }
-
-    const { data: transactions, error } = await query;
-
-    if (error) {
-      throw new Error(`Error fetching stats by date: ${error.message}`);
-    }
-
-    if (!transactions || transactions.length === 0) {
-      return [];
-    }
-
-    const  statsByDate: Record<string, { count: number; amount: number }> = {};
-
-    for (const transaction of transactions) {
-      const date = new Date(transaction.created_at).toISOString().split('T')[0];
-      const amount = parseFloat(transaction.amount.toString());
-
-      if (!statsByDate[date]) {
-        statsByDate[date] = { count: 0, amount: 0 };
+      if (storeId) {
+        query = query.eq('store_id', storeId);
       }
 
-      statsByDate[date].count++;
-      statsByDate[date].amount += amount;
-    }
+      if (startDate) {
+        query = query.gte('created_at', startDate.toISOString());
+      }
 
-    return Object.entries(statsByDate)
-      .map(([date, stats]) => ({
-        date,
-        count: stats.count,
-        amount: stats.amount,
-      }))
+      if (endDate) {
+        query = query.lte('created_at', endDate.toISOString());
+      }
+
+      const { data: transactions, error } = await query;
+
+      if (error) {
+        throw new Error(`Error fetching stats by date: ${error.message}`);
+      }
+
+      if (!transactions || transactions.length === 0) {
+        return [];
+      }
+
+      const statsByDate: Record<string, { count: number; amount: number }> = {};
+
+      for (const transaction of transactions) {
+        const date = new Date(transaction.created_at).toISOString().split('T')[0];
+        const amount = parseFloat(transaction.amount.toString());
+
+        if (!statsByDate[date]) {
+          statsByDate[date] = { count: 0, amount: 0 };
+        }
+
+        statsByDate[date].count++;
+        statsByDate[date].amount += amount;
+      }
+
+      return Object.entries(statsByDate)
+        .map(([date, stats]) => ({
+          date,
+          count: stats.count,
+          amount: stats.amount,
+        }))
         .sort((a, b) => a.date.localeCompare(b.date));
     } catch (error) {
       logger.error('Error getting stats by date:', error);
@@ -460,7 +463,7 @@ export async function getAllGeniusPayStats(
   storeId?: string
 ): Promise<GeniusPayStats> {
   const cacheKey = generateStatsCacheKey('all', startDate, endDate, storeId);
-  
+
   return geniuspayStatsCache.getOrSet(cacheKey, async () => {
     try {
       const [payments, revenue, time, byMethod, byDate] = await Promise.all([
@@ -488,16 +491,3 @@ export async function getAllGeniusPayStats(
     }
   });
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

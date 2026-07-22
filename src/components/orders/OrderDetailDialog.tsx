@@ -25,6 +25,7 @@ import {
 import { Order, OrderTransaction } from '@/hooks/useOrders';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { resolveExternalPaymentId } from '@/lib/payments/platform-payment-providers';
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -82,7 +83,7 @@ const OrderDetailDialogComponent = ({ open, onOpenChange, order }: OrderDetailDi
         const { data: transactionsData, error: transactionsError } = await supabase
           .from('transactions')
           .select(
-            'id, geniuspay_transaction_id, amount, currency, status, payment_provider, geniuspay_payment_method, created_at, completed_at'
+            'id, geniuspay_transaction_id, payment_id, amount, currency, status, payment_provider, geniuspay_payment_method, created_at, completed_at'
           )
           .eq('order_id', order.id)
           .order('created_at', { ascending: false });
@@ -97,6 +98,7 @@ const OrderDetailDialogComponent = ({ open, onOpenChange, order }: OrderDetailDi
             (transactionsData || []).map(t => ({
               id: t.id,
               geniuspay_transaction_id: t.geniuspay_transaction_id,
+              payment_id: (t as { payment_id?: string | null }).payment_id ?? null,
               amount: Number(t.amount || 0),
               currency: t.currency || 'XOF',
               status: t.status || 'pending',
@@ -567,7 +569,7 @@ const OrderDetailDialogComponent = ({ open, onOpenChange, order }: OrderDetailDi
                     void supabase
                       .from('transactions')
                       .select(
-                        'id, geniuspay_transaction_id, amount, currency, status, payment_provider, geniuspay_payment_method, created_at, completed_at'
+                        'id, geniuspay_transaction_id, payment_id, amount, currency, status, payment_provider, geniuspay_payment_method, created_at, completed_at'
                       )
                       .eq('order_id', order.id)
                       .order('created_at', { ascending: false })
@@ -577,6 +579,7 @@ const OrderDetailDialogComponent = ({ open, onOpenChange, order }: OrderDetailDi
                             data.map(t => ({
                               id: t.id,
                               geniuspay_transaction_id: t.geniuspay_transaction_id,
+                              payment_id: (t as { payment_id?: string | null }).payment_id ?? null,
                               amount: Number(t.amount || 0),
                               currency: t.currency || 'XOF',
                               status: t.status || 'pending',
@@ -616,12 +619,19 @@ const OrderDetailDialogComponent = ({ open, onOpenChange, order }: OrderDetailDi
                           )}
                         </div>
                         <div className="text-xs text-muted-foreground mt-1">
-                          {transaction.geniuspay_transaction_id && (
-                            <span className="font-mono">
-                              ID: {transaction.geniuspay_transaction_id.substring(0, 12)}...
-                            </span>
-                          )}
-                          {transaction.geniuspay_transaction_id && transaction.completed_at && ' • '}
+                          {(() => {
+                            const externalId = resolveExternalPaymentId(transaction);
+                            if (!externalId) return null;
+                            return (
+                              <span className="font-mono">
+                                ID: {externalId.substring(0, 16)}
+                                {externalId.length > 16 ? '...' : ''}
+                              </span>
+                            );
+                          })()}
+                          {resolveExternalPaymentId(transaction) &&
+                            transaction.completed_at &&
+                            ' • '}
                           {transaction.completed_at && (
                             <span>
                               {format(new Date(transaction.completed_at), 'dd MMM yyyy HH:mm', {

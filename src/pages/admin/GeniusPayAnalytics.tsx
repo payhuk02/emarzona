@@ -8,9 +8,26 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useGeniusPayStats, usePaymentStats, useRevenueStats, useTimeStats, usePaymentMethodStats, useStatsByDate } from '@/hooks/useGeniusPayStats';
+import {
+  useGeniusPayStats,
+  usePaymentStats,
+  useRevenueStats,
+  useTimeStats,
+  usePaymentMethodStats,
+  useStatsByDate,
+} from '@/hooks/useGeniusPayStats';
 import { AdminLayout } from '@/components/admin/AdminLayout';
-import { Loader2, TrendingUp, DollarSign, Clock, CheckCircle, XCircle, AlertCircle, BarChart3, PieChart } from 'lucide-react';
+import {
+  Loader2,
+  TrendingUp,
+  DollarSign,
+  Clock,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  BarChart3,
+  PieChart,
+} from 'lucide-react';
 import { formatCurrency } from '@/lib/currency-converter';
 import { format } from 'date-fns';
 
@@ -23,7 +40,11 @@ export default function GeniusPayAnalytics() {
     endDate: new Date(),
   });
 
-  const { data: stats, isLoading, error } = useGeniusPayStats({
+  const {
+    data: stats,
+    isLoading,
+    error,
+  } = useGeniusPayStats({
     startDate: dateRange.startDate,
     endDate: dateRange.endDate,
   });
@@ -83,9 +104,9 @@ export default function GeniusPayAnalytics() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Statistiques GeniusPay</h1>
+            <h1 className="text-3xl font-bold">Statistiques paiements</h1>
             <p className="text-muted-foreground">
-              Analyse détaillée des paiements GeniusPay
+              Analyse détaillée des paiements plateforme (MoneyFusion)
             </p>
           </div>
           <div className="flex gap-2">
@@ -151,7 +172,9 @@ export default function GeniusPayAnalytics() {
                 <div className="text-2xl font-bold text-green-600">{paymentStats.successful}</div>
                 <div className="flex items-center gap-2 mt-2">
                   <Progress value={paymentStats.successRate} className="flex-1" />
-                  <span className="text-xs text-muted-foreground">{paymentStats.successRate.toFixed(1)}%</span>
+                  <span className="text-xs text-muted-foreground">
+                    {paymentStats.successRate.toFixed(1)}%
+                  </span>
                 </div>
               </CardContent>
             </Card>
@@ -165,7 +188,9 @@ export default function GeniusPayAnalytics() {
                 <div className="text-2xl font-bold text-red-600">{paymentStats.failed}</div>
                 <div className="flex items-center gap-2 mt-2">
                   <Progress value={paymentStats.failureRate} className="flex-1" />
-                  <span className="text-xs text-muted-foreground">{paymentStats.failureRate.toFixed(1)}%</span>
+                  <span className="text-xs text-muted-foreground">
+                    {paymentStats.failureRate.toFixed(1)}%
+                  </span>
                 </div>
               </CardContent>
             </Card>
@@ -232,7 +257,9 @@ export default function GeniusPayAnalytics() {
           <Card>
             <CardHeader>
               <CardTitle>Temps de traitement</CardTitle>
-              <CardDescription>Statistiques sur la durée de traitement des paiements</CardDescription>
+              <CardDescription>
+                Statistiques sur la durée de traitement des paiements
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -246,7 +273,9 @@ export default function GeniusPayAnalytics() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Plus rapide</p>
-                  <p className="text-2xl font-bold text-green-600">{timeStats.fastestPayment} min</p>
+                  <p className="text-2xl font-bold text-green-600">
+                    {timeStats.fastestPayment} min
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Plus lent</p>
@@ -266,7 +295,7 @@ export default function GeniusPayAnalytics() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {methodStats.map((method) => (
+                {methodStats.map(method => (
                   <div key={method.method} className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Badge variant="outline">{method.method}</Badge>
@@ -301,19 +330,23 @@ export default function GeniusPayAnalytics() {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                {statsByDate.slice(-10).reverse().map((stat) => (
-                  <div key={stat.date} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted">
-                    <div>
-                      <p className="text-sm font-medium">
-                        {format(new Date(stat.date), 'PPP')}
-                      </p>
-                      <p className="text-xs text-muted-foreground">{stat.count} transactions</p>
+                {statsByDate
+                  .slice(-10)
+                  .reverse()
+                  .map(stat => (
+                    <div
+                      key={stat.date}
+                      className="flex items-center justify-between p-2 rounded-lg hover:bg-muted"
+                    >
+                      <div>
+                        <p className="text-sm font-medium">{format(new Date(stat.date), 'PPP')}</p>
+                        <p className="text-xs text-muted-foreground">{stat.count} transactions</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-bold">{formatCurrency(stat.amount, 'XOF')}</p>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm font-bold">{formatCurrency(stat.amount, 'XOF')}</p>
-                    </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             </CardContent>
           </Card>
@@ -322,10 +355,3 @@ export default function GeniusPayAnalytics() {
     </AdminLayout>
   );
 }
-
-
-
-
-
-
-

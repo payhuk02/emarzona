@@ -7,6 +7,7 @@ export const ADMIN_TRANSACTION_FIELDS = `
   currency,
   status,
   payment_provider,
+  payment_id,
   geniuspay_transaction_id,
   created_at,
   updated_at,
@@ -28,6 +29,7 @@ export type AdminTransactionRow = {
   currency: string;
   status: string;
   payment_provider: string;
+  payment_id: string | null;
   geniuspay_transaction_id: string | null;
   created_at: string;
   updated_at: string;
@@ -79,7 +81,7 @@ export function applyAdminTransactionSearchFilter(
   const q = search.trim();
   if (q.length < 2) return query;
   return query.or(
-    `id.ilike.%${q}%,order_id.ilike.%${q}%,geniuspay_transaction_id.ilike.%${q}%,orders.order_number.ilike.%${q}%,orders.customer_email.ilike.%${q}%`
+    `id.ilike.%${q}%,order_id.ilike.%${q}%,payment_id.ilike.%${q}%,geniuspay_transaction_id.ilike.%${q}%,orders.order_number.ilike.%${q}%,orders.customer_email.ilike.%${q}%`
   );
 }
 
@@ -92,8 +94,11 @@ function mapTransactionRow(row: Record<string, unknown>): AdminTransactionRow {
       typeof row.amount === 'number' ? row.amount : row.amount == null ? null : Number(row.amount),
     currency: String(row.currency ?? 'XOF'),
     status: String(row.status ?? 'pending'),
-    payment_provider: String(row.payment_provider ?? 'geniuspay'),
-    geniuspay_transaction_id: row.geniuspay_transaction_id ? String(row.geniuspay_transaction_id) : null,
+    payment_provider: String(row.payment_provider ?? 'moneyfusion'),
+    payment_id: row.payment_id ? String(row.payment_id) : null,
+    geniuspay_transaction_id: row.geniuspay_transaction_id
+      ? String(row.geniuspay_transaction_id)
+      : null,
     created_at: String(row.created_at ?? ''),
     updated_at: String(row.updated_at ?? ''),
     order: order
