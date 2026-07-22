@@ -106,8 +106,6 @@ const StoreFooter = ({
     </a>
   );
 
-  const showLegalFallback = legalLinks.length === 0 && !store?.legal_pages;
-
   return (
     <footer
       className={`bg-gradient-dark mt-8 sm:mt-12 lg:mt-16 border-t border-border ${footerStyleClass}`}
@@ -150,21 +148,6 @@ const StoreFooter = ({
                   />
                 </li>
               ))}
-              {showLegalFallback &&
-                (['terms', 'privacy', 'refund'] as const).map(key => (
-                  <li key={key}>
-                    <StoreFooterLinkItem
-                      link={{
-                        linkKey: key,
-                        label: t(key),
-                        href: `#${key}`,
-                        type: 'anchor',
-                      }}
-                      linkColor={theme.linkColor}
-                      linkHoverColor={theme.linkHoverColor}
-                    />
-                  </li>
-                ))}
             </ul>
           </div>
 

@@ -5,12 +5,11 @@ import { STORE_FOOTER_PAGE_ID } from '@/lib/admin/storeFooterCustomization';
 import { getPageCustomizationValue } from '@/lib/admin/pageCustomizationKeys';
 import {
   STORE_FOOTER_NAV_LINKS,
-  STORE_FOOTER_LEGAL_LABELS,
+  listConfiguredLegalFooterLinks,
   resolveFooterLinkType,
   type ResolvedStoreFooterLink,
 } from '@/lib/admin/storeFooterLinksConfig';
 import type { StoreLegalPages } from '@/hooks/useStores';
-import { generateStoreUrl } from '@/lib/store-utils';
 
 export function useStoreFooterLinks(options: {
   storeSlug?: string;
@@ -19,7 +18,7 @@ export function useStoreFooterLinks(options: {
 }) {
   const { t } = useStoreFooterT();
   const { pageCustomization } = usePageCustomization(STORE_FOOTER_PAGE_ID);
-  const { storeSlug, subdomain, legalPages } = options;
+  const { legalPages } = options;
 
   const navLinks = useMemo(
     () =>
@@ -38,14 +37,14 @@ export function useStoreFooterLinks(options: {
   );
 
   const legalLinks = useMemo(() => {
-    const baseUrl = storeSlug ? generateStoreUrl(storeSlug, subdomain) : '';
-    return STORE_FOOTER_LEGAL_LABELS.filter(item => legalPages?.[item.legalField]).map(item => ({
+    // Relative /legal/:page works on store subdomain and SPA navigation.
+    return listConfiguredLegalFooterLinks(legalPages).map(item => ({
       linkKey: item.legalKey,
       label: t(item.labelKey),
-      href: baseUrl ? `${baseUrl}/legal/${item.path}` : `#${item.path}`,
+      href: `/legal/${item.path}`,
       type: 'route' as const,
     }));
-  }, [legalPages, storeSlug, subdomain, t]);
+  }, [legalPages, t]);
 
   const sectionTitles = useMemo(
     () => ({

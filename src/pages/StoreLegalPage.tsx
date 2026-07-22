@@ -18,24 +18,27 @@ import { useStoreTheme } from '@/hooks/useStoreTheme';
 import type { Store, StoreLegalPages } from '@/hooks/useStores';
 import { logger } from '@/lib/logger';
 import { generateStoreUrl } from '@/lib/store-utils';
+import { hasLegalPageContent } from '@/lib/admin/storeFooterLinksConfig';
 
-const  LEGAL_PAGE_TITLES: Record<string, string> = {
+const LEGAL_PAGE_TITLES: Record<string, string> = {
   terms: 'Conditions générales de vente',
   privacy: 'Politique de confidentialité',
   returns: 'Politique de retour',
   shipping: 'Politique de livraison',
   refund: 'Politique de remboursement',
   cookies: 'Politique des cookies',
+  disclaimer: 'Avertissement',
   faq: 'FAQ',
 };
 
-const  LEGAL_PAGE_KEYS: Record<string, keyof StoreLegalPages> = {
+const LEGAL_PAGE_KEYS: Record<string, keyof StoreLegalPages> = {
   terms: 'terms_of_service',
   privacy: 'privacy_policy',
   returns: 'return_policy',
   shipping: 'shipping_policy',
   refund: 'refund_policy',
   cookies: 'cookie_policy',
+  disclaimer: 'disclaimer',
   faq: 'faq_content',
 };
 
@@ -77,7 +80,7 @@ export const StoreLegalPage = () => {
         setError(null);
 
         const { data, error: fetchError } = await supabase
-          .from('stores_public' as any)
+          .from('stores_public')
           .select(STORE_LEGAL_PAGE_FIELDS)
           .eq('slug', slug)
           .single();
@@ -87,7 +90,7 @@ export const StoreLegalPage = () => {
         }
 
         if (data) {
-          const  storeData: Store = {
+          const storeData: Store = {
             ...data,
             domain_status: data.domain_status || undefined,
           } as Store;
@@ -96,15 +99,15 @@ export const StoreLegalPage = () => {
 
           // Extraire le contenu de la page légale
           const legalPages = storeData.legal_pages as StoreLegalPages | null;
-          if (legalPages && legalPages[pageKey]) {
+          if (legalPages && hasLegalPageContent(legalPages, pageKey)) {
             setLegalContent(legalPages[pageKey] || null);
           } else {
-            setError('Cette page légale n\'est pas disponible');
+            setError("Cette page légale n'est pas disponible");
           }
         } else {
           setError('Boutique introuvable');
         }
-      } catch ( _err: unknown) {
+      } catch (err: unknown) {
         const errorMessage =
           err instanceof Error
             ? err.message
@@ -144,7 +147,9 @@ export const StoreLegalPage = () => {
           <div className="text-center max-w-md mx-auto px-4">
             <FileText className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
             <h1 className="text-2xl font-bold mb-2">Page introuvable</h1>
-            <p className="text-muted-foreground mb-6">{error || 'Cette page légale n\'est pas disponible.'}</p>
+            <p className="text-muted-foreground mb-6">
+              {error || "Cette page légale n'est pas disponible."}
+            </p>
             {store && (
               <Button onClick={() => navigate(generateStoreUrl(store.slug, store.subdomain))}>
                 <ArrowLeft className="h-4 w-4 mr-2" />
@@ -159,7 +164,10 @@ export const StoreLegalPage = () => {
 
   return (
     <StoreThemeProvider store={store}>
-      <div className="min-h-screen flex flex-col store-theme-active" style={{ backgroundColor: store.background_color || undefined }}>
+      <div
+        className="min-h-screen flex flex-col store-theme-active"
+        style={{ backgroundColor: store.background_color || undefined }}
+      >
         {store && (
           <StoreHeader
             store={
@@ -248,10 +256,3 @@ export const StoreLegalPage = () => {
 };
 
 export default StoreLegalPage;
-
-
-
-
-
-
-

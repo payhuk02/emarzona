@@ -271,9 +271,10 @@ export const StoreMarketingContentComponent: React.FC<StoreMarketingContentProps
     setCertifications(certifications.filter((_, i) => i !== index));
   };
 
-  // Sauvegarder automatiquement à chaque changement
+  // Keep parent form state in sync while editing (draft saved via onSave / Publier).
   React.useEffect(() => {
-    handleSave();
+    syncContentToParent();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- sync on local field changes only
   }, [
     welcomeMessage,
     missionStatement,

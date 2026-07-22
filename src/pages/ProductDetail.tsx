@@ -1452,6 +1452,14 @@ const ProductDetails = () => {
             instagram_url={(store as Store & { instagram_url?: string | null }).instagram_url}
             twitter_url={(store as Store & { twitter_url?: string | null }).twitter_url}
             linkedin_url={(store as Store & { linkedin_url?: string | null }).linkedin_url}
+            youtube_url={(store as Store & { youtube_url?: string | null }).youtube_url}
+            tiktok_url={(store as Store & { tiktok_url?: string | null }).tiktok_url}
+            pinterest_url={(store as Store & { pinterest_url?: string | null }).pinterest_url}
+            snapchat_url={(store as Store & { snapchat_url?: string | null }).snapchat_url}
+            discord_url={(store as Store & { discord_url?: string | null }).discord_url}
+            twitch_url={(store as Store & { twitch_url?: string | null }).twitch_url}
+            store={store as ThemedStore}
+            storeSlug={store.slug}
           />
         </div>
       </StoreThemeProvider>

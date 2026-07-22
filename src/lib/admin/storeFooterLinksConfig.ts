@@ -61,8 +61,29 @@ export const STORE_FOOTER_LEGAL_LABELS: StoreFooterLegalLabelDefinition[] = [
   },
   { legalKey: 'refund', labelKey: 'refund', legalField: 'refund_policy', path: 'refund' },
   { legalKey: 'cookies', labelKey: 'cookiePolicy', legalField: 'cookie_policy', path: 'cookies' },
+  {
+    legalKey: 'disclaimer',
+    labelKey: 'disclaimer',
+    legalField: 'disclaimer',
+    path: 'disclaimer',
+  },
   { legalKey: 'faq', labelKey: 'faq', legalField: 'faq_content', path: 'faq' },
 ];
+
+/** True when a legal page field has publishable content (non-empty after trim). */
+export function hasLegalPageContent(
+  legalPages: import('@/hooks/useStores').StoreLegalPages | null | undefined,
+  field: keyof import('@/hooks/useStores').StoreLegalPages
+): boolean {
+  const value = legalPages?.[field];
+  return typeof value === 'string' && value.trim().length > 0;
+}
+
+export function listConfiguredLegalFooterLinks(
+  legalPages: import('@/hooks/useStores').StoreLegalPages | null | undefined
+): StoreFooterLegalLabelDefinition[] {
+  return STORE_FOOTER_LEGAL_LABELS.filter(item => hasLegalPageContent(legalPages, item.legalField));
+}
 
 export interface ResolvedStoreFooterLink {
   linkKey: string;
