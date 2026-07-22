@@ -34,7 +34,12 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-  PERFORM public.get_or_create_store_notification_settings(NEW.id);
+  BEGIN
+    PERFORM public.get_or_create_store_notification_settings(NEW.id);
+  EXCEPTION
+    WHEN OTHERS THEN
+      RAISE WARNING 'seed_store_notification_settings_on_create failed for %: %', NEW.id, SQLERRM;
+  END;
   RETURN NEW;
 END;
 $$;
