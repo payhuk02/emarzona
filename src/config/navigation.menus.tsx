@@ -1018,16 +1018,6 @@ export const adminMenuSections = [
         url: '/admin/transaction-reconciliation',
         icon: GitCompare,
       },
-      {
-        title: 'Statistiques paiements',
-        url: '/admin/geniuspay-analytics',
-        icon: BarChart3,
-      },
-      {
-        title: 'Réconciliation paiements',
-        url: '/admin/geniuspay-reconciliation',
-        icon: RotateCcw,
-      },
     ],
   },
   {

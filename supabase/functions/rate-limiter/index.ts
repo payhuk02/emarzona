@@ -18,31 +18,7 @@ import {
   isServiceRoleJwt,
 } from '../_shared/edge-auth-utils.ts';
 import { createSupabaseUserClient } from '../_shared/supabase-admin.ts';
-
-const defaultAllowedOrigin = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
-const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || defaultAllowedOrigin)
-  .split(',')
-  .map(origin => origin.trim())
-  .filter(Boolean);
-
-function resolveCorsOrigin(originHeader: string | null): string {
-  if (!originHeader) return defaultAllowedOrigin;
-  if (allowedOrigins.includes(originHeader) || originHeader.startsWith('http://localhost:')) {
-    return originHeader;
-  }
-  return defaultAllowedOrigin;
-}
-
-function buildCorsHeaders(originHeader: string | null) {
-  return {
-    'Access-Control-Allow-Origin': resolveCorsOrigin(originHeader),
-    Vary: 'Origin',
-    'Access-Control-Allow-Headers':
-      'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
-    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-    'Access-Control-Max-Age': '86400',
-  };
-}
+import { buildCorsHeaders } from '../_shared/cors.ts';
 
 async function authorizeRateLimitRequest(req: Request): Promise<boolean> {
   const anonKey = Deno.env.get('SUPABASE_ANON_KEY')?.trim() ?? '';

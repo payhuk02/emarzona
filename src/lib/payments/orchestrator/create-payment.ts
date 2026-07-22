@@ -3,7 +3,6 @@
  */
 
 import { logger } from '@/lib/logger';
-import { createGeniusPayPlatformPayment } from '../adapters/geniuspay-adapter';
 import { createMoneyFusionPayment } from '../adapters/moneyfusion-adapter';
 import { createStripeConnectPayment } from '../adapters/stripe-connect-adapter';
 import { createPayPalCommercePayment } from '../adapters/paypal-commerce-adapter';
@@ -11,7 +10,6 @@ import type {
   OrchestratedPaymentRequest,
   OrchestratedPaymentResult,
   PaymentProviderCode,
-  PspFallbackInfo,
 } from '../types';
 import { PaymentProviderNotReadyError as NotReadyError } from '../types';
 import { loadStoreForcePlatformPayments, loadStorePaymentConnections } from './load-connections';
@@ -22,9 +20,6 @@ async function executeProviderPayment(
   request: OrchestratedPaymentRequest
 ): Promise<OrchestratedPaymentResult> {
   switch (provider) {
-    case 'geniuspay_platform':
-      return createGeniusPayPlatformPayment({ ...request, connections: request.connections });
-
     case 'moneyfusion':
       return createMoneyFusionPayment({ ...request, connections: request.connections });
 
@@ -33,6 +28,10 @@ async function executeProviderPayment(
 
     case 'paypal_commerce':
       return createPayPalCommercePayment(request);
+
+    case 'geniuspay_platform':
+      // GeniusPay retiré — bascule MoneyFusion
+      return createMoneyFusionPayment({ ...request, connections: request.connections });
 
     case 'flutterwave_connect':
       throw new NotReadyError(
@@ -47,24 +46,24 @@ async function executeProviderPayment(
   }
 }
 
-async function fallbackToGeniusPay(
+async function fallbackToMoneyFusion(
   request: OrchestratedPaymentRequest,
   fromProvider: PaymentProviderCode,
   reason: string
 ): Promise<OrchestratedPaymentResult> {
-  logger.warn('Orchestrator PSP fallback to GeniusPay', {
+  logger.warn('Orchestrator PSP fallback to MoneyFusion', {
     fromProvider,
     reason,
     storeId: request.storeId,
     orderId: request.orderId,
   });
 
-  const result = await createGeniusPayPlatformPayment(request);
+  const result = await createMoneyFusionPayment(request);
   return {
     ...result,
     psp_fallback: {
       from_provider: fromProvider,
-      to_provider: 'geniuspay_platform',
+      to_provider: 'moneyfusion',
       reason,
     },
   };
@@ -76,7 +75,7 @@ async function fallbackToGeniusPay(
 export async function createOrchestratedPayment(
   request: OrchestratedPaymentRequest
 ): Promise<OrchestratedPaymentResult> {
-  let resolvedProvider: PaymentProviderCode = 'geniuspay_platform';
+  let resolvedProvider: PaymentProviderCode = 'moneyfusion';
 
   try {
     const [connections, forcePlatform] = await Promise.all([
@@ -106,41 +105,27 @@ export async function createOrchestratedPayment(
       reason: resolved.reason,
     });
 
-    const result = await executeProviderPayment(resolved.provider, request);
-
-    if (
-      resolved.provider !== 'geniuspay_platform' &&
-      result.provider === 'geniuspay_platform' &&
-      !result.psp_fallback
-    ) {
-      return {
-        ...result,
-        psp_fallback: {
-          from_provider: resolved.provider,
-          to_provider: 'geniuspay_platform',
-          reason: 'adapter_redirect',
-        },
-      };
-    }
-
-    return result;
+    return await executeProviderPayment(resolved.provider, request);
   } catch (error: unknown) {
     if (error instanceof NotReadyError) {
-      return fallbackToGeniusPay(request, error.provider, 'provider_not_ready');
+      return fallbackToMoneyFusion(request, error.provider, 'provider_not_ready');
     }
 
     if (error instanceof Error && request.orderId && error.message.includes('Stripe')) {
-      return fallbackToGeniusPay(request, 'stripe_connect', 'provider_error');
+      return fallbackToMoneyFusion(request, 'stripe_connect', 'provider_error');
     }
 
     const message = error instanceof Error ? error.message : String(error);
     logger.error('createOrchestratedPayment failed', { error: message, storeId: request.storeId });
 
-    if (resolvedProvider !== 'geniuspay_platform') {
+    if (resolvedProvider !== 'moneyfusion') {
       try {
-        return await fallbackToGeniusPay(request, resolvedProvider, 'provider_error');
+        return await fallbackToMoneyFusion(request, resolvedProvider, 'provider_error');
       } catch (fallbackError) {
-        logger.error('GeniusPay fallback also failed', { fallbackError, storeId: request.storeId });
+        logger.error('MoneyFusion fallback also failed', {
+          fallbackError,
+          storeId: request.storeId,
+        });
       }
     }
 
@@ -148,7 +133,7 @@ export async function createOrchestratedPayment(
       success: false,
       transaction_id: '',
       checkout_url: '',
-      provider: 'geniuspay_platform',
+      provider: 'moneyfusion',
       error: message,
     };
   }

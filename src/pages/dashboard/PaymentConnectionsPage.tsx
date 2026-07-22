@@ -1,5 +1,5 @@
 /**
- * Connexions paiement vendeur — Stripe Connect, PayPal Commerce, GeniusPay plateforme
+ * Connexions paiement vendeur — Stripe Connect, PayPal Commerce, MoneyFusion plateforme
  */
 import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -34,7 +34,7 @@ export default function PaymentConnectionsPage() {
     refetch,
   } = useStorePaymentConnections();
 
-  const geniuspayConnection = connections.find(c => c.provider === 'geniuspay_platform');
+  const moneyfusionConnection = connections.find(c => c.provider === 'moneyfusion');
 
   useEffect(() => {
     const stripeReturn = searchParams.get('stripe');
@@ -137,8 +137,8 @@ export default function PaymentConnectionsPage() {
         <div className="mb-8">
           <h1 className="text-2xl md:text-3xl font-bold">Connexions paiement</h1>
           <p className="text-muted-foreground mt-1">
-            Connectez vos comptes pour encaisser dans le monde entier. GeniusPay reste disponible pour
-            l&apos;Afrique (XOF).
+            Connectez vos comptes pour encaisser dans le monde entier. MoneyFusion est disponible
+            pour l&apos;Afrique (XOF).
           </p>
           {!orchestrationEnabled && (
             <p className="text-sm text-amber-600 dark:text-amber-400 mt-2">
@@ -157,8 +157,8 @@ export default function PaymentConnectionsPage() {
               storeId={store.id}
               stripeConnection={stripeConnection}
               paypalConnection={paypalConnection}
-              geniuspayActive={
-                !geniuspayConnection || geniuspayConnection.external_account_status === 'active'
+              moneyfusionActive={
+                !moneyfusionConnection || moneyfusionConnection.external_account_status === 'active'
               }
             />
 
@@ -183,7 +183,7 @@ export default function PaymentConnectionsPage() {
                 <div className="flex items-center gap-3">
                   <Wallet className="h-5 w-5 text-primary" />
                   <div>
-                    <CardTitle className="text-lg">GeniusPay (plateforme Emarzona)</CardTitle>
+                    <CardTitle className="text-lg">MoneyFusion (plateforme Emarzona)</CardTitle>
                     <CardDescription>
                       Mobile money et paiements locaux — toujours actif pour votre boutique.
                     </CardDescription>
@@ -194,7 +194,7 @@ export default function PaymentConnectionsPage() {
               <CardContent>
                 <p className="text-sm text-muted-foreground">
                   Statut :{' '}
-                  {geniuspayConnection?.external_account_status === 'active'
+                  {moneyfusionConnection?.external_account_status === 'active'
                     ? 'Actif'
                     : 'Configuration plateforme'}
                 </p>
@@ -221,8 +221,8 @@ export default function PaymentConnectionsPage() {
                   2. Connectez <strong>PayPal</strong> pour les acheteurs US/EU préférant PayPal.
                 </p>
                 <p>
-                  3. <strong>GeniusPay</strong> reste actif pour l&apos;Afrique francophone (XOF) sans
-                  configuration supplémentaire.
+                  3. <strong>MoneyFusion</strong> reste actif pour l&apos;Afrique francophone (XOF)
+                  sans configuration supplémentaire.
                 </p>
                 <p className="text-xs pt-2">
                   Test recommandé après activation : commande 1 € / 1 $ sur staging ou preview

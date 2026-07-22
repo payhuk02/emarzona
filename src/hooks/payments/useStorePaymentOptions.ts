@@ -14,7 +14,7 @@ export type CheckoutPaymentProvider =
   | Exclude<PaymentProviderCode, 'geniuspay_platform' | 'moneyfusion'>;
 
 export function rpcProviderToCheckout(provider: string): CheckoutPaymentProvider {
-  if (provider === 'geniuspay_platform') return 'geniuspay';
+  if (provider === 'geniuspay_platform' || provider === 'geniuspay') return 'moneyfusion';
   if (provider === 'moneyfusion') return 'moneyfusion';
   if (
     provider === 'stripe_connect' ||
@@ -23,11 +23,11 @@ export function rpcProviderToCheckout(provider: string): CheckoutPaymentProvider
   ) {
     return provider;
   }
-  return 'geniuspay';
+  return 'moneyfusion';
 }
 
 export function checkoutProviderToRpc(provider: CheckoutPaymentProvider): PaymentProviderCode {
-  if (provider === 'geniuspay') return 'geniuspay_platform';
+  if (provider === 'geniuspay') return 'moneyfusion';
   return provider;
 }
 
@@ -80,17 +80,19 @@ export function useStorePaymentOptions(params: {
         logger.error('get_store_payment_options failed', { error, storeId });
         return [
           {
-            provider: 'geniuspay_platform',
+            provider: 'moneyfusion',
             connection_id: null,
-            label: 'GeniusPay',
+            label: 'MoneyFusion',
           },
         ];
       }
 
-      const options = parsePaymentOptions(data);
+      const options = parsePaymentOptions(data).filter(
+        opt => opt.provider !== 'geniuspay_platform'
+      );
       return options.length > 0
         ? options
-        : [{ provider: 'geniuspay_platform', connection_id: null, label: 'GeniusPay' }];
+        : [{ provider: 'moneyfusion', connection_id: null, label: 'MoneyFusion' }];
     },
   });
 }

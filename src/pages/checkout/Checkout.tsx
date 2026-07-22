@@ -791,7 +791,7 @@ const Checkout = () => {
   return (
     <StoreThemeProvider store={store as ThemedStore}>
       <div
-        className="min-h-screen bg-gradient-to-b from-muted/40 via-background to-background py-4 px-3 sm:py-8 sm:px-6 lg:px-8 pb-[max(5rem,env(safe-area-inset-bottom))] md:pb-8 store-theme-active"
+        className="checkout-readable min-h-screen bg-gradient-to-b from-muted/40 via-background to-background py-4 px-3 sm:py-8 sm:px-6 lg:px-8 pb-[max(5rem,env(safe-area-inset-bottom))] md:pb-8 store-theme-active"
         role="main"
         aria-label="Page de finalisation de commande"
       >
@@ -829,9 +829,7 @@ const Checkout = () => {
             <p className="text-muted-foreground mt-1.5 sm:mt-2 text-sm sm:text-base max-w-2xl leading-relaxed">
               {isPhysicalCod
                 ? 'Complétez vos informations pour confirmer votre commande (paiement à la livraison)'
-                : isGuestBuyer
-                  ? 'Achetez en tant qu’invité — renseignez votre email pour accéder à votre espace client après paiement'
-                  : 'Complétez vos informations pour procéder au paiement'}
+                : 'Complétez vos informations pour procéder au paiement'}
             </p>
           </header>
 

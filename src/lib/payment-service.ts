@@ -1,13 +1,8 @@
 /**
- * Service de paiement unifié
- * GeniusPay (legacy) ou orchestrateur V2 (feature flag)
+ * Service de paiement unifié — MoneyFusion (rail plateforme)
  */
-import {
-  initiateGeniusPayPayment,
-  verifyTransactionStatus as verifyGeniusPayTransaction,
-} from './geniuspay-payment';
+import { verifyTransactionStatus as verifyGeniusPayTransaction } from './geniuspay-payment';
 import { logger } from './logger';
-import { isSupportedCurrency, type Currency } from './currency-converter';
 import {
   createOrchestratedPayment,
   isMoneyFusionOnlyEnabled,
@@ -23,7 +18,7 @@ import {
   buildPaymentSuccessReturnUrl,
 } from './checkout/guest-payment-return';
 
-/** Type checkout — `geniuspay` legacy UI ; codes orchestrateur après migration UI */
+/** Type checkout — `geniuspay` legacy (redirigé MoneyFusion) */
 export type PaymentProvider = 'geniuspay' | PaymentProviderCode;
 
 export interface PaymentOptions {
@@ -43,14 +38,13 @@ export interface PaymentOptions {
   /** URLs de retour après checkout PSP (billing, abonnements) */
   returnUrl?: string;
   cancelUrl?: string;
-  /** Facturation plateforme : rail GeniusPay Emarzona uniquement */
+  /** Facturation plateforme : rail MoneyFusion Emarzona */
   forcePlatformPayments?: boolean;
   /**
-   * Méthode GeniusPay (`payment_method`). Défaut: pawapay.
-   * Passer `null` pour la page checkout GeniusPay (choix client).
+   * Méthode paiement legacy (ignorée — MoneyFusion gère le choix opérateur).
    */
   paymentMethod?: import('./geniuspay-types').GeniusPayPaymentMethod | null;
-  /** Code opérateur MMO PawaPay (optionnel) */
+  /** Code opérateur MMO (optionnel) */
   mmoProvider?: string;
 }
 
@@ -64,11 +58,8 @@ export interface PaymentResult {
 }
 
 function toOrchestratorPreferred(provider?: PaymentProvider): PaymentProviderCode | undefined {
-  if (!provider || provider === 'geniuspay') {
-    return 'geniuspay_platform';
-  }
-  if (provider === 'geniuspay_platform') {
-    return 'geniuspay_platform';
+  if (!provider || provider === 'geniuspay' || provider === 'geniuspay_platform') {
+    return 'moneyfusion';
   }
   if (provider === 'moneyfusion') {
     return 'moneyfusion';
@@ -77,12 +68,12 @@ function toOrchestratorPreferred(provider?: PaymentProvider): PaymentProviderCod
 }
 
 function toCheckoutProvider(provider: PaymentProviderCode): PaymentProvider {
-  if (provider === 'geniuspay_platform') return 'geniuspay';
+  if (provider === 'geniuspay_platform') return 'moneyfusion';
   return provider;
 }
 
 /**
- * Initie un paiement avec le provider spécifié (ou GeniusPay par défaut)
+ * Initie un paiement (MoneyFusion plateforme / orchestrateur V2)
  */
 async function resolvePaymentContext(options: PaymentOptions): Promise<PaymentOptions> {
   const { supabase } = await import('@/integrations/supabase/client');
@@ -173,7 +164,7 @@ export const initiatePayment = async (options: PaymentOptions): Promise<PaymentR
       success: false,
       transaction_id: '',
       checkout_url: '',
-      provider: options.provider ?? 'geniuspay',
+      provider: options.provider ?? 'moneyfusion',
       error: rate.message || 'Trop de tentatives de paiement. Réessayez plus tard.',
     };
   }
@@ -187,13 +178,12 @@ export const initiatePayment = async (options: PaymentOptions): Promise<PaymentR
       success: true,
       transaction_id: `e2e-${Date.now()}`,
       checkout_url: `/checkout?e2e=1${orderId ? `&orderId=${encodeURIComponent(orderId)}` : ''}`,
-      provider: 'geniuspay',
+      provider: 'moneyfusion',
       provider_transaction_id: 'e2e-stub',
     };
   }
 
-  // Mode temporaire : tous les checkouts passent exclusivement par MoneyFusion.
-  // En cas d'échec, retourner l'erreur au lieu de basculer vers GeniusPay.
+  // Rail plateforme : MoneyFusion uniquement (GeniusPay retiré).
   if (isMoneyFusionOnlyEnabled()) {
     return initiateMoneyFusionOnly({ ...resolvedOptions, provider: 'moneyfusion' });
   }
@@ -242,13 +232,13 @@ export const initiatePayment = async (options: PaymentOptions): Promise<PaymentR
         };
       }
 
-      logger.warn('Orchestrator returned failure, falling back to GeniusPay', {
+      logger.warn('Orchestrator returned failure, falling back to MoneyFusion', {
         error: orchestrated.error,
         orderId: resolvedOptions.orderId,
         storeId: resolvedOptions.storeId,
       });
     } catch (error: unknown) {
-      logger.error('CRITICAL: Orchestrator initiatePayment failed, falling back to GeniusPay', {
+      logger.error('CRITICAL: Orchestrator initiatePayment failed, falling back to MoneyFusion', {
         error,
         orderId: options.orderId,
         storeId: options.storeId,
@@ -257,54 +247,13 @@ export const initiatePayment = async (options: PaymentOptions): Promise<PaymentR
       toast({
         title: 'Information de paiement',
         description:
-          'Le système de paiement principal est temporairement indisponible. Redirection vers le système de secours.',
+          'Le système de paiement principal est temporairement indisponible. Redirection vers MoneyFusion.',
       });
     }
   }
 
-  // MoneyFusion explicite même si V2 est désactivé pour la boutique
-  if (resolvedOptions.provider === 'moneyfusion') {
-    const mf = await initiateMoneyFusionOnly(resolvedOptions);
-    if (mf.success) {
-      return mf;
-    }
-    logger.warn('MoneyFusion failed, falling back to GeniusPay', { error: mf.error });
-  }
-
-  try {
-    logger.log('Initiating GeniusPay payment', { orderId: options.orderId });
-    const currency: Currency | undefined =
-      options.currency && isSupportedCurrency(options.currency) ? options.currency : 'XOF';
-
-    const geniuspayResult = await initiateGeniusPayPayment({
-      ...resolvedOptions,
-      currency,
-      returnUrl: resolvedOptions.returnUrl,
-      cancelUrl: resolvedOptions.cancelUrl,
-      paymentMethod: resolvedOptions.paymentMethod,
-      mmoProvider: resolvedOptions.mmoProvider,
-    });
-
-    return {
-      success: geniuspayResult.success,
-      transaction_id: geniuspayResult.transaction_id,
-      checkout_url: geniuspayResult.checkout_url,
-      provider: 'geniuspay',
-      provider_transaction_id: geniuspayResult.geniuspay_id,
-      error: geniuspayResult.success ? undefined : 'Paiement GeniusPay non initialisé',
-    };
-  } catch (_error: unknown) {
-    const errorObj = _error instanceof Error ? _error : new Error(String(_error));
-    const errorMessage = errorObj.message || "Erreur inconnue lors de l'initiation du paiement";
-    logger.error('Payment initiation error:', { error: errorObj });
-    return {
-      success: false,
-      transaction_id: '',
-      checkout_url: '',
-      provider: options.provider ?? 'geniuspay',
-      error: errorMessage,
-    };
-  }
+  // MoneyFusion (rail plateforme) — GeniusPay retiré
+  return initiateMoneyFusionOnly({ ...resolvedOptions, provider: 'moneyfusion' });
 };
 
 /**
@@ -322,7 +271,7 @@ export const verifyTransactionStatus = async (
     .single();
 
   const resolvedProvider =
-    provider ?? (transaction?.payment_provider as PaymentProvider) ?? 'geniuspay';
+    provider ?? (transaction?.payment_provider as PaymentProvider) ?? 'moneyfusion';
 
   const connectProviders = ['stripe_connect', 'paypal_commerce', 'paypal'];
   if (connectProviders.includes(resolvedProvider)) {

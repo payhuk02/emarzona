@@ -241,18 +241,6 @@ export const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
         permissions: ['payments.manage'],
       },
       {
-        icon: BarChart3,
-        label: 'Statistiques GeniusPay',
-        path: '/admin/geniuspay-analytics',
-        permissions: ['payments.manage'],
-      },
-      {
-        icon: RotateCcw,
-        label: 'Réconciliation GeniusPay',
-        path: '/admin/geniuspay-reconciliation',
-        permissions: ['payments.manage'],
-      },
-      {
         icon: Repeat,
         label: 'Abonnements',
         path: '/admin/subscriptions',

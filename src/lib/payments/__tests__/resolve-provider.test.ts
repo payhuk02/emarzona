@@ -5,7 +5,7 @@ import type { StorePaymentConnection } from '@/types/store-payment-connection';
 const baseConnection = (overrides: Partial<StorePaymentConnection>): StorePaymentConnection => ({
   id: 'conn-1',
   store_id: 'store-1',
-  provider: 'geniuspay_platform',
+  provider: 'moneyfusion',
   connection_mode: 'platform_default',
   external_account_id: null,
   external_account_status: 'active',
@@ -18,7 +18,7 @@ const baseConnection = (overrides: Partial<StorePaymentConnection>): StorePaymen
 describe('resolvePaymentProvider', () => {
   it('choisit stripe_connect pour EUR si connecté', () => {
     const connections = [
-      baseConnection({ id: 'c-m', provider: 'geniuspay_platform' }),
+      baseConnection({ id: 'c-m', provider: 'moneyfusion' }),
       baseConnection({
         id: 'c-s',
         provider: 'stripe_connect',
@@ -38,7 +38,7 @@ describe('resolvePaymentProvider', () => {
     expect(result.connectionId).toBe('c-s');
   });
 
-  it('force geniuspay_platform si forcePlatformPayments', () => {
+  it('force moneyfusion si forcePlatformPayments', () => {
     const connections = [
       baseConnection({
         id: 'c-s',
@@ -55,13 +55,13 @@ describe('resolvePaymentProvider', () => {
       forcePlatformPayments: true,
     });
 
-    expect(result.provider).toBe('geniuspay_platform');
+    expect(result.provider).toBe('moneyfusion');
     expect(result.reason).toBe('store_force_platform_payments');
   });
 
-  it('retombe sur geniuspay si stripe inactif', () => {
+  it('retombe sur moneyfusion si stripe inactif', () => {
     const connections = [
-      baseConnection({ id: 'c-m', provider: 'geniuspay_platform' }),
+      baseConnection({ id: 'c-m', provider: 'moneyfusion' }),
       baseConnection({
         id: 'c-s',
         provider: 'stripe_connect',
@@ -76,12 +76,12 @@ describe('resolvePaymentProvider', () => {
       connections,
     });
 
-    expect(result.provider).toBe('geniuspay_platform');
+    expect(result.provider).toBe('moneyfusion');
   });
 
-  it('route XOF vers geniuspay même si Stripe connecté (pas de carte XOF)', () => {
+  it('route XOF vers moneyfusion même si Stripe connecté (pas de carte XOF)', () => {
     const connections = [
-      baseConnection({ id: 'c-m', provider: 'geniuspay_platform' }),
+      baseConnection({ id: 'c-m', provider: 'moneyfusion' }),
       baseConnection({
         id: 'c-s',
         provider: 'stripe_connect',
@@ -97,12 +97,12 @@ describe('resolvePaymentProvider', () => {
       connections,
     });
 
-    expect(result.provider).toBe('geniuspay_platform');
+    expect(result.provider).toBe('moneyfusion');
   });
 
   it('respecte la préférence acheteur si compatible', () => {
     const connections = [
-      baseConnection({ id: 'c-m', provider: 'geniuspay_platform' }),
+      baseConnection({ id: 'c-m', provider: 'moneyfusion' }),
       baseConnection({
         id: 'c-p',
         provider: 'paypal_commerce',
@@ -143,8 +143,29 @@ describe('resolvePaymentProvider', () => {
     expect(result.reason).toBe('buyer_preference');
   });
 
+  it('migre la préférence geniuspay vers moneyfusion', () => {
+    const connections = [baseConnection({ id: 'c-mf', provider: 'moneyfusion' })];
+
+    const result = resolvePaymentProvider({
+      storeId: 'store-1',
+      amount: 10_000,
+      currency: 'XOF',
+      connections,
+      buyerPreferredProvider: 'geniuspay_platform',
+    });
+
+    expect(result.provider).toBe('moneyfusion');
+    expect(result.reason).toBe('buyer_preference_migrated_to_moneyfusion');
+  });
+
   it('ignore la préférence moneyfusion si devise non supportée (EUR → routage normal)', () => {
-    const connections = [baseConnection({ id: 'c-m', provider: 'geniuspay_platform' })];
+    const connections = [
+      baseConnection({
+        id: 'c-s',
+        provider: 'stripe_connect',
+        capabilities: { card_payments: true },
+      }),
+    ];
 
     const result = resolvePaymentProvider({
       storeId: 'store-1',
@@ -154,7 +175,7 @@ describe('resolvePaymentProvider', () => {
       buyerPreferredProvider: 'moneyfusion',
     });
 
-    expect(result.provider).toBe('geniuspay_platform');
+    expect(result.provider).toBe('stripe_connect');
   });
 
   it('utilise la connexion moneyfusion active si présente (préférence acheteur)', () => {
@@ -175,7 +196,7 @@ describe('resolvePaymentProvider', () => {
     expect(result.connectionId).toBe('c-mf');
   });
 
-  it('route automatiquement vers moneyfusion seulement si connexion active existe', () => {
+  it('route automatiquement vers moneyfusion pour XOF', () => {
     const connections = [
       baseConnection({ id: 'c-mf', provider: 'moneyfusion' }),
       baseConnection({ id: 'c-m', provider: 'geniuspay_platform' }),
@@ -189,11 +210,10 @@ describe('resolvePaymentProvider', () => {
     });
 
     expect(result.provider).toBe('moneyfusion');
-    expect(result.connectionId).toBe('c-mf');
     expect(result.reason).toBe('auto_routing_moneyfusion');
   });
 
-  it("pas d'auto-routage moneyfusion sans connexion — fallback geniuspay", () => {
+  it('fallback moneyfusion même sans connexion boutique (rail plateforme)', () => {
     const connections = [baseConnection({ id: 'c-m', provider: 'geniuspay_platform' })];
 
     const result = resolvePaymentProvider({
@@ -203,6 +223,7 @@ describe('resolvePaymentProvider', () => {
       connections,
     });
 
-    expect(result.provider).toBe('geniuspay_platform');
+    expect(result.provider).toBe('moneyfusion');
+    expect(result.reason).toBe('auto_routing_moneyfusion');
   });
 });

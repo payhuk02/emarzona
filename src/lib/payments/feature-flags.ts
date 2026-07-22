@@ -1,10 +1,8 @@
 /**
- * Feature flags — orchestration paiements V2
+ * Feature flags — orchestration paiements V2 + MoneyFusion
  *
- * Production canary (P0-1) :
- * - `VITE_PAYMENT_ORCHESTRATION_V2=true` + `VITE_PAYMENT_ORCHESTRATION_V2_ROLLOUT=10`
- * - Preview Vercel : V2 auto si non défini
- * - Production sans env explicite : V2 activé, rollout 10 % (opt-out via `=false`)
+ * MoneyFusion est le rail plateforme opérationnel (mobile money XOF).
+ * GeniusPay est retiré de la surface produit (historique / edge conservés).
  */
 
 const TRUE_VALUES = new Set(['true', '1', 'yes']);
@@ -32,7 +30,6 @@ export function getPaymentOrchestrationV2RolloutPercent(): number {
   const raw = viteEnv('VITE_PAYMENT_ORCHESTRATION_V2_ROLLOUT');
   if (raw === undefined || raw === '') {
     if (!isPaymentOrchestrationV2Enabled()) return 0;
-    // Canary 10 % sur Vercel production si rollout non configuré
     if (viteEnv('VITE_VERCEL_ENV') === 'production') {
       return 10;
     }
@@ -44,10 +41,7 @@ export function getPaymentOrchestrationV2RolloutPercent(): number {
 }
 
 /**
- * Orchestration multi-PSP (Stripe Connect, PayPal Commerce, GeniusPay plateforme).
- * - `VITE_PAYMENT_ORCHESTRATION_V2=true` : activé partout (sauf rollout < 100)
- * - `VITE_PAYMENT_ORCHESTRATION_V2=false` : désactivé (legacy GeniusPay seul)
- * - Non défini + preview Vercel : activé pour QA staging
+ * Orchestration multi-PSP (Stripe Connect, PayPal Commerce, MoneyFusion plateforme).
  */
 export function isPaymentOrchestrationV2Enabled(): boolean {
   const env = viteEnv('VITE_PAYMENT_ORCHESTRATION_V2');
@@ -59,8 +53,6 @@ export function isPaymentOrchestrationV2Enabled(): boolean {
 
   const vercelEnv = viteEnv('VITE_VERCEL_ENV');
   if (vercelEnv === 'preview') return true;
-
-  // P0-1 canary prod : V2 on par défaut sur Vercel production (opt-out explicite)
   if (vercelEnv === 'production') {
     return true;
   }
@@ -83,30 +75,23 @@ export function isPaymentOrchestrationV2EnabledForStore(storeId?: string | null)
   return bucket < rollout;
 }
 
-/**
- * MoneyFusion (FusionPay) — option sélectionnable au checkout.
- * `VITE_MONEYFUSION_ENABLED=true` pour activer (défaut: true en preview/dev, sinon false).
- */
-export function isMoneyFusionEnabled(): boolean {
-  const env = viteEnv('VITE_MONEYFUSION_ENABLED');
-  if (env !== undefined && env !== '') {
-    const normalized = String(env).toLowerCase();
-    if (FALSE_VALUES.has(normalized)) return false;
-    return TRUE_VALUES.has(normalized);
-  }
-  return viteEnv('VITE_VERCEL_ENV') === 'preview' || import.meta.env.DEV === true;
+/** GeniusPay retiré de la plateforme (conservé uniquement pour transactions historiques). */
+export function isGeniusPayEnabled(): boolean {
+  return false;
 }
 
 /**
- * Mode temporaire MoneyFusion uniquement.
- * Masque tous les autres PSP et interdit le fallback GeniusPay.
- * Actif par défaut (GeniusPay retiré pour le moment) — opt-out explicite via
- * `VITE_MONEYFUSION_ONLY=false`.
+ * MoneyFusion (FusionPay) — rail plateforme opérationnel.
+ * Toujours actif (opt-out impossible côté produit).
+ */
+export function isMoneyFusionEnabled(): boolean {
+  return true;
+}
+
+/**
+ * MoneyFusion uniquement pour le checkout plateforme (mobile money).
+ * Masque GeniusPay et interdit tout fallback GeniusPay.
  */
 export function isMoneyFusionOnlyEnabled(): boolean {
-  const env = viteEnv('VITE_MONEYFUSION_ONLY');
-  if (env === undefined || env === '') return true;
-  const normalized = String(env).toLowerCase();
-  if (FALSE_VALUES.has(normalized)) return false;
-  return TRUE_VALUES.has(normalized);
+  return true;
 }

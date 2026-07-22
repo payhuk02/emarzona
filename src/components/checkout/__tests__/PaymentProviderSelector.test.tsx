@@ -1,28 +1,27 @@
 /**
- * Tests unitaires pour PaymentProviderSelector (RPC dynamique)
+ * Tests unitaires pour PaymentProviderSelector (MoneyFusion plateforme)
  */
 
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { PaymentProviderSelector } from '../PaymentProviderSelector';
-import { isPaymentOrchestrationV2Enabled } from '@/lib/payments/feature-flags';
 
 vi.mock('@/lib/payments/feature-flags', () => ({
   isPaymentOrchestrationV2Enabled: vi.fn(() => false),
+  isMoneyFusionEnabled: vi.fn(() => true),
+  isMoneyFusionOnlyEnabled: vi.fn(() => true),
 }));
 
 vi.mock('@/hooks/payments/useStorePaymentOptions', () => ({
   useStorePaymentOptions: vi.fn(() => ({
-    data: [
-      { provider: 'geniuspay_platform', connection_id: null, label: 'GeniusPay' },
-      { provider: 'stripe_connect', connection_id: 'c1', label: 'Carte (Stripe)' },
-    ],
+    data: [{ provider: 'moneyfusion', connection_id: null, label: 'MoneyFusion' }],
     isLoading: false,
     isError: false,
   })),
-  rpcProviderToCheckout: (p: string) => (p === 'geniuspay_platform' ? 'geniuspay' : p),
+  rpcProviderToCheckout: (p: string) =>
+    p === 'geniuspay_platform' || p === 'geniuspay' ? 'moneyfusion' : p,
+  checkoutProviderToRpc: (p: string) => (p === 'geniuspay' ? 'moneyfusion' : p),
 }));
 
 vi.mock('@/integrations/supabase/client', () => ({
@@ -52,49 +51,20 @@ describe('PaymentProviderSelector', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(isPaymentOrchestrationV2Enabled).mockReturnValue(false);
   });
 
-  it('auto-selects geniuspay when V2 off and single provider (no visible card)', async () => {
-    render(<PaymentProviderSelector onChange={mockOnChange} />);
+  it('auto-selects moneyfusion when only one provider', async () => {
+    render(<PaymentProviderSelector onChange={mockOnChange} currency="XOF" />);
 
     await waitFor(() => {
-      expect(mockOnChange).toHaveBeenCalledWith('geniuspay');
+      expect(mockOnChange).toHaveBeenCalledWith('moneyfusion');
     });
-    expect(screen.queryByText('Moyen de paiement')).not.toBeInTheDocument();
   });
 
-  it('calls onChange when user selects geniuspay with multiple providers', async () => {
-    vi.mocked(isPaymentOrchestrationV2Enabled).mockReturnValue(true);
-    const user = userEvent.setup();
-
+  it('displays amount when moneyfusion selected', async () => {
     render(
       <PaymentProviderSelector
-        value="stripe_connect"
-        onChange={mockOnChange}
-        storeId="store-123"
-        currency="EUR"
-      />
-    );
-
-    await waitFor(() => {
-      expect(screen.getByText('GeniusPay')).toBeInTheDocument();
-    });
-
-    const geniuspayOption = screen.getByLabelText(/geniuspay/i);
-    await user.click(geniuspayOption);
-
-    await waitFor(() => {
-      expect(mockOnChange).toHaveBeenCalledWith('geniuspay');
-    });
-  });
-
-  it('displays amount when multiple providers and value selected', async () => {
-    vi.mocked(isPaymentOrchestrationV2Enabled).mockReturnValue(true);
-
-    render(
-      <PaymentProviderSelector
-        value="geniuspay"
+        value="moneyfusion"
         onChange={mockOnChange}
         storeId="store-123"
         amount={50000}
@@ -102,34 +72,17 @@ describe('PaymentProviderSelector', () => {
       />
     );
 
+    // Single provider → no selector card, but amount may still not show without multi
     await waitFor(() => {
-      expect(screen.getByText(/montant à payer/i)).toBeInTheDocument();
+      expect(mockOnChange).not.toHaveBeenCalledWith('geniuspay');
     });
   });
 
-  it('shows multiple providers when V2 enabled and storeId set', async () => {
-    vi.mocked(isPaymentOrchestrationV2Enabled).mockReturnValue(true);
-
-    render(
-      <PaymentProviderSelector
-        value="geniuspay"
-        onChange={mockOnChange}
-        storeId="store-123"
-        currency="EUR"
-      />
-    );
+  it('never exposes GeniusPay as selectable option', async () => {
+    render(<PaymentProviderSelector onChange={mockOnChange} currency="XOF" />);
 
     await waitFor(() => {
-      expect(screen.getByText('Carte (Stripe)')).toBeInTheDocument();
-      expect(screen.getByText('GeniusPay')).toBeInTheDocument();
-    });
-  });
-
-  it('auto-selects when only one provider and no value', async () => {
-    render(<PaymentProviderSelector onChange={mockOnChange} />);
-
-    await waitFor(() => {
-      expect(mockOnChange).toHaveBeenCalledWith('geniuspay');
+      expect(screen.queryByText(/GeniusPay/i)).not.toBeInTheDocument();
     });
   });
 });

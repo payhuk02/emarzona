@@ -112,7 +112,7 @@ export default function Checkout() {
 
   // State pour le provider de paiement sélectionné
   const [selectedPaymentProvider, setSelectedPaymentProvider] =
-    useState<PaymentProvider>('geniuspay');
+    useState<PaymentProvider>('moneyfusion');
 
   // State pour la gestion multi-stores
   const [isMultiStore, setIsMultiStore] = useState<boolean>(false);
@@ -788,7 +788,7 @@ export default function Checkout() {
         }
 
         // Initier le paiement
-        const paymentProvider = selectedPaymentProvider || 'geniuspay';
+        const paymentProvider = selectedPaymentProvider || 'moneyfusion';
         const paymentResult = await initiatePayment({
           storeId,
           orderId: order.id,
@@ -1296,7 +1296,7 @@ export default function Checkout() {
       const hasAffiliate = affiliateInfo.affiliate_link_id && affiliateInfo.product_id;
 
       // Initier le paiement avec le provider sélectionné
-      const paymentProvider = selectedPaymentProvider || 'geniuspay';
+      const paymentProvider = selectedPaymentProvider || 'moneyfusion';
       const paymentResult = await initiatePayment({
         storeId: product.store_id,
         orderId: order.id,

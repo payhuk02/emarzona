@@ -37,7 +37,6 @@ import { ARTIST_EDITION_TYPE_OPTIONS } from '@/lib/artist-product-publish-valida
 import { useSpaceInputFix } from '@/hooks/useSpaceInputFix';
 import { logger } from '@/lib/logger';
 import { generateProductUrl } from '@/lib/store-utils';
-import { ImageStudioField } from '@/components/images/ImageStudioField';
 import { AIContentGenerator } from '@/components/products/AIContentGenerator';
 import { buildSeoFromGenerated, mergeImages } from '@/lib/ai-product-apply';
 import { ArtistFormField } from './ArtistFormField';
@@ -833,21 +832,6 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate, storeSlug }: ArtistBasic
       {/* Artwork Images */}
       <div className="space-y-2">
         <Label>Images de l'œuvre *</Label>
-        <ImageStudioField
-          context="artist"
-          fieldName="images"
-          value={data.images?.[0] ?? ''}
-          exampleUrl={data.images?.[0]}
-          onChange={url => {
-            if (!url) return;
-            const existing = data.images || [];
-            const merged = existing.includes(url) ? existing : [url, ...existing];
-            onUpdate({ images: merged });
-          }}
-          label="Studio IA"
-          buttonLabel="Améliorer avec le Studio IA"
-          className="mb-3"
-        />
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
           {(data.images || []).map((imageUrl, index) => (
             <div key={index} className="relative group">

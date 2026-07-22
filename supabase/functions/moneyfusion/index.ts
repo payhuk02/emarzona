@@ -209,9 +209,31 @@ async function resolveAuthorizedAmount(
 function normalizePhone(phone?: string): string {
   if (!phone) return '';
   const cleaned = phone.trim().replace(/\s/g, '');
-  if (/^\+[1-9]\d{6,14}$/.test(cleaned)) return cleaned;
+  // MoneyFusion attend un numéro national (ex. 75591378), pas +226...
   const digits = cleaned.replace(/\D/g, '');
-  return digits || cleaned;
+  if (!digits) return cleaned;
+  // Burkina Faso / WAEMU courants : retirer l'indicatif pays
+  if (digits.startsWith('226') && digits.length >= 11) {
+    return digits.slice(3);
+  }
+  if (digits.startsWith('225') && digits.length >= 12) {
+    return digits.slice(3);
+  }
+  if (digits.startsWith('221') && digits.length >= 12) {
+    return digits.slice(3);
+  }
+  return digits;
+}
+
+function sanitizeArticleLabel(label: string): string {
+  const cleaned = label
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9\s_-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .substring(0, 60);
+  return cleaned || 'Produit';
 }
 
 serve(async req => {
@@ -461,11 +483,13 @@ serve(async req => {
       validated.customer_email.split('@')[0] ||
       'Client';
     const phone = normalizePhone(validated.customer_phone);
-    const description = validated.description?.trim() || 'Paiement Emarzona';
+    const description = sanitizeArticleLabel(
+      validated.description?.trim() || 'Paiement Emarzona'
+    );
 
     const mfPayload = {
       totalPrice: validated.amount,
-      article: [{ [description.substring(0, 80)]: validated.amount }],
+      article: [{ [description]: validated.amount }],
       numeroSend: phone,
       nomclient: customerName,
       personal_Info: [
@@ -484,7 +508,8 @@ serve(async req => {
       amount: validated.amount,
       currency: validated.currency,
       localTxId,
-      hasPhone: !!phone,
+      phoneLen: phone.length,
+      articleKey: description,
     });
 
     let mfResponse: Response;
@@ -517,12 +542,26 @@ serve(async req => {
     }
 
     if (!mfResponse.ok || mfData.statut === false) {
-      await supabase.from('transactions').update({ status: 'failed' }).eq('id', localTxId);
       const message =
         (typeof mfData.message === 'string' && mfData.message) ||
         (typeof mfData.error === 'string' && mfData.error) ||
         'Échec initialisation MoneyFusion';
-      console.error('[MoneyFusion] API error', { status: mfResponse.status, message });
+      console.error('[MoneyFusion] API error', { status: mfResponse.status, message, mfData });
+      await supabase
+        .from('transactions')
+        .update({
+          status: 'failed',
+          metadata: {
+            ...rawMetadata,
+            payment_provider: 'moneyfusion',
+            moneyfusion_error: {
+              http_status: mfResponse.status,
+              message,
+              response: mfData,
+            },
+          },
+        })
+        .eq('id', localTxId);
       return new Response(
         JSON.stringify({
           error: 'Erreur MoneyFusion API',

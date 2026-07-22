@@ -191,84 +191,30 @@ export const IntegrationsSection = ({ onChange }: IntegrationsSectionProps) => {
 
         {/* Paiements */}
         <TabsContent value="payments" className="space-y-4">
-          {/* GeniusPay */}
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-base flex items-center gap-2">
                     <CreditCard className="h-4 w-4" />
-                    GeniusPay
+                    MoneyFusion
                   </CardTitle>
                   <CardDescription className="text-xs">
-                    Passerelle de paiement GeniusPay
+                    Passerelle de paiement MoneyFusion (mobile money XOF) — rail plateforme actif
                   </CardDescription>
                 </div>
-                <Switch
-                  checked={integrations.geniuspay.enabled}
-                  onCheckedChange={checked =>
-                    handleIntegrationChange('geniuspay', 'enabled', checked)
-                  }
-                />
+                <Badge variant="default" className="text-xs">
+                  Actif
+                </Badge>
               </div>
             </CardHeader>
-            {integrations.geniuspay.enabled && (
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Clé API</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      type={showSecrets.geniuspay_apiKey ? 'text' : 'password'}
-                      value={integrations.geniuspay.apiKey}
-                      onChange={e => handleIntegrationChange('geniuspay', 'apiKey', e.target.value)}
-                      placeholder="sk_live_..."
-                      className="flex-1 min-w-0"
-                    />
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => toggleSecretVisibility('geniuspay_apiKey')}
-                      className="shrink-0"
-                      aria-label={
-                        showSecrets.geniuspay_apiKey
-                          ? 'Masquer la clé API GeniusPay'
-                          : 'Afficher la clé API GeniusPay'
-                      }
-                    >
-                      {showSecrets.geniuspay_apiKey ? (
-                        <EyeOff className="h-4 w-4" aria-hidden="true" />
-                      ) : (
-                        <Eye className="h-4 w-4" aria-hidden="true" />
-                      )}
-                    </Button>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Mode</Label>
-                  <div className="flex gap-2">
-                    <Button
-                      variant={integrations.geniuspay.mode === 'sandbox' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => handleIntegrationChange('geniuspay', 'mode', 'sandbox')}
-                    >
-                      Sandbox
-                    </Button>
-                    <Button
-                      variant={integrations.geniuspay.mode === 'production' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => handleIntegrationChange('geniuspay', 'mode', 'production')}
-                    >
-                      Production
-                    </Button>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-xs">
-                    ⚠️ Configuré dans Supabase Edge Functions Secrets
-                  </Badge>
-                </div>
-              </CardContent>
-            )}
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Configuré via les secrets Supabase Edge Functions (
+                <code className="text-xs">MONEYFUSION_API_URL</code>
+                ). GeniusPay a été retiré de la plateforme.
+              </p>
+            </CardContent>
           </Card>
         </TabsContent>
 
@@ -813,10 +759,10 @@ export const IntegrationsSection = ({ onChange }: IntegrationsSectionProps) => {
             <div className="space-y-1">
               <Label className="text-amber-500">Important</Label>
               <p className="text-sm text-muted-foreground">
-                Les clés API (GeniusPay, Resend, Stripe, FedEx, OpenAI, etc.) doivent être configurées
-                dans Supabase Edge Functions Secrets. Cette interface enregistre uniquement les
-                options non sensibles (activation, IDs publics, mode) — les secrets saisis ne sont
-                pas persistés.
+                Les clés API (MoneyFusion, Resend, Stripe, FedEx, OpenAI, etc.) doivent être
+                configurées dans Supabase Edge Functions Secrets. Cette interface enregistre
+                uniquement les options non sensibles (activation, IDs publics, mode) — les secrets
+                saisis ne sont pas persistés.
               </p>
             </div>
           </div>

@@ -51,9 +51,9 @@ const AVAILABLE_CURRENCIES = [
   { code: 'GHS', name: 'Cedi Ghanéen', symbol: '₵' },
 ];
 
-const AVAILABLE_PAYMENT_PROVIDERS = [{ value: 'geniuspay', label: 'GeniusPay' }];
+const AVAILABLE_PAYMENT_PROVIDERS = [{ value: 'moneyfusion', label: 'MoneyFusion' }];
 
-export const StorePaymentSettings : React.FC<StorePaymentSettingsProps> = ({
+export const StorePaymentSettings: React.FC<StorePaymentSettingsProps> = ({
   storeId,
   store,
   onUpdate,
@@ -83,13 +83,15 @@ export const StorePaymentSettings : React.FC<StorePaymentSettingsProps> = ({
     store.free_shipping_threshold?.toString() || ''
   );
   const [enabledProviders, setEnabledProviders] = useState<string[]>(
-    store.enabled_payment_providers || ['geniuspay']
+    store.enabled_payment_providers?.includes('geniuspay')
+      ? ['moneyfusion']
+      : store.enabled_payment_providers || ['moneyfusion']
   );
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      const  updates: Record<string, unknown> = {
+      const updates: Record<string, unknown> = {
         minimum_order_amount: minimumOrderAmount ? parseFloat(minimumOrderAmount) : 0,
         maximum_order_amount: maximumOrderAmount ? parseFloat(maximumOrderAmount) : null,
         accepted_currencies: acceptedCurrencies.length > 0 ? acceptedCurrencies : ['XOF'],
@@ -405,10 +407,3 @@ export const StorePaymentSettings : React.FC<StorePaymentSettingsProps> = ({
     </div>
   );
 };
-
-
-
-
-
-
-

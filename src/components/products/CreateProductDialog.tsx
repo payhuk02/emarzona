@@ -16,7 +16,6 @@ import { MobileFormField } from '@/components/ui/mobile-form-field';
 import { Plus, Info } from '@/components/icons';
 import ProductSlugEditor from './ProductSlugEditor';
 import ImageUpload from './ImageUpload';
-import { ImageStudioField } from '@/components/images/ImageStudioField';
 import { useProductManagement } from '@/hooks/useProductManagement';
 import { generateSlug } from '@/lib/store-utils';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -185,19 +184,8 @@ const CreateProductDialogComponent = ({
             </TooltipContent>
           </Tooltip>
         </div>
-        <ImageStudioField
-          context="product"
-          fieldName="image_url"
-          value={imageUrl}
-          onChange={setImageUrl}
-          label="Studio IA"
-          buttonLabel="Améliorer avec le Studio IA"
-          className="mb-3"
-        />
         <ImageUpload value={imageUrl} onChange={setImageUrl} />
-        <p className="text-xs text-gray-500">
-          Studio IA ou upload classique — format recommandé 1536×1024 (3:2).
-        </p>
+        <p className="text-xs text-gray-500">Format recommandé 1536×1024 (3:2).</p>
       </div>
 
       <MobileFormField

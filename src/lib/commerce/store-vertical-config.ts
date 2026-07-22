@@ -37,7 +37,7 @@ const BASE_ONBOARDING = {
   payments: {
     id: 'payments',
     title: 'Configurer les paiements',
-    description: 'GeniusPay, Stripe ou PayPal',
+    description: 'MoneyFusion, Stripe ou PayPal',
     href: '/dashboard/payment-connections',
   },
   seo: (storeId: string): StoreOnboardingStep => ({

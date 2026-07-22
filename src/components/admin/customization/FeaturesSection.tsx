@@ -123,9 +123,9 @@ const ALL_FEATURES: Feature[] = [
 
   // Paiements
   {
-    id: 'geniuspay',
-    name: 'GeniusPay',
-    description: 'Intégration GeniusPay pour les paiements',
+    id: 'moneyfusion',
+    name: 'MoneyFusion',
+    description: 'Intégration MoneyFusion pour les paiements mobile money',
     category: 'Paiements',
     icon: CreditCard,
     enabled: true,

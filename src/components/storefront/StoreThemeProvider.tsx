@@ -298,6 +298,67 @@ const generateThemeCSS = (theme: StoreTheme): string => {
       padding: 2rem;
       box-shadow: var(--store-shadow);
     }
+
+    /*
+     * Checkout : fond clair forcé (gradient muted/background).
+     * Ne pas hériter de --store-text (souvent clair sur thèmes sombres)
+     * sinon titres / résumés deviennent illisibles.
+     */
+    .store-theme-active .checkout-readable {
+      color: hsl(var(--foreground));
+    }
+
+    .store-theme-active .checkout-readable h1,
+    .store-theme-active .checkout-readable h2,
+    .store-theme-active .checkout-readable h3,
+    .store-theme-active .checkout-readable h4,
+    .store-theme-active .checkout-readable h5,
+    .store-theme-active .checkout-readable h6 {
+      color: hsl(var(--foreground)) !important;
+    }
+
+    /*
+     * Description produit : aligner fond + texte boutique pour éviter
+     * texte clair (--store-text) sur carte blanche (bg-card).
+     */
+    .store-theme-active .product-description-content {
+      background-color: var(--store-background) !important;
+      color: var(--store-text) !important;
+    }
+
+    .store-theme-active .product-description-content h1,
+    .store-theme-active .product-description-content h2,
+    .store-theme-active .product-description-content h3,
+    .store-theme-active .product-description-content h4,
+    .store-theme-active .product-description-content h5,
+    .store-theme-active .product-description-content h6,
+    .store-theme-active .product-description-content p,
+    .store-theme-active .product-description-content li,
+    .store-theme-active .product-description-content strong,
+    .store-theme-active .product-description-content b,
+    .store-theme-active .product-description-content em,
+    .store-theme-active .product-description-content span,
+    .store-theme-active .product-description-content div {
+      color: var(--store-text) !important;
+    }
+
+    /* Couleurs quasi-blanches collées depuis l’éditeur → illisibles sur fond clair */
+    .store-theme-active .product-description-content [style*="color: white"],
+    .store-theme-active .product-description-content [style*="color:white"],
+    .store-theme-active .product-description-content [style*="color: #fff"],
+    .store-theme-active .product-description-content [style*="color:#fff"],
+    .store-theme-active .product-description-content [style*="color: #FFF"],
+    .store-theme-active .product-description-content [style*="color:#FFF"],
+    .store-theme-active .product-description-content [style*="color: #ffffff"],
+    .store-theme-active .product-description-content [style*="color:#ffffff"],
+    .store-theme-active .product-description-content [style*="color: #FFFFFF"],
+    .store-theme-active .product-description-content [style*="color:#FFFFFF"],
+    .store-theme-active .product-description-content [style*="color: rgb(255, 255, 255)"],
+    .store-theme-active .product-description-content [style*="color:rgb(255, 255, 255)"],
+    .store-theme-active .product-description-content [style*="color: rgb(255,255,255)"],
+    .store-theme-active .product-description-content [style*="color:rgb(255,255,255)"] {
+      color: var(--store-text) !important;
+    }
   `;
 };
 

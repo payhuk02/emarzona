@@ -33,7 +33,6 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { IMAGE_FORMATS } from '@/config/image-formats';
-import { ImageStudioField } from '@/components/images/ImageStudioField';
 
 /**
  * Form data interface pour ProductVisualTab
@@ -251,16 +250,6 @@ export const ProductVisualTab = ({
               <p className="text-xs text-gray-500 mt-2">
                 Format requis: 1536×1024 (ratio 3:2), WebP/JPEG, qualité 80–90.
               </p>
-
-              <ImageStudioField
-                context="product"
-                fieldName="image_url"
-                value={formData.image_url || ''}
-                onChange={url => updateFormData('image_url', url)}
-                label="Studio IA — image principale"
-                buttonLabel="Améliorer avec le Studio IA"
-                className="mt-4 pt-4 border-t"
-              />
 
               {formData.image_url && (
                 <div className="mt-4">

@@ -1,6 +1,5 @@
 import {
   FLUTTERWAVE_CONNECT_CURRENCIES,
-  GENIUSPAY_PLATFORM_CURRENCIES,
   MONEYFUSION_CURRENCIES,
   PAYPAL_COMMERCE_CURRENCIES,
   PROVIDER_PRIORITY,
@@ -38,7 +37,8 @@ function isProviderCompatible(
     case 'moneyfusion':
       return MONEYFUSION_CURRENCIES.has(currency);
     case 'geniuspay_platform':
-      return GENIUSPAY_PLATFORM_CURRENCIES.has(currency) || currency.length > 0;
+      // GeniusPay retiré — ne plus router vers ce rail
+      return false;
     default:
       return false;
   }
@@ -47,22 +47,32 @@ function isProviderCompatible(
 /**
  * Détermine le provider de paiement pour une commande.
  * Ne fait aucun appel réseau — les connexions doivent être chargées en amont.
+ * Fallback plateforme : MoneyFusion (XOF).
  */
 export function resolvePaymentProvider(input: ResolveProviderInput): ResolvedPaymentProvider {
   const currency = normalizeCurrency(input.currency);
   const activeConnections = input.connections.filter(isConnectionActive);
 
   if (input.forcePlatformPayments) {
-    const geniuspay = findConnection(activeConnections, 'geniuspay_platform');
+    const moneyfusion = findConnection(activeConnections, 'moneyfusion');
     return {
-      provider: 'geniuspay_platform',
-      connectionId: geniuspay?.id ?? null,
+      provider: 'moneyfusion',
+      connectionId: moneyfusion?.id ?? null,
       reason: 'store_force_platform_payments',
     };
   }
 
   if (input.buyerPreferredProvider) {
-    // MoneyFusion = rail plateforme (pas de connexion boutique obligatoire)
+    if (input.buyerPreferredProvider === 'geniuspay_platform') {
+      // Préférence legacy GeniusPay → MoneyFusion
+      const mfConn = findConnection(activeConnections, 'moneyfusion');
+      return {
+        provider: 'moneyfusion',
+        connectionId: mfConn?.id ?? null,
+        reason: 'buyer_preference_migrated_to_moneyfusion',
+      };
+    }
+
     if (input.buyerPreferredProvider === 'moneyfusion' && MONEYFUSION_CURRENCIES.has(currency)) {
       const mfConn = findConnection(activeConnections, 'moneyfusion');
       return {
@@ -83,8 +93,15 @@ export function resolvePaymentProvider(input: ResolveProviderInput): ResolvedPay
   }
 
   for (const provider of PROVIDER_PRIORITY) {
-    // MoneyFusion n'est sélectionné automatiquement que si une connexion active existe
-    // (sinon uniquement via préférence acheteur / UI).
+    if (provider === 'moneyfusion' && MONEYFUSION_CURRENCIES.has(currency)) {
+      const mfConn = findConnection(activeConnections, 'moneyfusion');
+      return {
+        provider: 'moneyfusion',
+        connectionId: mfConn?.id ?? null,
+        reason: 'auto_routing_moneyfusion',
+      };
+    }
+
     const connection = findConnection(activeConnections, provider);
     if (!connection) continue;
     if (!isProviderCompatible(provider, currency, connection)) continue;
@@ -96,10 +113,10 @@ export function resolvePaymentProvider(input: ResolveProviderInput): ResolvedPay
     };
   }
 
-  const geniuspayFallback = findConnection(activeConnections, 'geniuspay_platform');
+  const moneyfusionFallback = findConnection(activeConnections, 'moneyfusion');
   return {
-    provider: 'geniuspay_platform',
-    connectionId: geniuspayFallback?.id ?? null,
-    reason: 'fallback_geniuspay',
+    provider: 'moneyfusion',
+    connectionId: moneyfusionFallback?.id ?? null,
+    reason: 'fallback_moneyfusion',
   };
 }

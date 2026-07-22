@@ -12,7 +12,7 @@ interface PaymentConnectionsOnboardingChecklistProps {
   storeId: string;
   stripeConnection?: StorePaymentConnection;
   paypalConnection?: StorePaymentConnection;
-  geniuspayActive: boolean;
+  moneyfusionActive: boolean;
 }
 
 function StepRow({ done, label, detail }: { done: boolean; label: string; detail?: string }) {
@@ -35,14 +35,14 @@ export function PaymentConnectionsOnboardingChecklist({
   storeId,
   stripeConnection,
   paypalConnection,
-  geniuspayActive,
+  moneyfusionActive,
 }: PaymentConnectionsOnboardingChecklistProps) {
   const stripeActive = stripeConnection?.external_account_status === 'active';
   const paypalActive = paypalConnection?.external_account_status === 'active';
   const v2Enabled = isPaymentOrchestrationV2Enabled();
   const rollout = getPaymentOrchestrationV2RolloutPercent();
   const storeInCanary = isPaymentOrchestrationV2EnabledForStore(storeId);
-  const completedCount = [stripeActive, paypalActive, geniuspayActive].filter(Boolean).length;
+  const completedCount = [stripeActive, paypalActive, moneyfusionActive].filter(Boolean).length;
 
   return (
     <Card className="border-primary/20 bg-primary/5">
@@ -83,8 +83,8 @@ export function PaymentConnectionsOnboardingChecklist({
             }
           />
           <StepRow
-            done={geniuspayActive}
-            label="GeniusPay — mobile money & XOF (Afrique francophone)"
+            done={moneyfusionActive}
+            label="MoneyFusion — mobile money & XOF (Afrique francophone)"
             detail="Inclus avec Emarzona — toujours disponible pour vos clients locaux."
           />
         </ol>

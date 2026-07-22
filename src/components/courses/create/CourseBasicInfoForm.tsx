@@ -21,7 +21,6 @@ import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import { buildSeoFromGenerated, mergeImages } from '@/lib/ai-product-apply';
 import type { CourseSEOData } from '@/components/courses/create/CourseSEOForm';
-import { ImageStudioField } from '@/components/images/ImageStudioField';
 
 interface CourseBasicInfoFormProps {
   formData: {
@@ -638,24 +637,6 @@ export const CourseBasicInfoForm = ({
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            <ImageStudioField
-              context="course"
-              fieldName="images"
-              value={formData.image_url || ''}
-              exampleUrl={formData.images?.[0]}
-              onChange={url => {
-                if (!url) return;
-                const currentImages = formData.images || [];
-                const merged = currentImages.includes(url)
-                  ? currentImages
-                  : [url, ...currentImages];
-                onChange('images', merged);
-                onChange('image_url', merged[0] || url);
-              }}
-              label="Studio IA"
-              buttonLabel="Améliorer avec le Studio IA"
-              className="mb-4"
-            />
             <Label htmlFor="images_upload">Images du cours</Label>
             <p className="text-xs text-muted-foreground mb-2">
               Ajoutez plusieurs images pour montrer différents aspects de votre cours

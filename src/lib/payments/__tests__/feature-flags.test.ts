@@ -125,20 +125,8 @@ describe('isMoneyFusionEnabled', () => {
     vi.unstubAllEnvs();
   });
 
-  it('returns true when VITE_MONEYFUSION_ENABLED=true', () => {
-    vi.stubEnv('VITE_MONEYFUSION_ENABLED', 'true');
-    expect(isMoneyFusionEnabled()).toBe(true);
-  });
-
-  it('returns false when explicitly disabled', () => {
+  it('is always enabled (MoneyFusion rail plateforme)', () => {
     vi.stubEnv('VITE_MONEYFUSION_ENABLED', 'false');
-    vi.stubEnv('VITE_VERCEL_ENV', 'preview');
-    expect(isMoneyFusionEnabled()).toBe(false);
-  });
-
-  it('defaults to true on Vercel preview when unset', () => {
-    vi.unstubAllEnvs();
-    vi.stubEnv('VITE_VERCEL_ENV', 'preview');
     expect(isMoneyFusionEnabled()).toBe(true);
   });
 });
@@ -148,18 +136,13 @@ describe('isMoneyFusionOnlyEnabled', () => {
     vi.unstubAllEnvs();
   });
 
-  it('is enabled by default (GeniusPay retiré temporairement)', () => {
+  it('is always enabled (GeniusPay retiré de la plateforme)', () => {
     vi.stubEnv('VITE_MONEYFUSION_ONLY', '');
     expect(isMoneyFusionOnlyEnabled()).toBe(true);
   });
 
-  it('enables exclusive MoneyFusion mode explicitly', () => {
-    vi.stubEnv('VITE_MONEYFUSION_ONLY', 'true');
-    expect(isMoneyFusionOnlyEnabled()).toBe(true);
-  });
-
-  it('can be disabled explicitly', () => {
+  it('stays enabled even when env tries to disable', () => {
     vi.stubEnv('VITE_MONEYFUSION_ONLY', 'false');
-    expect(isMoneyFusionOnlyEnabled()).toBe(false);
+    expect(isMoneyFusionOnlyEnabled()).toBe(true);
   });
 });

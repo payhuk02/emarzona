@@ -95,9 +95,19 @@ const PLAIN_TEXT_CONFIG: PurifyConfig = {
  *
  * @see {@link PRODUCT_DESCRIPTION_CONFIG} pour la configuration de sécurité
  */
+/** Retire les couleurs de texte quasi-blanches (illisibles sur fond clair). */
+function stripNearWhiteTextColors(html: string): string {
+  return html
+    .replace(/color:\s*white\s*;?/gi, '')
+    .replace(/color:\s*#fff(?:fff)?\s*;?/gi, '')
+    .replace(/color:\s*rgb\(\s*255\s*,\s*255\s*,\s*255\s*\)\s*;?/gi, '')
+    .replace(/color:\s*rgba\(\s*255\s*,\s*255\s*,\s*255\s*,\s*[\d.]+\s*\)\s*;?/gi, '');
+}
+
 export function sanitizeProductDescription(html: string | null | undefined): string {
   if (!html) return '';
-  return String(DOMPurify.sanitize(html, PRODUCT_DESCRIPTION_CONFIG));
+  const clean = String(DOMPurify.sanitize(html, PRODUCT_DESCRIPTION_CONFIG));
+  return stripNearWhiteTextColors(clean);
 }
 
 /**

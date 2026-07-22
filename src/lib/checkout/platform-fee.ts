@@ -1,6 +1,7 @@
 /**
  * Frais plateforme checkout acheteur : 2 % du montant + 100 FCFA (XOF).
  * Le forfait 100 XOF est converti si la devise de la commande n'est pas XOF/XAF.
+ * Affichage UI : le détail de la ligne n'est pas montré ; seul le Total (TTC frais) l'est.
  */
 import { convertCurrency, isSupportedCurrency, type Currency } from '@/lib/currency-converter';
 

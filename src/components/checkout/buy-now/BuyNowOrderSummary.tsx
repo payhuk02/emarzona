@@ -6,10 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import CouponInput from '@/components/checkout/CouponInput';
 import { formatPrice } from '@/lib/product-helpers';
 import { htmlToPlainText } from '@/lib/html-sanitizer';
-import {
-  calculateBuyNowPlatformFee,
-  getBuyNowBasePrice,
-} from '@/pages/checkout/buy-now/checkout-buy-now-pricing';
+import { getBuyNowBasePrice } from '@/pages/checkout/buy-now/checkout-buy-now-pricing';
 import type {
   AppliedBuyNowCoupon,
   CheckoutProduct,
@@ -61,7 +58,6 @@ export default function BuyNowOrderSummary({
   onCouponRemove,
 }: BuyNowOrderSummaryProps) {
   const basePrice = getBuyNowBasePrice(product, selectedVariant);
-  const platformFee = calculateBuyNowPlatformFee(product, selectedVariant, appliedCouponCode);
   const promoPrice = product?.promotional_price;
   const originalPrice = Number(product?.price) || 0;
   const hasPromo = promoPrice && Number(promoPrice) < originalPrice && Number(promoPrice) > 0;
@@ -154,14 +150,6 @@ export default function BuyNowOrderSummary({
               <span>Code promo ({appliedCouponCode.code})</span>
               <span className="font-medium tabular-nums">
                 −{formatPrice(appliedCouponCode.discountAmount, currency)}
-              </span>
-            </div>
-          )}
-          {platformFee > 0 && (
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Frais de service (2% + 100 FCFA)</span>
-              <span className="font-medium tabular-nums text-foreground">
-                {formatPrice(platformFee, currency)}
               </span>
             </div>
           )}

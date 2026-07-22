@@ -6,7 +6,8 @@ export function getPaymentProviderLabel(provider: string | null | undefined): st
       return 'PayPal';
     case 'geniuspay_platform':
     case 'geniuspay':
-      return 'GeniusPay';
+      // Legacy label — GeniusPay retiré, afficher MoneyFusion pour l'historique
+      return 'MoneyFusion';
     case 'moneyfusion':
       return 'MoneyFusion';
     case 'flutterwave_connect':

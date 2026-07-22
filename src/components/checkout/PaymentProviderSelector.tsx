@@ -113,29 +113,24 @@ export function PaymentProviderSelector({
       available: true,
     };
 
+    // GeniusPay retiré — MoneyFusion est le rail plateforme.
     if (isMoneyFusionOnlyEnabled()) {
       return moneyfusionOk ? [moneyfusionOption] : [];
     }
 
     if (!orchestrationV2 || !storeId) {
-      const list: PaymentProviderOption[] = [
-        {
-          value: 'geniuspay',
-          ...PROVIDER_META.geniuspay,
-          available: true,
-        },
-      ];
-      if (moneyfusionOk) list.push(moneyfusionOption);
-      return list;
+      return moneyfusionOk ? [moneyfusionOption] : [];
     }
 
-    const source = (rpcOptions ?? []).filter(opt => opt.provider !== 'flutterwave_connect');
+    const source = (rpcOptions ?? []).filter(
+      opt => opt.provider !== 'flutterwave_connect' && opt.provider !== 'geniuspay_platform'
+    );
     const mapped = source.map(opt => {
       const checkoutValue = rpcProviderToCheckout(opt.provider);
-      const meta = PROVIDER_META[checkoutValue] ?? PROVIDER_META.geniuspay;
+      const meta = PROVIDER_META[checkoutValue] ?? PROVIDER_META.moneyfusion;
       return {
-        value: checkoutValue,
-        label: opt.label || meta.label,
+        value: checkoutValue === 'geniuspay' ? 'moneyfusion' : checkoutValue,
+        label: checkoutValue === 'geniuspay' ? meta.label : opt.label || meta.label,
         description: meta.description,
         icon: meta.icon,
         features: meta.features,
@@ -143,12 +138,11 @@ export function PaymentProviderSelector({
       };
     });
 
-    // Rail plateforme MoneyFusion (indépendant du RPC boutique)
     if (moneyfusionOk && !mapped.some(p => p.value === 'moneyfusion')) {
       mapped.push(moneyfusionOption);
     }
 
-    return mapped;
+    return mapped.filter(p => p.value !== 'geniuspay');
   }, [orchestrationV2, storeId, rpcOptions, currency]);
 
   useEffect(() => {
@@ -166,14 +160,14 @@ export function PaymentProviderSelector({
 
         const checkoutPref: CheckoutPaymentProvider =
           pref === 'geniuspay' || pref === 'geniuspay_platform'
-            ? 'geniuspay'
+            ? 'moneyfusion'
             : pref === 'moneyfusion'
               ? 'moneyfusion'
               : pref === 'stripe_connect' ||
                   pref === 'paypal_commerce' ||
                   pref === 'flutterwave_connect'
                 ? pref
-                : 'geniuspay';
+                : 'moneyfusion';
 
         const match = providers.find(p => p.value === checkoutPref);
         if (match) onChange(match.value);

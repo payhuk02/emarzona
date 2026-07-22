@@ -88,7 +88,7 @@ test.describe('Artist wizard — publish (E2E)', () => {
           artwork_title,
           artist_name,
           artist_type,
-          edition_type
+          artwork_edition_type
         )
       `
       )
@@ -111,7 +111,7 @@ test.describe('Artist wizard — publish (E2E)', () => {
         artwork_title: string;
         artist_name: string;
         artist_type: string;
-        edition_type: string;
+        artwork_edition_type: string;
       }>;
     };
 
@@ -121,7 +121,7 @@ test.describe('Artist wizard — publish (E2E)', () => {
     expect(product.slug.length).toBeGreaterThan(0);
     expect(product.artist_products?.[0]?.artwork_title).toBe(artworkTitle);
     expect(product.artist_products?.[0]?.artist_type).toBe('visual_artist');
-    expect(product.artist_products?.[0]?.edition_type).toBe('original');
+    expect(product.artist_products?.[0]?.artwork_edition_type).toBe('original');
 
     testInfo.attach('published-product-id', {
       body: product.id,
@@ -169,7 +169,7 @@ test.describe('Artist wizard — publish (E2E)', () => {
         is_draft,
         is_active,
         artist_products (
-          edition_type,
+          artwork_edition_type,
           edition_number,
           total_editions
         )
@@ -188,7 +188,7 @@ test.describe('Artist wizard — publish (E2E)', () => {
       is_draft: boolean;
       is_active: boolean;
       artist_products: Array<{
-        edition_type: string;
+        artwork_edition_type: string;
         edition_number: number;
         total_editions: number;
       }>;
@@ -196,7 +196,7 @@ test.describe('Artist wizard — publish (E2E)', () => {
 
     expect(product.is_draft).toBe(false);
     expect(product.is_active).toBe(true);
-    expect(product.artist_products?.[0]?.edition_type).toBe('limited_edition');
+    expect(product.artist_products?.[0]?.artwork_edition_type).toBe('limited_edition');
     expect(product.artist_products?.[0]?.edition_number).toBe(3);
     expect(product.artist_products?.[0]?.total_editions).toBe(25);
 
