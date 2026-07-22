@@ -13,13 +13,19 @@ import { OrderTimeline } from '@/components/customer/OrderTimeline';
 
 interface RecentOrdersTimelineProps {
   userId: string;
+  email?: string | null;
   onViewAll?: () => void;
   limit?: number;
 }
 
-export function RecentOrdersTimeline({ userId, onViewAll, limit = 3 }: RecentOrdersTimelineProps) {
+export function RecentOrdersTimeline({
+  userId,
+  email,
+  onViewAll,
+  limit = 3,
+}: RecentOrdersTimelineProps) {
   const { i18n, t } = useTranslation();
-  const { data: hub, isLoading } = useCustomerHubSummary(userId, limit, true);
+  const { data: hub, isLoading } = useCustomerHubSummary(userId, limit, true, email);
 
   const orders = hub?.recentOrders;
 

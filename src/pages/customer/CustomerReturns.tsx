@@ -58,6 +58,7 @@ import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import type { ProductReturn } from '@/hooks/physical/useReturns';
+import { resolveBuyerCustomerIds } from '@/lib/customer/resolve-buyer-customer-ids';
 
 export default function CustomerReturns() {
   const { user } = useAuth();
@@ -74,9 +75,14 @@ export default function CustomerReturns() {
 
   // Fetch user orders
   const { data: orders = [], isLoading: ordersLoading } = useQuery({
-    queryKey: ['customer-orders-for-returns', user?.id],
+    queryKey: ['customer-orders-for-returns', user?.id, user?.email],
     queryFn: async () => {
       if (!user?.id) return [];
+
+      const customerIds = await resolveBuyerCustomerIds({
+        userId: user.id,
+        email: user.email,
+      });
 
       const { data, error } = await supabase
         .from('orders')
@@ -99,7 +105,7 @@ export default function CustomerReturns() {
           )
         `
         )
-        .eq('customer_id', user.id)
+        .in('customer_id', customerIds)
         .eq('status', 'delivered')
         .order('created_at', { ascending: false })
         .limit(50);

@@ -57,6 +57,7 @@ import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import type { WarrantyRegistration, WarrantyClaim } from '@/hooks/physical/useWarranties';
+import { resolveBuyerCustomerIds } from '@/lib/customer/resolve-buyer-customer-ids';
 
 export default function CustomerWarranties() {
   const { user } = useAuth();
@@ -123,15 +124,19 @@ export default function CustomerWarranties() {
 
   // Fetch user warranty claims
   const { data: claims = [], isLoading: claimsLoading } = useQuery({
-    queryKey: ['customer-warranty-claims', user?.id],
+    queryKey: ['customer-warranty-claims', user?.id, user?.email],
     queryFn: async () => {
       if (!user?.id) return [];
 
       // Récupérer les commandes de l'utilisateur
+      const customerIds = await resolveBuyerCustomerIds({
+        userId: user.id,
+        email: user.email,
+      });
       const { data: userOrders } = await supabase
         .from('orders')
         .select('id')
-        .eq('customer_id', user.id);
+        .in('customer_id', customerIds);
 
       const orderIds = userOrders?.map(o => o.id) || [];
 
@@ -183,7 +188,7 @@ export default function CustomerWarranties() {
 
   // Fetch user orders for registration
   const { data: orders = [] } = useQuery({
-    queryKey: ['customer-orders-for-warranty', user?.id],
+    queryKey: ['customer-orders-for-warranty', user?.id, user?.email],
     queryFn: async () => {
       if (!user?.id) return [];
 
@@ -205,7 +210,7 @@ export default function CustomerWarranties() {
           )
         `
         )
-        .eq('customer_id', user.id)
+        .in('customer_id', await resolveBuyerCustomerIds({ userId: user.id, email: user.email }))
         .eq('status', 'delivered')
         .order('created_at', { ascending: false })
         .limit(50);

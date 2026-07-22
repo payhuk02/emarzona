@@ -10,6 +10,7 @@ import {
   logRpcFallback,
   type SupabaseRpcError,
 } from '@/lib/dashboard/rpc-error-utils';
+import { resolveBuyerCustomerIds } from '@/lib/customer/resolve-buyer-customer-ids';
 
 export interface CustomerHubOrderItem {
   product_type: string;
@@ -103,12 +104,15 @@ export async function fetchCustomerHubFromRpc(
 export async function fetchCustomerHubClientFallback(
   userId: string,
   limit = 5,
-  activeOnly = true
+  activeOnly = true,
+  email?: string | null
 ): Promise<CustomerHubSummary> {
+  const customerIds = await resolveBuyerCustomerIds({ userId, email });
+
   let orderQuery = supabase
     .from('orders')
     .select('id, order_number, status, payment_status, created_at')
-    .eq('customer_id', userId)
+    .in('customer_id', customerIds)
     .order('created_at', { ascending: false })
     .limit(limit);
 
@@ -157,13 +161,14 @@ export async function fetchCustomerHubClientFallback(
 export async function fetchCustomerHubSummary(
   userId: string,
   limit = 5,
-  activeOnly = true
+  activeOnly = true,
+  email?: string | null
 ): Promise<CustomerHubSummary> {
   try {
     return await fetchCustomerHubFromRpc(limit, activeOnly);
   } catch (err) {
     if (err instanceof Error && err.message === 'CUSTOMER_HUB_RPC_UNAVAILABLE') {
-      return fetchCustomerHubClientFallback(userId, limit, activeOnly);
+      return fetchCustomerHubClientFallback(userId, limit, activeOnly, email);
     }
     throw err;
   }

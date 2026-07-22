@@ -37,6 +37,7 @@ import {
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatLocaleNumber } from '@/lib/i18n/locale-format';
+import { resolveBuyerCustomerIds } from '@/lib/customer/resolve-buyer-customer-ids';
 import { ReturnsTab } from '@/components/customer/ReturnsTab';
 import CustomerMyGiftCards from './CustomerMyGiftCards';
 import { DownloadsTab } from '@/components/customer/DownloadsTab';
@@ -198,21 +199,26 @@ export default function CustomerPortal() {
 
   // Fetch customer statistics
   const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ['customer-stats', user?.id],
+    queryKey: ['customer-stats', user?.id, user?.email],
     queryFn: async (): Promise<CustomerStats> => {
       if (!user?.id) throw new Error('User not authenticated');
 
-      // Total orders
+      const customerIds = await resolveBuyerCustomerIds({
+        userId: user.id,
+        email: user.email,
+      });
+
+      // Total orders — via customers.id (+ legacy uid), jamais auth.uid seul comme FK
       const { count: ordersCount } = await supabase
         .from('orders')
         .select('id', { count: 'exact', head: true })
-        .eq('customer_id', user.id);
+        .in('customer_id', customerIds);
 
       // Get all orders for customer (for total spent and product type counting)
       const { data: allOrders } = await supabase
         .from('orders')
         .select('id, total_amount, payment_status')
-        .eq('customer_id', user.id);
+        .in('customer_id', customerIds);
 
       // Calculate total spent from paid orders (payment_status can be 'paid' or 'completed')
       const totalSpent =
@@ -538,7 +544,13 @@ export default function CustomerPortal() {
               className="space-y-2.5 sm:space-y-3 md:space-y-4 mt-3 sm:mt-4 md:mt-6"
             >
               <CustomerHubQuickActions />
-              {user?.id && <RecentOrdersTimeline userId={user.id} onViewAll={navigateToOrders} />}
+              {user?.id && (
+                <RecentOrdersTimeline
+                  userId={user.id}
+                  email={user.email}
+                  onViewAll={navigateToOrders}
+                />
+              )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3 md:gap-4">
                 {/* Mes Commandes */}

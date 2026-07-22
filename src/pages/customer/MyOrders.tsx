@@ -48,6 +48,7 @@ import {
 import { generateInvoicePDF } from '@/lib/invoice-generator';
 import { useToast } from '@/hooks/use-toast';
 import { buildOrderTimeline } from '@/lib/customer/order-timeline';
+import { resolveBuyerCustomerIds } from '@/lib/customer/resolve-buyer-customer-ids';
 import { OrderTimeline } from '@/components/customer/OrderTimeline';
 import { OrderProtectClaimButton } from '@/components/trust/OrderProtectClaimButton';
 import { useEffect } from 'react';
@@ -145,19 +146,17 @@ export default function MyOrders() {
   const { data: allOrders, isLoading } = useQuery({
     queryKey: ['customer-orders', user?.id, user?.email, statusFilter, typeFilter],
     queryFn: async (): Promise<Order[]> => {
-      if (!user?.email) return [];
+      if (!user?.id) return [];
 
-      // Fetch all customer profiles for this user's email across all stores
-      const { data: customersData, error: customerError } = await supabase
-        .from('customers')
-        .select('id')
-        .eq('email', user.email);
+      // Fetch customer profiles (user_id + email multi-store) — jamais auth.uid comme FK seule
+      const customerIds = await resolveBuyerCustomerIds({
+        userId: user.id,
+        email: user.email,
+      });
 
-      if (customerError || !customersData || customersData.length === 0) {
+      if (customerIds.length === 0) {
         return [];
       }
-
-      const customerIds = customersData.map(c => c.id);
 
       let query = supabase
         .from('orders')
