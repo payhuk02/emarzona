@@ -25,6 +25,7 @@ import React, { Suspense, lazy, useEffect } from 'react';
 import { logger } from '@/lib/logger';
 import { canShowErrorDetails } from '@/lib/security/error-debug';
 import { SkipLink } from '@/components/accessibility/SkipLink';
+import { Loader2 } from 'lucide-react';
 
 // Lazy-loaded non-critical components
 const PerformanceOptimizer = lazy(() =>
@@ -94,7 +95,7 @@ import { adminRoutes } from '@/routes/adminRoutes';
 const LoadingFallback = () => (
   <div className="flex min-h-screen items-center justify-center">
     <div className="flex flex-col items-center space-y-4">
-      <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
       <p className="text-muted-foreground">Chargement...</p>
     </div>
   </div>

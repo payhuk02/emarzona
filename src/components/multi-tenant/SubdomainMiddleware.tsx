@@ -15,6 +15,7 @@ import { logger } from '@/lib/logger';
 import { useStoreContext } from '@/contexts/StoreContext';
 import { StoreNotFound } from './StoreNotFound';
 import { StoreSubdomainRoutes } from '@/routes/storeSubdomainRoutes';
+import { Loader2 } from 'lucide-react';
 
 interface SubdomainMiddlewareProps {
   children: ReactNode;
@@ -89,7 +90,7 @@ export function SubdomainMiddleware({ children }: SubdomainMiddlewareProps) {
       return (
         <div className="flex min-h-screen items-center justify-center">
           <div className="flex flex-col items-center space-y-4">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
             <p className="text-muted-foreground">Chargement de la boutique...</p>
           </div>
         </div>

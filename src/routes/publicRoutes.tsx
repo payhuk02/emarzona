@@ -3,6 +3,7 @@ import { lazyPage } from '@/routes/lazyPage';
 import { Route, Navigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 import { generateStoreUrl, generateProductUrl } from '@/lib/store-utils';
+import { Loader2 } from 'lucide-react';
 
 // Pages publiques
 const Landing = lazyPage(() => import('@/pages/Landing'));
@@ -126,7 +127,7 @@ const StoreRedirectToSubdomain = () => {
   return (
     <div className="flex min-h-screen items-center justify-center">
       <div className="flex flex-col items-center space-y-4">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
         <p className="text-muted-foreground">Redirection vers la boutique...</p>
       </div>
     </div>
@@ -144,7 +145,7 @@ const StoreProductRedirectToSubdomain = () => {
   return (
     <div className="flex min-h-screen items-center justify-center">
       <div className="flex flex-col items-center space-y-4">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
         <p className="text-muted-foreground">Redirection vers le produit...</p>
       </div>
     </div>
@@ -163,7 +164,7 @@ const StoreLegalRedirectToSubdomain = () => {
   return (
     <div className="flex min-h-screen items-center justify-center">
       <div className="flex flex-col items-center space-y-4">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
         <p className="text-muted-foreground">Redirection...</p>
       </div>
     </div>
@@ -181,7 +182,7 @@ const OldProductRouteRedirect = () => {
   return (
     <div className="flex min-h-screen items-center justify-center">
       <div className="flex flex-col items-center space-y-4">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
         <p className="text-muted-foreground">Redirection...</p>
       </div>
     </div>

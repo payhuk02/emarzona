@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { Loader2 } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
@@ -23,8 +24,8 @@ export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background to-muted">
-        <div className="text-center space-y-4">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
+        <div className="text-center space-y-4 flex flex-col items-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <p className="text-muted-foreground">Chargement...</p>
         </div>
       </div>
