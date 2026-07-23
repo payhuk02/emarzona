@@ -92,21 +92,23 @@ export async function completeTransactionAndOrder(
       p_application_fee_amount: extras?.application_fee_amount ?? null,
     };
 
-    let result: {
+    type AtomicWebhookResult = {
       success?: boolean;
       reason?: string;
       order_id?: string | null;
       already_completed?: boolean;
-    } | null = null;
+    };
+
+    let result: AtomicWebhookResult | null = null;
     let rpcError: { message?: string } | null = null;
 
     const primary = await supabase.rpc('process_payment_webhook_atomic', rpcArgs);
-    result = primary.data as typeof result;
+    result = (primary.data ?? null) as AtomicWebhookResult | null;
     rpcError = primary.error;
 
     if (rpcError?.message?.includes('process_payment_webhook_atomic')) {
       const fallback = await supabase.rpc('process_geniuspay_webhook_atomic', rpcArgs);
-      result = fallback.data as typeof result;
+      result = (fallback.data ?? null) as AtomicWebhookResult | null;
       rpcError = fallback.error;
     }
 
