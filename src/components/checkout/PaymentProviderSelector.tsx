@@ -24,6 +24,7 @@ import {
   isPaymentOrchestrationV2Enabled,
 } from '@/lib/payments/feature-flags';
 import { MONEYFUSION_CURRENCIES, normalizeCurrency } from '@/lib/payments/constants';
+import { MoneyFusionCheckoutMethods } from '@/components/checkout/MoneyFusionCheckoutMethods';
 
 export type PaymentProvider = CheckoutPaymentProvider;
 
@@ -48,9 +49,9 @@ const PROVIDER_META: Record<
   },
   moneyfusion: {
     label: 'MoneyFusion',
-    description: 'Mobile Money Afrique de l’Ouest via MoneyFusion / FusionPay',
+    description: 'Mobile Money & carte via MoneyFusion / FusionPay (XOF)',
     icon: <Wallet className="h-5 w-5" />,
-    features: ['Mobile Money', 'XOF', 'Orange / MTN / Moov / Wave'],
+    features: ['Orange Money', 'MTN', 'Moov', 'Wave', 'Carte bancaire', 'XOF'],
   },
   stripe_connect: {
     label: 'Carte bancaire (Stripe)',
@@ -234,6 +235,25 @@ export function PaymentProviderSelector({
   }
 
   if (availableProviders.length === 1) {
+    const only = availableProviders[0];
+    if (only.value === 'moneyfusion') {
+      return (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Wallet className="h-4 w-4 text-primary" />
+              Paiement MoneyFusion
+            </CardTitle>
+            <CardDescription>
+              Vous serez redirigé pour choisir votre opérateur ou votre carte
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <MoneyFusionCheckoutMethods />
+          </CardContent>
+        </Card>
+      );
+    }
     return null;
   }
 
@@ -313,6 +333,11 @@ export function PaymentProviderSelector({
             <p className="text-xs text-muted-foreground mt-1">
               Vous serez redirigé vers {selectedProvider.label} pour finaliser votre paiement.
             </p>
+            {selectedProvider.value === 'moneyfusion' && (
+              <div className="mt-2">
+                <MoneyFusionCheckoutMethods compact />
+              </div>
+            )}
           </div>
         )}
       </CardContent>

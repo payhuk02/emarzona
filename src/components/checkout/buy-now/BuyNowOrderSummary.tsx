@@ -16,6 +16,7 @@ import type {
 } from '@/pages/checkout/buy-now/checkout-buy-now-types';
 import { ShoppingBag, Loader2, Lock, Tag, Truck, ArrowRight, AlertTriangle } from 'lucide-react';
 import { MONEYFUSION_MIN_AMOUNT_XOF } from '@/lib/moneyfusion-client';
+import { MoneyFusionCheckoutMethods } from '@/components/checkout/MoneyFusionCheckoutMethods';
 
 const PRODUCT_TYPE_LABELS: Record<string, string> = {
   digital: 'Produit digital',
@@ -179,6 +180,10 @@ export default function BuyNowOrderSummary({
               produit pour pouvoir payer en ligne.
             </p>
           </div>
+        )}
+
+        {!isCashOnDelivery && !belowMoneyFusionMin && (
+          <MoneyFusionCheckoutMethods className="rounded-xl border border-border/60 bg-muted/30 px-3 py-2.5" />
         )}
 
         {/* CTA — sticky on mobile at bottom of card flow */}

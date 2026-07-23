@@ -59,6 +59,8 @@ describe('PaymentProviderSelector', () => {
     await waitFor(() => {
       expect(mockOnChange).toHaveBeenCalledWith('moneyfusion');
     });
+    expect(screen.getByText(/Paiement MoneyFusion/i)).toBeInTheDocument();
+    expect(screen.getByText(/Orange Money/i)).toBeInTheDocument();
   });
 
   it('displays amount when moneyfusion selected', async () => {
@@ -72,9 +74,8 @@ describe('PaymentProviderSelector', () => {
       />
     );
 
-    // Single provider → no selector card, but amount may still not show without multi
     await waitFor(() => {
-      expect(mockOnChange).not.toHaveBeenCalledWith('geniuspay');
+      expect(screen.getByText(/Orange Money/i)).toBeInTheDocument();
     });
   });
 
