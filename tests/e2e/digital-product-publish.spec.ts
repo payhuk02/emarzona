@@ -77,11 +77,11 @@ test.describe('Digital wizard — publish (E2E)', () => {
         is_active,
         slug,
         digital_products (
-          main_file_url
-        ),
-        digital_product_files (
-          is_main,
-          file_url
+          main_file_url,
+          digital_product_files (
+            is_main,
+            file_url
+          )
         )
       `
       )
@@ -100,15 +100,18 @@ test.describe('Digital wizard — publish (E2E)', () => {
       is_draft: boolean;
       is_active: boolean;
       slug: string;
-      digital_products: Array<{ main_file_url: string | null }>;
-      digital_product_files: Array<{ is_main: boolean; file_url: string | null }>;
+      digital_products: Array<{
+        main_file_url: string | null;
+        digital_product_files: Array<{ is_main: boolean; file_url: string | null }>;
+      }>;
     };
 
     expect(product.is_draft).toBe(false);
     expect(product.is_active).toBe(true);
     expect(product.name).toBe(productName);
     expect(product.digital_products?.[0]?.main_file_url).toBeTruthy();
-    expect(product.digital_product_files?.some(f => f.is_main && Boolean(f.file_url))).toBe(true);
+    const files = product.digital_products?.[0]?.digital_product_files ?? [];
+    expect(files.some(f => f.is_main && Boolean(f.file_url))).toBe(true);
 
     testInfo.attach('published-digital-product-id', {
       body: product.id,

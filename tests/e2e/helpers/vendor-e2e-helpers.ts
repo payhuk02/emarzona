@@ -8,6 +8,7 @@ import {
 } from './store-theme-helpers';
 import { waitForReactApp, waitForVendorStoreReady } from '../shared/e2e-test-config';
 import { retryOnTransientPostgrest } from './supabase-schema-cache-retry';
+import { withAuthAdminRetry } from './auth-admin-retry';
 
 export type CommerceType = 'artist' | 'digital' | 'course' | 'physical' | 'service';
 
@@ -40,16 +41,19 @@ export async function createE2EVendor(
   const email = `${prefix}-${runId}@example.com`;
   const password = `E2E!${runId}aA1`;
 
-  const { data: createdUser, error: userError } = await admin.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true,
+  const created = await withAuthAdminRetry(`createE2EVendor(${email})`, async () => {
+    const result = await admin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+    });
+    if (result.error || !result.data.user) {
+      throw result.error ?? new Error('createUser failed');
+    }
+    return result.data;
   });
-  if (userError || !createdUser.user) {
-    throw userError ?? new Error('createUser failed');
-  }
 
-  const userId = createdUser.user.id;
+  const userId = created.user!.id;
   await seedTermsConsent(admin, userId);
 
   const { data: storeData, error: storeError } = await retryOnTransientPostgrest(() =>

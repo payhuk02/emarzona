@@ -388,7 +388,8 @@ export async function submitStoreWizardCreate(page: Page): Promise<void> {
   });
   await acceptTermsDialogIfVisible(page);
 
-  const onboardingUrl = page.waitForURL(/\/dashboard\/onboarding\//, {
+  // Express/wizard create now lands on store customization, not onboarding.
+  const afterCreateUrl = page.waitForURL(/\/dashboard\/store(\?|$|\/)/, {
     timeout: 90_000,
   });
 
@@ -469,7 +470,7 @@ export async function submitStoreWizardCreate(page: Page): Promise<void> {
     );
   }
 
-  await onboardingUrl;
+  await afterCreateUrl;
 }
 
 export async function submitStoreExpressCreate(page: Page): Promise<void> {
@@ -478,7 +479,8 @@ export async function submitStoreExpressCreate(page: Page): Promise<void> {
   });
   await acceptTermsDialogIfVisible(page);
 
-  const onboardingUrl = page.waitForURL(/\/dashboard\/onboarding\//, {
+  // Post-create redirect: /dashboard/store?storeId=… (customization), not onboarding.
+  const afterCreateUrl = page.waitForURL(/\/dashboard\/store(\?|$|\/)/, {
     timeout: 90_000,
   });
 
@@ -501,7 +503,7 @@ export async function submitStoreExpressCreate(page: Page): Promise<void> {
     throw new Error(`Express store create failed: ${response.status()} ${body}`);
   }
 
-  await onboardingUrl;
+  await afterCreateUrl;
 }
 
 export async function waitForStoreExpressCreateForm(page: Page): Promise<void> {

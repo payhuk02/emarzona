@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { createNodeSupabaseClient } from './helpers/create-node-supabase-client';
 import { assertSafeE2ESupabaseUrl, resolveE2ESupabaseUrl } from './helpers/e2e-supabase-guard';
+import { withAuthAdminRetry } from './helpers/auth-admin-retry';
 import {
   acceptTermsDialogIfVisible,
   dismissCookieBannerIfVisible,
@@ -49,7 +50,9 @@ test.describe('Store express create (E2E)', () => {
     test.skip(true, message);
   });
 
-  test('express path creates store and redirects to onboarding', async ({ page }, testInfo) => {
+  test('express path creates store and redirects to store customization', async ({
+    page,
+  }, testInfo) => {
     const admin = createNodeSupabaseClient(supabaseUrl!, supabaseServiceKey!);
 
     const runId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -58,13 +61,18 @@ test.describe('Store express create (E2E)', () => {
     const storeName = `E2E Express ${runId}`;
     const storeSlug = slugify(storeName);
 
-    const { data: createdUser, error: userError } = await admin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
+    const created = await withAuthAdminRetry(`store-express createUser(${email})`, async () => {
+      const result = await admin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+      });
+      if (result.error || !result.data.user) {
+        throw result.error ?? new Error('createUser failed');
+      }
+      return result.data;
     });
-    expect(userError).toBeNull();
-    const userId = createdUser.user!.id;
+    const userId = created.user!.id;
 
     await seedTermsConsent(admin, userId);
 
@@ -115,9 +123,10 @@ test.describe('Store express create (E2E)', () => {
       .eq('store_id', storeId!)
       .maybeSingle();
 
+    const landedOnStoreCustomize = /\/dashboard\/store(\?|$|\/)/.test(page.url());
     const landedOnOnboarding = /\/dashboard\/onboarding\//.test(page.url());
     const landedOnDashboard = /\/dashboard(\?|$|\/)/.test(page.url());
-    expect(landedOnOnboarding || landedOnDashboard).toBeTruthy();
+    expect(landedOnStoreCustomize || landedOnOnboarding || landedOnDashboard).toBeTruthy();
 
     expect(storeError).toBeNull();
     expect(storeRow?.name).toBe(storeName);

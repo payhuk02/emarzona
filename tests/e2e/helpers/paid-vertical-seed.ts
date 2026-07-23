@@ -4,6 +4,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { E2E_TEST_CONFIG } from '../shared/e2e-test-config';
 import { assertSafeE2ESupabaseUrl, resolveE2ESupabaseUrl } from './e2e-supabase-guard';
+import { withAuthAdminRetry } from './auth-admin-retry';
 
 export type SeededUser = { id: string; email: string; password: string };
 export type SeededStore = { id: string; slug: string; userId: string };
@@ -41,26 +42,12 @@ function slugify(input: string): string {
     .trim();
 }
 
-async function withAuthRetry<T>(label: string, fn: () => Promise<T>): Promise<T> {
-  let lastError: unknown;
-  for (let attempt = 1; attempt <= 3; attempt++) {
-    try {
-      return await fn();
-    } catch (error) {
-      lastError = error;
-      if (attempt === 3) break;
-      await new Promise(resolve => setTimeout(resolve, attempt * 2_000));
-    }
-  }
-  throw lastError ?? new Error(`${label} failed`);
-}
-
 export async function createE2EUser(
   admin: SupabaseClient,
   email: string,
   password: string = E2E_TEST_CONFIG.seededUserPassword
 ): Promise<SeededUser> {
-  return withAuthRetry(`createUser(${email})`, async () => {
+  return withAuthAdminRetry(`createUser(${email})`, async () => {
     const { data, error } = await admin.auth.admin.createUser({
       email,
       password,

@@ -20,7 +20,21 @@ export async function openCourseCreateWizard(page: Page): Promise<void> {
   await dismissCookieBannerIfVisible(page);
   await dismissPersonaOnboardingIfVisible(page);
   await expect(page.getByText(/Aucune boutique trouvée/i)).toHaveCount(0, { timeout: 5_000 });
-  await expect(page.locator('#title')).toBeVisible({ timeout: 60_000 });
+
+  const title = page.locator('#title');
+  try {
+    await expect(title).toBeVisible({ timeout: 60_000 });
+  } catch (error) {
+    const body = (
+      await page
+        .locator('body')
+        .innerText()
+        .catch(() => '')
+    ).slice(0, 400);
+    throw new Error(`Course wizard #title not visible — url=${page.url()} body=${body}`, {
+      cause: error,
+    });
+  }
 }
 
 export async function fillCourseBasicInfoStep(
