@@ -137,6 +137,16 @@ class GeniusPayClient {
             });
 
             clearTimeout(timeoutId);
+
+            // Function removed / not deployed — do not retry-spam
+            const status = (result.error as { context?: { status?: number } } | null)?.context
+              ?.status;
+            if (status === 404) {
+              throw new Error(
+                "L'Edge Function GeniusPay n'est plus déployée. Utilisez MoneyFusion."
+              );
+            }
+
             return result;
           } catch (err) {
             clearTimeout(timeoutId);

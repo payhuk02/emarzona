@@ -127,7 +127,18 @@ const AdminStoreWithdrawals = () => {
           });
 
           if (invokeError) {
-            throw new Error(invokeError.message);
+            // Surface edge body when available (403 Forbidden, payout errors, etc.)
+            const ctx = (invokeError as { context?: Response }).context;
+            let detail = invokeError.message;
+            if (ctx && typeof ctx.json === 'function') {
+              try {
+                const body = (await ctx.json()) as { error?: string; message?: string };
+                detail = body.error || body.message || detail;
+              } catch {
+                /* keep invokeError.message */
+              }
+            }
+            throw new Error(detail);
           }
           if (!data?.success) {
             throw new Error(data?.error || 'MoneyFusion payout failed');

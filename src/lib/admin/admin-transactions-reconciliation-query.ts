@@ -11,7 +11,7 @@ export const ADMIN_TRANSACTION_FIELDS = `
   geniuspay_transaction_id,
   created_at,
   updated_at,
-  order:orders(
+  order:orders!transactions_order_id_fkey(
     order_number,
     customer_email
   )
@@ -124,14 +124,17 @@ export async function fetchAdminTransactionStats(): Promise<AdminTransactionStat
       .select('id', { count: 'exact', head: true })
       .in('status', ['processing', 'pending'])
       .lt('created_at', threshold),
-    supabase.from('transactions').select('amount.sum()'),
+    // Prefer named aggregate alias — bare amount.sum() 400s on some PostgREST configs
+    supabase.from('transactions').select('total:amount.sum()').limit(1).maybeSingle(),
   ]);
+
+  const totalAmountRaw = (amountRes.data as { total?: number | null } | null)?.total;
 
   return {
     totalCount: totalRes.count ?? 0,
     processingCount: processingRes.count ?? 0,
     oldPendingCount: oldRes.count ?? 0,
-    totalAmount: Number((amountRes.data as { sum: number | null }[] | null)?.[0]?.sum ?? 0),
+    totalAmount: Number(totalAmountRaw ?? 0),
   };
 }
 

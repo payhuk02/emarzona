@@ -43,6 +43,12 @@ export async function assertStoreOwner(
   return { userId: user.id };
 }
 
+const PRINCIPAL_ADMIN_EMAIL = 'contact@edigit-agence.com';
+
+/**
+ * Aligné sur public.is_platform_admin() + checkUserIsAdmin (frontend).
+ * profiles.id ≠ auth.uid() — toujours filtrer sur profiles.user_id.
+ */
 export async function assertPlatformAdmin(
   supabaseUser: SupabaseClient
 ): Promise<{ userId: string }> {
@@ -54,24 +60,43 @@ export async function assertPlatformAdmin(
     throw new Error('Unauthorized');
   }
 
-  const { data: profile, error: profileError } = await supabaseUser
+  // Source de vérité RLS / panel admin
+  const { data: isPlatformAdmin, error: rpcError } = await supabaseUser.rpc('is_platform_admin');
+  if (!rpcError && isPlatformAdmin === true) {
+    return { userId: user.id };
+  }
+
+  const email = (user.email || '').trim().toLowerCase();
+  if (email === PRINCIPAL_ADMIN_EMAIL) {
+    return { userId: user.id };
+  }
+
+  const { data: profile } = await supabaseUser
     .from('profiles')
     .select('role, is_super_admin')
-    .eq('id', user.id)
+    .eq('user_id', user.id)
     .maybeSingle();
 
-  if (profileError || !profile) {
-    throw new Error('Forbidden');
+  const role = String(profile?.role || '').toLowerCase();
+  const profileOk =
+    profile?.is_super_admin === true ||
+    role === 'admin' ||
+    role === 'super_admin' ||
+    role === 'staff' ||
+    role === 'manager' ||
+    role === 'support';
+
+  if (profileOk) {
+    return { userId: user.id };
   }
 
-  const isAdmin =
-    profile.role === 'admin' ||
-    profile.is_super_admin === true ||
-    String(profile.role || '').toLowerCase() === 'super_admin';
-
-  if (!isAdmin) {
-    throw new Error('Forbidden');
+  const { data: hasAdminRole } = await supabaseUser.rpc('has_role', {
+    _user_id: user.id,
+    _role: 'admin',
+  });
+  if (hasAdminRole) {
+    return { userId: user.id };
   }
 
-  return { userId: user.id };
+  throw new Error('Forbidden');
 }
