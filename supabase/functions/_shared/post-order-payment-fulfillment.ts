@@ -67,6 +67,10 @@ async function sendOrderConfirmationEmail(
       }
     }
 
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!supabaseUrl || !supabaseServiceKey) return;
+
     if (!customerEmail) {
       console.warn(
         `No customer email for order ${orderId} — still sending seller confirmation if needed`
@@ -90,10 +94,6 @@ async function sendOrderConfirmationEmail(
       }).catch(err => console.error('seller-only confirmation invoke failed', err));
       return;
     }
-
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    if (!supabaseUrl || !supabaseServiceKey) return;
 
     const response = await fetch(`${supabaseUrl}/functions/v1/send-order-confirmation-email`, {
       method: 'POST',

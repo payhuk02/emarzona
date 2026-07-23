@@ -1,4 +1,4 @@
-import { proxySupabaseFunction } from './_lib/proxy-supabase-function.js';
+import { proxySupabaseFunction } from '../lib/api/proxy-supabase-function.js';
 
 /** Sitemap principal — https://www.emarzona.com/sitemap.xml */
 export default async function handler(_req, res) {

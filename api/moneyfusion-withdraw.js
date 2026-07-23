@@ -4,15 +4,13 @@
  * only needs ONE stable IP (Vercel alone rotates → whitelist breaks).
  *
  * Auth: x-internal-secret === EDGE_INTERNAL_SECRET (or CRON_SECRET)
- * Body: {
- *   action: "withdraw" | "methods",
- *   privateKey: string,
- *   payload?: object   // required for withdraw
- * }
+ *
+ * POST body: { action: "withdraw" | "methods", privateKey, payload? }
+ * GET  ?action=egress-ip  → diagnose outbound IP (Fixie vs dynamic)
  */
 
 import { URL } from 'url';
-import { moneyFusionHttpsRequest, getStaticEgressProxyUrl } from './_lib/moneyfusion-https.js';
+import { moneyFusionHttpsRequest, getStaticEgressProxyUrl } from '../lib/api/moneyfusion-https.js';
 
 function assertInternal(req) {
   const expected = (process.env.EDGE_INTERNAL_SECRET || process.env.CRON_SECRET || '').trim();
@@ -32,12 +30,54 @@ function assertMoneyFusionHost(apiUrl) {
   return ALLOWED_HOSTS.has(host) || host.endsWith('.moneyfusion.net');
 }
 
+async function handleEgressIp(req, res) {
+  if (!assertInternal(req)) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  const hasStatic = Boolean(getStaticEgressProxyUrl());
+  try {
+    const upstream = await moneyFusionHttpsRequest('GET', 'https://api.ipify.org', null, {
+      Accept: 'text/plain',
+    });
+    if (upstream.status >= 400 || !upstream.body?.trim()) {
+      return res.status(502).json({
+        error: 'Could not resolve egress IP',
+        detail: upstream.body,
+        staticProxyConfigured: hasStatic,
+      });
+    }
+    const egressIp = upstream.body.trim();
+    return res.status(200).json({
+      egressIp,
+      staticProxyConfigured: hasStatic,
+      mode: hasStatic ? 'static-proxy' : 'vercel-dynamic',
+      hint: hasStatic
+        ? `Whitelist ONLY this IP in MoneyFusion (Modifier Emarzona + Mon Compte API KEY): ${egressIp}`
+        : 'No static proxy. Set FIXIE_URL then whitelist the returned IP once.',
+    });
+  } catch (err) {
+    return res.status(502).json({
+      error: 'egress lookup failed',
+      detail: err instanceof Error ? err.message : String(err),
+      staticProxyConfigured: hasStatic,
+    });
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Headers', 'content-type, x-internal-secret');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     return res.status(204).end();
+  }
+
+  if (req.method === 'GET') {
+    const action = String(req.query?.action || '').trim();
+    if (action === 'egress-ip') {
+      return handleEgressIp(req, res);
+    }
+    return res.status(400).json({ error: 'GET requires ?action=egress-ip' });
   }
 
   if (req.method !== 'POST') {
@@ -88,11 +128,7 @@ export default async function handler(req, res) {
     const upstream = await moneyFusionHttpsRequest(method, apiUrl, payload, {
       'moneyfusion-private-key': privateKey,
     });
-    if (!getStaticEgressProxyUrl()) {
-      res.setHeader('X-Emarzona-Egress', 'vercel-dynamic');
-    } else {
-      res.setHeader('X-Emarzona-Egress', 'static-proxy');
-    }
+    res.setHeader('X-Emarzona-Egress', getStaticEgressProxyUrl() ? 'static-proxy' : 'vercel-dynamic');
     res.setHeader('Content-Type', upstream.contentType);
     return res.status(upstream.status).send(upstream.body);
   } catch (err) {

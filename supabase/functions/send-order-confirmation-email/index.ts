@@ -519,9 +519,10 @@ async function sendPhysicalEmail(
 
   const shippingAddress = formatShippingAddress(order, item);
   const orderDate = formatOrderDateTime(order.created_at);
+  const customerEmail = (payload.customer_email || '').trim();
 
   let whatsappLink: string | null = null;
-  let customerPortalLink = `${siteUrl.replace(/\/$/, '')}/login?email=${encodeURIComponent(payload.customer_email.trim())}&redirect=${encodeURIComponent('/account/physical')}`;
+  let customerPortalLink = `${siteUrl.replace(/\/$/, '')}/login?email=${encodeURIComponent(customerEmail)}&redirect=${encodeURIComponent('/account/physical')}`;
 
   try {
     whatsappLink = await resolvePhysicalWhatsAppLink(supabase, {
@@ -535,7 +536,7 @@ async function sendPhysicalEmail(
 
   try {
     customerPortalLink = await resolveCustomerPortalLink(supabase, {
-      email: payload.customer_email,
+      email: customerEmail || 'noreply@mail.emarzona.com',
       siteUrl,
       productType: 'physical',
     });
@@ -545,7 +546,7 @@ async function sendPhysicalEmail(
 
   const result = await invokeSendEmail(supabase, {
     templateSlug: 'order-confirmation-physical',
-    to: payload.customer_email,
+    to: customerEmail || 'noreply@mail.emarzona.com',
     toName: payload.customer_name,
     userId: payload.customer_id,
     productType: 'physical',
@@ -555,7 +556,7 @@ async function sendPhysicalEmail(
     storeId: order.store_id,
     variables: {
       user_name: payload.customer_name,
-      user_email: payload.customer_email,
+      user_email: customerEmail || 'noreply@mail.emarzona.com',
       order_id: order.id,
       order_number: orderNumber,
       store_name: storeName,
