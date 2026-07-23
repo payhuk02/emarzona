@@ -13,7 +13,7 @@ import { handleMoneyFusionRefund } from '../_shared/handle-moneyfusion-refund.ts
 import { handleMoneyFusionStoreWithdrawalPayout } from '../_shared/handle-moneyfusion-store-withdrawal.ts';
 import { authorizeCheckoutOrder } from '../_shared/order-checkout-auth.ts';
 import { enforceRateLimit, getClientIp, RATE_LIMIT_PRESETS } from '../_shared/rate-limit.ts';
-import { moneyFusionFetch } from '../_shared/moneyfusion-http.ts';
+import { moneyFusionFetch, moneyFusionPayInitiate, moneyFusionCheckoutUrlFromToken } from '../_shared/moneyfusion-http.ts';
 
 const MONEYFUSION_STATUS_URL = 'https://www.pay.moneyfusion.net/paiementNotif';
 const SITE_URL = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
@@ -594,14 +594,7 @@ serve(async req => {
 
     let mfResponse: Response;
     try {
-      mfResponse = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-        body: JSON.stringify(mfPayload),
-      });
+      mfResponse = await moneyFusionPayInitiate(apiUrl, mfPayload);
     } catch (fetchError) {
       await supabase.from('transactions').update({ status: 'failed' }).eq('id', localTxId);
       return new Response(
@@ -657,9 +650,30 @@ serve(async req => {
     }
 
     const token = String(mfData.token || mfData.tokenPay || '');
-    const checkoutUrl = String(mfData.url || '');
+    let checkoutUrl = String(mfData.url || mfData.payment_url || mfData.checkout_url || '');
+    if (!checkoutUrl && token) {
+      checkoutUrl = moneyFusionCheckoutUrlFromToken(token, validated.amount, customerName);
+      console.warn('[MoneyFusion] Synthesized checkout URL from token (API omitted url)', {
+        localTxId,
+        tokenPrefix: token.slice(0, 8),
+      });
+    }
     if (!checkoutUrl) {
-      await supabase.from('transactions').update({ status: 'failed' }).eq('id', localTxId);
+      await supabase
+        .from('transactions')
+        .update({
+          status: 'failed',
+          metadata: {
+            ...rawMetadata,
+            payment_provider: 'moneyfusion',
+            moneyfusion_error: {
+              message: 'missing_checkout_url',
+              http_status: mfResponse.status,
+              response: mfData,
+            },
+          },
+        })
+        .eq('id', localTxId);
       return new Response(
         JSON.stringify({
           error: 'Réponse MoneyFusion invalide',

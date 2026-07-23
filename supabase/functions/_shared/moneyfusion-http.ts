@@ -1,25 +1,39 @@
 /**
  * MoneyFusion HTTPS helper.
  * MF cert often fails Deno peer-name validation from Supabase Edge
- * (NotValidForName). Prefer Vercel proxy /api/moneyfusion-status when configured.
+ * (NotValidForName). Prefer Vercel proxies under /api/moneyfusion-*.
  */
 
 const MF_INSECURE_HOSTS = [
   'www.pay.moneyfusion.net',
   'pay.moneyfusion.net',
   'api.moneyfusion.net',
+  'payin.moneyfusion.net',
 ];
+
+function siteBase(): string {
+  return (Deno.env.get('SITE_URL') || 'https://www.emarzona.com').trim().replace(/\/$/, '');
+}
+
+function internalSecret(): string {
+  return (Deno.env.get('EDGE_INTERNAL_SECRET') || Deno.env.get('CRON_SECRET') || '').trim();
+}
 
 function statusProxyBase(): string | null {
   const explicit = (Deno.env.get('MONEYFUSION_STATUS_PROXY_URL') || '').trim();
   if (explicit) return explicit.replace(/\/$/, '');
-  const site = (Deno.env.get('SITE_URL') || 'https://www.emarzona.com').trim().replace(/\/$/, '');
-  return site ? `${site}/api/moneyfusion-status` : null;
+  return `${siteBase()}/api/moneyfusion-status`;
+}
+
+function payProxyBase(): string | null {
+  const explicit = (Deno.env.get('MONEYFUSION_PAY_PROXY_URL') || '').trim();
+  if (explicit) return explicit.replace(/\/$/, '');
+  return `${siteBase()}/api/moneyfusion-pay`;
 }
 
 async function fetchViaStatusProxy(token: string): Promise<Response | null> {
   const base = statusProxyBase();
-  const secret = (Deno.env.get('EDGE_INTERNAL_SECRET') || Deno.env.get('CRON_SECRET') || '').trim();
+  const secret = internalSecret();
   if (!base || !secret) return null;
 
   return await fetch(`${base}?token=${encodeURIComponent(token)}`, {
@@ -31,11 +45,63 @@ async function fetchViaStatusProxy(token: string): Promise<Response | null> {
   });
 }
 
+/** Initiate payin via Vercel TLS-tolerant proxy (preferred from Edge). */
+export async function moneyFusionPayInitiate(
+  apiUrl: string,
+  payload: Record<string, unknown>
+): Promise<Response> {
+  const base = payProxyBase();
+  const secret = internalSecret();
+  if (base && secret) {
+    try {
+      const proxied = await fetch(base, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          'x-internal-secret': secret,
+        },
+        body: JSON.stringify({ apiUrl, payload }),
+      });
+      // If proxy is not deployed yet (404/405), fall through to direct.
+      if (proxied.status !== 404 && proxied.status !== 405) {
+        return proxied;
+      }
+    } catch (err) {
+      console.warn('[MoneyFusion] pay proxy failed, falling back to direct', err);
+    }
+  }
+
+  return await moneyFusionFetch(apiUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+}
+
+/** Build checkout URL when MF returns token without url. */
+export function moneyFusionCheckoutUrlFromToken(
+  token: string,
+  amount?: number,
+  clientName?: string
+): string {
+  const t = token.trim();
+  if (!t) return '';
+  const amt = amount != null && Number.isFinite(amount) ? String(amount) : '';
+  const name = (clientName || 'Client').trim().replace(/\s+/g, ' ').slice(0, 80);
+  if (amt && name) {
+    return `https://payin.moneyfusion.net/payment/${encodeURIComponent(t)}/${encodeURIComponent(amt)}/${encodeURIComponent(name)}`;
+  }
+  return `https://payin.moneyfusion.net/payment/${encodeURIComponent(t)}`;
+}
+
 export async function moneyFusionFetch(
   url: string,
   init?: RequestInit
 ): Promise<Response> {
-  // Route paiementNotif through Node TLS-tolerant proxy when possible
   try {
     const parsed = new URL(url);
     if (parsed.pathname.includes('/paiementNotif/')) {
@@ -46,7 +112,7 @@ export async function moneyFusionFetch(
       }
     }
   } catch {
-    // fall through to direct fetch
+    // fall through
   }
 
   const createHttpClient = (
