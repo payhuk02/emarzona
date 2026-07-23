@@ -217,7 +217,14 @@ const AdminStoreWithdrawals = () => {
         setShowApproveDialog(false);
         setSelectedWithdrawal(null);
       } catch (err: unknown) {
-        const errorMessage = err instanceof Error ? err.message : String(err);
+        let errorMessage = err instanceof Error ? err.message : String(err);
+        const ipMatch = errorMessage.match(/(\d{1,3}(?:\.\d{1,3}){3})/);
+        if (/ip.*autoris|non autoris/i.test(errorMessage) && ipMatch) {
+          errorMessage =
+            `${errorMessage.includes('Mon Compte') ? errorMessage : errorMessage + '.'} ` +
+            `Ajoutez ${ipMatch[1]} dans MoneyFusion → Mon Compte → API KEY (et aussi dans API de Paiement → Emarzona). ` +
+            `0.0.0.0 ne suffit pas ; l’IP Vercel change souvent.`;
+        }
         logger.error('Error approving withdrawal', { error: err, errorMessage });
         toast({
           title: 'Erreur',

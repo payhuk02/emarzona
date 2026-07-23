@@ -94,6 +94,19 @@ async function fetchViaWithdrawProxy(input: {
   }
 }
 
+/** Enrichit le message MF « IP non autorisée » avec les 2 endroits à mettre à jour. */
+export function formatMoneyFusionIpError(message: string): string {
+  const ipMatch = message.match(/(\d{1,3}(?:\.\d{1,3}){3})/);
+  if (!/ip|autoris/i.test(message) || !ipMatch) return message;
+  const ip = ipMatch[1];
+  return (
+    `${message}. Ajoutez ${ip} dans MoneyFusion aux 2 endroits : ` +
+    `(1) Mon Compte → API KEY → Adresses IP autorisées, ` +
+    `(2) API de Paiement → Modifier Emarzona → Adresses IP. ` +
+    `0.0.0.0 ne fonctionne pas. Sur Vercel l’IP change : ajoutez chaque IP affichée.`
+  );
+}
+
 export function digitsOnlyPhone(phone: string): string {
   return phone.replace(/\D/g, '');
 }
@@ -198,24 +211,21 @@ export async function initiateMoneyFusionWithdraw(input: {
 
   let res: Response;
   try {
+    // Never call MF withdraw directly from Edge: that uses a different egress IP
+    // and breaks MoneyFusion whitelist (Vercel IPs ≠ Supabase IPs).
     const proxied = await fetchViaWithdrawProxy({
       action: 'withdraw',
       privateKey: input.privateKey,
       payload,
     });
-    if (proxied) {
-      res = proxied;
-    } else {
-      res = await moneyFusionFetch(WITHDRAW_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-          'moneyfusion-private-key': input.privateKey,
-        },
-        body: JSON.stringify(payload),
-      });
+    if (!proxied) {
+      return {
+        ok: false,
+        message:
+          'Proxy retrait MoneyFusion indisponible. Vérifiez /api/moneyfusion-withdraw sur Vercel et EDGE_INTERNAL_SECRET.',
+      };
     }
+    res = proxied;
   } catch (e) {
     return { ok: false, message: e instanceof Error ? e.message : String(e) };
   }
@@ -229,11 +239,11 @@ export async function initiateMoneyFusionWithdraw(input: {
   }
 
   if (!res.ok || data.statut === false) {
-    const message =
+    const raw =
       (typeof data.message === 'string' && data.message) ||
       (typeof data.error === 'string' && data.error) ||
       `MoneyFusion withdraw HTTP ${res.status}`;
-    return { ok: false, message };
+    return { ok: false, message: formatMoneyFusionIpError(raw) };
   }
 
   const tokenPay = String(data.tokenPay || data.token || '').trim();
