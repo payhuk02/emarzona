@@ -26,12 +26,13 @@ export const useStoreWithdrawals = (filters?: StoreWithdrawalFilters) => {
     try {
       setLoading(true);
 
+      // Hint FK explicitly: PostgREST sees store_id on many views (PGRST201 → 400).
       let query = supabase
         .from('store_withdrawals')
         .select(
           `
           *,
-          store:stores(id, name, slug, user_id)
+          store:stores!store_withdrawals_store_id_fkey(id, name, slug, user_id)
         `
         )
         .order('created_at', { ascending: false });
@@ -69,8 +70,7 @@ export const useStoreWithdrawals = (filters?: StoreWithdrawalFilters) => {
       if (error) throw error;
 
       setWithdrawals(data || []);
-    } catch (_error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+    } catch (error: unknown) {
       logger.error('Error fetching withdrawals', { error });
       toast({
         title: 'Erreur',

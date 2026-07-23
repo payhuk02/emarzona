@@ -257,7 +257,7 @@ export const initiatePayment = async (options: PaymentOptions): Promise<PaymentR
 };
 
 /**
- * Vérifie le statut d'une transaction
+ * Vérifie le statut d'une transaction auprès du PSP et finalise si paid.
  */
 export const verifyTransactionStatus = async (
   transactionId: string,
@@ -266,7 +266,7 @@ export const verifyTransactionStatus = async (
   const { supabase } = await import('@/integrations/supabase/client');
   const { data: transaction } = await supabase
     .from('transactions')
-    .select('id, status, payment_provider, geniuspay_transaction_id')
+    .select('id, status, payment_provider, payment_id, geniuspay_transaction_id')
     .eq('id', transactionId)
     .single();
 
@@ -276,6 +276,32 @@ export const verifyTransactionStatus = async (
   const connectProviders = ['stripe_connect', 'paypal_commerce', 'paypal'];
   if (connectProviders.includes(resolvedProvider)) {
     return transaction ?? { id: transactionId, status: 'unknown' };
+  }
+
+  if (['completed', 'failed', 'cancelled'].includes(transaction?.status ?? '')) {
+    return transaction ?? { id: transactionId, status: 'unknown' };
+  }
+
+  const isMoneyFusion =
+    resolvedProvider === 'moneyfusion' ||
+    resolvedProvider === 'geniuspay_platform' ||
+    resolvedProvider === 'geniuspay' ||
+    !transaction?.geniuspay_transaction_id;
+
+  const mfToken = transaction?.payment_id || transaction?.geniuspay_transaction_id;
+  if (isMoneyFusion && mfToken) {
+    try {
+      const { moneyfusionClient } = await import('./moneyfusion-client');
+      await moneyfusionClient.verifyPayment(String(mfToken), transactionId);
+    } catch (error) {
+      logger.error('MoneyFusion verify on return failed', { error, transactionId });
+    }
+    const { data: updated } = await supabase
+      .from('transactions')
+      .select('*')
+      .eq('id', transactionId)
+      .single();
+    return updated ?? transaction ?? { id: transactionId, status: 'unknown' };
   }
 
   if (!transaction?.geniuspay_transaction_id) {

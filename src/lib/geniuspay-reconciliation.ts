@@ -67,20 +67,25 @@ async function fetchMoneyFusionSnapshot(token: string): Promise<PspSnapshot> {
     throw new Error(error.message || 'MoneyFusion verify failed');
   }
   const payload = (data || {}) as Record<string, unknown>;
-  if (payload.error) {
-    throw new Error(String(payload.message || payload.error));
+  if (payload.error || payload.success === false) {
+    throw new Error(String(payload.reason || payload.message || payload.error || 'verify failed'));
   }
+  // Nouveau shape sync : data.statut = completed|processing|…
+  // Ancien shape MF : data.data.statut = paid|pending|…
   const outer = (payload.data || payload) as Record<string, unknown>;
-  const inner =
-    outer.data && typeof outer.data === 'object' ? (outer.data as Record<string, unknown>) : outer;
-  const statut = String(inner.statut ?? inner.status ?? '')
+  const nested =
+    outer.data && typeof outer.data === 'object' ? (outer.data as Record<string, unknown>) : null;
+  const inner = nested || outer;
+  const statut = String(inner.statut ?? inner.status ?? outer.statut ?? '')
     .toLowerCase()
     .trim();
   const amountRaw = inner.Montant ?? inner.montant ?? inner.amount ?? 0;
-  const amount = typeof amountRaw === 'string' ? parseFloat(amountRaw) : Number(amountRaw) || 0;
+  const feesRaw = inner.frais ?? inner.fee ?? 0;
+  const base = typeof amountRaw === 'string' ? parseFloat(amountRaw) : Number(amountRaw) || 0;
+  const fees = typeof feesRaw === 'string' ? parseFloat(feesRaw) : Number(feesRaw) || 0;
   const currency = String(inner.currency ?? inner.devise ?? 'XOF');
   return {
-    amount,
+    amount: base + fees,
     status: mapPspStatus(statut),
     currency,
     raw: inner,

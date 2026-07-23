@@ -18,11 +18,13 @@ type GuestAccessState = 'idle' | 'loading' | 'redirecting' | 'failed';
 
 function mapUrlProviderToPaymentProvider(
   provider: string | null
-): 'geniuspay' | 'stripe_connect' | 'paypal_commerce' | undefined {
+): 'moneyfusion' | 'geniuspay' | 'stripe_connect' | 'paypal_commerce' | undefined {
   if (!provider) return undefined;
   if (provider === 'stripe' || provider === 'stripe_connect') return 'stripe_connect';
   if (provider === 'paypal' || provider === 'paypal_commerce') return 'paypal_commerce';
-  if (provider === 'geniuspay' || provider === 'geniuspay_platform') return 'geniuspay';
+  if (provider === 'moneyfusion' || provider === 'geniuspay' || provider === 'geniuspay_platform') {
+    return 'moneyfusion';
+  }
   return undefined;
 }
 
@@ -95,9 +97,24 @@ const PaymentSuccess = () => {
 
     const confirmPayment = async () => {
       try {
-        if (transactionId) {
+        let txId = transactionId;
+
+        // Retour MoneyFusion parfois sans transaction_id dans l'URL → lookup
+        if (!txId && orderId) {
+          const { data: pendingTx } = await supabase
+            .from('transactions')
+            .select('id')
+            .eq('order_id', orderId)
+            .in('status', ['processing', 'pending'])
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          txId = pendingTx?.id ?? null;
+        }
+
+        if (txId) {
           const mappedProvider = mapUrlProviderToPaymentProvider(providerParam);
-          await verifyTransactionStatus(transactionId, mappedProvider);
+          await verifyTransactionStatus(txId, mappedProvider);
         }
 
         if (orderId) {

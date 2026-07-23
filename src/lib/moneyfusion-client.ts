@@ -104,8 +104,12 @@ class MoneyFusionClient {
     return (await this.callFunction('create_checkout', checkoutData)) as MoneyFusionCheckoutResult;
   }
 
-  async verifyPayment(token: string): Promise<unknown> {
-    return this.callFunction('verify_payment', { paymentId: token });
+  async verifyPayment(token: string, transactionId?: string): Promise<unknown> {
+    return this.callFunction('verify_payment', {
+      paymentId: token,
+      token,
+      ...(transactionId ? { transactionId } : {}),
+    });
   }
 }
 

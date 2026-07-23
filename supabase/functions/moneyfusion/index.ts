@@ -14,6 +14,7 @@ import { handleMoneyFusionStoreWithdrawalPayout } from '../_shared/handle-moneyf
 import { authorizeCheckoutOrder } from '../_shared/order-checkout-auth.ts';
 import { enforceRateLimit, getClientIp, RATE_LIMIT_PRESETS } from '../_shared/rate-limit.ts';
 import { moneyFusionFetch, moneyFusionPayInitiate, moneyFusionCheckoutUrlFromToken } from '../_shared/moneyfusion-http.ts';
+import { syncMoneyFusionTransactionFromToken } from '../_shared/moneyfusion-sync-from-status.ts';
 
 const MONEYFUSION_STATUS_URL = 'https://www.pay.moneyfusion.net/paiementNotif';
 const SITE_URL = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
@@ -271,9 +272,100 @@ serve(async req => {
       });
     }
 
+    if (action === 'reconcile_stuck') {
+      // Cron / ops : rattrape processing/pending moneyfusion via paiementNotif
+      const authHeader = req.headers.get('authorization') ?? '';
+      const cronSecret = req.headers.get('x-cron-secret')?.trim() ?? '';
+      const internalSecret = req.headers.get('x-internal-secret')?.trim() ?? '';
+      const expectedCron = (Deno.env.get('CRON_SECRET') || '').trim();
+      const expectedInternal = (Deno.env.get('EDGE_INTERNAL_SECRET') || '').trim();
+      const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+      const token = authHeader.replace(/^Bearer\s+/i, '').trim();
+      const allowed =
+        (expectedCron && cronSecret === expectedCron) ||
+        (expectedInternal && internalSecret === expectedInternal) ||
+        (serviceKey && token === serviceKey);
+      if (!allowed) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      const d = (data || {}) as Record<string, unknown>;
+      const hoursBack = Number(d.hours_back ?? 72);
+      const limit = Math.min(Number(d.limit ?? 50), 100);
+      const minAgeMinutes = Number(d.min_age_minutes ?? 2);
+      const since = new Date(Date.now() - hoursBack * 60 * 60 * 1000).toISOString();
+      const olderThan = new Date(Date.now() - minAgeMinutes * 60 * 1000).toISOString();
+
+      const { data: targets, error: listError } = await supabase
+        .from('transactions')
+        .select('id, payment_id, status, amount, order_id, created_at')
+        .eq('payment_provider', 'moneyfusion')
+        .in('status', ['processing', 'pending'])
+        .not('payment_id', 'is', null)
+        .gte('created_at', since)
+        .lte('created_at', olderThan)
+        .order('created_at', { ascending: true })
+        .limit(limit);
+
+      if (listError) {
+        return new Response(JSON.stringify({ error: listError.message }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      let completed = 0;
+      let failed = 0;
+      let stillPending = 0;
+      let errors = 0;
+      const details: Array<Record<string, unknown>> = [];
+
+      for (const row of targets || []) {
+        const mfToken = String(row.payment_id || '').trim();
+        if (!mfToken) continue;
+        try {
+          const sync = await syncMoneyFusionTransactionFromToken(supabase, mfToken, {
+            source: 'reconcile_stuck',
+            transactionIdHint: String(row.id),
+          });
+          if (sync.completed) completed++;
+          else if (sync.status === 'failed' || sync.status === 'cancelled') failed++;
+          else if (sync.status === 'processing' || sync.status === 'completed') stillPending++;
+          else if (!sync.success) errors++;
+          details.push({ transaction_id: row.id, order_id: row.order_id, result: sync });
+        } catch (rowErr) {
+          errors++;
+          details.push({
+            transaction_id: row.id,
+            error: rowErr instanceof Error ? rowErr.message : String(rowErr),
+          });
+        }
+        await new Promise(r => setTimeout(r, 120));
+      }
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          scanned: (targets || []).length,
+          completed,
+          failed,
+          still_pending: stillPending,
+          errors,
+          hours_back: hoursBack,
+          processed_at: new Date().toISOString(),
+          details: details.slice(0, 20),
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     if (action === 'verify_payment') {
       const d = (data || {}) as Record<string, unknown>;
       const token = String(d.paymentId || d.token || '').trim();
+      const transactionIdHint = String(d.transactionId || d.transaction_id || '').trim();
       if (!token) {
         return new Response(JSON.stringify({ error: 'token requis' }), {
           status: 400,
@@ -281,38 +373,73 @@ serve(async req => {
         });
       }
 
-      const statusRes = await moneyFusionFetch(
-        `${MONEYFUSION_STATUS_URL}/${encodeURIComponent(token)}`,
-        {
-          method: 'GET',
-          headers: { Accept: 'application/json' },
-        }
-      );
-      const statusText = await statusRes.text();
-      let statusData: unknown = {};
-      try {
-        statusData = statusText ? JSON.parse(statusText) : {};
-      } catch {
-        statusData = { raw: statusText.slice(0, 200) };
-      }
+      // Re-vérifie auprès de MF puis finalise la tx locale si paid
+      // (filet si le webhook n'a pas abouti).
+      const sync = await syncMoneyFusionTransactionFromToken(supabase, token, {
+        source: 'verify_payment',
+        transactionIdHint: transactionIdHint || undefined,
+      });
 
-      if (!statusRes.ok) {
+      if (!sync.success && sync.error === 'transaction_not_found') {
+        // Fallback lecture seule (compat admin / debug)
+        const statusRes = await moneyFusionFetch(
+          `${MONEYFUSION_STATUS_URL}/${encodeURIComponent(token)}`,
+          {
+            method: 'GET',
+            headers: { Accept: 'application/json' },
+          }
+        );
+        const statusText = await statusRes.text();
+        let statusData: unknown = {};
+        try {
+          statusData = statusText ? JSON.parse(statusText) : {};
+        } catch {
+          statusData = { raw: statusText.slice(0, 200) };
+        }
         return new Response(
           JSON.stringify({
-            error: 'Erreur MoneyFusion',
-            message: 'Impossible de vérifier le statut',
-            details: statusData,
+            success: statusRes.ok,
+            data: statusData,
+            sync,
           }),
           {
-            status: statusRes.status,
+            status: statusRes.ok ? 200 : statusRes.status,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           }
         );
       }
 
-      return new Response(JSON.stringify({ success: true, data: statusData }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      if (!sync.success) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: sync.error || 'sync_failed',
+            reason: sync.reason,
+            status: sync.status,
+            transactionId: sync.transactionId,
+            orderId: sync.orderId,
+          }),
+          {
+            status: sync.error === 'payment_validation_failed' ? 400 : 502,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
+        );
+      }
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          data: {
+            statut: sync.status,
+            status: sync.status,
+            transactionId: sync.transactionId,
+            orderId: sync.orderId,
+            alreadyCompleted: sync.alreadyCompleted,
+            completed: sync.completed,
+          },
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     if (action === 'refund_payment') {
