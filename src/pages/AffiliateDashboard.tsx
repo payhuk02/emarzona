@@ -18,7 +18,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Progress } from '@/components/ui/progress';
 import { useCurrentAffiliate, useAffiliates } from '@/hooks/useAffiliates';
 import { useAffiliateLinks, type AffiliateLink } from '@/hooks/useAffiliateLinks';
 import { CreateAffiliateLinkDialog } from '@/components/affiliate/CreateAffiliateLinkDialog';
@@ -41,7 +40,6 @@ import {
 } from '@/components/icons';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatCurrency } from '@/lib/utils';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useToast } from '@/hooks/use-toast';
 import { RegistrationDialog } from '@/components/affiliate/RegistrationDialog';
@@ -645,7 +643,7 @@ const AffiliateDashboard = () => {
                     {stat.value}
                   </div>
                   <p className="text-xs text-muted-foreground truncate mt-1">{stat.subtitle}</p>
-                  {stat.highlight && !balanceLoading && balance.available >= 10000 && (
+                  {stat.highlight && !balanceLoading && balance.available > 0 && (
                     <Button size="sm" className="w-full mt-2 text-xs" variant="outline">
                       <Wallet className="h-3 w-3 mr-1.5" />
                       Retirer
@@ -657,35 +655,18 @@ const AffiliateDashboard = () => {
           })}
         </div>
 
-        {/* Progression vers le retrait minimum */}
         <Card className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150">
           <CardHeader className="p-3 sm:p-4">
-            <CardTitle className="text-sm sm:text-base">
-              Progression vers le retrait minimum
-            </CardTitle>
+            <CardTitle className="text-sm sm:text-base">Solde retirable</CardTitle>
           </CardHeader>
           <CardContent className="p-3 sm:p-4 pt-0">
-            <div className="space-y-2 sm:space-y-3">
-              <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0 text-xs sm:text-sm">
-                <span className="text-muted-foreground">Minimum : 10 000 XOF</span>
-                <span className="font-semibold">
-                  {balanceLoading ? '...' : `${formatCurrency(balance.available)} / 10 000 XOF`}
-                </span>
-              </div>
-              <Progress
-                value={balanceLoading ? 0 : Math.min((balance.available / 10000) * 100, 100)}
-                className="h-2"
-              />
-              {!balanceLoading && balance.available >= 10000 && (
-                <Alert className="mt-2 sm:mt-3">
-                  <CheckCircle2 className="h-4 w-4" />
-                  <AlertTitle className="text-sm">Vous pouvez retirer !</AlertTitle>
-                  <AlertDescription className="text-xs sm:text-sm">
-                    Vous avez atteint le montant minimum de retrait
-                  </AlertDescription>
-                </Alert>
-              )}
-            </div>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              {balanceLoading
+                ? '...'
+                : balance.available > 0
+                  ? `Vous pouvez retirer jusqu'à ${formatCurrency(balance.available)} (tout montant positif).`
+                  : 'Aucun solde disponible pour un retrait.'}
+            </p>
           </CardContent>
         </Card>
 

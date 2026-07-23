@@ -7,11 +7,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  AffiliateWithdrawal, 
-  WithdrawalRequestForm,
-  WithdrawalFilters 
-} from '@/types/affiliate';
+import { AffiliateWithdrawal, WithdrawalRequestForm, WithdrawalFilters } from '@/types/affiliate';
 import { logger } from '@/lib/logger';
 
 const AFFILIATE_WITHDRAWAL_FIELDS =
@@ -26,12 +22,14 @@ export const useAffiliateWithdrawals = (filters?: WithdrawalFilters) => {
     try {
       setLoading(true);
 
-      let  query= supabase
+      let query = supabase
         .from('affiliate_withdrawals')
-        .select(`
+        .select(
+          `
           ${AFFILIATE_WITHDRAWAL_FIELDS},
           affiliate:affiliates(display_name, email, affiliate_code)
-        `)
+        `
+        )
         .order('created_at', { ascending: false });
 
       if (filters?.status) {
@@ -63,7 +61,7 @@ export const useAffiliateWithdrawals = (filters?: WithdrawalFilters) => {
       if (error) throw error;
 
       setWithdrawals(data || []);
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error fetching withdrawals:', error);
       toast({
@@ -96,10 +94,8 @@ export const useAffiliateWithdrawals = (filters?: WithdrawalFilters) => {
         throw new Error(`Solde insuffisant. Disponible : ${availableBalance} XOF`);
       }
 
-      // Vérifier le montant minimum (ex: 10000 XOF)
-      const MIN_WITHDRAWAL = 10000;
-      if (formData.amount < MIN_WITHDRAWAL) {
-        throw new Error(`Le montant minimum de retrait est de ${MIN_WITHDRAWAL} XOF`);
+      if (formData.amount <= 0) {
+        throw new Error('Le montant de retrait doit être supérieur à 0 XOF');
       }
 
       // Créer la demande de retrait
@@ -114,10 +110,12 @@ export const useAffiliateWithdrawals = (filters?: WithdrawalFilters) => {
           notes: formData.notes,
           status: 'pending',
         })
-        .select(`
+        .select(
+          `
           ${AFFILIATE_WITHDRAWAL_FIELDS},
           affiliate:affiliates(display_name, email, affiliate_code)
-        `)
+        `
+        )
         .single();
 
       if (error) throw error;
@@ -129,7 +127,7 @@ export const useAffiliateWithdrawals = (filters?: WithdrawalFilters) => {
 
       await fetchWithdrawals();
       return data;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error requesting withdrawal:', error);
       toast({
@@ -143,7 +141,9 @@ export const useAffiliateWithdrawals = (filters?: WithdrawalFilters) => {
 
   const approveWithdrawal = async (withdrawalId: string): Promise<boolean> => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       const { error } = await supabase
         .from('affiliate_withdrawals')
@@ -163,7 +163,7 @@ export const useAffiliateWithdrawals = (filters?: WithdrawalFilters) => {
 
       await fetchWithdrawals();
       return true;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error approving withdrawal:', error);
       toast({
@@ -175,10 +175,7 @@ export const useAffiliateWithdrawals = (filters?: WithdrawalFilters) => {
     }
   };
 
-  const rejectWithdrawal = async (
-    withdrawalId: string, 
-    reason: string
-  ): Promise<boolean> => {
+  const rejectWithdrawal = async (withdrawalId: string, reason: string): Promise<boolean> => {
     try {
       const { error } = await supabase
         .from('affiliate_withdrawals')
@@ -198,7 +195,7 @@ export const useAffiliateWithdrawals = (filters?: WithdrawalFilters) => {
 
       await fetchWithdrawals();
       return true;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error rejecting withdrawal:', error);
       toast({
@@ -216,7 +213,9 @@ export const useAffiliateWithdrawals = (filters?: WithdrawalFilters) => {
     proofUrl?: string
   ): Promise<boolean> => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       // Récupérer le retrait
       const { data: withdrawal, error: withdrawalError } = await supabase
@@ -258,7 +257,7 @@ export const useAffiliateWithdrawals = (filters?: WithdrawalFilters) => {
 
       await fetchWithdrawals();
       return true;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error completing withdrawal:', error);
       toast({
@@ -270,10 +269,7 @@ export const useAffiliateWithdrawals = (filters?: WithdrawalFilters) => {
     }
   };
 
-  const markAsFailed = async (
-    withdrawalId: string,
-    reason: string
-  ): Promise<boolean> => {
+  const markAsFailed = async (withdrawalId: string, reason: string): Promise<boolean> => {
     try {
       const { error } = await supabase
         .from('affiliate_withdrawals')
@@ -288,13 +284,13 @@ export const useAffiliateWithdrawals = (filters?: WithdrawalFilters) => {
 
       toast({
         title: 'Retrait échoué',
-        description: 'Le retrait n\'a pas pu être effectué',
+        description: "Le retrait n'a pas pu être effectué",
         variant: 'destructive',
       });
 
       await fetchWithdrawals();
       return true;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error marking withdrawal as failed:', error);
       toast({
@@ -324,7 +320,7 @@ export const useAffiliateWithdrawals = (filters?: WithdrawalFilters) => {
 
       await fetchWithdrawals();
       return true;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error cancelling withdrawal:', error);
       toast({
@@ -367,17 +363,19 @@ export const usePendingWithdrawals = () => {
       try {
         const { data, error } = await supabase
           .from('affiliate_withdrawals')
-          .select(`
+          .select(
+            `
             ${AFFILIATE_WITHDRAWAL_FIELDS},
             affiliate:affiliates(display_name, email, affiliate_code)
-          `)
+          `
+          )
           .eq('status', 'pending')
           .order('created_at', { ascending: true });
 
         if (error) throw error;
 
         setPending(data || []);
-        
+
         const total = data?.reduce((sum, w) => sum + Number(w.amount), 0) || 0;
         setTotalAmount(total);
       } catch (error) {
@@ -440,10 +438,3 @@ export const useAffiliateBalance = (affiliateId?: string) => {
 
   return { balance, loading };
 };
-
-
-
-
-
-
-

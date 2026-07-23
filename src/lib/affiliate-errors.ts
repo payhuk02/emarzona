@@ -12,40 +12,40 @@ export enum AffiliateErrorCode {
   AFFILIATE_ALREADY_EXISTS = 'AFFILIATE_ALREADY_EXISTS',
   AFFILIATE_SUSPENDED = 'AFFILIATE_SUSPENDED',
   AFFILIATE_INACTIVE = 'AFFILIATE_INACTIVE',
-  
+
   // Erreurs de lien
   LINK_NOT_FOUND = 'LINK_NOT_FOUND',
   LINK_INVALID = 'LINK_INVALID',
   LINK_EXPIRED = 'LINK_EXPIRED',
   LINK_ALREADY_EXISTS = 'LINK_ALREADY_EXISTS',
-  
+
   // Erreurs de produit
   PRODUCT_AFFILIATE_DISABLED = 'PRODUCT_AFFILIATE_DISABLED',
   PRODUCT_NOT_FOUND = 'PRODUCT_NOT_FOUND',
   PRODUCT_SETTINGS_NOT_FOUND = 'PRODUCT_SETTINGS_NOT_FOUND',
-  
+
   // Erreurs de commission
   COMMISSION_NOT_FOUND = 'COMMISSION_NOT_FOUND',
   COMMISSION_ALREADY_PAID = 'COMMISSION_ALREADY_PAID',
   COMMISSION_INVALID_AMOUNT = 'COMMISSION_INVALID_AMOUNT',
   COMMISSION_BELOW_MINIMUM = 'COMMISSION_BELOW_MINIMUM',
-  
+
   // Erreurs de tracking
   TRACKING_COOKIE_INVALID = 'TRACKING_COOKIE_INVALID',
   TRACKING_COOKIE_EXPIRED = 'TRACKING_COOKIE_EXPIRED',
   CLICK_NOT_FOUND = 'CLICK_NOT_FOUND',
   CLICK_ALREADY_CONVERTED = 'CLICK_ALREADY_CONVERTED',
-  
+
   // Erreurs de retrait
   WITHDRAWAL_NOT_FOUND = 'WITHDRAWAL_NOT_FOUND',
   WITHDRAWAL_INSUFFICIENT_BALANCE = 'WITHDRAWAL_INSUFFICIENT_BALANCE',
   WITHDRAWAL_BELOW_MINIMUM = 'WITHDRAWAL_BELOW_MINIMUM',
   WITHDRAWAL_ALREADY_PROCESSED = 'WITHDRAWAL_ALREADY_PROCESSED',
-  
+
   // Erreurs de validation
   VALIDATION_ERROR = 'VALIDATION_ERROR',
   INVALID_INPUT = 'INVALID_INPUT',
-  
+
   // Erreurs système
   DATABASE_ERROR = 'DATABASE_ERROR',
   NETWORK_ERROR = 'NETWORK_ERROR',
@@ -64,7 +64,7 @@ export class AffiliateError extends Error {
   ) {
     super(message);
     this.name = 'AffiliateError';
-    
+
     // Maintient la stack trace pour le débogage
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, AffiliateError);
@@ -94,42 +94,46 @@ export class AffiliateError extends Error {
       return this.message;
     }
 
-    const  messages: Record<AffiliateErrorCode, string> = {
+    const messages: Record<AffiliateErrorCode, string> = {
       [AffiliateErrorCode.AFFILIATE_NOT_FOUND]: 'Affilié introuvable',
       [AffiliateErrorCode.AFFILIATE_ALREADY_EXISTS]: 'Cet affilié existe déjà',
       [AffiliateErrorCode.AFFILIATE_SUSPENDED]: 'Cet affilié est suspendu',
       [AffiliateErrorCode.AFFILIATE_INACTIVE]: 'Cet affilié est inactif',
 
-      [AffiliateErrorCode.LINK_NOT_FOUND]: 'Lien d\'affiliation introuvable',
-      [AffiliateErrorCode.LINK_INVALID]: 'Lien d\'affiliation invalide',
-      [AffiliateErrorCode.LINK_EXPIRED]: 'Ce lien d\'affiliation a expiré',
+      [AffiliateErrorCode.LINK_NOT_FOUND]: "Lien d'affiliation introuvable",
+      [AffiliateErrorCode.LINK_INVALID]: "Lien d'affiliation invalide",
+      [AffiliateErrorCode.LINK_EXPIRED]: "Ce lien d'affiliation a expiré",
       [AffiliateErrorCode.LINK_ALREADY_EXISTS]: 'Un lien existe déjà pour ce produit',
 
-      [AffiliateErrorCode.PRODUCT_AFFILIATE_DISABLED]: 'L\'affiliation n\'est pas activée pour ce produit',
+      [AffiliateErrorCode.PRODUCT_AFFILIATE_DISABLED]:
+        "L'affiliation n'est pas activée pour ce produit",
       [AffiliateErrorCode.PRODUCT_NOT_FOUND]: 'Produit introuvable',
-      [AffiliateErrorCode.PRODUCT_SETTINGS_NOT_FOUND]: 'Paramètres d\'affiliation introuvables',
+      [AffiliateErrorCode.PRODUCT_SETTINGS_NOT_FOUND]: "Paramètres d'affiliation introuvables",
 
       [AffiliateErrorCode.COMMISSION_NOT_FOUND]: 'Commission introuvable',
       [AffiliateErrorCode.COMMISSION_ALREADY_PAID]: 'Cette commission a déjà été payée',
       [AffiliateErrorCode.COMMISSION_INVALID_AMOUNT]: 'Montant de commission invalide',
-      [AffiliateErrorCode.COMMISSION_BELOW_MINIMUM]: 'Le montant de la commande est inférieur au minimum requis',
+      [AffiliateErrorCode.COMMISSION_BELOW_MINIMUM]:
+        'Le montant de la commande est inférieur au minimum requis',
 
       [AffiliateErrorCode.TRACKING_COOKIE_INVALID]: 'Cookie de tracking invalide',
       [AffiliateErrorCode.TRACKING_COOKIE_EXPIRED]: 'Cookie de tracking expiré',
-      [AffiliateErrorCode.CLICK_NOT_FOUND]: 'Clic d\'affiliation introuvable',
+      [AffiliateErrorCode.CLICK_NOT_FOUND]: "Clic d'affiliation introuvable",
       [AffiliateErrorCode.CLICK_ALREADY_CONVERTED]: 'Ce clic a déjà été converti',
 
       [AffiliateErrorCode.WITHDRAWAL_NOT_FOUND]: 'Demande de retrait introuvable',
       [AffiliateErrorCode.WITHDRAWAL_INSUFFICIENT_BALANCE]: 'Solde insuffisant pour ce retrait',
-      [AffiliateErrorCode.WITHDRAWAL_BELOW_MINIMUM]: 'Le montant est inférieur au minimum de retrait (10 000 XOF)',
-      [AffiliateErrorCode.WITHDRAWAL_ALREADY_PROCESSED]: 'Cette demande de retrait a déjà été traitée',
+      [AffiliateErrorCode.WITHDRAWAL_BELOW_MINIMUM]:
+        'Le montant est inférieur au minimum de retrait (10 000 XOF)',
+      [AffiliateErrorCode.WITHDRAWAL_ALREADY_PROCESSED]:
+        'Cette demande de retrait a déjà été traitée',
 
       [AffiliateErrorCode.VALIDATION_ERROR]: 'Erreur de validation des données',
-      [AffiliateErrorCode.INVALID_INPUT]: 'Données d\'entrée invalides',
+      [AffiliateErrorCode.INVALID_INPUT]: "Données d'entrée invalides",
 
       [AffiliateErrorCode.DATABASE_ERROR]: 'Erreur de base de données',
       [AffiliateErrorCode.NETWORK_ERROR]: 'Erreur de réseau',
-      [AffiliateErrorCode.UNKNOWN_ERROR]: 'Une erreur inconnue s\'est produite',
+      [AffiliateErrorCode.UNKNOWN_ERROR]: "Une erreur inconnue s'est produite",
     };
 
     return messages[this.code] || this.message;
@@ -145,10 +149,10 @@ export class AffiliateError extends Error {
         return 'Contactez le support pour réactiver votre compte affilié';
 
       case AffiliateErrorCode.LINK_EXPIRED:
-        return 'Créez un nouveau lien d\'affiliation pour ce produit';
+        return "Créez un nouveau lien d'affiliation pour ce produit";
 
       case AffiliateErrorCode.PRODUCT_AFFILIATE_DISABLED:
-        return 'L\'affiliation n\'est pas disponible pour ce produit actuellement';
+        return "L'affiliation n'est pas disponible pour ce produit actuellement";
 
       case AffiliateErrorCode.COMMISSION_BELOW_MINIMUM:
         return 'Augmentez le montant de votre commande pour bénéficier de commissions';
@@ -175,7 +179,7 @@ export class AffiliateError extends Error {
         return 'Vérifiez vos données et réessayez';
 
       default:
-        return this.details?.suggestion as string || null;
+        return (this.details?.suggestion as string) || null;
     }
   }
 
@@ -252,11 +256,7 @@ export const AffiliateErrors = {
     ),
 
   linkExpired: () =>
-    new AffiliateError(
-      'Ce lien d\'affiliation a expiré',
-      AffiliateErrorCode.LINK_EXPIRED,
-      410
-    ),
+    new AffiliateError("Ce lien d'affiliation a expiré", AffiliateErrorCode.LINK_EXPIRED, 410),
 
   linkAlreadyExists: (productId?: string, existingLinkUrl?: string) =>
     new AffiliateError(
@@ -313,7 +313,7 @@ export const AffiliateErrors = {
       { available, requested }
     ),
 
-  withdrawalBelowMinimum: (amount: number, minimum: number = 10000) =>
+  withdrawalBelowMinimum: (amount: number, minimum: number = 1) =>
     new AffiliateError(
       `Le montant (${amount} XOF) est inférieur au minimum de retrait (${minimum} XOF)`,
       AffiliateErrorCode.WITHDRAWAL_BELOW_MINIMUM,
@@ -330,24 +330,18 @@ export const AffiliateErrors = {
     ),
 
   databaseError: (error: unknown) =>
-    new AffiliateError(
-      'Erreur de base de données',
-      AffiliateErrorCode.DATABASE_ERROR,
-      500,
-      { originalError: error instanceof Error ? error.message : String(error) }
-    ),
+    new AffiliateError('Erreur de base de données', AffiliateErrorCode.DATABASE_ERROR, 500, {
+      originalError: error instanceof Error ? error.message : String(error),
+    }),
 
   networkError: (error: unknown) =>
-    new AffiliateError(
-      'Erreur de réseau',
-      AffiliateErrorCode.NETWORK_ERROR,
-      503,
-      { originalError: error instanceof Error ? error.message : String(error) }
-    ),
+    new AffiliateError('Erreur de réseau', AffiliateErrorCode.NETWORK_ERROR, 503, {
+      originalError: error instanceof Error ? error.message : String(error),
+    }),
 
   unknownError: (error: unknown) =>
     new AffiliateError(
-      'Une erreur inconnue s\'est produite',
+      "Une erreur inconnue s'est produite",
       AffiliateErrorCode.UNKNOWN_ERROR,
       500,
       { originalError: error instanceof Error ? error.message : String(error) }
@@ -361,21 +355,17 @@ export const AffiliateErrors = {
       400,
       {
         reason,
-        suggestion: 'Vérifiez que l\'alias n\'est pas déjà utilisé et que les paramètres sont valides'
+        suggestion:
+          "Vérifiez que l'alias n'est pas déjà utilisé et que les paramètres sont valides",
       }
     ),
 
   shortLinkExpired: (expirationType?: string, expiredAt?: string) =>
-    new AffiliateError(
-      'Ce lien court a expiré',
-      AffiliateErrorCode.VALIDATION_ERROR,
-      410,
-      {
-        expirationType,
-        expiredAt,
-        suggestion: 'Créez un nouveau lien court avec une durée d\'expiration plus longue'
-      }
-    ),
+    new AffiliateError('Ce lien court a expiré', AffiliateErrorCode.VALIDATION_ERROR, 410, {
+      expirationType,
+      expiredAt,
+      suggestion: "Créez un nouveau lien court avec une durée d'expiration plus longue",
+    }),
 
   shortLinkRateLimited: (retryAfter: number, maxActions: number) =>
     new AffiliateError(
@@ -385,7 +375,7 @@ export const AffiliateErrors = {
       {
         retryAfter,
         maxActions,
-        suggestion: 'Attendez le temps indiqué avant de créer un nouveau lien court'
+        suggestion: 'Attendez le temps indiqué avant de créer un nouveau lien court',
       }
     ),
 
@@ -395,7 +385,8 @@ export const AffiliateErrors = {
       AffiliateErrorCode.DATABASE_ERROR,
       503,
       {
-        suggestion: 'Réessayez dans quelques minutes ou contactez le support si le problème persiste'
+        suggestion:
+          'Réessayez dans quelques minutes ou contactez le support si le problème persiste',
       }
     ),
 };
@@ -410,51 +401,61 @@ export function handleSupabaseError(error: unknown): AffiliateError {
 
   // Erreur Supabase
   if (error && typeof error === 'object' && 'code' in error) {
-    const supabaseError = error as { 
-      code: string; 
-      message: string; 
-      details?: string; 
+    const supabaseError = error as {
+      code: string;
+      message: string;
+      details?: string;
       hint?: string;
     };
-    
+
     // Erreur 404 - Table ou fonction non trouvée (migration non exécutée)
-    if (supabaseError.code === 'PGRST301' || supabaseError.code === '42P01' || 
-        supabaseError.code === 'PGRST202' || 
-        supabaseError.message?.includes('404') ||
-        supabaseError.message?.includes('does not exist') ||
-        supabaseError.message?.includes('not found in the schema cache')) {
-      
+    if (
+      supabaseError.code === 'PGRST301' ||
+      supabaseError.code === '42P01' ||
+      supabaseError.code === 'PGRST202' ||
+      supabaseError.message?.includes('404') ||
+      supabaseError.message?.includes('does not exist') ||
+      supabaseError.message?.includes('not found in the schema cache')
+    ) {
       // Si c'est une fonction RPC pour les liens courts
-      if (supabaseError.message?.includes('generate_short_link_code') || 
-          supabaseError.hint?.includes('generate_short_link_code')) {
+      if (
+        supabaseError.message?.includes('generate_short_link_code') ||
+        supabaseError.hint?.includes('generate_short_link_code')
+      ) {
         return new AffiliateError(
-          'La fonctionnalité de liens courts nécessite l\'exécution de la migration SQL: 20250131_affiliate_short_links.sql',
+          "La fonctionnalité de liens courts nécessite l'exécution de la migration SQL: 20250131_affiliate_short_links.sql",
           AffiliateErrorCode.DATABASE_ERROR,
           503,
           { migration: '20250131_affiliate_short_links.sql', type: 'rpc_function' }
         );
       }
-      
+
       // Si c'est la table affiliate_short_links
-      if (supabaseError.message?.includes('affiliate_short_links') || 
-          supabaseError.details?.includes('affiliate_short_links') ||
-          supabaseError.message?.includes('relation "affiliate_short_links"')) {
+      if (
+        supabaseError.message?.includes('affiliate_short_links') ||
+        supabaseError.details?.includes('affiliate_short_links') ||
+        supabaseError.message?.includes('relation "affiliate_short_links"')
+      ) {
         return new AffiliateError(
-          'La fonctionnalité de liens courts nécessite l\'exécution de la migration SQL: 20250131_affiliate_short_links.sql',
+          "La fonctionnalité de liens courts nécessite l'exécution de la migration SQL: 20250131_affiliate_short_links.sql",
           AffiliateErrorCode.DATABASE_ERROR,
           503,
           { migration: '20250131_affiliate_short_links.sql', type: 'table' }
         );
       }
-      
+
       // Erreur générique de ressource non trouvée
       return AffiliateErrors.linkNotFound();
     }
-    
+
     // Erreurs de contrainte unique
     if (supabaseError.code === '23505') {
       // Vérifier si c'est une erreur de lien existant
-      if (supabaseError.message?.includes('affiliate_links') || supabaseError.message?.includes('affiliate_id') || supabaseError.message?.includes('product_id')) {
+      if (
+        supabaseError.message?.includes('affiliate_links') ||
+        supabaseError.message?.includes('affiliate_id') ||
+        supabaseError.message?.includes('product_id')
+      ) {
         return new AffiliateError(
           'Un lien existe déjà pour ce produit',
           AffiliateErrorCode.LINK_ALREADY_EXISTS,
@@ -467,17 +468,17 @@ export function handleSupabaseError(error: unknown): AffiliateError {
         409
       );
     }
-    
+
     // Erreur de clé étrangère
     if (supabaseError.code === '23503') {
       return AffiliateErrors.databaseError(error);
     }
-    
+
     // Erreur de valeur nulle
     if (supabaseError.code === '23502') {
       return AffiliateErrors.validationError('required_field', 'Un champ requis est manquant');
     }
-    
+
     // Erreur de permission
     if (supabaseError.code === '42501') {
       return AffiliateErrors.databaseError(error);
@@ -499,10 +500,3 @@ export function handleSupabaseError(error: unknown): AffiliateError {
 export function isAffiliateError(error: unknown): error is AffiliateError {
   return error instanceof AffiliateError;
 }
-
-
-
-
-
-
-

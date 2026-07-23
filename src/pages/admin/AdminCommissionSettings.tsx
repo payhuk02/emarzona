@@ -26,7 +26,6 @@ import {
   Users,
   DollarSign,
   Shield,
-  RefreshCw,
   Calculator,
 } from 'lucide-react';
 import { usePlatformSettingsDirect } from '@/hooks/usePlatformSettingsDirect';
@@ -61,7 +60,7 @@ export default function AdminCommissionSettings() {
   const [localSettings, setLocalSettings] = useState({
     platformCommissionRate: 10.0,
     referralCommissionRate: 2.0,
-    minWithdrawalAmount: 10000,
+    minWithdrawalAmount: 1,
     autoApproveWithdrawals: false,
   });
 
@@ -71,7 +70,7 @@ export default function AdminCommissionSettings() {
       setLocalSettings({
         platformCommissionRate: settings.platform_commission_rate || 10.0,
         referralCommissionRate: settings.referral_commission_rate || 2.0,
-        minWithdrawalAmount: settings.min_withdrawal_amount || 10000,
+        minWithdrawalAmount: settings.min_withdrawal_amount || 1,
         autoApproveWithdrawals: settings.auto_approve_withdrawals || false,
       });
     }
@@ -526,7 +525,7 @@ export default function AdminCommissionSettings() {
                         <Input
                           id="autoPayoutMin"
                           type="number"
-                          min={10000}
+                          min={1}
                           step={1000}
                           value={autoPayoutLocal.min_amount}
                           disabled={autoPayoutLoading || autoPayoutSaving}

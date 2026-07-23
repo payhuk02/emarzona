@@ -10,23 +10,28 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from '@/components/ui/dialog';
 import { BottomSheet, BottomSheetContent } from '@/components/ui/bottom-sheet';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { MobileFormField } from '@/components/ui/mobile-form-field';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, AlertCircle } from '@/components/icons';
 import { useResponsiveModal } from '@/hooks/use-responsive-modal';
-import { StoreWithdrawalRequestForm, MobileMoneyDetails, BankCardDetails, BankTransferDetails, MobileMoneyOperator } from '@/types/store-withdrawals';
+import {
+  StoreWithdrawalRequestForm,
+  MobileMoneyDetails,
+  BankCardDetails,
+  BankTransferDetails,
+  MobileMoneyOperator,
+  StorePaymentMethod,
+} from '@/types/store-withdrawals';
 import { formatCurrency } from '@/lib/utils';
 import { useStorePaymentMethods } from '@/hooks/useStorePaymentMethods';
 import { COUNTRIES } from '@/lib/countries';
-import { getMobileMoneyOperatorsForCountry, getDefaultOperatorForCountry } from '@/lib/mobile-money-operators';
+import {
+  getMobileMoneyOperatorsForCountry,
+  getDefaultOperatorForCountry,
+} from '@/lib/mobile-money-operators';
 
 interface WithdrawalRequestDialogProps {
   open: boolean;
@@ -45,7 +50,7 @@ export const WithdrawalRequestDialog = ({
 }: WithdrawalRequestDialogProps) => {
   const { useBottomSheet } = useResponsiveModal();
   const [loading, setLoading] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<'mobile_money' | 'bank_card' | 'bank_transfer'>('mobile_money');
+  const [paymentMethod, setPaymentMethod] = useState<StorePaymentMethod>('mobile_money');
   const [selectedSavedMethod, setSelectedSavedMethod] = useState<string>('new');
   const [amount, setAmount] = useState('');
   const [notes, setNotes] = useState('');
@@ -79,7 +84,7 @@ export const WithdrawalRequestDialog = ({
   const [accountHolderName, setAccountHolderName] = useState('');
   const [iban, setIban] = useState('');
 
-  const MIN_WITHDRAWAL = 10000;
+  const MIN_WITHDRAWAL = 1;
   const amountNum = parseFloat(amount) || 0;
 
   // Charger les détails d'une méthode sauvegardée sélectionnée
@@ -89,7 +94,7 @@ export const WithdrawalRequestDialog = ({
       if (savedMethod) {
         setPaymentMethod(savedMethod.payment_method);
         const details = savedMethod.payment_details;
-        
+
         if (savedMethod.payment_method === 'mobile_money') {
           const mobileDetails = details as MobileMoneyDetails;
           setMobileCountry(mobileDetails.country || 'BF');
@@ -137,7 +142,9 @@ export const WithdrawalRequestDialog = ({
       setNotes('');
       setMobileCountry('BF');
       // Sélectionner la méthode par défaut si disponible
-      const defaultMethod = paymentMethods.find(m => m.is_default && m.payment_method === paymentMethod);
+      const defaultMethod = paymentMethods.find(
+        m => m.is_default && m.payment_method === paymentMethod
+      );
       if (defaultMethod) {
         setSelectedSavedMethod(defaultMethod.id);
       }
@@ -153,7 +160,7 @@ export const WithdrawalRequestDialog = ({
       return;
     }
 
-    let  paymentDetails: MobileMoneyDetails | BankCardDetails | BankTransferDetails;
+    let paymentDetails: MobileMoneyDetails | BankCardDetails | BankTransferDetails;
 
     if (paymentMethod === 'mobile_money') {
       if (!mobilePhone || !mobileOperator || !mobileCountry) return;
@@ -201,7 +208,7 @@ export const WithdrawalRequestDialog = ({
       setTransferBankName('');
       setAccountHolderName('');
       onOpenChange(false);
-    } catch (error) {
+    } catch (_error) {
       // Error handled by parent
     } finally {
       setLoading(false);
@@ -244,9 +251,7 @@ export const WithdrawalRequestDialog = ({
                   </p>
                 )}
                 {amountNum > availableBalance && (
-                  <p className="text-destructive">
-                    Montant supérieur au solde disponible
-                  </p>
+                  <p className="text-destructive">Montant supérieur au solde disponible</p>
                 )}
               </>
             )}
@@ -256,280 +261,280 @@ export const WithdrawalRequestDialog = ({
           amountNum > 0 && (amountNum < MIN_WITHDRAWAL || amountNum > availableBalance)
             ? amountNum < MIN_WITHDRAWAL
               ? `Minimum requis : ${formatCurrency(MIN_WITHDRAWAL)}`
-              : "Montant supérieur au solde disponible"
+              : 'Montant supérieur au solde disponible'
             : undefined
         }
         fieldProps={{
           min: MIN_WITHDRAWAL,
           max: availableBalance,
-          step: "1000",
-          placeholder: `Minimum: ${formatCurrency(MIN_WITHDRAWAL)}`,
+          step: '1000',
+          placeholder: `Montant (max ${formatCurrency(availableBalance)})`,
         }}
       />
 
       {/* Méthode de paiement */}
+      <MobileFormField
+        label="Méthode de paiement"
+        name="payment_method"
+        type="select"
+        value={paymentMethod}
+        onChange={value => {
+          setPaymentMethod(value as StorePaymentMethod);
+          setSelectedSavedMethod('new');
+        }}
+        required
+        selectOptions={[
+          { value: 'mobile_money', label: 'Mobile Money' },
+          { value: 'bank_card', label: 'Carte bancaire' },
+          { value: 'bank_transfer', label: 'Virement bancaire' },
+        ]}
+      />
+
+      {/* Sélectionner une méthode sauvegardée */}
+      {storeId && paymentMethods.length > 0 && (
+        <div className="space-y-2">
           <MobileFormField
-            label="Méthode de paiement"
-            name="payment_method"
+            label="Utiliser une méthode sauvegardée"
+            name="saved_method"
             type="select"
-            value={paymentMethod}
-            onChange={(value) => {
-              setPaymentMethod(value as any);
-              setSelectedSavedMethod('new');
-            }}
-            required
+            value={selectedSavedMethod}
+            onChange={setSelectedSavedMethod}
             selectOptions={[
-              { value: 'mobile_money', label: 'Mobile Money' },
-              { value: 'bank_card', label: 'Carte bancaire' },
-              { value: 'bank_transfer', label: 'Virement bancaire' },
+              { value: 'new', label: 'Nouvelle méthode' },
+              ...paymentMethods.map(method => ({
+                value: method.id,
+                label: `${method.label}${method.is_default ? ' (Par défaut)' : ''}`,
+              })),
             ]}
           />
-
-          {/* Sélectionner une méthode sauvegardée */}
-          {storeId && paymentMethods.length > 0 && (
-            <div className="space-y-2">
-              <MobileFormField
-                label="Utiliser une méthode sauvegardée"
-                name="saved_method"
-                type="select"
-                value={selectedSavedMethod}
-                onChange={setSelectedSavedMethod}
-                selectOptions={[
-                  { value: 'new', label: 'Nouvelle méthode' },
-                  ...paymentMethods.map((method) => ({
-                    value: method.id,
-                    label: `${method.label}${method.is_default ? ' (Par défaut)' : ''}`,
-                  })),
-                ]}
-              />
-              {selectedSavedMethod !== 'new' && (
-                <p className="text-xs text-muted-foreground">
-                  Les détails seront pré-remplis automatiquement
-                </p>
-              )}
-            </div>
+          {selectedSavedMethod !== 'new' && (
+            <p className="text-xs text-muted-foreground">
+              Les détails seront pré-remplis automatiquement
+            </p>
           )}
+        </div>
+      )}
 
-          {/* Détails selon la méthode */}
-          {paymentMethod === 'mobile_money' && (
-            <div className="space-y-3 sm:space-y-4 p-3 sm:p-4 border rounded-lg">
-              <h4 className="font-semibold text-sm sm:text-base">Détails Mobile Money</h4>
-              <MobileFormField
-                label="Pays"
-                name="mobile_country"
-                type="select"
-                value={mobileCountry}
-                onChange={(value) => {
-                  setMobileCountry(value);
-                  const defaultOp = getDefaultOperatorForCountry(value);
-                  setMobileOperator(defaultOp);
-                }}
-                required
-                selectOptions={COUNTRIES.map((country) => ({
-                  value: country.code,
-                  label: country.name,
-                }))}
-              />
-              <MobileFormField
-                label="Opérateur"
-                name="operator"
-                type="select"
-                value={mobileOperator}
-                onChange={(value) => setMobileOperator(value as any)}
-                required
-                selectOptions={availableOperators.map((op) => ({
-                  value: op.value,
-                  label: op.label,
-                }))}
-              />
-              <MobileFormField
-                label="Numéro de téléphone"
-                name="mobile_phone"
-                type="tel"
-                value={mobilePhone}
-                onChange={setMobilePhone}
-                required
-                fieldProps={{
-                  placeholder: "+226 XX XX XX XX",
-                }}
-              />
-              <MobileFormField
-                label="Nom complet (optionnel)"
-                name="mobile_full_name"
-                type="text"
-                value={mobileFullName}
-                onChange={setMobileFullName}
-                fieldProps={{
-                  placeholder: "Nom complet du titulaire",
-                }}
-              />
-            </div>
-          )}
-
-          {paymentMethod === 'bank_card' && (
-            <div className="space-y-3 sm:space-y-4 p-3 sm:p-4 border rounded-lg">
-              <h4 className="font-semibold text-sm sm:text-base">Détails Carte bancaire</h4>
-              <MobileFormField
-                label="Numéro de carte"
-                name="card_number"
-                type="text"
-                value={cardNumber}
-                onChange={setCardNumber}
-                required
-                fieldProps={{
-                  placeholder: "1234 5678 9012 3456",
-                  maxLength: 19,
-                }}
-              />
-              <MobileFormField
-                label="Nom du titulaire"
-                name="cardholder_name"
-                type="text"
-                value={cardholderName}
-                onChange={setCardholderName}
-                required
-                fieldProps={{
-                  placeholder: "Nom complet",
-                }}
-              />
-              <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                <MobileFormField
-                  label="Mois d'expiration"
-                  name="expiry_month"
-                  type="text"
-                  value={expiryMonth}
-                  onChange={setExpiryMonth}
-                  fieldProps={{
-                    placeholder: "MM",
-                    maxLength: 2,
-                  }}
-                />
-                <MobileFormField
-                  label="Année d'expiration"
-                  name="expiry_year"
-                  type="text"
-                  value={expiryYear}
-                  onChange={setExpiryYear}
-                  fieldProps={{
-                    placeholder: "YYYY",
-                    maxLength: 4,
-                  }}
-                />
-              </div>
-              <MobileFormField
-                label="Nom de la banque"
-                name="bank_name"
-                type="text"
-                value={bankName}
-                onChange={setBankName}
-                fieldProps={{
-                  placeholder: "Nom de la banque",
-                }}
-              />
-            </div>
-          )}
-
-          {paymentMethod === 'bank_transfer' && (
-            <div className="space-y-3 sm:space-y-4 p-3 sm:p-4 border rounded-lg">
-              <h4 className="font-semibold text-sm sm:text-base">Détails Virement bancaire</h4>
-              <MobileFormField
-                label="Numéro de compte"
-                name="account_number"
-                type="text"
-                value={accountNumber}
-                onChange={setAccountNumber}
-                required
-                fieldProps={{
-                  placeholder: "Numéro de compte bancaire",
-                }}
-              />
-              <MobileFormField
-                label="Nom de la banque"
-                name="transfer_bank_name"
-                type="text"
-                value={transferBankName}
-                onChange={setTransferBankName}
-                required
-                fieldProps={{
-                  placeholder: "Nom de la banque",
-                }}
-              />
-              <MobileFormField
-                label="Nom du titulaire"
-                name="account_holder_name"
-                type="text"
-                value={accountHolderName}
-                onChange={setAccountHolderName}
-                required
-                fieldProps={{
-                  placeholder: "Nom complet du titulaire",
-                }}
-              />
-              <MobileFormField
-                label="IBAN (optionnel)"
-                name="iban"
-                type="text"
-                value={iban}
-                onChange={setIban}
-                fieldProps={{
-                  placeholder: "IBAN",
-                }}
-              />
-            </div>
-          )}
-
-          {/* Notes */}
+      {/* Détails selon la méthode */}
+      {paymentMethod === 'mobile_money' && (
+        <div className="space-y-3 sm:space-y-4 p-3 sm:p-4 border rounded-lg">
+          <h4 className="font-semibold text-sm sm:text-base">Détails Mobile Money</h4>
           <MobileFormField
-            label="Notes (optionnel)"
-            name="notes"
-            type="textarea"
-            value={notes}
-            onChange={setNotes}
+            label="Pays"
+            name="mobile_country"
+            type="select"
+            value={mobileCountry}
+            onChange={value => {
+              setMobileCountry(value);
+              const defaultOp = getDefaultOperatorForCountry(value);
+              setMobileOperator(defaultOp);
+            }}
+            required
+            selectOptions={COUNTRIES.map(country => ({
+              value: country.code,
+              label: country.name,
+            }))}
+          />
+          <MobileFormField
+            label="Opérateur"
+            name="operator"
+            type="select"
+            value={mobileOperator}
+            onChange={value => setMobileOperator(value as MobileMoneyOperator)}
+            required
+            selectOptions={availableOperators.map(op => ({
+              value: op.value,
+              label: op.label,
+            }))}
+          />
+          <MobileFormField
+            label="Numéro de téléphone"
+            name="mobile_phone"
+            type="tel"
+            value={mobilePhone}
+            onChange={setMobilePhone}
+            required
             fieldProps={{
-              placeholder: "Informations supplémentaires...",
-              rows: 3,
+              placeholder: '+226 XX XX XX XX',
             }}
           />
-
-          {/* Alertes */}
-          {amountNum > 0 && amountNum < MIN_WITHDRAWAL && (
-            <Alert variant="destructive" className="text-xs sm:text-sm">
-              <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4" />
-              <AlertDescription className="text-xs sm:text-sm">
-                Le montant minimum de retrait est de {formatCurrency(MIN_WITHDRAWAL)}
-              </AlertDescription>
-            </Alert>
-          )}
-
-          {amountNum > availableBalance && (
-            <Alert variant="destructive" className="text-xs sm:text-sm">
-              <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4" />
-              <AlertDescription className="text-xs sm:text-sm">
-                Le montant demandé dépasse votre solde disponible
-              </AlertDescription>
-            </Alert>
-          )}
-
-          <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t">
-          <Button 
-            variant="outline" 
-            onClick={() => onOpenChange(false)} 
-            disabled={loading}
-            className="w-full sm:w-auto"
-            size="sm"
-          >
-            Annuler
-          </Button>
-          <Button 
-            onClick={handleSubmit} 
-            disabled={!isValid() || loading}
-            className="w-full sm:w-auto"
-            size="sm"
-          >
-            {loading && <Loader2 className="mr-2 h-3 w-3 sm:h-4 sm:w-4 animate-spin" />}
-            <span className="text-xs sm:text-sm">Envoyer la demande</span>
-          </Button>
+          <MobileFormField
+            label="Nom complet (optionnel)"
+            name="mobile_full_name"
+            type="text"
+            value={mobileFullName}
+            onChange={setMobileFullName}
+            fieldProps={{
+              placeholder: 'Nom complet du titulaire',
+            }}
+          />
         </div>
+      )}
+
+      {paymentMethod === 'bank_card' && (
+        <div className="space-y-3 sm:space-y-4 p-3 sm:p-4 border rounded-lg">
+          <h4 className="font-semibold text-sm sm:text-base">Détails Carte bancaire</h4>
+          <MobileFormField
+            label="Numéro de carte"
+            name="card_number"
+            type="text"
+            value={cardNumber}
+            onChange={setCardNumber}
+            required
+            fieldProps={{
+              placeholder: '1234 5678 9012 3456',
+              maxLength: 19,
+            }}
+          />
+          <MobileFormField
+            label="Nom du titulaire"
+            name="cardholder_name"
+            type="text"
+            value={cardholderName}
+            onChange={setCardholderName}
+            required
+            fieldProps={{
+              placeholder: 'Nom complet',
+            }}
+          />
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
+            <MobileFormField
+              label="Mois d'expiration"
+              name="expiry_month"
+              type="text"
+              value={expiryMonth}
+              onChange={setExpiryMonth}
+              fieldProps={{
+                placeholder: 'MM',
+                maxLength: 2,
+              }}
+            />
+            <MobileFormField
+              label="Année d'expiration"
+              name="expiry_year"
+              type="text"
+              value={expiryYear}
+              onChange={setExpiryYear}
+              fieldProps={{
+                placeholder: 'YYYY',
+                maxLength: 4,
+              }}
+            />
+          </div>
+          <MobileFormField
+            label="Nom de la banque"
+            name="bank_name"
+            type="text"
+            value={bankName}
+            onChange={setBankName}
+            fieldProps={{
+              placeholder: 'Nom de la banque',
+            }}
+          />
+        </div>
+      )}
+
+      {paymentMethod === 'bank_transfer' && (
+        <div className="space-y-3 sm:space-y-4 p-3 sm:p-4 border rounded-lg">
+          <h4 className="font-semibold text-sm sm:text-base">Détails Virement bancaire</h4>
+          <MobileFormField
+            label="Numéro de compte"
+            name="account_number"
+            type="text"
+            value={accountNumber}
+            onChange={setAccountNumber}
+            required
+            fieldProps={{
+              placeholder: 'Numéro de compte bancaire',
+            }}
+          />
+          <MobileFormField
+            label="Nom de la banque"
+            name="transfer_bank_name"
+            type="text"
+            value={transferBankName}
+            onChange={setTransferBankName}
+            required
+            fieldProps={{
+              placeholder: 'Nom de la banque',
+            }}
+          />
+          <MobileFormField
+            label="Nom du titulaire"
+            name="account_holder_name"
+            type="text"
+            value={accountHolderName}
+            onChange={setAccountHolderName}
+            required
+            fieldProps={{
+              placeholder: 'Nom complet du titulaire',
+            }}
+          />
+          <MobileFormField
+            label="IBAN (optionnel)"
+            name="iban"
+            type="text"
+            value={iban}
+            onChange={setIban}
+            fieldProps={{
+              placeholder: 'IBAN',
+            }}
+          />
+        </div>
+      )}
+
+      {/* Notes */}
+      <MobileFormField
+        label="Notes (optionnel)"
+        name="notes"
+        type="textarea"
+        value={notes}
+        onChange={setNotes}
+        fieldProps={{
+          placeholder: 'Informations supplémentaires...',
+          rows: 3,
+        }}
+      />
+
+      {/* Alertes */}
+      {amountNum > 0 && amountNum < MIN_WITHDRAWAL && (
+        <Alert variant="destructive" className="text-xs sm:text-sm">
+          <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+          <AlertDescription className="text-xs sm:text-sm">
+            Le montant minimum de retrait est de {formatCurrency(MIN_WITHDRAWAL)}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {amountNum > availableBalance && (
+        <Alert variant="destructive" className="text-xs sm:text-sm">
+          <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+          <AlertDescription className="text-xs sm:text-sm">
+            Le montant demandé dépasse votre solde disponible
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t">
+        <Button
+          variant="outline"
+          onClick={() => onOpenChange(false)}
+          disabled={loading}
+          className="w-full sm:w-auto"
+          size="sm"
+        >
+          Annuler
+        </Button>
+        <Button
+          onClick={handleSubmit}
+          disabled={!isValid() || loading}
+          className="w-full sm:w-auto"
+          size="sm"
+        >
+          {loading && <Loader2 className="mr-2 h-3 w-3 sm:h-4 sm:w-4 animate-spin" />}
+          <span className="text-xs sm:text-sm">Envoyer la demande</span>
+        </Button>
+      </div>
     </div>
   );
 
@@ -561,10 +566,3 @@ export const WithdrawalRequestDialog = ({
     </>
   );
 };
-
-
-
-
-
-
-

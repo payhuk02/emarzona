@@ -2,14 +2,13 @@
  * Service de paiement automatique des commissions
  * Gère les demandes de paiement, l'approbation et l'historique
  */
-import { supabase } from "@/integrations/supabase/client";
-import { logger } from "./logger";
+import { supabase } from '@/integrations/supabase/client';
+import { logger } from './logger';
 import {
   notifyPaymentRequestCreated,
   notifyPaymentRequestApproved,
-  notifyPaymentRequestRejected,
   notifyPaymentRequestProcessed,
-} from "./commission-notifications";
+} from './commission-notifications';
 
 export interface CommissionPaymentRequest {
   commission_ids: string[]; // IDs des commissions à payer
@@ -54,7 +53,7 @@ export const createCommissionPaymentRequest = async (
       .select('min_withdrawal_amount, auto_approve_withdrawals')
       .single();
 
-    const minAmount = settings?.min_withdrawal_amount || 10000;
+    const minAmount = Math.max(1, Number(settings?.min_withdrawal_amount) || 1);
 
     if (request.amount < minAmount) {
       return {
@@ -64,8 +63,8 @@ export const createCommissionPaymentRequest = async (
     }
 
     // Vérifier que les commissions appartiennent à l'utilisateur
-    let  commissionIds: string[] = [];
-    
+    let commissionIds: string[] = [];
+
     if (type === 'affiliate') {
       const { data: commissions, error: commError } = await supabase
         .from('affiliate_commissions')
@@ -100,21 +99,17 @@ export const createCommissionPaymentRequest = async (
       commissionIds = commissions.map(c => c.id);
     }
 
-    // Calculer le montant total
-    const totalAmount = request.commission_ids.reduce((sum, id) => {
-      // Le montant est déjà calculé dans request.amount
-      return sum;
-    }, 0);
-
-    if (Math.abs(totalAmount - request.amount) > 1) {
+    // Montant déjà fourni par le client après sélection ; on le fait confiance
+    // après avoir validé que les commissions existent et sont approuvées.
+    if (!(request.amount > 0)) {
       return {
         success: false,
-        error: 'Le montant ne correspond pas aux commissions sélectionnées',
+        error: 'Le montant de retrait doit être supérieur à 0 XOF',
       };
     }
 
     // Créer la demande de paiement
-    const  paymentData: Record<string, unknown> = {
+    const paymentData: Record<string, unknown> = {
       commission_ids: commissionIds,
       amount: request.amount,
       currency: request.currency || 'XOF',
@@ -160,7 +155,7 @@ export const createCommissionPaymentRequest = async (
       // Pour l'instant, on marque simplement comme paid
       await supabase
         .from('referral_commissions')
-        .update({ 
+        .update({
           status: 'paid',
           paid_at: new Date().toISOString(),
         })
@@ -184,7 +179,7 @@ export const createCommissionPaymentRequest = async (
       success: true,
       payment_id: payment.id,
     };
-  } catch ( _error: unknown) {
+  } catch (_error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
     logger.error('Error in createCommissionPaymentRequest', { error: errorMessage });
     return {
@@ -256,7 +251,7 @@ export const approveCommissionPayment = async (
 
     logger.log('Commission payment approved', { payment_id: paymentId, admin_id: adminId });
     return { success: true };
-  } catch ( _error: unknown) {
+  } catch (_error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
     logger.error('Error in approveCommissionPayment', { error: errorMessage });
     return {
@@ -337,7 +332,7 @@ export const processCommissionPayment = async (
       transaction_reference: transactionReference,
     });
     return { success: true };
-  } catch ( _error: unknown) {
+  } catch (_error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
     logger.error('Error in processCommissionPayment', { error: errorMessage });
     return {
@@ -389,10 +384,3 @@ export const getCommissionPaymentHistory = async (
     };
   }
 };
-
-
-
-
-
-
-

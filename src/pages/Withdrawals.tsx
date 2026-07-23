@@ -7,7 +7,6 @@
 import { useState, useMemo, useCallback } from 'react';
 import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useTranslation } from 'react-i18next';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useStore } from '@/hooks/useStore';
 import { useStoreEarnings } from '@/hooks/useStoreEarnings';
@@ -164,8 +163,7 @@ const Withdrawals = () => {
     );
   }
 
-  // Afficher un message si la migration n'a pas été exécutée
-  const hasMigrationError = earningsLoading === false && earnings === null && store;
+  // Message affiché plus bas si earnings null après chargement (migration absente)
 
   return (
     <AppPageShell mainClassName="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
@@ -181,7 +179,7 @@ const Withdrawals = () => {
         </div>
         <Button
           onClick={() => setShowRequestDialog(true)}
-          disabled={!earnings || (earnings.available_balance || 0) < 10000}
+          disabled={!earnings || (earnings.available_balance || 0) <= 0}
           className="w-full sm:w-auto h-8 sm:h-9 text-xs sm:text-sm"
           size="sm"
         >
