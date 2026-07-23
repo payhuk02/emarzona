@@ -126,7 +126,7 @@ export async function refundPayment(options: RefundOptions): Promise<RefundResul
       return { success: false, error: `Refunds not supported for provider: ${provider}` };
   }
 
-  if (result.success) {
+  if (result.success && (result.status == null || result.status === 'refunded')) {
     await notifyRefund(result, options.transactionId);
   }
 

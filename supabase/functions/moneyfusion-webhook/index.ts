@@ -195,16 +195,21 @@ serve(async req => {
           : {};
 
       if (eventName === 'payout.session.completed') {
-        // Idempotent: applyPaymentRefund no-ops if already refunded
+        const amount =
+          Number(payload.montant ?? payload.Montant ?? refundMeta.amount ?? payoutTx.amount) ||
+          Number(payoutTx.amount);
+        const reason =
+          typeof refundMeta.reason === 'string' && refundMeta.reason
+            ? refundMeta.reason
+            : 'MoneyFusion payout.session.completed';
+
+        // P0-C: book ledger only when payout settles (idempotent if already refunded)
         if (payoutTx.status !== 'refunded') {
-          const amount =
-            Number(payload.montant ?? payload.Montant ?? refundMeta.amount ?? payoutTx.amount) ||
-            Number(payoutTx.amount);
           await applyPaymentRefund(supabase, String(payoutTx.id), {
             refundId: token,
             amount,
             currency: String(payoutTx.currency || 'XOF').toUpperCase(),
-            reason: 'MoneyFusion payout.session.completed',
+            reason,
             provider: 'moneyfusion',
           }).catch(err =>
             console.error('[MoneyFusion webhook] payout applyPaymentRefund failed', err)
@@ -219,6 +224,7 @@ serve(async req => {
               moneyfusion_refund: {
                 ...refundMeta,
                 tokenPay: token,
+                amount,
                 payout_status: 'completed',
                 payout_completed_at: new Date().toISOString(),
               },
@@ -226,6 +232,7 @@ serve(async req => {
           })
           .eq('id', payoutTx.id);
       } else if (eventName === 'payout.session.cancelled') {
+        // Ledger was never booked on initiate — mark payout failed for retry/manual
         await supabase
           .from('transactions')
           .update({

@@ -146,12 +146,23 @@ describe('refundPayment', () => {
     });
   });
 
-  it('returns moneyfusion invoke error', async () => {
-    fromMock.mockReturnValueOnce(queryWith({ id: 'tx-mf', payment_provider: 'moneyfusion' }));
-    invokeMock.mockResolvedValue({ data: null, error: { message: 'mf down' } });
+  it('does not notify when moneyfusion refund is still processing', async () => {
+    fromMock.mockReturnValueOnce(queryWith({ id: 'tx-mf-p', payment_provider: 'moneyfusion' }));
+    invokeMock.mockResolvedValue({
+      data: {
+        success: true,
+        amount: 500,
+        currency: 'XOF',
+        refund_id: 'tok-p',
+        status: 'processing',
+      },
+      error: null,
+    });
 
-    const result = await refundPayment({ transactionId: 'tx-mf' });
-    expect(result).toEqual({ success: false, error: 'mf down' });
+    const result = await refundPayment({ transactionId: 'tx-mf-p' });
+    expect(result.success).toBe(true);
+    expect(result.status).toBe('processing');
+    expect(notifyPaymentRefunded).not.toHaveBeenCalled();
   });
 
   it('defaults to geniuspay when payment_provider is null', async () => {

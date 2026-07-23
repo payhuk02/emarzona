@@ -81,14 +81,6 @@ export async function handleMoneyFusionRefund(
     };
   }
 
-  const txAmount = Number(transaction.amount ?? 0);
-  const alreadyRefunded = Number(transaction.refunded_amount ?? 0);
-  const refundAmount = body.amount ?? Math.max(0, txAmount - alreadyRefunded);
-  if (refundAmount <= 0 || alreadyRefunded + refundAmount > txAmount + 0.01) {
-    return { status: 400, body: { success: false, error: 'Invalid refund amount' } };
-  }
-
-  const currency = String(transaction.currency || 'XOF').toUpperCase();
   const meta =
     transaction.metadata && typeof transaction.metadata === 'object'
       ? (transaction.metadata as Record<string, unknown>)
@@ -97,6 +89,35 @@ export async function handleMoneyFusionRefund(
     transaction.last_webhook_payload && typeof transaction.last_webhook_payload === 'object'
       ? (transaction.last_webhook_payload as Record<string, unknown>)
       : null;
+
+  const existingRefund =
+    meta?.moneyfusion_refund && typeof meta.moneyfusion_refund === 'object'
+      ? (meta.moneyfusion_refund as Record<string, unknown>)
+      : null;
+  if (
+    existingRefund &&
+    String(existingRefund.payout_status || '') === 'pending' &&
+    body.confirmManual !== true
+  ) {
+    return {
+      status: 409,
+      body: {
+        success: false,
+        error: 'A MoneyFusion refund payout is already pending for this transaction',
+        refund_id: existingRefund.tokenPay ?? null,
+        status: 'processing',
+      },
+    };
+  }
+
+  const txAmount = Number(transaction.amount ?? 0);
+  const alreadyRefunded = Number(transaction.refunded_amount ?? 0);
+  const refundAmount = body.amount ?? Math.max(0, txAmount - alreadyRefunded);
+  if (refundAmount <= 0 || alreadyRefunded + refundAmount > txAmount + 0.01) {
+    return { status: 400, body: { success: false, error: 'Invalid refund amount' } };
+  }
+
+  const currency = String(transaction.currency || 'XOF').toUpperCase();
 
   if (body.confirmManual === true) {
     const refundId = `mf-manual-${body.transactionId.slice(0, 8)}-${Date.now()}`;
@@ -196,14 +217,7 @@ export async function handleMoneyFusionRefund(
     };
   }
 
-  await applyPaymentRefund(supabaseAdmin, body.transactionId, {
-    refundId: withdraw.tokenPay,
-    amount: refundAmount,
-    currency,
-    reason: body.reason ?? 'Customer request',
-    provider: 'moneyfusion',
-  });
-
+  // P0-C: do NOT book ledger until payout.session.completed webhook.
   await supabaseAdmin
     .from('transactions')
     .update({
@@ -213,9 +227,11 @@ export async function handleMoneyFusionRefund(
           mode: 'payout',
           tokenPay: withdraw.tokenPay,
           amount: refundAmount,
+          currency,
           withdraw_mode: withdrawMode,
           countryCode,
           reason: body.reason ?? null,
+          payout_status: 'pending',
           initiated_at: new Date().toISOString(),
         },
       },
@@ -229,8 +245,9 @@ export async function handleMoneyFusionRefund(
       refund_id: withdraw.tokenPay,
       amount: refundAmount,
       currency,
-      status: 'refunded',
+      status: 'processing',
       mode: 'payout',
+      message: 'Refund payout initiated — ledger updates on payout.session.completed',
     },
   };
 }
