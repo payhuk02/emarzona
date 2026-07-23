@@ -100,10 +100,8 @@ export function formatMoneyFusionIpError(message: string): string {
   if (!/ip|autoris/i.test(message) || !ipMatch) return message;
   const ip = ipMatch[1];
   return (
-    `${message}. Ajoutez ${ip} dans MoneyFusion aux 2 endroits : ` +
-    `(1) Mon Compte → API KEY → Adresses IP autorisées, ` +
-    `(2) API de Paiement → Modifier Emarzona → Adresses IP. ` +
-    `0.0.0.0 ne fonctionne pas. Sur Vercel l’IP change : ajoutez chaque IP affichée.`
+    `${message}. Ajoutez ${ip} dans MoneyFusion (Modifier Emarzona + Mon Compte → API KEY). ` +
+    `0.0.0.0 ne fonctionne pas. Sur Vercel l’IP change : configurez FIXIE_URL ou MONEYFUSION_STATIC_EGRESS_PROXY pour une IP fixe unique.`
   );
 }
 

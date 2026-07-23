@@ -1,49 +1,16 @@
 /**
- * Diagnose Vercel egress IP seen by the public internet.
- * MoneyFusion whitelist must include this IP (it rotates on serverless).
- *
+ * Diagnose egress IP (Vercel dynamic vs static proxy).
  * Auth: x-internal-secret === EDGE_INTERNAL_SECRET (or CRON_SECRET)
  * GET /api/moneyfusion-egress-ip
  */
 
-import https from 'https';
+import { moneyFusionHttpsRequest, getStaticEgressProxyUrl } from './_lib/moneyfusion-https.js';
 
 function assertInternal(req) {
   const expected = (process.env.EDGE_INTERNAL_SECRET || process.env.CRON_SECRET || '').trim();
   if (!expected) return false;
   const got = (req.headers['x-internal-secret'] || '').toString().trim();
   return got.length > 0 && got === expected;
-}
-
-function fetchText(url) {
-  return new Promise((resolve, reject) => {
-    const u = new URL(url);
-    const req = https.request(
-      {
-        hostname: u.hostname,
-        path: `${u.pathname}${u.search}`,
-        method: 'GET',
-        headers: { Accept: 'text/plain, application/json' },
-        timeout: 10000,
-      },
-      (res) => {
-        const chunks = [];
-        res.on('data', (c) => chunks.push(c));
-        res.on('end', () => {
-          resolve({
-            status: res.statusCode || 502,
-            body: Buffer.concat(chunks).toString('utf8').trim(),
-          });
-        });
-      }
-    );
-    req.on('error', reject);
-    req.on('timeout', () => {
-      req.destroy();
-      reject(new Error('egress lookup timeout'));
-    });
-    req.end();
-  });
 }
 
 export default async function handler(req, res) {
@@ -62,20 +29,35 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
+  const hasStatic = Boolean(getStaticEgressProxyUrl());
+
   try {
-    const upstream = await fetchText('https://api.ipify.org');
-    if (upstream.status >= 400 || !upstream.body) {
-      return res.status(502).json({ error: 'Could not resolve egress IP', detail: upstream.body });
+    // ipify over the same egress path as MoneyFusion withdraw
+    const upstream = await moneyFusionHttpsRequest('GET', 'https://api.ipify.org', null, {
+      Accept: 'text/plain',
+    });
+    if (upstream.status >= 400 || !upstream.body?.trim()) {
+      return res.status(502).json({
+        error: 'Could not resolve egress IP',
+        detail: upstream.body,
+        staticProxyConfigured: hasStatic,
+      });
     }
+
+    const egressIp = upstream.body.trim();
     return res.status(200).json({
-      egressIp: upstream.body,
-      hint:
-        'Ajoutez cette IP dans MoneyFusion (Mon Compte → API KEY et API de Paiement → Emarzona). Sur Vercel elle peut changer.',
+      egressIp,
+      staticProxyConfigured: hasStatic,
+      mode: hasStatic ? 'static-proxy' : 'vercel-dynamic',
+      hint: hasStatic
+        ? `Whitelist ONLY this IP in MoneyFusion (Modifier Emarzona + Mon Compte API KEY): ${egressIp}`
+        : 'No static proxy. Vercel IP rotates — set FIXIE_URL or MONEYFUSION_STATIC_EGRESS_PROXY, then whitelist the returned IP once.',
     });
   } catch (err) {
     return res.status(502).json({
       error: 'egress lookup failed',
       detail: err instanceof Error ? err.message : String(err),
+      staticProxyConfigured: hasStatic,
     });
   }
 }

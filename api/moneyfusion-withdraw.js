@@ -1,7 +1,7 @@
 /**
  * MoneyFusion withdraw proxy (Vercel)
- * Payouts from Supabase Edge hit MoneyFusion IP whitelist (Edge egress blocked).
- * Edge calls this with x-internal-secret; we forward from Vercel egress (same as payin).
+ * Prefer static egress (FIXIE_URL / MONEYFUSION_STATIC_EGRESS_PROXY) so MoneyFusion
+ * only needs ONE stable IP (Vercel alone rotates → whitelist breaks).
  *
  * Auth: x-internal-secret === EDGE_INTERNAL_SECRET (or CRON_SECRET)
  * Body: {
@@ -11,61 +11,14 @@
  * }
  */
 
-import https from 'https';
 import { URL } from 'url';
+import { moneyFusionHttpsRequest, getStaticEgressProxyUrl } from './_lib/moneyfusion-https.js';
 
 function assertInternal(req) {
   const expected = (process.env.EDGE_INTERNAL_SECRET || process.env.CRON_SECRET || '').trim();
   if (!expected) return false;
   const got = (req.headers['x-internal-secret'] || '').toString().trim();
   return got.length > 0 && got === expected;
-}
-
-function requestInsecure(method, apiUrl, payload, extraHeaders = {}) {
-  const u = new URL(apiUrl);
-  if (u.protocol !== 'https:') {
-    return Promise.reject(new Error('Only https MoneyFusion URLs are allowed'));
-  }
-  const body = method === 'GET' || payload == null ? null : JSON.stringify(payload);
-  return new Promise((resolve, reject) => {
-    const headers = {
-      Accept: 'application/json',
-      ...extraHeaders,
-    };
-    if (body != null) {
-      headers['Content-Type'] = 'application/json';
-      headers['Content-Length'] = Buffer.byteLength(body);
-    }
-    const req = https.request(
-      {
-        hostname: u.hostname,
-        port: u.port || 443,
-        path: `${u.pathname}${u.search}`,
-        method,
-        headers,
-        rejectUnauthorized: false,
-        timeout: 45000,
-      },
-      (res) => {
-        const chunks = [];
-        res.on('data', (c) => chunks.push(c));
-        res.on('end', () => {
-          resolve({
-            status: res.statusCode || 502,
-            body: Buffer.concat(chunks).toString('utf8'),
-            contentType: res.headers['content-type'] || 'application/json',
-          });
-        });
-      }
-    );
-    req.on('error', reject);
-    req.on('timeout', () => {
-      req.destroy();
-      reject(new Error('MoneyFusion withdraw proxy timeout'));
-    });
-    if (body != null) req.write(body);
-    req.end();
-  });
 }
 
 const ALLOWED_HOSTS = new Set([
@@ -132,15 +85,23 @@ export default async function handler(req, res) {
   }
 
   try {
-    const upstream = await requestInsecure(method, apiUrl, payload, {
+    const upstream = await moneyFusionHttpsRequest(method, apiUrl, payload, {
       'moneyfusion-private-key': privateKey,
     });
+    if (!getStaticEgressProxyUrl()) {
+      res.setHeader('X-Emarzona-Egress', 'vercel-dynamic');
+    } else {
+      res.setHeader('X-Emarzona-Egress', 'static-proxy');
+    }
     res.setHeader('Content-Type', upstream.contentType);
     return res.status(upstream.status).send(upstream.body);
   } catch (err) {
     return res.status(502).json({
       error: 'MoneyFusion withdraw proxy failed',
       detail: err instanceof Error ? err.message : String(err),
+      hint: getStaticEgressProxyUrl()
+        ? undefined
+        : 'Configure FIXIE_URL or MONEYFUSION_STATIC_EGRESS_PROXY for a single stable IP (Vercel IPs rotate; 0.0.0.0 is rejected by MoneyFusion).',
     });
   }
 }
