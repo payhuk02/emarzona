@@ -106,7 +106,9 @@ COMMENT ON FUNCTION public.order_net_revenue_amount(UUID) IS
 -- ---------------------------------------------------------------------------
 -- 3. Admin fee view: also surface inferred fees (rule without platform_fee key)
 -- ---------------------------------------------------------------------------
-CREATE OR REPLACE VIEW public.admin_checkout_platform_fees AS
+DROP VIEW IF EXISTS public.admin_checkout_platform_fees;
+
+CREATE VIEW public.admin_checkout_platform_fees AS
 SELECT
   o.id AS order_id,
   o.order_number,
