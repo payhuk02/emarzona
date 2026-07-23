@@ -7,6 +7,7 @@ type AdminSupabaseClient = SupabaseClient<any, 'public', any>;
 export type StoreNotificationSettingsRow = {
   email_enabled?: boolean | null;
   email_new_order?: boolean | null;
+  email_payment_failed?: boolean | null;
   notification_email?: string | null;
   quiet_hours_enabled?: boolean | null;
   quiet_hours_start?: string | null;
@@ -93,6 +94,35 @@ export function shouldSendSellerNewOrderEmail(
   return { allowed: true };
 }
 
+export function shouldSendSellerPaymentFailedEmail(
+  settings: StoreNotificationSettingsRow | null | undefined,
+  options?: { now?: Date }
+): { allowed: boolean; reason?: string } {
+  const merged: StoreNotificationSettingsRow = {
+    email_enabled: true,
+    email_payment_failed: true,
+    critical_alerts_enabled: true,
+    ...settings,
+  };
+
+  if (merged.email_enabled === false) {
+    return { allowed: false, reason: 'email_disabled' };
+  }
+
+  if (merged.email_payment_failed === false) {
+    return { allowed: false, reason: 'email_payment_failed_disabled' };
+  }
+
+  if (isWithinStoreQuietHours(merged, options?.now)) {
+    const bypassQuietHours = merged.critical_alerts_enabled !== false;
+    if (!bypassQuietHours) {
+      return { allowed: false, reason: 'quiet_hours' };
+    }
+  }
+
+  return { allowed: true };
+}
+
 export async function fetchStoreNotificationSettings(
   supabase: AdminSupabaseClient,
   storeId: string
@@ -100,7 +130,7 @@ export async function fetchStoreNotificationSettings(
   const { data } = await supabase
     .from('store_notification_settings')
     .select(
-      'email_enabled, email_new_order, notification_email, quiet_hours_enabled, quiet_hours_start, quiet_hours_end, quiet_hours_timezone, critical_alerts_enabled, notification_frequency'
+      'email_enabled, email_new_order, email_payment_failed, notification_email, quiet_hours_enabled, quiet_hours_start, quiet_hours_end, quiet_hours_timezone, critical_alerts_enabled, notification_frequency'
     )
     .eq('store_id', storeId)
     .maybeSingle();
@@ -217,7 +247,8 @@ export async function sendSellerOrderNotificationEmail(
     to: recipient.email,
     toName: recipient.name,
     userId: recipient.userId,
-    productType: (options.primaryItem.product_type as string) || 'generic',
+    // Force generic template lookup (product_type NULL) — works for all verticals
+    productType: null,
     productId: options.primaryItem.product_id as string | undefined,
     productName: itemForVariables.product_name as string | undefined,
     orderId: options.order.id as string,
@@ -228,6 +259,84 @@ export async function sendSellerOrderNotificationEmail(
   if (!sendResult.ok) {
     return { sent: false, error: sendResult.error ?? 'send-email failed' };
   }
+
+  return { sent: true };
+}
+
+export async function sendSellerPaymentFailedEmail(
+  supabase: AdminSupabaseClient,
+  options: {
+    order: Record<string, unknown>;
+    items: Array<Record<string, unknown>>;
+    primaryItem: Record<string, unknown>;
+    invokeSendEmail: SendEmailInvoker;
+  }
+): Promise<SellerOrderNotificationResult> {
+  const storeId = options.order.store_id as string | undefined;
+  if (!storeId) {
+    return { sent: false, skipped: 'missing_store_id' };
+  }
+
+  const settings = await fetchStoreNotificationSettings(supabase, storeId);
+  const permission = shouldSendSellerPaymentFailedEmail(settings);
+  if (!permission.allowed) {
+    console.log(
+      `Seller payment-failed email skipped for order ${options.order.id}: ${permission.reason ?? 'not_allowed'}`
+    );
+    return { sent: false, skipped: permission.reason };
+  }
+
+  const recipient = await resolveSellerOrderNotificationRecipient(supabase, storeId, settings);
+  if (!recipient) {
+    console.warn('Seller payment-failed email skipped: no recipient email found');
+    return { sent: false, skipped: 'no_recipient' };
+  }
+
+  const { data: storeRow } = await supabase
+    .from('stores')
+    .select('name')
+    .eq('id', storeId)
+    .maybeSingle();
+
+  const siteUrl = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
+  const itemForVariables = {
+    ...options.primaryItem,
+    product_name: summarizeProductNames(options.items),
+  };
+
+  const variables = await buildSellerOrderEmailVariables(supabase, {
+    order: { ...options.order, payment_status: options.order.payment_status || 'failed' },
+    item: itemForVariables,
+    storeName: storeRow?.name ?? 'Boutique',
+    siteUrl,
+  });
+
+  const sendResult = await options.invokeSendEmail({
+    templateSlug: 'seller-payment-failed',
+    to: recipient.email,
+    toName: recipient.name,
+    userId: recipient.userId,
+    productType: null,
+    productId: options.primaryItem.product_id as string | undefined,
+    productName: itemForVariables.product_name as string | undefined,
+    orderId: options.order.id as string,
+    storeId,
+    variables,
+  });
+
+  if (!sendResult.ok) {
+    return { sent: false, error: sendResult.error ?? 'send-email failed' };
+  }
+
+  await supabase
+    .from('orders')
+    .update({
+      metadata: {
+        ...((options.order.metadata as Record<string, unknown>) || {}),
+        seller_failed_email_sent_at: new Date().toISOString(),
+      },
+    })
+    .eq('id', options.order.id as string);
 
   return { sent: true };
 }

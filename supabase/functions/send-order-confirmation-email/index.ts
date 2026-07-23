@@ -9,7 +9,7 @@ import {
   resolveCustomerPortalLink,
   resolvePhysicalWhatsAppLink,
 } from '../_shared/physical-order-email-utils.ts';
-import { sendSellerOrderNotificationEmail } from '../_shared/seller-order-notification-email.ts';
+import { sendSellerOrderNotificationEmail, sendSellerPaymentFailedEmail } from '../_shared/seller-order-notification-email.ts';
 
 const ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGINS') || '')
   .split(',')
@@ -36,9 +36,11 @@ function getCorsHeaders(req: Request) {
 
 interface EmailPayload {
   order_id: string;
-  customer_email: string;
-  customer_name: string;
+  customer_email?: string;
+  customer_name?: string;
   customer_id?: string;
+  seller_only?: boolean;
+  notify_seller_payment_failed?: boolean;
 }
 
 function parseOrderMetadata(metadata: unknown): Record<string, unknown> {
@@ -103,8 +105,8 @@ serve(async req => {
 
     const payload: EmailPayload = await req.json();
 
-    if (!payload.order_id || !payload.customer_email) {
-      return new Response(JSON.stringify({ error: 'order_id and customer_email are required' }), {
+    if (!payload.order_id) {
+      return new Response(JSON.stringify({ error: 'order_id is required' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -204,8 +206,49 @@ serve(async req => {
     }
 
     const orderMetadata = parseOrderMetadata(order.metadata);
+    const orderItems = (order.order_items || []) as Array<Record<string, unknown>>;
+    const primaryItem = orderItems[0] || {
+      product_name: 'Produit',
+      product_type: 'generic',
+    };
+
+    // Seller payment-failed email path (triggered by SQL enqueue on failed/cancelled)
+    if (payload.notify_seller_payment_failed) {
+      if (orderMetadata.seller_failed_email_sent_at) {
+        return new Response(
+          JSON.stringify({
+            success: true,
+            orderId: payload.order_id,
+            duplicate: true,
+            message: 'Seller payment-failed email already sent',
+          }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const failedResult = await sendSellerPaymentFailedEmail(supabase, {
+        order: { ...order, metadata: orderMetadata },
+        items: orderItems.length > 0 ? orderItems : [primaryItem],
+        primaryItem,
+        invokeSendEmail: body => invokeSendEmail(supabase, body),
+      });
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          orderId: payload.order_id,
+          sellerPaymentFailedEmailSent: failedResult.sent,
+          sellerPaymentFailedSkipped: failedResult.skipped,
+          sellerPaymentFailedError: failedResult.error,
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const customerEmailsAlreadySent = Boolean(orderMetadata.confirmation_email_sent_at);
     const sellerEmailAlreadySent = Boolean(orderMetadata.seller_order_email_sent_at);
+    const sellerOnly = payload.seller_only === true;
+    const hasCustomerEmail = Boolean(payload.customer_email?.trim());
 
     if (customerEmailsAlreadySent && sellerEmailAlreadySent) {
       console.log(
@@ -228,7 +271,7 @@ serve(async req => {
     const emailResults: Array<Record<string, unknown>> = [];
     let emailsSentCount = 0;
 
-    if (!customerEmailsAlreadySent) {
+    if (!sellerOnly && hasCustomerEmail && !customerEmailsAlreadySent) {
       // Grouper les items par type de produit
       const itemsByType: Record<string, typeof order.order_items> = {};
 
@@ -301,7 +344,6 @@ serve(async req => {
     let sellerEmailSent = sellerEmailAlreadySent;
     let sellerEmailSkipped: string | undefined;
     let sellerEmailError: string | undefined;
-    const orderItems = (order.order_items || []) as Array<Record<string, unknown>>;
 
     if (!sellerEmailAlreadySent && orderItems.length > 0) {
       try {

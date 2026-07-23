@@ -160,6 +160,10 @@ export async function syncMoneyFusionTransactionFromToken(
         webhook_processed_at: new Date().toISOString(),
         webhook_attempts: Number(transaction.webhook_attempts || 0) + 1,
         updated_at: new Date().toISOString(),
+        failed_at:
+          mappedStatus === 'failed' || mappedStatus === 'cancelled'
+            ? new Date().toISOString()
+            : undefined,
         metadata: {
           ...((transaction.metadata as Record<string, unknown>) || {}),
           [`${source}_at`]: new Date().toISOString(),
@@ -167,6 +171,41 @@ export async function syncMoneyFusionTransactionFromToken(
         },
       })
       .eq('id', transactionId);
+
+    // Seller in-app + email triggers depend on orders.payment_status
+    if (orderId && (mappedStatus === 'failed' || mappedStatus === 'cancelled')) {
+      const { data: existingOrder } = await supabase
+        .from('orders')
+        .select('id, payment_status, metadata')
+        .eq('id', orderId)
+        .maybeSingle();
+
+      if (
+        existingOrder &&
+        ['pending', 'processing', 'awaiting_payment', 'unpaid'].includes(
+          String(existingOrder.payment_status || '')
+        )
+      ) {
+        const prevMeta =
+          existingOrder.metadata && typeof existingOrder.metadata === 'object'
+            ? (existingOrder.metadata as Record<string, unknown>)
+            : {};
+        await supabase
+          .from('orders')
+          .update({
+            payment_status: 'failed',
+            updated_at: new Date().toISOString(),
+            metadata: {
+              ...prevMeta,
+              moneyfusion_failure_at: new Date().toISOString(),
+              moneyfusion_failure_statut: verified.statut,
+              moneyfusion_failure_source: source,
+              moneyfusion_mapped_status: mappedStatus,
+            },
+          })
+          .eq('id', orderId);
+      }
+    }
 
     return {
       success: true,

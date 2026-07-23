@@ -465,8 +465,48 @@ serve(async req => {
           webhook_processed_at: new Date().toISOString(),
           webhook_attempts: Number(transaction.webhook_attempts || 0) + 1,
           last_webhook_payload: safePayload,
+          failed_at:
+            mappedStatus === 'failed' || mappedStatus === 'cancelled'
+              ? new Date().toISOString()
+              : undefined,
+          updated_at: new Date().toISOString(),
         })
         .eq('id', transactionId);
+
+      // Mark order failed/cancelled so seller in-app + email triggers fire
+      if (orderId && (mappedStatus === 'failed' || mappedStatus === 'cancelled')) {
+        const { data: existingOrder } = await supabase
+          .from('orders')
+          .select('metadata, payment_status')
+          .eq('id', orderId)
+          .maybeSingle();
+
+        if (
+          existingOrder &&
+          !['paid', 'completed', 'failed', 'cancelled'].includes(
+            String(existingOrder.payment_status || '')
+          )
+        ) {
+          const prevMeta =
+            existingOrder.metadata && typeof existingOrder.metadata === 'object'
+              ? (existingOrder.metadata as Record<string, unknown>)
+              : {};
+          await supabase
+            .from('orders')
+            .update({
+              // Use failed for both — orders.payment_status may not allow 'cancelled'
+              payment_status: 'failed',
+              updated_at: new Date().toISOString(),
+              metadata: {
+                ...prevMeta,
+                moneyfusion_failure_at: new Date().toISOString(),
+                moneyfusion_failure_statut: verified.statut,
+                moneyfusion_mapped_status: mappedStatus,
+              },
+            })
+            .eq('id', orderId);
+        }
+      }
 
       await markWebhookProcessed(supabase, 'moneyfusion', externalEventId);
 

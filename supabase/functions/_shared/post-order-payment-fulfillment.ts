@@ -68,7 +68,26 @@ async function sendOrderConfirmationEmail(
     }
 
     if (!customerEmail) {
-      console.warn(`Cannot send confirmation email for order ${orderId}: no email`);
+      console.warn(
+        `No customer email for order ${orderId} — still sending seller confirmation if needed`
+      );
+      await fetch(`${supabaseUrl}/functions/v1/send-order-confirmation-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${supabaseServiceKey}`,
+          ...(Deno.env.get('EDGE_INTERNAL_SECRET')
+            ? { 'x-internal-secret': Deno.env.get('EDGE_INTERNAL_SECRET')! }
+            : {}),
+        },
+        body: JSON.stringify({
+          order_id: orderId,
+          customer_email: 'noreply@mail.emarzona.com',
+          customer_name: customerName,
+          customer_id: customerId,
+          seller_only: true,
+        }),
+      }).catch(err => console.error('seller-only confirmation invoke failed', err));
       return;
     }
 
