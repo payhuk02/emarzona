@@ -479,15 +479,21 @@ export async function runPostOrderPaymentFulfillment(
   transactionId: string
 ): Promise<void> {
   // S4: sync payments + facture paid (idempotent; even on re-delivery)
+  const syncErrors: string[] = [];
+
   try {
     const { error: paySyncErr } = await supabase.rpc('sync_payment_row_from_transaction', {
       p_transaction_id: transactionId,
     });
     if (paySyncErr) {
       console.error('sync_payment_row_from_transaction failed', paySyncErr);
+      syncErrors.push(`sync_payment_row_from_transaction: ${paySyncErr.message}`);
     }
   } catch (e) {
     console.error('sync_payment_row_from_transaction exception', e);
+    syncErrors.push(
+      `sync_payment_row_from_transaction: ${e instanceof Error ? e.message : String(e)}`
+    );
   }
 
   try {
@@ -496,9 +502,37 @@ export async function runPostOrderPaymentFulfillment(
     });
     if (invErr) {
       console.error('ensure_order_invoice_paid failed', invErr);
+      syncErrors.push(`ensure_order_invoice_paid: ${invErr.message}`);
     }
   } catch (e) {
     console.error('ensure_order_invoice_paid exception', e);
+    syncErrors.push(`ensure_order_invoice_paid: ${e instanceof Error ? e.message : String(e)}`);
+  }
+
+  if (syncErrors.length > 0) {
+    try {
+      const { data: orderForMeta } = await supabase
+        .from('orders')
+        .select('metadata')
+        .eq('id', orderId)
+        .maybeSingle();
+      const prevMeta = parseOrderMetadata((orderForMeta as Record<string, unknown> | null)?.metadata);
+      await supabase
+        .from('orders')
+        .update({
+          metadata: {
+            ...prevMeta,
+            s4_accounting_sync_failed_at: new Date().toISOString(),
+            s4_accounting_sync_errors: syncErrors,
+            // Keep monitor eligible to retry (no post_payment_fulfillment_at yet)
+            edge_fulfillment_pending: true,
+          },
+        })
+        .eq('id', orderId);
+    } catch (metaErr) {
+      console.error('Failed to persist S4 sync errors on order metadata', metaErr);
+    }
+    throw new Error(`S4 accounting sync failed: ${syncErrors.join(' | ')}`);
   }
 
   const { data: order, error: orderError } = await supabase
@@ -553,6 +587,9 @@ export async function runPostOrderPaymentFulfillment(
         ...orderMetadata,
         post_payment_fulfillment_at: new Date().toISOString(),
         post_payment_fulfillment_tx: transactionId,
+        edge_fulfillment_pending: false,
+        s4_accounting_sync_failed_at: null,
+        s4_accounting_sync_errors: null,
       },
     })
     .eq('id', orderId);

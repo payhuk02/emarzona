@@ -147,6 +147,7 @@ const AdminStoreWithdrawals = () => {
         }
 
         // Bank / card: manual processing path
+        // available_balance already excludes processing/completed; also reserve other pending.
         const { data: earnings, error: earningsError } = await supabase
           .from('store_earnings')
           .select('available_balance')
@@ -163,10 +164,23 @@ const AdminStoreWithdrawals = () => {
           return;
         }
 
-        if (earnings && withdrawal.amount > (earnings.available_balance || 0)) {
+        const { data: otherPending } = await supabase
+          .from('store_withdrawals')
+          .select('amount')
+          .eq('store_id', withdrawal.store_id)
+          .eq('status', 'pending')
+          .neq('id', withdrawal.id);
+
+        const otherPendingSum = (otherPending || []).reduce(
+          (sum, row) => sum + Number(row.amount || 0),
+          0
+        );
+        const availableAfterPending = (earnings?.available_balance || 0) - otherPendingSum;
+
+        if (withdrawal.amount > availableAfterPending) {
           toast({
             title: 'Solde insuffisant',
-            description: `Le solde disponible (${earnings.available_balance || 0} XOF) est inférieur au montant du retrait (${withdrawal.amount} XOF)`,
+            description: `Disponible après autres retraits en attente : ${availableAfterPending} XOF (demande : ${withdrawal.amount} XOF)`,
             variant: 'destructive',
           });
           return;

@@ -13,6 +13,7 @@ import { handleMoneyFusionRefund } from '../_shared/handle-moneyfusion-refund.ts
 import { handleMoneyFusionStoreWithdrawalPayout } from '../_shared/handle-moneyfusion-store-withdrawal.ts';
 import { authorizeCheckoutOrder } from '../_shared/order-checkout-auth.ts';
 import { enforceRateLimit, getClientIp, RATE_LIMIT_PRESETS } from '../_shared/rate-limit.ts';
+import { moneyFusionFetch } from '../_shared/moneyfusion-http.ts';
 
 const MONEYFUSION_STATUS_URL = 'https://www.pay.moneyfusion.net/paiementNotif';
 const SITE_URL = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
@@ -280,10 +281,13 @@ serve(async req => {
         });
       }
 
-      const statusRes = await fetch(`${MONEYFUSION_STATUS_URL}/${encodeURIComponent(token)}`, {
-        method: 'GET',
-        headers: { Accept: 'application/json' },
-      });
+      const statusRes = await moneyFusionFetch(
+        `${MONEYFUSION_STATUS_URL}/${encodeURIComponent(token)}`,
+        {
+          method: 'GET',
+          headers: { Accept: 'application/json' },
+        }
+      );
       const statusText = await statusRes.text();
       let statusData: unknown = {};
       try {

@@ -25,14 +25,20 @@ export async function upstashSetNx(
       body: JSON.stringify(['SET', key, value, 'NX', 'EX', ttlSeconds]),
     });
 
-    if (!res.ok) return false;
+    if (!res.ok) {
+      console.error('Redis Mutex HTTP error — fail-open to avoid blocking paid webhooks', res.status);
+      return true;
+    }
 
     const data = await res.json();
-    if (data.error) return false;
+    if (data.error) {
+      console.error('Redis Mutex API error — fail-open', data.error);
+      return true;
+    }
     return data.result === 'OK';
   } catch (err) {
-    console.error('Redis Mutex error:', err);
-    return false;
+    console.error('Redis Mutex error — fail-open', err);
+    return true;
   }
 }
 

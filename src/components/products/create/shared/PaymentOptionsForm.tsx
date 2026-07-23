@@ -228,8 +228,8 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
                     </div>
                     <p className="text-sm text-muted-foreground">
                       {productType === 'physical'
-                        ? "Le client paie la totalité mais l'argent est retenu par la plateforme jusqu'à confirmation de livraison."
-                        : "Le client paie la totalité mais l'argent est retenu par la plateforme jusqu'à confirmation de la prestation."}
+                        ? 'Le client paie la totalité. Un suivi « sécurisé » accompagne la confirmation de livraison (médiation possible). Pas de séquestre bancaire séparé — le crédit suit le portefeuille boutique.'
+                        : 'Le client paie la totalité. Un suivi « sécurisé » accompagne la confirmation de prestation (médiation possible). Pas de séquestre bancaire séparé — le crédit suit le portefeuille boutique.'}
                     </p>
                     <div className="mt-3 p-3 bg-yellow-50 dark:bg-yellow-950 rounded-md border border-yellow-200">
                       <div className="space-y-2">
@@ -238,15 +238,12 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
                           <div className="text-sm text-yellow-900 dark:text-yellow-100">
                             <p className="font-medium mb-1">Protection acheteur et vendeur</p>
                             <ul className="text-xs space-y-1 text-yellow-800 dark:text-yellow-200">
+                              <li>• Client paie : {safePrice.toLocaleString()} XOF (encaissé)</li>
                               <li>
-                                • Client paie : {safePrice.toLocaleString()} XOF (retenu en escrow)
-                              </li>
-                              <li>
-                                •{' '}
+                                • Statut sécurisé jusqu’à{' '}
                                 {productType === 'physical'
-                                  ? 'Après livraison confirmée'
-                                  : 'Après prestation confirmée'}{' '}
-                                : transfert au vendeur
+                                  ? 'confirmation de livraison'
+                                  : 'confirmation de prestation'}
                               </li>
                               <li>• En cas de problème : médiation plateforme</li>
                             </ul>

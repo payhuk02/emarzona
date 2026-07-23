@@ -21,6 +21,7 @@ import {
   billingCustomerFromTransaction,
 } from '../_shared/physical-subscription-webhook.ts';
 import { applyPaymentRefund } from '../_shared/apply-payment-refund.ts';
+import { moneyFusionFetch, moneyFusionPaidAmount } from '../_shared/moneyfusion-http.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': Deno.env.get('SITE_URL') || 'https://www.emarzona.com',
@@ -59,7 +60,7 @@ async function fetchVerifiedStatus(token: string): Promise<{
   error?: string;
 }> {
   try {
-    const res = await fetch(`${MONEYFUSION_STATUS_URL}/${encodeURIComponent(token)}`, {
+    const res = await moneyFusionFetch(`${MONEYFUSION_STATUS_URL}/${encodeURIComponent(token)}`, {
       method: 'GET',
       headers: { Accept: 'application/json' },
     });
@@ -78,13 +79,7 @@ async function fetchVerifiedStatus(token: string): Promise<{
         ? (data.data as Record<string, unknown>)
         : data;
     const statut = String(inner.statut ?? inner.status ?? '').toLowerCase().trim();
-    const amountRaw = inner.Montant ?? inner.montant ?? inner.amount;
-    const amount =
-      amountRaw != null && amountRaw !== ''
-        ? typeof amountRaw === 'string'
-          ? parseFloat(amountRaw)
-          : Number(amountRaw)
-        : undefined;
+    const amount = moneyFusionPaidAmount(inner);
     return { ok: true, statut, amount, raw: data };
   } catch (e) {
     return {

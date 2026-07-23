@@ -455,18 +455,19 @@ const OrderDetailDialogComponent = ({ open, onOpenChange, order }: OrderDetailDi
               </div>
             )}
 
-            {/* Détails paiement escrow */}
+            {/* Détails paiement sécurisé (suivi livraison — pas de séquestre bancaire) */}
             {order.payment_type === 'delivery_secured' && (
               <div className="p-3 bg-yellow-50 dark:bg-yellow-950 rounded-lg border border-yellow-200 dark:border-yellow-800">
                 <div className="flex items-start gap-2">
                   <Shield className="h-4 w-4 text-yellow-600 mt-0.5" />
                   <div className="space-y-1">
                     <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
-                      Fonds sécurisés en escrow
+                      Paiement sécurisé (suivi livraison)
                     </p>
                     <p className="text-xs text-yellow-700 dark:text-yellow-300">
-                      Les fonds seront libérés après confirmation de livraison ou automatiquement
-                      après le délai de sécurité.
+                      Le paiement est encaissé. Ce statut suit la confirmation de livraison /
+                      prestation (médiation possible). Ce n’est pas un séquestre bancaire séparé —
+                      le crédit vendeur suit le portefeuille boutique standard.
                     </p>
                   </div>
                 </div>

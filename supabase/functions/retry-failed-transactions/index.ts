@@ -9,6 +9,8 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.58.0";
+import { completeTransactionAndOrder } from '../_shared/complete-order-payment.ts';
+import { runPostOrderPaymentFulfillment } from '../_shared/post-order-payment-fulfillment.ts';
 
 const defaultAllowedOrigin = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
 const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || defaultAllowedOrigin)
@@ -123,7 +125,14 @@ async function verifyTransactionWithProvider(
         paymentData.statut || paymentData.status || paymentData.payment_status || 'processing'
       ).toLowerCase();
       const newStatus = STATUS_MAP[rawStatus] || 'processing';
-      return { success: true, newStatus };
+      const base = Number(paymentData.Montant ?? paymentData.montant ?? paymentData.amount ?? 0);
+      const fees = Number(paymentData.frais ?? paymentData.fee ?? 0);
+      return {
+        success: true,
+        newStatus,
+        pspAmount: Number.isFinite(base) ? base + (Number.isFinite(fees) ? fees : 0) : undefined,
+        rawStatus,
+      };
     }
 
     if (provider === 'geniuspay') {
@@ -166,23 +175,60 @@ async function verifyTransactionWithProvider(
 }
 
 /**
- * Met à jour le statut d'une transaction
+ * Met à jour le statut d'une transaction.
+ * Sur completed: passe par completeTransactionAndOrder + S4 fulfillment (pas de bypass).
  */
 async function updateTransactionStatus(
   supabase: any,
   transactionId: string,
   newStatus: string,
-  resultData?: any
+  resultData?: any,
+  paymentProvider?: string
 ): Promise<boolean> {
   try {
+    if (newStatus === 'completed') {
+      const provider = String(paymentProvider || 'moneyfusion').toLowerCase();
+      const externalEventId = `retry-failed:${transactionId}:${Date.now()}`;
+      const { orderId, alreadyCompleted } = await completeTransactionAndOrder(
+        supabase,
+        transactionId,
+        {
+          webhookPayload: resultData ?? { source: 'retry-failed-transactions' },
+          paymentProviderUsed: provider,
+          externalEventId,
+          eventType: 'retry_verification',
+        }
+      );
+
+      const { data: tx } = await supabase
+        .from('transactions')
+        .select('order_id')
+        .eq('id', transactionId)
+        .maybeSingle();
+
+      const fulfillmentOrderId = orderId || tx?.order_id || null;
+      if (fulfillmentOrderId) {
+        await runPostOrderPaymentFulfillment(supabase, fulfillmentOrderId, transactionId);
+      } else if (!alreadyCompleted) {
+        console.warn('retry-failed: completed without order_id', { transactionId });
+      }
+
+      await supabase.from('transaction_logs').insert({
+        transaction_id: transactionId,
+        event_type: 'retry_verification',
+        status: newStatus,
+        response_data: resultData,
+      });
+
+      return true;
+    }
+
     const updates: any = {
       status: newStatus,
       updated_at: new Date().toISOString(),
     };
 
-    if (newStatus === 'completed') {
-      updates.completed_at = new Date().toISOString();
-    } else if (newStatus === 'failed') {
+    if (newStatus === 'failed') {
       updates.failed_at = new Date().toISOString();
     }
 
@@ -196,27 +242,6 @@ async function updateTransactionStatus(
       return false;
     }
 
-    // Si la transaction est complétée, mettre à jour l'order associé
-    if (newStatus === 'completed') {
-      const { data: transaction } = await supabase
-        .from('transactions')
-        .select('order_id')
-        .eq('id', transactionId)
-        .single();
-
-      if (transaction?.order_id) {
-        await supabase
-          .from('orders')
-          .update({
-            status: 'completed',
-            payment_status: 'paid',
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', transaction.order_id);
-      }
-    }
-
-    // Logger le retry
     await supabase.from('transaction_logs').insert({
       transaction_id: transactionId,
       event_type: 'retry_verification',
@@ -358,7 +383,8 @@ serve(async (req) => {
           supabase,
           transaction.id,
           verificationResult.newStatus,
-          verificationResult
+          verificationResult,
+          transaction.payment_provider
         );
 
         if (updateSuccess) {

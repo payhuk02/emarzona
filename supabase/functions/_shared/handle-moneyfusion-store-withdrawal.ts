@@ -125,22 +125,38 @@ export async function handleMoneyFusionStoreWithdrawalPayout(
     .eq('store_id', withdrawal.store_id)
     .maybeSingle();
 
-  // For pending: balance must cover amount. processing already reserved.
+  // available_balance already excludes processing/completed.
+  // Also reserve other pending so concurrent approvals cannot over-draw.
   if (withdrawal.status === 'pending') {
-    const available = Number(earnings?.available_balance ?? 0);
-    if (Number(withdrawal.amount) > available + 0.01) {
+    const { data: otherPending } = await supabaseAdmin
+      .from('store_withdrawals')
+      .select('amount')
+      .eq('store_id', withdrawal.store_id)
+      .eq('status', 'pending')
+      .neq('id', withdrawal.id);
+
+    const otherPendingSum = (otherPending || []).reduce(
+      (sum, row) => sum + Number(row.amount || 0),
+      0
+    );
+    const availableAfterPending =
+      Number(earnings?.available_balance ?? 0) - otherPendingSum;
+
+    if (Number(withdrawal.amount) > availableAfterPending + 0.01) {
       return {
         status: 400,
         body: {
           success: false,
-          error: `Insufficient store balance (${available}) for withdrawal ${withdrawal.amount}`,
+          error: `Insufficient store balance after other pending (${availableAfterPending}) for withdrawal ${withdrawal.amount}`,
         },
       };
     }
   }
 
   const now = new Date().toISOString();
-  const { error: lockErr } = await supabaseAdmin
+
+  // Claim row first so concurrent admins cannot double-pay.
+  const { data: claimed, error: claimErr } = await supabaseAdmin
     .from('store_withdrawals')
     .update({
       status: 'processing',
@@ -149,10 +165,22 @@ export async function handleMoneyFusionStoreWithdrawalPayout(
       updated_at: now,
     })
     .eq('id', withdrawal.id)
-    .in('status', ['pending', 'processing']);
+    .eq('status', withdrawal.status)
+    .is('transaction_reference', null)
+    .select('id')
+    .maybeSingle();
 
-  if (lockErr) {
-    return { status: 500, body: { success: false, error: lockErr.message } };
+  if (claimErr) {
+    return { status: 500, body: { success: false, error: claimErr.message } };
+  }
+  if (!claimed) {
+    return {
+      status: 409,
+      body: {
+        success: false,
+        error: 'Withdrawal already claimed or payout already initiated',
+      },
+    };
   }
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
@@ -184,7 +212,8 @@ export async function handleMoneyFusionStoreWithdrawalPayout(
     };
   }
 
-  await supabaseAdmin
+  // Persist tokenPay immediately after initiate (narrow webhook race window).
+  const { error: tokenErr } = await supabaseAdmin
     .from('store_withdrawals')
     .update({
       transaction_reference: withdraw.tokenPay,
@@ -202,6 +231,18 @@ export async function handleMoneyFusionStoreWithdrawalPayout(
       updated_at: new Date().toISOString(),
     })
     .eq('id', withdrawal.id);
+
+  if (tokenErr) {
+    return {
+      status: 500,
+      body: {
+        success: false,
+        error: `Payout initiated but failed to persist tokenPay: ${tokenErr.message}`,
+        tokenPay: withdraw.tokenPay,
+        requires_manual: true,
+      },
+    };
+  }
 
   return {
     status: 200,

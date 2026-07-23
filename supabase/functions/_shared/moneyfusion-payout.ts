@@ -3,6 +3,8 @@
  * Doc: https://docs.moneyfusion.net/fr/payout
  */
 
+import { moneyFusionFetch } from './moneyfusion-http.ts';
+
 const WITHDRAW_URL = 'https://pay.moneyfusion.net/api/v1/withdraw';
 const WITHDRAW_METHODS_URL = 'https://pay.moneyfusion.net/api/v1/withdraw/methods';
 
@@ -62,7 +64,7 @@ export async function resolveWithdrawMode(
   try {
     const headers: Record<string, string> = { Accept: 'application/json' };
     if (privateKey) headers['moneyfusion-private-key'] = privateKey;
-    const res = await fetch(WITHDRAW_METHODS_URL, { method: 'GET', headers });
+    const res = await moneyFusionFetch(WITHDRAW_METHODS_URL, { method: 'GET', headers });
     if (!res.ok) return null;
     const json = (await res.json()) as { data?: WithdrawMethodCountry[] };
     const countries = Array.isArray(json.data) ? json.data : [];
@@ -96,7 +98,7 @@ export async function initiateMoneyFusionWithdraw(input: {
 
   let res: Response;
   try {
-    res = await fetch(WITHDRAW_URL, {
+    res = await moneyFusionFetch(WITHDRAW_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
