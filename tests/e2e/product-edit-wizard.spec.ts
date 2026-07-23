@@ -114,7 +114,7 @@ test.describe('Edit product wizards — smoke (E2E)', () => {
     const originalName = `Digital edit E2E ${ctx.runId}`;
     const updatedName = `${originalName} (modifié)`;
 
-    await loginE2EVendor(page, ctx.email, ctx.password);
+    await loginE2EVendor(page, ctx.email, ctx.password, ctx.storeId);
     await openDigitalCreateWizard(page);
     await waitForReactApp(page);
     await fillDigitalBasicInfoStep(page, { name: originalName });
@@ -144,7 +144,7 @@ test.describe('Edit product wizards — smoke (E2E)', () => {
     const originalTitle = `Cours edit E2E ${ctx.runId}`;
     const updatedTitle = `${originalTitle} (modifié)`;
 
-    await loginE2EVendor(page, ctx.email, ctx.password);
+    await loginE2EVendor(page, ctx.email, ctx.password, ctx.storeId);
     await openCourseCreateWizard(page);
     await waitForReactApp(page);
     await fillCourseBasicInfoStep(page, { title: originalTitle });
@@ -175,7 +175,7 @@ test.describe('Edit product wizards — smoke (E2E)', () => {
     const updatedName = `${originalName} (modifié)`;
     const sku = `E2E-EDIT-${ctx.runId}`;
 
-    await loginE2EVendor(page, ctx.email, ctx.password);
+    await loginE2EVendor(page, ctx.email, ctx.password, ctx.storeId);
     await openPhysicalCreateWizard(page);
     await waitForReactApp(page);
     await fillPhysicalBasicInfoStep(page, { name: originalName });
@@ -208,7 +208,7 @@ test.describe('Edit product wizards — smoke (E2E)', () => {
     const originalName = `Service edit E2E ${ctx.runId}`;
     const updatedName = `${originalName} (modifié)`;
 
-    await loginE2EVendor(page, ctx.email, ctx.password);
+    await loginE2EVendor(page, ctx.email, ctx.password, ctx.storeId);
     await openServiceCreateWizard(page);
     await waitForReactApp(page);
     await fillServiceBasicInfoStep(page, { name: originalName });

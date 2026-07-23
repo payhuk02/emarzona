@@ -49,7 +49,7 @@ test.describe('Physical wizard — publish (E2E)', () => {
     const productName = `Physique publié E2E ${ctx.runId}`;
     const sku = `E2E-PHY-${ctx.runId}`;
 
-    await loginE2EVendor(page, ctx.email, ctx.password);
+    await loginE2EVendor(page, ctx.email, ctx.password, ctx.storeId);
     await openPhysicalCreateWizard(page);
     await waitForReactApp(page);
 

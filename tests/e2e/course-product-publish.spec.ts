@@ -48,7 +48,7 @@ test.describe('Course wizard — publish (E2E)', () => {
     const courseTitle = `Cours publié E2E ${ctx.runId}`;
     const courseSlug = `cours-e2e-${ctx.runId}`;
 
-    await loginE2EVendor(page, ctx.email, ctx.password);
+    await loginE2EVendor(page, ctx.email, ctx.password, ctx.storeId);
     await openCourseCreateWizard(page);
     await waitForReactApp(page);
 

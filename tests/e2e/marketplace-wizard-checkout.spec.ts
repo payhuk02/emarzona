@@ -62,7 +62,7 @@ test.describe('Marketplace — wizard publish to guest checkout (E2E)', () => {
     const productName = `Digital checkout E2E ${ctx.runId}`;
     const guestEmail = `guest-digital-${ctx.runId}@example.com`;
 
-    await loginE2EVendor(page, ctx.email, ctx.password);
+    await loginE2EVendor(page, ctx.email, ctx.password, ctx.storeId);
     await openDigitalCreateWizard(page);
     await waitForReactApp(page);
     await fillDigitalBasicInfoStep(page, { name: productName });
@@ -102,7 +102,7 @@ test.describe('Marketplace — wizard publish to guest checkout (E2E)', () => {
     const courseSlug = `cours-checkout-e2e-${ctx.runId}`;
     const guestEmail = `guest-course-${ctx.runId}@example.com`;
 
-    await loginE2EVendor(page, ctx.email, ctx.password);
+    await loginE2EVendor(page, ctx.email, ctx.password, ctx.storeId);
     await openCourseCreateWizard(page);
     await waitForReactApp(page);
     await fillCourseBasicInfoStep(page, { title: courseTitle, slug: courseSlug });

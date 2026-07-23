@@ -110,7 +110,12 @@ export async function cleanupE2EVendor(
   }
 }
 
-export async function loginE2EVendor(page: Page, email: string, password: string): Promise<void> {
+export async function loginE2EVendor(
+  page: Page,
+  email: string,
+  password: string,
+  storeId?: string
+): Promise<void> {
   await page.goto('/login', { waitUntil: 'domcontentloaded' });
   await page.locator('input[name="email-login"], input[type="email"]').first().fill(email);
   await page.locator('#password-login').fill(password);
@@ -120,6 +125,11 @@ export async function loginE2EVendor(page: Page, email: string, password: string
     .locator('button[type="submit"]')
     .click();
   await expect(page).toHaveURL('/dashboard', { timeout: 30_000 });
+  if (storeId) {
+    await page.evaluate(id => {
+      localStorage.setItem('selectedStoreId', id);
+    }, storeId);
+  }
   await waitForReactApp(page);
   await waitForVendorStoreReady(page);
   await dismissCookieBannerIfVisible(page);

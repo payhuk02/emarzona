@@ -48,7 +48,7 @@ test.describe('Service wizard — publish (E2E)', () => {
     const serviceName = `Service publié E2E ${ctx.runId}`;
     const locationAddress = `12 avenue E2E ${ctx.runId}, Abidjan`;
 
-    await loginE2EVendor(page, ctx.email, ctx.password);
+    await loginE2EVendor(page, ctx.email, ctx.password, ctx.storeId);
     await openServiceCreateWizard(page);
     await waitForReactApp(page);
 

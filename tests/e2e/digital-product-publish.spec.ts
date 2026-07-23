@@ -51,7 +51,7 @@ test.describe('Digital wizard — publish (E2E)', () => {
     const ctx = await createE2EVendor(admin, 'digital', 'e2e-digital-pub');
     const productName = `Digital publié E2E ${ctx.runId}`;
 
-    await loginE2EVendor(page, ctx.email, ctx.password);
+    await loginE2EVendor(page, ctx.email, ctx.password, ctx.storeId);
     await openDigitalCreateWizard(page);
     await waitForReactApp(page);
 

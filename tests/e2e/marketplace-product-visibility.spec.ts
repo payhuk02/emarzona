@@ -112,7 +112,7 @@ test.describe('Marketplace — product visibility after wizard publish (E2E)', (
     const courseTitle = `Cours marketplace E2E ${ctx.runId}`;
     const courseSlug = `cours-mp-e2e-${ctx.runId}`;
 
-    await loginE2EVendor(page, ctx.email, ctx.password);
+    await loginE2EVendor(page, ctx.email, ctx.password, ctx.storeId);
     await openCourseCreateWizard(page);
     await waitForReactApp(page);
 
@@ -151,7 +151,7 @@ test.describe('Marketplace — product visibility after wizard publish (E2E)', (
     const ctx = await createE2EVendor(admin, 'digital', 'e2e-mp-digital');
     const productName = `Digital marketplace E2E ${ctx.runId}`;
 
-    await loginE2EVendor(page, ctx.email, ctx.password);
+    await loginE2EVendor(page, ctx.email, ctx.password, ctx.storeId);
     await openDigitalCreateWizard(page);
     await waitForReactApp(page);
 
@@ -185,7 +185,7 @@ test.describe('Marketplace — product visibility after wizard publish (E2E)', (
     const productName = `Physique marketplace E2E ${ctx.runId}`;
     const sku = `E2E-MP-${ctx.runId}`;
 
-    await loginE2EVendor(page, ctx.email, ctx.password);
+    await loginE2EVendor(page, ctx.email, ctx.password, ctx.storeId);
     await openPhysicalCreateWizard(page);
     await waitForReactApp(page);
 
@@ -221,7 +221,7 @@ test.describe('Marketplace — product visibility after wizard publish (E2E)', (
     const ctx = await createE2EVendor(admin, 'service', 'e2e-mp-service');
     const serviceName = `Service marketplace E2E ${ctx.runId}`;
 
-    await loginE2EVendor(page, ctx.email, ctx.password);
+    await loginE2EVendor(page, ctx.email, ctx.password, ctx.storeId);
     await openServiceCreateWizard(page);
     await waitForReactApp(page);
 
