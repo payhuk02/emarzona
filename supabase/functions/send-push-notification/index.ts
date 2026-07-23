@@ -70,6 +70,8 @@ async function deliverWebPush(
       data: {
         ...(payload.data || {}),
         url: payload.url || '/',
+        playPlatformSound: true,
+        requireInteraction: payload.requireInteraction ?? false,
       },
     };
 
@@ -166,22 +168,30 @@ serve(async req => {
       );
     }
 
+    const resolvedRequireInteraction =
+      body.requireInteraction === true ||
+      priority === 'high' ||
+      priority === 'urgent' ||
+      ['order_payment_received', 'order_payment_failed', 'physical_product_order_placed', 'physical_order_paid', 'physical_order_failed'].includes(
+        String(body.tag ?? body.data?.type ?? '')
+      );
+
     const payload: PushPayload = {
       title,
       body: messageBody,
       icon: body.icon,
       badge: body.badge,
-      tag: body.tag ?? body.data?.type,
+      tag: body.tag ?? body.data?.notification_id ?? body.data?.type,
       url: url || '/dashboard',
       data: body.data,
       silent: body.silent,
-      requireInteraction: body.requireInteraction,
+      requireInteraction: resolvedRequireInteraction,
       vibrate: body.vibrate,
       soundEnabled: body.data?.soundEnabled ?? body.soundEnabled,
       vibrationEnabled: body.data?.vibrationEnabled ?? body.vibrationEnabled,
       vibrationIntensity: body.data?.vibrationIntensity ?? body.vibrationIntensity,
       urgency: body.urgency ?? mapUrgency(priority),
-      ttl: body.ttl,
+      ttl: body.ttl ?? (resolvedRequireInteraction ? 86400 : undefined),
     };
 
     const { data: subscriptions, error: subscriptionsError } = await supabase.rpc(

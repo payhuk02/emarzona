@@ -3,6 +3,7 @@ import { useDeferredMount } from '@/hooks/useDeferredMount';
 import { useRealtimeNotifications } from '@/hooks/useNotifications';
 import { useNotificationBadgeSync } from '@/hooks/useNotificationBadgeSync';
 import { AutoEnablePushNotifications } from '@/components/notifications/AutoEnablePushNotifications';
+import { PushSoundBridge } from '@/components/notifications/PushSoundBridge';
 
 /**
  * Abonnement Realtime + son/vibration + push auto + badge sur toutes les pages authentifiées.
@@ -17,6 +18,7 @@ export function AuthenticatedRealtimeNotifications() {
   return (
     <>
       <AutoEnablePushNotifications />
+      <PushSoundBridge />
     </>
   );
 }

@@ -372,17 +372,26 @@ export const useRealtimeNotifications = (options?: { enabled?: boolean }) => {
             const shouldVibrate = preferences?.vibration_notifications !== false;
 
             if (osNotificationGranted) {
+              const isOrderAlert = [
+                'order_payment_received',
+                'order_payment_failed',
+                'physical_product_order_placed',
+                'physical_order_paid',
+                'physical_order_failed',
+              ].includes(String(notif.type || ''));
+
               const notification = new Notification(notif.title, {
                 body: notif.message,
                 icon: '/icon-192x192.png',
                 badge: '/badge-72x72.png',
-                tag: notif.type || 'default',
+                tag: notif.id || notif.type || 'default',
                 data: {
                   notificationId: notif.id,
                   type: notif.type,
                   action_url: notif.action_url,
                 },
-                requireInteraction: false,
+                requireInteraction:
+                  isOrderAlert || notif.priority === 'high' || notif.priority === 'urgent',
                 silent: !shouldPlaySound,
                 vibrate: getVibrationPattern(preferences?.vibration_intensity, shouldVibrate),
                 timestamp: Date.now(),

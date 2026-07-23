@@ -57,9 +57,7 @@ export function SellerPushOptInBanner({
     return null;
   }
 
-  if (permission.permission === 'denied') {
-    return null;
-  }
+  const denied = permission.permission === 'denied';
 
   const title =
     variant === 'orders'
@@ -69,15 +67,19 @@ export function SellerPushOptInBanner({
           'Activez les alertes commande en temps réel'
         );
 
-  const description =
-    variant === 'orders'
+  const description = denied
+    ? t(
+        'notifications.sellerPushOptIn.deniedDescription',
+        'Les notifications sont bloquées dans le navigateur. Autorisez-les pour ce site (icône cadenas → Notifications) afin de recevoir son + alerte à l’écran même si Emarzona est fermé — succès et échecs, y compris produits physiques.'
+      )
+    : variant === 'orders'
       ? t(
           'notifications.sellerPushOptIn.ordersDescription',
-          'Recevez une notification sonore sur cet appareil dès qu’un client confirme une commande, même si Emarzona est fermé.'
+          'Recevez son + bandeau à l’écran à chaque confirmation ou échec d’achat (digital, service, cours, artiste et physique), même si l’application n’est pas ouverte — connexion internet requise.'
         )
       : t(
           'notifications.sellerPushOptIn.dashboardDescription',
-          'Les vendeurs qui activent les notifications push sont alertés immédiatement à chaque nouvelle commande confirmée.'
+          'Activez les notifications push pour être alerté immédiatement à chaque vente réussie ou échouée, y compris les commandes physiques, même hors application.'
         );
 
   return (
@@ -94,20 +96,22 @@ export function SellerPushOptInBanner({
       <AlertDescription className="text-violet-950/80 dark:text-violet-100/80">
         <p className="mb-3">{description}</p>
         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-          <Button
-            type="button"
-            size="sm"
-            className="min-h-[40px] bg-violet-600 hover:bg-violet-700 text-white gap-2"
-            disabled={isLoading}
-            onClick={() => void handleSubscribe()}
-          >
-            {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-            ) : (
-              <Bell className="h-4 w-4" aria-hidden />
-            )}
-            {t('notifications.sellerPushOptIn.activate', 'Activer les alertes')}
-          </Button>
+          {!denied && (
+            <Button
+              type="button"
+              size="sm"
+              className="min-h-[40px] bg-violet-600 hover:bg-violet-700 text-white gap-2"
+              disabled={isLoading}
+              onClick={() => void handleSubscribe()}
+            >
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+              ) : (
+                <Bell className="h-4 w-4" aria-hidden />
+              )}
+              {t('notifications.sellerPushOptIn.activate', 'Activer les alertes')}
+            </Button>
+          )}
           <Button
             type="button"
             size="sm"

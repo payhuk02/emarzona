@@ -292,7 +292,10 @@ self.addEventListener('push', event => {
         badge: data.badge || notificationData.badge,
         tag: data.tag || data.type || notificationData.tag,
         data: data.data || data.metadata || {},
-        requireInteraction: data.requireInteraction || false,
+        requireInteraction:
+          data.requireInteraction === true ||
+          data.data?.requireInteraction === true ||
+          false,
         silent: data.silent !== undefined ? data.silent : !notificationData.soundEnabled,
         vibrate: Array.isArray(data.vibrate) ? data.vibrate : undefined,
         url: data.url || data.data?.url || data.data?.action_url || '/',
@@ -341,7 +344,29 @@ self.addEventListener('push', event => {
 
   event.waitUntil(
     (async () => {
-      await self.registration.showNotification(notificationData.title, notificationOptions);
+      const clientList = await clients.matchAll({ type: 'window', includeUncontrolled: true });
+      const hasFocusedClient = clientList.some(client => client.focused);
+      const playPlatformSound =
+        notificationData.data?.playPlatformSound !== false && notificationData.soundEnabled !== false;
+
+      // App au premier plan : laisser Realtime afficher ; jouer le son plateforme via postMessage.
+      // App fermée / onglet en arrière-plan : notification OS sticky (écran + son système).
+      if (!hasFocusedClient) {
+        const sticky =
+          notificationData.requireInteraction === true ||
+          notificationData.data?.requireInteraction === true ||
+          [
+            'order_payment_received',
+            'order_payment_failed',
+            'physical_product_order_placed',
+            'physical_order_paid',
+            'physical_order_failed',
+          ].includes(String(notificationData.data?.type || ''));
+        await self.registration.showNotification(notificationData.title, {
+          ...notificationOptions,
+          requireInteraction: sticky || notificationOptions.requireInteraction,
+        });
+      }
 
       const unreadCount =
         notificationData.unreadCount ?? notificationData.data?.unreadCount ?? null;
@@ -358,12 +383,18 @@ self.addEventListener('push', event => {
         }
       }
 
-      const clientList = await clients.matchAll({ type: 'window', includeUncontrolled: true });
       for (const client of clientList) {
         client.postMessage({
           type: 'EMARZONA_UNREAD_COUNT',
           unreadCount: typeof unreadCount === 'number' ? unreadCount : undefined,
         });
+        if (playPlatformSound) {
+          client.postMessage({
+            type: 'EMARZONA_PLAY_NOTIFICATION_SOUND',
+            notificationType: notificationData.data?.type || notificationData.tag,
+            soundEnabled: notificationData.soundEnabled !== false,
+          });
+        }
       }
     })()
   );
