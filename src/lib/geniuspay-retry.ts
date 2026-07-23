@@ -37,26 +37,26 @@ const NON_RETRYABLE_ERRORS = [
   '401',
   '403',
   '400',
+  '404',
   '422',
+  "n'est plus déployée",
 ];
 
 /**
  * Vérifie si une erreur peut être retentée
  */
 function isRetryableError(error: unknown): boolean {
-  if (error instanceof GeniusPayValidationError || 
-      error instanceof GeniusPayAuthenticationError) {
+  if (error instanceof GeniusPayValidationError || error instanceof GeniusPayAuthenticationError) {
     return false;
   }
 
-  if (error instanceof GeniusPayNetworkError || 
-      error instanceof GeniusPayTimeoutError) {
+  if (error instanceof GeniusPayNetworkError || error instanceof GeniusPayTimeoutError) {
     return true;
   }
 
   if (error instanceof Error) {
     const errorMessage = error.message.toLowerCase();
-    
+
     // Vérifier les erreurs non retentables
     for (const nonRetryable of NON_RETRYABLE_ERRORS) {
       if (errorMessage.includes(nonRetryable.toLowerCase())) {
@@ -92,7 +92,7 @@ function sleep(ms: number): Promise<void> {
   // Ajouter un jitter aléatoire de ±20%
   const jitter = ms * 0.2 * (Math.random() * 2 - 1);
   const delay = Math.max(0, ms + jitter);
-  
+
   return new Promise(resolve => setTimeout(resolve, delay));
 }
 
@@ -103,24 +103,20 @@ export async function callWithRetry<T>(
   fn: () => Promise<T>,
   options: RetryOptions = {}
 ): Promise<T> {
-  const {
-    maxRetries = 3,
-    backoffMs = 1000,
-    retryableErrors = RETRYABLE_ERRORS,
-  } = options;
+  const { maxRetries = 3, backoffMs = 1000, retryableErrors = RETRYABLE_ERRORS } = options;
 
-  let  lastError: unknown;
-  let  attempt= 0;
+  let lastError: unknown;
+  let attempt = 0;
 
   while (attempt <= maxRetries) {
     try {
       const result = await fn();
-      
+
       // Si c'est le premier essai, pas de log
       if (attempt > 0) {
         logger.info(`[GeniusPayRetry] Success after ${attempt} retry(ies)`);
       }
-      
+
       return result;
     } catch (error) {
       lastError = error;
@@ -145,11 +141,14 @@ export async function callWithRetry<T>(
 
       // Calculer le délai de backoff
       const backoff = calculateBackoff(attempt, backoffMs);
-      
-      logger.warn(`[GeniusPayRetry] Attempt ${attempt + 1}/${maxRetries + 1} failed, retrying in ${backoff}ms:`, {
-        error: error instanceof Error ? error.message : String(error),
-        backoff,
-      });
+
+      logger.warn(
+        `[GeniusPayRetry] Attempt ${attempt + 1}/${maxRetries + 1} failed, retrying in ${backoff}ms:`,
+        {
+          error: error instanceof Error ? error.message : String(error),
+          backoff,
+        }
+      );
 
       // Attendre avant de réessayer
       await sleep(backoff);
@@ -160,11 +159,3 @@ export async function callWithRetry<T>(
   // Ne devrait jamais arriver, mais TypeScript l'exige
   throw lastError;
 }
-
-
-
-
-
-
-
-
