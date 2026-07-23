@@ -1,16 +1,41 @@
 /**
- * Tableau de bord premium — cartes colorées (inspiré maquette)
+ * Tableau de bord premium — Architecture CSS de classe entreprise (Stripe/Vercel/Shopify)
+ * Utilisant le Glassmorphism, des ombres complexes, et des micro-interactions fluides.
  */
 
 .dashboard-premium {
-  --dash-purple: 139 92 246;
-  --dash-blue: 59 130 246;
-  --dash-green: 16 185 129;
-  --dash-orange: 249 115 22;
+  --dash-purple-rgb: 139, 92, 246;
+  --dash-blue-rgb: 59, 130, 246;
+  --dash-green-rgb: 16, 185, 129;
+  --dash-orange-rgb: 249, 115, 22;
+
+  --dash-surface-glass: rgba(255, 255, 255, 0.75);
+  --dash-surface-glass-dark: rgba(255, 255, 255, 0.9);
+  
+  --shadow-ambient: 0 4px 24px -4px rgba(0, 0, 0, 0.04);
+  --shadow-directional: 0 12px 32px -8px rgba(0, 0, 0, 0.08);
+  --shadow-hover: 0 20px 40px -8px rgba(0, 0, 0, 0.12);
+  
+  --border-glass: inset 0 1px 0 0 rgba(255, 255, 255, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+.dark .dashboard-premium {
+  --dash-surface-glass: rgba(17, 24, 39, 0.75);
+  --dash-surface-glass-dark: rgba(17, 24, 39, 0.9);
+  
+  --shadow-ambient: 0 4px 24px -4px rgba(0, 0, 0, 0.2);
+  --shadow-directional: 0 12px 32px -8px rgba(0, 0, 0, 0.4);
+  --shadow-hover: 0 20px 40px -8px rgba(0, 0, 0, 0.6);
+  
+  --border-glass: inset 0 1px 0 0 rgba(255, 255, 255, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
 }
 
 .landing-premium.app-premium #main-content:has(.dashboard-premium) {
-  background: #f3f4f6 !important;
+  background: #f8fafc !important; /* Très léger gris/bleu pour faire ressortir les cartes blanches */
+}
+
+.dark .landing-premium.app-premium #main-content:has(.dashboard-premium) {
+  background: #0f1117 !important; 
 }
 
 .dashboard-premium .dashboard-metric-icon-wrap svg {
@@ -18,177 +43,232 @@
   stroke: currentColor !important;
 }
 
-/* Carte KPI colorée */
+/* Carte KPI Premium (Glassmorphism & Glow) */
 .dashboard-metric-card {
-  @apply relative overflow-hidden rounded-2xl border bg-white p-5 sm:p-6 shadow-sm transition-shadow duration-300;
-  @apply hover:shadow-md;
+  @apply relative overflow-hidden rounded-[1.25rem] border-0 p-5 sm:p-6 transition-all duration-500 ease-out;
+  background: var(--dash-surface-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: var(--shadow-ambient), var(--border-glass);
+  transform: translateZ(0); /* Hardware acceleration */
 }
 
-.dashboard-metric-card--purple {
-  border-color: rgb(var(--dash-purple) / 0.15);
-}
-.dashboard-metric-card--blue {
-  border-color: rgb(var(--dash-blue) / 0.15);
-}
-.dashboard-metric-card--green {
-  border-color: rgb(var(--dash-green) / 0.15);
-}
-.dashboard-metric-card--orange {
-  border-color: rgb(var(--dash-orange) / 0.15);
+.dashboard-metric-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: var(--shadow-hover), var(--border-glass);
+  background: var(--dash-surface-glass-dark);
 }
 
-.dashboard-metric-icon-wrap {
-  @apply flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full shrink-0;
+/* Effets de survol sur l'icône */
+.dashboard-metric-card:hover .dashboard-metric-icon-wrap {
+  transform: scale(1.1) rotate(5deg);
 }
 
-.dashboard-metric-card--purple .dashboard-metric-icon-wrap {
-  background: rgb(var(--dash-purple) / 0.12);
-  color: rgb(var(--dash-purple));
-}
-.dashboard-metric-card--blue .dashboard-metric-icon-wrap {
-  background: rgb(var(--dash-blue) / 0.12);
-  color: rgb(var(--dash-blue));
-}
-.dashboard-metric-card--green .dashboard-metric-icon-wrap {
-  background: rgb(var(--dash-green) / 0.12);
-  color: rgb(var(--dash-green));
-}
-.dashboard-metric-card--orange .dashboard-metric-icon-wrap {
-  background: rgb(var(--dash-orange) / 0.12);
-  color: rgb(var(--dash-orange));
-}
-
-.dashboard-metric-icon-wrap svg {
-  @apply h-5 w-5 sm:h-6 sm:w-6;
-  color: inherit !important;
-  stroke: currentColor !important;
-}
-
-.dashboard-metric-trend {
-  @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs sm:text-sm font-semibold tabular-nums;
-}
-
-.dashboard-metric-trend--up {
-  @apply bg-emerald-50 text-emerald-700;
-}
-
-.dashboard-metric-trend--down {
-  @apply bg-red-50 text-red-600;
-}
-
-.dashboard-metric-label {
-  @apply mt-4 text-sm sm:text-base font-medium text-muted-foreground;
-}
-
-.dashboard-metric-value {
-  font-family: var(--lp-serif, Georgia, serif);
-  @apply mt-1 text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground tracking-tight tabular-nums;
-}
-
-.dashboard-metric-sub {
-  @apply mt-1 text-xs sm:text-sm text-muted-foreground;
-}
-
+/* Orbes de fond (Glow effect derrière la carte, contenu dans le débordement) */
 .dashboard-metric-wave {
-  pointer-events: none;
   position: absolute;
-  right: -10%;
-  bottom: -2px;
-  left: -10%;
-  height: 72px;
-  opacity: 0.55;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.15;
+  transition: opacity 0.5s ease-out;
+}
+
+.dashboard-metric-card:hover .dashboard-metric-wave {
+  opacity: 0.3;
 }
 
 .dashboard-metric-card--purple .dashboard-metric-wave {
-  background: radial-gradient(
-    ellipse 80% 100% at 50% 100%,
-    rgb(var(--dash-purple) / 0.18),
-    transparent 70%
-  );
+  background: radial-gradient(circle at 100% 0%, rgba(var(--dash-purple-rgb), 1) 0%, transparent 60%),
+              radial-gradient(circle at 0% 100%, rgba(var(--dash-purple-rgb), 0.5) 0%, transparent 60%);
 }
 .dashboard-metric-card--blue .dashboard-metric-wave {
-  background: radial-gradient(
-    ellipse 80% 100% at 50% 100%,
-    rgb(var(--dash-blue) / 0.18),
-    transparent 70%
-  );
+  background: radial-gradient(circle at 100% 0%, rgba(var(--dash-blue-rgb), 1) 0%, transparent 60%),
+              radial-gradient(circle at 0% 100%, rgba(var(--dash-blue-rgb), 0.5) 0%, transparent 60%);
 }
 .dashboard-metric-card--green .dashboard-metric-wave {
-  background: radial-gradient(
-    ellipse 80% 100% at 50% 100%,
-    rgb(var(--dash-green) / 0.18),
-    transparent 70%
-  );
+  background: radial-gradient(circle at 100% 0%, rgba(var(--dash-green-rgb), 1) 0%, transparent 60%),
+              radial-gradient(circle at 0% 100%, rgba(var(--dash-green-rgb), 0.5) 0%, transparent 60%);
 }
 .dashboard-metric-card--orange .dashboard-metric-wave {
-  background: radial-gradient(
-    ellipse 80% 100% at 50% 100%,
-    rgb(var(--dash-orange) / 0.18),
-    transparent 70%
-  );
+  background: radial-gradient(circle at 100% 0%, rgba(var(--dash-orange-rgb), 1) 0%, transparent 60%),
+              radial-gradient(circle at 0% 100%, rgba(var(--dash-orange-rgb), 0.5) 0%, transparent 60%);
 }
 
-/* Panneau blanc (graphiques, listes) */
+/* Icône Premium */
+.dashboard-metric-icon-wrap {
+  @apply flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl shrink-0 transition-transform duration-500 ease-out;
+  box-shadow: inset 0 2px 4px rgba(255,255,255,0.3);
+}
+
+.dark .dashboard-metric-icon-wrap {
+  box-shadow: inset 0 2px 4px rgba(255,255,255,0.1);
+}
+
+.dashboard-metric-card--purple .dashboard-metric-icon-wrap {
+  background: linear-gradient(135deg, rgba(var(--dash-purple-rgb), 0.2), rgba(var(--dash-purple-rgb), 0.05));
+  color: rgb(var(--dash-purple-rgb));
+  border: 1px solid rgba(var(--dash-purple-rgb), 0.2);
+}
+.dashboard-metric-card--blue .dashboard-metric-icon-wrap {
+  background: linear-gradient(135deg, rgba(var(--dash-blue-rgb), 0.2), rgba(var(--dash-blue-rgb), 0.05));
+  color: rgb(var(--dash-blue-rgb));
+  border: 1px solid rgba(var(--dash-blue-rgb), 0.2);
+}
+.dashboard-metric-card--green .dashboard-metric-icon-wrap {
+  background: linear-gradient(135deg, rgba(var(--dash-green-rgb), 0.2), rgba(var(--dash-green-rgb), 0.05));
+  color: rgb(var(--dash-green-rgb));
+  border: 1px solid rgba(var(--dash-green-rgb), 0.2);
+}
+.dashboard-metric-card--orange .dashboard-metric-icon-wrap {
+  background: linear-gradient(135deg, rgba(var(--dash-orange-rgb), 0.2), rgba(var(--dash-orange-rgb), 0.05));
+  color: rgb(var(--dash-orange-rgb));
+  border: 1px solid rgba(var(--dash-orange-rgb), 0.2);
+}
+
+.dashboard-metric-icon-wrap svg {
+  @apply h-6 w-6 sm:h-7 sm:w-7;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+/* Badges de tendance */
+.dashboard-metric-trend {
+  @apply inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs sm:text-sm font-bold tabular-nums transition-colors duration-300;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
+}
+
+.dashboard-metric-trend--up {
+  @apply bg-emerald-500/10 text-emerald-700 border border-emerald-500/20;
+}
+.dark .dashboard-metric-trend--up {
+  @apply text-emerald-400;
+}
+
+.dashboard-metric-trend--down {
+  @apply bg-red-500/10 text-red-700 border border-red-500/20;
+}
+.dark .dashboard-metric-trend--down {
+  @apply text-red-400;
+}
+
+/* Typographie */
+.dashboard-metric-label {
+  @apply mt-6 text-sm sm:text-base font-semibold text-muted-foreground tracking-wide uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dashboard-metric-value {
+  font-family: var(--lp-sans, 'Inter', system-ui, sans-serif);
+  @apply mt-2 text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground tracking-tight tabular-nums;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.dashboard-metric-sub {
+  @apply mt-2 text-xs sm:text-sm font-medium text-muted-foreground/80;
+}
+
+/* Panneau blanc (graphiques, listes) - Bento Grid */
 .dashboard-premium-panel {
-  @apply rounded-2xl border border-border/50 bg-white p-5 sm:p-6 lg:p-7 shadow-sm;
+  @apply relative overflow-hidden rounded-[1.5rem] border-0 p-6 sm:p-8 transition-all duration-500 ease-out;
+  background: var(--dash-surface-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: var(--shadow-directional), var(--border-glass);
+}
+
+.dashboard-premium-panel:hover {
+  box-shadow: var(--shadow-hover), var(--border-glass);
 }
 
 .dashboard-premium-panel-title {
-  font-family: var(--lp-serif, Georgia, serif);
-  @apply text-lg sm:text-xl font-bold text-foreground tracking-tight;
+  font-family: var(--lp-sans, 'Inter', system-ui, sans-serif);
+  @apply text-xl sm:text-2xl font-bold text-foreground tracking-tight;
 }
 
 .dashboard-premium-panel-subtitle {
-  @apply text-sm sm:text-base text-muted-foreground mt-0.5;
+  @apply text-sm sm:text-base font-medium text-muted-foreground mt-1;
 }
 
 /* Barre de progression catégories */
 .dashboard-category-bar {
-  @apply h-2 rounded-full bg-muted/60 overflow-hidden;
+  @apply h-2.5 rounded-full bg-muted/60 overflow-hidden shadow-inner;
 }
 
 .dashboard-category-bar-fill {
-  @apply h-full rounded-full transition-all duration-500;
+  @apply h-full rounded-full transition-all duration-700 ease-out;
+  box-shadow: inset 0 1px 2px rgba(255,255,255,0.3);
 }
 
 /* Mini métriques footer */
 .dashboard-mini-metric {
-  @apply rounded-xl border border-border/40 bg-white p-4 sm:p-5 shadow-sm;
+  @apply rounded-2xl border-0 p-4 sm:p-5 transition-transform duration-300;
+  background: var(--dash-surface-glass);
+  box-shadow: var(--shadow-ambient), var(--border-glass);
+}
+.dashboard-mini-metric:hover {
+  transform: translateY(-2px);
 }
 
 .dashboard-mini-metric-value {
-  @apply text-xl sm:text-2xl font-bold text-foreground tabular-nums mt-1;
+  @apply text-2xl sm:text-3xl font-extrabold text-foreground tabular-nums mt-1.5 tracking-tight;
 }
 
 .dashboard-mini-metric-label {
-  @apply text-sm font-medium text-muted-foreground;
+  @apply text-sm font-semibold text-muted-foreground uppercase tracking-wider;
 }
 
 /* Liste commandes premium */
 .dashboard-order-row {
-  @apply flex items-center gap-3 sm:gap-4 py-3 sm:py-3.5 border-b border-border/40 last:border-0;
+  @apply flex items-center gap-4 sm:gap-5 py-4 border-b border-border/30 last:border-0 transition-colors duration-200 hover:bg-muted/30 rounded-xl px-2 -mx-2;
 }
 
 .dashboard-order-avatar {
-  @apply flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold text-foreground;
+  @apply flex h-12 w-12 shrink-0 items-center justify-center rounded-[1rem] font-bold text-foreground;
+  background: linear-gradient(135deg, hsl(var(--muted)), hsl(var(--muted)/0.5));
+  box-shadow: inset 0 2px 4px rgba(255,255,255,0.5), 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.dark .dashboard-order-avatar {
+  box-shadow: inset 0 2px 4px rgba(255,255,255,0.1), 0 4px 12px rgba(0,0,0,0.2);
 }
 
 .dashboard-status-badge {
-  @apply inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold;
+  @apply inline-flex rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider shadow-sm;
 }
 
 .dashboard-status-badge--completed,
 .dashboard-status-badge--delivered {
-  @apply bg-emerald-50 text-emerald-700;
+  @apply bg-emerald-500/10 text-emerald-700 border border-emerald-500/20;
 }
+.dark .dashboard-status-badge--completed,
+.dark .dashboard-status-badge--delivered {
+  @apply text-emerald-400;
+}
+
 .dashboard-status-badge--pending,
 .dashboard-status-badge--processing,
 .dashboard-status-badge--confirmed {
-  @apply bg-blue-50 text-blue-700;
+  @apply bg-blue-500/10 text-blue-700 border border-blue-500/20;
 }
+.dark .dashboard-status-badge--pending,
+.dark .dashboard-status-badge--processing,
+.dark .dashboard-status-badge--confirmed {
+  @apply text-blue-400;
+}
+
 .dashboard-status-badge--shipped {
-  @apply bg-amber-50 text-amber-800;
+  @apply bg-orange-500/10 text-orange-700 border border-orange-500/20;
 }
+.dark .dashboard-status-badge--shipped {
+  @apply text-orange-400;
+}
+
 .dashboard-status-badge--cancelled {
-  @apply bg-red-50 text-red-600;
+  @apply bg-red-500/10 text-red-700 border border-red-500/20;
+}
+.dark .dashboard-status-badge--cancelled {
+  @apply text-red-400;
 }

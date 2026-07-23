@@ -490,6 +490,12 @@ export const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
         permissions: ['settings.manage'],
       },
       {
+        icon: MessageSquare,
+        label: 'Commentaires & Avis',
+        path: '/admin/article-comments',
+        permissions: ['settings.manage'],
+      },
+      {
         icon: Mail,
         label: 'Newsletter',
         path: '/admin/newsletter-subscribers',

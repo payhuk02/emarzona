@@ -5,7 +5,7 @@ export type MetricTheme = 'purple' | 'blue' | 'green' | 'orange';
 
 interface DashboardMetricCardProps {
   label: string;
-  value: string;
+  value: string | React.ReactNode;
   sublabel?: string;
   trendPercent: number;
   icon: LucideIcon;
@@ -26,9 +26,12 @@ export function DashboardMetricCard({
   const trendLabel = `${isUp ? '+' : ''}${trendPercent}%`;
 
   return (
-    <article className={cn('dashboard-metric-card', `dashboard-metric-card--${theme}`, className)}>
-      <div className="flex items-start justify-between gap-3 relative z-[1]">
-        <div className="dashboard-metric-icon-wrap" aria-hidden>
+    <article className={cn('dashboard-metric-card group', `dashboard-metric-card--${theme}`, className)}>
+      {/* Background glow orbs - animated via CSS */}
+      <div className="dashboard-metric-wave" aria-hidden="true" />
+      
+      <div className="flex items-start justify-between gap-3 relative z-10">
+        <div className="dashboard-metric-icon-wrap" aria-hidden="true">
           <Icon />
         </div>
         <span
@@ -38,17 +41,16 @@ export function DashboardMetricCard({
           )}
         >
           {isUp ? (
-            <TrendingUp className="h-3.5 w-3.5" aria-hidden />
+            <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden="true" />
           ) : (
-            <TrendingDown className="h-3.5 w-3.5" aria-hidden />
+            <TrendingDown className="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden="true" />
           )}
           {trendLabel}
         </span>
       </div>
-      <p className="dashboard-metric-label relative z-[1]">{label}</p>
-      <p className="dashboard-metric-value relative z-[1] break-words">{value}</p>
-      {sublabel && <p className="dashboard-metric-sub relative z-[1]">{sublabel}</p>}
-      <div className="dashboard-metric-wave" aria-hidden />
+      <p className="dashboard-metric-label relative z-10">{label}</p>
+      <div className="dashboard-metric-value relative z-10 break-words">{value}</div>
+      {sublabel && <p className="dashboard-metric-sub relative z-10">{sublabel}</p>}
     </article>
   );
 }

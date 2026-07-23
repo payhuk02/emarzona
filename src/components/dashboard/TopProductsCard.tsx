@@ -94,18 +94,18 @@ const TopProductsCardComponent = ({ products, variant = 'default' }: TopProducts
             <div
               key={product.id}
               className={cn(
-                'flex items-center gap-3 cursor-pointer transition-colors touch-manipulation',
+                'cursor-pointer transition-colors touch-manipulation',
                 isPremium
-                  ? 'py-3.5 hover:bg-muted/30'
-                  : 'p-2 sm:p-3 md:p-4 rounded-lg border hover:bg-muted/50 min-h-[50px] sm:min-h-[60px]'
+                  ? 'dashboard-order-row'
+                  : 'flex items-center gap-3 p-2 sm:p-3 md:p-4 rounded-lg border hover:bg-muted/50 min-h-[50px] sm:min-h-[60px]'
               )}
               style={{ willChange: 'transform' }}
               onClick={() => navigate('/dashboard/products')}
             >
               <div
                 className={cn(
-                  'flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full font-bold shrink-0 text-sm',
-                  isPremium ? 'bg-violet-500/15 text-violet-700' : 'bg-primary/10 text-primary'
+                  'shrink-0',
+                  isPremium ? 'dashboard-order-avatar !text-violet-700 dark:!text-violet-300' : 'flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full font-bold bg-primary/10 text-primary text-sm'
                 )}
               >
                 {index + 1}
