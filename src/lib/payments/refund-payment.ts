@@ -1,10 +1,14 @@
 /**
- * Remboursement unifié multi-PSP (GeniusPay, Stripe Connect, PayPal Commerce)
+ * Remboursement unifié multi-PSP (GeniusPay, Stripe Connect, PayPal Commerce, MoneyFusion)
  */
 
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
-import { refundGeniusPayPayment, type RefundOptions, type RefundResult } from '@/lib/geniuspay-payment';
+import {
+  refundGeniusPayPayment,
+  type RefundOptions,
+  type RefundResult,
+} from '@/lib/geniuspay-payment';
 
 async function refundPayPalCommerce(options: RefundOptions): Promise<RefundResult> {
   const { data, error } = await supabase.functions.invoke<RefundResult>('paypal-refund', {
@@ -35,6 +39,23 @@ async function refundStripeConnect(options: RefundOptions): Promise<RefundResult
 
   if (!data?.success) {
     return { success: false, error: data?.error ?? 'Stripe refund failed' };
+  }
+
+  return data;
+}
+
+async function refundMoneyFusion(options: RefundOptions): Promise<RefundResult> {
+  const { data, error } = await supabase.functions.invoke<RefundResult>('moneyfusion-refund', {
+    body: options,
+  });
+
+  if (error) {
+    logger.error('moneyfusion-refund invoke failed', { error });
+    return { success: false, error: error.message };
+  }
+
+  if (!data?.success) {
+    return { success: false, error: data?.error ?? 'MoneyFusion refund failed' };
   }
 
   return data;
@@ -93,6 +114,9 @@ export async function refundPayment(options: RefundOptions): Promise<RefundResul
       break;
     case 'stripe_connect':
       result = await refundStripeConnect(options);
+      break;
+    case 'moneyfusion':
+      result = await refundMoneyFusion(options);
       break;
     case 'geniuspay':
     case 'geniuspay_platform':

@@ -20,6 +20,7 @@ import {
   activatePhysicalSubscriptionFromWebhook,
   billingCustomerFromTransaction,
 } from '../_shared/physical-subscription-webhook.ts';
+import { applyPaymentRefund } from '../_shared/apply-payment-refund.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': Deno.env.get('SITE_URL') || 'https://www.emarzona.com',
@@ -39,6 +40,7 @@ function sanitizePayload(payload: Record<string, unknown>): Record<string, unkno
     moyen: payload.moyen ?? null,
     has_personal_Info: Array.isArray(payload.personal_Info),
     numeroTransaction: payload.numeroTransaction ?? null,
+    numeroRetrait: payload.numeroRetrait ?? null,
   };
 }
 
@@ -145,7 +147,108 @@ serve(async req => {
       );
     }
 
-    // Re-vérification obligatoire (webhook non signé)
+    const eventName = typeof payload.event === 'string' ? payload.event : '';
+
+    // Payout / refund reverse — pas de GET paiementNotif (token différent du payin)
+    if (eventName.startsWith('payout.')) {
+      const { data: txByRefund } = await supabase
+        .from('transactions')
+        .select('id, status, amount, currency, refunded_amount, metadata')
+        .eq('payment_provider', 'moneyfusion')
+        .contains('metadata', { moneyfusion_refund: { tokenPay: token } })
+        .maybeSingle();
+
+      let payoutTx = txByRefund;
+      if (!payoutTx) {
+        // Fallback: scan recent MF txs with matching refund token in metadata JSON
+        const { data: candidates } = await supabase
+          .from('transactions')
+          .select('id, status, amount, currency, refunded_amount, metadata')
+          .eq('payment_provider', 'moneyfusion')
+          .order('updated_at', { ascending: false })
+          .limit(50);
+        payoutTx =
+          (candidates || []).find(row => {
+            const m = row.metadata as Record<string, unknown> | null;
+            const refund = m?.moneyfusion_refund as Record<string, unknown> | undefined;
+            return refund && String(refund.tokenPay || '') === token;
+          }) ?? null;
+      }
+
+      if (!payoutTx) {
+        console.warn('[MoneyFusion webhook] payout token not linked to transaction', {
+          token: token.slice(0, 8),
+          eventName,
+        });
+        return new Response(JSON.stringify({ success: true, ignored: true, reason: 'unknown_payout_token' }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      const meta =
+        payoutTx.metadata && typeof payoutTx.metadata === 'object'
+          ? (payoutTx.metadata as Record<string, unknown>)
+          : {};
+      const refundMeta =
+        meta.moneyfusion_refund && typeof meta.moneyfusion_refund === 'object'
+          ? (meta.moneyfusion_refund as Record<string, unknown>)
+          : {};
+
+      if (eventName === 'payout.session.completed') {
+        // Idempotent: applyPaymentRefund no-ops if already refunded
+        if (payoutTx.status !== 'refunded') {
+          const amount =
+            Number(payload.montant ?? payload.Montant ?? refundMeta.amount ?? payoutTx.amount) ||
+            Number(payoutTx.amount);
+          await applyPaymentRefund(supabase, String(payoutTx.id), {
+            refundId: token,
+            amount,
+            currency: String(payoutTx.currency || 'XOF').toUpperCase(),
+            reason: 'MoneyFusion payout.session.completed',
+            provider: 'moneyfusion',
+          }).catch(err =>
+            console.error('[MoneyFusion webhook] payout applyPaymentRefund failed', err)
+          );
+        }
+
+        await supabase
+          .from('transactions')
+          .update({
+            metadata: {
+              ...meta,
+              moneyfusion_refund: {
+                ...refundMeta,
+                tokenPay: token,
+                payout_status: 'completed',
+                payout_completed_at: new Date().toISOString(),
+              },
+            },
+          })
+          .eq('id', payoutTx.id);
+      } else if (eventName === 'payout.session.cancelled') {
+        await supabase
+          .from('transactions')
+          .update({
+            metadata: {
+              ...meta,
+              moneyfusion_refund: {
+                ...refundMeta,
+                tokenPay: token,
+                payout_status: 'cancelled',
+                payout_cancelled_at: new Date().toISOString(),
+                payout_payload: safePayload,
+              },
+            },
+          })
+          .eq('id', payoutTx.id);
+      }
+
+      return new Response(JSON.stringify({ success: true, event: eventName, transactionId: payoutTx.id }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Re-vérification obligatoire (webhook non signé) — payin only
     const verified = await fetchVerifiedStatus(token);
     if (!verified.ok) {
       console.error('[MoneyFusion webhook] Status re-check failed', {

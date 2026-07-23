@@ -131,6 +131,8 @@ export interface RefundOptions {
   transactionId: string;
   amount?: number; // Si non spécifié, remboursement total
   reason?: string;
+  /** MoneyFusion only: mark DB refund after manual dashboard payout */
+  confirmManual?: boolean;
 }
 
 export interface RefundResult {

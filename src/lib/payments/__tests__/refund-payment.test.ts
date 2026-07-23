@@ -129,6 +129,31 @@ describe('refundPayment', () => {
     expect(refundGeniusPayPayment).toHaveBeenCalledWith({ transactionId: 'tx-3' });
   });
 
+  it('routes moneyfusion to moneyfusion-refund', async () => {
+    fromMock
+      .mockReturnValueOnce(queryWith({ id: 'tx-mf', payment_provider: 'moneyfusion' }))
+      .mockReturnValueOnce(queryWith({ store_id: 's1', amount: 500, currency: 'XOF' }));
+    invokeMock.mockResolvedValue({
+      data: { success: true, amount: 500, currency: 'XOF', refund_id: 'tok-1' },
+      error: null,
+    });
+
+    const result = await refundPayment({ transactionId: 'tx-mf', reason: 'return' });
+
+    expect(result.success).toBe(true);
+    expect(invokeMock).toHaveBeenCalledWith('moneyfusion-refund', {
+      body: { transactionId: 'tx-mf', reason: 'return' },
+    });
+  });
+
+  it('returns moneyfusion invoke error', async () => {
+    fromMock.mockReturnValueOnce(queryWith({ id: 'tx-mf', payment_provider: 'moneyfusion' }));
+    invokeMock.mockResolvedValue({ data: null, error: { message: 'mf down' } });
+
+    const result = await refundPayment({ transactionId: 'tx-mf' });
+    expect(result).toEqual({ success: false, error: 'mf down' });
+  });
+
   it('defaults to geniuspay when payment_provider is null', async () => {
     fromMock
       .mockReturnValueOnce(queryWith({ id: 'tx-5', payment_provider: null }))
