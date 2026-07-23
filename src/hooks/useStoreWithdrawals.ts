@@ -116,7 +116,7 @@ export const useStoreWithdrawals = (filters?: StoreWithdrawalFilters) => {
 
       await fetchWithdrawals();
       return data;
-    } catch (_error: unknown) {
+    } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error requesting withdrawal', { error });
       toast({
@@ -145,7 +145,7 @@ export const useStoreWithdrawals = (filters?: StoreWithdrawalFilters) => {
 
       await fetchWithdrawals();
       return true;
-    } catch (_error: unknown) {
+    } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error cancelling withdrawal', { error });
       toast({
