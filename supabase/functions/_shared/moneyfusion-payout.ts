@@ -94,14 +94,15 @@ async function fetchViaWithdrawProxy(input: {
   }
 }
 
-/** Enrichit le message MF « IP non autorisée » avec les 2 endroits à mettre à jour. */
+/** Enrichit le message MF « IP non autorisée » (retrait = API KEY, pas l’app payin). */
 export function formatMoneyFusionIpError(message: string): string {
   const ipMatch = message.match(/(\d{1,3}(?:\.\d{1,3}){3})/);
   if (!/ip|autoris/i.test(message) || !ipMatch) return message;
   const ip = ipMatch[1];
   return (
-    `${message}. Ajoutez ${ip} dans MoneyFusion (Modifier Emarzona + Mon Compte → API KEY). ` +
-    `0.0.0.0 ne fonctionne pas. Sur Vercel l’IP change : configurez FIXIE_URL ou MONEYFUSION_STATIC_EGRESS_PROXY pour une IP fixe unique.`
+    `${message}. Pour les RETRAITS : ajoutez ${ip} dans MoneyFusion → Mon Compte → Paramètres → API KEY → Adresses IP. ` +
+    `Fixie a 2 IP (load-balance) : ajoutez les DEUX, ou épinglez FIXIE_OUTBOUND_IP. ` +
+    `« API de Paiement → Emarzona » sert au payin, pas au withdraw. 0.0.0.0 est refusé.`
   );
 }
 

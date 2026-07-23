@@ -220,10 +220,11 @@ const AdminStoreWithdrawals = () => {
         let errorMessage = err instanceof Error ? err.message : String(err);
         const ipMatch = errorMessage.match(/(\d{1,3}(?:\.\d{1,3}){3})/);
         if (/ip.*autoris|non autoris/i.test(errorMessage) && ipMatch) {
-          errorMessage =
-            `${errorMessage.includes('Mon Compte') ? errorMessage : errorMessage + '.'} ` +
-            `Ajoutez ${ipMatch[1]} dans MoneyFusion → Mon Compte → API KEY (et aussi dans API de Paiement → Emarzona). ` +
-            `0.0.0.0 ne suffit pas ; l’IP Vercel change souvent.`;
+          if (!/API KEY|Fixie|RETRAITS/i.test(errorMessage)) {
+            errorMessage =
+              `${errorMessage} Ajoutez ${ipMatch[1]} dans MoneyFusion → Mon Compte → API KEY (retraits). ` +
+              `Fixie a 2 IP : whitelist les deux (ou FIXIE_OUTBOUND_IP). API de Paiement = payin seulement.`;
+          }
         }
         logger.error('Error approving withdrawal', { error: err, errorMessage });
         toast({

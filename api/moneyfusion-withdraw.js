@@ -10,7 +10,11 @@
  */
 
 import { URL } from 'url';
-import { moneyFusionHttpsRequest, getStaticEgressProxyUrl } from '../lib/api/moneyfusion-https.js';
+import {
+  moneyFusionHttpsRequest,
+  getStaticEgressProxyUrl,
+  getPinnedEgressIp,
+} from '../lib/api/moneyfusion-https.js';
 
 function assertInternal(req) {
   const expected = (process.env.EDGE_INTERNAL_SECRET || process.env.CRON_SECRET || '').trim();
@@ -35,31 +39,46 @@ async function handleEgressIp(req, res) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
   const hasStatic = Boolean(getStaticEgressProxyUrl());
+  const pinned = getPinnedEgressIp();
+  const samples = Math.min(5, Math.max(1, Number(req.query?.samples) || (pinned ? 1 : 3)));
   try {
-    const upstream = await moneyFusionHttpsRequest('GET', 'https://api.ipify.org', null, {
-      Accept: 'text/plain',
-    });
-    if (upstream.status >= 400 || !upstream.body?.trim()) {
+    const seen = [];
+    for (let i = 0; i < samples; i++) {
+      const upstream = await moneyFusionHttpsRequest('GET', 'https://api.ipify.org', null, {
+        Accept: 'text/plain',
+      });
+      if (upstream.status < 400 && upstream.body?.trim()) {
+        const ip = upstream.body.trim();
+        if (!seen.includes(ip)) seen.push(ip);
+      }
+    }
+    if (seen.length === 0) {
       return res.status(502).json({
         error: 'Could not resolve egress IP',
-        detail: upstream.body,
         staticProxyConfigured: hasStatic,
+        pinnedEgressIp: pinned || null,
       });
     }
-    const egressIp = upstream.body.trim();
+    const egressIp = pinned || seen[0];
+    const loadBalanced = !pinned && seen.length > 1;
     return res.status(200).json({
       egressIp,
+      egressIps: seen,
+      pinnedEgressIp: pinned || null,
       staticProxyConfigured: hasStatic,
-      mode: hasStatic ? 'static-proxy' : 'vercel-dynamic',
-      hint: hasStatic
-        ? `Whitelist ONLY this IP in MoneyFusion (Modifier Emarzona + Mon Compte API KEY): ${egressIp}`
-        : 'No static proxy. Set FIXIE_URL then whitelist the returned IP once.',
+      mode: pinned ? 'static-proxy-pinned' : hasStatic ? 'static-proxy' : 'vercel-dynamic',
+      hint: !hasStatic
+        ? 'No static proxy. Set FIXIE_URL then whitelist the returned IP once.'
+        : loadBalanced
+          ? `Fixie load-balances across ${seen.join(' + ')}. Whitelist BOTH in MoneyFusion → Mon Compte → API KEY (retrait), or set FIXIE_OUTBOUND_IP to pin one.`
+          : `Whitelist this IP in MoneyFusion → Mon Compte → API KEY (retraits): ${egressIp}. API de Paiement is for payin only.`,
     });
   } catch (err) {
     return res.status(502).json({
       error: 'egress lookup failed',
       detail: err instanceof Error ? err.message : String(err),
       staticProxyConfigured: hasStatic,
+      pinnedEgressIp: pinned || null,
     });
   }
 }
@@ -128,7 +147,13 @@ export default async function handler(req, res) {
     const upstream = await moneyFusionHttpsRequest(method, apiUrl, payload, {
       'moneyfusion-private-key': privateKey,
     });
-    res.setHeader('X-Emarzona-Egress', getStaticEgressProxyUrl() ? 'static-proxy' : 'vercel-dynamic');
+    const egressMode = getPinnedEgressIp()
+      ? 'static-proxy-pinned'
+      : getStaticEgressProxyUrl()
+        ? 'static-proxy'
+        : 'vercel-dynamic';
+    res.setHeader('X-Emarzona-Egress', egressMode);
+    if (getPinnedEgressIp()) res.setHeader('X-Emarzona-Egress-Ip', getPinnedEgressIp());
     res.setHeader('Content-Type', upstream.contentType);
     return res.status(upstream.status).send(upstream.body);
   } catch (err) {
