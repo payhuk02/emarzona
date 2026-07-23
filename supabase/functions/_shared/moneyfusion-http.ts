@@ -63,9 +63,44 @@ export async function moneyFusionPayInitiate(
         },
         body: JSON.stringify({ apiUrl, payload }),
       });
-      // If proxy is not deployed yet (404/405), fall through to direct.
-      if (proxied.status !== 404 && proxied.status !== 405) {
-        return proxied;
+
+      // Proxy missing / not ready
+      if (proxied.status === 404 || proxied.status === 405) {
+        console.warn('[MoneyFusion] pay proxy not available', proxied.status);
+      } else if (proxied.status === 401 || proxied.status === 403) {
+        // EDGE_INTERNAL_SECRET mismatch on Vercel — do NOT treat as MF API error
+        console.warn(
+          '[MoneyFusion] pay proxy unauthorized — check EDGE_INTERNAL_SECRET on Vercel; falling back to direct'
+        );
+      } else {
+        // Clone-friendly: read body once for logging if looks like proxy error envelope
+        const text = await proxied.text();
+        let parsed: Record<string, unknown> | null = null;
+        try {
+          parsed = text ? (JSON.parse(text) as Record<string, unknown>) : null;
+        } catch {
+          parsed = null;
+        }
+        const proxyErr =
+          parsed &&
+          typeof parsed.error === 'string' &&
+          (parsed.error === 'Unauthorized' ||
+            parsed.error === 'MoneyFusion pay proxy failed' ||
+            String(parsed.error).includes('proxy'));
+
+        if (proxyErr && proxied.status >= 400) {
+          console.warn('[MoneyFusion] pay proxy error envelope, falling back to direct', {
+            status: proxied.status,
+            error: parsed?.error,
+          });
+        } else {
+          return new Response(text, {
+            status: proxied.status,
+            headers: {
+              'Content-Type': proxied.headers.get('Content-Type') || 'application/json',
+            },
+          });
+        }
       }
     } catch (err) {
       console.warn('[MoneyFusion] pay proxy failed, falling back to direct', err);
