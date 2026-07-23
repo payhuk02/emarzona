@@ -45,12 +45,12 @@ async function refundStripeConnect(options: RefundOptions): Promise<RefundResult
 }
 
 async function refundMoneyFusion(options: RefundOptions): Promise<RefundResult> {
-  const { data, error } = await supabase.functions.invoke<RefundResult>('moneyfusion-refund', {
-    body: options,
+  const { data, error } = await supabase.functions.invoke<RefundResult>('moneyfusion', {
+    body: { action: 'refund_payment', data: options },
   });
 
   if (error) {
-    logger.error('moneyfusion-refund invoke failed', { error });
+    logger.error('moneyfusion refund_payment invoke failed', { error });
     return { success: false, error: error.message };
   }
 

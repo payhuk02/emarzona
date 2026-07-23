@@ -129,7 +129,7 @@ describe('refundPayment', () => {
     expect(refundGeniusPayPayment).toHaveBeenCalledWith({ transactionId: 'tx-3' });
   });
 
-  it('routes moneyfusion to moneyfusion-refund', async () => {
+  it('routes moneyfusion to moneyfusion refund_payment action', async () => {
     fromMock
       .mockReturnValueOnce(queryWith({ id: 'tx-mf', payment_provider: 'moneyfusion' }))
       .mockReturnValueOnce(queryWith({ store_id: 's1', amount: 500, currency: 'XOF' }));
@@ -141,8 +141,8 @@ describe('refundPayment', () => {
     const result = await refundPayment({ transactionId: 'tx-mf', reason: 'return' });
 
     expect(result.success).toBe(true);
-    expect(invokeMock).toHaveBeenCalledWith('moneyfusion-refund', {
-      body: { transactionId: 'tx-mf', reason: 'return' },
+    expect(invokeMock).toHaveBeenCalledWith('moneyfusion', {
+      body: { action: 'refund_payment', data: { transactionId: 'tx-mf', reason: 'return' } },
     });
   });
 

@@ -9,6 +9,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'npm:@supabase/supabase-js@2.58.0';
 import { resolveOrderExpectedPayableAmount } from '../_shared/complete-order-payment.ts';
+import { handleMoneyFusionRefund } from '../_shared/handle-moneyfusion-refund.ts';
 import { authorizeCheckoutOrder } from '../_shared/order-checkout-auth.ts';
 import { enforceRateLimit, getClientIp, RATE_LIMIT_PRESETS } from '../_shared/rate-limit.ts';
 
@@ -248,17 +249,6 @@ serve(async req => {
   }
 
   try {
-    const apiUrl = (Deno.env.get('MONEYFUSION_API_URL') || '').trim();
-    if (!apiUrl || !apiUrl.startsWith('https://')) {
-      return new Response(
-        JSON.stringify({
-          error: 'Configuration manquante',
-          message: 'MONEYFUSION_API_URL n\'est pas configuré dans les secrets Edge Functions',
-        }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
     if (!supabaseUrl || !serviceKey) {
@@ -320,11 +310,49 @@ serve(async req => {
       });
     }
 
+    if (action === 'refund_payment') {
+      try {
+        const refundResult = await handleMoneyFusionRefund(
+          supabase,
+          req.headers.get('Authorization'),
+          (data || {}) as {
+            transactionId: string;
+            amount?: number;
+            reason?: string;
+            confirmManual?: boolean;
+          }
+        );
+        return new Response(JSON.stringify(refundResult.body), {
+          status: refundResult.status,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      } catch (refundErr) {
+        const message = refundErr instanceof Error ? refundErr.message : String(refundErr);
+        const status =
+          message === 'Unauthorized' || message.includes('access denied') ? 403 : 500;
+        return new Response(JSON.stringify({ success: false, error: message }), {
+          status,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
     if (action !== 'create_checkout') {
       return new Response(JSON.stringify({ error: 'Action non supportée' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
+    }
+
+    const apiUrl = (Deno.env.get('MONEYFUSION_API_URL') || '').trim();
+    if (!apiUrl || !apiUrl.startsWith('https://')) {
+      return new Response(
+        JSON.stringify({
+          error: 'Configuration manquante',
+          message: "MONEYFUSION_API_URL n'est pas configuré dans les secrets Edge Functions",
+        }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const validation = validateCreateCheckout(data);
