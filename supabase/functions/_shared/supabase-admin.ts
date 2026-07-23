@@ -42,3 +42,36 @@ export async function assertStoreOwner(
   }
   return { userId: user.id };
 }
+
+export async function assertPlatformAdmin(
+  supabaseUser: SupabaseClient
+): Promise<{ userId: string }> {
+  const {
+    data: { user },
+    error,
+  } = await supabaseUser.auth.getUser();
+  if (error || !user) {
+    throw new Error('Unauthorized');
+  }
+
+  const { data: profile, error: profileError } = await supabaseUser
+    .from('profiles')
+    .select('role, is_super_admin')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  if (profileError || !profile) {
+    throw new Error('Forbidden');
+  }
+
+  const isAdmin =
+    profile.role === 'admin' ||
+    profile.is_super_admin === true ||
+    String(profile.role || '').toLowerCase() === 'super_admin';
+
+  if (!isAdmin) {
+    throw new Error('Forbidden');
+  }
+
+  return { userId: user.id };
+}

@@ -102,10 +102,51 @@ const AdminStoreWithdrawals = () => {
   const [proofUrl, setProofUrl] = useState('');
   const [historyWithdrawalId, setHistoryWithdrawalId] = useState<string | null>(null);
 
+  const canManualComplete = useCallback((w: StoreWithdrawal) => {
+    if (w.status !== 'processing') return false;
+    // MoneyFusion mobile payout completes via webhook once tokenPay is stored
+    if (w.payment_method === 'mobile_money' && w.transaction_reference) return false;
+    return true;
+  }, []);
+
   const handleApprove = useCallback(
     async (withdrawal: StoreWithdrawal) => {
       try {
-        // Vérifier le solde disponible avant d'approuver
+        // Mobile Money → MoneyFusion payout (admin-gated edge)
+        if (withdrawal.payment_method === 'mobile_money') {
+          const { data, error: invokeError } = await supabase.functions.invoke<{
+            success?: boolean;
+            error?: string;
+            tokenPay?: string;
+            requires_manual?: boolean;
+          }>('moneyfusion', {
+            body: {
+              action: 'payout_store_withdrawal',
+              data: { withdrawalId: withdrawal.id },
+            },
+          });
+
+          if (invokeError) {
+            throw new Error(invokeError.message);
+          }
+          if (!data?.success) {
+            throw new Error(data?.error || 'MoneyFusion payout failed');
+          }
+
+          toast({
+            title: 'Retrait approuvé',
+            description: data.tokenPay
+              ? `Payout MoneyFusion initié (${data.tokenPay}). Finalisation via webhook.`
+              : 'Payout MoneyFusion initié. Finalisation via webhook.',
+          });
+
+          await refetch();
+          setShowApproveDialog(false);
+          setSelectedWithdrawal(null);
+          return;
+        }
+
+        // Bank / card: manual processing path
         const { data: earnings, error: earningsError } = await supabase
           .from('store_earnings')
           .select('available_balance')
@@ -122,7 +163,6 @@ const AdminStoreWithdrawals = () => {
           return;
         }
 
-        // Vérifier que le solde disponible est suffisant
         if (earnings && withdrawal.amount > (earnings.available_balance || 0)) {
           toast({
             title: 'Solde insuffisant',
@@ -145,18 +185,18 @@ const AdminStoreWithdrawals = () => {
 
         toast({
           title: 'Retrait approuvé',
-          description: 'Le retrait a été approuvé et est en cours de traitement',
+          description: 'Le retrait a été approuvé — complétez-le manuellement après virement',
         });
 
         await refetch();
         setShowApproveDialog(false);
         setSelectedWithdrawal(null);
-      } catch (_error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        logger.error('Error approving withdrawal', { error });
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        logger.error('Error approving withdrawal', { error: err, errorMessage });
         toast({
           title: 'Erreur',
-          description: "Impossible d'approuver le retrait",
+          description: errorMessage || "Impossible d'approuver le retrait",
           variant: 'destructive',
         });
       }
@@ -572,7 +612,7 @@ const AdminStoreWithdrawals = () => {
                         </Button>
                       </>
                     )}
-                    {row.status === 'processing' && (
+                    {canManualComplete(row) && (
                       <Button
                         size="sm"
                         variant="default"
@@ -685,7 +725,7 @@ const AdminStoreWithdrawals = () => {
                                 </Button>
                               </>
                             )}
-                            {withdrawal.status === 'processing' && (
+                            {canManualComplete(withdrawal) && (
                               <Button
                                 size="sm"
                                 variant="default"

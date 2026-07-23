@@ -10,6 +10,7 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'npm:@supabase/supabase-js@2.58.0';
 import { resolveOrderExpectedPayableAmount } from '../_shared/complete-order-payment.ts';
 import { handleMoneyFusionRefund } from '../_shared/handle-moneyfusion-refund.ts';
+import { handleMoneyFusionStoreWithdrawalPayout } from '../_shared/handle-moneyfusion-store-withdrawal.ts';
 import { authorizeCheckoutOrder } from '../_shared/order-checkout-auth.ts';
 import { enforceRateLimit, getClientIp, RATE_LIMIT_PRESETS } from '../_shared/rate-limit.ts';
 
@@ -329,7 +330,33 @@ serve(async req => {
       } catch (refundErr) {
         const message = refundErr instanceof Error ? refundErr.message : String(refundErr);
         const status =
-          message === 'Unauthorized' || message.includes('access denied') ? 403 : 500;
+          message === 'Unauthorized' ||
+          message === 'Forbidden' ||
+          message.includes('access denied')
+            ? 403
+            : 500;
+        return new Response(JSON.stringify({ success: false, error: message }), {
+          status,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
+    if (action === 'payout_store_withdrawal') {
+      try {
+        const payoutResult = await handleMoneyFusionStoreWithdrawalPayout(
+          supabase,
+          req.headers.get('Authorization'),
+          (data || {}) as { withdrawalId: string }
+        );
+        return new Response(JSON.stringify(payoutResult.body), {
+          status: payoutResult.status,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      } catch (payoutErr) {
+        const message = payoutErr instanceof Error ? payoutErr.message : String(payoutErr);
+        const status =
+          message === 'Unauthorized' || message === 'Forbidden' ? 403 : 500;
         return new Response(JSON.stringify({ success: false, error: message }), {
           status,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
