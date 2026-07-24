@@ -143,6 +143,15 @@ const Withdrawals = () => {
     }
   };
 
+  const pendingAmount = useMemo(
+    () =>
+      withdrawals
+        .filter(w => w.status === 'pending')
+        .reduce((sum, w) => sum + Number(w.amount || 0), 0),
+    [withdrawals]
+  );
+  const withdrawableBalance = Math.max(0, Number(earnings?.available_balance || 0) - pendingAmount);
+
   if (storeLoading) {
     return (
       <AppPageShell mainClassName="p-6 space-y-6">
@@ -179,7 +188,7 @@ const Withdrawals = () => {
         </div>
         <Button
           onClick={() => setShowRequestDialog(true)}
-          disabled={!earnings || (earnings.available_balance || 0) <= 0}
+          disabled={!earnings || withdrawableBalance <= 0}
           className="w-full sm:w-auto h-8 sm:h-9 text-xs sm:text-sm"
           size="sm"
         >
@@ -206,6 +215,7 @@ const Withdrawals = () => {
       <EarningsBalance
         earnings={earnings}
         loading={earningsLoading}
+        pendingAmount={pendingAmount}
         onWithdrawClick={() => setShowRequestDialog(true)}
       />
 
@@ -231,7 +241,7 @@ const Withdrawals = () => {
       <WithdrawalRequestDialog
         open={showRequestDialog}
         onOpenChange={setShowRequestDialog}
-        availableBalance={earnings?.available_balance || 0}
+        availableBalance={withdrawableBalance}
         storeId={store?.id}
         onSubmit={handleRequestWithdrawal}
       />

@@ -14,11 +14,20 @@ interface EarningsBalanceProps {
   earnings: StoreEarnings | null;
   loading: boolean;
   onWithdrawClick: () => void;
+  /** Sum of pending withdrawal amounts reserved from available_balance */
+  pendingAmount?: number;
 }
 
-export const EarningsBalance = ({ earnings, loading, onWithdrawClick }: EarningsBalanceProps) => {
+export const EarningsBalance = ({
+  earnings,
+  loading,
+  onWithdrawClick,
+  pendingAmount = 0,
+}: EarningsBalanceProps) => {
   const availableBalance = earnings?.available_balance || 0;
-  const canWithdraw = availableBalance > 0;
+  const reservedPending = Math.max(0, pendingAmount);
+  const withdrawable = Math.max(0, availableBalance - reservedPending);
+  const canWithdraw = withdrawable > 0;
 
   return (
     <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
@@ -31,9 +40,15 @@ export const EarningsBalance = ({ earnings, loading, onWithdrawClick }: Earnings
           <Wallet className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-primary flex-shrink-0" />
         </CardHeader>
         <CardContent className="p-2.5 sm:p-3 md:p-4">
-          <div className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold text-primary mb-2 sm:mb-3 md:mb-4">
+          <div className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold text-primary mb-1">
             {loading ? '...' : formatCurrency(availableBalance)}
           </div>
+          {!loading && reservedPending > 0 && (
+            <p className="text-[9px] sm:text-[10px] md:text-xs text-amber-700 dark:text-amber-400 mb-2">
+              Retraits en attente : {formatCurrency(reservedPending)} — retirable :{' '}
+              <strong>{formatCurrency(withdrawable)}</strong>
+            </p>
+          )}
           <Button
             size="sm"
             className="w-full h-8 sm:h-9 text-[10px] sm:text-xs md:text-sm"
@@ -46,7 +61,8 @@ export const EarningsBalance = ({ earnings, loading, onWithdrawClick }: Earnings
           </Button>
           {!loading && canWithdraw && (
             <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mt-2">
-              Retrait possible pour tout montant positif jusqu&apos;au solde disponible.
+              Mobile Money : minimum 200 XOF, jusqu&apos;au solde retirable
+              {reservedPending > 0 ? ' (hors retraits en attente)' : ''}.
             </p>
           )}
         </CardContent>
