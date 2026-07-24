@@ -111,6 +111,11 @@ class MoneyFusionClient {
       ...(transactionId ? { transactionId } : {}),
     });
   }
+
+  /** Guest return: transaction_id only (Edge résout payment_id en service role). */
+  async verifyPaymentByTransaction(transactionId: string): Promise<unknown> {
+    return this.callFunction('verify_payment', { transactionId });
+  }
 }
 
 export const moneyfusionClient = new MoneyFusionClient();

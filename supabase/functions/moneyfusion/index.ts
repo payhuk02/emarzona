@@ -364,8 +364,19 @@ serve(async req => {
 
     if (action === 'verify_payment') {
       const d = (data || {}) as Record<string, unknown>;
-      const token = String(d.paymentId || d.token || '').trim();
+      let token = String(d.paymentId || d.token || '').trim();
       const transactionIdHint = String(d.transactionId || d.transaction_id || '').trim();
+
+      // Guest return URL has transaction_id but RLS blocks reading payment_id client-side
+      if (!token && transactionIdHint) {
+        const { data: txRow } = await supabase
+          .from('transactions')
+          .select('payment_id, payment_provider')
+          .eq('id', transactionIdHint)
+          .maybeSingle();
+        token = String(txRow?.payment_id || '').trim();
+      }
+
       if (!token) {
         return new Response(JSON.stringify({ error: 'token requis' }), {
           status: 400,

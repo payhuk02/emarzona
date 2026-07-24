@@ -7,7 +7,7 @@ import {
   completeTransactionAndOrder,
   validateOrderPaymentAmount,
 } from './complete-order-payment.ts';
-import { moneyFusionFetch, moneyFusionPaidAmount } from './moneyfusion-http.ts';
+import { moneyFusionFetch, moneyFusionPaidAmount, moneyFusionAmountCandidates } from './moneyfusion-http.ts';
 import { runPostOrderPaymentFulfillment } from './post-order-payment-fulfillment.ts';
 
 const MONEYFUSION_STATUS_URL = 'https://www.pay.moneyfusion.net/paiementNotif';
@@ -216,19 +216,37 @@ export async function syncMoneyFusionTransactionFromToken(
     };
   }
 
-  const pspAmount =
-    verified.amount != null && !Number.isNaN(verified.amount) ? Number(verified.amount) : null;
   const localAmount = Number(transaction.amount);
   const txCurrency = typeof transaction.currency === 'string' ? transaction.currency : null;
+  const amountCandidates =
+    verified.raw && typeof verified.raw === 'object'
+      ? (() => {
+          const root = verified.raw as Record<string, unknown>;
+          const inner =
+            root.data && typeof root.data === 'object'
+              ? (root.data as Record<string, unknown>)
+              : root;
+          return moneyFusionAmountCandidates(inner);
+        })()
+      : [];
+  if (verified.amount != null && Number.isFinite(verified.amount)) {
+    amountCandidates.push(Number(verified.amount));
+  }
+  const uniqueAmounts = [...new Set(amountCandidates.filter(n => Number.isFinite(n)))];
 
   if (orderId) {
-    const amountToValidate = pspAmount != null ? pspAmount : localAmount;
-    const paymentCheck = await validateOrderPaymentAmount(
-      supabase,
-      orderId,
-      amountToValidate,
-      txCurrency
-    );
+    let paymentCheck: { valid: boolean; orderAmount?: number; reason?: string } = {
+      valid: false,
+      reason: 'amount_mismatch',
+    };
+    let matchedAmount: number | null = null;
+    for (const candidate of uniqueAmounts.length ? uniqueAmounts : [localAmount]) {
+      paymentCheck = await validateOrderPaymentAmount(supabase, orderId, candidate, txCurrency);
+      if (paymentCheck.valid) {
+        matchedAmount = candidate;
+        break;
+      }
+    }
     if (!paymentCheck.valid) {
       return {
         success: false,
@@ -240,14 +258,18 @@ export async function syncMoneyFusionTransactionFromToken(
       };
     }
 
-    if (pspAmount != null && Math.abs(pspAmount - localAmount) > 1) {
+    if (
+      matchedAmount != null &&
+      Math.abs(matchedAmount - localAmount) > 1 &&
+      !uniqueAmounts.some(a => Math.abs(a - localAmount) <= 1)
+    ) {
       return {
         success: false,
         status: mappedStatus,
         transactionId,
         orderId,
         error: 'psp_local_amount_mismatch',
-        reason: `psp=${pspAmount} local=${localAmount}`,
+        reason: `psp=${matchedAmount} local=${localAmount}`,
       };
     }
   }

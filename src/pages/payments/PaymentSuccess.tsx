@@ -98,6 +98,7 @@ const PaymentSuccess = () => {
     const confirmPayment = async () => {
       try {
         let txId = transactionId;
+        const mappedProvider = mapUrlProviderToPaymentProvider(providerParam);
 
         // Retour MoneyFusion parfois sans transaction_id dans l'URL → lookup
         if (!txId && orderId) {
@@ -105,16 +106,23 @@ const PaymentSuccess = () => {
             .from('transactions')
             .select('id')
             .eq('order_id', orderId)
-            .in('status', ['processing', 'pending'])
+            .in('status', ['processing', 'pending', 'completed'])
             .order('created_at', { ascending: false })
             .limit(1)
             .maybeSingle();
           txId = pendingTx?.id ?? null;
         }
 
+        let verifyResult: { status?: string } | null = null;
         if (txId) {
-          const mappedProvider = mapUrlProviderToPaymentProvider(providerParam);
-          await verifyTransactionStatus(txId, mappedProvider);
+          verifyResult = (await verifyTransactionStatus(txId, mappedProvider)) as {
+            status?: string;
+          } | null;
+          if (verifyResult?.status === 'completed') {
+            setConfirmationState('confirmed');
+            if (orderId) await loadOrderInfo(orderId);
+            return;
+          }
         }
 
         if (orderId) {
@@ -127,20 +135,27 @@ const PaymentSuccess = () => {
               .eq('id', orderId)
               .maybeSingle();
 
-            if (!order) {
-              setConfirmationState('pending');
-              return;
-            }
-
-            if (order.payment_status === 'paid') {
+            if (order?.payment_status === 'paid') {
               setConfirmationState('confirmed');
               await loadOrderInfo(orderId);
               return;
             }
 
-            if (order.payment_status === 'failed') {
+            if (order?.payment_status === 'failed') {
               setConfirmationState('failed');
               return;
+            }
+
+            // Invité : RLS peut masquer la commande — re-vérifier via Edge
+            if (!order && txId && attempt > 0 && attempt % 3 === 0) {
+              const again = (await verifyTransactionStatus(txId, mappedProvider)) as {
+                status?: string;
+              } | null;
+              if (again?.status === 'completed') {
+                setConfirmationState('confirmed');
+                await loadOrderInfo(orderId);
+                return;
+              }
             }
 
             await new Promise(r => setTimeout(r, 2000));

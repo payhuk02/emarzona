@@ -36,13 +36,26 @@ async function fetchViaStatusProxy(token: string): Promise<Response | null> {
   const secret = internalSecret();
   if (!base || !secret) return null;
 
-  return await fetch(`${base}?token=${encodeURIComponent(token)}`, {
-    method: 'GET',
-    headers: {
-      Accept: 'application/json',
-      'x-internal-secret': secret,
-    },
-  });
+  try {
+    const proxied = await fetch(`${base}?token=${encodeURIComponent(token)}`, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'x-internal-secret': secret,
+      },
+    });
+
+    // Auth / routing errors → fall back to TLS-tolerant direct fetch
+    if (proxied.status === 401 || proxied.status === 403 || proxied.status === 404 || proxied.status === 405) {
+      console.warn('[MoneyFusion] status proxy unavailable', proxied.status);
+      return null;
+    }
+
+    return proxied;
+  } catch (err) {
+    console.warn('[MoneyFusion] status proxy failed, falling back to direct', err);
+    return null;
+  }
 }
 
 /** Initiate payin via Vercel TLS-tolerant proxy (preferred from Edge). */
@@ -176,7 +189,7 @@ export async function moneyFusionFetch(
   return await fetch(url, init);
 }
 
-/** Montant + frais = amount the buyer paid (MF often splits them). */
+/** Montant acheteur : MF peut renvoyer Montant=total ou Montant=net + frais. */
 export function moneyFusionPaidAmount(inner: Record<string, unknown>): number | undefined {
   const amountRaw = inner.Montant ?? inner.montant ?? inner.amount;
   const feesRaw = inner.frais ?? inner.fee ?? inner.fees;
@@ -193,5 +206,31 @@ export function moneyFusionPaidAmount(inner: Record<string, unknown>): number | 
         : Number(feesRaw)
       : 0;
   if (base == null || !Number.isFinite(base)) return undefined;
-  return base + (Number.isFinite(fees) ? fees : 0);
+  const withFees = base + (Number.isFinite(fees) ? fees : 0);
+  // Prefer total (net+fees) when fees are present; callers also tolerate Montant-only via validate
+  return Number.isFinite(fees) && fees > 0 ? withFees : base;
+}
+
+/** Candidates for amount matching (order total may equal Montant or Montant+frais). */
+export function moneyFusionAmountCandidates(inner: Record<string, unknown>): number[] {
+  const amountRaw = inner.Montant ?? inner.montant ?? inner.amount;
+  const feesRaw = inner.frais ?? inner.fee ?? inner.fees;
+  const base =
+    amountRaw != null && amountRaw !== ''
+      ? typeof amountRaw === 'string'
+        ? parseFloat(amountRaw)
+        : Number(amountRaw)
+      : undefined;
+  if (base == null || !Number.isFinite(base)) return [];
+  const fees =
+    feesRaw != null && feesRaw !== ''
+      ? typeof feesRaw === 'string'
+        ? parseFloat(feesRaw)
+        : Number(feesRaw)
+      : 0;
+  const out = [base];
+  if (Number.isFinite(fees) && fees > 0) {
+    out.push(base + fees);
+  }
+  return out;
 }

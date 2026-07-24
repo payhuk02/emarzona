@@ -72,7 +72,19 @@ export async function completeTransactionAndOrder(
 
     if (!acquired) {
       console.log(`[MUTEX] Duplicate webhook detected and blocked: ${lockKey}`);
-      return { orderId: null, alreadyCompleted: true };
+      // Ne pas inventer un succès : relire l'état réel (RPC/trigger peut avoir échoué
+      // après acquisition du lock, laissant la tx en processing).
+      const { data: existingTx } = await supabase
+        .from('transactions')
+        .select('id, order_id, status')
+        .eq('id', transactionId)
+        .maybeSingle();
+      if (existingTx?.status === 'completed') {
+        return { orderId: existingTx.order_id ?? null, alreadyCompleted: true };
+      }
+      throw new Error(
+        'payment_completion_in_progress_or_failed: retry after prior attempt finishes'
+      );
     }
   }
 
@@ -113,8 +125,12 @@ export async function completeTransactionAndOrder(
     }
 
     if (rpcError) {
-      console.error('RPC process_payment_webhook_atomic error:', rpcError);
-      throw rpcError;
+      const rpcMessage =
+        typeof rpcError.message === 'string' && rpcError.message.trim()
+          ? rpcError.message
+          : JSON.stringify(rpcError);
+      console.error('RPC process_payment_webhook_atomic error:', rpcMessage);
+      throw new Error(`process_payment_webhook_atomic: ${rpcMessage}`);
     }
 
     if (!result?.success && result?.reason === 'duplicate_webhook') {

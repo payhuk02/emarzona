@@ -288,11 +288,44 @@ export const verifyTransactionStatus = async (
     resolvedProvider === 'geniuspay' ||
     !transaction?.geniuspay_transaction_id;
 
-  const mfToken = transaction?.payment_id || transaction?.geniuspay_transaction_id;
-  if (isMoneyFusion && mfToken) {
+  // Invité : RLS bloque la lecture de transactions → appeler l'Edge avec transactionId seul
+  if (isMoneyFusion) {
     try {
       const { moneyfusionClient } = await import('./moneyfusion-client');
-      await moneyfusionClient.verifyPayment(String(mfToken), transactionId);
+      const mfToken = transaction?.payment_id || transaction?.geniuspay_transaction_id;
+      const verifyData = mfToken
+        ? ((await moneyfusionClient.verifyPayment(String(mfToken), transactionId)) as {
+            status?: string;
+            statut?: string;
+            completed?: boolean;
+            alreadyCompleted?: boolean;
+          })
+        : ((await moneyfusionClient.verifyPaymentByTransaction(transactionId)) as {
+            status?: string;
+            statut?: string;
+            completed?: boolean;
+            alreadyCompleted?: boolean;
+          });
+
+      const edgeStatus = String(verifyData?.status || verifyData?.statut || '').toLowerCase();
+      if (
+        edgeStatus === 'completed' ||
+        verifyData?.completed === true ||
+        verifyData?.alreadyCompleted === true
+      ) {
+        return {
+          ...(transaction ?? { id: transactionId }),
+          id: transactionId,
+          status: 'completed',
+        };
+      }
+      if (edgeStatus === 'failed' || edgeStatus === 'cancelled') {
+        return {
+          ...(transaction ?? { id: transactionId }),
+          id: transactionId,
+          status: edgeStatus,
+        };
+      }
     } catch (error) {
       logger.error('MoneyFusion verify on return failed', { error, transactionId });
     }
