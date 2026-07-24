@@ -130,20 +130,84 @@ export function inferCountryCodeFromPhone(phone: string): string {
   return 'ci';
 }
 
+/** Operator family from seller form values (orange_money, mtn_mobile_money, …). */
+export function operatorFamily(moyen: string | null | undefined): string | null {
+  const raw = String(moyen || '')
+    .toLowerCase()
+    .replace(/_/g, '-')
+    .trim();
+  if (!raw) return null;
+  if (raw.includes('orange')) return 'orange';
+  if (raw.includes('mtn')) return 'mtn';
+  if (raw.includes('moov')) return 'moov';
+  if (raw.includes('wave')) return 'wave';
+  if (raw.includes('free')) return 'free';
+  if (raw.includes('t-money') || raw.includes('tmoney') || raw === 't_money') return 't-money';
+  return null;
+}
+
+/**
+ * MoneyFusion withdraw_mode keys are NOT always `{op}-{iso}`.
+ * BF → orange-money-burkina (not orange-money-bf). Prefer live /withdraw/methods.
+ */
+const MF_WITHDRAW_MODE_FALLBACK: Record<string, Partial<Record<string, string>>> = {
+  ci: {
+    orange: 'orange-money-ci',
+    mtn: 'mtn-ci',
+    moov: 'moov-ci',
+    wave: 'wave-ci',
+  },
+  bf: {
+    orange: 'orange-money-burkina',
+    moov: 'moov-burkina-faso',
+  },
+  bj: {
+    mtn: 'mtn-benin',
+    moov: 'moov-benin',
+  },
+  tg: {
+    't-money': 't-money-togo',
+  },
+  sn: {
+    orange: 'orange-money-sn',
+    wave: 'wave-sn',
+    free: 'free-money-sn',
+  },
+  ml: {
+    orange: 'orange-money-mali',
+    moov: 'moov-ml',
+  },
+};
+
 export function guessWithdrawMode(moyen: string | null | undefined, countryCode: string): string | null {
+  const cc = String(countryCode || '')
+    .toLowerCase()
+    .trim();
   const raw = String(moyen || '')
     .toLowerCase()
     .trim()
-    .replace(/\s+/g, '-');
+    .replace(/\s+/g, '-')
+    .replace(/_/g, '-');
   if (!raw) return null;
-  if (raw.includes('-') && !raw.endsWith('-')) {
-    // Already looks like orange-money-ci / mtn-bf
-    if (/^(mtn|moov|wave|orange)/.test(raw)) return raw;
+
+  // Full MF key already (orange-money-burkina, mtn-ci, …) — keep unless known-bad ISO suffix
+  if (/^(orange-money|mtn|moov|wave|free-money|t-money|airtel)(-[a-z0-9]+)+$/.test(raw)) {
+    const badIso = /-(bf|bj|tg|ml)$/.test(raw) && !/(burkina|benin|togo|mali)/.test(raw);
+    if (!badIso) return raw;
   }
-  if (raw.includes('orange')) return `orange-money-${countryCode}`;
-  if (raw.includes('mtn')) return `mtn-${countryCode}`;
-  if (raw.includes('moov')) return `moov-${countryCode}`;
-  if (raw.includes('wave')) return `wave-${countryCode}`;
+
+  const family = operatorFamily(raw);
+  if (!family) return null;
+  const mapped = MF_WITHDRAW_MODE_FALLBACK[cc]?.[family];
+  if (mapped) return mapped;
+
+  // CI-style fallback only when we have no explicit map entry
+  if (cc === 'ci') {
+    if (family === 'orange') return 'orange-money-ci';
+    if (family === 'mtn') return 'mtn-ci';
+    if (family === 'moov') return 'moov-ci';
+    if (family === 'wave') return 'wave-ci';
+  }
   return null;
 }
 
@@ -152,40 +216,70 @@ type WithdrawMethodCountry = {
   paymentMethods?: Array<{ key?: string; name?: string }>;
 };
 
-export async function resolveWithdrawMode(
-  moyen: string | null | undefined,
-  countryCode: string,
-  privateKey?: string
-): Promise<string | null> {
-  const guessed = guessWithdrawMode(moyen, countryCode);
-  if (guessed) return guessed;
+async function fetchWithdrawMethods(privateKey?: string): Promise<WithdrawMethodCountry[]> {
+  let res: Response | null = null;
+  if (privateKey) {
+    res = await fetchViaWithdrawProxy({ action: 'methods', privateKey });
+  }
+  if (!res) {
+    const headers: Record<string, string> = { Accept: 'application/json' };
+    if (privateKey) headers['moneyfusion-private-key'] = privateKey;
+    res = await moneyFusionFetch(WITHDRAW_METHODS_URL, { method: 'GET', headers });
+  }
+  if (!res?.ok) return [];
+  const json = (await res.json()) as { data?: WithdrawMethodCountry[] };
+  return Array.isArray(json.data) ? json.data : [];
+}
 
-  try {
-    let res: Response | null = null;
-    if (privateKey) {
-      res = await fetchViaWithdrawProxy({ action: 'methods', privateKey });
-    }
-    if (!res) {
-      const headers: Record<string, string> = { Accept: 'application/json' };
-      if (privateKey) headers['moneyfusion-private-key'] = privateKey;
-      res = await moneyFusionFetch(WITHDRAW_METHODS_URL, { method: 'GET', headers });
-    }
-    if (!res.ok) return null;
-    const json = (await res.json()) as { data?: WithdrawMethodCountry[] };
-    const countries = Array.isArray(json.data) ? json.data : [];
-    const country = countries.find(c => String(c.code || '').toLowerCase() === countryCode);
-    const methods = country?.paymentMethods ?? [];
-    const needle = String(moyen || '').toLowerCase();
-    if (!needle) return methods[0]?.key ?? null;
+function matchMethodKey(
+  methods: Array<{ key?: string; name?: string }>,
+  moyen: string | null | undefined
+): string | null {
+  if (!methods.length) return null;
+  const family = operatorFamily(moyen);
+  const needle = String(moyen || '')
+    .toLowerCase()
+    .replace(/_/g, '-');
+  if (family) {
+    const byFamily = methods.find(m => {
+      const key = String(m.key || '').toLowerCase();
+      const name = String(m.name || '').toLowerCase();
+      return key.includes(family) || name.includes(family);
+    });
+    if (byFamily?.key) return byFamily.key;
+  }
+  if (needle) {
     const match = methods.find(m => {
       const key = String(m.key || '').toLowerCase();
       const name = String(m.name || '').toLowerCase();
       return key.includes(needle) || name.includes(needle) || needle.includes(key);
     });
-    return match?.key ?? methods[0]?.key ?? null;
-  } catch {
-    return null;
+    if (match?.key) return match.key;
   }
+  return methods[0]?.key ?? null;
+}
+
+export async function resolveWithdrawMode(
+  moyen: string | null | undefined,
+  countryCode: string,
+  privateKey?: string
+): Promise<string | null> {
+  const cc = String(countryCode || '')
+    .toLowerCase()
+    .trim();
+
+  // Prefer live MF catalog — ISO guesses are wrong for BF/BJ/TG/…
+  try {
+    const countries = await fetchWithdrawMethods(privateKey);
+    const country = countries.find(c => String(c.code || '').toLowerCase() === cc);
+    const methods = country?.paymentMethods ?? [];
+    const fromApi = matchMethodKey(methods, moyen);
+    if (fromApi) return fromApi;
+  } catch {
+    /* fall through to static map */
+  }
+
+  return guessWithdrawMode(moyen, cc);
 }
 
 export async function initiateMoneyFusionWithdraw(input: {

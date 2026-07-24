@@ -197,9 +197,12 @@ export async function handleMoneyFusionStoreWithdrawalPayout(
 
   if (!withdraw.ok) {
     const isIpBlock = /ip.*autoris|non autoris/i.test(withdraw.message);
-    // IP whitelist errors are config issues — keep row pending so admin can retry
-    // after fixing MoneyFusion, instead of burning the request as "failed".
-    if (isIpBlock) {
+    const isRetryableMode =
+      /momentanément indisponible|momentanement indisponible|réessayer plus tard|reesayer plus tard/i.test(
+        withdraw.message
+      );
+    // Config / transient MF errors — keep row pending so admin can retry.
+    if (isIpBlock || isRetryableMode) {
       await supabaseAdmin
         .from('store_withdrawals')
         .update({
