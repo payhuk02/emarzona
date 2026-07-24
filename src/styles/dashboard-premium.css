@@ -237,7 +237,7 @@
 }
 
 .dashboard-quick-actions {
-  @apply flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-thin;
+  @apply flex gap-2 overflow-x-auto pb-1 -mx-1 px-1;
 }
 
 .dashboard-quick-action-chip {
