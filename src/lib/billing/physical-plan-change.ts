@@ -4,6 +4,7 @@ import { physicalPlanLabel } from '@/lib/billing/physical-plan-display';
 import {
   convertInvoiceAmountToCheckout,
   detectUserCheckoutCurrency,
+  withPhysicalBillingCheckoutFee,
 } from '@/lib/billing/physical-subscription-checkout';
 import { isSupportedCurrency } from '@/lib/currency-converter';
 import { initiateBillingCheckout } from '@/lib/billing/initiate-billing-payment';
@@ -77,15 +78,16 @@ export async function initiatePhysicalPlanChange(
     const newLabel = physicalPlanLabel(newPlanSlug);
     const checkoutCurrency = detectUserCheckoutCurrency();
     const invoiceCurrency = isSupportedCurrency(row.currency) ? row.currency : 'USD';
-    const checkoutAmount = convertInvoiceAmountToCheckout(
+    const planAmount = convertInvoiceAmountToCheckout(
       Number(row.amount),
       invoiceCurrency,
       checkoutCurrency
     );
+    const withFee = withPhysicalBillingCheckoutFee(planAmount, checkoutCurrency);
 
     const checkoutUrl = await initiateBillingCheckout({
       storeId,
-      amount: checkoutAmount,
+      amount: withFee.amount,
       currency: checkoutCurrency,
       description: `Upgrade abonnement — ${newLabel}`,
       customerEmail,
@@ -94,6 +96,8 @@ export async function initiatePhysicalPlanChange(
       planSlug: newPlanSlug,
       invoiceId: row.id,
       successQuery: { plan_change: '1' },
+      planAmount: withFee.planAmount,
+      platformFee: withFee.platformFee,
     });
 
     return { action: 'checkout_required', checkoutUrl };

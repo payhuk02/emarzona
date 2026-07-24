@@ -10,8 +10,8 @@ import {
 import { authorizeCheckoutOrder } from '../_shared/order-checkout-auth.ts';
 import { enforceRateLimit, getClientIp, RATE_LIMIT_PRESETS } from '../_shared/rate-limit.ts';
 import {
-  isAuthorizedPlanCheckoutAmount,
-  resolveAuthorizedCheckoutAmount,
+  isAuthorizedPlanCheckoutAmountWithFee,
+  resolveAuthorizedCheckoutAmountWithFee,
 } from '../_shared/physical-plan-pricing.ts';
 
 // ============================================================================
@@ -582,7 +582,15 @@ async function resolveAuthorizedPaymentAmount(
     const planCurrency = (plan.currency as string) || 'USD';
     const clientCurrency = validated.currency || planCurrency;
 
-    if (!isAuthorizedPlanCheckoutAmount(expected, planCurrency, validated.amount, clientCurrency)) {
+    // Abonnement vendeur physique : montant TTC = plan + frais checkout 2%+100
+    if (
+      !isAuthorizedPlanCheckoutAmountWithFee(
+        expected,
+        planCurrency,
+        validated.amount,
+        clientCurrency
+      )
+    ) {
       console.warn('[GeniusPay] Physical subscription amount mismatch', {
         clientAmount: validated.amount,
         clientCurrency,
@@ -595,7 +603,7 @@ async function resolveAuthorizedPaymentAmount(
 
     return {
       valid: true,
-      amount: resolveAuthorizedCheckoutAmount(
+      amount: resolveAuthorizedCheckoutAmountWithFee(
         expected,
         planCurrency,
         validated.amount,
@@ -645,14 +653,19 @@ async function resolveAuthorizedPaymentAmount(
     const clientCurrency = validated.currency || invoiceCurrency;
 
     if (
-      !isAuthorizedPlanCheckoutAmount(expected, invoiceCurrency, validated.amount, clientCurrency)
+      !isAuthorizedPlanCheckoutAmountWithFee(
+        expected,
+        invoiceCurrency,
+        validated.amount,
+        clientCurrency
+      )
     ) {
       return { valid: false, error: 'Montant prorata invalide' };
     }
 
     return {
       valid: true,
-      amount: resolveAuthorizedCheckoutAmount(
+      amount: resolveAuthorizedCheckoutAmountWithFee(
         expected,
         invoiceCurrency,
         validated.amount,
@@ -696,14 +709,19 @@ async function resolveAuthorizedPaymentAmount(
     const clientCurrency = validated.currency || invoiceCurrency;
 
     if (
-      !isAuthorizedPlanCheckoutAmount(expected, invoiceCurrency, validated.amount, clientCurrency)
+      !isAuthorizedPlanCheckoutAmountWithFee(
+        expected,
+        invoiceCurrency,
+        validated.amount,
+        clientCurrency
+      )
     ) {
       return { valid: false, error: 'Montant invalide pour cette facture' };
     }
 
     return {
       valid: true,
-      amount: resolveAuthorizedCheckoutAmount(
+      amount: resolveAuthorizedCheckoutAmountWithFee(
         expected,
         invoiceCurrency,
         validated.amount,

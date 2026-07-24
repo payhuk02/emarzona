@@ -1,9 +1,10 @@
 /**
  * Règles tarifaires plateforme Emarzona (5 systèmes e-commerce).
  *
- * - Produits physiques : abonnement requis (essai 30 jours + 3 paliers en USD)
- * - Digital / services / cours / œuvres : commission vendeur 10% par vente réussie
- * - Frais checkout acheteur (séparé) : 2% + 100 FCFA — admin /admin/checkout-fees
+ * - Produits physiques : abonnement vendeur requis (essai 30 jours + 3 paliers en USD) ;
+ *   pas de commission 10% ni de frais acheteur 2%+100 sur les ventes physiques
+ * - Abonnements vendeur physiques : frais checkout 2% + 100 FCFA sur le paiement du plan
+ * - Digital / services / cours / œuvres : commission vendeur 10% + frais acheteur 2%+100
  */
 
 export const COMMISSION_ONLY_PRODUCT_TYPES = ['digital', 'service', 'course', 'artist'] as const;

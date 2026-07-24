@@ -3,6 +3,7 @@ import { logger } from '@/lib/logger';
 import {
   convertInvoiceAmountToCheckout,
   detectUserCheckoutCurrency,
+  withPhysicalBillingCheckoutFee,
 } from '@/lib/billing/physical-subscription-checkout';
 import { isSupportedCurrency } from '@/lib/currency-converter';
 import { initiateBillingCheckout } from '@/lib/billing/initiate-billing-payment';
@@ -68,15 +69,16 @@ export async function initiateSubscriptionRenewalCheckout(
   const row = invoice as { id: string; amount: number; currency: string };
   const checkoutCurrency = detectUserCheckoutCurrency();
   const invoiceCurrency = isSupportedCurrency(row.currency) ? row.currency : 'USD';
-  const checkoutAmount = convertInvoiceAmountToCheckout(
+  const planAmount = convertInvoiceAmountToCheckout(
     Number(row.amount),
     invoiceCurrency,
     checkoutCurrency
   );
+  const withFee = withPhysicalBillingCheckoutFee(planAmount, checkoutCurrency);
 
   return initiateBillingCheckout({
     storeId,
-    amount: checkoutAmount,
+    amount: withFee.amount,
     currency: checkoutCurrency,
     description: 'Renouvellement abonnement produits physiques',
     customerEmail,
@@ -84,5 +86,7 @@ export async function initiateSubscriptionRenewalCheckout(
     purpose: 'physical_subscription_renewal',
     planSlug,
     invoiceId: row.id,
+    planAmount: withFee.planAmount,
+    platformFee: withFee.platformFee,
   });
 }

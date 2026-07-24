@@ -1,6 +1,12 @@
 /**
  * Tarification plans physiques — conversion USD → devise checkout (Edge Functions)
+ * Les checkouts d'abonnement vendeur incluent les frais acheteur 2%+100.
  */
+
+import {
+  applyCheckoutPlatformFee,
+  estimatePlanAmountFromCheckoutTtc,
+} from './checkout-platform-fee.ts';
 
 const ZERO_DECIMAL = new Set(['XOF', 'XAF', 'XPF', 'JPY', 'KRW', 'VND', 'CLP', 'UGX', 'RWF']);
 
@@ -89,6 +95,36 @@ export function isAuthorizedPlanCheckoutAmount(
   return Math.abs(clientInExpectedCurrency - normalizedExpected) <= tolerance;
 }
 
+/**
+ * Valide un checkout d'abonnement physique TTC (plan + frais 2%+100).
+ * Le client envoie toujours le total avec frais ; on estime le plan hors frais puis on compare.
+ */
+export function isAuthorizedPlanCheckoutAmountWithFee(
+  expectedPlanAmount: number,
+  expectedCurrency: string,
+  clientTtcAmount: number,
+  clientCurrency: string
+): boolean {
+  const normalizedExpected = roundAmountForCurrency(expectedPlanAmount, expectedCurrency);
+  const normalizedClientTtc = roundAmountForCurrency(clientTtcAmount, clientCurrency);
+
+  if (expectedCurrency === clientCurrency) {
+    const expectedTtc = applyCheckoutPlatformFee(normalizedExpected, expectedCurrency);
+    return normalizedClientTtc === expectedTtc;
+  }
+
+  const estimatedPlanInClient = estimatePlanAmountFromCheckoutTtc(
+    normalizedClientTtc,
+    clientCurrency
+  );
+  return isAuthorizedPlanCheckoutAmount(
+    normalizedExpected,
+    expectedCurrency,
+    estimatedPlanInClient,
+    clientCurrency
+  );
+}
+
 /** Montant autorisé pour GeniusPay après validation (aligné sur ce que le client a affiché). */
 export function resolveAuthorizedCheckoutAmount(
   expectedAmount: number,
@@ -100,4 +136,20 @@ export function resolveAuthorizedCheckoutAmount(
     return roundAmountForCurrency(expectedAmount, expectedCurrency);
   }
   return roundAmountForCurrency(clientAmount, clientCurrency);
+}
+
+/** Montant TTC autorisé (plan + frais 2%+100) après validation. */
+export function resolveAuthorizedCheckoutAmountWithFee(
+  expectedPlanAmount: number,
+  expectedCurrency: string,
+  clientTtcAmount: number,
+  clientCurrency: string
+): number {
+  if (expectedCurrency === clientCurrency) {
+    return applyCheckoutPlatformFee(
+      roundAmountForCurrency(expectedPlanAmount, expectedCurrency),
+      expectedCurrency
+    );
+  }
+  return roundAmountForCurrency(clientTtcAmount, clientCurrency);
 }

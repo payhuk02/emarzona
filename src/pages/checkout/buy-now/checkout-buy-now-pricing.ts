@@ -31,11 +31,17 @@ export function calculateBuyNowSubtotal(
   return Math.max(0, base - couponDiscount);
 }
 
+/** Produits physiques : pas de frais acheteur 2%+100 (monétisation = abonnement vendeur). */
+function shouldApplyBuyNowPlatformFee(product: CheckoutProduct): boolean {
+  return product?.product_type !== 'physical';
+}
+
 export function calculateBuyNowPlatformFee(
   product: CheckoutProduct,
   selectedVariant: CheckoutVariant,
   appliedCoupon: AppliedBuyNowCoupon | null
 ): number {
+  if (!shouldApplyBuyNowPlatformFee(product)) return 0;
   const currency = product?.currency || 'XOF';
   return getCheckoutPlatformFee(
     calculateBuyNowSubtotal(product, selectedVariant, appliedCoupon),
@@ -43,15 +49,18 @@ export function calculateBuyNowPlatformFee(
   );
 }
 
-/** Prix final checkout : sous-total + 2 % + 100 FCFA (XOF). */
+/**
+ * Prix final checkout.
+ * Digital / service / course / artist : sous-total + 2 % + 100 FCFA.
+ * Physique : sous-total seul (pas de frais acheteur).
+ */
 export function calculateBuyNowPrice(
   product: CheckoutProduct,
   selectedVariant: CheckoutVariant,
   appliedCoupon: AppliedBuyNowCoupon | null
 ): number {
+  const subtotal = calculateBuyNowSubtotal(product, selectedVariant, appliedCoupon);
+  if (!shouldApplyBuyNowPlatformFee(product)) return subtotal;
   const currency = product?.currency || 'XOF';
-  return applyCheckoutPlatformFee(
-    calculateBuyNowSubtotal(product, selectedVariant, appliedCoupon),
-    currency
-  );
+  return applyCheckoutPlatformFee(subtotal, currency);
 }
