@@ -35,14 +35,23 @@ type CheckoutFeeRow = {
   total_amount: number;
   subtotal: number;
   checkout_fee_amount: number;
+  checkout_fee_net?: number;
+  refunded_amount?: number;
   fee_rule: string;
   created_at: string;
 };
 
 type FeesSummary = {
   total_fees: number;
+  total_fees_net?: number;
+  refunded_fees?: number;
   order_count: number;
-  currency_breakdown: Array<{ currency: string; fees: number; orders: number }>;
+  currency_breakdown: Array<{
+    currency: string;
+    fees: number;
+    fees_net?: number;
+    orders: number;
+  }>;
   from: string;
   to: string;
 };
@@ -60,7 +69,7 @@ export default function AdminCheckoutFees() {
 
   const summaryQuery = useQuery({
     queryKey: ['admin-checkout-fees-summary', fromIso, toIso],
-    queryFn: async (): Promise<FeesSummary> => {
+    queryFn: async (): Promise<FeesSummary | null> => {
       const { data, error } = await supabase.rpc(
         // @ts-expect-error RPC added in S1 migration — types not regenerated yet
         'admin_checkout_fees_summary',
@@ -69,7 +78,10 @@ export default function AdminCheckoutFees() {
           p_to: toIso,
         }
       );
-      if (error) throw error;
+      if (error) {
+        console.warn('[AdminCheckoutFees] summary RPC failed, will use list fallback', error);
+        return null;
+      }
       return data as FeesSummary;
     },
   });
@@ -85,16 +97,45 @@ export default function AdminCheckoutFees() {
         .gte('created_at', fromIso)
         .lte('created_at', toIso)
         .order('created_at', { ascending: false })
-        .limit(200);
+        .limit(500);
       if (error) throw error;
       return (data || []) as CheckoutFeeRow[];
     },
   });
 
-  const summary = summaryQuery.data;
   const rows = listQuery.data || [];
+  const listFallbackSummary = useMemo((): FeesSummary => {
+    const paidRows = rows.filter(r =>
+      ['paid', 'completed', 'partially_refunded'].includes(String(r.payment_status || ''))
+    );
+    const total_fees = paidRows.reduce((s, r) => s + Number(r.checkout_fee_amount || 0), 0);
+    const total_fees_net = paidRows.reduce(
+      (s, r) => s + Number(r.checkout_fee_net ?? r.checkout_fee_amount ?? 0),
+      0
+    );
+    return {
+      total_fees,
+      total_fees_net,
+      refunded_fees: Math.max(0, total_fees - total_fees_net),
+      order_count: paidRows.length,
+      currency_breakdown: [
+        {
+          currency: paidRows[0]?.currency || 'XOF',
+          fees: total_fees,
+          fees_net: total_fees_net,
+          orders: paidRows.length,
+        },
+      ],
+      from: fromIso,
+      to: toIso,
+    };
+  }, [rows, fromIso, toIso]);
+
+  const summary = summaryQuery.data ?? (rows.length > 0 ? listFallbackSummary : undefined);
   const loading = summaryQuery.isLoading || listQuery.isLoading;
   const primaryCurrency = summary?.currency_breakdown?.[0]?.currency || 'XOF';
+  const displayFees = Number(summary?.total_fees_net ?? summary?.total_fees) || 0;
+  const refundedFees = Number(summary?.refunded_fees) || 0;
 
   return (
     <AdminLayout>
@@ -171,11 +212,16 @@ export default function AdminCheckoutFees() {
           <Card>
             <CardHeader className="pb-2">
               <CardDescription className="flex items-center gap-2">
-                <Wallet className="h-4 w-4" /> Total frais checkout
+                <Wallet className="h-4 w-4" /> Total frais checkout (net)
               </CardDescription>
               <CardTitle className="text-2xl tabular-nums">
-                {formatPrice(Number(summary?.total_fees) || 0, primaryCurrency)}
+                {formatPrice(displayFees, primaryCurrency)}
               </CardTitle>
+              {refundedFees > 0 && (
+                <p className="text-xs text-muted-foreground pt-1">
+                  Dont remboursé (estim.) : {formatPrice(refundedFees, primaryCurrency)}
+                </p>
+              )}
             </CardHeader>
           </Card>
           <Card>
@@ -195,7 +241,7 @@ export default function AdminCheckoutFees() {
             </CardHeader>
             <CardContent className="pt-0">
               <p className="text-xs text-muted-foreground">
-                Commission vendeur 10% gérée à part (earnings).
+                Commission vendeur 10% gérée à part (page Revenus).
               </p>
             </CardContent>
           </Card>
@@ -220,7 +266,9 @@ export default function AdminCheckoutFees() {
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Détail des encaissements</CardTitle>
-            <CardDescription>200 dernières commandes payées avec frais checkout</CardDescription>
+            <CardDescription>
+              Frais checkout (2%+100) — remboursements partiels/totaux réduisent le net
+            </CardDescription>
           </CardHeader>
           <CardContent>
             {listQuery.isError && (
@@ -238,15 +286,18 @@ export default function AdminCheckoutFees() {
                     <TableHead>Date</TableHead>
                     <TableHead>Commande</TableHead>
                     <TableHead>Boutique</TableHead>
+                    <TableHead>Statut</TableHead>
                     <TableHead className="text-right">Sous-total</TableHead>
-                    <TableHead className="text-right">Frais 2%+100</TableHead>
+                    <TableHead className="text-right">Frais brut</TableHead>
+                    <TableHead className="text-right">Remboursé cmd</TableHead>
+                    <TableHead className="text-right">Frais net</TableHead>
                     <TableHead className="text-right">Total</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {loading && (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                      <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                         <Loader2 className="h-5 w-5 animate-spin inline mr-2" />
                         Chargement…
                       </TableCell>
@@ -254,31 +305,44 @@ export default function AdminCheckoutFees() {
                   )}
                   {!loading && rows.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                      <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                         Aucun frais checkout sur la période
                       </TableCell>
                     </TableRow>
                   )}
-                  {rows.map(row => (
-                    <TableRow key={row.order_id}>
-                      <TableCell className="whitespace-nowrap text-sm">
-                        {format(new Date(row.created_at), 'dd MMM yyyy HH:mm', { locale: fr })}
-                      </TableCell>
-                      <TableCell className="font-mono text-xs">
-                        {row.order_number || row.order_id}
-                      </TableCell>
-                      <TableCell className="text-sm">{row.store_name || '—'}</TableCell>
-                      <TableCell className="text-right tabular-nums text-sm">
-                        {formatPrice(Number(row.subtotal) || 0, row.currency)}
-                      </TableCell>
-                      <TableCell className="text-right tabular-nums text-sm font-medium text-emerald-700 dark:text-emerald-400">
-                        {formatPrice(Number(row.checkout_fee_amount) || 0, row.currency)}
-                      </TableCell>
-                      <TableCell className="text-right tabular-nums text-sm">
-                        {formatPrice(Number(row.total_amount) || 0, row.currency)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {rows.map(row => {
+                    const feeNet = Number(row.checkout_fee_net ?? row.checkout_fee_amount) || 0;
+                    const refunded = Number(row.refunded_amount) || 0;
+                    return (
+                      <TableRow key={row.order_id}>
+                        <TableCell className="whitespace-nowrap text-sm">
+                          {format(new Date(row.created_at), 'dd MMM yyyy HH:mm', { locale: fr })}
+                        </TableCell>
+                        <TableCell className="font-mono text-xs">
+                          {row.order_number || row.order_id.slice(0, 8)}
+                        </TableCell>
+                        <TableCell className="text-sm">{row.store_name || '—'}</TableCell>
+                        <TableCell className="text-xs">
+                          <Badge variant="outline">{row.payment_status}</Badge>
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums text-sm">
+                          {formatPrice(Number(row.subtotal) || 0, row.currency)}
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums text-sm">
+                          {formatPrice(Number(row.checkout_fee_amount) || 0, row.currency)}
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums text-sm text-amber-700 dark:text-amber-400">
+                          {refunded > 0 ? formatPrice(refunded, row.currency) : '—'}
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                          {formatPrice(feeNet, row.currency)}
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums text-sm">
+                          {formatPrice(Number(row.total_amount) || 0, row.currency)}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>

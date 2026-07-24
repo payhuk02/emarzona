@@ -65,7 +65,8 @@ const PlatformRevenue = () => {
               Revenus de la Plateforme
             </h1>
             <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground mt-0.5 sm:mt-1">
-              Suivi des commissions (10% par vente)
+              Commissions vendeur (~10% sur digital / services / cours / art). Les produits
+              physiques sont à 0% — frais acheteur 2%+100 sur la page Frais checkout.
             </p>
           </div>
           <Button onClick={exportToCSV} variant="outline" size="sm" className="text-xs sm:text-sm">
@@ -208,8 +209,12 @@ const PlatformRevenue = () => {
                 ))}
               </div>
             ) : commissions.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                Aucune commission enregistrée pour cette période
+              <div className="text-center py-12 text-muted-foreground space-y-2">
+                <p>Aucune commission vendeur enregistrée pour cette période.</p>
+                <p className="text-sm">
+                  Les ventes physiques n&apos;engendrent pas de commission 10%. Consultez{' '}
+                  <strong>Frais checkout (2%+100)</strong> pour les fonds acheteur encaissés.
+                </p>
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -219,36 +224,51 @@ const PlatformRevenue = () => {
                       <TableHead>Date</TableHead>
                       <TableHead>Boutique</TableHead>
                       <TableHead className="text-right">Montant Total</TableHead>
-                      <TableHead className="text-right">Commission (10%)</TableHead>
+                      <TableHead className="text-right">Commission</TableHead>
                       <TableHead className="text-right">Reversement Vendeur</TableHead>
+                      <TableHead className="text-right">Remboursé</TableHead>
                       <TableHead>Statut</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {commissions.map(commission => (
-                      <TableRow key={commission.id}>
-                        <TableCell>
-                          {format(new Date(commission.created_at), 'dd MMM yyyy', {
-                            locale: fr,
-                          })}
-                        </TableCell>
-                        <TableCell>{commission.stores?.name || 'N/A'}</TableCell>
-                        <TableCell className="text-right">
-                          {commission.total_amount.toLocaleString('fr-FR')} XOF
-                        </TableCell>
-                        <TableCell className="text-right font-semibold text-green-600">
-                          {commission.commission_amount.toLocaleString('fr-FR')} XOF
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {commission.seller_amount.toLocaleString('fr-FR')} XOF
-                        </TableCell>
-                        <TableCell>
-                          <span className="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-green-50 text-green-700">
-                            {commission.status}
-                          </span>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {commissions.map(commission => {
+                      const totalAmount =
+                        Number(commission.total_amount) ||
+                        Number(commission.orders?.total_amount) ||
+                        0;
+                      const commissionAmount = Number(commission.commission_amount) || 0;
+                      const sellerAmount =
+                        Number(commission.seller_amount) ||
+                        Math.max(0, totalAmount - commissionAmount);
+                      const refunded = Number(commission.orders?.refunded_amount) || 0;
+                      return (
+                        <TableRow key={commission.id}>
+                          <TableCell>
+                            {format(new Date(commission.created_at), 'dd MMM yyyy', {
+                              locale: fr,
+                            })}
+                          </TableCell>
+                          <TableCell>{commission.stores?.name || 'N/A'}</TableCell>
+                          <TableCell className="text-right">
+                            {totalAmount.toLocaleString('fr-FR')} XOF
+                          </TableCell>
+                          <TableCell className="text-right font-semibold text-green-600">
+                            {commissionAmount.toLocaleString('fr-FR')} XOF
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {sellerAmount.toLocaleString('fr-FR')} XOF
+                          </TableCell>
+                          <TableCell className="text-right text-amber-700">
+                            {refunded > 0 ? `${refunded.toLocaleString('fr-FR')} XOF` : '—'}
+                          </TableCell>
+                          <TableCell>
+                            <span className="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-green-50 text-green-700">
+                              {commission.status}
+                            </span>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </div>
