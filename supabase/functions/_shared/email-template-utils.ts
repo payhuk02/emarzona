@@ -27,14 +27,62 @@ export interface RenderedEmail {
   fromName?: string;
 }
 
-/** Legacy slug aliases → templates en base */
-/** Fallback uniquement si le slug dédié n'existe pas en base */
+/** Legacy slug aliases → templates en base (fallback si le slug demandé est absent) */
 export const EMAIL_TEMPLATE_SLUG_ALIASES: Record<string, string> = {
   'welcome-user': 'welcome',
 };
 
 export function resolveEmailTemplateSlug(slug: string): string {
   return EMAIL_TEMPLATE_SLUG_ALIASES[slug] ?? slug;
+}
+
+async function fetchTemplateBySlug(
+  supabase: SupabaseClient,
+  slug: string,
+  productType?: string | null
+): Promise<DbEmailTemplate | null> {
+  if (productType) {
+    const { data } = await supabase
+      .from('email_templates')
+      .select(
+        'id,slug,name,category,subject,html_content,text_content,from_email,from_name,product_type'
+      )
+      .eq('slug', slug)
+      .eq('product_type', productType)
+      .eq('is_active', true)
+      .maybeSingle();
+    if (data) return data as DbEmailTemplate;
+  }
+
+  const { data, error } = await supabase
+    .from('email_templates')
+    .select(
+      'id,slug,name,category,subject,html_content,text_content,from_email,from_name,product_type'
+    )
+    .eq('slug', slug)
+    .is('product_type', null)
+    .eq('is_active', true)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return data as DbEmailTemplate;
+}
+
+export async function fetchEmailTemplate(
+  supabase: SupabaseClient,
+  slug: string,
+  productType?: string | null
+): Promise<DbEmailTemplate | null> {
+  // Préférer le slug demandé (ex. welcome-user) ; alias seulement en fallback.
+  const direct = await fetchTemplateBySlug(supabase, slug, productType);
+  if (direct) return direct;
+
+  const alias = EMAIL_TEMPLATE_SLUG_ALIASES[slug];
+  if (alias && alias !== slug) {
+    return fetchTemplateBySlug(supabase, alias, productType);
+  }
+
+  return null;
 }
 
 function isTruthyVariable(value: unknown): boolean {
@@ -87,40 +135,6 @@ export function pickLocalized(
   return field[language] || field['fr'] || field['en'] || Object.values(field)[0] || '';
 }
 
-export async function fetchEmailTemplate(
-  supabase: SupabaseClient,
-  slug: string,
-  productType?: string | null
-): Promise<DbEmailTemplate | null> {
-  const resolvedSlug = resolveEmailTemplateSlug(slug);
-
-  if (productType) {
-    const { data } = await supabase
-      .from('email_templates')
-      .select(
-        'id,slug,name,category,subject,html_content,text_content,from_email,from_name,product_type'
-      )
-      .eq('slug', resolvedSlug)
-      .eq('product_type', productType)
-      .eq('is_active', true)
-      .maybeSingle();
-    if (data) return data as DbEmailTemplate;
-  }
-
-  const { data, error } = await supabase
-    .from('email_templates')
-    .select(
-      'id,slug,name,category,subject,html_content,text_content,from_email,from_name,product_type'
-    )
-    .eq('slug', resolvedSlug)
-    .is('product_type', null)
-    .eq('is_active', true)
-    .maybeSingle();
-
-  if (error || !data) return null;
-  return data as DbEmailTemplate;
-}
-
 export async function resolveUserLanguage(
   supabase: SupabaseClient,
   userId?: string
@@ -152,27 +166,6 @@ export async function renderDbTemplate(
 
   const subjectRaw = pickLocalized(template.subject, language);
   const htmlRaw = pickLocalized(template.html_content, language);
-
-  // #region agent log
-  fetch('http://127.0.0.1:7740/ingest/c21af8ec-02ef-48c9-95f8-23aa8fa2c366', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'fed886' },
-    body: JSON.stringify({
-      sessionId: 'fed886',
-      hypothesisId: 'H1-email-json-text',
-      location: 'email-template-utils.ts:renderDbTemplate',
-      message: 'Template localized preview',
-      data: {
-        slug,
-        language,
-        subjectType: typeof template.subject,
-        subjectLooksJson: subjectRaw.trim().startsWith('{"'),
-        subjectPreview: subjectRaw.slice(0, 100),
-      },
-      timestamp: Date.now(),
-    }),
-  }).catch(() => {});
-  // #endregion
 
   const subject = replaceVariables(subjectRaw, variables);
   const html = replaceVariables(htmlRaw, variables);
