@@ -7,6 +7,7 @@ import {
   inferCountryCodeFromPhone,
   initiateMoneyFusionWithdraw,
   resolveWithdrawMode,
+  MONEYFUSION_WITHDRAW_MIN_AMOUNT,
 } from './moneyfusion-payout.ts';
 
 export interface StoreWithdrawalPayoutBody {
@@ -61,6 +62,20 @@ export async function handleMoneyFusionStoreWithdrawalPayout(
         success: false,
         error: 'MoneyFusion payout only supports mobile_money withdrawals',
         requires_manual: true,
+      },
+    };
+  }
+
+  const amount = Number(withdrawal.amount);
+  if (!Number.isFinite(amount) || amount < MONEYFUSION_WITHDRAW_MIN_AMOUNT) {
+    return {
+      status: 422,
+      body: {
+        success: false,
+        error: `Montant minimum MoneyFusion : ${MONEYFUSION_WITHDRAW_MIN_AMOUNT} ${String(withdrawal.currency || 'XOF').toUpperCase()} (reçu : ${amount})`,
+        code: 'moneyfusion_min_amount',
+        requires_manual: true,
+        retryable: false,
       },
     };
   }
@@ -198,7 +213,7 @@ export async function handleMoneyFusionStoreWithdrawalPayout(
   if (!withdraw.ok) {
     const isIpBlock = /ip.*autoris|non autoris/i.test(withdraw.message);
     const isRetryableMode =
-      /momentanément indisponible|momentanement indisponible|réessayer plus tard|reesayer plus tard/i.test(
+      /momentanément indisponible|momentanement indisponible|réessayer plus tard|reesayer plus tard|solde|minimum/i.test(
         withdraw.message
       );
     // Config / transient MF errors — keep row pending so admin can retry.

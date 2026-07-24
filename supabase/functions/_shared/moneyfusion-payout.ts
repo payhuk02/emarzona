@@ -142,13 +142,19 @@ export function operatorFamily(moyen: string | null | undefined): string | null 
   if (raw.includes('moov')) return 'moov';
   if (raw.includes('wave')) return 'wave';
   if (raw.includes('free')) return 'free';
-  if (raw.includes('t-money') || raw.includes('tmoney') || raw === 't_money') return 't-money';
+  if (raw.includes('t-money') || raw.includes('tmoney')) return 't-money';
+  if (raw.includes('mpesa') || raw.includes('m-pesa')) return 'mpesa';
+  if (raw.includes('airtel')) return 'airtel';
+  if (raw.includes('amana')) return 'amana';
+  if (raw.includes('zamani')) return 'zamani';
+  if (raw.includes('nita')) return 'nita';
+  if (raw.includes('crypto')) return 'crypto';
   return null;
 }
 
 /**
- * MoneyFusion withdraw_mode keys are NOT always `{op}-{iso}`.
- * BF → orange-money-burkina (not orange-money-bf). Prefer live /withdraw/methods.
+ * MoneyFusion withdraw_mode keys from live GET /withdraw/methods (Jul 2026).
+ * Prefer live catalog in resolveWithdrawMode; this is offline fallback only.
  */
 const MF_WITHDRAW_MODE_FALLBACK: Record<string, Partial<Record<string, string>>> = {
   ci: {
@@ -169,15 +175,37 @@ const MF_WITHDRAW_MODE_FALLBACK: Record<string, Partial<Record<string, string>>>
     't-money': 't-money-togo',
   },
   sn: {
-    orange: 'orange-money-sn',
-    wave: 'wave-sn',
-    free: 'free-money-sn',
+    orange: 'orange-money-senegal',
+    wave: 'wave-senegal',
   },
   ml: {
     orange: 'orange-money-mali',
-    moov: 'moov-ml',
+  },
+  ne: {
+    airtel: 'airtel-money-ne',
+    amana: 'amana-ne',
+    zamani: 'zamanicash-ne',
+    moov: 'moov-money-ne',
+    nita: 'nita-ne',
+  },
+  cd: {
+    mpesa: 'mpesa-cd',
+  },
+  cg: {
+    mtn: 'mtn-cg',
+  },
+  cm: {
+    orange: 'orange-cm',
+    mtn: 'mtn-cm',
+  },
+  ga: {
+    airtel: 'airtel-ga',
+    moov: 'moov-ga',
   },
 };
+
+/** MoneyFusion payout minimum (XOF / local unit as returned by API). */
+export const MONEYFUSION_WITHDRAW_MIN_AMOUNT = 200;
 
 export function guessWithdrawMode(moyen: string | null | undefined, countryCode: string): string | null {
   const cc = String(countryCode || '')
@@ -235,13 +263,19 @@ function matchMethodKey(
   methods: Array<{ key?: string; name?: string }>,
   moyen: string | null | undefined
 ): string | null {
-  if (!methods.length) return null;
+  const mobileMethods = methods.filter(m => {
+    const key = String(m.key || '').toLowerCase();
+    return key && !key.startsWith('crypto');
+  });
+  const pool = mobileMethods.length ? mobileMethods : methods;
+  if (!pool.length) return null;
+
   const family = operatorFamily(moyen);
   const needle = String(moyen || '')
     .toLowerCase()
     .replace(/_/g, '-');
-  if (family) {
-    const byFamily = methods.find(m => {
+  if (family && family !== 'crypto') {
+    const byFamily = pool.find(m => {
       const key = String(m.key || '').toLowerCase();
       const name = String(m.name || '').toLowerCase();
       return key.includes(family) || name.includes(family);
@@ -249,14 +283,34 @@ function matchMethodKey(
     if (byFamily?.key) return byFamily.key;
   }
   if (needle) {
-    const match = methods.find(m => {
+    const match = pool.find(m => {
       const key = String(m.key || '').toLowerCase();
       const name = String(m.name || '').toLowerCase();
       return key.includes(needle) || name.includes(needle) || needle.includes(key);
     });
     if (match?.key) return match.key;
   }
-  return methods[0]?.key ?? null;
+  return pool[0]?.key ?? null;
+}
+
+function extractTokenPay(data: Record<string, unknown>): string {
+  const direct = [data.tokenPay, data.token_pay, data.token, data.TokenPay];
+  for (const v of direct) {
+    if (typeof v === 'string' && v.trim()) return v.trim();
+  }
+  const nested = data.data;
+  if (nested && typeof nested === 'object' && !Array.isArray(nested)) {
+    const obj = nested as Record<string, unknown>;
+    for (const k of ['tokenPay', 'token_pay', 'token', 'TokenPay']) {
+      const v = obj[k];
+      if (typeof v === 'string' && v.trim()) return v.trim();
+    }
+  }
+  // Case-insensitive scan of top-level keys
+  for (const [k, v] of Object.entries(data)) {
+    if (/^token_?pay$/i.test(k) && typeof v === 'string' && v.trim()) return v.trim();
+  }
+  return '';
 }
 
 export async function resolveWithdrawMode(
@@ -340,9 +394,15 @@ export async function initiateMoneyFusionWithdraw(input: {
     return { ok: false, message: formatMoneyFusionIpError(raw) };
   }
 
-  const tokenPay = String(data.tokenPay || data.token || '').trim();
+  // MF sometimes returns statut:true WITHOUT tokenPay for business errors
+  // e.g. "Le retrait minimum est 200", "solde insuffisant".
+  const tokenPay = extractTokenPay(data);
   if (!tokenPay) {
-    return { ok: false, message: 'MoneyFusion withdraw sans tokenPay' };
+    const raw =
+      (typeof data.message === 'string' && data.message.trim()) ||
+      (typeof data.error === 'string' && data.error.trim()) ||
+      'MoneyFusion withdraw sans tokenPay';
+    return { ok: false, message: formatMoneyFusionIpError(raw) };
   }
 
   return {
