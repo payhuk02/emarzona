@@ -190,11 +190,14 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
 
       const memberStoreIds = memberStores?.map(m => m.store_id) || [];
 
-      // 2. Construire la requête avec le filtre explicite pour ne pas afficher
-      // toutes les boutiques de la plateforme si l'utilisateur est admin
+      // 2. Filtre explicite (évite que les admins reçoivent toutes les boutiques).
+      // logo_url vit dans store_appearance (colonne droppée de stores) — ne pas le
+      // sélectionner sur stores sinon PostgREST échoue et le dashboard croit « 0 boutique ».
       let query = supabase
         .from('stores')
-        .select('id,user_id,name,slug,logo_url,created_at,updated_at,metadata,commerce_type');
+        .select(
+          'id,user_id,name,slug,created_at,updated_at,metadata,commerce_type,store_appearance(logo_url)'
+        );
 
       if (memberStoreIds.length > 0) {
         query = query.or(`user_id.eq.${user.id},id.in.(${memberStoreIds.join(',')})`);
@@ -211,12 +214,22 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
         throw fetchError;
       }
 
-      const storesData = (data || []).map(row => ({
-        ...row,
-        commerce_type: resolveStoreCommerceTypeFromStore(
-          row as { commerce_type?: unknown; metadata?: Record<string, unknown> | null }
-        ),
-      })) as Store[];
+      const storesData = (data || []).map(row => {
+        const appearanceRaw = (row as { store_appearance?: unknown }).store_appearance;
+        const appearance = Array.isArray(appearanceRaw)
+          ? (appearanceRaw[0] as { logo_url?: string | null } | undefined)
+          : (appearanceRaw as { logo_url?: string | null } | null | undefined);
+        const { store_appearance: _appearance, ...storeRow } = row as Record<string, unknown> & {
+          store_appearance?: unknown;
+        };
+        return {
+          ...storeRow,
+          logo_url: appearance?.logo_url ?? null,
+          commerce_type: resolveStoreCommerceTypeFromStore(
+            storeRow as { commerce_type?: unknown; metadata?: Record<string, unknown> | null }
+          ),
+        };
+      }) as Store[];
       setStores(storesData);
 
       if (storesData.length > 0) {
@@ -242,11 +255,8 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       const errorMessage =
         err instanceof Error ? err.message : 'Erreur lors du chargement des boutiques';
       setError(errorMessage);
-      // Conserver la sélection courante sur erreur transitoire (évite flash onboarding)
-      if (storesRef.current.length === 0) {
-        setStores([]);
-        setSelectedStoreIdState(null);
-      }
+      // Ne pas traiter une erreur comme « aucune boutique » (évite faux onboarding).
+      // Conserver la liste / sélection déjà en mémoire s'il y en a.
     } finally {
       setLoading(false);
     }

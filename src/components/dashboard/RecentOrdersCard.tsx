@@ -148,7 +148,7 @@ const RecentOrdersCardComponent = ({ orders, variant = 'default' }: RecentOrders
                   <div className="dashboard-order-avatar" aria-hidden>
                     {customerInitials(order.customers?.name)}
                   </div>
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-0 w-full sm:w-auto">
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="text-sm sm:text-base font-semibold">{order.order_number}</p>
                       {getStatusBadge(order.status)}
@@ -157,8 +157,11 @@ const RecentOrdersCardComponent = ({ orders, variant = 'default' }: RecentOrders
                       {order.customers?.name || 'Client'} •{' '}
                       {format(new Date(order.created_at), 'dd MMM yyyy', { locale: fr })}
                     </p>
+                    <p className="text-sm font-bold tabular-nums mt-1 sm:hidden">
+                      {formatFcfa(order.total_amount)}
+                    </p>
                   </div>
-                  <p className="text-sm sm:text-base font-bold tabular-nums shrink-0">
+                  <p className="hidden sm:block text-sm sm:text-base font-bold tabular-nums shrink-0">
                     {formatFcfa(order.total_amount)}
                   </p>
                 </>

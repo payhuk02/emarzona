@@ -11,11 +11,10 @@ import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useSessionHealth } from '@/hooks/useSessionHealth';
 import { useDeferredMount } from '@/hooks/useDeferredMount';
-import type { Notification } from '@/types/notifications';
 import { PeriodType } from '@/components/dashboard/PeriodFilter';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { DashboardStats } from '@/components/dashboard/DashboardStats';
-import { useNotifications, useUnreadCount } from '@/hooks/useNotifications';
+import { useUnreadCount } from '@/hooks/useNotifications';
 import {
   DashboardFullSkeleton,
   DashboardSecondarySkeleton,
@@ -26,7 +25,6 @@ import { DashboardErrorHandler } from '@/components/dashboard/DashboardErrorHand
 import { DashboardActionCenter } from '@/components/dashboard/DashboardActionCenter';
 import { PhysicalSubscriptionAlert } from '@/components/billing/PhysicalSubscriptionAlert';
 import { SellerPushOptInBanner } from '@/components/notifications/SellerPushOptInBanner';
-import { DashboardNotificationsStrip } from '@/components/dashboard/DashboardNotificationsStrip';
 import '@/styles/dashboard-premium.css';
 
 const DashboardSecondaryPanels = lazy(() =>
@@ -64,7 +62,7 @@ const DashboardSecondaryPanels = lazy(() =>
  */
 /** Route /dashboard : oriente vers onboarding ou tableau de bord complet */
 const Dashboard = () => {
-  const { loading: contextLoading, stores } = useStoreContext();
+  const { loading: contextLoading, stores, error: storesError } = useStoreContext();
   const { store, loading: storeLoading, hasStores } = useStore();
 
   const shellView = resolveDashboardShellView({
@@ -73,6 +71,7 @@ const Dashboard = () => {
     hasStores,
     storesCount: stores.length,
     store,
+    storesError,
   });
 
   if (shellView === 'onboarding') {
@@ -152,7 +151,7 @@ const DashboardWithStore = ({ store, storeLoading }: DashboardWithStoreProps) =>
     }
   }, [showStatsSkeleton, stats]);
 
-  /** Notifications après KPI chargés + idle (évite requêtes/realtime au 1er paint). */
+  /** Unread count after KPI (header bell + ActionCenter chip). */
   const notificationsEnabled = useDeferredMount(!showStatsSkeleton && hasStatsData, 2000);
 
   // Refresh session uniquement après le 1er contrôle auth (évite faux positif au mount)
@@ -177,55 +176,7 @@ const DashboardWithStore = ({ store, storeLoading }: DashboardWithStoreProps) =>
     refreshSessionIfNeeded,
   ]);
 
-  // Récupérer les vraies notifications depuis Supabase (inclut les messages) - Déferré
-  const { data: notificationsResult } = useNotifications({
-    page: 1,
-    pageSize: 5,
-    includeArchived: false,
-    enabled: notificationsEnabled,
-  });
   const { data: unreadCount = 0 } = useUnreadCount({ enabled: notificationsEnabled });
-
-  // ✅ VALIDATION: Type-safe transformation des notifications Supabase
-  interface DashboardNotification {
-    id: string;
-    title: string;
-    message: string;
-    type: 'warning' | 'success';
-    timestamp: string;
-    read: boolean;
-  }
-
-  // Fonction de validation stricte des notifications
-  const validateNotification = (notif: unknown): notif is Notification => {
-    if (!notif || typeof notif !== 'object') return false;
-    const n = notif as Record<string, unknown>;
-    return (
-      typeof n.id === 'string' &&
-      typeof n.title === 'string' &&
-      typeof n.message === 'string' &&
-      typeof n.created_at === 'string' &&
-      (n.is_read === undefined || typeof n.is_read === 'boolean')
-    );
-  };
-
-  // Transformer les notifications Supabase en format compatible avec le Dashboard
-  const notifications = useMemo<DashboardNotification[]>(() => {
-    const dbNotifications = notificationsResult?.data || [];
-    return dbNotifications.filter(validateNotification).map(
-      (notif): DashboardNotification => ({
-        id: notif.id,
-        title: notif.title,
-        message: notif.message,
-        type:
-          notif.priority === 'urgent' || notif.priority === 'high'
-            ? ('warning' as const)
-            : ('success' as const),
-        timestamp: notif.created_at,
-        read: notif.is_read || false,
-      })
-    );
-  }, [notificationsResult?.data]);
 
   // ✅ ACCESSIBILITÉ: État pour les annonces aria-live
   const [statusMessage, setStatusMessage] = useState<string>('');
@@ -351,8 +302,8 @@ const DashboardWithStore = ({ store, storeLoading }: DashboardWithStoreProps) =>
 
   return (
     <AppPageShell>
-      <div className="dashboard-premium container mx-auto max-w-[90rem] p-4 sm:p-5 lg:p-8 pb-10">
-        <div className="mb-6 sm:mb-8">
+      <div className="dashboard-premium container mx-auto max-w-[90rem] p-3 sm:p-5 lg:p-8 pb-10">
+        <div className="mb-5 sm:mb-6">
           <DashboardHeader {...dashboardHeaderProps} />
         </div>
 
@@ -368,12 +319,12 @@ const DashboardWithStore = ({ store, storeLoading }: DashboardWithStoreProps) =>
 
         {store?.id && <PhysicalSubscriptionAlert storeId={store.id} />}
 
-        {store?.id && <SellerPushOptInBanner className="mb-6" variant="dashboard" />}
+        {store?.id && <SellerPushOptInBanner className="mb-5" variant="dashboard" />}
 
         {showStatsSkeleton ? (
           <DashboardFullSkeleton />
         ) : stats ? (
-          <div className="space-y-6 sm:space-y-8">
+          <div className="space-y-5 sm:space-y-6">
             <DashboardActionCenter
               operational={stats.operational}
               periodLabel={stats.periodLabel}
@@ -383,14 +334,6 @@ const DashboardWithStore = ({ store, storeLoading }: DashboardWithStoreProps) =>
               customDomain={store?.custom_domain}
               unreadNotifications={unreadCount}
             />
-
-            {notificationsEnabled && (
-              <DashboardNotificationsStrip
-                notifications={notifications}
-                unreadCount={unreadCount}
-                enabled={notificationsEnabled}
-              />
-            )}
 
             <div
               className={cn(

@@ -26,7 +26,7 @@ interface PeriodFilterProps {
   className?: string;
 }
 
-export const PeriodFilter : React.FC<PeriodFilterProps> = ({
+export const PeriodFilter: React.FC<PeriodFilterProps> = ({
   period,
   onPeriodChange,
   customStartDate,
@@ -75,28 +75,28 @@ export const PeriodFilter : React.FC<PeriodFilterProps> = ({
         : undefined;
 
   return (
-    <div className={cn('flex items-center gap-2', className)}>
+    <div className={cn('flex items-center gap-2 min-w-0 w-full sm:w-auto', className)}>
       <Select value={period} onValueChange={handlePeriodChange}>
         <SelectTrigger
           className={cn(
-            'h-9 sm:h-10 text-[10px] sm:text-xs md:text-sm',
-            className?.includes('w-full') ? 'w-full' : 'w-[180px]'
+            'h-9 sm:h-10 text-xs sm:text-sm min-w-0',
+            'w-full sm:w-auto sm:min-w-[9.5rem]'
           )}
         >
-          <CalendarIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 mr-1.5 sm:mr-2" />
+          <CalendarIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 shrink-0" />
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="7d" className="text-[10px] sm:text-xs md:text-sm">
+          <SelectItem value="7d" className="text-xs sm:text-sm">
             7 derniers jours
           </SelectItem>
-          <SelectItem value="30d" className="text-[10px] sm:text-xs md:text-sm">
+          <SelectItem value="30d" className="text-xs sm:text-sm">
             30 derniers jours
           </SelectItem>
-          <SelectItem value="90d" className="text-[10px] sm:text-xs md:text-sm">
+          <SelectItem value="90d" className="text-xs sm:text-sm">
             90 derniers jours
           </SelectItem>
-          <SelectItem value="custom" className="text-[10px] sm:text-xs md:text-sm">
+          <SelectItem value="custom" className="text-xs sm:text-sm">
             Personnalisé
           </SelectItem>
         </SelectContent>
@@ -108,12 +108,12 @@ export const PeriodFilter : React.FC<PeriodFilterProps> = ({
             <Button
               variant="outline"
               className={cn(
-                'justify-start text-left font-normal h-9 sm:h-10 text-[10px] sm:text-xs md:text-sm',
-                className?.includes('w-full') ? 'w-full' : 'w-full sm:w-[280px] md:w-[320px]',
+                'justify-start text-left font-normal h-9 sm:h-10 text-xs sm:text-sm min-w-0',
+                'w-full sm:w-auto sm:min-w-[12rem] sm:max-w-[18rem]',
                 !customStartDate && !customEndDate && 'text-muted-foreground'
               )}
             >
-              <CalendarIcon className="mr-1.5 sm:mr-2 h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
+              <CalendarIcon className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
               {customStartDate && customEndDate ? (
                 <span className="flex-1 truncate">
                   {format(customStartDate, 'dd MMM yyyy', { locale: fr })} -{' '}
@@ -217,10 +217,3 @@ export const PeriodFilter : React.FC<PeriodFilterProps> = ({
     </div>
   );
 };
-
-
-
-
-
-
-

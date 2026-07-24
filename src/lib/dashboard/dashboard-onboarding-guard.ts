@@ -10,10 +10,13 @@ export function resolveDashboardShellView(input: {
   hasStores: boolean;
   storesCount: number;
   store: unknown | null;
+  /** Erreur de chargement des boutiques : ne jamais conclure « 0 boutique ». */
+  storesError?: string | null;
 }): DashboardShellView {
   const awaitingStoreResolution =
     input.contextLoading ||
     input.storeLoading ||
+    Boolean(input.storesError) ||
     ((input.hasStores || input.storesCount > 0) && !input.store);
 
   if (!awaitingStoreResolution && !input.hasStores && input.storesCount === 0) {

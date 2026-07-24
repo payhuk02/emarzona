@@ -50,7 +50,7 @@ export const DashboardRecentActivity = React.memo<DashboardRecentActivityProps>(
                   key={item.id}
                   className="flex items-start gap-3 py-3.5 border-b border-border/40 last:border-0"
                 >
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-violet-500/10 text-violet-600">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
                     <Icon className="h-4 w-4" />
                   </span>
                   <div className="flex-1 min-w-0">

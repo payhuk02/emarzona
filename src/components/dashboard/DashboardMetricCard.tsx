@@ -1,7 +1,7 @@
 import { LucideIcon, TrendingDown, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export type MetricTheme = 'purple' | 'blue' | 'green' | 'orange';
+export type MetricTheme = 'orange' | 'blue' | 'slate' | 'amber' | 'purple' | 'green';
 
 interface DashboardMetricCardProps {
   label: string;
@@ -24,13 +24,19 @@ export function DashboardMetricCard({
 }: DashboardMetricCardProps) {
   const isUp = trendPercent >= 0;
   const trendLabel = `${isUp ? '+' : ''}${trendPercent}%`;
+  const themeClass = theme === 'purple' ? 'orange' : theme === 'green' ? 'slate' : theme;
 
   return (
-    <article className={cn('dashboard-metric-card group', `dashboard-metric-card--${theme}`, className)}>
-      {/* Background glow orbs - animated via CSS */}
+    <article
+      className={cn(
+        'dashboard-metric-card group',
+        `dashboard-metric-card--${themeClass}`,
+        className
+      )}
+    >
       <div className="dashboard-metric-wave" aria-hidden="true" />
-      
-      <div className="flex items-start justify-between gap-3 relative z-10">
+
+      <div className="flex items-start justify-between gap-2 relative z-10">
         <div className="dashboard-metric-icon-wrap" aria-hidden="true">
           <Icon />
         </div>
@@ -41,9 +47,9 @@ export function DashboardMetricCard({
           )}
         >
           {isUp ? (
-            <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden="true" />
+            <TrendingUp className="h-3.5 w-3.5" aria-hidden="true" />
           ) : (
-            <TrendingDown className="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden="true" />
+            <TrendingDown className="h-3.5 w-3.5" aria-hidden="true" />
           )}
           {trendLabel}
         </span>

@@ -52,21 +52,21 @@ export const DashboardHeader = React.memo<DashboardHeaderProps>(
           ref={headerRef}
           className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700"
         >
-          <div className="flex items-start sm:items-center gap-2 sm:gap-3">
+          <div className="flex items-start sm:items-center gap-2 sm:gap-3 min-w-0 flex-1">
             <SidebarTrigger className="mt-1 sm:mt-0 shrink-0" />
             <div className="flex-1 min-w-0">
               <h1 className="app-premium-page-title flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
-                <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
                   <LayoutDashboard
-                    className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 xl:h-8 xl:w-8 text-black shrink-0"
+                    className="h-5 w-5 sm:h-6 sm:w-6 text-foreground shrink-0"
                     aria-hidden="true"
                   />
-                  <span className="text-black font-bold break-words">
+                  <span className="text-foreground font-bold truncate">
                     {getValue('dashboard.title') || t('dashboard.title')}
                   </span>
                   {isUpdating && (
-                    <div className="ml-2 flex items-center gap-1 text-xs text-muted-foreground animate-in fade-in">
-                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div>
+                    <div className="ml-1 flex items-center gap-1 text-xs text-muted-foreground animate-in fade-in shrink-0">
+                      <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></div>
                       <span className="hidden sm:inline">Mise à jour...</span>
                     </div>
                   )}
@@ -77,7 +77,7 @@ export const DashboardHeader = React.memo<DashboardHeaderProps>(
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap w-full sm:w-auto sm:justify-end">
             {/* Notifications Bell - Desktop */}
             <div className="hidden sm:block relative">
               <Button
@@ -111,10 +111,10 @@ export const DashboardHeader = React.memo<DashboardHeaderProps>(
             />
             <Badge
               variant="outline"
-              className="text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2 hidden sm:flex items-center gap-1.5 min-h-[44px]"
+              className="text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2 hidden sm:flex items-center gap-1.5 min-h-[40px]"
               aria-label={getValue('dashboard.online') || 'En ligne'}
             >
-              <Activity className="h-3 w-3 sm:h-3.5 sm:w-3.5" aria-hidden="true" />
+              <Activity className="h-3.5 w-3.5" aria-hidden="true" />
               {getValue('dashboard.online')}
             </Badge>
             <Button

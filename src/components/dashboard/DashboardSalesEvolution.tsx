@@ -54,19 +54,19 @@ export const DashboardSalesEvolution = React.memo<DashboardSalesEvolutionProps>(
             </p>
           </div>
         </div>
-        <div className="h-[280px] sm:h-[320px] lg:h-[360px] flex-1 min-h-[240px]">
-          <ChartSuspense height={360}>
+        <div className="h-[260px] sm:h-[300px] lg:h-[320px] flex-1 min-h-[220px]">
+          <ChartSuspense height={320}>
             <LazyResponsiveContainer width="100%" height="100%">
               <LazyLineChart data={chartData}>
-                <LazyCartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                <LazyCartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
                 <LazyXAxis
                   dataKey="month"
-                  tick={{ fontSize: 13, fill: '#6b7280' }}
+                  tick={{ fontSize: 12, fill: '#64748b' }}
                   axisLine={false}
                   tickLine={false}
                 />
                 <LazyYAxis
-                  tick={{ fontSize: 13, fill: '#6b7280' }}
+                  tick={{ fontSize: 12, fill: '#64748b' }}
                   axisLine={false}
                   tickLine={false}
                   tickFormatter={v => formatLocaleNumber(Number(v), locale)}
@@ -77,18 +77,18 @@ export const DashboardSalesEvolution = React.memo<DashboardSalesEvolutionProps>(
                     t('dashboard.salesEvolution.revenue', 'Revenus'),
                   ]}
                   contentStyle={{
-                    borderRadius: 12,
-                    border: '1px solid #e5e7eb',
-                    fontSize: 14,
+                    borderRadius: 10,
+                    border: '1px solid #e2e8f0',
+                    fontSize: 13,
                   }}
                 />
                 <LazyLine
                   type="monotone"
                   dataKey="revenue"
-                  stroke="#8b5cf6"
-                  strokeWidth={3}
-                  dot={{ fill: '#8b5cf6', strokeWidth: 2, r: 5 }}
-                  activeDot={{ r: 7, fill: '#7c3aed', stroke: '#fff', strokeWidth: 2 }}
+                  stroke="#f97316"
+                  strokeWidth={2.5}
+                  dot={{ fill: '#f97316', strokeWidth: 0, r: 3.5 }}
+                  activeDot={{ r: 6, fill: '#ea580c', stroke: '#fff', strokeWidth: 2 }}
                 />
               </LazyLineChart>
             </LazyResponsiveContainer>

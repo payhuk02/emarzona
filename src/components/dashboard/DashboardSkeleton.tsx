@@ -10,7 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 export function DashboardMetricCardSkeleton() {
   return (
     <article
-      className="dashboard-metric-card dashboard-metric-card--purple min-h-[8.5rem] animate-pulse"
+      className="dashboard-metric-card dashboard-metric-card--orange min-h-[8.5rem] animate-pulse"
       aria-hidden
     >
       <div className="flex justify-between gap-3 mb-4">

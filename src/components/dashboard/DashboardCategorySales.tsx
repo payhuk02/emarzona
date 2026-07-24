@@ -19,27 +19,27 @@ const TYPE_ICONS: Record<ProductType, React.ComponentType<{ className?: string }
 };
 
 const BAR_COLORS: Record<ProductType, string> = {
-  digital: 'bg-violet-500',
+  digital: 'bg-orange-500',
   physical: 'bg-blue-500',
   service: 'bg-emerald-500',
   course: 'bg-amber-500',
-  artist: 'bg-pink-500',
+  artist: 'bg-sky-500',
 };
 
 const ICON_BG: Record<ProductType, string> = {
-  digital: 'bg-violet-500/15',
+  digital: 'bg-orange-500/15',
   physical: 'bg-blue-500/15',
   service: 'bg-emerald-500/15',
   course: 'bg-amber-500/15',
-  artist: 'bg-pink-500/15',
+  artist: 'bg-sky-500/15',
 };
 
 const ICON_COLOR: Record<ProductType, string> = {
-  digital: 'text-violet-600',
+  digital: 'text-orange-600',
   physical: 'text-blue-600',
   service: 'text-emerald-600',
   course: 'text-amber-600',
-  artist: 'text-pink-600',
+  artist: 'text-sky-600',
 };
 
 interface DashboardCategorySalesProps {

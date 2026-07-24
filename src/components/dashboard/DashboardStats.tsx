@@ -32,7 +32,7 @@ export const DashboardStats = React.memo<DashboardStatsProps>(({ stats }) => {
       value: formatFcfa(stats.totalRevenue),
       trend: stats.trends.revenueGrowth,
       icon: DollarSign,
-      theme: 'purple' as const,
+      theme: 'orange' as const,
     },
     {
       label: t('dashboard.stats.orders.title', 'Commandes'),
@@ -49,14 +49,14 @@ export const DashboardStats = React.memo<DashboardStatsProps>(({ stats }) => {
       value: formatLocaleNumber(stats.totalCustomers, locale),
       trend: stats.trends.customerGrowth,
       icon: Users,
-      theme: 'green' as const,
+      theme: 'slate' as const,
     },
     {
       label: t('dashboard.stats.avgBasket', 'Panier moyen'),
       value: formatFcfa(avgBasket),
       trend: stats.trends.revenueGrowth,
       icon: Wallet,
-      theme: 'orange' as const,
+      theme: 'amber' as const,
     },
   ];
 
@@ -79,7 +79,7 @@ export const DashboardStats = React.memo<DashboardStatsProps>(({ stats }) => {
         {t('dashboard.stats.periodHint', 'KPI sur la période : {{period}}', { period: periodHint })}
       </p>
       <div
-        className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4"
+        className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4"
         role="region"
         aria-label={t('dashboard.stats.ariaLabel', 'Statistiques du tableau de bord')}
       >

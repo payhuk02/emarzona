@@ -105,7 +105,9 @@ const TopProductsCardComponent = ({ products, variant = 'default' }: TopProducts
               <div
                 className={cn(
                   'shrink-0',
-                  isPremium ? 'dashboard-order-avatar !text-violet-700 dark:!text-violet-300' : 'flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full font-bold bg-primary/10 text-primary text-sm'
+                  isPremium
+                    ? 'dashboard-order-avatar text-primary'
+                    : 'flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full font-bold bg-primary/10 text-primary text-sm'
                 )}
               >
                 {index + 1}

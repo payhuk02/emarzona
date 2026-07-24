@@ -20,7 +20,7 @@ interface ActionItem {
   count: number;
   href: string;
   icon: React.ElementType;
-  tone: 'amber' | 'blue' | 'violet' | 'rose' | 'emerald';
+  tone: 'amber' | 'blue' | 'slate' | 'rose' | 'emerald';
 }
 
 interface DashboardActionCenterProps {
@@ -77,7 +77,7 @@ export const DashboardActionCenter = React.memo<DashboardActionCenterProps>(
         count: operational.draftProducts,
         href: '/dashboard/products',
         icon: Package,
-        tone: 'violet',
+        tone: 'slate',
       },
       {
         id: 'reviews',
@@ -93,11 +93,14 @@ export const DashboardActionCenter = React.memo<DashboardActionCenterProps>(
       storeSlug && generateStoreUrl(storeSlug, storeSubdomain, customDomain ?? undefined);
 
     const toneClasses: Record<ActionItem['tone'], string> = {
-      amber: 'border-amber-200/80 bg-amber-50/40 hover:bg-amber-50/70',
-      blue: 'border-blue-200/80 bg-blue-50/40 hover:bg-blue-50/70',
-      violet: 'border-violet-200/80 bg-violet-50/40 hover:bg-violet-50/70',
-      rose: 'border-rose-200/80 bg-rose-50/40 hover:bg-rose-50/70',
-      emerald: 'border-emerald-200/80 bg-emerald-50/40 hover:bg-emerald-50/70',
+      amber:
+        'border-amber-200/90 bg-amber-50/70 hover:bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800/50 dark:hover:bg-amber-950/45',
+      blue: 'border-blue-200/90 bg-blue-50/70 hover:bg-blue-50 dark:bg-blue-950/30 dark:border-blue-800/50 dark:hover:bg-blue-950/45',
+      slate:
+        'border-slate-200/90 bg-slate-50/80 hover:bg-slate-50 dark:bg-slate-900/40 dark:border-slate-700/60 dark:hover:bg-slate-900/60',
+      rose: 'border-rose-200/90 bg-rose-50/70 hover:bg-rose-50 dark:bg-rose-950/30 dark:border-rose-800/50 dark:hover:bg-rose-950/45',
+      emerald:
+        'border-emerald-200/90 bg-emerald-50/70 hover:bg-emerald-50 dark:bg-emerald-950/30 dark:border-emerald-800/50 dark:hover:bg-emerald-950/45',
     };
 
     return (
@@ -107,7 +110,7 @@ export const DashboardActionCenter = React.memo<DashboardActionCenterProps>(
         aria-label={t('dashboard.actions.ariaLabel', 'Actions et alertes')}
       >
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
-          <div>
+          <div className="min-w-0">
             <h2 className="dashboard-premium-panel-title">
               {t('dashboard.actions.title', 'À traiter')}
             </h2>
@@ -117,12 +120,12 @@ export const DashboardActionCenter = React.memo<DashboardActionCenterProps>(
               })}
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 shrink-0">
             {unreadNotifications > 0 && (
               <button
                 type="button"
                 onClick={() => navigate('/notifications')}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-border/60 px-3 py-2 text-sm font-medium hover:bg-muted/50 transition-colors"
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-sm font-medium hover:bg-muted/60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <MessageSquare className="h-4 w-4" aria-hidden />
                 {t('dashboard.actions.notifications', '{{count}} notification(s)', {
@@ -135,7 +138,7 @@ export const DashboardActionCenter = React.memo<DashboardActionCenterProps>(
                 href={storeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-lg border border-border/60 px-3 py-2 text-sm font-medium hover:bg-muted/50 transition-colors"
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-sm font-medium hover:bg-muted/60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <ExternalLink className="h-4 w-4" aria-hidden />
                 {t('dashboard.actions.viewStore', 'Voir {{name}}', {
@@ -154,7 +157,7 @@ export const DashboardActionCenter = React.memo<DashboardActionCenterProps>(
             )}
           </p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-2.5 sm:gap-3">
             {items.map(item => {
               const Icon = item.icon;
               return (
@@ -162,16 +165,15 @@ export const DashboardActionCenter = React.memo<DashboardActionCenterProps>(
                   key={item.id}
                   type="button"
                   onClick={() => navigate(item.href)}
-                  className={cn(
-                    'rounded-xl border p-4 text-left transition-colors touch-manipulation',
-                    toneClasses[item.tone]
-                  )}
+                  className={cn('dashboard-action-tile', toneClasses[item.tone])}
                 >
                   <div className="flex items-center justify-between gap-2 mb-2">
-                    <Icon className="h-5 w-5 shrink-0 opacity-80" aria-hidden />
-                    <span className="text-2xl font-bold tabular-nums">{item.count}</span>
+                    <Icon className="h-4 w-4 sm:h-5 sm:w-5 shrink-0 opacity-80" aria-hidden />
+                    <span className="text-xl sm:text-2xl font-bold tabular-nums">{item.count}</span>
                   </div>
-                  <span className="text-sm font-medium leading-snug">{item.label}</span>
+                  <span className="text-xs sm:text-sm font-medium leading-snug line-clamp-2">
+                    {item.label}
+                  </span>
                 </button>
               );
             })}

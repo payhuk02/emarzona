@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { CheckCircle2, Clock, Package, Users } from 'lucide-react';
+import { CheckCircle2, Package, Truck, Users } from 'lucide-react';
 import { formatFcfa } from '@/lib/format-currency';
 import type { DashboardStats } from '@/hooks/useDashboardStats';
 
@@ -21,9 +21,9 @@ export const DashboardFooterMetrics = React.memo<DashboardFooterMetricsProps>(({
       icon: CheckCircle2,
     },
     {
-      label: t('dashboard.footer.toFulfill', 'À traiter'),
+      label: t('dashboard.footer.toShip', 'À expédier'),
       value: String(operational.ordersToFulfill),
-      icon: Clock,
+      icon: Truck,
     },
     {
       label: t('dashboard.footer.avgBasket', 'Panier moyen'),
@@ -39,7 +39,7 @@ export const DashboardFooterMetrics = React.memo<DashboardFooterMetricsProps>(({
 
   return (
     <div
-      className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5"
+      className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4"
       role="region"
       aria-label={t('dashboard.footer.ariaLabel', 'Indicateurs secondaires')}
     >
@@ -47,11 +47,11 @@ export const DashboardFooterMetrics = React.memo<DashboardFooterMetricsProps>(({
         const Icon = item.icon;
         return (
           <div key={item.label} className="dashboard-mini-metric">
-            <div className="flex items-center gap-2 text-muted-foreground">
+            <div className="flex items-center gap-2 text-muted-foreground min-w-0">
               <Icon className="h-4 w-4 shrink-0" aria-hidden />
-              <span className="dashboard-mini-metric-label">{item.label}</span>
+              <span className="dashboard-mini-metric-label truncate">{item.label}</span>
             </div>
-            <p className="dashboard-mini-metric-value">{item.value}</p>
+            <p className="dashboard-mini-metric-value break-words">{item.value}</p>
           </div>
         );
       })}

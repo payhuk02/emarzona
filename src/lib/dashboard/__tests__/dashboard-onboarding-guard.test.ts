@@ -49,4 +49,17 @@ describe('resolveDashboardShellView', () => {
       })
     ).toBe('dashboard');
   });
+
+  it('does not show onboarding when store fetch failed', () => {
+    expect(
+      resolveDashboardShellView({
+        contextLoading: false,
+        storeLoading: false,
+        hasStores: false,
+        storesCount: 0,
+        store: null,
+        storesError: 'column logo_url does not exist',
+      })
+    ).toBe('skeleton');
+  });
 });
