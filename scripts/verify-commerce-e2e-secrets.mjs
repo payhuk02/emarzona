@@ -299,10 +299,39 @@ const admin = createClient(url, serviceKey, {
   realtime: { transport: ws },
 });
 
-const { error } = await admin.auth.admin.listUsers({ page: 1, perPage: 1 });
+function isTransientAuthAdminError(error) {
+  const message = error?.message ?? String(error ?? '');
+  return /unrecognized JWT kid|unable to parse or verify signature|token is unverifiable|ES256/i.test(
+    message
+  );
+}
 
-if (error) {
-  console.error(`Supabase service role key rejected for project ${projectRef}: ${error.message}`);
+async function withAuthAdminRetry(label, fn, options = {}) {
+  const attempts = options.attempts ?? 5;
+  const initialDelayMs = options.initialDelayMs ?? 1500;
+  let lastError;
+
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+      if (!isTransientAuthAdminError(error) || attempt === attempts) break;
+      await new Promise(resolve => setTimeout(resolve, initialDelayMs * attempt));
+    }
+  }
+
+  throw lastError ?? new Error(`${label} failed`);
+}
+
+try {
+  await withAuthAdminRetry('commerce-e2e listUsers probe', async () => {
+    const { error } = await admin.auth.admin.listUsers({ page: 1, perPage: 1 });
+    if (error) throw error;
+  });
+} catch (error) {
+  const message = error?.message ?? String(error);
+  console.error(`Supabase service role key rejected for project ${projectRef}: ${message}`);
   console.error('');
   console.error('Ensure URL and service role secret belong to the same Supabase project.');
   console.error('Rotate CI secret: npm run setup:commerce-e2e-secret');

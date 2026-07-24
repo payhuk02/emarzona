@@ -69,7 +69,20 @@ export const usePlatformCommissions = (startDate?: string, endDate?: string) => 
         query = query.lte('created_at', `${endDate}T23:59:59.999Z`);
       }
 
-      const { data, error } = await query;
+      let { data, error } = await query;
+
+      // Fallback sans embeds si RLS/jointure bloque (évite totaux à 0 silencieux)
+      if (error) {
+        logger.warn('usePlatformCommissions embed query failed, falling back', { error });
+        let plain = supabase
+          .from('platform_commissions')
+          .select('*')
+          .in('status', ['completed', 'pending', 'paid'])
+          .order('created_at', { ascending: false });
+        if (startDate) plain = plain.gte('created_at', `${startDate}T00:00:00.000Z`);
+        if (endDate) plain = plain.lte('created_at', `${endDate}T23:59:59.999Z`);
+        ({ data, error } = await plain);
+      }
 
       if (error) throw error;
 

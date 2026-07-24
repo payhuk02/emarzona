@@ -144,8 +144,10 @@ export const SelectField = React.forwardRef<HTMLButtonElement, SelectFieldProps>
         {/* Select Root (standard ou MobileSelect) */}
         {useMobileSelectRoot ? (
           <MobileSelect
-            value={value}
-            onValueChange={onValueChange}
+            value={value?.trim() ? value : undefined}
+            onValueChange={next => {
+              if (next?.trim()) onValueChange?.(next);
+            }}
             disabled={disabled || loading}
             ref={mobileHandleRef}
           >
