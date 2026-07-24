@@ -1,12 +1,10 @@
-import { useMemo, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useStore } from '@/hooks/useStore';
 import { useOrders } from '@/hooks/useOrders';
-import { useCustomers } from '@/hooks/useCustomers';
-import { useProductsOptimized } from '@/hooks/useProducts';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DollarSign, ShoppingCart, Users, Package, BarChart3, Plus } from 'lucide-react';
 import { SalesChart } from '@/components/analytics/SalesChart';
@@ -19,54 +17,50 @@ import { CohortAnalysis } from '@/components/analytics/CohortAnalysis';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useUnifiedAnalytics, type TimeRange } from '@/hooks/useUnifiedAnalytics';
+
+const formatFcfa = (amount: number) => `${Math.round(amount).toLocaleString('fr-FR')} FCFA`;
 
 const Analytics = () => {
   const navigate = useNavigate();
   const { store, loading: storeLoading } = useStore();
-  const { orders, loading: ordersLoading } = useOrders(store?.id);
-  // Utiliser avec limite raisonnable pour stats (100 suffit pour calculer les statistiques)
-  // Note: Pour les stats précises, on pourrait créer un hook spécialisé qui récupère juste les totaux
-  const { data: customersResult, isLoading: customersLoading } = useCustomers(store?.id, {
-    page: 1,
-    pageSize: 100,
-  });
-  const customers = customersResult?.data || [];
-  const { products, isLoading: productsLoading } = useProductsOptimized(store?.id, {
-    page: 1,
-    itemsPerPage: 100,
+  const [timeRange, setTimeRange] = useState<TimeRange>('30d');
+  const {
+    analytics,
+    loading: analyticsLoading,
+    error: analyticsError,
+  } = useUnifiedAnalytics(timeRange);
+  // Liste paginée uniquement pour graphiques / commandes récentes (vue classique)
+  const { orders, loading: ordersLoading } = useOrders(store?.id, {
+    page: 0,
+    pageSize: 50,
+    sortBy: 'created_at',
+    sortDirection: 'desc',
   });
 
-  // Animations au scroll
   const headerRef = useScrollAnimation<HTMLDivElement>();
   const statsRef = useScrollAnimation<HTMLDivElement>();
   const chartsRef = useScrollAnimation<HTMLDivElement>();
 
-  // Calculs optimisés avec useMemo
-  const totalRevenue = useMemo(
-    () => orders?.reduce((sum, order) => sum + Number(order.total_amount), 0) || 0,
-    [orders]
-  );
-  const completedOrders = useMemo(
-    () => orders?.filter(o => o.status === 'completed').length || 0,
-    [orders]
-  );
-  const activeProducts = useMemo(() => products?.filter(p => p.is_active).length || 0, [products]);
-
-  // Logging pour le chargement des données
   useEffect(() => {
-    if (
-      !ordersLoading &&
-      !customersLoading &&
-      !productsLoading &&
-      orders &&
-      customers &&
-      products
-    ) {
-      logger.info(
-        `Analytics chargées: ${orders.length} commandes, ${customers.length} clients, ${products.length} produits`
-      );
+    if (!analyticsLoading && store?.id) {
+      logger.info('Analytics page overview synced', {
+        storeId: store.id,
+        timeRange,
+        revenue: analytics.overview.totalRevenue,
+        orders: analytics.overview.totalOrders,
+        buyers: analytics.overview.totalCustomers,
+        crm: analytics.overview.crmCustomersTotal,
+      });
     }
-  }, [ordersLoading, customersLoading, productsLoading, orders, customers, products]);
+  }, [analyticsLoading, store?.id, timeRange, analytics.overview]);
 
   if (storeLoading) {
     return (
@@ -97,7 +91,7 @@ const Analytics = () => {
               <div className="flex flex-col sm:flex-row gap-3">
                 <Button
                   onClick={() => navigate(STORE_CREATE_PATH)}
-                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Créer une boutique
@@ -113,12 +107,12 @@ const Analytics = () => {
     );
   }
 
-  const isLoading = ordersLoading || customersLoading || productsLoading;
+  const isLoading = analyticsLoading;
+  const overview = analytics.overview;
 
   return (
     <AppPageShell>
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
-        {/* Header - Responsive & Animated */}
         <div
           ref={headerRef}
           className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700"
@@ -129,135 +123,140 @@ const Analytics = () => {
               className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2"
               id="analytics-title"
             >
-              <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
+              <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10 border border-primary/20">
                 <BarChart3
-                  className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400"
+                  className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 text-primary"
                   aria-hidden="true"
                 />
               </div>
-              <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                Statistiques
-              </span>
+              <span className="text-foreground">Statistiques</span>
             </h1>
             <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
-              Vue d'ensemble de votre activité
+              Vue d&apos;ensemble de votre activité
             </p>
           </div>
+          <Select value={timeRange} onValueChange={v => setTimeRange(v as TimeRange)}>
+            <SelectTrigger className="w-full sm:w-[10.5rem]" aria-label="Période d'analyse">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="7d">7 jours</SelectItem>
+              <SelectItem value="30d">30 jours</SelectItem>
+              <SelectItem value="90d">90 jours</SelectItem>
+              <SelectItem value="1y">1 an</SelectItem>
+              <SelectItem value="all">Tout</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
-        {/* Stats Cards - Responsive */}
+        {analyticsError && (
+          <Card className="border-destructive/40 bg-destructive/5">
+            <CardContent className="p-3 text-sm text-destructive">
+              Impossible de charger certaines métriques : {analyticsError}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Cartes synchronisées avec Vue Unifiée (même période + mêmes règles) */}
         <div
           ref={statsRef}
           className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
           role="region"
           aria-label="Cartes statistiques"
         >
-          {/* Revenu total */}
-          <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
+          <Card className="border-border/50 bg-card/50">
             <CardContent className="p-3 sm:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm text-muted-foreground mb-0.5 sm:mb-1">
-                    Revenu total
-                  </p>
+                  <p className="text-xs text-muted-foreground mb-1">Revenu (période)</p>
                   {isLoading ? (
                     <Skeleton className="h-6 w-24 mb-1" />
                   ) : (
-                    <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                      {totalRevenue.toLocaleString()} XOF
+                    <p className="text-base sm:text-xl font-bold text-foreground">
+                      {formatFcfa(overview.totalRevenue)}
                     </p>
                   )}
-                  <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mt-0.5 sm:mt-1">
-                    Total des ventes
+                  <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
+                    Commandes payées éligibles
                   </p>
                 </div>
-                <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-green-500/10 to-emerald-500/5">
-                  <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-green-500" />
+                <div className="p-2 rounded-lg bg-emerald-500/10">
+                  <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Commandes */}
-          <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
+          <Card className="border-border/50 bg-card/50">
             <CardContent className="p-3 sm:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm text-muted-foreground mb-0.5 sm:mb-1">
-                    Commandes
-                  </p>
+                  <p className="text-xs text-muted-foreground mb-1">Commandes</p>
                   {isLoading ? (
                     <Skeleton className="h-6 w-16 mb-1" />
                   ) : (
-                    <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-                      {orders?.length || 0}
+                    <p className="text-base sm:text-xl font-bold text-foreground">
+                      {overview.totalOrders}
                     </p>
                   )}
-                  <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mt-0.5 sm:mt-1">
-                    {completedOrders} terminées
+                  <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
+                    Sur la période sélectionnée
                   </p>
                 </div>
-                <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/5">
-                  <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-blue-500" />
+                <div className="p-2 rounded-lg bg-blue-500/10">
+                  <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Clients */}
-          <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
+          <Card className="border-border/50 bg-card/50">
             <CardContent className="p-3 sm:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm text-muted-foreground mb-0.5 sm:mb-1">
-                    Clients
-                  </p>
+                  <p className="text-xs text-muted-foreground mb-1">Acheteurs</p>
                   {isLoading ? (
                     <Skeleton className="h-6 w-16 mb-1" />
                   ) : (
-                    <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                      {customers?.length || 0}
+                    <p className="text-base sm:text-xl font-bold text-foreground">
+                      {overview.totalCustomers}
                     </p>
                   )}
-                  <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mt-0.5 sm:mt-1">
-                    Base clients
+                  <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
+                    Base CRM : {overview.crmCustomersTotal}
                   </p>
                 </div>
-                <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5">
-                  <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-purple-500" />
+                <div className="p-2 rounded-lg bg-slate-500/10">
+                  <Users className="h-4 w-4 sm:h-5 sm:w-5 text-slate-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Produits actifs */}
-          <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
+          <Card className="border-border/50 bg-card/50">
             <CardContent className="p-3 sm:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm text-muted-foreground mb-0.5 sm:mb-1">
-                    Produits actifs
-                  </p>
+                  <p className="text-xs text-muted-foreground mb-1">Produits actifs</p>
                   {isLoading ? (
                     <Skeleton className="h-6 w-16 mb-1" />
                   ) : (
-                    <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
-                      {activeProducts}
+                    <p className="text-base sm:text-xl font-bold text-foreground">
+                      {overview.activeProducts}
                     </p>
                   )}
-                  <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mt-0.5 sm:mt-1">
-                    Sur {products?.length || 0} total
+                  <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
+                    Sur {overview.totalProducts} total
                   </p>
                 </div>
-                <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-orange-500/10 to-red-500/5">
-                  <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-orange-500" />
+                <div className="p-2 rounded-lg bg-orange-500/10">
+                  <Package className="h-4 w-4 sm:h-5 sm:w-5 text-orange-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Tabs pour basculer entre vue classique, vue unifiée et analytics avancés */}
         <Tabs defaultValue="unified" className="space-y-4">
           <TabsList>
             <TabsTrigger value="unified">Vue Unifiée</TabsTrigger>
@@ -266,19 +265,24 @@ const Analytics = () => {
           </TabsList>
 
           <TabsContent value="unified" className="space-y-4">
-            <UnifiedAnalyticsDashboard />
+            <UnifiedAnalyticsDashboard
+              timeRange={timeRange}
+              onTimeRangeChange={setTimeRange}
+              analytics={analytics}
+              loading={analyticsLoading}
+              hidePeriodSelect
+            />
           </TabsContent>
 
           <TabsContent value="classic" className="space-y-4">
-            {/* Charts and Tables */}
             <div
               ref={chartsRef}
               className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2 animate-in fade-in slide-in-from-bottom-4 duration-700"
               role="region"
               aria-label="Graphiques et tableaux"
             >
-              <SalesChart orders={orders || []} loading={isLoading} />
-              <TopProducts orders={orders || []} loading={isLoading} />
+              <SalesChart orders={orders || []} loading={ordersLoading} />
+              <TopProducts products={analytics.topProducts} loading={analyticsLoading} />
             </div>
 
             <div
@@ -286,14 +290,13 @@ const Analytics = () => {
               aria-label="Commandes récentes"
               className="animate-in fade-in slide-in-from-bottom-4 duration-700"
             >
-              <RecentOrders orders={orders?.slice(0, 5) || []} loading={isLoading} />
+              <RecentOrders orders={orders?.slice(0, 5) || []} loading={ordersLoading} />
             </div>
           </TabsContent>
 
           <TabsContent value="advanced" className="space-y-4">
-            {/* Analytics Avancés */}
             <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2 animate-in fade-in slide-in-from-bottom-4 duration-700">
-              <FunnelAnalysis />
+              <FunnelAnalysis storeId={store.id} timeRange={timeRange} />
               <CohortAnalysis />
             </div>
           </TabsContent>

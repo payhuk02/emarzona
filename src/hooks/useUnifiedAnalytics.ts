@@ -10,6 +10,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { useStore } from './useStore';
 import { logger } from '@/lib/logger';
 import { fetchWebMetricsForPeriod } from '@/lib/dashboard/fetch-web-metrics';
+import {
+  isOrderEligibleForRevenue,
+  orderNetRevenueAmount,
+} from '@/lib/orders/order-revenue-eligibility';
 
 export type ProductType = 'digital' | 'physical' | 'service' | 'course' | 'artist';
 export type TimeRange = '7d' | '30d' | '90d' | '1y' | 'all';
@@ -30,8 +34,10 @@ interface AnalyticsOrderItem {
 interface AnalyticsOrderRow {
   customer_id?: string | null;
   total_amount: string | number;
+  refunded_amount?: string | number | null;
   created_at: string;
   status?: string | null;
+  payment_status?: string | null;
   order_items?: AnalyticsOrderItem[] | null;
 }
 
@@ -78,7 +84,12 @@ export interface UnifiedAnalytics {
   overview: {
     totalRevenue: number;
     totalOrders: number;
+    /** Acheteurs distincts sur la période (customer_id commandes). */
     totalCustomers: number;
+    /** Effectif CRM boutique (table customers), hors filtre période. */
+    crmCustomersTotal: number;
+    activeProducts: number;
+    totalProducts: number;
     averageOrderValue: number;
     conversionRate: number;
     growthRate: number;
@@ -164,6 +175,9 @@ const getFallbackAnalytics = (): UnifiedAnalytics => ({
     totalRevenue: 0,
     totalOrders: 0,
     totalCustomers: 0,
+    crmCustomersTotal: 0,
+    activeProducts: 0,
+    totalProducts: 0,
     averageOrderValue: 0,
     conversionRate: 0,
     growthRate: 0,
@@ -197,9 +211,13 @@ const getFallbackAnalytics = (): UnifiedAnalytics => ({
   geographic: [],
 });
 
-export const useUnifiedAnalytics = (timeRange: TimeRange = '30d') => {
+export const useUnifiedAnalytics = (
+  timeRange: TimeRange = '30d',
+  options?: { enabled?: boolean }
+) => {
+  const enabled = options?.enabled !== false;
   const [analytics, setAnalytics] = useState<UnifiedAnalytics>(getFallbackAnalytics());
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(enabled);
   const [error, setError] = useState<string | null>(null);
   const { store } = useStore();
 
@@ -216,6 +234,7 @@ export const useUnifiedAnalytics = (timeRange: TimeRange = '30d') => {
   }, []);
 
   const fetchAnalytics = useCallback(async () => {
+    if (!enabled) return;
     if (!store) {
       setAnalytics(getFallbackAnalytics());
       setLoading(false);
@@ -236,7 +255,9 @@ export const useUnifiedAnalytics = (timeRange: TimeRange = '30d') => {
           `
           id,
           total_amount,
+          refunded_amount,
           status,
+          payment_status,
           created_at,
           customer_id,
           order_items (
@@ -265,8 +286,11 @@ export const useUnifiedAnalytics = (timeRange: TimeRange = '30d') => {
         .select(
           `
           total_amount,
+          refunded_amount,
           status,
+          payment_status,
           created_at,
+          customer_id,
           order_items (
             quantity,
             price,
@@ -278,52 +302,53 @@ export const useUnifiedAnalytics = (timeRange: TimeRange = '30d') => {
         .gte('created_at', previousStartDate.toISOString())
         .lt('created_at', startDate.toISOString());
 
-      // Récupérer les clients
-      const { data: customers } = await supabase
-        .from('customers')
-        .select('id, name, email')
-        .eq('store_id', store.id);
+      // Clients CRM + catalogue produits (totaux exacts, hors pagination)
+      const [
+        { count: crmCustomersTotal },
+        { count: totalProducts },
+        { count: activeProducts },
+        { data: customers },
+      ] = await Promise.all([
+        supabase
+          .from('customers')
+          .select('*', { count: 'exact', head: true })
+          .eq('store_id', store.id),
+        supabase
+          .from('products')
+          .select('*', { count: 'exact', head: true })
+          .eq('store_id', store.id),
+        supabase
+          .from('products')
+          .select('*', { count: 'exact', head: true })
+          .eq('store_id', store.id)
+          .eq('is_active', true)
+          .or('is_draft.eq.false,is_draft.is.null'),
+        supabase.from('customers').select('id, name, email').eq('store_id', store.id),
+      ]);
 
-      // Calculer les analytics
-      const completedOrders = (orders?.filter(o => o.status === 'completed') ??
-        []) as AnalyticsOrderRow[];
-      const totalRevenue = completedOrders.reduce(
-        (sum, o) => sum + parseFloat(o.total_amount.toString()),
+      // Calculer les analytics (aligné dashboard : revenu éligible)
+      const periodOrders = (orders ?? []) as AnalyticsOrderRow[];
+      const previousPeriodOrders = (previousOrders ?? []) as AnalyticsOrderRow[];
+      const revenueOrders = periodOrders.filter(o =>
+        isOrderEligibleForRevenue(o.status, o.payment_status)
+      );
+      const previousRevenueOrders = previousPeriodOrders.filter(o =>
+        isOrderEligibleForRevenue(o.status, o.payment_status)
+      );
+      const totalRevenue = revenueOrders.reduce(
+        (sum, o) => sum + orderNetRevenueAmount(o.total_amount, o.refunded_amount),
         0
       );
-      const totalOrders = orders?.length || 0;
-      const totalCustomers = new Set(orders?.map(o => o.customer_id).filter(Boolean)).size;
-      const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+      const totalOrders = periodOrders.length;
+      const totalCustomers = new Set(periodOrders.map(o => o.customer_id).filter(Boolean)).size;
+      const previousCustomers = new Set(
+        previousPeriodOrders.map(o => o.customer_id).filter(Boolean)
+      ).size;
+      const averageOrderValue = revenueOrders.length > 0 ? totalRevenue / revenueOrders.length : 0;
 
-      // Revenus par type de produit
-      const byProductType: Record<ProductType, ProductTypeAccumulator> = {
-        digital: { revenue: 0, orders: 0, units: 0, products: new Set() },
-        physical: { revenue: 0, orders: 0, units: 0, products: new Set() },
-        service: { revenue: 0, orders: 0, units: 0, products: new Set() },
-        course: { revenue: 0, orders: 0, units: 0, products: new Set() },
-        artist: { revenue: 0, orders: 0, units: 0, products: new Set() },
-      };
-
-      completedOrders.forEach(order => {
-        const items = order.order_items ?? [];
-        items.forEach(item => {
-          const product = item.products;
-          if (product && product.product_type) {
-            const type = product.product_type as ProductType;
-            if (byProductType[type]) {
-              byProductType[type].revenue +=
-                parseFloat(item.price.toString()) * (item.quantity || 1);
-              byProductType[type].orders += 1;
-              byProductType[type].units += item.quantity || 1;
-              byProductType[type].products.add(product.id);
-            }
-          }
-        });
-      });
-
-      const completedPrevious = (previousOrders?.filter(o => o.status === 'completed') ??
-        []) as AnalyticsOrderRow[];
-      const previousByType = accumulateByProductType(completedPrevious);
+      // Revenus par type de produit (sur commandes éligibles)
+      const byProductType = accumulateByProductType(revenueOrders);
+      const previousByType = accumulateByProductType(previousRevenueOrders);
 
       // Convertir en format final
       const byProductTypeFinal: Record<ProductType, ProductTypeMetrics> = {
@@ -393,7 +418,7 @@ export const useUnifiedAnalytics = (timeRange: TimeRange = '30d') => {
         artist: number;
       }
       const revenueByDate: Record<string, RevenueByDateData> = {};
-      completedOrders.forEach(order => {
+      revenueOrders.forEach(order => {
         const date = new Date(order.created_at).toISOString().split('T')[0];
         if (!revenueByDate[date]) {
           revenueByDate[date] = {
@@ -406,10 +431,12 @@ export const useUnifiedAnalytics = (timeRange: TimeRange = '30d') => {
             artist: 0,
           };
         }
-        revenueByDate[date].revenue += parseFloat(order.total_amount.toString());
+        revenueByDate[date].revenue += orderNetRevenueAmount(
+          order.total_amount,
+          order.refunded_amount
+        );
         revenueByDate[date].orders += 1;
 
-        // Par type
         const items = order.order_items ?? [];
         items.forEach(item => {
           const product = item.products;
@@ -437,7 +464,7 @@ export const useUnifiedAnalytics = (timeRange: TimeRange = '30d') => {
         units: number;
       }
       const productRevenue: Record<string, ProductRevenueData> = {};
-      completedOrders.forEach(order => {
+      revenueOrders.forEach(order => {
         const items = order.order_items ?? [];
         items.forEach(item => {
           const product = item.products;
@@ -465,6 +492,7 @@ export const useUnifiedAnalytics = (timeRange: TimeRange = '30d') => {
         .slice(0, 10)
         .map(p => ({
           ...p,
+          type: p.type as ProductType,
           growth: byProductTypeFinal[p.type as ProductType]?.growth ?? 0,
         }));
 
@@ -476,7 +504,7 @@ export const useUnifiedAnalytics = (timeRange: TimeRange = '30d') => {
         lastOrderDate: string;
       }
       const customerStats: Record<string, CustomerStatsData> = {};
-      completedOrders.forEach(order => {
+      revenueOrders.forEach(order => {
         if (order.customer_id) {
           if (!customerStats[order.customer_id]) {
             customerStats[order.customer_id] = {
@@ -486,7 +514,10 @@ export const useUnifiedAnalytics = (timeRange: TimeRange = '30d') => {
               lastOrderDate: order.created_at,
             };
           }
-          customerStats[order.customer_id].totalSpent += parseFloat(order.total_amount.toString());
+          customerStats[order.customer_id].totalSpent += orderNetRevenueAmount(
+            order.total_amount,
+            order.refunded_amount
+          );
           customerStats[order.customer_id].orders += 1;
           if (
             new Date(order.created_at) > new Date(customerStats[order.customer_id].lastOrderDate)
@@ -497,26 +528,29 @@ export const useUnifiedAnalytics = (timeRange: TimeRange = '30d') => {
       });
 
       const topCustomers = Object.values(customerStats)
-        .map((c: { customer_id: string; total_amount: number; created_at: string }) => {
+        .map(c => {
           const customer = customers?.find(cust => cust.id === c.id);
           return {
-            ...c,
+            id: c.id,
             name: customer?.name || 'Client inconnu',
             email: customer?.email || '',
+            totalSpent: c.totalSpent,
+            orders: c.orders,
             averageOrderValue: c.orders > 0 ? c.totalSpent / c.orders : 0,
+            lastOrderDate: c.lastOrderDate,
           };
         })
-        .sort((a: { totalSpent: number }, b: { totalSpent: number }) => b.totalSpent - a.totalSpent)
+        .sort((a, b) => b.totalSpent - a.totalSpent)
         .slice(0, 10);
 
-      // Tendances
-      const previousRevenue =
-        previousOrders?.reduce((sum, o) => sum + parseFloat(o.total_amount.toString()), 0) || 0;
-      const revenueGrowth =
-        previousRevenue > 0 ? ((totalRevenue - previousRevenue) / previousRevenue) * 100 : 0;
-      const orderGrowth = previousOrders
-        ? ((totalOrders - previousOrders.length) / previousOrders.length) * 100
-        : 0;
+      // Tendances (période précédente, mêmes règles de revenu)
+      const previousRevenue = previousRevenueOrders.reduce(
+        (sum, o) => sum + orderNetRevenueAmount(o.total_amount, o.refunded_amount),
+        0
+      );
+      const revenueGrowth = calcGrowthPercent(totalRevenue, previousRevenue);
+      const orderGrowth = calcGrowthPercent(totalOrders, previousPeriodOrders.length);
+      const customerGrowth = calcGrowthPercent(totalCustomers, previousCustomers);
 
       // Métriques web (période courante — analytics_events + user_sessions)
       const webMetrics = await fetchWebMetricsForPeriod(store.id, startDate);
@@ -524,8 +558,7 @@ export const useUnifiedAnalytics = (timeRange: TimeRange = '30d') => {
       const bounceRate = webMetrics.bounceRate;
       const averageSessionDuration = webMetrics.sessionDuration;
 
-      const totalConversions = completedOrders.length;
-
+      const totalConversions = revenueOrders.length;
       const conversionRate = pageViews > 0 ? (totalConversions / pageViews) * 100 : 0;
 
       const customersWithMultipleOrders = Object.values(customerStats).filter(
@@ -539,6 +572,9 @@ export const useUnifiedAnalytics = (timeRange: TimeRange = '30d') => {
           totalRevenue,
           totalOrders,
           totalCustomers,
+          crmCustomersTotal: crmCustomersTotal ?? 0,
+          activeProducts: activeProducts ?? 0,
+          totalProducts: totalProducts ?? 0,
           averageOrderValue,
           conversionRate,
           growthRate: revenueGrowth,
@@ -558,28 +594,32 @@ export const useUnifiedAnalytics = (timeRange: TimeRange = '30d') => {
         trends: {
           revenueTrend: revenueGrowth > 5 ? 'up' : revenueGrowth < -5 ? 'down' : 'stable',
           orderTrend: orderGrowth > 5 ? 'up' : orderGrowth < -5 ? 'down' : 'stable',
-          customerTrend: 'stable',
+          customerTrend: customerGrowth > 5 ? 'up' : customerGrowth < -5 ? 'down' : 'stable',
           revenueGrowth,
           orderGrowth,
-          customerGrowth: 0,
+          customerGrowth,
         },
         geographic: [],
       });
 
       logger.info('Unified analytics loaded', { storeId: store.id, timeRange });
-    } catch (_error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
       logger.error('Error fetching unified analytics', { error: errorMessage });
       setError(errorMessage);
       setAnalytics(getFallbackAnalytics());
     } finally {
       setLoading(false);
     }
-  }, [store?.id, timeRange, getDateRange]);
+  }, [store?.id, timeRange, getDateRange, enabled]);
 
   useEffect(() => {
+    if (!enabled) {
+      setLoading(false);
+      return;
+    }
     fetchAnalytics();
-  }, [fetchAnalytics]);
+  }, [fetchAnalytics, enabled]);
 
   return { analytics, loading, error, refetch: fetchAnalytics };
 };

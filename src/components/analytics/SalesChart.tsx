@@ -1,6 +1,6 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Order } from "@/hooks/useOrders";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Order } from '@/hooks/useOrders';
 import { BarChart3 } from '@/components/icons';
 
 interface SalesChartProps {
@@ -23,8 +23,8 @@ export const SalesChart = ({ orders, loading }: SalesChartProps) => {
   }
 
   // Group orders by month
-  const  salesByMonth: Record<string, number> = {};
-  orders.forEach((order) => {
+  const salesByMonth: Record<string, number> = {};
+  orders.forEach(order => {
     const date = new Date(order.created_at);
     const monthKey = date.toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' });
     salesByMonth[monthKey] = (salesByMonth[monthKey] || 0) + Number(order.total_amount);
@@ -37,12 +37,14 @@ export const SalesChart = ({ orders, loading }: SalesChartProps) => {
     <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
       <CardHeader>
         <CardTitle className="text-base sm:text-lg">Ventes par mois</CardTitle>
-        <CardDescription className="text-xs sm:text-sm">Évolution du chiffre d'affaires</CardDescription>
+        <CardDescription className="text-xs sm:text-sm">
+          Évolution du chiffre d'affaires
+        </CardDescription>
       </CardHeader>
       <CardContent>
         {hasData ? (
           <div className="space-y-3 sm:space-y-4">
-            {months.map((month) => {
+            {months.map(month => {
               const amount = salesByMonth[month];
               const maxAmount = Math.max(...Object.values(salesByMonth));
               const percentage = (amount / maxAmount) * 100;
@@ -52,12 +54,12 @@ export const SalesChart = ({ orders, loading }: SalesChartProps) => {
                   <div className="flex justify-between text-xs sm:text-sm">
                     <span className="font-medium">{month}</span>
                     <span className="text-muted-foreground">
-                      {amount.toLocaleString()} XOF
+                      {amount.toLocaleString('fr-FR')} FCFA
                     </span>
                   </div>
                   <div className="w-full bg-muted/50 rounded-full h-2">
                     <div
-                      className="bg-gradient-to-r from-purple-600 to-pink-600 h-2 rounded-full transition-all"
+                      className="bg-primary h-2 rounded-full transition-all"
                       style={{ width: `${percentage}%` }}
                     />
                   </div>
@@ -77,9 +79,3 @@ export const SalesChart = ({ orders, loading }: SalesChartProps) => {
     </Card>
   );
 };
-
-
-
-
-
-
