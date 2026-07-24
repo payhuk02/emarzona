@@ -1,21 +1,12 @@
-import { LayoutDashboard, Search, Check, Plus } from '@/components/icons';
-import {
-  Circle,
-  Clock3,
-  ChevronDown,
-  ChevronRight,
-  Lock,
-  ShoppingBag,
-  Key,
-  Activity,
-  Package,
-} from 'lucide-react';
+import { LayoutDashboard, Search, Plus } from '@/components/icons';
+import { Circle, Lock, ShoppingBag, Key, Activity, Package } from 'lucide-react';
 import { usePlatformLogo } from '@/hooks/usePlatformLogo';
 import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { SidebarCollapsibleSection } from '@/components/sidebar/SidebarCollapsibleSection';
 import { SidebarNavCommandPalette } from '@/components/sidebar/SidebarNavCommandPalette';
 import { SidebarPersonaSwitch } from '@/components/sidebar/SidebarPersonaSwitch';
 import { PersonaOnboardingCoach } from '@/components/sidebar/PersonaOnboardingCoach';
+import { SidebarStoreSwitcher } from '@/components/sidebar/SidebarStoreSwitcher';
 import { NAV_LINK_ACTIVE, NAV_LINK_INACTIVE } from '@/components/sidebar/sidebar-nav-shared';
 import {
   DEFAULT_OPEN_SECTION_KEYS,
@@ -50,8 +41,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { EmarzonaBrandName } from '@/components/brand/EmarzonaBrandName';
 import { cn } from '@/lib/utils';
-import { STORE_CREATE_PATH } from '@/lib/store/store-create-path';
-import { useToast } from '@/hooks/use-toast';
 import { useAdmin } from '@/hooks/useAdmin';
 import { useStoreContext } from '@/contexts/StoreContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -74,21 +63,12 @@ import {
 import { isSellerNavItemActive, resolveSellerNavUrl } from '@/lib/navigation/vendor-products-nav';
 import { logger } from '@/lib/logger';
 import { LogoImageWithFallback } from '@/components/sidebar/LogoImageWithFallback';
-import { MegaMenuDropdown } from '@/components/navigation/MegaMenuDropdown';
-import { CONTEXT_SIDEBAR_MAPPING } from '@/config/navigation.context.extended';
 
 const isNavItemPlanLocked = (
   url: string,
   planSlug: string | null,
   commerceType?: StoreCommerceType | null
 ) => isNavPathPlanLocked(url, planSlug, commerceType);
-
-// Exact hub path only — startsWith would wrap create wizards (/products/new/*)
-// in MegaMenuDropdown (button, no href) and break commerce-gating E2E + deep links.
-const getContextSectionsForItem = (itemUrl: string) => {
-  const path = itemUrl.split('?')[0].replace(/\/+$/, '') || '/';
-  return CONTEXT_SIDEBAR_MAPPING[path] ?? [];
-};
 
 const buildDefaultCollapsedSections = (
   sections: NavSection[],
@@ -114,16 +94,8 @@ export function AppSidebar() {
   const { state, isMobile } = useSidebar();
   const navigate = useNavigate();
   const location = useLocation();
-  const { toast } = useToast();
   const { isAdmin } = useAdmin();
-  const {
-    stores,
-    selectedStoreId,
-    selectedStore,
-    switchStore,
-    canCreateStore,
-    loading: storesLoading,
-  } = useStoreContext();
+  const { selectedStoreId, selectedStore } = useStoreContext();
   const { planSlug } = useStorePhysicalAccess(selectedStoreId);
   const commerceType = selectedStore?.commerce_type;
   const storeMetadata = selectedStore?.metadata ?? null;
@@ -133,12 +105,9 @@ export function AppSidebar() {
   const isCollapsed = state === 'collapsed' && !isMobile;
   const { persona, setPersona, needsPersonaOnboarding } = useSidebarPersona(isAdmin);
   const [commandOpen, setCommandOpen] = useState(false);
-  /** Which hub mega-menu is open (per-url); a shared boolean opened every hub at once. */
-  const [openMegaMenuUrl, setOpenMegaMenuUrl] = useState<string | null>(null);
 
   const [collapsedSections, setCollapsedSections] = useState<string[]>([]);
   const [prefsHydrated, setPrefsHydrated] = useState(false);
-  const [storesMenuOpen, setStoresMenuOpen] = useState(false);
 
   const showAdminMenu = isAdmin && persona === 'admin';
   const showUserMenu = !showAdminMenu;
@@ -161,8 +130,6 @@ export function AppSidebar() {
     commerceType,
     storeMetadata,
   });
-
-  const allCurrentEntries = useMemo(() => flattenNavSections(activeSections), [activeSections]);
 
   const navCommandEntries = useMemo(
     () =>
@@ -229,11 +196,6 @@ export function AppSidebar() {
     else navigate('/dashboard');
   };
 
-  const currentNavItem = useMemo(
-    () => allCurrentEntries.find(item => isNavLinkActive(item.url, 'exact')),
-    [allCurrentEntries, isNavLinkActive]
-  );
-
   useEffect(() => {
     setSidebarPrefsUserId(userId);
   }, [userId]);
@@ -245,10 +207,8 @@ export function AppSidebar() {
         SIDEBAR_PREF_KEYS.collapsedSections,
         userId
       );
-      const storedStores = readSidebarJsonPref<boolean>(SIDEBAR_PREF_KEYS.storesExpanded, userId);
 
       if (storedCollapsed) setCollapsedSections(storedCollapsed);
-      if (storedStores !== null) setStoresMenuOpen(storedStores);
       setPrefsHydrated(true);
     } catch (error) {
       logger.warn('Failed to restore sidebar preferences', error);
@@ -270,12 +230,6 @@ export function AppSidebar() {
   }, [prefsHydrated, activeSections, location.pathname, location.search, commerceType, userId]);
 
   useEffect(() => {
-    if (!prefsHydrated) return;
-    if (hasSidebarJsonPref(SIDEBAR_PREF_KEYS.storesExpanded, userId)) return;
-    setStoresMenuOpen(stores.length <= 1);
-  }, [prefsHydrated, stores.length, userId]);
-
-  useEffect(() => {
     const activeKey = activeSections.find(s =>
       sectionContainsPath(s, location.pathname, location.search, commerceType)
     )?.sectionKey;
@@ -284,11 +238,6 @@ export function AppSidebar() {
       prev.includes(activeKey) ? prev.filter(k => k !== activeKey) : prev
     );
   }, [location.pathname, location.search, activeSections, commerceType]);
-
-  useEffect(() => {
-    if (!prefsHydrated) return;
-    writeSidebarJsonPref(SIDEBAR_PREF_KEYS.storesExpanded, storesMenuOpen, userId);
-  }, [storesMenuOpen, prefsHydrated, userId]);
 
   useEffect(() => {
     if (!prefsHydrated) return;
@@ -305,15 +254,6 @@ export function AppSidebar() {
     handlePlanLockedNav(itemTitle, itemUrl);
   };
 
-  const navigateToNavItem = (item: { title: string; url: string }) => {
-    recordNavClick(item.url);
-    if (showUserMenu && isNavItemPlanLocked(item.url, planSlug, commerceType)) {
-      handleLockedNavClick(item.title, item.url);
-      return;
-    }
-    navigate(resolveNavHref(item.url));
-  };
-
   return (
     <Sidebar
       collapsible="icon"
@@ -327,34 +267,41 @@ export function AppSidebar() {
         commerceType={commerceType}
       />
 
-      {/* En-tête compact : logo + palette */}
+      {/* En-tête compact : boutique active (vendeur) ou marque plateforme */}
       <div className={cn('shrink-0 border-b border-border', isCollapsed ? 'p-2' : 'px-3 py-2.5')}>
         <div className="flex items-center gap-2 min-h-[2.75rem]">
-          <Link
-            to={logoHome}
-            className="flex items-center gap-1.5 group transition-opacity duration-200 hover:opacity-90 shrink-0"
-            aria-label={t(logoAriaKey)}
-          >
-            {platformLogo ? (
-              <LogoImageWithFallback
-                src={platformLogo}
-                className={cn('flex-shrink-0', isCollapsed ? 'h-8 w-8' : 'h-9 w-9 sm:h-10 sm:w-10')}
-              />
-            ) : (
-              <div
-                className={cn(
-                  'flex-shrink-0 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-md',
-                  isCollapsed ? 'h-8 w-8' : 'h-9 w-9 sm:h-10 sm:w-10'
-                )}
-                aria-hidden="true"
-              >
-                <span className="text-sm font-bold text-white">E</span>
-              </div>
-            )}
-            {!isCollapsed && (
-              <EmarzonaBrandName className="hidden text-lg tracking-tight sm:inline" />
-            )}
-          </Link>
+          {persona === 'seller' ? (
+            <SidebarStoreSwitcher isCollapsed={isCollapsed} />
+          ) : (
+            <Link
+              to={logoHome}
+              className="flex items-center gap-1.5 group transition-opacity duration-200 hover:opacity-90 shrink-0"
+              aria-label={t(logoAriaKey)}
+            >
+              {platformLogo ? (
+                <LogoImageWithFallback
+                  src={platformLogo}
+                  className={cn(
+                    'flex-shrink-0',
+                    isCollapsed ? 'h-8 w-8' : 'h-9 w-9 sm:h-10 sm:w-10'
+                  )}
+                />
+              ) : (
+                <div
+                  className={cn(
+                    'flex-shrink-0 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-md',
+                    isCollapsed ? 'h-8 w-8' : 'h-9 w-9 sm:h-10 sm:w-10'
+                  )}
+                  aria-hidden="true"
+                >
+                  <span className="text-sm font-bold text-white">E</span>
+                </div>
+              )}
+              {!isCollapsed && (
+                <EmarzonaBrandName className="hidden text-lg tracking-tight sm:inline" />
+              )}
+            </Link>
+          )}
           {isCollapsed ? (
             <Button
               variant="ghost"
@@ -424,12 +371,8 @@ export function AppSidebar() {
                         logger.warn(`Menu item missing icon: ${item.title}`);
                       }
 
-                      // Menu spécial pour "Tableau de bord" avec sous-menu des boutiques - STATIQUE (toujours ouvert)
-                      if (
-                        getNavItemPath(item.url) === '/dashboard' &&
-                        !storesLoading &&
-                        stores.length > 0
-                      ) {
+                      // Tableau de bord — navigation directe (switcher boutiques dans l’en-tête)
+                      if (getNavItemPath(item.url) === '/dashboard') {
                         const isDashboardActive = location.pathname === '/dashboard';
                         return (
                           <SidebarMenuItem
@@ -442,7 +385,12 @@ export function AppSidebar() {
                                 isDashboardActive ? NAV_LINK_ACTIVE : NAV_LINK_INACTIVE
                               }`}
                             >
-                              <NavLink to={item.url} end className="flex items-center gap-2 w-full">
+                              <NavLink
+                                to={item.url}
+                                end
+                                onClick={() => recordNavClick(item.url)}
+                                className="flex items-center gap-2 w-full"
+                              >
                                 <IconComponent
                                   className="h-4 w-4 shrink-0 stroke-[2]"
                                   aria-hidden="true"
@@ -452,72 +400,6 @@ export function AppSidebar() {
                                 )}
                               </NavLink>
                             </SidebarMenuButton>
-                            {!isCollapsed && stores.length > 0 && (
-                              <button
-                                type="button"
-                                onClick={() => setStoresMenuOpen(open => !open)}
-                                className="ml-6 mt-1 flex w-[calc(100%-1.5rem)] items-center justify-between rounded-md px-2 py-1.5 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
-                                aria-expanded={storesMenuOpen}
-                              >
-                                <span>
-                                  {t('sidebar.chrome.myStores', { count: stores.length })}
-                                </span>
-                                {storesMenuOpen ? (
-                                  <ChevronDown className="h-3.5 w-3.5 shrink-0" />
-                                ) : (
-                                  <ChevronRight className="h-3.5 w-3.5 shrink-0" />
-                                )}
-                              </button>
-                            )}
-                            {!isCollapsed && stores.length > 0 && (
-                              <div
-                                className={cn(
-                                  'ml-4 grid transition-[grid-template-rows] duration-300 ease-out',
-                                  storesMenuOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
-                                )}
-                              >
-                                <div className="overflow-hidden min-h-0 space-y-1 border-l border-border pl-2 mt-1">
-                                  {stores.map(store => (
-                                    <Button
-                                      key={store.id}
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => {
-                                        switchStore(store.id);
-                                        navigate('/dashboard');
-                                        toast({
-                                          title: t('sidebar.chrome.storeChangedTitle'),
-                                          description: t('sidebar.chrome.storeChangedDescription', {
-                                            name: store.name,
-                                          }),
-                                        });
-                                      }}
-                                      className={`w-full justify-start transition-all duration-200 opacity-90 ${
-                                        selectedStoreId === store.id
-                                          ? NAV_LINK_ACTIVE
-                                          : NAV_LINK_INACTIVE
-                                      }`}
-                                    >
-                                      {selectedStoreId === store.id && (
-                                        <Check className="h-3 w-3 mr-2" />
-                                      )}
-                                      <span className="truncate">{store.name}</span>
-                                    </Button>
-                                  ))}
-                                  {canCreateStore() && (
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => navigate(STORE_CREATE_PATH)}
-                                      className={`w-full justify-start ${NAV_LINK_INACTIVE} transition-all duration-200`}
-                                    >
-                                      <Plus className="h-3 w-3 mr-2" />
-                                      <span>{t('sidebar.chrome.createStore')}</span>
-                                    </Button>
-                                  )}
-                                </div>
-                              </div>
-                            )}
                           </SidebarMenuItem>
                         );
                       }
@@ -558,65 +440,29 @@ export function AppSidebar() {
 
                       return (
                         <SidebarMenuItem key={`${section.label}-${item.title}-${item.url}`}>
-                          {getContextSectionsForItem(item.url).length > 0 ? (
-                            <MegaMenuDropdown
-                              trigger={
-                                <SidebarMenuButton asChild tooltip={item.title}>
-                                  <NavLink
-                                    to={parseNavTo(resolveNavHref(item.url))}
-                                    end
-                                    data-sidebar-path={item.url.split('?')[0]}
-                                    onClick={e => {
-                                      // Keep href for E2E/deep-link discovery; open mega menu instead of navigating.
-                                      e.preventDefault();
-                                      recordNavClick(item.url);
-                                    }}
-                                    className={
-                                      isNavLinkActive(item.url)
-                                        ? `transition-all duration-200 group relative flex items-center ${NAV_LINK_ACTIVE}`
-                                        : `transition-all duration-200 group relative flex items-center ${NAV_LINK_INACTIVE}`
-                                    }
-                                  >
-                                    <IconComponent
-                                      className="h-4 w-4 shrink-0 stroke-[2]"
-                                      aria-hidden="true"
-                                    />
-                                    {!isCollapsed ? (
-                                      <span className="flex-1 font-medium">{item.title}</span>
-                                    ) : (
-                                      <span className="sr-only">{item.title}</span>
-                                    )}
-                                  </NavLink>
-                                </SidebarMenuButton>
+                          <SidebarMenuButton asChild tooltip={item.title}>
+                            <NavLink
+                              to={parseNavTo(resolveNavHref(item.url))}
+                              end
+                              data-sidebar-path={item.url.split('?')[0]}
+                              onClick={() => recordNavClick(item.url)}
+                              className={
+                                isNavLinkActive(item.url)
+                                  ? `transition-all duration-200 group relative flex items-center ${NAV_LINK_ACTIVE}`
+                                  : `transition-all duration-200 group relative flex items-center ${NAV_LINK_INACTIVE}`
                               }
-                              sections={getContextSectionsForItem(item.url)}
-                              isOpen={openMegaMenuUrl === item.url}
-                              onOpenChange={open => setOpenMegaMenuUrl(open ? item.url : null)}
-                            />
-                          ) : (
-                            <SidebarMenuButton asChild tooltip={item.title}>
-                              <NavLink
-                                to={parseNavTo(resolveNavHref(item.url))}
-                                end
-                                onClick={() => recordNavClick(item.url)}
-                                className={
-                                  isNavLinkActive(item.url)
-                                    ? `transition-all duration-200 group relative flex items-center ${NAV_LINK_ACTIVE}`
-                                    : `transition-all duration-200 group relative flex items-center ${NAV_LINK_INACTIVE}`
-                                }
-                              >
-                                <IconComponent
-                                  className="h-4 w-4 shrink-0 stroke-[2]"
-                                  aria-hidden="true"
-                                />
-                                {!isCollapsed ? (
-                                  <span className="flex-1 font-medium">{item.title}</span>
-                                ) : (
-                                  <span className="sr-only">{item.title}</span>
-                                )}
-                              </NavLink>
-                            </SidebarMenuButton>
-                          )}
+                            >
+                              <IconComponent
+                                className="h-4 w-4 shrink-0 stroke-[2]"
+                                aria-hidden="true"
+                              />
+                              {!isCollapsed ? (
+                                <span className="flex-1 font-medium">{item.title}</span>
+                              ) : (
+                                <span className="sr-only">{item.title}</span>
+                              )}
+                            </NavLink>
+                          </SidebarMenuButton>
                         </SidebarMenuItem>
                       );
                     })}

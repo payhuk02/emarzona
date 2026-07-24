@@ -194,7 +194,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       // toutes les boutiques de la plateforme si l'utilisateur est admin
       let query = supabase
         .from('stores')
-        .select('id,user_id,name,slug,created_at,updated_at,metadata,commerce_type');
+        .select('id,user_id,name,slug,logo_url,created_at,updated_at,metadata,commerce_type');
 
       if (memberStoreIds.length > 0) {
         query = query.or(`user_id.eq.${user.id},id.in.(${memberStoreIds.join(',')})`);

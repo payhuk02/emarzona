@@ -1,15 +1,13 @@
 /**
- * MegaMenuDropdown - Enterprise-grade dropdown navigation
- * Animated with framer-motion for smooth transitions
- * Supports keyboard navigation and search within dropdown
+ * MegaMenuDropdown — dropdown navigation (hors sidebar principal).
+ * Les hubs du AppSidebar naviguent directement via NavLink (pas ce composant).
  */
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Search, X } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 
@@ -40,7 +38,6 @@ export function MegaMenuDropdown({
 }: MegaMenuDropdownProps) {
   const { t } = useTranslation();
   const [internalOpen, setInternalOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
@@ -68,26 +65,13 @@ export function MegaMenuDropdown({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen, setOpen]);
 
-  const filteredSections = useCallback(() => {
-    if (!searchQuery.trim()) return sections;
-    const query = searchQuery.toLowerCase();
-    return sections
-      .map(section => ({
-        ...section,
-        items: section.items.filter(
-          item =>
-            item.title.toLowerCase().includes(query) ||
-            item.description?.toLowerCase().includes(query)
-        ),
-      }))
-      .filter(section => section.items.length > 0);
-  }, [sections, searchQuery]);
-
-  const handleItemClick = (url: string) => {
-    navigate(url);
-    setOpen(false);
-    setSearchQuery('');
-  };
+  const handleItemClick = useCallback(
+    (url: string) => {
+      navigate(url);
+      setOpen(false);
+    },
+    [navigate, setOpen]
+  );
 
   const toggleOpen = () => setOpen(!isOpen);
 
@@ -123,33 +107,8 @@ export function MegaMenuDropdown({
             className="absolute left-0 top-full z-50 mt-2 w-screen max-w-4xl rounded-xl border border-border/50 bg-background/95 backdrop-blur-sm shadow-2xl"
           >
             <div className="p-4">
-              <div className="relative mb-4">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  placeholder={t('sidebar.chrome.megaMenuSearchPlaceholder', {
-                    defaultValue: 'Search in menu…',
-                  })}
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-10"
-                  autoFocus
-                />
-                {searchQuery && (
-                  <button
-                    type="button"
-                    onClick={() => setSearchQuery('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                    aria-label={t('sidebar.chrome.megaMenuClearSearch', {
-                      defaultValue: 'Clear search',
-                    })}
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {filteredSections().map((section, sectionIndex) => (
+                {sections.map((section, sectionIndex) => (
                   <div key={sectionIndex} className="space-y-3">
                     <h3 className="text-sm font-semibold text-foreground/90">{section.label}</h3>
                     <div className="space-y-1">
@@ -177,15 +136,6 @@ export function MegaMenuDropdown({
                   </div>
                 ))}
               </div>
-
-              {filteredSections().length === 0 && (
-                <div className="py-8 text-center text-sm text-muted-foreground">
-                  {t('sidebar.chrome.megaMenuNoResults', {
-                    query: searchQuery,
-                    defaultValue: `No results found for "${searchQuery}"`,
-                  })}
-                </div>
-              )}
             </div>
 
             <div className="flex items-center justify-between border-t border-border/50 px-4 py-3">
