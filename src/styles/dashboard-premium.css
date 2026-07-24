@@ -27,25 +27,24 @@
 }
 
 .landing-premium.app-premium #main-content:has(.dashboard-premium) {
-  /* Dégradé bleu brand en haut — contraste avec titres noirs (#000 via app-premium) */
+  /* Dégradé orange brand — contraste avec titres noirs (#000 via app-premium) */
   background: linear-gradient(
     180deg,
-    rgba(59, 130, 246, 0.22) 0%,
-    rgba(37, 99, 235, 0.1) 28%,
-    rgba(248, 250, 252, 0.92) 58%,
-    #f8fafc 100%
+    rgba(249, 115, 22, 0.2) 0%,
+    rgba(251, 146, 60, 0.1) 28%,
+    rgba(255, 247, 237, 0.95) 58%,
+    #fff7ed 100%
   ) !important;
 }
 
 .dark .landing-premium.app-premium #main-content:has(.dashboard-premium) {
-  /* Remplace le fond quasi-noir illisible ; lavis bleu clair pour garder le titre #000 lisible */
   background: linear-gradient(
     165deg,
-    #93c5fd 0%,
-    #bfdbfe 22%,
-    #dbeafe 48%,
-    #e2e8f0 78%,
-    #f1f5f9 100%
+    #fdba74 0%,
+    #fed7aa 22%,
+    #ffedd5 48%,
+    #fff7ed 78%,
+    #f8fafc 100%
   ) !important;
 }
 

@@ -1,12 +1,11 @@
 /**
- * Bannière opt-in push pour vendeurs — alertes commande même app fermée.
+ * CTA compact opt-in push vendeur — alerte commande même app fermée.
+ * Mobile : un seul bouton « Activer notification » (pas de long texte).
  */
 
 import { useCallback, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Bell, BellRing, Loader2, X } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Bell, Loader2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
@@ -15,6 +14,7 @@ import {
   isSellerPushOptInDismissed,
 } from '@/lib/notifications/seller-push-opt-in-prefs';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 export type SellerPushOptInBannerProps = {
   className?: string;
@@ -27,6 +27,7 @@ export function SellerPushOptInBanner({
   variant = 'dashboard',
 }: SellerPushOptInBannerProps) {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const { user } = useAuth();
   const { isSupported, isVapidReady, isSubscribed, isLoading, permission, subscribe } =
     usePushNotifications();
@@ -43,11 +44,29 @@ export function SellerPushOptInBanner({
   }, [user?.id]);
 
   const handleSubscribe = useCallback(async () => {
+    if (permission.permission === 'denied') {
+      toast({
+        title: t('notifications.sellerPushOptIn.deniedTitle', 'Notifications bloquées'),
+        description: t(
+          'notifications.sellerPushOptIn.deniedDescriptionShort',
+          'Autorisez les notifications dans le navigateur (cadenas → Notifications).'
+        ),
+        variant: 'destructive',
+      });
+      return;
+    }
     const ok = await subscribe();
     if (ok) {
       setDismissed(true);
+      toast({
+        title: t('notifications.sellerPushOptIn.enabledTitle', 'Notifications activées'),
+        description: t(
+          'notifications.sellerPushOptIn.enabledDescription',
+          'Vous serez alerté à chaque commande, même hors application.'
+        ),
+      });
     }
-  }, [subscribe]);
+  }, [permission.permission, subscribe, t, toast]);
 
   if (!user?.id || dismissed || isSubscribed) {
     return null;
@@ -57,92 +76,59 @@ export function SellerPushOptInBanner({
     return null;
   }
 
+  const label = t('notifications.sellerPushOptIn.activateShort', 'Activer notification');
   const denied = permission.permission === 'denied';
 
-  const title =
-    variant === 'orders'
-      ? t('notifications.sellerPushOptIn.ordersTitle', 'Ne manquez aucune commande')
-      : t(
-          'notifications.sellerPushOptIn.dashboardTitle',
-          'Activez les alertes commande en temps réel'
-        );
-
-  const description = denied
-    ? t(
-        'notifications.sellerPushOptIn.deniedDescription',
-        'Les notifications sont bloquées dans le navigateur. Autorisez-les pour ce site (icône cadenas → Notifications) afin de recevoir son + alerte à l’écran même si Emarzona est fermé — succès et échecs, y compris produits physiques.'
-      )
-    : variant === 'orders'
-      ? t(
-          'notifications.sellerPushOptIn.ordersDescription',
-          'Recevez son + bandeau à l’écran à chaque confirmation ou échec d’achat (digital, service, cours, artiste et physique), même si l’application n’est pas ouverte — connexion internet requise.'
-        )
-      : t(
-          'notifications.sellerPushOptIn.dashboardDescription',
-          'Activez les notifications push pour être alerté immédiatement à chaque vente réussie ou échouée, y compris les commandes physiques, même hors application.'
-        );
-
   return (
-    <Alert
+    <div
       className={cn(
-        'relative border-violet-300/60 bg-gradient-to-r from-violet-50/90 to-blue-50/80 dark:from-violet-950/40 dark:to-blue-950/30 dark:border-violet-700/50',
+        'flex items-center justify-between gap-2 rounded-full border border-orange-200/80',
+        'bg-gradient-to-r from-orange-50 to-amber-50/80 px-1.5 py-1 shadow-sm',
+        'dark:from-orange-950/40 dark:to-amber-950/30 dark:border-orange-800/50',
         className
       )}
       role="region"
       aria-label={t('notifications.sellerPushOptIn.ariaLabel', 'Activer les alertes commande')}
     >
-      <BellRing className="h-4 w-4 text-violet-700 dark:text-violet-300" aria-hidden />
-      <AlertTitle className="text-violet-900 dark:text-violet-100 pr-8">{title}</AlertTitle>
-      <AlertDescription className="text-violet-950/80 dark:text-violet-100/80">
-        <p className="mb-3">{description}</p>
-        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-          {!denied && (
-            <Button
-              type="button"
-              size="sm"
-              className="min-h-[40px] bg-violet-600 hover:bg-violet-700 text-white gap-2"
-              disabled={isLoading}
-              onClick={() => void handleSubscribe()}
-            >
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-              ) : (
-                <Bell className="h-4 w-4" aria-hidden />
-              )}
-              {t('notifications.sellerPushOptIn.activate', 'Activer les alertes')}
-            </Button>
-          )}
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            className="min-h-[40px] border-violet-300/70"
-            disabled={isLoading}
-            onClick={handleDismiss}
-          >
-            {t('notifications.sellerPushOptIn.later', 'Plus tard')}
-          </Button>
-          <Button
-            asChild
-            type="button"
-            size="sm"
-            variant="ghost"
-            className="min-h-[40px] text-violet-800 dark:text-violet-200"
-          >
-            <Link to="/dashboard/settings?tab=notifications">
-              {t('notifications.sellerPushOptIn.settings', 'Paramètres notifications')}
-            </Link>
-          </Button>
-        </div>
-      </AlertDescription>
+      <Button
+        type="button"
+        size="sm"
+        disabled={isLoading}
+        onClick={() => void handleSubscribe()}
+        className={cn(
+          'min-h-9 h-9 rounded-full px-3 sm:px-4 gap-1.5 font-medium shadow-none',
+          'bg-primary text-primary-foreground hover:bg-primary/90',
+          denied && 'opacity-90'
+        )}
+        title={
+          denied
+            ? t(
+                'notifications.sellerPushOptIn.deniedDescriptionShort',
+                'Autorisez les notifications dans le navigateur (cadenas → Notifications).'
+              )
+            : variant === 'orders'
+              ? t('notifications.sellerPushOptIn.ordersTitle', 'Ne manquez aucune commande')
+              : t(
+                  'notifications.sellerPushOptIn.dashboardTitle',
+                  'Activez les alertes commande en temps réel'
+                )
+        }
+      >
+        {isLoading ? (
+          <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" aria-hidden />
+        ) : (
+          <Bell className="h-3.5 w-3.5 shrink-0" aria-hidden />
+        )}
+        <span className="text-xs sm:text-sm whitespace-nowrap">{label}</span>
+      </Button>
       <button
         type="button"
         onClick={handleDismiss}
-        className="absolute right-3 top-3 rounded-md p-1 text-violet-700/70 hover:text-violet-900 hover:bg-violet-100/80 dark:hover:bg-violet-900/50"
+        className="shrink-0 rounded-full p-2 text-muted-foreground hover:text-foreground hover:bg-background/70 transition-colors touch-manipulation"
         aria-label={t('common.close', 'Fermer')}
       >
-        <X className="h-4 w-4" aria-hidden />
+        <X className="h-3.5 w-3.5" aria-hidden />
       </button>
-    </Alert>
+    </div>
   );
 }

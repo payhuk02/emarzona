@@ -117,10 +117,9 @@ export const useOrders = (storeId?: string, options: UseOrdersOptions = {}) => {
         const errorCode = queryError.code;
         const errorMessage = queryError.message || '';
 
-        // Table n'existe pas (42P01) ou relation invalide
+        // Table n'existe pas (42P01) — ne pas confondre avec « column X does not exist »
         if (
           errorCode === '42P01' ||
-          errorMessage.includes('does not exist') ||
           (errorMessage.includes('relation') && errorMessage.includes('does not exist'))
         ) {
           logger.warn("Table orders n'existe pas encore", {

@@ -14,6 +14,7 @@ import {
   isOrderEligibleForRevenue,
   orderNetRevenueAmount,
 } from '@/lib/orders/order-revenue-eligibility';
+import { toUserErrorMessage } from '@/lib/user-error-message';
 
 export type ProductType = 'digital' | 'physical' | 'service' | 'course' | 'artist';
 export type TimeRange = '7d' | '30d' | '90d' | '1y' | 'all';
@@ -26,12 +27,18 @@ interface AnalyticsOrderProduct {
 }
 
 interface AnalyticsOrderItem {
-  price: string | number;
+  order_id?: string | null;
+  product_id?: string | null;
   quantity?: number | null;
+  unit_price?: number | null;
+  total_price?: number | null;
+  product_type?: string | null;
+  product_name?: string | null;
   products?: AnalyticsOrderProduct | null;
 }
 
 interface AnalyticsOrderRow {
+  id?: string;
   customer_id?: string | null;
   total_amount: string | number;
   refunded_amount?: string | number | null;
@@ -55,6 +62,25 @@ function calcGrowthPercent(current: number, previous: number): number {
   return Math.round(((current - previous) / previous) * 100);
 }
 
+function itemRevenue(item: AnalyticsOrderItem): number {
+  if (item.total_price != null) return Number(item.total_price) || 0;
+  return (Number(item.unit_price) || 0) * (item.quantity || 1);
+}
+
+function itemProductType(item: AnalyticsOrderItem): ProductType | undefined {
+  const raw = item.product_type || item.products?.product_type;
+  if (
+    raw === 'digital' ||
+    raw === 'physical' ||
+    raw === 'service' ||
+    raw === 'course' ||
+    raw === 'artist'
+  ) {
+    return raw;
+  }
+  return undefined;
+}
+
 function accumulateByProductType(orders: AnalyticsOrderRow[]) {
   const acc: Record<ProductType, ProductTypeAccumulator> = {
     digital: { revenue: 0, orders: 0, units: 0, products: new Set() },
@@ -66,17 +92,51 @@ function accumulateByProductType(orders: AnalyticsOrderRow[]) {
 
   orders.forEach(order => {
     (order.order_items ?? []).forEach(item => {
-      const product = item.products;
-      const type = product?.product_type as ProductType | undefined;
+      const type = itemProductType(item);
       if (!type || !acc[type]) return;
-      acc[type].revenue += parseFloat(String(item.price)) * (item.quantity || 1);
+      acc[type].revenue += itemRevenue(item);
       acc[type].orders += 1;
       acc[type].units += item.quantity || 1;
-      if (product?.id) acc[type].products.add(product.id);
+      const productId = item.product_id || item.products?.id;
+      if (productId) acc[type].products.add(productId);
     });
   });
 
   return acc;
+}
+
+async function attachOrderItems(orders: AnalyticsOrderRow[]): Promise<AnalyticsOrderRow[]> {
+  const orderIds = orders.map(o => o.id).filter(Boolean) as string[];
+  if (orderIds.length === 0) return orders;
+
+  const { data: items, error } = await supabase
+    .from('order_items')
+    .select(
+      'order_id, product_id, quantity, unit_price, total_price, product_type, product_name, products(id, name, product_type, price)'
+    )
+    .in('order_id', orderIds);
+
+  if (error) {
+    logger.warn('Analytics order_items fetch degraded', {
+      message: toUserErrorMessage(error),
+    });
+    return orders;
+  }
+
+  const byOrder = new Map<string, AnalyticsOrderItem[]>();
+  for (const raw of items ?? []) {
+    const item = raw as AnalyticsOrderItem;
+    const oid = item.order_id;
+    if (!oid) continue;
+    const list = byOrder.get(oid) ?? [];
+    list.push(item);
+    byOrder.set(oid, list);
+  }
+
+  return orders.map(order => ({
+    ...order,
+    order_items: order.id ? (byOrder.get(order.id) ?? []) : [],
+  }));
 }
 
 export interface UnifiedAnalytics {
@@ -248,31 +308,11 @@ export const useUnifiedAnalytics = (
       const startDate = getDateRange(timeRange);
       const previousStartDate = new Date(startDate.getTime() - (Date.now() - startDate.getTime()));
 
-      // Récupérer les commandes
-      const { data: orders, error: ordersError } = await supabase
+      // Commandes plates (sans embed order_items.price qui n'existe pas — total_price/unit_price)
+      const { data: ordersRaw, error: ordersError } = await supabase
         .from('orders')
         .select(
-          `
-          id,
-          total_amount,
-          refunded_amount,
-          status,
-          payment_status,
-          created_at,
-          customer_id,
-          order_items (
-            id,
-            product_id,
-            quantity,
-            price,
-            products (
-              id,
-              name,
-              product_type,
-              price
-            )
-          )
-        `
+          'id, total_amount, refunded_amount, status, payment_status, created_at, customer_id'
         )
         .eq('store_id', store.id)
         .gte('created_at', startDate.toISOString())
@@ -280,29 +320,27 @@ export const useUnifiedAnalytics = (
 
       if (ordersError) throw ordersError;
 
-      // Récupérer les commandes précédentes pour les tendances
-      const { data: previousOrders } = await supabase
+      const { data: previousOrdersRaw, error: previousOrdersError } = await supabase
         .from('orders')
         .select(
-          `
-          total_amount,
-          refunded_amount,
-          status,
-          payment_status,
-          created_at,
-          customer_id,
-          order_items (
-            quantity,
-            price,
-            products ( id, product_type )
-          )
-        `
+          'id, total_amount, refunded_amount, status, payment_status, created_at, customer_id'
         )
         .eq('store_id', store.id)
         .gte('created_at', previousStartDate.toISOString())
         .lt('created_at', startDate.toISOString());
 
-      // Clients CRM + catalogue produits (totaux exacts, hors pagination)
+      if (previousOrdersError) {
+        logger.warn('Analytics previous orders degraded', {
+          message: toUserErrorMessage(previousOrdersError),
+        });
+      }
+
+      const orders = await attachOrderItems((ordersRaw ?? []) as AnalyticsOrderRow[]);
+      const previousOrders = await attachOrderItems(
+        (previousOrdersRaw ?? []) as AnalyticsOrderRow[]
+      );
+
+      // Clients CRM + catalogue produits (totaux exacts)
       const [
         { count: crmCustomersTotal },
         { count: totalProducts },
@@ -321,8 +359,7 @@ export const useUnifiedAnalytics = (
           .from('products')
           .select('*', { count: 'exact', head: true })
           .eq('store_id', store.id)
-          .eq('is_active', true)
-          .or('is_draft.eq.false,is_draft.is.null'),
+          .eq('is_active', true),
         supabase.from('customers').select('id, name, email').eq('store_id', store.id),
       ]);
 
@@ -439,13 +476,10 @@ export const useUnifiedAnalytics = (
 
         const items = order.order_items ?? [];
         items.forEach(item => {
-          const product = item.products;
-          if (product && product.product_type) {
-            const type = product.product_type as ProductType;
-            const amount = parseFloat(item.price.toString()) * (item.quantity || 1);
-            if (revenueByDate[date][type] !== undefined) {
-              revenueByDate[date][type] += amount;
-            }
+          const type = itemProductType(item);
+          const amount = itemRevenue(item);
+          if (type && revenueByDate[date][type] !== undefined) {
+            revenueByDate[date][type] += amount;
           }
         });
       });
@@ -467,23 +501,23 @@ export const useUnifiedAnalytics = (
       revenueOrders.forEach(order => {
         const items = order.order_items ?? [];
         items.forEach(item => {
-          const product = item.products;
-          if (product) {
-            if (!productRevenue[product.id]) {
-              productRevenue[product.id] = {
-                id: product.id,
-                name: product.name,
-                type: product.product_type ?? '',
-                revenue: 0,
-                orders: 0,
-                units: 0,
-              };
-            }
-            productRevenue[product.id].revenue +=
-              parseFloat(item.price.toString()) * (item.quantity || 1);
-            productRevenue[product.id].orders += 1;
-            productRevenue[product.id].units += item.quantity || 1;
+          const productId = item.product_id || item.products?.id;
+          if (!productId) return;
+          const type = itemProductType(item) ?? '';
+          const name = item.products?.name || item.product_name || item.products?.id || 'Produit';
+          if (!productRevenue[productId]) {
+            productRevenue[productId] = {
+              id: productId,
+              name,
+              type,
+              revenue: 0,
+              orders: 0,
+              units: 0,
+            };
           }
+          productRevenue[productId].revenue += itemRevenue(item);
+          productRevenue[productId].orders += 1;
+          productRevenue[productId].units += item.quantity || 1;
         });
       });
 
@@ -604,7 +638,7 @@ export const useUnifiedAnalytics = (
 
       logger.info('Unified analytics loaded', { storeId: store.id, timeRange });
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : String(err);
+      const errorMessage = toUserErrorMessage(err) || 'Erreur analytics';
       logger.error('Error fetching unified analytics', { error: errorMessage });
       setError(errorMessage);
       setAnalytics(getFallbackAnalytics());

@@ -125,12 +125,18 @@ export const DashboardActionCenter = React.memo<DashboardActionCenterProps>(
               <button
                 type="button"
                 onClick={() => navigate('/notifications')}
-                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-sm font-medium hover:bg-muted/60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <MessageSquare className="h-4 w-4" aria-hidden />
-                {t('dashboard.actions.notifications', '{{count}} notification(s)', {
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-2.5 sm:px-3 py-1.5 text-sm font-medium hover:bg-muted/60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                aria-label={t('dashboard.actions.notificationsAria', '{{count}} notifications', {
                   count: unreadNotifications,
                 })}
+              >
+                <MessageSquare className="h-4 w-4 shrink-0" aria-hidden />
+                <span className="tabular-nums">
+                  {unreadNotifications > 99 ? '99+' : unreadNotifications}
+                </span>
+                <span className="hidden sm:inline">
+                  {t('dashboard.actions.notificationsShort', 'notif.')}
+                </span>
               </button>
             )}
             {storeUrl && (
