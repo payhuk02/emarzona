@@ -423,7 +423,7 @@ serve(async req => {
           const { data: orderData, error: orderError } = await supabase
             .from('orders')
             .select(
-              'id,store_id,order_number,customer_id,total_amount,currency,status,payment_status,created_at,metadata,customer_email,shipping_address,expected_delivery_date,tracking_number,tracking_link'
+              'id,store_id,order_number,customer_id,total_amount,currency,status,payment_status,created_at,metadata'
             )
             .eq('id', orderId)
             .single();

@@ -6,7 +6,7 @@ import {
 
 describe('guest-payment-return', () => {
   it('resolveCustomerPortalPath maps product types', () => {
-    expect(resolveCustomerPortalPath('digital')).toBe('/account/downloads');
+    expect(resolveCustomerPortalPath('digital')).toBe('/account/digital');
     expect(resolveCustomerPortalPath('course')).toBe('/account/courses');
     expect(resolveCustomerPortalPath('artist')).toBe('/account/artist');
   });

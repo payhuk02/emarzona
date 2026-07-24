@@ -169,6 +169,31 @@ const PaymentSuccess = () => {
   }, [orderId, transactionId, providerParam, sessionId, searchParams]);
 
   useEffect(() => {
+    if (confirmationState !== 'confirmed' || !user) return;
+    if (purchasedProductType !== 'course') return;
+
+    const learnUrl = resolveCourseLearnUrl({
+      slug: purchasedProductSlug,
+      productId: purchasedProductId,
+    });
+    if (learnUrl === '/account/courses' && !purchasedProductSlug && !purchasedProductId) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      navigate(learnUrl);
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, [
+    confirmationState,
+    user,
+    purchasedProductType,
+    purchasedProductSlug,
+    purchasedProductId,
+    navigate,
+  ]);
+
+  useEffect(() => {
     if (confirmationState !== 'confirmed' || !purchasedProductId) return;
 
     const timer = setTimeout(() => setShowUpsell(true), 2000);
@@ -285,11 +310,11 @@ const PaymentSuccess = () => {
               <>
                 {purchasedProductType === 'digital' && (
                   <Button
-                    onClick={() => navigate('/account/downloads')}
+                    onClick={() => navigate('/account/digital')}
                     className="flex items-center gap-2"
                   >
                     <Download className="h-4 w-4" />
-                    Mes téléchargements
+                    Mes achats digitaux
                   </Button>
                 )}
                 <Button

@@ -1,6 +1,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'npm:@supabase/supabase-js@2.58.0';
 import { isDuplicateAuthUserError } from '../_shared/auth-admin-utils.ts';
+import { resolveCustomerPortalPath } from '../_shared/guest-customer-magic-link.ts';
 
 const defaultAllowedOrigin = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
 const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || defaultAllowedOrigin)
@@ -26,24 +27,86 @@ function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
 }
 
-function resolvePortalPath(productType: string | null | undefined): string {
-  switch (productType) {
-    case 'digital':
-      return '/account/downloads';
-    case 'course':
-      return '/account/courses';
-    case 'service':
-      return '/account/bookings';
-    case 'artist':
-      return '/account/artist';
-    case 'physical':
-      return '/account/physical';
-    default:
-      return '/account/orders';
+function parseMetadata(metadata: unknown): Record<string, unknown> {
+  if (metadata == null) return {};
+  if (typeof metadata === 'string') {
+    try {
+      return JSON.parse(metadata) as Record<string, unknown>;
+    } catch {
+      return {};
+    }
   }
+  if (typeof metadata === 'object' && !Array.isArray(metadata)) {
+    return metadata as Record<string, unknown>;
+  }
+  return {};
 }
 
 const PAID_STATUSES = new Set(['paid', 'completed']);
+
+/**
+ * Lie l'utilisateur auth aux artefacts d'achat (licences, customer, enrollments).
+ */
+async function backfillPurchaseAccess(
+  supabaseAdmin: ReturnType<typeof createClient>,
+  options: {
+    userId: string;
+    orderId: string;
+    customerId: string | null;
+    email: string;
+  }
+): Promise<void> {
+  const { userId, orderId, customerId, email } = options;
+
+  // Licences digitales de cette commande (ou même email sans user)
+  await supabaseAdmin
+    .from('digital_licenses')
+    .update({ user_id: userId, updated_at: new Date().toISOString() })
+    .eq('order_id', orderId)
+    .is('user_id', null);
+
+  await supabaseAdmin
+    .from('digital_licenses')
+    .update({ user_id: userId, order_id: orderId, updated_at: new Date().toISOString() })
+    .is('user_id', null)
+    .ilike('customer_email', email);
+
+  if (customerId) {
+    await supabaseAdmin
+      .from('customers')
+      .update({ user_id: userId, updated_at: new Date().toISOString() })
+      .eq('id', customerId)
+      .is('user_id', null);
+  }
+
+  // Enrollments cours créés sans user (rare) — lier par email via metadata n/a;
+  // auto_enroll utilise déjà auth.users.email. On s'assure que les enrollments
+  // orphelins liés à la commande (si stockés) restent accessibles.
+  const { data: courseItems } = await supabaseAdmin
+    .from('order_items')
+    .select('product_id')
+    .eq('order_id', orderId)
+    .eq('product_type', 'course');
+
+  for (const item of courseItems ?? []) {
+    if (!item.product_id) continue;
+    const { data: course } = await supabaseAdmin
+      .from('courses')
+      .select('id')
+      .eq('product_id', item.product_id)
+      .maybeSingle();
+    if (!course?.id) continue;
+    try {
+      await supabaseAdmin.rpc('enroll_user_in_course', {
+        p_course_id: course.id,
+        p_order_id: orderId,
+        p_user_id: userId,
+      });
+    } catch (err) {
+      console.warn('enroll_user_in_course backfill failed', err);
+    }
+  }
+}
 
 serve(async (req: Request) => {
   const corsHeaders = buildCorsHeaders(req.headers.get('origin'));
@@ -87,7 +150,7 @@ serve(async (req: Request) => {
 
     const { data: order, error: orderError } = await supabaseAdmin
       .from('orders')
-      .select('id, payment_status, customer_id, customer_email, metadata')
+      .select('id, payment_status, customer_id, metadata')
       .eq('id', orderId)
       .maybeSingle();
 
@@ -109,7 +172,11 @@ serve(async (req: Request) => {
       );
     }
 
-    let orderEmail = order.customer_email ? normalizeEmail(order.customer_email) : null;
+    const orderMeta = parseMetadata(order.metadata);
+    let orderEmail: string | null =
+      typeof orderMeta.customer_email === 'string'
+        ? normalizeEmail(orderMeta.customer_email)
+        : null;
 
     if (!orderEmail && order.customer_id) {
       const { data: customer } = await supabaseAdmin
@@ -124,19 +191,42 @@ serve(async (req: Request) => {
 
     if (!orderEmail || orderEmail !== normalizedEmail) {
       return new Response(
-        JSON.stringify({ success: false, error: 'Email non associé à cette commande', code: 'EMAIL_MISMATCH' }),
+        JSON.stringify({
+          success: false,
+          error: 'Email non associé à cette commande',
+          code: 'EMAIL_MISMATCH',
+        }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     const { data: orderItems } = await supabaseAdmin
       .from('order_items')
-      .select('product_type')
+      .select('product_type, product_id, products(slug)')
       .eq('order_id', orderId)
       .limit(1);
 
     const productType = orderItems?.[0]?.product_type ?? null;
-    const redirectPath = resolvePortalPath(productType);
+    let redirectPath = resolveCustomerPortalPath(productType);
+
+    // Cours : rediriger vers /learn/:slug si disponible
+    if (productType === 'course') {
+      const productRow = orderItems?.[0]?.products as { slug?: string } | null;
+      const slug = productRow?.slug;
+      if (slug) {
+        redirectPath = `/learn/${encodeURIComponent(slug)}`;
+      } else if (orderItems?.[0]?.product_id) {
+        const { data: product } = await supabaseAdmin
+          .from('products')
+          .select('slug')
+          .eq('id', orderItems[0].product_id)
+          .maybeSingle();
+        if (product?.slug) {
+          redirectPath = `/learn/${encodeURIComponent(product.slug)}`;
+        }
+      }
+    }
+
     const redirectTo = `${siteUrl.replace(/\/$/, '')}${redirectPath}`;
 
     let targetUserId: string | null = null;
@@ -152,24 +242,59 @@ serve(async (req: Request) => {
     });
 
     if (createError) {
-      if (isDuplicateAuthUserError(createError)) {
+      if (!isDuplicateAuthUserError(createError)) {
+        throw createError;
+      }
+      // Compte existant : magic link (pas de 409) + récupération user id
+      const { data: linkProbe, error: probeError } = await supabaseAdmin.auth.admin.generateLink({
+        type: 'magiclink',
+        email: normalizedEmail,
+        options: { redirectTo },
+      });
+      if (probeError || !linkProbe?.properties?.action_link) {
+        console.error('generateLink for existing user failed', probeError);
         return new Response(
           JSON.stringify({
             success: false,
-            error: 'Un compte existe déjà. Connectez-vous avec cet email.',
-            code: 'USER_EXISTS_LOGIN_REQUIRED',
+            error: 'Impossible de générer le lien de connexion',
+            code: 'LINK_GENERATION_FAILED',
           }),
-          { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-      throw createError;
+
+      targetUserId = linkProbe.user?.id ?? null;
+      if (targetUserId) {
+        await backfillPurchaseAccess(supabaseAdmin, {
+          userId: targetUserId,
+          orderId,
+          customerId: order.customer_id ?? null,
+          email: normalizedEmail,
+        });
+      }
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          actionLink: linkProbe.properties.action_link,
+          redirectPath,
+          existingUser: true,
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     targetUserId = created.user?.id ?? null;
-
     if (!targetUserId) {
       throw new Error('Utilisateur introuvable');
     }
+
+    await backfillPurchaseAccess(supabaseAdmin, {
+      userId: targetUserId,
+      orderId,
+      customerId: order.customer_id ?? null,
+      email: normalizedEmail,
+    });
 
     const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
       type: 'magiclink',

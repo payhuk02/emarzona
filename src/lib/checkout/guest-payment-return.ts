@@ -13,7 +13,8 @@ export type GuestPurchasableProductType =
 export function resolveCustomerPortalPath(productType?: string | null): string {
   switch (productType) {
     case 'digital':
-      return '/account/downloads';
+      // Achats digitaux (licences / fichiers), pas l'historique de downloads
+      return '/account/digital';
     case 'course':
       return '/account/courses';
     case 'service':

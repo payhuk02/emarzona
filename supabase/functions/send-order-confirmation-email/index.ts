@@ -580,9 +580,48 @@ async function sendServiceEmail(
   item: any,
   payload: EmailPayload
 ): Promise<boolean> {
-  // Récupérer les détails de la réservation
-  const bookingDate = item.item_metadata?.booking_date || 'À déterminer';
-  const bookingTime = item.item_metadata?.booking_time || 'À déterminer';
+  const siteUrl = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
+  let bookingDate = item.item_metadata?.booking_date || 'À déterminer';
+  let bookingTime = item.item_metadata?.booking_time || 'À déterminer';
+  let bookingLink = item.item_metadata?.booking_link || `${siteUrl.replace(/\/$/, '')}/account/bookings`;
+  let providerName = item.item_metadata?.provider_name || 'Notre équipe';
+
+  const bookingId =
+    item.booking_id ||
+    item.item_metadata?.booking_id ||
+    order.metadata?.booking_id ||
+    null;
+
+  if (bookingId) {
+    const { data: booking } = await supabase
+      .from('service_bookings')
+      .select('id, scheduled_date, scheduled_time, status, meeting_link, start_time, notes')
+      .eq('id', bookingId)
+      .maybeSingle();
+
+    if (booking) {
+      if (booking.scheduled_date) {
+        bookingDate = new Date(booking.scheduled_date).toLocaleDateString('fr-FR');
+      } else if (booking.start_time) {
+        bookingDate = new Date(booking.start_time).toLocaleDateString('fr-FR');
+        bookingTime = new Date(booking.start_time).toLocaleTimeString('fr-FR', {
+          hour: '2-digit',
+          minute: '2-digit',
+        });
+      }
+      if (booking.scheduled_time) bookingTime = String(booking.scheduled_time);
+      if (booking.meeting_link) bookingLink = booking.meeting_link;
+    }
+  }
+
+  if (order.store_id) {
+    const { data: storeRow } = await supabase
+      .from('stores')
+      .select('name')
+      .eq('id', order.store_id)
+      .maybeSingle();
+    if (storeRow?.name) providerName = storeRow.name;
+  }
 
   const result = await invokeSendEmail(supabase, {
     templateSlug: 'order-confirmation-service',
@@ -600,8 +639,8 @@ async function sendServiceEmail(
       service_name: item.product_name,
       booking_date: bookingDate,
       booking_time: bookingTime,
-      booking_link: item.item_metadata?.booking_link || '#',
-      provider_name: item.item_metadata?.provider_name || 'Notre équipe',
+      booking_link: bookingLink,
+      provider_name: providerName,
     },
   });
 
@@ -614,17 +653,55 @@ async function sendCourseEmail(
   item: any,
   payload: EmailPayload
 ): Promise<boolean> {
-  // Récupérer les détails du cours
+  const siteUrl = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
+
   const { data: course } = await supabase
-    .from('course_products')
-    .select('*, instructor:profiles(*)')
+    .from('courses')
+    .select(
+      'id, product_id, total_duration_minutes, certificate_enabled, level, products(slug, name, store_id)'
+    )
     .eq('product_id', item.product_id)
-    .single();
+    .maybeSingle();
 
   if (!course) {
     console.warn(`Course not found for product_id: ${item.product_id}`);
     return false;
   }
+
+  const product = course.products as { slug?: string; name?: string; store_id?: string } | null;
+  const slug = product?.slug;
+  const courseLink = slug
+    ? `${siteUrl.replace(/\/$/, '')}/learn/${encodeURIComponent(slug)}`
+    : `${siteUrl.replace(/\/$/, '')}/account/courses`;
+
+  let instructorName = 'Notre équipe';
+  if (product?.store_id) {
+    const { data: store } = await supabase
+      .from('stores')
+      .select('name, user_id')
+      .eq('id', product.store_id)
+      .maybeSingle();
+    if (store?.name) instructorName = store.name;
+    if (store?.user_id) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('display_name, first_name, last_name')
+        .eq('id', store.user_id)
+        .maybeSingle();
+      const name =
+        profile?.display_name ||
+        [profile?.first_name, profile?.last_name].filter(Boolean).join(' ').trim();
+      if (name) instructorName = name;
+    }
+  }
+
+  const durationMinutes = Number(course.total_duration_minutes) || 0;
+  const courseDuration =
+    durationMinutes > 0
+      ? durationMinutes >= 60
+        ? `${Math.round(durationMinutes / 60)} h`
+        : `${durationMinutes} min`
+      : undefined;
 
   const result = await invokeSendEmail(supabase, {
     templateSlug: 'course-enrollment-confirmation',
@@ -633,15 +710,15 @@ async function sendCourseEmail(
     userId: payload.customer_id,
     productType: 'course',
     productId: item.product_id,
-    productName: item.product_name,
+    productName: item.product_name || product?.name,
     variables: {
       user_name: payload.customer_name,
-      course_name: item.product_name,
+      course_name: item.product_name || product?.name,
       enrollment_date: new Date().toLocaleDateString('fr-FR'),
-      course_link: course.enrollment_url || '#',
-      instructor_name: course.instructor?.full_name || 'Notre équipe',
-      course_duration: course.duration,
-      certificate_available: course.certificate_available || false,
+      course_link: courseLink,
+      instructor_name: instructorName,
+      course_duration: courseDuration,
+      certificate_available: Boolean(course.certificate_enabled),
     },
   });
 

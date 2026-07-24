@@ -8,7 +8,7 @@ function normalizeEmail(email: string): string {
 export function resolveCustomerPortalPath(productType: string | null | undefined): string {
   switch (productType) {
     case 'digital':
-      return '/account/downloads';
+      return '/account/digital';
     case 'course':
       return '/account/courses';
     case 'service':

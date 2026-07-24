@@ -8,8 +8,9 @@ import { logArtistFulfillmentEvent } from './artist-fulfillment-observability.ts
 import { triggerEmailWorkflowsForEvent } from './workflow-executor.ts';
 import { triggerSequenceEnrollmentsForEvent } from './sequence-enrollment-utils.ts';
 
+/** Colonnes orders réelles (pas de customer_email / shipping_* / tracking_* sur orders). */
 const ORDER_SELECT =
-  'id, store_id, order_number, customer_id, total_amount, currency, status, payment_status, created_at, metadata, customer_email, shipping_address, expected_delivery_date, tracking_number, tracking_link';
+  'id, store_id, order_number, customer_id, total_amount, currency, status, payment_status, created_at, metadata';
 
 function parseOrderMetadata(metadata: unknown): Record<string, unknown> {
   if (metadata == null) return {};
