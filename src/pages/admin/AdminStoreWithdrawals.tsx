@@ -220,10 +220,10 @@ const AdminStoreWithdrawals = () => {
         let errorMessage = err instanceof Error ? err.message : String(err);
         const ipMatch = errorMessage.match(/(\d{1,3}(?:\.\d{1,3}){3})/);
         if (/ip.*autoris|non autoris/i.test(errorMessage) && ipMatch) {
-          if (!/API KEY|Fixie|RETRAITS/i.test(errorMessage)) {
+          if (!/re-ajoutez|régénérez|MoneyFusion/i.test(errorMessage)) {
             errorMessage =
-              `${errorMessage} Ajoutez ${ipMatch[1]} dans MoneyFusion → Mon Compte → API KEY (retraits). ` +
-              `Fixie a 2 IP : whitelist les deux (ou FIXIE_OUTBOUND_IP). API de Paiement = payin seulement.`;
+              `${errorMessage} IP vue par MF : ${ipMatch[1]}. Si déjà whitelistée : supprimer/re-ajouter, ` +
+              `aussi dans API de Paiement → Emarzona, + 54.217.142.99, ou régénérer la clé API.`;
           }
         }
         logger.error('Error approving withdrawal', { error: err, errorMessage });

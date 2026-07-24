@@ -100,9 +100,10 @@ export function formatMoneyFusionIpError(message: string): string {
   if (!/ip|autoris/i.test(message) || !ipMatch) return message;
   const ip = ipMatch[1];
   return (
-    `${message}. Pour les RETRAITS : ajoutez ${ip} dans MoneyFusion → Mon Compte → Paramètres → API KEY → Adresses IP. ` +
-    `Fixie a 2 IP (load-balance) : ajoutez les DEUX, ou épinglez FIXIE_OUTBOUND_IP. ` +
-    `« API de Paiement → Emarzona » sert au payin, pas au withdraw. 0.0.0.0 est refusé.`
+    `${message}. Emarzona sort bien via ${ip} (Fixie pin). Si cette IP est déjà dans API KEY → Adresses IP : ` +
+    `(1) supprimez-la puis re-ajoutez-la, (2) mettez aussi ${ip} dans API de Paiement → Modifier Emarzona, ` +
+    `(3) ajoutez la 2ᵉ IP Fixie 54.217.142.99, (4) sinon régénérez la clé API et mettez à jour MONEYFUSION_PRIVATE_KEY. ` +
+    `0.0.0.0 est refusé. Contactez le support MoneyFusion si ça persiste (clé valide mais IP refusée).`
   );
 }
 

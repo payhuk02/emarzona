@@ -196,6 +196,33 @@ export async function handleMoneyFusionStoreWithdrawalPayout(
   });
 
   if (!withdraw.ok) {
+    const isIpBlock = /ip.*autoris|non autoris/i.test(withdraw.message);
+    // IP whitelist errors are config issues — keep row pending so admin can retry
+    // after fixing MoneyFusion, instead of burning the request as "failed".
+    if (isIpBlock) {
+      await supabaseAdmin
+        .from('store_withdrawals')
+        .update({
+          status: 'pending',
+          approved_at: null,
+          approved_by: null,
+          failure_reason: withdraw.message,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', withdrawal.id);
+
+      return {
+        status: 422,
+        body: {
+          success: false,
+          error: withdraw.message,
+          code: 'moneyfusion_ip_not_authorized',
+          requires_manual: true,
+          retryable: true,
+        },
+      };
+    }
+
     await supabaseAdmin
       .from('store_withdrawals')
       .update({
@@ -207,7 +234,7 @@ export async function handleMoneyFusionStoreWithdrawalPayout(
       .eq('id', withdrawal.id);
 
     return {
-      status: 502,
+      status: 422,
       body: { success: false, error: withdraw.message, requires_manual: true },
     };
   }
