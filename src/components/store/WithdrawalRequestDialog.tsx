@@ -84,7 +84,8 @@ export const WithdrawalRequestDialog = ({
   const [accountHolderName, setAccountHolderName] = useState('');
   const [iban, setIban] = useState('');
 
-  const MIN_WITHDRAWAL = 1;
+  // MoneyFusion payout rejects below 200 (statut:true without tokenPay).
+  const MIN_WITHDRAWAL = paymentMethod === 'mobile_money' ? 200 : 1;
   const amountNum = parseFloat(amount) || 0;
 
   // Charger les détails d'une méthode sauvegardée sélectionnée
