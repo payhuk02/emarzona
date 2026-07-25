@@ -29,7 +29,7 @@
       "destination": "/api/store-robots?slug=myemarzona.shop"
     },
     {
-      "source": "/((?!api/|supabase/|assets/|fonts/).*)",
+      "source": "/((?!api/|supabase/|assets/|fonts/|js/|images/).*)",
       "destination": "/index.html"
     }
   ],

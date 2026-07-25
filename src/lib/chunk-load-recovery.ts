@@ -21,7 +21,12 @@ export function isChunkLoadErrorMessage(message: string): boolean {
     lower.includes('error loading dynamically imported module') ||
     lower.includes('chunkloaderror') ||
     lower.includes('loading chunk') ||
-    lower.includes('dynamically imported module')
+    lower.includes('dynamically imported module') ||
+    // SPA fallback / stale deploy: server returns index.html for a hashed .js URL
+    lower.includes('failed to load module script') ||
+    lower.includes('mime type of "text/html"') ||
+    lower.includes("mime type of 'text/html'") ||
+    lower.includes('strict mime type checking')
   );
 }
 
@@ -62,4 +67,10 @@ export function installChunkLoadRecovery(): void {
     },
     true
   );
+
+  // Vite: échec de modulepreload / import après un nouveau deploy
+  window.addEventListener('vite:preloadError', event => {
+    event.preventDefault();
+    reloadOnceForChunkError();
+  });
 }

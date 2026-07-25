@@ -99,9 +99,20 @@ function staleWhileRevalidate(request, cacheName) {
   );
 }
 
-/** Network-only pour JS/CSS hashés — jamais servir un vieux chunk depuis le cache SW. */
+/** Network-only pour JS/CSS hashés — jamais servir un vieux chunk depuis le cache SW.
+ *  Rejette aussi les faux positifs SPA (index.html servi sous une URL .js).
+ */
 function networkOnlyHashedAsset(request) {
-  return fetch(request).catch(() => undefined);
+  return fetch(request)
+    .then(response => {
+      if (!response) return undefined;
+      const contentType = response.headers.get('content-type') || '';
+      if (contentType.includes('text/html')) {
+        return undefined;
+      }
+      return response;
+    })
+    .catch(() => undefined);
 }
 
 self.addEventListener('install', event => {
