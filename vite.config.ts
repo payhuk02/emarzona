@@ -96,6 +96,8 @@ export default defineConfig(({ mode }) => {
   };
 
   // Chunks dédiés pour les dépendances lourdes non-critiques
+  // Note: do NOT force `pdf` (jspdf) — Vite's __vitePreload helper got trapped in that
+  // chunk and made every lazy() route sync-depend on /js/pdf-*.js (dashboard white screen).
   const SEPARATED_CHUNKS: Record<string, string[]> = {
     three: ['three/', '@react-three/'],
     charts: ['recharts'],
@@ -104,7 +106,6 @@ export default defineConfig(({ mode }) => {
     i18n: ['i18next', 'react-i18next'],
     animations: ['framer-motion'],
     'date-utils': ['date-fns'],
-    pdf: ['jspdf', 'jspdf-autotable'],
     canvas: ['html2canvas'],
     qrcode: ['qrcode', 'html5-qrcode'],
     utils: ['clsx', 'tailwind-merge', 'class-variance-authority'],
@@ -174,16 +175,9 @@ export default defineConfig(({ mode }) => {
         preserveEntrySignatures: 'strict',
         output: {
           manualChunks: id => {
-            // Route-level domain chunks disabled: path-based splits caused circular chunk
-            // dependencies (admin ↔ dashboard re-exports) → TDZ crash on production load.
-
-            // Checkout-specific chunks
-            if (id.includes('/src/components/checkout/cart/')) {
-              return 'checkout-cart';
-            }
-            if (id.includes('/src/components/checkout/buy-now/')) {
-              return 'checkout-buy-now';
-            }
+            // Path-based app splits disabled: they pulled shared UI/runtime into named
+            // chunks (Badge → checkout-buy-now, __vitePreload → pdf) so /dashboard
+            // sync-loaded those files and white-screened when a deploy/CDN served HTML.
             if (!id.includes('node_modules/')) return undefined;
 
             // Lucide: seul Loader2 reste dans le principal
