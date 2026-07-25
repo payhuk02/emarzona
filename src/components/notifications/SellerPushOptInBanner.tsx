@@ -44,12 +44,23 @@ export function SellerPushOptInBanner({
   }, [user?.id]);
 
   const handleSubscribe = useCallback(async () => {
+    if (!isVapidReady) {
+      toast({
+        title: t('notifications.sellerPushOptIn.unavailableTitle', 'Notifications indisponibles'),
+        description: t(
+          'notifications.sellerPushOptIn.unavailableDescription',
+          'La configuration push n’est pas encore active sur cet environnement.'
+        ),
+        variant: 'destructive',
+      });
+      return;
+    }
     if (permission.permission === 'denied') {
       toast({
         title: t('notifications.sellerPushOptIn.deniedTitle', 'Notifications bloquées'),
         description: t(
           'notifications.sellerPushOptIn.deniedDescriptionShort',
-          'Autorisez les notifications dans le navigateur (cadenas → Notifications).'
+          'Autorisez les notifications dans le navigateur (cadenas → Notifications). Sur iPhone : ajoutez Emarzona à l’écran d’accueil puis réessayez.'
         ),
         variant: 'destructive',
       });
@@ -66,18 +77,25 @@ export function SellerPushOptInBanner({
         ),
       });
     }
-  }, [permission.permission, subscribe, t, toast]);
+  }, [isVapidReady, permission.permission, subscribe, t, toast]);
 
   if (!user?.id || dismissed || isSubscribed) {
     return null;
   }
 
-  if (!isSupported || !isVapidReady) {
+  // Sur mobile, PushManager peut manquer (Safari non installé en PWA) — on affiche quand même
+  // un CTA explicatif si Notification existe, sinon on masque.
+  if (!isSupported && typeof Notification === 'undefined') {
+    return null;
+  }
+
+  if (!isSupported && !isVapidReady) {
     return null;
   }
 
   const label = t('notifications.sellerPushOptIn.activateShort', 'Activer notification');
   const denied = permission.permission === 'denied';
+  const canActivate = isSupported && isVapidReady;
 
   return (
     <div
@@ -94,24 +112,41 @@ export function SellerPushOptInBanner({
         type="button"
         size="sm"
         disabled={isLoading}
-        onClick={() => void handleSubscribe()}
+        onClick={() => {
+          if (!canActivate && !isSupported) {
+            toast({
+              title: t('notifications.sellerPushOptIn.iosTitle', 'Installer l’app'),
+              description: t(
+                'notifications.sellerPushOptIn.iosDescription',
+                'Sur iPhone/iPad : Partager → Sur l’écran d’accueil, puis ouvrez Emarzona depuis l’icône pour activer les notifications.'
+              ),
+            });
+            return;
+          }
+          void handleSubscribe();
+        }}
         className={cn(
           'min-h-9 h-9 rounded-full px-3 sm:px-4 gap-1.5 font-medium shadow-none',
           'bg-primary text-primary-foreground hover:bg-primary/90',
           denied && 'opacity-90'
         )}
         title={
-          denied
+          !isSupported
             ? t(
-                'notifications.sellerPushOptIn.deniedDescriptionShort',
-                'Autorisez les notifications dans le navigateur (cadenas → Notifications).'
+                'notifications.sellerPushOptIn.iosDescription',
+                'Sur iPhone/iPad : Partager → Sur l’écran d’accueil, puis ouvrez Emarzona depuis l’icône pour activer les notifications.'
               )
-            : variant === 'orders'
-              ? t('notifications.sellerPushOptIn.ordersTitle', 'Ne manquez aucune commande')
-              : t(
-                  'notifications.sellerPushOptIn.dashboardTitle',
-                  'Activez les alertes commande en temps réel'
+            : denied
+              ? t(
+                  'notifications.sellerPushOptIn.deniedDescriptionShort',
+                  'Autorisez les notifications dans le navigateur (cadenas → Notifications).'
                 )
+              : variant === 'orders'
+                ? t('notifications.sellerPushOptIn.ordersTitle', 'Ne manquez aucune commande')
+                : t(
+                    'notifications.sellerPushOptIn.dashboardTitle',
+                    'Activez les alertes commande en temps réel'
+                  )
         }
       >
         {isLoading ? (

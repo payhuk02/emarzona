@@ -240,13 +240,24 @@ export async function dismissPersonaOnboardingIfVisible(page: Page): Promise<voi
 
   const dismiss = page.getByRole('button', { name: /^Compris$/i });
   if (await dismiss.isVisible().catch(() => false)) {
-    // Radix can report the button as visible while its anchored popover sits
-    // outside a narrow CI viewport. A forced click still exercises dismiss().
-    await dismiss.click({ force: true });
+    // Radix popover can sit outside a narrow CI viewport — prefer DOM click.
+    await dismiss
+      .evaluate((el: HTMLElement) => el.click())
+      .catch(async () => {
+        await dismiss.scrollIntoViewIfNeeded().catch(() => undefined);
+        await dismiss.click({ force: true, timeout: 5_000 });
+      });
     await expect(dismiss)
       .toBeHidden({ timeout: 10_000 })
       .catch(() => undefined);
   }
+
+  // Ensure coach overlay cannot block later wizard interactions.
+  await page.evaluate(() => {
+    document
+      .querySelectorAll('[data-testid="persona-onboarding-coach"], [data-persona-onboarding]')
+      .forEach(node => node.remove());
+  });
 }
 
 export async function dismissCookieBannerIfVisible(page: Page): Promise<void> {

@@ -193,11 +193,22 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       // 2. Filtre explicite (évite que les admins reçoivent toutes les boutiques).
       // logo_url vit dans store_appearance (colonne droppée de stores) — ne pas le
       // sélectionner sur stores sinon PostgREST échoue et le dashboard croit « 0 boutique ».
-      let query = supabase
-        .from('stores')
-        .select(
-          'id,user_id,name,slug,created_at,updated_at,metadata,commerce_type,store_appearance(logo_url)'
-        );
+      // Cast: embed store_appearance hors schéma types.ts → évite TS2589 (instantiation profonde).
+      type StoresListQuery = {
+        select: (columns: string) => StoresListQuery;
+        or: (filters: string) => StoresListQuery;
+        eq: (column: string, value: string) => StoresListQuery;
+        order: (
+          column: string,
+          opts: { ascending: boolean }
+        ) => PromiseLike<{ data: Record<string, unknown>[] | null; error: Error | null }>;
+      };
+      const storesTable = (
+        supabase as unknown as { from: (table: string) => StoresListQuery }
+      ).from('stores');
+      let query = storesTable.select(
+        'id,user_id,name,slug,created_at,updated_at,metadata,commerce_type,store_appearance(logo_url)'
+      );
 
       if (memberStoreIds.length > 0) {
         query = query.or(`user_id.eq.${user.id},id.in.(${memberStoreIds.join(',')})`);

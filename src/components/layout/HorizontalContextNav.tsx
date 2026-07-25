@@ -44,38 +44,28 @@ function MegaMenuLink({
   const Icon = item.icon;
   const active = isNavItemActive(item.url, location.pathname, location.search, 'prefix');
   const linkClassName = cn(
-    'group flex w-full items-start gap-3 rounded-xl text-sm transition-colors duration-200 ease-out',
-    variant === 'sidebar' ? 'min-h-[44px] touch-manipulation px-3 py-2.5' : 'p-2.5',
-    'hover:bg-accent/80 hover:shadow-sm focus:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30',
-    active
-      ? 'bg-primary/5 text-primary font-semibold shadow-sm'
-      : 'text-foreground/80 hover:text-foreground'
+    'group flex w-full items-center gap-2 rounded-md text-sm font-bold transition-colors duration-150 ease-out',
+    variant === 'sidebar' ? 'min-h-[44px] touch-manipulation px-2.5 py-1.5' : 'px-2 py-1',
+    'hover:bg-accent/80 focus:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30',
+    active ? 'bg-primary/5 text-primary shadow-sm' : 'text-foreground/90 hover:text-foreground'
   );
 
   const renderContent = () => (
     <>
       <div
         className={cn(
-          'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-all duration-300 shadow-sm mt-0.5',
+          'flex h-7 w-7 shrink-0 items-center justify-center rounded-md border transition-colors',
           active
-            ? 'border-primary/20 bg-primary/10 text-primary shadow-primary/10'
-            : 'border-border/40 bg-gradient-to-b from-background to-background/80 text-muted-foreground group-hover:border-foreground/20 group-hover:text-foreground group-hover:shadow-md group-hover:bg-background'
+            ? 'border-primary/20 bg-primary/10 text-primary'
+            : 'border-border/40 bg-background text-muted-foreground group-hover:border-foreground/20 group-hover:text-foreground'
         )}
       >
-        <Icon
-          className={cn(
-            'h-4 w-4',
-            active ? '' : 'group-hover:scale-110 transition-transform duration-300 ease-out'
-          )}
-          aria-hidden
-        />
+        <Icon className="h-3.5 w-3.5" aria-hidden />
       </div>
-      <div className="flex flex-col gap-1 mt-0.5">
-        <span className="leading-snug break-words line-clamp-2">
-          {item.title}
-          {item.locked && <Lock className="inline-block ml-1.5 h-3 w-3 opacity-70" aria-hidden />}
-        </span>
-      </div>
+      <span className="leading-tight break-words line-clamp-2 font-bold">
+        {item.title}
+        {item.locked && <Lock className="inline-block ml-1.5 h-3 w-3 opacity-70" aria-hidden />}
+      </span>
     </>
   );
 
@@ -126,31 +116,31 @@ function MegaMenuPanel({
 
   if (domain.subgroups) {
     const subgroupCount = domain.subgroups.length;
-    let gridClass = 'grid gap-3 p-3 ';
-    if (subgroupCount === 1) gridClass += 'grid-cols-1 w-[240px]';
-    else if (subgroupCount === 2) gridClass += 'grid-cols-2 w-[440px]';
-    else if (subgroupCount === 3) gridClass += 'grid-cols-3 w-[600px]';
-    else gridClass += 'md:grid-cols-2 lg:grid-cols-3 md:w-[600px] lg:w-[800px]';
+    let gridClass = 'grid gap-2 p-2 ';
+    if (subgroupCount === 1) gridClass += 'grid-cols-1 w-[220px]';
+    else if (subgroupCount === 2) gridClass += 'grid-cols-2 w-[400px]';
+    else if (subgroupCount === 3) gridClass += 'grid-cols-3 w-[560px]';
+    else gridClass += 'md:grid-cols-2 lg:grid-cols-3 md:w-[560px] lg:w-[720px]';
 
     return (
       <div
         className={cn(
           isSidebar
-            ? 'flex flex-col gap-5 px-1 py-1'
+            ? 'flex flex-col gap-3 px-1 py-1'
             : `${gridClass} max-h-[min(74vh,560px)] overflow-y-auto bg-background/80 backdrop-blur-2xl border border-white/10 shadow-2xl rounded-xl`
         )}
       >
         {domain.subgroups.map(group => (
-          <div key={group.groupKey} className="min-w-0 space-y-1.5">
+          <div key={group.groupKey} className="min-w-0 space-y-0.5">
             <p
               className={cn(
-                'font-bold uppercase tracking-widest text-primary/80 mb-2',
-                isSidebar ? 'px-3 text-xs' : 'px-2 text-[10px]'
+                'font-bold uppercase tracking-widest text-primary/80 mb-1',
+                isSidebar ? 'px-2.5 text-xs' : 'px-2 text-[10px]'
               )}
             >
               {group.label}
             </p>
-            <div className="space-y-0.5">
+            <div className="space-y-0">
               {group.items.map(item => (
                 <MegaMenuLink
                   key={`${group.groupKey}-${item.url}`}
@@ -171,8 +161,8 @@ function MegaMenuPanel({
     <div
       className={cn(
         isSidebar
-          ? 'flex flex-col gap-0.5 px-1 py-1'
-          : 'grid gap-1 p-3 sm:grid-cols-2 md:w-[480px] lg:w-[560px] max-h-[min(74vh,520px)] overflow-y-auto bg-background/80 backdrop-blur-2xl border border-white/10 shadow-2xl rounded-xl'
+          ? 'flex flex-col gap-0 px-1 py-1'
+          : 'grid gap-0.5 p-2 sm:grid-cols-2 md:w-[440px] lg:w-[520px] max-h-[min(74vh,520px)] overflow-y-auto bg-background/80 backdrop-blur-2xl border border-white/10 shadow-2xl rounded-xl'
       )}
     >
       {domain.items.map(item => (

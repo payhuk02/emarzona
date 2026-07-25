@@ -241,14 +241,13 @@ function matchesPrefix(pathname: string, prefix: string): boolean {
 
 export function resolveStoreCommerceTypeFromStore(store: {
   commerce_type?: unknown;
-  metadata?: Record<string, unknown> | null;
+  metadata?: unknown;
 }): StoreCommerceType {
-  return parseStoreCommerceType(
-    store.commerce_type ??
-      (store.metadata && typeof store.metadata === 'object'
-        ? store.metadata.commerce_type
-        : undefined)
-  );
+  const meta =
+    store.metadata && typeof store.metadata === 'object'
+      ? (store.metadata as Record<string, unknown>)
+      : null;
+  return parseStoreCommerceType(store.commerce_type ?? meta?.commerce_type);
 }
 
 export function getRouteCapabilityRule(pathname: string): RouteRule | null {
