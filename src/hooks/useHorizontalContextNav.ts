@@ -5,9 +5,11 @@ import { resolveHorizontalNavDomains } from '@/lib/navigation/resolveHorizontalN
 import { toCommerceNavPersona } from '@/config/navigation.persona';
 import { useAdmin } from '@/hooks/useAdmin';
 import { useStoreContext } from '@/contexts/StoreContext';
+import { useStore } from '@/hooks/useStore';
 import { useStorePhysicalAccess } from '@/hooks/billing/useStorePhysicalAccess';
 import { useSidebarPersona } from '@/hooks/useSidebarPersona';
 import { useProgressiveUX } from '@/hooks/useProgressiveUX';
+import { resolveStoreCommerceTypeFromStore } from '@/lib/commerce/store-capability-map';
 
 export function useHorizontalContextNav() {
   const { t } = useTranslation();
@@ -15,9 +17,13 @@ export function useHorizontalContextNav() {
   const { isAdmin } = useAdmin();
   const { persona: sidebarPersona } = useSidebarPersona(isAdmin);
   const { selectedStoreId, selectedStore } = useStoreContext();
+  const { store: detailStore } = useStore();
   const { planSlug } = useStorePhysicalAccess(selectedStoreId);
-  const commerceType = selectedStore?.commerce_type;
-  const storeMetadata = selectedStore?.metadata ?? null;
+  const commerceStore =
+    detailStore?.id === selectedStoreId ? detailStore : (selectedStore ?? detailStore);
+  const commerceType = commerceStore ? resolveStoreCommerceTypeFromStore(commerceStore) : undefined;
+  const storeMetadata =
+    (commerceStore?.metadata as Record<string, unknown> | null | undefined) ?? null;
   const persona = toCommerceNavPersona(sidebarPersona);
   const { isExpertMode } = useProgressiveUX();
 

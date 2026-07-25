@@ -27,23 +27,23 @@
 }
 
 .landing-premium.app-premium #main-content:has(.dashboard-premium) {
-  /* Dégradé orange brand — contraste avec titres noirs (#000 via app-premium) */
+  /* Dégradé bleu ciel premium — contraste avec titres noirs (#000 via app-premium) */
   background: linear-gradient(
     180deg,
-    rgba(249, 115, 22, 0.2) 0%,
-    rgba(251, 146, 60, 0.1) 28%,
-    rgba(255, 247, 237, 0.95) 58%,
-    #fff7ed 100%
+    rgba(56, 189, 248, 0.24) 0%,
+    rgba(125, 211, 252, 0.14) 26%,
+    rgba(224, 242, 254, 0.85) 55%,
+    #f0f9ff 100%
   ) !important;
 }
 
 .dark .landing-premium.app-premium #main-content:has(.dashboard-premium) {
   background: linear-gradient(
     165deg,
-    #fdba74 0%,
-    #fed7aa 22%,
-    #ffedd5 48%,
-    #fff7ed 78%,
+    #7dd3fc 0%,
+    #bae6fd 24%,
+    #e0f2fe 52%,
+    #f0f9ff 78%,
     #f8fafc 100%
   ) !important;
 }

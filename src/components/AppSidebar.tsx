@@ -43,6 +43,7 @@ import { EmarzonaBrandName } from '@/components/brand/EmarzonaBrandName';
 import { cn } from '@/lib/utils';
 import { useAdmin } from '@/hooks/useAdmin';
 import { useStoreContext } from '@/contexts/StoreContext';
+import { useStore } from '@/hooks/useStore';
 import { useAuth } from '@/contexts/AuthContext';
 import { useStorePhysicalAccess } from '@/hooks/billing/useStorePhysicalAccess';
 import { isNavPathPlanLocked } from '@/lib/navigation/plan-lock-nav';
@@ -59,6 +60,7 @@ import { parseStoreCommerceType } from '@/lib/billing/store-commerce-access';
 import {
   canAccessCommercePath,
   getPrimaryProductCreatePath,
+  resolveStoreCommerceTypeFromStore,
 } from '@/lib/commerce/store-capability-map';
 import { isSellerNavItemActive, resolveSellerNavUrl } from '@/lib/navigation/vendor-products-nav';
 import { logger } from '@/lib/logger';
@@ -96,9 +98,14 @@ export function AppSidebar() {
   const location = useLocation();
   const { isAdmin } = useAdmin();
   const { selectedStoreId, selectedStore } = useStoreContext();
+  const { store: detailStore } = useStore();
   const { planSlug } = useStorePhysicalAccess(selectedStoreId);
-  const commerceType = selectedStore?.commerce_type;
-  const storeMetadata = selectedStore?.metadata ?? null;
+  // Prefer detail fetch when it matches the selected store (avoid keepPreviousData leak).
+  const commerceStore =
+    detailStore?.id === selectedStoreId ? detailStore : (selectedStore ?? detailStore);
+  const commerceType = commerceStore ? resolveStoreCommerceTypeFromStore(commerceStore) : undefined;
+  const storeMetadata =
+    (commerceStore?.metadata as Record<string, unknown> | null | undefined) ?? null;
   const platformLogo = usePlatformLogo();
   const handlePlanLockedNav = usePlanLockNavAction();
   /** Desktop rail only — mobile drawer always shows labels + icons */

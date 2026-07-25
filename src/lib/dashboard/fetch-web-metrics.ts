@@ -1,5 +1,6 @@
 /**
- * Web analytics metrics (pageViews, bounce, session duration) from analytics_events / user_sessions.
+ * Web analytics metrics (pageViews, bounce, session duration) from analytics_events.
+ * Note: auth `user_sessions` is unrelated (device sessions) — do not query it here.
  */
 
 import { supabase } from '@/integrations/supabase/client';
@@ -76,13 +77,6 @@ type AnalyticsEventRow = {
   created_at: string;
 };
 
-type UserSessionRow = {
-  page_views: number | null;
-  clicks: number | null;
-  duration: number | null;
-  start_time: string;
-};
-
 /** Client fallback when RPC web metrics are not deployed yet. */
 export async function fetchWebMetricsFromTables(
   storeId: string,
@@ -90,7 +84,7 @@ export async function fetchWebMetricsFromTables(
 ): Promise<DashboardWebMetrics> {
   const compareStart = compareStartForRange(range);
 
-  const [currentRes, previousRes, sessionsRes] = await Promise.all([
+  const [currentRes, previousRes] = await Promise.all([
     supabase
       .from('analytics_events')
       .select('event_type, session_id, duration, created_at')
@@ -104,12 +98,6 @@ export async function fetchWebMetricsFromTables(
       .eq('event_type', 'view')
       .gte('created_at', compareStart.toISOString())
       .lt('created_at', range.start.toISOString()),
-    supabase
-      .from('user_sessions')
-      .select('page_views, clicks, duration, start_time')
-      .eq('store_id', storeId)
-      .gte('start_time', range.start.toISOString())
-      .lte('start_time', range.end.toISOString()),
   ]);
 
   if (currentRes.error) {
@@ -125,19 +113,10 @@ export async function fetchWebMetricsFromTables(
     ? 0
     : ((previousRes.data ?? []) as { event_type: string }[]).length;
 
-  const sessions = (sessionsRes.data ?? []) as UserSessionRow[];
   let bounceRate = 0;
   let sessionDuration = 0;
 
-  if (sessions.length > 0) {
-    const bounces = sessions.filter(s => (s.page_views ?? 0) <= 1 && (s.clicks ?? 0) === 0).length;
-    bounceRate = Math.round((bounces / sessions.length) * 10000) / 100;
-    const durations = sessions.map(s => s.duration ?? 0).filter(d => d > 0);
-    sessionDuration =
-      durations.length > 0
-        ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length)
-        : 0;
-  } else if (pageViews > 0) {
+  if (pageViews > 0) {
     const bySession = new Map<
       string,
       { views: number; interactions: number; endDuration: number }

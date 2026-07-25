@@ -1,4 +1,5 @@
 import { canAccessAdminPath } from '@/lib/admin/admin-route-permissions';
+import { pinPrimaryCreateNavSection } from '@/config/navigation.create';
 import { getNavItemPath } from '@/config/navigation.helpers';
 import type { StoreCommerceType } from '@/constants/store-commerce-types';
 import type { NavSection } from '@/config/navigation.types';
@@ -127,5 +128,8 @@ export function filterSellerNavSectionsByAccess(
     }))
     .filter(section => section.items.length > 0);
 
-  return dedupeNavSectionsByResolvedHref(filtered, options.commerceType);
+  return pinPrimaryCreateNavSection(
+    dedupeNavSectionsByResolvedHref(filtered, options.commerceType),
+    options.commerceType
+  );
 }

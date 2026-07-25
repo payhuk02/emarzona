@@ -12,7 +12,7 @@ import { logger } from '@/lib/logger';
 import { fetchWebMetricsForPeriod } from '@/lib/dashboard/fetch-web-metrics';
 import {
   isOrderEligibleForRevenue,
-  orderNetRevenueAmount,
+  orderSellerProductRevenueAmount,
 } from '@/lib/orders/order-revenue-eligibility';
 import { toUserErrorMessage } from '@/lib/user-error-message';
 
@@ -45,6 +45,7 @@ interface AnalyticsOrderRow {
   created_at: string;
   status?: string | null;
   payment_status?: string | null;
+  metadata?: unknown;
   order_items?: AnalyticsOrderItem[] | null;
 }
 
@@ -65,6 +66,20 @@ function calcGrowthPercent(current: number, previous: number): number {
 function itemRevenue(item: AnalyticsOrderItem): number {
   if (item.total_price != null) return Number(item.total_price) || 0;
   return (Number(item.unit_price) || 0) * (item.quantity || 1);
+}
+
+function orderItemsTotal(order: AnalyticsOrderRow): number {
+  return (order.order_items ?? []).reduce((sum, item) => sum + itemRevenue(item), 0);
+}
+
+/** Revenu vendeur (prix produit), hors frais checkout 2%+100 et TTC. */
+function orderSellerRevenue(order: AnalyticsOrderRow): number {
+  return orderSellerProductRevenueAmount({
+    total_amount: Number(order.total_amount),
+    refunded_amount: order.refunded_amount != null ? Number(order.refunded_amount) : null,
+    metadata: order.metadata,
+    itemsTotal: orderItemsTotal(order),
+  });
 }
 
 function itemProductType(item: AnalyticsOrderItem): ProductType | undefined {
@@ -312,7 +327,7 @@ export const useUnifiedAnalytics = (
       const { data: ordersRaw, error: ordersError } = await supabase
         .from('orders')
         .select(
-          'id, total_amount, refunded_amount, status, payment_status, created_at, customer_id'
+          'id, total_amount, refunded_amount, status, payment_status, created_at, customer_id, metadata'
         )
         .eq('store_id', store.id)
         .gte('created_at', startDate.toISOString())
@@ -323,7 +338,7 @@ export const useUnifiedAnalytics = (
       const { data: previousOrdersRaw, error: previousOrdersError } = await supabase
         .from('orders')
         .select(
-          'id, total_amount, refunded_amount, status, payment_status, created_at, customer_id'
+          'id, total_amount, refunded_amount, status, payment_status, created_at, customer_id, metadata'
         )
         .eq('store_id', store.id)
         .gte('created_at', previousStartDate.toISOString())
@@ -372,10 +387,7 @@ export const useUnifiedAnalytics = (
       const previousRevenueOrders = previousPeriodOrders.filter(o =>
         isOrderEligibleForRevenue(o.status, o.payment_status)
       );
-      const totalRevenue = revenueOrders.reduce(
-        (sum, o) => sum + orderNetRevenueAmount(o.total_amount, o.refunded_amount),
-        0
-      );
+      const totalRevenue = revenueOrders.reduce((sum, o) => sum + orderSellerRevenue(o), 0);
       const totalOrders = periodOrders.length;
       const totalCustomers = new Set(periodOrders.map(o => o.customer_id).filter(Boolean)).size;
       const previousCustomers = new Set(
@@ -468,10 +480,7 @@ export const useUnifiedAnalytics = (
             artist: 0,
           };
         }
-        revenueByDate[date].revenue += orderNetRevenueAmount(
-          order.total_amount,
-          order.refunded_amount
-        );
+        revenueByDate[date].revenue += orderSellerRevenue(order);
         revenueByDate[date].orders += 1;
 
         const items = order.order_items ?? [];
@@ -548,10 +557,7 @@ export const useUnifiedAnalytics = (
               lastOrderDate: order.created_at,
             };
           }
-          customerStats[order.customer_id].totalSpent += orderNetRevenueAmount(
-            order.total_amount,
-            order.refunded_amount
-          );
+          customerStats[order.customer_id].totalSpent += orderSellerRevenue(order);
           customerStats[order.customer_id].orders += 1;
           if (
             new Date(order.created_at) > new Date(customerStats[order.customer_id].lastOrderDate)
@@ -579,14 +585,14 @@ export const useUnifiedAnalytics = (
 
       // Tendances (période précédente, mêmes règles de revenu)
       const previousRevenue = previousRevenueOrders.reduce(
-        (sum, o) => sum + orderNetRevenueAmount(o.total_amount, o.refunded_amount),
+        (sum, o) => sum + orderSellerRevenue(o),
         0
       );
       const revenueGrowth = calcGrowthPercent(totalRevenue, previousRevenue);
       const orderGrowth = calcGrowthPercent(totalOrders, previousPeriodOrders.length);
       const customerGrowth = calcGrowthPercent(totalCustomers, previousCustomers);
 
-      // Métriques web (période courante — analytics_events + user_sessions)
+      // Métriques web (période courante — analytics_events)
       const webMetrics = await fetchWebMetricsForPeriod(store.id, startDate);
       const pageViews = webMetrics.pageViews;
       const bounceRate = webMetrics.bounceRate;
