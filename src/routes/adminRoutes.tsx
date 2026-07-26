@@ -64,6 +64,7 @@ const AdminReviews = lazyPage(() =>
 const AdminInventory = lazyPage(() => import('@/pages/admin/AdminInventory'));
 const AdminSupport = lazyPage(() => import('@/pages/admin/AdminSupport'));
 const AdminAnalytics = lazyPage(() => import('@/pages/admin/AdminAnalytics'));
+const AdminVisitors = lazyPage(() => import('@/pages/admin/AdminVisitors'));
 const AISettingsPage = lazyPage(() => import('@/pages/admin/AISettingsPage'));
 const AIManagementPage = lazyPage(() => import('@/pages/admin/AIManagementPage'));
 const AdminPayments = lazyPage(() => import('@/pages/admin/AdminPayments'));
@@ -154,6 +155,7 @@ export const adminRoutes = (
     {pr('/admin/inventory', AdminInventory)}
     {pr('/admin/support', AdminSupport)}
     {pr('/admin/analytics', AdminAnalytics)}
+    {pr('/admin/visitors', AdminVisitors)}
     {pr('/admin/ai-settings', AISettingsPage)}
     {pr('/admin/ai-management', AIManagementPage)}
     {pr('/admin/marketing', MarketingAutomationDashboard)}

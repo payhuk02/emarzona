@@ -1085,6 +1085,11 @@ export const adminMenuSections = [
         icon: BarChart3,
       },
       {
+        title: 'Visiteurs',
+        url: '/admin/visitors',
+        icon: Globe,
+      },
+      {
         title: 'Monitoring',
         url: '/admin/monitoring',
         icon: Activity,

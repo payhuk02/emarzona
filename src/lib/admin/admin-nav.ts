@@ -370,6 +370,12 @@ export const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
         permissions: ['analytics.view'],
       },
       {
+        icon: Globe,
+        label: 'Visiteurs',
+        path: '/admin/visitors',
+        permissions: ['analytics.view'],
+      },
+      {
         icon: BarChart3,
         label: 'Monitoring Transactions',
         path: '/admin/transaction-monitoring',

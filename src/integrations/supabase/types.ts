@@ -23683,6 +23683,72 @@ export type Database = {
         };
         Relationships: [];
       };
+      platform_visitor_events: {
+        Row: {
+          id: string;
+          session_id: string;
+          user_id: string | null;
+          event_type: string;
+          page_path: string;
+          page_url: string | null;
+          referrer: string | null;
+          country: string | null;
+          region: string | null;
+          city: string | null;
+          timezone: string | null;
+          language: string | null;
+          device_type: string | null;
+          browser: string | null;
+          os: string | null;
+          user_agent: string | null;
+          duration_ms: number | null;
+          event_data: Json | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          session_id: string;
+          user_id?: string | null;
+          event_type: string;
+          page_path: string;
+          page_url?: string | null;
+          referrer?: string | null;
+          country?: string | null;
+          region?: string | null;
+          city?: string | null;
+          timezone?: string | null;
+          language?: string | null;
+          device_type?: string | null;
+          browser?: string | null;
+          os?: string | null;
+          user_agent?: string | null;
+          duration_ms?: number | null;
+          event_data?: Json | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          session_id?: string;
+          user_id?: string | null;
+          event_type?: string;
+          page_path?: string;
+          page_url?: string | null;
+          referrer?: string | null;
+          country?: string | null;
+          region?: string | null;
+          city?: string | null;
+          timezone?: string | null;
+          language?: string | null;
+          device_type?: string | null;
+          browser?: string | null;
+          os?: string | null;
+          user_agent?: string | null;
+          duration_ms?: number | null;
+          event_data?: Json | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       portfolio_comment_likes: {
         Row: {
           comment_id: string;
@@ -46718,6 +46784,10 @@ export type Database = {
         }[];
       };
       get_platform_customization: { Args: never; Returns: Json };
+      get_platform_visitor_analytics: {
+        Args: { p_period_days?: number };
+        Returns: Json;
+      };
       get_platform_status_summary: { Args: never; Returns: Json };
       get_popular_products_by_users:
         | {

@@ -20,6 +20,7 @@ import { getRoutePrefetchConfig } from '@/lib/route-prefetch-config';
 import { resolveStoreCommerceTypeFromStore } from '@/lib/commerce/store-capability-map';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useBehavioralAnalytics } from '@/hooks/useBehavioralAnalytics';
+import { PlatformVisitorTracker } from '@/components/analytics/PlatformVisitorTracker';
 
 import React, { Suspense, lazy, useEffect } from 'react';
 import { logger } from '@/lib/logger';
@@ -290,6 +291,7 @@ const AppContent = () => {
           <AffiliateLinkTracker />
           <ReferralTracker />
         </Suspense>
+        <PlatformVisitorTracker />
         <Suspense fallback={<LoadingFallback />}>
           {(() => {
             const routes = (

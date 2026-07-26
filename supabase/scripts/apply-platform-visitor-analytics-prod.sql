@@ -1,0 +1,6 @@
+-- =============================================================================
+-- Déploiement prod : analytics visiteurs plateforme (/admin/visitors)
+-- Usage : coller et exécuter le fichier de migration complet dans SQL Editor :
+--   supabase/migrations/20260725120000__platform_visitor_analytics.sql
+-- Projet prod : hbdnzajbyjakdhuavrvb
+-- =============================================================================
