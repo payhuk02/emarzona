@@ -195,6 +195,8 @@ function resolveSellerHorizontalNavDomains(
       );
     }
 
+    if (items.length === 0) continue;
+
     const isActive =
       items.some(item =>
         isSellerNavItemActive(item.url, input.pathname, input.search, 'prefix', input.commerceType)

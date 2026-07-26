@@ -13,6 +13,8 @@ import {
   formatSearchShortcutKey,
   formatSidebarToggleShortcutKey,
 } from '@/lib/navigation/keyboard-shortcuts';
+import { Switch } from '@/components/ui/switch';
+import { useProgressiveUX } from '@/hooks/useProgressiveUX';
 
 type UtilityBarHeaderProps = {
   className?: string;
@@ -22,6 +24,7 @@ export function UtilityBarHeader({ className }: UtilityBarHeaderProps) {
   const { t } = useTranslation();
   const searchShortcut = formatSearchShortcutKey();
   const sidebarShortcut = formatSidebarToggleShortcutKey();
+  const { isExpertMode, toggleExpertMode } = useProgressiveUX();
 
   return (
     <header
@@ -60,6 +63,21 @@ export function UtilityBarHeader({ className }: UtilityBarHeaderProps) {
         </span>
       </div>
       <div className="flex items-center gap-1 sm:gap-2 ml-auto shrink-0">
+        {/* 🔒 UX Progressive Toggle */}
+        <div className="hidden md:flex items-center gap-2 mr-2 px-2 border-r">
+          <label
+            htmlFor="utility-expert-mode"
+            className="text-xs font-medium text-muted-foreground whitespace-nowrap cursor-pointer hover:text-foreground"
+          >
+            Mode Expert
+          </label>
+          <Switch
+            id="utility-expert-mode"
+            checked={isExpertMode}
+            onCheckedChange={toggleExpertMode}
+            className="scale-75 data-[state=checked]:bg-primary"
+          />
+        </div>
         <NotificationBell />
         <UserUtilityActions variant="shell" />
       </div>

@@ -36,7 +36,7 @@ export const validateCodeFormat = (code: string): ValidationResult => {
   }
 
   if (!/^[A-Z0-9]+$/.test(normalizedCode)) {
-    errors.push("Le code doit être alphanumérique (lettres et chiffres uniquement)");
+    errors.push("Le code doit être alphanumérique");
   }
 
   return {

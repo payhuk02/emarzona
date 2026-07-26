@@ -8,9 +8,6 @@
 export const EXPERT_ONLY_PATHS = [
   // Marketing & Gamification
   '/dashboard/gamification',
-  '/dashboard/affiliates',
-  '/dashboard/store-affiliates',
-  '/dashboard/referrals',
   '/dashboard/emails/workflows',
   '/dashboard/emails/segments',
   '/dashboard/emails/tags',

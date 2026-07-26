@@ -22,6 +22,10 @@ vi.mock('@/lib/logger', () => ({
   },
 }));
 
+vi.mock('@/lib/wizard/prefetch-product-wizards', () => ({
+  prefetchProductWizards: vi.fn(),
+}));
+
 describe('usePrefetch', () => {
   beforeEach(() => {
     document.head.innerHTML = '';

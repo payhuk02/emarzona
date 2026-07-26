@@ -87,12 +87,12 @@ const AffiliateLinkCard = memo(({ link, index }: { link: AffiliateLink; index: n
                 </p>
               </div>
             </div>
-            <div className="flex gap-2 flex-shrink-0">
+            <div className="flex gap-2 flex-shrink-0 mt-2 sm:mt-0 w-full sm:w-auto">
               <Button
                 size="sm"
                 variant="outline"
                 onClick={handleCopy}
-                className="gap-1.5 sm:gap-2 text-xs"
+                className="flex-1 sm:flex-none gap-1.5 sm:gap-2 text-xs"
               >
                 <Copy className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                 <span className="hidden sm:inline">Copier</span>
@@ -101,7 +101,7 @@ const AffiliateLinkCard = memo(({ link, index }: { link: AffiliateLink; index: n
                 size="sm"
                 variant="outline"
                 onClick={handleOpen}
-                className="gap-1.5 sm:gap-2 text-xs"
+                className="flex-1 sm:flex-none gap-1.5 sm:gap-2 text-xs"
               >
                 <ExternalLink className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                 <span className="hidden sm:inline">Ouvrir</span>
@@ -568,14 +568,13 @@ const AffiliateDashboard = () => {
               </Badge>
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row w-full sm:w-auto items-stretch sm:items-center gap-2 mt-3 sm:mt-0">
             <Button
               onClick={() => setShowCreateLinkDialog(true)}
-              className="min-h-[44px] h-9 sm:h-10 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-xs sm:text-sm"
+              className="w-full sm:w-auto min-h-[44px] h-9 sm:h-10 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-xs sm:text-sm"
             >
               <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
-              <span className="hidden sm:inline">Nouveau lien</span>
-              <span className="sm:hidden">Nouveau</span>
+              <span>Nouveau lien</span>
             </Button>
           </div>
         </div>
@@ -737,7 +736,7 @@ const AffiliateDashboard = () => {
                         )}
                       </CardDescription>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto mt-2 sm:mt-0">
                       {links.length > 0 && (
                         <Button
                           variant="outline"
@@ -759,21 +758,19 @@ const AffiliateDashboard = () => {
                               });
                             }
                           }}
-                          className="gap-2 min-h-[44px] h-9 sm:h-10 text-xs sm:text-sm transition-all hover:scale-105"
+                          className="w-full sm:w-auto gap-2 min-h-[44px] h-9 sm:h-10 text-xs sm:text-sm transition-all hover:scale-105"
                         >
                           <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                          <span className="hidden sm:inline">Exporter CSV</span>
-                          <span className="sm:hidden">CSV</span>
+                          <span>Exporter CSV</span>
                         </Button>
                       )}
                       <Button
-                        className="gap-2 w-full sm:w-auto bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 min-h-[44px] h-9 sm:h-10 text-xs sm:text-sm"
+                        className="w-full sm:w-auto gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 min-h-[44px] h-9 sm:h-10 text-xs sm:text-sm"
                         size="sm"
                         onClick={() => setShowCreateLinkDialog(true)}
                       >
                         <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                        <span className="hidden sm:inline">Créer un lien</span>
-                        <span className="sm:hidden">Créer</span>
+                        <span>Créer un lien</span>
                       </Button>
                     </div>
                   </div>
@@ -853,11 +850,10 @@ const AffiliateDashboard = () => {
                             });
                           }
                         }}
-                        className="gap-2 min-h-[44px] h-9 sm:h-10 text-xs sm:text-sm transition-all hover:scale-105"
+                        className="w-full sm:w-auto mt-3 sm:mt-0 gap-2 min-h-[44px] h-9 sm:h-10 text-xs sm:text-sm transition-all hover:scale-105"
                       >
                         <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                        <span className="hidden sm:inline">Exporter CSV</span>
-                        <span className="sm:hidden">CSV</span>
+                        <span>Exporter CSV</span>
                       </Button>
                     )}
                   </div>

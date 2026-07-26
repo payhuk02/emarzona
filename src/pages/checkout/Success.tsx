@@ -1,30 +1,36 @@
-import { useEffect, useState, useCallback } from "react";
-import { useSearchParams, Link } from "react-router-dom";
-import { CheckCircle, ArrowRight, Loader2, Shield, Star, Gift } from "lucide-react";
-import { loadGeniusPayPayment } from "@/lib/geniuspay-lazy";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { supabase } from "@/integrations/supabase/client";
-import { logger } from "@/lib/logger";
-import { useAdvancedLoyalty } from "@/hooks/useAdvancedLoyalty";
-import { useRecommendationTracking } from "@/hooks/useRecommendationTracking";
-import type { Database } from "@/integrations/supabase/types";
+import { useEffect, useState, useCallback } from 'react';
+import { useSearchParams, Link } from 'react-router-dom';
+import { CheckCircle, ArrowRight, Loader2, Shield, Star, Gift } from 'lucide-react';
+import { loadGeniusPayPayment } from '@/lib/geniuspay-lazy';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/lib/logger';
+import { useAdvancedLoyalty } from '@/hooks/useAdvancedLoyalty';
+import { useRecommendationTracking } from '@/hooks/useRecommendationTracking';
+import type { Database } from '@/integrations/supabase/types';
 
 const CheckoutSuccess = () => {
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
-  const [transaction, setTransaction] = useState<Database['public']['Tables']['transactions']['Row'] | null>(null);
+  const [transaction, setTransaction] = useState<
+    Database['public']['Tables']['transactions']['Row'] | null
+  >(null);
   const [error, setError] = useState<string | null>(null);
-  const [product, setProduct] = useState<Database['public']['Tables']['products']['Row'] | null>(null);
-  const [loyaltyReward, setLoyaltyReward] = useState<{ points: number; tier?: string } | null>(null);
+  const [product, setProduct] = useState<Database['public']['Tables']['products']['Row'] | null>(
+    null
+  );
+  const [loyaltyReward, setLoyaltyReward] = useState<{ points: number; tier?: string } | null>(
+    null
+  );
 
   const { triggerLoyaltyEvent } = useAdvancedLoyalty();
   const { trackRecommendationPurchase } = useRecommendationTracking();
-  const transactionId = searchParams.get("transaction_id");
+  const transactionId = searchParams.get('transaction_id');
 
   const verifyTransaction = useCallback(async () => {
     if (!transactionId) {
-      setError("ID de transaction manquant");
+      setError('ID de transaction manquant');
       setLoading(false);
       return;
     }
@@ -34,45 +40,54 @@ const CheckoutSuccess = () => {
       const result = await verifyTransactionStatus(transactionId);
       setTransaction(result);
 
-      if (result.status === "processing") {
+      if (result.status === 'processing') {
         setTimeout(() => verifyTransaction(), 3000);
       }
 
-      if (result.status === "completed" && result.customer_id) {
+      if (result.status === 'completed' && result.customer_id) {
         try {
           const reward = await triggerLoyaltyEvent('purchase', {
             orderId: result.id,
             amount: result.amount || 0,
             currency: result.currency || 'XAF',
             storeId: result.store_id,
-            customerId: result.customer_id
+            customerId: result.customer_id,
           });
           setLoyaltyReward(reward);
-          logger.info("Loyalty points awarded for purchase", { orderId: result.id, reward });
+          logger.info('Loyalty points awarded for purchase', { orderId: result.id, reward });
         } catch (loyaltyError) {
-          logger.error("Failed to award loyalty points", { error: loyaltyError, orderId: result.id });
+          logger.error('Failed to award loyalty points', {
+            error: loyaltyError,
+            orderId: result.id,
+          });
         }
 
         try {
           await trackRecommendationPurchase(result.product_id || '', 'purchase');
-          logger.info("Purchase tracked for recommendations", { productId: result.product_id, orderId: result.id });
+          logger.info('Purchase tracked for recommendations', {
+            productId: result.product_id,
+            orderId: result.id,
+          });
         } catch (trackingError) {
-          logger.error("Failed to track recommendation purchase", { error: trackingError, orderId: result.id });
+          logger.error('Failed to track recommendation purchase', {
+            error: trackingError,
+            orderId: result.id,
+          });
         }
       }
 
       if (result?.product_id) {
         const { data: prod } = await supabase
           .from('products')
-          .select('id,name,licensing_type,license_terms')
+          .select('id,name,licensing_type,license_terms,product_type')
           .eq('id', result.product_id)
           .single();
         if (prod) setProduct(prod);
       }
     } catch (_err: unknown) {
-      logger.error("Verification error", { error: _err });
+      logger.error('Verification error', { error: _err });
       const errorObj = _err instanceof Error ? _err : new Error(String(_err));
-      setError(errorObj.message || "Erreur lors de la vérification du paiement");
+      setError(errorObj.message || 'Erreur lors de la vérification du paiement');
     } finally {
       setLoading(false);
     }
@@ -99,7 +114,7 @@ const CheckoutSuccess = () => {
         <Card className="max-w-md w-full">
           <CardContent className="pt-6 text-center">
             <p className="text-destructive font-medium mb-4">
-              {error || "Transaction introuvable"}
+              {error || 'Transaction introuvable'}
             </p>
             <Link to="/marketplace">
               <Button>Retour au marketplace</Button>
@@ -110,8 +125,8 @@ const CheckoutSuccess = () => {
     );
   }
 
-  const isCompleted = transaction.status === "completed";
-  const isProcessing = transaction.status === "processing";
+  const isCompleted = transaction.status === 'completed';
+  const isProcessing = transaction.status === 'processing';
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center text-center bg-gradient-to-b from-green-50 to-white dark:from-green-950/20 dark:to-background px-4">
@@ -123,10 +138,10 @@ const CheckoutSuccess = () => {
 
       <h1 className="text-3xl font-bold text-foreground mb-2">
         {isCompleted
-          ? "Paiement réussi 🎉"
+          ? 'Paiement réussi 🎉'
           : isProcessing
-          ? "Paiement en cours ⏳"
-          : "Statut du paiement"}
+            ? 'Paiement en cours ⏳'
+            : 'Statut du paiement'}
       </h1>
 
       <Card className="max-w-md w-full my-6">
@@ -143,17 +158,13 @@ const CheckoutSuccess = () => {
               <span
                 className={`font-medium ${
                   isCompleted
-                    ? "text-green-600"
+                    ? 'text-green-600'
                     : isProcessing
-                    ? "text-yellow-600"
-                    : "text-gray-600"
+                      ? 'text-yellow-600'
+                      : 'text-gray-600'
                 }`}
               >
-                {isCompleted
-                  ? "Complété"
-                  : isProcessing
-                  ? "En cours"
-                  : transaction.status}
+                {isCompleted ? 'Complété' : isProcessing ? 'En cours' : transaction.status}
               </span>
             </div>
             <div className="flex justify-between">
@@ -183,7 +194,10 @@ const CheckoutSuccess = () => {
                 {loyaltyReward.tier && (
                   <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
                     <Gift className="h-3 w-3" />
-                    <span>Nouveau niveau : <strong className="text-amber-600">{loyaltyReward.tier}</strong></span>
+                    <span>
+                      Nouveau niveau :{' '}
+                      <strong className="text-amber-600">{loyaltyReward.tier}</strong>
+                    </span>
                   </div>
                 )}
               </div>
@@ -197,17 +211,29 @@ const CheckoutSuccess = () => {
         <Card className="max-w-md w-full my-2">
           <CardContent className="pt-6">
             <div className="flex items-start gap-3">
-              <div className={`h-8 w-8 rounded-full flex items-center justify-center ${product.licensing_type === 'plr' ? 'bg-emerald-100' : product.licensing_type === 'copyrighted' ? 'bg-red-100' : 'bg-gray-100'}`}>
-                <Shield className={`h-4 w-4 ${product.licensing_type === 'plr' ? 'text-emerald-700' : product.licensing_type === 'copyrighted' ? 'text-red-700' : 'text-gray-700'}`} />
+              <div
+                className={`h-8 w-8 rounded-full flex items-center justify-center ${product.licensing_type === 'plr' ? 'bg-emerald-100' : product.licensing_type === 'copyrighted' ? 'bg-red-100' : 'bg-gray-100'}`}
+              >
+                <Shield
+                  className={`h-4 w-4 ${product.licensing_type === 'plr' ? 'text-emerald-700' : product.licensing_type === 'copyrighted' ? 'text-red-700' : 'text-gray-700'}`}
+                />
               </div>
               <div className="text-left text-sm">
                 <p className="font-semibold">
-                  {product.licensing_type === 'plr' ? 'Licence PLR (droits de label privé)' : product.licensing_type === 'copyrighted' ? "Protégé par droit d'auteur" : 'Licence standard'}
+                  {product.licensing_type === 'plr'
+                    ? 'Licence PLR (droits de label privé)'
+                    : product.licensing_type === 'copyrighted'
+                      ? "Protégé par droit d'auteur"
+                      : 'Licence standard'}
                 </p>
                 {product.license_terms ? (
-                  <p className="text-muted-foreground mt-1 whitespace-pre-wrap">{product.license_terms}</p>
+                  <p className="text-muted-foreground mt-1 whitespace-pre-wrap">
+                    {product.license_terms}
+                  </p>
                 ) : (
-                  <p className="text-muted-foreground mt-1">Veuillez respecter les conditions d'utilisation de ce contenu.</p>
+                  <p className="text-muted-foreground mt-1">
+                    Veuillez respecter les conditions d'utilisation de ce contenu.
+                  </p>
                 )}
               </div>
             </div>
@@ -217,10 +243,10 @@ const CheckoutSuccess = () => {
 
       <p className="text-muted-foreground max-w-md mb-8">
         {isCompleted
-          ? "Merci pour votre achat ! Votre paiement a été confirmé avec succès."
+          ? 'Merci pour votre achat ! Votre paiement a été confirmé avec succès.'
           : isProcessing
-          ? "Votre paiement est en cours de traitement. Veuillez patienter..."
-          : "Votre transaction a été enregistrée."}
+            ? 'Votre paiement est en cours de traitement. Veuillez patienter...'
+            : 'Votre transaction a été enregistrée.'}
       </p>
 
       <div className="flex flex-col sm:flex-row gap-3">
@@ -230,9 +256,19 @@ const CheckoutSuccess = () => {
           </Button>
         </Link>
         {isCompleted && (
-          <Link to="/dashboard">
+          <Link
+            to={
+              product?.product_type === 'digital'
+                ? '/account/digital'
+                : product?.product_type === 'course'
+                  ? '/account/courses'
+                  : product?.product_type === 'service'
+                    ? '/account/bookings'
+                    : '/account/orders'
+            }
+          >
             <Button size="lg" className="gap-2">
-              Voir mes commandes
+              Voir mon achat
               <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
@@ -243,9 +279,3 @@ const CheckoutSuccess = () => {
 };
 
 export default CheckoutSuccess;
-
-
-
-
-
-

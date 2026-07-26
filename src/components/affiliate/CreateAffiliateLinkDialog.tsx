@@ -5,13 +5,7 @@
  */
 
 import { memo, useState, useCallback, useMemo } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { BottomSheet, BottomSheetContent } from '@/components/ui/bottom-sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -143,18 +137,13 @@ export const CreateAffiliateLinkDialog = memo(
     ]);
 
     return (
-      <Dialog open={open} onOpenChange={handleClose}>
-        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-xl sm:text-2xl">
-              Créer un nouveau lien d'affiliation
-            </DialogTitle>
-            <DialogDescription className="text-sm sm:text-base">
-              Sélectionnez un produit et générez votre lien unique de promotion
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-6 py-4">
+      <BottomSheet open={open} onOpenChange={handleClose}>
+        <BottomSheetContent 
+          className="sm:max-w-2xl"
+          title="Créer un nouveau lien d'affiliation"
+          description="Sélectionnez un produit et générez votre lien unique de promotion"
+        >
+          <div className="space-y-6">
             {/* Recherche de produit */}
             <div className="space-y-2">
               <Label htmlFor="product-search" className="text-sm font-medium">
@@ -359,8 +348,8 @@ export const CreateAffiliateLinkDialog = memo(
               </Button>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </BottomSheetContent>
+      </BottomSheet>
     );
   },
   (prevProps, nextProps) => {

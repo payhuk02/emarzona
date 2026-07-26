@@ -41,7 +41,7 @@ supabase link failed.
   if (-not $env:SUPABASE_DB_PASSWORD) {
     Write-Host 'Tip: set $env:SUPABASE_DB_PASSWORD if the API times out.' -ForegroundColor Yellow
   }
-  npx supabase db push --yes
+  npx supabase db push --yes --include-all
   if ($LASTEXITCODE -ne 0) {
     throw 'supabase db push failed. Check login, DB password, and migration logs.'
   }
