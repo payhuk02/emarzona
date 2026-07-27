@@ -1,1 +1,8 @@
-{"p_product_id":"8730ccf3-6e42-4c56-94c5-ef1e4cb03c39","p_scheduled_date":"2026-07-22","p_scheduled_start_time":"09:00:00","p_scheduled_end_time":"10:00:00","p_staff_member_id":null,"p_exclude_booking_id":null}
+{
+  "p_product_id": "8730ccf3-6e42-4c56-94c5-ef1e4cb03c39",
+  "p_scheduled_date": "2026-07-22",
+  "p_scheduled_start_time": "09:00:00",
+  "p_scheduled_end_time": "10:00:00",
+  "p_staff_member_id": null,
+  "p_exclude_booking_id": null
+}

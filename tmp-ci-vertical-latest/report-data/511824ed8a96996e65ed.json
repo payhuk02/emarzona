@@ -1,1 +1,930 @@
-{"fileId":"511824ed8a96996e65ed","fileName":"artist-paid-purchase.spec.ts","tests":[{"testId":"511824ed8a96996e65ed-7971599fb2832f871ea5","title":"paid order appears in customer artist portal","projectName":"chromium","location":{"file":"artist-paid-purchase.spec.ts","line":35,"column":3},"duration":35126,"annotations":[],"tags":[],"outcome":"expected","path":["Artist paid purchase (E2E)"],"results":[{"duration":35126,"startTime":"2026-07-21T11:07:59.838Z","retry":0,"steps":[{"title":"Before Hooks","startTime":"2026-07-21T11:07:59.842Z","duration":404,"steps":[{"title":"beforeAll hook","startTime":"2026-07-21T11:07:59.843Z","duration":31,"steps":[],"attachments":[],"location":{"file":"artist-paid-purchase.spec.ts","line":24,"column":8},"count":1,"skipped":false,"snippet":" \u001b[90m  23 |\u001b[39m\n \u001b[90m  24 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeAll(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m       ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  25 |\u001b[39m     \u001b[36mif\u001b[39m (canRun) {"},{"title":"Fixture \"browser\"","startTime":"2026-07-21T11:07:59.880Z","duration":226,"steps":[{"title":"Launch browser","startTime":"2026-07-21T11:07:59.883Z","duration":223,"steps":[],"attachments":[],"count":1,"skipped":false}],"attachments":[],"count":1,"skipped":false},{"title":"Fixture \"context\"","startTime":"2026-07-21T11:08:00.112Z","duration":85,"steps":[{"title":"Create context","startTime":"2026-07-21T11:08:00.116Z","duration":80,"steps":[],"attachments":[],"count":1,"skipped":false}],"attachments":[],"count":1,"skipped":false},{"title":"Fixture \"page\"","startTime":"2026-07-21T11:08:00.199Z","duration":47,"steps":[{"title":"Create page","startTime":"2026-07-21T11:08:00.201Z","duration":45,"steps":[],"attachments":[],"count":1,"skipped":false}],"attachments":[],"count":1,"skipped":false}],"attachments":[],"count":1,"skipped":false},{"title":"Navigate to \"/auth/v1/verify?token=3f6f3c3c0da8fbea8adb175b3b937ecf9b13864cbd5f208d0b6501f2&type=magiclink&redirect_to=http://localhost:8080/dashboard\"","startTime":"2026-07-21T11:08:03.148Z","duration":7230,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":176,"column":14},"count":1,"skipped":false,"snippet":" \u001b[90m 175 |\u001b[39m\n \u001b[90m 176 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(data\u001b[33m.\u001b[39mproperties\u001b[33m.\u001b[39maction_link\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 177 |\u001b[39m     waitUntil\u001b[33m:\u001b[39m \u001b[32m'domcontentloaded'\u001b[39m\u001b[33m,\u001b[39m"},{"title":"Wait for function","startTime":"2026-07-21T11:08:10.379Z","duration":124,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":182,"column":6},"count":1,"skipped":false,"snippet":" \u001b[90m 181 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m 182 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(() \u001b[33m=>\u001b[39m \u001b[35m/access_token=/\u001b[39m\u001b[33m.\u001b[39mtest(window\u001b[33m.\u001b[39mlocation\u001b[33m.\u001b[39mhash)\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 183 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[33mE2E_TEST_CONFIG\u001b[39m\u001b[33m.\u001b[39mauthTimeout\u001b[33m,\u001b[39m"},{"title":"Evaluate","startTime":"2026-07-21T11:08:10.504Z","duration":17,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":187,"column":29},"count":1,"skipped":false,"snippet":" \u001b[90m 186 |\u001b[39m\n \u001b[90m 187 |\u001b[39m   \u001b[36mconst\u001b[39m tokens \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                            ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 188 |\u001b[39m     \u001b[36mconst\u001b[39m params \u001b[33m=\u001b[39m \u001b[36mnew\u001b[39m \u001b[33mURLSearchParams\u001b[39m(window\u001b[33m.\u001b[39mlocation\u001b[33m.\u001b[39mhash\u001b[33m.\u001b[39mreplace(\u001b[35m/^#/\u001b[39m\u001b[33m,\u001b[39m \u001b[32m''\u001b[39m))\u001b[33m;\u001b[39m"},{"title":"Navigate to \"/\"","startTime":"2026-07-21T11:08:10.523Z","duration":203,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":211,"column":14},"count":1,"skipped":false,"snippet":" \u001b[90m 210 |\u001b[39m\n \u001b[90m 211 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(baseURL\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 212 |\u001b[39m     waitUntil\u001b[33m:\u001b[39m \u001b[32m'domcontentloaded'\u001b[39m\u001b[33m,\u001b[39m"},{"title":"Evaluate","startTime":"2026-07-21T11:08:10.727Z","duration":131,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":215,"column":14},"count":1,"skipped":false,"snippet":" \u001b[90m 214 |\u001b[39m   })\u001b[33m;\u001b[39m\n \u001b[90m 215 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mevaluate(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 216 |\u001b[39m     ({ key\u001b[33m,\u001b[39m value }) \u001b[33m=>\u001b[39m {"},{"title":"Navigate to \"/dashboard\"","startTime":"2026-07-21T11:08:10.859Z","duration":213,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":83,"column":31},"count":1,"skipped":false,"snippet":" \u001b[90m  82 |\u001b[39m )\u001b[33m:\u001b[39m \u001b[33mPromise\u001b[39m\u001b[33m<\u001b[39m\u001b[36mimport\u001b[39m(\u001b[32m'@playwright/test'\u001b[39m)\u001b[33m.\u001b[39m\u001b[33mResponse\u001b[39m \u001b[33m|\u001b[39m \u001b[36mnull\u001b[39m\u001b[33m>\u001b[39m {\n \u001b[90m  83 |\u001b[39m   \u001b[36mconst\u001b[39m response \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(path\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                              ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  84 |\u001b[39m     waitUntil\u001b[33m:\u001b[39m \u001b[32m'domcontentloaded'\u001b[39m\u001b[33m,\u001b[39m"},{"title":"Evaluate","startTime":"2026-07-21T11:08:11.074Z","duration":33,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":28,"column":6},"count":1,"skipped":false,"snippet":" \u001b[90m  27 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  28 |\u001b[39m     \u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  29 |\u001b[39m       \u001b[36mtry\u001b[39m {"},{"title":"Wait for function","startTime":"2026-07-21T11:08:11.109Z","duration":64,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":47,"column":14},"count":1,"skipped":false,"snippet":" \u001b[90m  46 |\u001b[39m\n \u001b[90m  47 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForFunction(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  48 |\u001b[39m     () \u001b[33m=>\u001b[39m {"},{"title":"Wait for function","startTime":"2026-07-21T11:08:11.175Z","duration":27,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":56,"column":6},"count":1,"skipped":false,"snippet":" \u001b[90m  55 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  56 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(() \u001b[33m=>\u001b[39m \u001b[33m!\u001b[39mdocument\u001b[33m.\u001b[39mgetElementById(\u001b[32m'seo-fallback'\u001b[39m)\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  57 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[35m10\u001b[39m_000\u001b[33m,\u001b[39m"},{"title":"Wait for load state \"domcontentloaded\"","startTime":"2026-07-21T11:08:11.204Z","duration":1,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":223,"column":14},"count":1,"skipped":false,"snippet":" \u001b[90m 222 |\u001b[39m   \u001b[36mawait\u001b[39m gotoApp(page\u001b[33m,\u001b[39m redirectPath)\u001b[33m;\u001b[39m\n \u001b[90m 223 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForURL(\u001b[35m/\\/(dashboard|marketplace|account|admin)/\u001b[39m\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 224 |\u001b[39m     timeout\u001b[33m:\u001b[39m \u001b[33mE2E_TEST_CONFIG\u001b[39m\u001b[33m.\u001b[39mauthTimeout\u001b[33m,\u001b[39m"},{"title":"Evaluate","startTime":"2026-07-21T11:08:11.207Z","duration":12,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":28,"column":6},"count":1,"skipped":false,"snippet":" \u001b[90m  27 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  28 |\u001b[39m     \u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  29 |\u001b[39m       \u001b[36mtry\u001b[39m {"},{"title":"Wait for function","startTime":"2026-07-21T11:08:11.221Z","duration":28,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":47,"column":14},"count":1,"skipped":false,"snippet":" \u001b[90m  46 |\u001b[39m\n \u001b[90m  47 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForFunction(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  48 |\u001b[39m     () \u001b[33m=>\u001b[39m {"},{"title":"Wait for function","startTime":"2026-07-21T11:08:11.250Z","duration":19,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":56,"column":6},"count":1,"skipped":false,"snippet":" \u001b[90m  55 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  56 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(() \u001b[33m=>\u001b[39m \u001b[33m!\u001b[39mdocument\u001b[33m.\u001b[39mgetElementById(\u001b[32m'seo-fallback'\u001b[39m)\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  57 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[35m10\u001b[39m_000\u001b[33m,\u001b[39m"},{"title":"Navigate to \"/account/artist\"","startTime":"2026-07-21T11:08:11.273Z","duration":890,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":83,"column":31},"count":1,"skipped":false,"snippet":" \u001b[90m  82 |\u001b[39m )\u001b[33m:\u001b[39m \u001b[33mPromise\u001b[39m\u001b[33m<\u001b[39m\u001b[36mimport\u001b[39m(\u001b[32m'@playwright/test'\u001b[39m)\u001b[33m.\u001b[39m\u001b[33mResponse\u001b[39m \u001b[33m|\u001b[39m \u001b[36mnull\u001b[39m\u001b[33m>\u001b[39m {\n \u001b[90m  83 |\u001b[39m   \u001b[36mconst\u001b[39m response \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(path\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                              ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  84 |\u001b[39m     waitUntil\u001b[33m:\u001b[39m \u001b[32m'domcontentloaded'\u001b[39m\u001b[33m,\u001b[39m"},{"title":"Evaluate","startTime":"2026-07-21T11:08:12.165Z","duration":49,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":28,"column":6},"count":1,"skipped":false,"snippet":" \u001b[90m  27 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  28 |\u001b[39m     \u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  29 |\u001b[39m       \u001b[36mtry\u001b[39m {"},{"title":"Wait for function","startTime":"2026-07-21T11:08:12.216Z","duration":67,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":47,"column":14},"count":1,"skipped":false,"snippet":" \u001b[90m  46 |\u001b[39m\n \u001b[90m  47 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForFunction(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  48 |\u001b[39m     () \u001b[33m=>\u001b[39m {"},{"title":"Wait for function","startTime":"2026-07-21T11:08:12.284Z","duration":54,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":56,"column":6},"count":1,"skipped":false,"snippet":" \u001b[90m  55 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  56 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(() \u001b[33m=>\u001b[39m \u001b[33m!\u001b[39mdocument\u001b[33m.\u001b[39mgetElementById(\u001b[32m'seo-fallback'\u001b[39m)\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  57 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[35m10\u001b[39m_000\u001b[33m,\u001b[39m"},{"title":"Expect \"toBeVisible\" getByRole('heading', { name: /espace artiste/i })","startTime":"2026-07-21T11:08:12.349Z","duration":498,"steps":[],"attachments":[],"location":{"file":"artist-paid-purchase.spec.ts","line":44,"column":76},"count":1,"skipped":false,"snippet":" \u001b[90m  43 |\u001b[39m\n \u001b[90m  44 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[35m/espace artiste/i\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible({\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                                                                           ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  45 |\u001b[39m         timeout\u001b[33m:\u001b[39m \u001b[35m20\u001b[39m_000\u001b[33m,\u001b[39m"},{"title":"Expect \"toBeVisible\" getByText('E2E Oeuvre 1784632080252-c523e0534b19')","startTime":"2026-07-21T11:08:12.849Z","duration":6911,"steps":[],"attachments":[],"location":{"file":"artist-paid-purchase.spec.ts","line":48,"column":58},"count":1,"skipped":false,"snippet":" \u001b[90m  47 |\u001b[39m       \u001b[90m// Attendre le chargement RPC list_my_artist_orders (onglet achats par défaut)\u001b[39m\n \u001b[90m  48 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByText(fixture\u001b[33m.\u001b[39mproduct\u001b[33m.\u001b[39mname))\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m30\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                                                         ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  49 |\u001b[39m     } \u001b[36mfinally\u001b[39m {"},{"title":"After Hooks","startTime":"2026-07-21T11:08:35.224Z","duration":32,"steps":[{"title":"Fixture \"page\"","startTime":"2026-07-21T11:08:35.226Z","duration":0,"steps":[],"attachments":[],"count":1,"skipped":false},{"title":"Fixture \"context\"","startTime":"2026-07-21T11:08:35.226Z","duration":14,"steps":[{"title":"Close context","startTime":"2026-07-21T11:08:35.233Z","duration":7,"steps":[],"attachments":[],"count":1,"skipped":false}],"attachments":[],"count":1,"skipped":false}],"attachments":[],"count":1,"skipped":false}],"errors":[],"status":"passed","annotations":[],"attachments":[]}],"ok":true},{"testId":"511824ed8a96996e65ed-71701d00adafb86a02ea","title":"certificate verification page accepts seeded code","projectName":"chromium","location":{"file":"artist-paid-purchase.spec.ts","line":58,"column":3},"duration":10697,"annotations":[],"tags":[],"outcome":"expected","path":["Artist paid purchase (E2E)"],"results":[{"duration":10697,"startTime":"2026-07-21T11:08:35.256Z","retry":0,"steps":[{"title":"Before Hooks","startTime":"2026-07-21T11:08:35.258Z","duration":88,"steps":[{"title":"Fixture \"context\"","startTime":"2026-07-21T11:08:35.271Z","duration":48,"steps":[{"title":"Create context","startTime":"2026-07-21T11:08:35.272Z","duration":46,"steps":[],"attachments":[],"count":1,"skipped":false}],"attachments":[],"count":1,"skipped":false},{"title":"Fixture \"page\"","startTime":"2026-07-21T11:08:35.319Z","duration":27,"steps":[{"title":"Create page","startTime":"2026-07-21T11:08:35.321Z","duration":25,"steps":[],"attachments":[],"count":1,"skipped":false}],"attachments":[],"count":1,"skipped":false}],"attachments":[],"count":1,"skipped":false},{"title":"Navigate to \"/verify/E2E484E64\"","startTime":"2026-07-21T11:08:39.567Z","duration":665,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":83,"column":31},"count":1,"skipped":false,"snippet":" \u001b[90m  82 |\u001b[39m )\u001b[33m:\u001b[39m \u001b[33mPromise\u001b[39m\u001b[33m<\u001b[39m\u001b[36mimport\u001b[39m(\u001b[32m'@playwright/test'\u001b[39m)\u001b[33m.\u001b[39m\u001b[33mResponse\u001b[39m \u001b[33m|\u001b[39m \u001b[36mnull\u001b[39m\u001b[33m>\u001b[39m {\n \u001b[90m  83 |\u001b[39m   \u001b[36mconst\u001b[39m response \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(path\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                              ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  84 |\u001b[39m     waitUntil\u001b[33m:\u001b[39m \u001b[32m'domcontentloaded'\u001b[39m\u001b[33m,\u001b[39m"},{"title":"Evaluate","startTime":"2026-07-21T11:08:40.233Z","duration":108,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":28,"column":6},"count":1,"skipped":false,"snippet":" \u001b[90m  27 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  28 |\u001b[39m     \u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  29 |\u001b[39m       \u001b[36mtry\u001b[39m {"},{"title":"Wait for function","startTime":"2026-07-21T11:08:40.345Z","duration":145,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":47,"column":14},"count":1,"skipped":false,"snippet":" \u001b[90m  46 |\u001b[39m\n \u001b[90m  47 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForFunction(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  48 |\u001b[39m     () \u001b[33m=>\u001b[39m {"},{"title":"Wait for function","startTime":"2026-07-21T11:08:40.491Z","duration":36,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":56,"column":6},"count":1,"skipped":false,"snippet":" \u001b[90m  55 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  56 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(() \u001b[33m=>\u001b[39m \u001b[33m!\u001b[39mdocument\u001b[33m.\u001b[39mgetElementById(\u001b[32m'seo-fallback'\u001b[39m)\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  57 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[35m10\u001b[39m_000\u001b[33m,\u001b[39m"},{"title":"Expect \"toBeVisible\" getByRole('heading', { name: /vérification de certificat/i })","startTime":"2026-07-21T11:08:40.530Z","duration":183,"steps":[],"attachments":[],"location":{"file":"artist-paid-purchase.spec.ts","line":67,"column":88},"count":1,"skipped":false,"snippet":" \u001b[90m  66 |\u001b[39m       \u001b[36mawait\u001b[39m gotoApp(page\u001b[33m,\u001b[39m \u001b[32m`/verify/${code}`\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m  67 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[35m/vérification de certificat/i\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible({\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                                                                                       ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  68 |\u001b[39m         timeout\u001b[33m:\u001b[39m \u001b[35m15\u001b[39m_000\u001b[33m,\u001b[39m"},{"title":"Expect \"toBeVisible\" getByText('E2E484E64')","startTime":"2026-07-21T11:08:40.714Z","duration":15,"steps":[],"attachments":[],"location":{"file":"artist-paid-purchase.spec.ts","line":70,"column":60},"count":1,"skipped":false,"snippet":" \u001b[90m  69 |\u001b[39m       })\u001b[33m;\u001b[39m\n \u001b[90m  70 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByText(code\u001b[33m,\u001b[39m { exact\u001b[33m:\u001b[39m \u001b[36mfalse\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                                                           ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  71 |\u001b[39m       \u001b[36mconst\u001b[39m authentic \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mgetByText(\u001b[35m/certificat authentique/i\u001b[39m)\u001b[33m;\u001b[39m"},{"title":"After Hooks","startTime":"2026-07-21T11:08:45.956Z","duration":18,"steps":[{"title":"Fixture \"page\"","startTime":"2026-07-21T11:08:45.956Z","duration":1,"steps":[],"attachments":[],"count":1,"skipped":false},{"title":"Fixture \"context\"","startTime":"2026-07-21T11:08:45.957Z","duration":11,"steps":[{"title":"Close context","startTime":"2026-07-21T11:08:45.962Z","duration":6,"steps":[],"attachments":[],"count":1,"skipped":false}],"attachments":[],"count":1,"skipped":false}],"attachments":[],"count":1,"skipped":false}],"errors":[],"status":"passed","annotations":[],"attachments":[]}],"ok":true},{"testId":"511824ed8a96996e65ed-f640f91c1703eb3c9c0d","title":"logged-in buyer reaches checkout from artist product detail","projectName":"chromium","location":{"file":"artist-paid-purchase.spec.ts","line":91,"column":3},"duration":18115,"annotations":[],"tags":[],"outcome":"expected","path":["Artist paid purchase (E2E)"],"results":[{"duration":18115,"startTime":"2026-07-21T11:08:45.974Z","retry":0,"steps":[{"title":"Before Hooks","startTime":"2026-07-21T11:08:45.975Z","duration":105,"steps":[{"title":"Fixture \"context\"","startTime":"2026-07-21T11:08:45.983Z","duration":71,"steps":[{"title":"Create context","startTime":"2026-07-21T11:08:45.990Z","duration":64,"steps":[],"attachments":[],"count":1,"skipped":false}],"attachments":[],"count":1,"skipped":false},{"title":"Fixture \"page\"","startTime":"2026-07-21T11:08:46.055Z","duration":25,"steps":[{"title":"Create page","startTime":"2026-07-21T11:08:46.056Z","duration":24,"steps":[],"attachments":[],"count":1,"skipped":false}],"attachments":[],"count":1,"skipped":false}],"attachments":[],"count":1,"skipped":false},{"title":"Navigate to \"/auth/v1/verify?token=c69ddadcf6b5e1b2a725b269f8e1dbdbf6024f82b5fd54c6ef8f22fc&type=magiclink&redirect_to=http://localhost:8080/dashboard\"","startTime":"2026-07-21T11:08:50.281Z","duration":872,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":176,"column":14},"count":1,"skipped":false,"snippet":" \u001b[90m 175 |\u001b[39m\n \u001b[90m 176 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(data\u001b[33m.\u001b[39mproperties\u001b[33m.\u001b[39maction_link\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 177 |\u001b[39m     waitUntil\u001b[33m:\u001b[39m \u001b[32m'domcontentloaded'\u001b[39m\u001b[33m,\u001b[39m"},{"title":"Wait for function","startTime":"2026-07-21T11:08:51.154Z","duration":108,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":182,"column":6},"count":1,"skipped":false,"snippet":" \u001b[90m 181 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m 182 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(() \u001b[33m=>\u001b[39m \u001b[35m/access_token=/\u001b[39m\u001b[33m.\u001b[39mtest(window\u001b[33m.\u001b[39mlocation\u001b[33m.\u001b[39mhash)\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 183 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[33mE2E_TEST_CONFIG\u001b[39m\u001b[33m.\u001b[39mauthTimeout\u001b[33m,\u001b[39m"},{"title":"Evaluate","startTime":"2026-07-21T11:08:51.263Z","duration":18,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":187,"column":29},"count":1,"skipped":false,"snippet":" \u001b[90m 186 |\u001b[39m\n \u001b[90m 187 |\u001b[39m   \u001b[36mconst\u001b[39m tokens \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                            ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 188 |\u001b[39m     \u001b[36mconst\u001b[39m params \u001b[33m=\u001b[39m \u001b[36mnew\u001b[39m \u001b[33mURLSearchParams\u001b[39m(window\u001b[33m.\u001b[39mlocation\u001b[33m.\u001b[39mhash\u001b[33m.\u001b[39mreplace(\u001b[35m/^#/\u001b[39m\u001b[33m,\u001b[39m \u001b[32m''\u001b[39m))\u001b[33m;\u001b[39m"},{"title":"Navigate to \"/\"","startTime":"2026-07-21T11:08:51.282Z","duration":202,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":211,"column":14},"count":1,"skipped":false,"snippet":" \u001b[90m 210 |\u001b[39m\n \u001b[90m 211 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(baseURL\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 212 |\u001b[39m     waitUntil\u001b[33m:\u001b[39m \u001b[32m'domcontentloaded'\u001b[39m\u001b[33m,\u001b[39m"},{"title":"Evaluate","startTime":"2026-07-21T11:08:51.485Z","duration":104,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":215,"column":14},"count":1,"skipped":false,"snippet":" \u001b[90m 214 |\u001b[39m   })\u001b[33m;\u001b[39m\n \u001b[90m 215 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mevaluate(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 216 |\u001b[39m     ({ key\u001b[33m,\u001b[39m value }) \u001b[33m=>\u001b[39m {"},{"title":"Navigate to \"/dashboard\"","startTime":"2026-07-21T11:08:51.590Z","duration":204,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":83,"column":31},"count":1,"skipped":false,"snippet":" \u001b[90m  82 |\u001b[39m )\u001b[33m:\u001b[39m \u001b[33mPromise\u001b[39m\u001b[33m<\u001b[39m\u001b[36mimport\u001b[39m(\u001b[32m'@playwright/test'\u001b[39m)\u001b[33m.\u001b[39m\u001b[33mResponse\u001b[39m \u001b[33m|\u001b[39m \u001b[36mnull\u001b[39m\u001b[33m>\u001b[39m {\n \u001b[90m  83 |\u001b[39m   \u001b[36mconst\u001b[39m response \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(path\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                              ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  84 |\u001b[39m     waitUntil\u001b[33m:\u001b[39m \u001b[32m'domcontentloaded'\u001b[39m\u001b[33m,\u001b[39m"},{"title":"Evaluate","startTime":"2026-07-21T11:08:51.795Z","duration":30,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":28,"column":6},"count":1,"skipped":false,"snippet":" \u001b[90m  27 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  28 |\u001b[39m     \u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  29 |\u001b[39m       \u001b[36mtry\u001b[39m {"},{"title":"Wait for function","startTime":"2026-07-21T11:08:51.827Z","duration":47,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":47,"column":14},"count":1,"skipped":false,"snippet":" \u001b[90m  46 |\u001b[39m\n \u001b[90m  47 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForFunction(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  48 |\u001b[39m     () \u001b[33m=>\u001b[39m {"},{"title":"Wait for function","startTime":"2026-07-21T11:08:51.875Z","duration":25,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":56,"column":6},"count":1,"skipped":false,"snippet":" \u001b[90m  55 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  56 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(() \u001b[33m=>\u001b[39m \u001b[33m!\u001b[39mdocument\u001b[33m.\u001b[39mgetElementById(\u001b[32m'seo-fallback'\u001b[39m)\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  57 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[35m10\u001b[39m_000\u001b[33m,\u001b[39m"},{"title":"Wait for load state \"domcontentloaded\"","startTime":"2026-07-21T11:08:51.901Z","duration":1,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":223,"column":14},"count":1,"skipped":false,"snippet":" \u001b[90m 222 |\u001b[39m   \u001b[36mawait\u001b[39m gotoApp(page\u001b[33m,\u001b[39m redirectPath)\u001b[33m;\u001b[39m\n \u001b[90m 223 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForURL(\u001b[35m/\\/(dashboard|marketplace|account|admin)/\u001b[39m\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 224 |\u001b[39m     timeout\u001b[33m:\u001b[39m \u001b[33mE2E_TEST_CONFIG\u001b[39m\u001b[33m.\u001b[39mauthTimeout\u001b[33m,\u001b[39m"},{"title":"Evaluate","startTime":"2026-07-21T11:08:51.903Z","duration":4,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":28,"column":6},"count":1,"skipped":false,"snippet":" \u001b[90m  27 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  28 |\u001b[39m     \u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  29 |\u001b[39m       \u001b[36mtry\u001b[39m {"},{"title":"Wait for function","startTime":"2026-07-21T11:08:51.908Z","duration":16,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":47,"column":14},"count":1,"skipped":false,"snippet":" \u001b[90m  46 |\u001b[39m\n \u001b[90m  47 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForFunction(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  48 |\u001b[39m     () \u001b[33m=>\u001b[39m {"},{"title":"Wait for function","startTime":"2026-07-21T11:08:51.925Z","duration":19,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":56,"column":6},"count":1,"skipped":false,"snippet":" \u001b[90m  55 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  56 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(() \u001b[33m=>\u001b[39m \u001b[33m!\u001b[39mdocument\u001b[33m.\u001b[39mgetElementById(\u001b[32m'seo-fallback'\u001b[39m)\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  57 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[35m10\u001b[39m_000\u001b[33m,\u001b[39m"},{"title":"Navigate to \"/artist/64a46078-37ff-495f-9a9a-394cf2c07ca2\"","startTime":"2026-07-21T11:08:51.946Z","duration":801,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":83,"column":31},"count":1,"skipped":false,"snippet":" \u001b[90m  82 |\u001b[39m )\u001b[33m:\u001b[39m \u001b[33mPromise\u001b[39m\u001b[33m<\u001b[39m\u001b[36mimport\u001b[39m(\u001b[32m'@playwright/test'\u001b[39m)\u001b[33m.\u001b[39m\u001b[33mResponse\u001b[39m \u001b[33m|\u001b[39m \u001b[36mnull\u001b[39m\u001b[33m>\u001b[39m {\n \u001b[90m  83 |\u001b[39m   \u001b[36mconst\u001b[39m response \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(path\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                              ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  84 |\u001b[39m     waitUntil\u001b[33m:\u001b[39m \u001b[32m'domcontentloaded'\u001b[39m\u001b[33m,\u001b[39m"},{"title":"Evaluate","startTime":"2026-07-21T11:08:52.749Z","duration":46,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":28,"column":6},"count":1,"skipped":false,"snippet":" \u001b[90m  27 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  28 |\u001b[39m     \u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  29 |\u001b[39m       \u001b[36mtry\u001b[39m {"},{"title":"Wait for function","startTime":"2026-07-21T11:08:52.797Z","duration":78,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":47,"column":14},"count":1,"skipped":false,"snippet":" \u001b[90m  46 |\u001b[39m\n \u001b[90m  47 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForFunction(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  48 |\u001b[39m     () \u001b[33m=>\u001b[39m {"},{"title":"Wait for function","startTime":"2026-07-21T11:08:52.879Z","duration":44,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":56,"column":6},"count":1,"skipped":false,"snippet":" \u001b[90m  55 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  56 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(() \u001b[33m=>\u001b[39m \u001b[33m!\u001b[39mdocument\u001b[33m.\u001b[39mgetElementById(\u001b[32m'seo-fallback'\u001b[39m)\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  57 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[35m10\u001b[39m_000\u001b[33m,\u001b[39m"},{"title":"Expect \"toHaveCount\" getByText(/Œuvre non trouvée/i)","startTime":"2026-07-21T11:08:52.926Z","duration":119,"steps":[],"attachments":[],"location":{"file":"artist-paid-purchase.spec.ts","line":113,"column":58},"count":1,"skipped":false,"snippet":" \u001b[90m 112 |\u001b[39m\n \u001b[90m 113 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByText(\u001b[35m/Œuvre non trouvée/i\u001b[39m))\u001b[33m.\u001b[39mtoHaveCount(\u001b[35m0\u001b[39m\u001b[33m,\u001b[39m { timeout\u001b[33m:\u001b[39m \u001b[35m5\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                                                         ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 114 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { level\u001b[33m:\u001b[39m \u001b[35m1\u001b[39m }))\u001b[33m.\u001b[39mtoContainText(fixture\u001b[33m.\u001b[39mproduct\u001b[33m.\u001b[39mname\u001b[33m,\u001b[39m {"},{"title":"Expect \"toContainText\" getByRole('heading', { level: 1 })","startTime":"2026-07-21T11:08:53.046Z","duration":1909,"steps":[],"attachments":[],"location":{"file":"artist-paid-purchase.spec.ts","line":114,"column":61},"count":1,"skipped":false,"snippet":" \u001b[90m 113 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByText(\u001b[35m/Œuvre non trouvée/i\u001b[39m))\u001b[33m.\u001b[39mtoHaveCount(\u001b[35m0\u001b[39m\u001b[33m,\u001b[39m { timeout\u001b[33m:\u001b[39m \u001b[35m5\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m 114 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { level\u001b[33m:\u001b[39m \u001b[35m1\u001b[39m }))\u001b[33m.\u001b[39mtoContainText(fixture\u001b[33m.\u001b[39mproduct\u001b[33m.\u001b[39mname\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                                                            ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 115 |\u001b[39m         timeout\u001b[33m:\u001b[39m \u001b[35m45\u001b[39m_000\u001b[33m,\u001b[39m"},{"title":"Expect \"toBeVisible\" getByTestId('artist-add-to-cart')","startTime":"2026-07-21T11:08:54.956Z","duration":2,"steps":[],"attachments":[],"location":{"file":"artist-paid-purchase.spec.ts","line":117,"column":60},"count":1,"skipped":false,"snippet":" \u001b[90m 116 |\u001b[39m       })\u001b[33m;\u001b[39m\n \u001b[90m 117 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'artist-add-to-cart'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m15\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                                                           ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 118 |\u001b[39m       \u001b[36mconst\u001b[39m addToCart \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'artist-add-to-cart'\u001b[39m)\u001b[33m;\u001b[39m"},{"title":"Click getByTestId('artist-add-to-cart')","startTime":"2026-07-21T11:08:54.958Z","duration":30,"steps":[],"attachments":[],"location":{"file":"artist-paid-purchase.spec.ts","line":119,"column":23},"count":1,"skipped":false,"snippet":" \u001b[90m 118 |\u001b[39m       \u001b[36mconst\u001b[39m addToCart \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'artist-add-to-cart'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 119 |\u001b[39m       \u001b[36mawait\u001b[39m addToCart\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                      ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 120 |\u001b[39m"},{"title":"Navigate to \"/checkout\"","startTime":"2026-07-21T11:08:54.989Z","duration":651,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":83,"column":31},"count":1,"skipped":false,"snippet":" \u001b[90m  82 |\u001b[39m )\u001b[33m:\u001b[39m \u001b[33mPromise\u001b[39m\u001b[33m<\u001b[39m\u001b[36mimport\u001b[39m(\u001b[32m'@playwright/test'\u001b[39m)\u001b[33m.\u001b[39m\u001b[33mResponse\u001b[39m \u001b[33m|\u001b[39m \u001b[36mnull\u001b[39m\u001b[33m>\u001b[39m {\n \u001b[90m  83 |\u001b[39m   \u001b[36mconst\u001b[39m response \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(path\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                              ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  84 |\u001b[39m     waitUntil\u001b[33m:\u001b[39m \u001b[32m'domcontentloaded'\u001b[39m\u001b[33m,\u001b[39m"},{"title":"Evaluate","startTime":"2026-07-21T11:08:55.641Z","duration":62,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":28,"column":6},"count":1,"skipped":false,"snippet":" \u001b[90m  27 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  28 |\u001b[39m     \u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  29 |\u001b[39m       \u001b[36mtry\u001b[39m {"},{"title":"Wait for function","startTime":"2026-07-21T11:08:55.704Z","duration":130,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":47,"column":14},"count":1,"skipped":false,"snippet":" \u001b[90m  46 |\u001b[39m\n \u001b[90m  47 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForFunction(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  48 |\u001b[39m     () \u001b[33m=>\u001b[39m {"},{"title":"Wait for function","startTime":"2026-07-21T11:08:55.835Z","duration":30,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":56,"column":6},"count":1,"skipped":false,"snippet":" \u001b[90m  55 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  56 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(() \u001b[33m=>\u001b[39m \u001b[33m!\u001b[39mdocument\u001b[33m.\u001b[39mgetElementById(\u001b[32m'seo-fallback'\u001b[39m)\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  57 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[35m10\u001b[39m_000\u001b[33m,\u001b[39m"},{"title":"Expect \"toHaveURL\"","startTime":"2026-07-21T11:08:55.866Z","duration":37,"steps":[],"attachments":[],"location":{"file":"artist-paid-purchase.spec.ts","line":122,"column":26},"count":1,"skipped":false,"snippet":" \u001b[90m 121 |\u001b[39m       \u001b[36mawait\u001b[39m gotoApp(page\u001b[33m,\u001b[39m \u001b[32m'/checkout'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 122 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page)\u001b[33m.\u001b[39mtoHaveURL(\u001b[35m/\\/checkout/\u001b[39m\u001b[33m,\u001b[39m { timeout\u001b[33m:\u001b[39m \u001b[35m15\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                         ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 123 |\u001b[39m"},{"title":"After Hooks","startTime":"2026-07-21T11:09:04.085Z","duration":32,"steps":[{"title":"Fixture \"page\"","startTime":"2026-07-21T11:09:04.086Z","duration":0,"steps":[],"attachments":[],"count":1,"skipped":false},{"title":"Fixture \"context\"","startTime":"2026-07-21T11:09:04.086Z","duration":13,"steps":[{"title":"Close context","startTime":"2026-07-21T11:09:04.089Z","duration":10,"steps":[],"attachments":[],"count":1,"skipped":false}],"attachments":[],"count":1,"skipped":false}],"attachments":[],"count":1,"skipped":false}],"errors":[],"status":"passed","annotations":[],"attachments":[]}],"ok":true}]}
+{
+  "fileId": "511824ed8a96996e65ed",
+  "fileName": "artist-paid-purchase.spec.ts",
+  "tests": [
+    {
+      "testId": "511824ed8a96996e65ed-7971599fb2832f871ea5",
+      "title": "paid order appears in customer artist portal",
+      "projectName": "chromium",
+      "location": { "file": "artist-paid-purchase.spec.ts", "line": 35, "column": 3 },
+      "duration": 35126,
+      "annotations": [],
+      "tags": [],
+      "outcome": "expected",
+      "path": ["Artist paid purchase (E2E)"],
+      "results": [
+        {
+          "duration": 35126,
+          "startTime": "2026-07-21T11:07:59.838Z",
+          "retry": 0,
+          "steps": [
+            {
+              "title": "Before Hooks",
+              "startTime": "2026-07-21T11:07:59.842Z",
+              "duration": 404,
+              "steps": [
+                {
+                  "title": "beforeAll hook",
+                  "startTime": "2026-07-21T11:07:59.843Z",
+                  "duration": 31,
+                  "steps": [],
+                  "attachments": [],
+                  "location": { "file": "artist-paid-purchase.spec.ts", "line": 24, "column": 8 },
+                  "count": 1,
+                  "skipped": false,
+                  "snippet": " \u001b[90m  23 |\u001b[39m\n \u001b[90m  24 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeAll(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m       ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  25 |\u001b[39m     \u001b[36mif\u001b[39m (canRun) {"
+                },
+                {
+                  "title": "Fixture \"browser\"",
+                  "startTime": "2026-07-21T11:07:59.880Z",
+                  "duration": 226,
+                  "steps": [
+                    {
+                      "title": "Launch browser",
+                      "startTime": "2026-07-21T11:07:59.883Z",
+                      "duration": 223,
+                      "steps": [],
+                      "attachments": [],
+                      "count": 1,
+                      "skipped": false
+                    }
+                  ],
+                  "attachments": [],
+                  "count": 1,
+                  "skipped": false
+                },
+                {
+                  "title": "Fixture \"context\"",
+                  "startTime": "2026-07-21T11:08:00.112Z",
+                  "duration": 85,
+                  "steps": [
+                    {
+                      "title": "Create context",
+                      "startTime": "2026-07-21T11:08:00.116Z",
+                      "duration": 80,
+                      "steps": [],
+                      "attachments": [],
+                      "count": 1,
+                      "skipped": false
+                    }
+                  ],
+                  "attachments": [],
+                  "count": 1,
+                  "skipped": false
+                },
+                {
+                  "title": "Fixture \"page\"",
+                  "startTime": "2026-07-21T11:08:00.199Z",
+                  "duration": 47,
+                  "steps": [
+                    {
+                      "title": "Create page",
+                      "startTime": "2026-07-21T11:08:00.201Z",
+                      "duration": 45,
+                      "steps": [],
+                      "attachments": [],
+                      "count": 1,
+                      "skipped": false
+                    }
+                  ],
+                  "attachments": [],
+                  "count": 1,
+                  "skipped": false
+                }
+              ],
+              "attachments": [],
+              "count": 1,
+              "skipped": false
+            },
+            {
+              "title": "Navigate to \"/auth/v1/verify?token=3f6f3c3c0da8fbea8adb175b3b937ecf9b13864cbd5f208d0b6501f2&type=magiclink&redirect_to=http://localhost:8080/dashboard\"",
+              "startTime": "2026-07-21T11:08:03.148Z",
+              "duration": 7230,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 176, "column": 14 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 175 |\u001b[39m\n \u001b[90m 176 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(data\u001b[33m.\u001b[39mproperties\u001b[33m.\u001b[39maction_link\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 177 |\u001b[39m     waitUntil\u001b[33m:\u001b[39m \u001b[32m'domcontentloaded'\u001b[39m\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Wait for function",
+              "startTime": "2026-07-21T11:08:10.379Z",
+              "duration": 124,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 182, "column": 6 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 181 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m 182 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(() \u001b[33m=>\u001b[39m \u001b[35m/access_token=/\u001b[39m\u001b[33m.\u001b[39mtest(window\u001b[33m.\u001b[39mlocation\u001b[33m.\u001b[39mhash)\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 183 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[33mE2E_TEST_CONFIG\u001b[39m\u001b[33m.\u001b[39mauthTimeout\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Evaluate",
+              "startTime": "2026-07-21T11:08:10.504Z",
+              "duration": 17,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 187, "column": 29 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 186 |\u001b[39m\n \u001b[90m 187 |\u001b[39m   \u001b[36mconst\u001b[39m tokens \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                            ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 188 |\u001b[39m     \u001b[36mconst\u001b[39m params \u001b[33m=\u001b[39m \u001b[36mnew\u001b[39m \u001b[33mURLSearchParams\u001b[39m(window\u001b[33m.\u001b[39mlocation\u001b[33m.\u001b[39mhash\u001b[33m.\u001b[39mreplace(\u001b[35m/^#/\u001b[39m\u001b[33m,\u001b[39m \u001b[32m''\u001b[39m))\u001b[33m;\u001b[39m"
+            },
+            {
+              "title": "Navigate to \"/\"",
+              "startTime": "2026-07-21T11:08:10.523Z",
+              "duration": 203,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 211, "column": 14 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 210 |\u001b[39m\n \u001b[90m 211 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(baseURL\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 212 |\u001b[39m     waitUntil\u001b[33m:\u001b[39m \u001b[32m'domcontentloaded'\u001b[39m\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Evaluate",
+              "startTime": "2026-07-21T11:08:10.727Z",
+              "duration": 131,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 215, "column": 14 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 214 |\u001b[39m   })\u001b[33m;\u001b[39m\n \u001b[90m 215 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mevaluate(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 216 |\u001b[39m     ({ key\u001b[33m,\u001b[39m value }) \u001b[33m=>\u001b[39m {"
+            },
+            {
+              "title": "Navigate to \"/dashboard\"",
+              "startTime": "2026-07-21T11:08:10.859Z",
+              "duration": 213,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 83, "column": 31 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  82 |\u001b[39m )\u001b[33m:\u001b[39m \u001b[33mPromise\u001b[39m\u001b[33m<\u001b[39m\u001b[36mimport\u001b[39m(\u001b[32m'@playwright/test'\u001b[39m)\u001b[33m.\u001b[39m\u001b[33mResponse\u001b[39m \u001b[33m|\u001b[39m \u001b[36mnull\u001b[39m\u001b[33m>\u001b[39m {\n \u001b[90m  83 |\u001b[39m   \u001b[36mconst\u001b[39m response \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(path\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                              ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  84 |\u001b[39m     waitUntil\u001b[33m:\u001b[39m \u001b[32m'domcontentloaded'\u001b[39m\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Evaluate",
+              "startTime": "2026-07-21T11:08:11.074Z",
+              "duration": 33,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 28, "column": 6 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  27 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  28 |\u001b[39m     \u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  29 |\u001b[39m       \u001b[36mtry\u001b[39m {"
+            },
+            {
+              "title": "Wait for function",
+              "startTime": "2026-07-21T11:08:11.109Z",
+              "duration": 64,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 47, "column": 14 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  46 |\u001b[39m\n \u001b[90m  47 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForFunction(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  48 |\u001b[39m     () \u001b[33m=>\u001b[39m {"
+            },
+            {
+              "title": "Wait for function",
+              "startTime": "2026-07-21T11:08:11.175Z",
+              "duration": 27,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 56, "column": 6 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  55 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  56 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(() \u001b[33m=>\u001b[39m \u001b[33m!\u001b[39mdocument\u001b[33m.\u001b[39mgetElementById(\u001b[32m'seo-fallback'\u001b[39m)\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  57 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[35m10\u001b[39m_000\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Wait for load state \"domcontentloaded\"",
+              "startTime": "2026-07-21T11:08:11.204Z",
+              "duration": 1,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 223, "column": 14 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 222 |\u001b[39m   \u001b[36mawait\u001b[39m gotoApp(page\u001b[33m,\u001b[39m redirectPath)\u001b[33m;\u001b[39m\n \u001b[90m 223 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForURL(\u001b[35m/\\/(dashboard|marketplace|account|admin)/\u001b[39m\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 224 |\u001b[39m     timeout\u001b[33m:\u001b[39m \u001b[33mE2E_TEST_CONFIG\u001b[39m\u001b[33m.\u001b[39mauthTimeout\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Evaluate",
+              "startTime": "2026-07-21T11:08:11.207Z",
+              "duration": 12,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 28, "column": 6 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  27 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  28 |\u001b[39m     \u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  29 |\u001b[39m       \u001b[36mtry\u001b[39m {"
+            },
+            {
+              "title": "Wait for function",
+              "startTime": "2026-07-21T11:08:11.221Z",
+              "duration": 28,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 47, "column": 14 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  46 |\u001b[39m\n \u001b[90m  47 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForFunction(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  48 |\u001b[39m     () \u001b[33m=>\u001b[39m {"
+            },
+            {
+              "title": "Wait for function",
+              "startTime": "2026-07-21T11:08:11.250Z",
+              "duration": 19,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 56, "column": 6 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  55 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  56 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(() \u001b[33m=>\u001b[39m \u001b[33m!\u001b[39mdocument\u001b[33m.\u001b[39mgetElementById(\u001b[32m'seo-fallback'\u001b[39m)\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  57 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[35m10\u001b[39m_000\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Navigate to \"/account/artist\"",
+              "startTime": "2026-07-21T11:08:11.273Z",
+              "duration": 890,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 83, "column": 31 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  82 |\u001b[39m )\u001b[33m:\u001b[39m \u001b[33mPromise\u001b[39m\u001b[33m<\u001b[39m\u001b[36mimport\u001b[39m(\u001b[32m'@playwright/test'\u001b[39m)\u001b[33m.\u001b[39m\u001b[33mResponse\u001b[39m \u001b[33m|\u001b[39m \u001b[36mnull\u001b[39m\u001b[33m>\u001b[39m {\n \u001b[90m  83 |\u001b[39m   \u001b[36mconst\u001b[39m response \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(path\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                              ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  84 |\u001b[39m     waitUntil\u001b[33m:\u001b[39m \u001b[32m'domcontentloaded'\u001b[39m\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Evaluate",
+              "startTime": "2026-07-21T11:08:12.165Z",
+              "duration": 49,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 28, "column": 6 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  27 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  28 |\u001b[39m     \u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  29 |\u001b[39m       \u001b[36mtry\u001b[39m {"
+            },
+            {
+              "title": "Wait for function",
+              "startTime": "2026-07-21T11:08:12.216Z",
+              "duration": 67,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 47, "column": 14 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  46 |\u001b[39m\n \u001b[90m  47 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForFunction(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  48 |\u001b[39m     () \u001b[33m=>\u001b[39m {"
+            },
+            {
+              "title": "Wait for function",
+              "startTime": "2026-07-21T11:08:12.284Z",
+              "duration": 54,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 56, "column": 6 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  55 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  56 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(() \u001b[33m=>\u001b[39m \u001b[33m!\u001b[39mdocument\u001b[33m.\u001b[39mgetElementById(\u001b[32m'seo-fallback'\u001b[39m)\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  57 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[35m10\u001b[39m_000\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Expect \"toBeVisible\" getByRole('heading', { name: /espace artiste/i })",
+              "startTime": "2026-07-21T11:08:12.349Z",
+              "duration": 498,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "artist-paid-purchase.spec.ts", "line": 44, "column": 76 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  43 |\u001b[39m\n \u001b[90m  44 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[35m/espace artiste/i\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible({\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                                                                           ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  45 |\u001b[39m         timeout\u001b[33m:\u001b[39m \u001b[35m20\u001b[39m_000\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Expect \"toBeVisible\" getByText('E2E Oeuvre 1784632080252-c523e0534b19')",
+              "startTime": "2026-07-21T11:08:12.849Z",
+              "duration": 6911,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "artist-paid-purchase.spec.ts", "line": 48, "column": 58 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  47 |\u001b[39m       \u001b[90m// Attendre le chargement RPC list_my_artist_orders (onglet achats par défaut)\u001b[39m\n \u001b[90m  48 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByText(fixture\u001b[33m.\u001b[39mproduct\u001b[33m.\u001b[39mname))\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m30\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                                                         ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  49 |\u001b[39m     } \u001b[36mfinally\u001b[39m {"
+            },
+            {
+              "title": "After Hooks",
+              "startTime": "2026-07-21T11:08:35.224Z",
+              "duration": 32,
+              "steps": [
+                {
+                  "title": "Fixture \"page\"",
+                  "startTime": "2026-07-21T11:08:35.226Z",
+                  "duration": 0,
+                  "steps": [],
+                  "attachments": [],
+                  "count": 1,
+                  "skipped": false
+                },
+                {
+                  "title": "Fixture \"context\"",
+                  "startTime": "2026-07-21T11:08:35.226Z",
+                  "duration": 14,
+                  "steps": [
+                    {
+                      "title": "Close context",
+                      "startTime": "2026-07-21T11:08:35.233Z",
+                      "duration": 7,
+                      "steps": [],
+                      "attachments": [],
+                      "count": 1,
+                      "skipped": false
+                    }
+                  ],
+                  "attachments": [],
+                  "count": 1,
+                  "skipped": false
+                }
+              ],
+              "attachments": [],
+              "count": 1,
+              "skipped": false
+            }
+          ],
+          "errors": [],
+          "status": "passed",
+          "annotations": [],
+          "attachments": []
+        }
+      ],
+      "ok": true
+    },
+    {
+      "testId": "511824ed8a96996e65ed-71701d00adafb86a02ea",
+      "title": "certificate verification page accepts seeded code",
+      "projectName": "chromium",
+      "location": { "file": "artist-paid-purchase.spec.ts", "line": 58, "column": 3 },
+      "duration": 10697,
+      "annotations": [],
+      "tags": [],
+      "outcome": "expected",
+      "path": ["Artist paid purchase (E2E)"],
+      "results": [
+        {
+          "duration": 10697,
+          "startTime": "2026-07-21T11:08:35.256Z",
+          "retry": 0,
+          "steps": [
+            {
+              "title": "Before Hooks",
+              "startTime": "2026-07-21T11:08:35.258Z",
+              "duration": 88,
+              "steps": [
+                {
+                  "title": "Fixture \"context\"",
+                  "startTime": "2026-07-21T11:08:35.271Z",
+                  "duration": 48,
+                  "steps": [
+                    {
+                      "title": "Create context",
+                      "startTime": "2026-07-21T11:08:35.272Z",
+                      "duration": 46,
+                      "steps": [],
+                      "attachments": [],
+                      "count": 1,
+                      "skipped": false
+                    }
+                  ],
+                  "attachments": [],
+                  "count": 1,
+                  "skipped": false
+                },
+                {
+                  "title": "Fixture \"page\"",
+                  "startTime": "2026-07-21T11:08:35.319Z",
+                  "duration": 27,
+                  "steps": [
+                    {
+                      "title": "Create page",
+                      "startTime": "2026-07-21T11:08:35.321Z",
+                      "duration": 25,
+                      "steps": [],
+                      "attachments": [],
+                      "count": 1,
+                      "skipped": false
+                    }
+                  ],
+                  "attachments": [],
+                  "count": 1,
+                  "skipped": false
+                }
+              ],
+              "attachments": [],
+              "count": 1,
+              "skipped": false
+            },
+            {
+              "title": "Navigate to \"/verify/E2E484E64\"",
+              "startTime": "2026-07-21T11:08:39.567Z",
+              "duration": 665,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 83, "column": 31 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  82 |\u001b[39m )\u001b[33m:\u001b[39m \u001b[33mPromise\u001b[39m\u001b[33m<\u001b[39m\u001b[36mimport\u001b[39m(\u001b[32m'@playwright/test'\u001b[39m)\u001b[33m.\u001b[39m\u001b[33mResponse\u001b[39m \u001b[33m|\u001b[39m \u001b[36mnull\u001b[39m\u001b[33m>\u001b[39m {\n \u001b[90m  83 |\u001b[39m   \u001b[36mconst\u001b[39m response \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(path\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                              ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  84 |\u001b[39m     waitUntil\u001b[33m:\u001b[39m \u001b[32m'domcontentloaded'\u001b[39m\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Evaluate",
+              "startTime": "2026-07-21T11:08:40.233Z",
+              "duration": 108,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 28, "column": 6 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  27 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  28 |\u001b[39m     \u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  29 |\u001b[39m       \u001b[36mtry\u001b[39m {"
+            },
+            {
+              "title": "Wait for function",
+              "startTime": "2026-07-21T11:08:40.345Z",
+              "duration": 145,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 47, "column": 14 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  46 |\u001b[39m\n \u001b[90m  47 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForFunction(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  48 |\u001b[39m     () \u001b[33m=>\u001b[39m {"
+            },
+            {
+              "title": "Wait for function",
+              "startTime": "2026-07-21T11:08:40.491Z",
+              "duration": 36,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 56, "column": 6 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  55 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  56 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(() \u001b[33m=>\u001b[39m \u001b[33m!\u001b[39mdocument\u001b[33m.\u001b[39mgetElementById(\u001b[32m'seo-fallback'\u001b[39m)\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  57 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[35m10\u001b[39m_000\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Expect \"toBeVisible\" getByRole('heading', { name: /vérification de certificat/i })",
+              "startTime": "2026-07-21T11:08:40.530Z",
+              "duration": 183,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "artist-paid-purchase.spec.ts", "line": 67, "column": 88 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  66 |\u001b[39m       \u001b[36mawait\u001b[39m gotoApp(page\u001b[33m,\u001b[39m \u001b[32m`/verify/${code}`\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m  67 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[35m/vérification de certificat/i\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible({\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                                                                                       ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  68 |\u001b[39m         timeout\u001b[33m:\u001b[39m \u001b[35m15\u001b[39m_000\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Expect \"toBeVisible\" getByText('E2E484E64')",
+              "startTime": "2026-07-21T11:08:40.714Z",
+              "duration": 15,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "artist-paid-purchase.spec.ts", "line": 70, "column": 60 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  69 |\u001b[39m       })\u001b[33m;\u001b[39m\n \u001b[90m  70 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByText(code\u001b[33m,\u001b[39m { exact\u001b[33m:\u001b[39m \u001b[36mfalse\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                                                           ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  71 |\u001b[39m       \u001b[36mconst\u001b[39m authentic \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mgetByText(\u001b[35m/certificat authentique/i\u001b[39m)\u001b[33m;\u001b[39m"
+            },
+            {
+              "title": "After Hooks",
+              "startTime": "2026-07-21T11:08:45.956Z",
+              "duration": 18,
+              "steps": [
+                {
+                  "title": "Fixture \"page\"",
+                  "startTime": "2026-07-21T11:08:45.956Z",
+                  "duration": 1,
+                  "steps": [],
+                  "attachments": [],
+                  "count": 1,
+                  "skipped": false
+                },
+                {
+                  "title": "Fixture \"context\"",
+                  "startTime": "2026-07-21T11:08:45.957Z",
+                  "duration": 11,
+                  "steps": [
+                    {
+                      "title": "Close context",
+                      "startTime": "2026-07-21T11:08:45.962Z",
+                      "duration": 6,
+                      "steps": [],
+                      "attachments": [],
+                      "count": 1,
+                      "skipped": false
+                    }
+                  ],
+                  "attachments": [],
+                  "count": 1,
+                  "skipped": false
+                }
+              ],
+              "attachments": [],
+              "count": 1,
+              "skipped": false
+            }
+          ],
+          "errors": [],
+          "status": "passed",
+          "annotations": [],
+          "attachments": []
+        }
+      ],
+      "ok": true
+    },
+    {
+      "testId": "511824ed8a96996e65ed-f640f91c1703eb3c9c0d",
+      "title": "logged-in buyer reaches checkout from artist product detail",
+      "projectName": "chromium",
+      "location": { "file": "artist-paid-purchase.spec.ts", "line": 91, "column": 3 },
+      "duration": 18115,
+      "annotations": [],
+      "tags": [],
+      "outcome": "expected",
+      "path": ["Artist paid purchase (E2E)"],
+      "results": [
+        {
+          "duration": 18115,
+          "startTime": "2026-07-21T11:08:45.974Z",
+          "retry": 0,
+          "steps": [
+            {
+              "title": "Before Hooks",
+              "startTime": "2026-07-21T11:08:45.975Z",
+              "duration": 105,
+              "steps": [
+                {
+                  "title": "Fixture \"context\"",
+                  "startTime": "2026-07-21T11:08:45.983Z",
+                  "duration": 71,
+                  "steps": [
+                    {
+                      "title": "Create context",
+                      "startTime": "2026-07-21T11:08:45.990Z",
+                      "duration": 64,
+                      "steps": [],
+                      "attachments": [],
+                      "count": 1,
+                      "skipped": false
+                    }
+                  ],
+                  "attachments": [],
+                  "count": 1,
+                  "skipped": false
+                },
+                {
+                  "title": "Fixture \"page\"",
+                  "startTime": "2026-07-21T11:08:46.055Z",
+                  "duration": 25,
+                  "steps": [
+                    {
+                      "title": "Create page",
+                      "startTime": "2026-07-21T11:08:46.056Z",
+                      "duration": 24,
+                      "steps": [],
+                      "attachments": [],
+                      "count": 1,
+                      "skipped": false
+                    }
+                  ],
+                  "attachments": [],
+                  "count": 1,
+                  "skipped": false
+                }
+              ],
+              "attachments": [],
+              "count": 1,
+              "skipped": false
+            },
+            {
+              "title": "Navigate to \"/auth/v1/verify?token=c69ddadcf6b5e1b2a725b269f8e1dbdbf6024f82b5fd54c6ef8f22fc&type=magiclink&redirect_to=http://localhost:8080/dashboard\"",
+              "startTime": "2026-07-21T11:08:50.281Z",
+              "duration": 872,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 176, "column": 14 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 175 |\u001b[39m\n \u001b[90m 176 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(data\u001b[33m.\u001b[39mproperties\u001b[33m.\u001b[39maction_link\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 177 |\u001b[39m     waitUntil\u001b[33m:\u001b[39m \u001b[32m'domcontentloaded'\u001b[39m\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Wait for function",
+              "startTime": "2026-07-21T11:08:51.154Z",
+              "duration": 108,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 182, "column": 6 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 181 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m 182 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(() \u001b[33m=>\u001b[39m \u001b[35m/access_token=/\u001b[39m\u001b[33m.\u001b[39mtest(window\u001b[33m.\u001b[39mlocation\u001b[33m.\u001b[39mhash)\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 183 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[33mE2E_TEST_CONFIG\u001b[39m\u001b[33m.\u001b[39mauthTimeout\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Evaluate",
+              "startTime": "2026-07-21T11:08:51.263Z",
+              "duration": 18,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 187, "column": 29 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 186 |\u001b[39m\n \u001b[90m 187 |\u001b[39m   \u001b[36mconst\u001b[39m tokens \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                            ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 188 |\u001b[39m     \u001b[36mconst\u001b[39m params \u001b[33m=\u001b[39m \u001b[36mnew\u001b[39m \u001b[33mURLSearchParams\u001b[39m(window\u001b[33m.\u001b[39mlocation\u001b[33m.\u001b[39mhash\u001b[33m.\u001b[39mreplace(\u001b[35m/^#/\u001b[39m\u001b[33m,\u001b[39m \u001b[32m''\u001b[39m))\u001b[33m;\u001b[39m"
+            },
+            {
+              "title": "Navigate to \"/\"",
+              "startTime": "2026-07-21T11:08:51.282Z",
+              "duration": 202,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 211, "column": 14 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 210 |\u001b[39m\n \u001b[90m 211 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(baseURL\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 212 |\u001b[39m     waitUntil\u001b[33m:\u001b[39m \u001b[32m'domcontentloaded'\u001b[39m\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Evaluate",
+              "startTime": "2026-07-21T11:08:51.485Z",
+              "duration": 104,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 215, "column": 14 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 214 |\u001b[39m   })\u001b[33m;\u001b[39m\n \u001b[90m 215 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mevaluate(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 216 |\u001b[39m     ({ key\u001b[33m,\u001b[39m value }) \u001b[33m=>\u001b[39m {"
+            },
+            {
+              "title": "Navigate to \"/dashboard\"",
+              "startTime": "2026-07-21T11:08:51.590Z",
+              "duration": 204,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 83, "column": 31 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  82 |\u001b[39m )\u001b[33m:\u001b[39m \u001b[33mPromise\u001b[39m\u001b[33m<\u001b[39m\u001b[36mimport\u001b[39m(\u001b[32m'@playwright/test'\u001b[39m)\u001b[33m.\u001b[39m\u001b[33mResponse\u001b[39m \u001b[33m|\u001b[39m \u001b[36mnull\u001b[39m\u001b[33m>\u001b[39m {\n \u001b[90m  83 |\u001b[39m   \u001b[36mconst\u001b[39m response \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(path\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                              ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  84 |\u001b[39m     waitUntil\u001b[33m:\u001b[39m \u001b[32m'domcontentloaded'\u001b[39m\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Evaluate",
+              "startTime": "2026-07-21T11:08:51.795Z",
+              "duration": 30,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 28, "column": 6 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  27 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  28 |\u001b[39m     \u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  29 |\u001b[39m       \u001b[36mtry\u001b[39m {"
+            },
+            {
+              "title": "Wait for function",
+              "startTime": "2026-07-21T11:08:51.827Z",
+              "duration": 47,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 47, "column": 14 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  46 |\u001b[39m\n \u001b[90m  47 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForFunction(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  48 |\u001b[39m     () \u001b[33m=>\u001b[39m {"
+            },
+            {
+              "title": "Wait for function",
+              "startTime": "2026-07-21T11:08:51.875Z",
+              "duration": 25,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 56, "column": 6 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  55 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  56 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(() \u001b[33m=>\u001b[39m \u001b[33m!\u001b[39mdocument\u001b[33m.\u001b[39mgetElementById(\u001b[32m'seo-fallback'\u001b[39m)\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  57 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[35m10\u001b[39m_000\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Wait for load state \"domcontentloaded\"",
+              "startTime": "2026-07-21T11:08:51.901Z",
+              "duration": 1,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 223, "column": 14 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 222 |\u001b[39m   \u001b[36mawait\u001b[39m gotoApp(page\u001b[33m,\u001b[39m redirectPath)\u001b[33m;\u001b[39m\n \u001b[90m 223 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForURL(\u001b[35m/\\/(dashboard|marketplace|account|admin)/\u001b[39m\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 224 |\u001b[39m     timeout\u001b[33m:\u001b[39m \u001b[33mE2E_TEST_CONFIG\u001b[39m\u001b[33m.\u001b[39mauthTimeout\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Evaluate",
+              "startTime": "2026-07-21T11:08:51.903Z",
+              "duration": 4,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 28, "column": 6 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  27 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  28 |\u001b[39m     \u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  29 |\u001b[39m       \u001b[36mtry\u001b[39m {"
+            },
+            {
+              "title": "Wait for function",
+              "startTime": "2026-07-21T11:08:51.908Z",
+              "duration": 16,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 47, "column": 14 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  46 |\u001b[39m\n \u001b[90m  47 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForFunction(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  48 |\u001b[39m     () \u001b[33m=>\u001b[39m {"
+            },
+            {
+              "title": "Wait for function",
+              "startTime": "2026-07-21T11:08:51.925Z",
+              "duration": 19,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 56, "column": 6 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  55 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  56 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(() \u001b[33m=>\u001b[39m \u001b[33m!\u001b[39mdocument\u001b[33m.\u001b[39mgetElementById(\u001b[32m'seo-fallback'\u001b[39m)\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  57 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[35m10\u001b[39m_000\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Navigate to \"/artist/64a46078-37ff-495f-9a9a-394cf2c07ca2\"",
+              "startTime": "2026-07-21T11:08:51.946Z",
+              "duration": 801,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 83, "column": 31 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  82 |\u001b[39m )\u001b[33m:\u001b[39m \u001b[33mPromise\u001b[39m\u001b[33m<\u001b[39m\u001b[36mimport\u001b[39m(\u001b[32m'@playwright/test'\u001b[39m)\u001b[33m.\u001b[39m\u001b[33mResponse\u001b[39m \u001b[33m|\u001b[39m \u001b[36mnull\u001b[39m\u001b[33m>\u001b[39m {\n \u001b[90m  83 |\u001b[39m   \u001b[36mconst\u001b[39m response \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(path\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                              ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  84 |\u001b[39m     waitUntil\u001b[33m:\u001b[39m \u001b[32m'domcontentloaded'\u001b[39m\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Evaluate",
+              "startTime": "2026-07-21T11:08:52.749Z",
+              "duration": 46,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 28, "column": 6 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  27 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  28 |\u001b[39m     \u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  29 |\u001b[39m       \u001b[36mtry\u001b[39m {"
+            },
+            {
+              "title": "Wait for function",
+              "startTime": "2026-07-21T11:08:52.797Z",
+              "duration": 78,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 47, "column": 14 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  46 |\u001b[39m\n \u001b[90m  47 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForFunction(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  48 |\u001b[39m     () \u001b[33m=>\u001b[39m {"
+            },
+            {
+              "title": "Wait for function",
+              "startTime": "2026-07-21T11:08:52.879Z",
+              "duration": 44,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 56, "column": 6 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  55 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  56 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(() \u001b[33m=>\u001b[39m \u001b[33m!\u001b[39mdocument\u001b[33m.\u001b[39mgetElementById(\u001b[32m'seo-fallback'\u001b[39m)\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  57 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[35m10\u001b[39m_000\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Expect \"toHaveCount\" getByText(/Œuvre non trouvée/i)",
+              "startTime": "2026-07-21T11:08:52.926Z",
+              "duration": 119,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "artist-paid-purchase.spec.ts", "line": 113, "column": 58 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 112 |\u001b[39m\n \u001b[90m 113 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByText(\u001b[35m/Œuvre non trouvée/i\u001b[39m))\u001b[33m.\u001b[39mtoHaveCount(\u001b[35m0\u001b[39m\u001b[33m,\u001b[39m { timeout\u001b[33m:\u001b[39m \u001b[35m5\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                                                         ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 114 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { level\u001b[33m:\u001b[39m \u001b[35m1\u001b[39m }))\u001b[33m.\u001b[39mtoContainText(fixture\u001b[33m.\u001b[39mproduct\u001b[33m.\u001b[39mname\u001b[33m,\u001b[39m {"
+            },
+            {
+              "title": "Expect \"toContainText\" getByRole('heading', { level: 1 })",
+              "startTime": "2026-07-21T11:08:53.046Z",
+              "duration": 1909,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "artist-paid-purchase.spec.ts", "line": 114, "column": 61 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 113 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByText(\u001b[35m/Œuvre non trouvée/i\u001b[39m))\u001b[33m.\u001b[39mtoHaveCount(\u001b[35m0\u001b[39m\u001b[33m,\u001b[39m { timeout\u001b[33m:\u001b[39m \u001b[35m5\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m 114 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { level\u001b[33m:\u001b[39m \u001b[35m1\u001b[39m }))\u001b[33m.\u001b[39mtoContainText(fixture\u001b[33m.\u001b[39mproduct\u001b[33m.\u001b[39mname\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                                                            ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 115 |\u001b[39m         timeout\u001b[33m:\u001b[39m \u001b[35m45\u001b[39m_000\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Expect \"toBeVisible\" getByTestId('artist-add-to-cart')",
+              "startTime": "2026-07-21T11:08:54.956Z",
+              "duration": 2,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "artist-paid-purchase.spec.ts", "line": 117, "column": 60 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 116 |\u001b[39m       })\u001b[33m;\u001b[39m\n \u001b[90m 117 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'artist-add-to-cart'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m15\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                                                           ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 118 |\u001b[39m       \u001b[36mconst\u001b[39m addToCart \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'artist-add-to-cart'\u001b[39m)\u001b[33m;\u001b[39m"
+            },
+            {
+              "title": "Click getByTestId('artist-add-to-cart')",
+              "startTime": "2026-07-21T11:08:54.958Z",
+              "duration": 30,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "artist-paid-purchase.spec.ts", "line": 119, "column": 23 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 118 |\u001b[39m       \u001b[36mconst\u001b[39m addToCart \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'artist-add-to-cart'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 119 |\u001b[39m       \u001b[36mawait\u001b[39m addToCart\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                      ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 120 |\u001b[39m"
+            },
+            {
+              "title": "Navigate to \"/checkout\"",
+              "startTime": "2026-07-21T11:08:54.989Z",
+              "duration": 651,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 83, "column": 31 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  82 |\u001b[39m )\u001b[33m:\u001b[39m \u001b[33mPromise\u001b[39m\u001b[33m<\u001b[39m\u001b[36mimport\u001b[39m(\u001b[32m'@playwright/test'\u001b[39m)\u001b[33m.\u001b[39m\u001b[33mResponse\u001b[39m \u001b[33m|\u001b[39m \u001b[36mnull\u001b[39m\u001b[33m>\u001b[39m {\n \u001b[90m  83 |\u001b[39m   \u001b[36mconst\u001b[39m response \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(path\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                              ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  84 |\u001b[39m     waitUntil\u001b[33m:\u001b[39m \u001b[32m'domcontentloaded'\u001b[39m\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Evaluate",
+              "startTime": "2026-07-21T11:08:55.641Z",
+              "duration": 62,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 28, "column": 6 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  27 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  28 |\u001b[39m     \u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  29 |\u001b[39m       \u001b[36mtry\u001b[39m {"
+            },
+            {
+              "title": "Wait for function",
+              "startTime": "2026-07-21T11:08:55.704Z",
+              "duration": 130,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 47, "column": 14 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  46 |\u001b[39m\n \u001b[90m  47 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForFunction(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  48 |\u001b[39m     () \u001b[33m=>\u001b[39m {"
+            },
+            {
+              "title": "Wait for function",
+              "startTime": "2026-07-21T11:08:55.835Z",
+              "duration": 30,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 56, "column": 6 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  55 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  56 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(() \u001b[33m=>\u001b[39m \u001b[33m!\u001b[39mdocument\u001b[33m.\u001b[39mgetElementById(\u001b[32m'seo-fallback'\u001b[39m)\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  57 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[35m10\u001b[39m_000\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Expect \"toHaveURL\"",
+              "startTime": "2026-07-21T11:08:55.866Z",
+              "duration": 37,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "artist-paid-purchase.spec.ts", "line": 122, "column": 26 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 121 |\u001b[39m       \u001b[36mawait\u001b[39m gotoApp(page\u001b[33m,\u001b[39m \u001b[32m'/checkout'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 122 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page)\u001b[33m.\u001b[39mtoHaveURL(\u001b[35m/\\/checkout/\u001b[39m\u001b[33m,\u001b[39m { timeout\u001b[33m:\u001b[39m \u001b[35m15\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                         ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 123 |\u001b[39m"
+            },
+            {
+              "title": "After Hooks",
+              "startTime": "2026-07-21T11:09:04.085Z",
+              "duration": 32,
+              "steps": [
+                {
+                  "title": "Fixture \"page\"",
+                  "startTime": "2026-07-21T11:09:04.086Z",
+                  "duration": 0,
+                  "steps": [],
+                  "attachments": [],
+                  "count": 1,
+                  "skipped": false
+                },
+                {
+                  "title": "Fixture \"context\"",
+                  "startTime": "2026-07-21T11:09:04.086Z",
+                  "duration": 13,
+                  "steps": [
+                    {
+                      "title": "Close context",
+                      "startTime": "2026-07-21T11:09:04.089Z",
+                      "duration": 10,
+                      "steps": [],
+                      "attachments": [],
+                      "count": 1,
+                      "skipped": false
+                    }
+                  ],
+                  "attachments": [],
+                  "count": 1,
+                  "skipped": false
+                }
+              ],
+              "attachments": [],
+              "count": 1,
+              "skipped": false
+            }
+          ],
+          "errors": [],
+          "status": "passed",
+          "annotations": [],
+          "attachments": []
+        }
+      ],
+      "ok": true
+    }
+  ]
+}

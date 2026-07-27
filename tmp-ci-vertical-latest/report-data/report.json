@@ -1,1 +1,166 @@
-{"metadata":{"ci":{"commitHref":"https://github.com/payhuk02/emarzona/commit/169a2d3555f64f38e8f9dfa210f1d5f5a47b9bc7","commitHash":"169a2d3555f64f38e8f9dfa210f1d5f5a47b9bc7","buildHref":"https://github.com/payhuk02/emarzona/actions/runs/29824829459"},"gitCommit":{"shortHash":"169a2d3","hash":"169a2d3555f64f38e8f9dfa210f1d5f5a47b9bc7","subject":"fix(e2e): stabilize wizards publish and mixed-cart after auth/upload races","body":"fix(e2e): stabilize wizards publish and mixed-cart after auth/upload races\n\nSync cart auth on session changes, stub catalog uploads in E2E, and wait for vendor store readiness so wizard publish and service add-to-cart stop timing out in CI.\n\nCo-authored-by: Cursor <cursoragent@cursor.com>\n","author":{"name":"Roger","email":"payhuk02@gmail.com","time":1784631969000},"committer":{"name":"Roger","email":"payhuk02@gmail.com","time":1784631969000},"branch":"main"},"actualWorkers":1},"startTime":1784632076616,"duration":448751.294,"files":[{"fileId":"806bfd16ad72419c32f1","fileName":"mixed-cart-book-pay-confirm.spec.ts","tests":[{"testId":"806bfd16ad72419c32f1-22717e210cbf23ecfc6b","title":"service booking to cart, add physical, checkout and confirm booking","projectName":"chromium","location":{"file":"mixed-cart-book-pay-confirm.spec.ts","line":43,"column":3},"duration":261630,"annotations":[],"tags":[],"outcome":"unexpected","path":["Mixed cart book → pay → confirm (E2E)"],"ok":false,"results":[{"attachments":[{"name":"error-context","contentType":"text/markdown","path":"data/901837a2006087b53a247ecff6635df284ab4e27.md"}]},{"attachments":[{"name":"error-context","contentType":"text/markdown","path":"data/506f76bfb14e61e768f08e75c4b02eceb381ff32.md"},{"name":"trace","contentType":"application/zip","path":"data/a060816b678d4608c6c47f9a51704eb2cbac855a.zip"}]}]}],"stats":{"total":1,"expected":0,"unexpected":1,"flaky":0,"skipped":0,"ok":false}},{"fileId":"511824ed8a96996e65ed","fileName":"artist-paid-purchase.spec.ts","tests":[{"testId":"511824ed8a96996e65ed-7971599fb2832f871ea5","title":"paid order appears in customer artist portal","projectName":"chromium","location":{"file":"artist-paid-purchase.spec.ts","line":35,"column":3},"duration":35126,"annotations":[],"tags":[],"outcome":"expected","path":["Artist paid purchase (E2E)"],"ok":true,"results":[{"attachments":[]}]},{"testId":"511824ed8a96996e65ed-71701d00adafb86a02ea","title":"certificate verification page accepts seeded code","projectName":"chromium","location":{"file":"artist-paid-purchase.spec.ts","line":58,"column":3},"duration":10697,"annotations":[],"tags":[],"outcome":"expected","path":["Artist paid purchase (E2E)"],"ok":true,"results":[{"attachments":[]}]},{"testId":"511824ed8a96996e65ed-f640f91c1703eb3c9c0d","title":"logged-in buyer reaches checkout from artist product detail","projectName":"chromium","location":{"file":"artist-paid-purchase.spec.ts","line":91,"column":3},"duration":18115,"annotations":[],"tags":[],"outcome":"expected","path":["Artist paid purchase (E2E)"],"ok":true,"results":[{"attachments":[]}]}],"stats":{"total":3,"expected":3,"unexpected":0,"flaky":0,"skipped":0,"ok":true}},{"fileId":"fcc34f837359e2d60f8e","fileName":"course-paid-enrollment.spec.ts","tests":[{"testId":"fcc34f837359e2d60f8e-8297f2fbe1f202f108b1","title":"paid order enrolls buyer and unlocks learn route","projectName":"chromium","location":{"file":"course-paid-enrollment.spec.ts","line":40,"column":3},"duration":55093,"annotations":[{"type":"supabase-probe","description":"envKey=sb_publishable_P…(46)(publishable) via VITE_SUPABASE_ANON_KEY | anonLen=46 pubLen=46 | clientKey=sb_publishable_P…(publishable) match=true | rest=200 | productsErr=none | authUser=b24988c1-aee4-45ac-b58b-4d889de86765"}],"tags":[],"outcome":"expected","path":["Course paid enrollment (E2E)"],"ok":true,"results":[{"attachments":[{"name":"supabase-runtime-probe","contentType":"application/json"},{"name":"supabase-runtime-probe-eval","contentType":"application/json"},{"name":"supabase-runtime-probe","contentType":"application/json"},{"name":"cleanup-error","contentType":"text/plain"},{"name":"stdout","contentType":"text/plain"}]}]},{"testId":"fcc34f837359e2d60f8e-c64193dda2a6be171089","title":"logged-in buyer reaches checkout from course detail","projectName":"chromium","location":{"file":"course-paid-enrollment.spec.ts","line":95,"column":3},"duration":61425,"annotations":[],"tags":[],"outcome":"expected","path":["Course paid enrollment (E2E)"],"ok":true,"results":[{"attachments":[]}]}],"stats":{"total":2,"expected":2,"unexpected":0,"flaky":0,"skipped":0,"ok":true}}],"projectNames":["chromium"],"stats":{"total":6,"expected":5,"unexpected":1,"flaky":0,"skipped":0,"ok":false},"errors":[],"options":{},"machines":[]}
+{
+  "metadata": {
+    "ci": {
+      "commitHref": "https://github.com/payhuk02/emarzona/commit/169a2d3555f64f38e8f9dfa210f1d5f5a47b9bc7",
+      "commitHash": "169a2d3555f64f38e8f9dfa210f1d5f5a47b9bc7",
+      "buildHref": "https://github.com/payhuk02/emarzona/actions/runs/29824829459"
+    },
+    "gitCommit": {
+      "shortHash": "169a2d3",
+      "hash": "169a2d3555f64f38e8f9dfa210f1d5f5a47b9bc7",
+      "subject": "fix(e2e): stabilize wizards publish and mixed-cart after auth/upload races",
+      "body": "fix(e2e): stabilize wizards publish and mixed-cart after auth/upload races\n\nSync cart auth on session changes, stub catalog uploads in E2E, and wait for vendor store readiness so wizard publish and service add-to-cart stop timing out in CI.\n\nCo-authored-by: Cursor <cursoragent@cursor.com>\n",
+      "author": { "name": "Roger", "email": "payhuk02@gmail.com", "time": 1784631969000 },
+      "committer": { "name": "Roger", "email": "payhuk02@gmail.com", "time": 1784631969000 },
+      "branch": "main"
+    },
+    "actualWorkers": 1
+  },
+  "startTime": 1784632076616,
+  "duration": 448751.294,
+  "files": [
+    {
+      "fileId": "806bfd16ad72419c32f1",
+      "fileName": "mixed-cart-book-pay-confirm.spec.ts",
+      "tests": [
+        {
+          "testId": "806bfd16ad72419c32f1-22717e210cbf23ecfc6b",
+          "title": "service booking to cart, add physical, checkout and confirm booking",
+          "projectName": "chromium",
+          "location": { "file": "mixed-cart-book-pay-confirm.spec.ts", "line": 43, "column": 3 },
+          "duration": 261630,
+          "annotations": [],
+          "tags": [],
+          "outcome": "unexpected",
+          "path": ["Mixed cart book → pay → confirm (E2E)"],
+          "ok": false,
+          "results": [
+            {
+              "attachments": [
+                {
+                  "name": "error-context",
+                  "contentType": "text/markdown",
+                  "path": "data/901837a2006087b53a247ecff6635df284ab4e27.md"
+                }
+              ]
+            },
+            {
+              "attachments": [
+                {
+                  "name": "error-context",
+                  "contentType": "text/markdown",
+                  "path": "data/506f76bfb14e61e768f08e75c4b02eceb381ff32.md"
+                },
+                {
+                  "name": "trace",
+                  "contentType": "application/zip",
+                  "path": "data/a060816b678d4608c6c47f9a51704eb2cbac855a.zip"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "stats": { "total": 1, "expected": 0, "unexpected": 1, "flaky": 0, "skipped": 0, "ok": false }
+    },
+    {
+      "fileId": "511824ed8a96996e65ed",
+      "fileName": "artist-paid-purchase.spec.ts",
+      "tests": [
+        {
+          "testId": "511824ed8a96996e65ed-7971599fb2832f871ea5",
+          "title": "paid order appears in customer artist portal",
+          "projectName": "chromium",
+          "location": { "file": "artist-paid-purchase.spec.ts", "line": 35, "column": 3 },
+          "duration": 35126,
+          "annotations": [],
+          "tags": [],
+          "outcome": "expected",
+          "path": ["Artist paid purchase (E2E)"],
+          "ok": true,
+          "results": [{ "attachments": [] }]
+        },
+        {
+          "testId": "511824ed8a96996e65ed-71701d00adafb86a02ea",
+          "title": "certificate verification page accepts seeded code",
+          "projectName": "chromium",
+          "location": { "file": "artist-paid-purchase.spec.ts", "line": 58, "column": 3 },
+          "duration": 10697,
+          "annotations": [],
+          "tags": [],
+          "outcome": "expected",
+          "path": ["Artist paid purchase (E2E)"],
+          "ok": true,
+          "results": [{ "attachments": [] }]
+        },
+        {
+          "testId": "511824ed8a96996e65ed-f640f91c1703eb3c9c0d",
+          "title": "logged-in buyer reaches checkout from artist product detail",
+          "projectName": "chromium",
+          "location": { "file": "artist-paid-purchase.spec.ts", "line": 91, "column": 3 },
+          "duration": 18115,
+          "annotations": [],
+          "tags": [],
+          "outcome": "expected",
+          "path": ["Artist paid purchase (E2E)"],
+          "ok": true,
+          "results": [{ "attachments": [] }]
+        }
+      ],
+      "stats": { "total": 3, "expected": 3, "unexpected": 0, "flaky": 0, "skipped": 0, "ok": true }
+    },
+    {
+      "fileId": "fcc34f837359e2d60f8e",
+      "fileName": "course-paid-enrollment.spec.ts",
+      "tests": [
+        {
+          "testId": "fcc34f837359e2d60f8e-8297f2fbe1f202f108b1",
+          "title": "paid order enrolls buyer and unlocks learn route",
+          "projectName": "chromium",
+          "location": { "file": "course-paid-enrollment.spec.ts", "line": 40, "column": 3 },
+          "duration": 55093,
+          "annotations": [
+            {
+              "type": "supabase-probe",
+              "description": "envKey=sb_publishable_P…(46)(publishable) via VITE_SUPABASE_ANON_KEY | anonLen=46 pubLen=46 | clientKey=sb_publishable_P…(publishable) match=true | rest=200 | productsErr=none | authUser=b24988c1-aee4-45ac-b58b-4d889de86765"
+            }
+          ],
+          "tags": [],
+          "outcome": "expected",
+          "path": ["Course paid enrollment (E2E)"],
+          "ok": true,
+          "results": [
+            {
+              "attachments": [
+                { "name": "supabase-runtime-probe", "contentType": "application/json" },
+                { "name": "supabase-runtime-probe-eval", "contentType": "application/json" },
+                { "name": "supabase-runtime-probe", "contentType": "application/json" },
+                { "name": "cleanup-error", "contentType": "text/plain" },
+                { "name": "stdout", "contentType": "text/plain" }
+              ]
+            }
+          ]
+        },
+        {
+          "testId": "fcc34f837359e2d60f8e-c64193dda2a6be171089",
+          "title": "logged-in buyer reaches checkout from course detail",
+          "projectName": "chromium",
+          "location": { "file": "course-paid-enrollment.spec.ts", "line": 95, "column": 3 },
+          "duration": 61425,
+          "annotations": [],
+          "tags": [],
+          "outcome": "expected",
+          "path": ["Course paid enrollment (E2E)"],
+          "ok": true,
+          "results": [{ "attachments": [] }]
+        }
+      ],
+      "stats": { "total": 2, "expected": 2, "unexpected": 0, "flaky": 0, "skipped": 0, "ok": true }
+    }
+  ],
+  "projectNames": ["chromium"],
+  "stats": { "total": 6, "expected": 5, "unexpected": 1, "flaky": 0, "skipped": 0, "ok": false },
+  "errors": [],
+  "options": {},
+  "machines": []
+}

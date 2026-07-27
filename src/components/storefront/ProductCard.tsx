@@ -26,21 +26,15 @@ import {
   Star,
   Download,
   Crown,
-  Sparkles,
+  CheckCircle2,
+  Lock,
+  MessageCircle,
+  ExternalLink,
   Package,
-  Zap,
-  RefreshCw,
-  DollarSign,
-  Gift,
-  Heart,
-  Eye,
-  TrendingUp,
-  CheckCircle,
-  Loader2,
-  Shield,
-  MessageSquare,
+  Star,
   Play,
   ZoomIn,
+  Eye,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { VendorMessagingLink } from '@/components/vendor/VendorMessagingLink';
@@ -50,16 +44,6 @@ import { initiateMarketplaceDirectBuy } from '@/lib/marketplace/initiate-direct-
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { safeRedirect } from '@/lib/url-validator';
-import { PriceStockAlertButton } from '@/components/marketplace/PriceStockAlertButton';
-import { PaymentOptionsBadge, getPaymentOptions } from '@/components/products/PaymentOptionsBadge';
-import { PricingModelBadge } from '@/components/products/PricingModelBadge';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import {
   GuestPurchaseDialog,
   type GuestCustomerInfo,
@@ -75,42 +59,29 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isZoomOpen, setIsZoomOpen] = useState(false);
   const [guestDialogOpen, setGuestDialogOpen] = useState(false);
-  const [_userId, setUserId] = useState<string | null>(null);
   const { toast } = useToast();
   const isDigital = product.product_type === 'digital';
   const extendedProduct = product as ExtendedProduct;
 
-  // Récupérer l'utilisateur pour les alertes
-  useEffect(() => {
-    const fetchUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setUserId(user?.id || null);
-    };
-    fetchUser();
-  }, []);
-
   // Mémoriser les calculs de prix pour éviter les recalculs
-  const { price, oldPrice, hasPromo, discountPercent } = useMemo(() => {
+  const { price, hasPromo, discountPercent } = useMemo(() => {
     let currentPrice = product.price || 0;
     let crossedOutPrice: number | null = null;
-    
+
     // Check for different promo price schemas based on product type
-    const backendPromotionalPrice = (product as any).promotional_price;
-    const backendCompareAtPrice = product.compare_at_price;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const p = product as any;
+    const backendPromotionalPrice = p.promotional_price;
+    const backendCompareAtPrice = p.compare_at_price;
     const legacyPromoPrice = product.promo_price;
-    
+
     if (backendPromotionalPrice && backendPromotionalPrice < product.price) {
-      // Service/Digital schema: price is regular, promotional_price is discounted
       currentPrice = backendPromotionalPrice;
       crossedOutPrice = product.price;
     } else if (backendCompareAtPrice && backendCompareAtPrice > product.price) {
-      // Physical/Artist/Course schema: price is discounted, compare_at_price is regular
       currentPrice = product.price;
       crossedOutPrice = backendCompareAtPrice;
     } else if (legacyPromoPrice && legacyPromoPrice < product.price) {
-      // Legacy fallback
       currentPrice = legacyPromoPrice;
       crossedOutPrice = product.price;
     }
@@ -122,11 +93,10 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
 
     return {
       price: currentPrice,
-      oldPrice: crossedOutPrice,
       hasPromo: calculatedHasPromo,
       discountPercent: calculatedDiscountPercent,
     };
-  }, [product.price, product.promo_price, product.compare_at_price, (product as any).promotional_price]);
+  }, [product]);
 
   // Vérifier si le produit est nouveau (< 7 jours) - mémorisé
   const isNew = useMemo(() => {
@@ -136,53 +106,6 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
     const daysDiff = (now.getTime() - createdDate.getTime()) / (1000 * 3600 * 24);
     return daysDiff < 7;
   }, [product.created_at]);
-
-  // Formater le prix - mémorisé
-  const formatPrice = useCallback((amount: number) => {
-    return new Intl.NumberFormat('fr-FR').format(amount);
-  }, []);
-
-  // Nettoyer les balises HTML de la description - mémorisé
-  const stripHtmlTags = useCallback((html: string): string => {
-    // SÉCURISÉ : Extraire le texte sans utiliser innerHTML (évite XSS)
-    if (!html.includes('<')) {
-      // Pas de HTML, retourner directement
-      return html;
-    }
-
-    // Utiliser la fonction sécurisée de utils
-    try {
-      const temp = document.createElement('div');
-      temp.textContent = html;
-      return temp.textContent || '';
-    } catch (_e) {
-      // Fallback : utiliser textContent (plus sûr que innerHTML)
-      const temp = document.createElement('div');
-      temp.textContent = html; // textContent échappe automatiquement
-      return temp.textContent || '';
-    }
-  }, []);
-
-  // Générer une description courte - mémorisé
-  const shortDescription = useMemo((): string | undefined => {
-    let rawText = '';
-
-    if (extendedProduct.short_description && extendedProduct.short_description.trim()) {
-      rawText = extendedProduct.short_description;
-    } else if (product.description && product.description.trim()) {
-      rawText = product.description;
-    } else {
-      return undefined;
-    }
-
-    const cleanText = stripHtmlTags(rawText).trim();
-
-    if (cleanText.length > 120) {
-      return cleanText.substring(0, 117) + '...';
-    }
-
-    return cleanText;
-  }, [product, extendedProduct.short_description, stripHtmlTags]);
 
   // Gérer les favoris - mémorisé
   const handleFavorite = useCallback(
@@ -255,7 +178,7 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
         setGuestDialogOpen(false);
       }
     },
-    [product.store_id, product.id, product.name, product.currency, price, storeSlug, toast]
+    [product, price, storeSlug, toast]
   );
 
   // Gérer l'achat — invité autorisé avant création de compte

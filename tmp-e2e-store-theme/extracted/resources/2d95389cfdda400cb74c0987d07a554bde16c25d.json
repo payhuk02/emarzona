@@ -1,1 +1,12 @@
-[{"user_id":"0ec09abf-ac46-4e23-9c43-ea8dfe984034","display_name":"e2e-store-theme-1784538132377-c1a0456355353@example.com","first_name":null,"last_name":null,"bio":null,"phone":null,"location":null,"website":null}]
+[
+  {
+    "user_id": "0ec09abf-ac46-4e23-9c43-ea8dfe984034",
+    "display_name": "e2e-store-theme-1784538132377-c1a0456355353@example.com",
+    "first_name": null,
+    "last_name": null,
+    "bio": null,
+    "phone": null,
+    "location": null,
+    "website": null
+  }
+]

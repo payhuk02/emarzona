@@ -1,1 +1,5 @@
-{"email":"e2e-mixed-buyer-1784538196602-a5164bc4efc1f@example.com","password":"E2eTestPass1!","gotrue_meta_security":{}}
+{
+  "email": "e2e-mixed-buyer-1784538196602-a5164bc4efc1f@example.com",
+  "password": "E2eTestPass1!",
+  "gotrue_meta_security": {}
+}

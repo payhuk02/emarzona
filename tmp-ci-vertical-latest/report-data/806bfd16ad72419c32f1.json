@@ -1,1 +1,1168 @@
-{"fileId":"806bfd16ad72419c32f1","fileName":"mixed-cart-book-pay-confirm.spec.ts","tests":[{"testId":"806bfd16ad72419c32f1-22717e210cbf23ecfc6b","title":"service booking to cart, add physical, checkout and confirm booking","projectName":"chromium","location":{"file":"mixed-cart-book-pay-confirm.spec.ts","line":43,"column":3},"duration":261630,"annotations":[],"tags":[],"outcome":"unexpected","path":["Mixed cart book → pay → confirm (E2E)"],"results":[{"duration":128542,"startTime":"2026-07-21T11:11:00.731Z","retry":0,"steps":[{"title":"Before Hooks","startTime":"2026-07-21T11:11:00.733Z","duration":132,"steps":[{"title":"beforeAll hook","startTime":"2026-07-21T11:11:00.733Z","duration":22,"steps":[],"attachments":[],"location":{"file":"mixed-cart-book-pay-confirm.spec.ts","line":32,"column":8},"count":1,"skipped":false,"snippet":" \u001b[90m  31 |\u001b[39m\n \u001b[90m  32 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeAll(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m       ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  33 |\u001b[39m     \u001b[36mif\u001b[39m (canRun) {"},{"title":"Fixture \"context\"","startTime":"2026-07-21T11:11:00.762Z","duration":76,"steps":[{"title":"Create context","startTime":"2026-07-21T11:11:00.776Z","duration":61,"steps":[],"attachments":[],"count":1,"skipped":false}],"attachments":[],"count":1,"skipped":false},{"title":"Fixture \"page\"","startTime":"2026-07-21T11:11:00.838Z","duration":27,"steps":[{"title":"Create page","startTime":"2026-07-21T11:11:00.839Z","duration":26,"steps":[],"attachments":[],"count":1,"skipped":false}],"attachments":[],"count":1,"skipped":false}],"attachments":[],"count":1,"skipped":false},{"title":"Navigate to \"/login\"","startTime":"2026-07-21T11:11:05.447Z","duration":688,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":83,"column":31},"count":1,"skipped":false,"snippet":" \u001b[90m  82 |\u001b[39m )\u001b[33m:\u001b[39m \u001b[33mPromise\u001b[39m\u001b[33m<\u001b[39m\u001b[36mimport\u001b[39m(\u001b[32m'@playwright/test'\u001b[39m)\u001b[33m.\u001b[39m\u001b[33mResponse\u001b[39m \u001b[33m|\u001b[39m \u001b[36mnull\u001b[39m\u001b[33m>\u001b[39m {\n \u001b[90m  83 |\u001b[39m   \u001b[36mconst\u001b[39m response \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(path\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                              ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  84 |\u001b[39m     waitUntil\u001b[33m:\u001b[39m \u001b[32m'domcontentloaded'\u001b[39m\u001b[33m,\u001b[39m"},{"title":"Evaluate","startTime":"2026-07-21T11:11:06.137Z","duration":74,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":28,"column":6},"count":1,"skipped":false,"snippet":" \u001b[90m  27 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  28 |\u001b[39m     \u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  29 |\u001b[39m       \u001b[36mtry\u001b[39m {"},{"title":"Wait for function","startTime":"2026-07-21T11:11:06.212Z","duration":64,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":47,"column":14},"count":1,"skipped":false,"snippet":" \u001b[90m  46 |\u001b[39m\n \u001b[90m  47 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForFunction(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  48 |\u001b[39m     () \u001b[33m=>\u001b[39m {"},{"title":"Wait for function","startTime":"2026-07-21T11:11:06.281Z","duration":38,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":56,"column":6},"count":1,"skipped":false,"snippet":" \u001b[90m  55 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  56 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(() \u001b[33m=>\u001b[39m \u001b[33m!\u001b[39mdocument\u001b[33m.\u001b[39mgetElementById(\u001b[32m'seo-fallback'\u001b[39m)\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  57 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[35m10\u001b[39m_000\u001b[33m,\u001b[39m"},{"title":"Fill \"e2e-mixed-buyer-1784632260868-dc5f914e36c3e@example.com\" locator('input[name=\"email-login\"], input[type=\"email\"]').first()","startTime":"2026-07-21T11:11:06.322Z","duration":314,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":103,"column":20},"count":1,"skipped":false,"snippet":" \u001b[90m 102 |\u001b[39m   \u001b[36mconst\u001b[39m emailInput \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'input[name=\"email-login\"], input[type=\"email\"]'\u001b[39m)\u001b[33m.\u001b[39mfirst()\u001b[33m;\u001b[39m\n \u001b[90m 103 |\u001b[39m   \u001b[36mawait\u001b[39m emailInput\u001b[33m.\u001b[39mfill(email)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                   ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 104 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'#password-login'\u001b[39m)\u001b[33m.\u001b[39mfill(password)\u001b[33m;\u001b[39m"},{"title":"Fill \"E2eTestPass1!\" locator('#password-login')","startTime":"2026-07-21T11:11:06.638Z","duration":119,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":104,"column":41},"count":1,"skipped":false,"snippet":" \u001b[90m 103 |\u001b[39m   \u001b[36mawait\u001b[39m emailInput\u001b[33m.\u001b[39mfill(email)\u001b[33m;\u001b[39m\n \u001b[90m 104 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'#password-login'\u001b[39m)\u001b[33m.\u001b[39mfill(password)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                                        ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 105 |\u001b[39m   \u001b[36mawait\u001b[39m page"},{"title":"Click locator('form').filter({ has: locator('#password-login') }).locator('button[type=\"submit\"]')","startTime":"2026-07-21T11:11:06.759Z","duration":974,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":109,"column":6},"count":1,"skipped":false,"snippet":" \u001b[90m 108 |\u001b[39m     \u001b[33m.\u001b[39mlocator(\u001b[32m'button[type=\"submit\"]'\u001b[39m)\n \u001b[90m 109 |\u001b[39m     \u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 110 |\u001b[39m"},{"title":"Wait for navigation","startTime":"2026-07-21T11:11:07.735Z","duration":1590,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":112,"column":16},"count":1,"skipped":false,"snippet":" \u001b[90m 111 |\u001b[39m   \u001b[36mtry\u001b[39m {\n \u001b[90m 112 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForURL(\u001b[35m/\\/(dashboard|marketplace|account|admin)/\u001b[39m\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m               ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 113 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[33mE2E_TEST_CONFIG\u001b[39m\u001b[33m.\u001b[39mauthTimeout\u001b[33m,\u001b[39m"},{"title":"Evaluate","startTime":"2026-07-21T11:11:09.326Z","duration":4,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":28,"column":6},"count":1,"skipped":false,"snippet":" \u001b[90m  27 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  28 |\u001b[39m     \u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  29 |\u001b[39m       \u001b[36mtry\u001b[39m {"},{"title":"Wait for function","startTime":"2026-07-21T11:11:09.332Z","duration":7,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":47,"column":14},"count":1,"skipped":false,"snippet":" \u001b[90m  46 |\u001b[39m\n \u001b[90m  47 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForFunction(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  48 |\u001b[39m     () \u001b[33m=>\u001b[39m {"},{"title":"Wait for function","startTime":"2026-07-21T11:11:09.340Z","duration":2,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":56,"column":6},"count":1,"skipped":false,"snippet":" \u001b[90m  55 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  56 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(() \u001b[33m=>\u001b[39m \u001b[33m!\u001b[39mdocument\u001b[33m.\u001b[39mgetElementById(\u001b[32m'seo-fallback'\u001b[39m)\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  57 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[35m10\u001b[39m_000\u001b[33m,\u001b[39m"},{"title":"Evaluate","startTime":"2026-07-21T11:11:09.342Z","duration":1,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":28,"column":6},"count":1,"skipped":false,"snippet":" \u001b[90m  27 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  28 |\u001b[39m     \u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  29 |\u001b[39m       \u001b[36mtry\u001b[39m {"},{"title":"Wait for function","startTime":"2026-07-21T11:11:09.344Z","duration":3,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":47,"column":14},"count":1,"skipped":false,"snippet":" \u001b[90m  46 |\u001b[39m\n \u001b[90m  47 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForFunction(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  48 |\u001b[39m     () \u001b[33m=>\u001b[39m {"},{"title":"Wait for function","startTime":"2026-07-21T11:11:09.348Z","duration":1,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":56,"column":6},"count":1,"skipped":false,"snippet":" \u001b[90m  55 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  56 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(() \u001b[33m=>\u001b[39m \u001b[33m!\u001b[39mdocument\u001b[33m.\u001b[39mgetElementById(\u001b[32m'seo-fallback'\u001b[39m)\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  57 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[35m10\u001b[39m_000\u001b[33m,\u001b[39m"},{"title":"Wait for function","startTime":"2026-07-21T11:11:09.351Z","duration":20000,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":65,"column":6},"error":"TimeoutError: page.waitForFunction: Timeout 20000ms exceeded.","count":1,"skipped":false,"snippet":" \u001b[90m  64 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  65 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  66 |\u001b[39m       () \u001b[33m=>\u001b[39m {"},{"title":"Navigate to \"/service/b2303b43-b6a2-4fcb-b6a1-3711012acd99\"","startTime":"2026-07-21T11:11:29.353Z","duration":798,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":83,"column":31},"count":1,"skipped":false,"snippet":" \u001b[90m  82 |\u001b[39m )\u001b[33m:\u001b[39m \u001b[33mPromise\u001b[39m\u001b[33m<\u001b[39m\u001b[36mimport\u001b[39m(\u001b[32m'@playwright/test'\u001b[39m)\u001b[33m.\u001b[39m\u001b[33mResponse\u001b[39m \u001b[33m|\u001b[39m \u001b[36mnull\u001b[39m\u001b[33m>\u001b[39m {\n \u001b[90m  83 |\u001b[39m   \u001b[36mconst\u001b[39m response \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(path\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                              ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  84 |\u001b[39m     waitUntil\u001b[33m:\u001b[39m \u001b[32m'domcontentloaded'\u001b[39m\u001b[33m,\u001b[39m"},{"title":"Evaluate","startTime":"2026-07-21T11:11:30.152Z","duration":88,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":28,"column":6},"count":1,"skipped":false,"snippet":" \u001b[90m  27 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  28 |\u001b[39m     \u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  29 |\u001b[39m       \u001b[36mtry\u001b[39m {"},{"title":"Wait for function","startTime":"2026-07-21T11:11:30.241Z","duration":67,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":47,"column":14},"count":1,"skipped":false,"snippet":" \u001b[90m  46 |\u001b[39m\n \u001b[90m  47 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForFunction(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  48 |\u001b[39m     () \u001b[33m=>\u001b[39m {"},{"title":"Wait for function","startTime":"2026-07-21T11:11:30.310Z","duration":45,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":56,"column":6},"count":1,"skipped":false,"snippet":" \u001b[90m  55 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  56 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(() \u001b[33m=>\u001b[39m \u001b[33m!\u001b[39mdocument\u001b[33m.\u001b[39mgetElementById(\u001b[32m'seo-fallback'\u001b[39m)\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  57 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[35m10\u001b[39m_000\u001b[33m,\u001b[39m"},{"title":"Expect \"toHaveCount\" getByText(/Service non trouvé/i)","startTime":"2026-07-21T11:11:30.358Z","duration":78,"steps":[],"attachments":[],"location":{"file":"mixed-cart-book-pay-confirm.spec.ts","line":63,"column":59},"count":1,"skipped":false,"snippet":" \u001b[90m  62 |\u001b[39m\n \u001b[90m  63 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByText(\u001b[35m/Service non trouvé/i\u001b[39m))\u001b[33m.\u001b[39mtoHaveCount(\u001b[35m0\u001b[39m\u001b[33m,\u001b[39m { timeout\u001b[33m:\u001b[39m \u001b[35m5\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                                                          ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  64 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { level\u001b[33m:\u001b[39m \u001b[35m1\u001b[39m }))\u001b[33m.\u001b[39mtoContainText("},{"title":"Expect \"toContainText\" getByRole('heading', { level: 1 })","startTime":"2026-07-21T11:11:30.438Z","duration":1916,"steps":[],"attachments":[],"location":{"file":"mixed-cart-book-pay-confirm.spec.ts","line":64,"column":61},"count":1,"skipped":false,"snippet":" \u001b[90m  63 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByText(\u001b[35m/Service non trouvé/i\u001b[39m))\u001b[33m.\u001b[39mtoHaveCount(\u001b[35m0\u001b[39m\u001b[33m,\u001b[39m { timeout\u001b[33m:\u001b[39m \u001b[35m5\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m  64 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { level\u001b[33m:\u001b[39m \u001b[35m1\u001b[39m }))\u001b[33m.\u001b[39mtoContainText(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                                                            ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  65 |\u001b[39m         fixture\u001b[33m.\u001b[39mserviceProduct\u001b[33m.\u001b[39mname\u001b[33m,\u001b[39m"},{"title":"Evaluate","startTime":"2026-07-21T11:11:32.364Z","duration":22,"steps":[],"attachments":[],"location":{"file":"helpers/store-theme-helpers.ts","line":243,"column":14},"count":1,"skipped":false,"snippet":" \u001b[90m 242 |\u001b[39m \u001b[36mexport\u001b[39m \u001b[36masync\u001b[39m \u001b[36mfunction\u001b[39m dismissCookieBannerIfVisible(page\u001b[33m:\u001b[39m \u001b[33mPage\u001b[39m)\u001b[33m:\u001b[39m \u001b[33mPromise\u001b[39m\u001b[33m<\u001b[39m\u001b[36mvoid\u001b[39m\u001b[33m>\u001b[39m {\n \u001b[90m 243 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 244 |\u001b[39m     document\u001b[33m.\u001b[39mcookie \u001b[33m=\u001b[39m \u001b[32m'emarzona_consent=true; path=/; max-age=31536000; SameSite=Lax'\u001b[39m\u001b[33m;\u001b[39m"},{"title":"Expect \"toBeVisible\" getByTestId('service-quick-days')","startTime":"2026-07-21T11:11:32.402Z","duration":860,"steps":[],"attachments":[],"location":{"file":"helpers/service-booking-ui.ts","line":18,"column":27},"count":1,"skipped":false,"snippet":" \u001b[90m 17 |\u001b[39m   \u001b[36mconst\u001b[39m quickDays \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'service-quick-days'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 18 |\u001b[39m   \u001b[36mawait\u001b[39m expect(quickDays)\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m45\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m \u001b[31m\u001b[1m                          ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 19 |\u001b[39m"},{"title":"Click getByTestId('service-quick-day-2026-07-22')","startTime":"2026-07-21T11:11:33.264Z","duration":67,"steps":[],"attachments":[],"location":{"file":"helpers/service-booking-ui.ts","line":23,"column":22},"count":1,"skipped":false,"snippet":" \u001b[90m 22 |\u001b[39m     \u001b[36mif\u001b[39m (\u001b[36mawait\u001b[39m specific\u001b[33m.\u001b[39misVisible()\u001b[33m.\u001b[39m\u001b[36mcatch\u001b[39m(() \u001b[33m=>\u001b[39m \u001b[36mfalse\u001b[39m)) {\n \u001b[90m 23 |\u001b[39m       \u001b[36mawait\u001b[39m specific\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m \u001b[31m\u001b[1m                     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 24 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'[data-testid^=\"time-slot-\"]'\u001b[39m)\u001b[33m.\u001b[39mfirst())\u001b[33m.\u001b[39mtoBeVisible({"},{"title":"Expect \"toBeVisible\" locator('[data-testid^=\"time-slot-\"]').first()","startTime":"2026-07-21T11:11:33.331Z","duration":357,"steps":[],"attachments":[],"location":{"file":"helpers/service-booking-ui.ts","line":24,"column":73},"count":1,"skipped":false,"snippet":" \u001b[90m 23 |\u001b[39m       \u001b[36mawait\u001b[39m specific\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m 24 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'[data-testid^=\"time-slot-\"]'\u001b[39m)\u001b[33m.\u001b[39mfirst())\u001b[33m.\u001b[39mtoBeVisible({\n \u001b[90m    |\u001b[39m \u001b[31m\u001b[1m                                                                        ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 25 |\u001b[39m         timeout\u001b[33m:\u001b[39m \u001b[35m20\u001b[39m_000\u001b[33m,\u001b[39m"},{"title":"Evaluate","startTime":"2026-07-21T11:11:33.689Z","duration":1,"steps":[],"attachments":[],"location":{"file":"helpers/store-theme-helpers.ts","line":243,"column":14},"count":1,"skipped":false,"snippet":" \u001b[90m 242 |\u001b[39m \u001b[36mexport\u001b[39m \u001b[36masync\u001b[39m \u001b[36mfunction\u001b[39m dismissCookieBannerIfVisible(page\u001b[33m:\u001b[39m \u001b[33mPage\u001b[39m)\u001b[33m:\u001b[39m \u001b[33mPromise\u001b[39m\u001b[33m<\u001b[39m\u001b[36mvoid\u001b[39m\u001b[33m>\u001b[39m {\n \u001b[90m 243 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 244 |\u001b[39m     document\u001b[33m.\u001b[39mcookie \u001b[33m=\u001b[39m \u001b[32m'emarzona_consent=true; path=/; max-age=31536000; SameSite=Lax'\u001b[39m\u001b[33m;\u001b[39m"},{"title":"Expect \"toBeVisible\" locator('[data-testid^=\"time-slot-\"]').first()","startTime":"2026-07-21T11:11:33.694Z","duration":3,"steps":[],"attachments":[],"location":{"file":"helpers/service-booking-ui.ts","line":40,"column":22},"count":1,"skipped":false,"snippet":" \u001b[90m 39 |\u001b[39m   \u001b[36mconst\u001b[39m slot \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'[data-testid^=\"time-slot-\"]'\u001b[39m)\u001b[33m.\u001b[39mfirst()\u001b[33m;\u001b[39m\n \u001b[90m 40 |\u001b[39m   \u001b[36mawait\u001b[39m expect(slot)\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m15\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m \u001b[31m\u001b[1m                     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 41 |\u001b[39m   \u001b[36mawait\u001b[39m slot\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m"},{"title":"Click locator('[data-testid^=\"time-slot-\"]').first()","startTime":"2026-07-21T11:11:33.697Z","duration":59,"steps":[],"attachments":[],"location":{"file":"helpers/service-booking-ui.ts","line":41,"column":14},"count":1,"skipped":false,"snippet":" \u001b[90m 40 |\u001b[39m   \u001b[36mawait\u001b[39m expect(slot)\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m15\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m 41 |\u001b[39m   \u001b[36mawait\u001b[39m slot\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 42 |\u001b[39m }"},{"title":"Expect \"toBeVisible\" getByText(/Créneau disponible/i)","startTime":"2026-07-21T11:11:33.757Z","duration":6,"steps":[],"attachments":[],"location":{"file":"mixed-cart-book-pay-confirm.spec.ts","line":75,"column":59},"count":1,"skipped":false,"snippet":" \u001b[90m  74 |\u001b[39m\n \u001b[90m  75 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByText(\u001b[35m/Créneau disponible/i\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m20\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                                                          ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  76 |\u001b[39m"},{"title":"Expect \"toBeEnabled\" getByTestId('service-add-to-cart')","startTime":"2026-07-21T11:11:33.764Z","duration":6,"steps":[],"attachments":[],"location":{"file":"mixed-cart-book-pay-confirm.spec.ts","line":78,"column":31},"count":1,"skipped":false,"snippet":" \u001b[90m  77 |\u001b[39m       \u001b[36mconst\u001b[39m addToCart \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'service-add-to-cart'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m  78 |\u001b[39m       \u001b[36mawait\u001b[39m expect(addToCart)\u001b[33m.\u001b[39mtoBeEnabled({ timeout\u001b[33m:\u001b[39m \u001b[35m20\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                              ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  79 |\u001b[39m       \u001b[36mawait\u001b[39m dismissCookieBannerIfVisible(page)\u001b[33m;\u001b[39m"},{"title":"Evaluate","startTime":"2026-07-21T11:11:33.771Z","duration":1,"steps":[],"attachments":[],"location":{"file":"helpers/store-theme-helpers.ts","line":243,"column":14},"count":1,"skipped":false,"snippet":" \u001b[90m 242 |\u001b[39m \u001b[36mexport\u001b[39m \u001b[36masync\u001b[39m \u001b[36mfunction\u001b[39m dismissCookieBannerIfVisible(page\u001b[33m:\u001b[39m \u001b[33mPage\u001b[39m)\u001b[33m:\u001b[39m \u001b[33mPromise\u001b[39m\u001b[33m<\u001b[39m\u001b[36mvoid\u001b[39m\u001b[33m>\u001b[39m {\n \u001b[90m 243 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 244 |\u001b[39m     document\u001b[33m.\u001b[39mcookie \u001b[33m=\u001b[39m \u001b[32m'emarzona_consent=true; path=/; max-age=31536000; SameSite=Lax'\u001b[39m\u001b[33m;\u001b[39m"},{"title":"Wait for event \"response\"","startTime":"2026-07-21T11:11:33.779Z","duration":1796,"steps":[],"attachments":[],"location":{"file":"mixed-cart-book-pay-confirm.spec.ts","line":85,"column":31},"count":1,"skipped":false,"snippet":" \u001b[90m  84 |\u001b[39m\n \u001b[90m  85 |\u001b[39m       \u001b[36mconst\u001b[39m reserveRpc \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mwaitForResponse(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                              ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  86 |\u001b[39m         response \u001b[33m=>\u001b[39m"},{"title":"Wait for event \"response\"","startTime":"2026-07-21T11:11:33.780Z","duration":45001,"steps":[],"attachments":[],"location":{"file":"mixed-cart-book-pay-confirm.spec.ts","line":91,"column":31},"error":"TimeoutError: page.waitForResponse: Timeout 45000ms exceeded while waiting for event \"response\"","count":1,"skipped":false,"snippet":" \u001b[90m  90 |\u001b[39m       )\u001b[33m;\u001b[39m\n \u001b[90m  91 |\u001b[39m       \u001b[36mconst\u001b[39m cartInsert \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mwaitForResponse(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                              ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  92 |\u001b[39m         response \u001b[33m=>\u001b[39m"},{"title":"Click getByTestId('service-add-to-cart')","startTime":"2026-07-21T11:11:33.780Z","duration":78,"steps":[],"attachments":[],"location":{"file":"mixed-cart-book-pay-confirm.spec.ts","line":97,"column":23},"count":1,"skipped":false,"snippet":" \u001b[90m  96 |\u001b[39m\n \u001b[90m  97 |\u001b[39m       \u001b[36mawait\u001b[39m addToCart\u001b[33m.\u001b[39mclick({ timeout\u001b[33m:\u001b[39m \u001b[35m15\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                      ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  98 |\u001b[39m"},{"title":"Wait for navigation","startTime":"2026-07-21T11:12:18.783Z","duration":45000,"steps":[],"attachments":[],"location":{"file":"mixed-cart-book-pay-confirm.spec.ts","line":120,"column":10},"error":"TimeoutError: page.waitForURL: Timeout 45000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation until \"load\"\n============================================================","count":1,"skipped":false,"snippet":" \u001b[90m 119 |\u001b[39m       \u001b[36mconst\u001b[39m navigated \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\n \u001b[90m 120 |\u001b[39m         \u001b[33m.\u001b[39mwaitForURL(\u001b[35m/\\/cart/\u001b[39m\u001b[33m,\u001b[39m { timeout\u001b[33m:\u001b[39m \u001b[35m45\u001b[39m_000 })\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m         ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 121 |\u001b[39m         \u001b[33m.\u001b[39mthen(() \u001b[33m=>\u001b[39m \u001b[36mtrue\u001b[39m)"},{"title":"After Hooks","startTime":"2026-07-21T11:13:09.251Z","duration":64,"steps":[{"title":"Fixture \"page\"","startTime":"2026-07-21T11:13:09.252Z","duration":0,"steps":[],"attachments":[],"count":1,"skipped":false},{"title":"Fixture \"context\"","startTime":"2026-07-21T11:13:09.252Z","duration":53,"steps":[{"title":"Close context","startTime":"2026-07-21T11:13:09.293Z","duration":12,"steps":[],"attachments":[],"count":1,"skipped":false}],"attachments":[],"count":1,"skipped":false}],"attachments":[],"count":1,"skipped":false},{"title":"Worker Cleanup","startTime":"2026-07-21T11:13:09.315Z","duration":32,"steps":[{"title":"Fixture \"browser\"","startTime":"2026-07-21T11:13:09.317Z","duration":27,"steps":[],"attachments":[],"count":1,"skipped":false}],"attachments":[],"count":1,"skipped":false}],"errors":[{"message":"Error: Expected /cart after add-to-cart. toast=Ajouter au panier page=Aller au contenu principal\nRetour en haut\nRetour\nE2E Service 1784632260868-dc5f914e36c3e\nDétails du service\n\nDurée\n\n60 minutes\n\nParticipants\n\nJusqu'à 5 personnes\n\nType\n\nGroupe\n\nDescription\nÉquipe\nAvis\nÀ propos de ce service\nService E2E panier mixte\nDétails du service\n\nDurée\n\n60 minutes\n\nParticipants\n\n1 - 5 personnes\n\nLieu\n\nSur site\n\nType\n\nappointment\n\nRéserver\n5,000 XOF\n\nPrix par personne\n\nStandard\nAchat unique\nPaiement complet\nNombre de participants\n-\n1\n+\nSélectionnez une date\nDisponibilités\nAujourd'hui\n\nProchains jours disponibles\n\nmar. 21 juil.\nmer. 22 juil.\njeu. 23 juil.\nven. 24 juil.\nsam. 25 juil.\ndim. 26 juil.\nlun. 27 juil.\nmar. 28 juil.\nAujourd'huiPrécédentSuivant\nJuly 20 – 26\nMoisSemaineJourAgenda\n20 Mon\n21 Tue\n22 Wed\n23 Thu\n24 Fri\n25 Sat\n26 Sun\n8:00 AM\n9:00 AM\n10:00 AM\n11:00 AM\n12\n\n  137 |               .catch(() => '')\n  138 |           ).slice(0, 800);\n> 139 |           throw new Error(\n      |                 ^\n  140 |             `Expected /cart after add-to-cart. toast=${errText || '(none)'} page=${bodySnippet}`\n  141 |           );\n  142 |         }\n    at /home/runner/work/emarzona/emarzona/tests/e2e/mixed-cart-book-pay-confirm.spec.ts:139:17","codeframe":"   39 |     if (process.env.CI) throw new Error(message);\n   40 |     test.skip(true, message);\n   41 |   });\n   42 |\n   43 |   test('service booking to cart, add physical, checkout and confirm booking', async ({\n   44 |     page,\n   45 |   }, testInfo) => {\n   46 |     const admin = createNodeSupabaseClient(supabaseUrl!, supabaseServiceKey!);\n   47 |     const runId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;\n   48 |     const fixture = await seedMixedCartFixture(admin, runId);\n   49 |     let bookingId: string | undefined;\n   50 |     let orderId: string | undefined;\n   51 |\n   52 |     try {\n   53 |       await loginAsSeededUser(\n   54 |         page,\n   55 |         admin,\n   56 |         fixture.buyer.email,\n   57 |         '/dashboard',\n   58 |         fixture.buyer.password\n   59 |       );\n   60 |       await waitForVendorStoreReady(page);\n   61 |       await gotoApp(page, `/service/${fixture.serviceProduct.id}`);\n   62 |\n   63 |       await expect(page.getByText(/Service non trouvé/i)).toHaveCount(0, { timeout: 5_000 });\n   64 |       await expect(page.getByRole('heading', { level: 1 })).toContainText(\n   65 |         fixture.serviceProduct.name,\n   66 |         {\n   67 |           timeout: 30_000,\n   68 |         }\n   69 |       );\n   70 |\n   71 |       const { date } = tomorrowAt10();\n   72 |       await selectServiceCalendarDay(page, date);\n   73 |       await selectFirstAvailableTimeSlot(page);\n   74 |\n   75 |       await expect(page.getByText(/Créneau disponible/i)).toBeVisible({ timeout: 20_000 });\n   76 |\n   77 |       const addToCart = page.getByTestId('service-add-to-cart');\n   78 |       await expect(addToCart).toBeEnabled({ timeout: 20_000 });\n   79 |       await dismissCookieBannerIfVisible(page);\n   80 |\n   81 |       const bookingError = page.getByText(\n   82 |         /Erreur de réservation|Réservation impossible|Authentification requise|Impossible de finaliser|Délai dépassé|Date invalide|Sélection incomplète|Compléments manquants|créneau n'est pas disponible|identifiant de créneau|ajouter au panier|Produit non trouvé/i\n   83 |       );\n   84 |\n   85 |       const reserveRpc = page.waitForResponse(\n   86 |         response =>\n   87 |           response.url().includes('/rest/v1/rpc/reserve_service_booking') &&\n   88 |           response.request().method() === 'POST',\n   89 |         { timeout: 45_000 }\n   90 |       );\n   91 |       const cartInsert = page.waitForResponse(\n   92 |         response =>\n   93 |           response.url().includes('/rest/v1/cart_items') && response.request().method() === 'POST',\n   94 |         { timeout: 45_000 }\n   95 |       );\n   96 |\n   97 |       await addToCart.click({ timeout: 15_000 });\n   98 |\n   99 |       const rpcResponse = await reserveRpc.catch(() => null);\n  100 |       if (rpcResponse && (rpcResponse.status() < 200 || rpcResponse.status() >= 300)) {\n  101 |         const body = await rpcResponse.text().catch(() => '');\n  102 |         throw new Error(\n  103 |           `reserve_service_booking failed (${rpcResponse.status()}): ${body.slice(0, 400)}`\n  104 |         );\n  105 |       }\n  106 |       if (!rpcResponse) {\n  107 |         const errText = (await bookingError.textContent().catch(() => null)) ?? '';\n  108 |         throw new Error(`reserve_service_booking RPC was not called. toast=${errText || '(none)'}`);\n  109 |       }\n  110 |\n  111 |       const cartResponse = await cartInsert.catch(() => null);\n  112 |       if (cartResponse && (cartResponse.status() < 200 || cartResponse.status() >= 300)) {\n  113 |         const body = await cartResponse.text().catch(() => '');\n  114 |         throw new Error(\n  115 |           `cart_items insert failed (${cartResponse.status()}): ${body.slice(0, 400)}`\n  116 |         );\n  117 |       }\n  118 |\n  119 |       const navigated = await page\n  120 |         .waitForURL(/\\/cart/, { timeout: 45_000 })\n  121 |         .then(() => true)\n  122 |         .catch(() => false);\n  123 |       if (!navigated) {\n  124 |         const errText = (await bookingError.textContent().catch(() => null)) ?? '';\n  125 |         const successToast = await page\n  126 |           .getByText(/Service ajouté au panier|Ajouté au panier/i)\n  127 |           .first()\n  128 |           .isVisible()\n  129 |           .catch(() => false);\n  130 |         if (successToast) {\n  131 |           await gotoApp(page, '/cart');\n  132 |         } else {\n  133 |           const bodySnippet = (\n  134 |             await page\n  135 |               .locator('body')\n  136 |               .innerText()\n  137 |               .catch(() => '')\n  138 |           ).slice(0, 800);\n> 139 |           throw new Error(\n      |                 ^ Error: Expected /cart after add-to-cart. toast=Ajouter au panier page=Aller au contenu principal\n  140 |             `Expected /cart after add-to-cart. toast=${errText || '(none)'} page=${bodySnippet}`\n  141 |           );\n  142 |         }\n  143 |       }\n  144 |       await expect(page.getByText(fixture.serviceProduct.name)).toBeVisible({ timeout: 10_000 });\n  145 |\n  146 |       await gotoApp(page, `/physical/${fixture.physicalProduct.id}`);\n  147 |       await expect(page.getByRole('heading', { level: 1 })).toContainText(\n  148 |         fixture.physicalProduct.name,\n  149 |         { timeout: 15_000 }\n  150 |       );\n  151 |\n  152 |       const addPhysical = page.getByRole('button', { name: /ajouter au panier/i });\n  153 |       await expect(addPhysical).toBeEnabled({ timeout: 10_000 });\n  154 |       await addPhysical.click();\n  155 |\n  156 |       await gotoApp(page, '/cart');\n  157 |       await expect(page.getByText(fixture.physicalProduct.name)).toBeVisible({ timeout: 10_000 });\n  158 |\n  159 |       await page\n  160 |         .getByRole('link', { name: /passer au paiement|checkout|commander/i })\n  161 |         .first()\n  162 |         .click();\n  163 |       await page.waitForURL(/\\/checkout/, { timeout: 30_000 });\n  164 |\n  165 |       const firstName = page\n  166 |         .locator('[data-testid=\"checkout-firstname\"], input[name=\"firstName\"]')\n  167 |         .first();\n  168 |       const lastName = page\n  169 |         .locator('[data-testid=\"checkout-lastname\"], input[name=\"lastName\"]')\n  170 |         .first();\n  171 |       const email = page.locator('[data-testid=\"checkout-email\"], input[name=\"email\"]').first();\n  172 |       const phone = page.locator('[data-testid=\"checkout-phone\"], input[name=\"phone\"]').first();\n  173 |\n  174 |       await firstName.fill('E2E');\n  175 |       await lastName.fill('Buyer');\n  176 |       await email.fill(fixture.buyer.email);\n  177 |       await phone.fill('+22670123456');\n  178 |\n  179 |       const address = page.locator('input[name=\"address\"]').first();\n  180 |       if (await address.isVisible().catch(() => false)) {\n  181 |         await address.fill('123 Rue Test');\n  182 |         await page.locator('input[name=\"city\"]').first().fill('Ouagadougou');\n  183 |         await page.locator('input[name=\"country\"]').first().fill('Burkina Faso');\n  184 |       }\n  185 |\n  186 |       const submit = page.locator('[data-testid=\"checkout-submit\"]').first();\n  187 |       await expect(submit).toBeVisible({ timeout: 10_000 });\n  188 |       await submit.click();\n  189 |\n  190 |       await page.waitForURL(/\\/checkout/, { timeout: 45_000 });\n  191 |\n  192 |       const { data: bookings } = await admin\n  193 |         .from('service_bookings')\n  194 |         .select('id, status')\n  195 |         .eq('product_id', fixture.serviceProduct.id)\n  196 |         .eq('user_id', fixture.buyer.id)\n  197 |         .order('created_at', { ascending: false })\n  198 |         .limit(1);\n  199 |\n  200 |       bookingId = bookings?.[0]?.id;\n  201 |       expect(bookingId).toBeTruthy();\n  202 |\n  203 |       const { data: orders } = await admin\n  204 |         .from('orders')\n  205 |         .select('id, status, payment_status')\n  206 |         .eq('store_id', fixture.store.id)\n  207 |         .order('created_at', { ascending: false })\n  208 |         .limit(1);\n  209 |\n  210 |       orderId = orders?.[0]?.id;\n  211 |       expect(orderId).toBeTruthy();\n  212 |\n  213 |       await simulateMixedCartPayment(admin, orderId!, bookingId!);\n  214 |       await assertServiceBookingStatus(admin, bookingId!, 'confirmed');\n  215 |     } finally {\n  216 |       try {\n  217 |         await Promise.race([\n  218 |           cleanupMixedCartFixture(admin, fixture),\n  219 |           new Promise((_, reject) =>\n  220 |             setTimeout(() => reject(new Error('cleanupMixedCartFixture timeout')), 30_000)\n  221 |           ),\n  222 |         ]);\n  223 |       } catch (e) {\n  224 |         testInfo.attach('cleanup-error', { body: String(e), contentType: 'text/plain' });\n  225 |       }\n  226 |     }\n  227 |   });\n  228 | });\n  229 |\n  230 | //"}],"status":"failed","annotations":[],"attachments":[{"name":"error-context","contentType":"text/markdown","path":"data/901837a2006087b53a247ecff6635df284ab4e27.md"}]},{"duration":133088,"startTime":"2026-07-21T11:13:10.391Z","retry":1,"steps":[{"title":"Before Hooks","startTime":"2026-07-21T11:13:10.395Z","duration":220,"steps":[{"title":"beforeAll hook","startTime":"2026-07-21T11:13:10.396Z","duration":18,"steps":[],"attachments":[],"location":{"file":"mixed-cart-book-pay-confirm.spec.ts","line":32,"column":8},"count":1,"skipped":false,"snippet":" \u001b[90m  31 |\u001b[39m\n \u001b[90m  32 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeAll(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m       ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  33 |\u001b[39m     \u001b[36mif\u001b[39m (canRun) {"},{"title":"Fixture \"browser\"","startTime":"2026-07-21T11:13:10.420Z","duration":78,"steps":[{"title":"Launch browser","startTime":"2026-07-21T11:13:10.427Z","duration":71,"steps":[],"attachments":[],"count":1,"skipped":false}],"attachments":[],"count":1,"skipped":false},{"title":"Fixture \"context\"","startTime":"2026-07-21T11:13:10.501Z","duration":78,"steps":[{"title":"Create context","startTime":"2026-07-21T11:13:10.506Z","duration":69,"steps":[],"attachments":[],"count":1,"skipped":false}],"attachments":[],"count":1,"skipped":false},{"title":"Fixture \"page\"","startTime":"2026-07-21T11:13:10.580Z","duration":35,"steps":[{"title":"Create page","startTime":"2026-07-21T11:13:10.581Z","duration":34,"steps":[],"attachments":[],"count":1,"skipped":false}],"attachments":[],"count":1,"skipped":false}],"attachments":[],"count":1,"skipped":false},{"title":"Navigate to \"/login\"","startTime":"2026-07-21T11:13:15.989Z","duration":1007,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":83,"column":31},"count":1,"skipped":false,"snippet":" \u001b[90m  82 |\u001b[39m )\u001b[33m:\u001b[39m \u001b[33mPromise\u001b[39m\u001b[33m<\u001b[39m\u001b[36mimport\u001b[39m(\u001b[32m'@playwright/test'\u001b[39m)\u001b[33m.\u001b[39m\u001b[33mResponse\u001b[39m \u001b[33m|\u001b[39m \u001b[36mnull\u001b[39m\u001b[33m>\u001b[39m {\n \u001b[90m  83 |\u001b[39m   \u001b[36mconst\u001b[39m response \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(path\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                              ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  84 |\u001b[39m     waitUntil\u001b[33m:\u001b[39m \u001b[32m'domcontentloaded'\u001b[39m\u001b[33m,\u001b[39m"},{"title":"Evaluate","startTime":"2026-07-21T11:13:16.999Z","duration":140,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":28,"column":6},"count":1,"skipped":false,"snippet":" \u001b[90m  27 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  28 |\u001b[39m     \u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  29 |\u001b[39m       \u001b[36mtry\u001b[39m {"},{"title":"Wait for function","startTime":"2026-07-21T11:13:17.143Z","duration":162,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":47,"column":14},"count":1,"skipped":false,"snippet":" \u001b[90m  46 |\u001b[39m\n \u001b[90m  47 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForFunction(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  48 |\u001b[39m     () \u001b[33m=>\u001b[39m {"},{"title":"Wait for function","startTime":"2026-07-21T11:13:17.307Z","duration":69,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":56,"column":6},"count":1,"skipped":false,"snippet":" \u001b[90m  55 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  56 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(() \u001b[33m=>\u001b[39m \u001b[33m!\u001b[39mdocument\u001b[33m.\u001b[39mgetElementById(\u001b[32m'seo-fallback'\u001b[39m)\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  57 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[35m10\u001b[39m_000\u001b[33m,\u001b[39m"},{"title":"Fill \"e2e-mixed-buyer-1784632390619-66ec594bf26ab@example.com\" locator('input[name=\"email-login\"], input[type=\"email\"]').first()","startTime":"2026-07-21T11:13:17.384Z","duration":218,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":103,"column":20},"count":1,"skipped":false,"snippet":" \u001b[90m 102 |\u001b[39m   \u001b[36mconst\u001b[39m emailInput \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'input[name=\"email-login\"], input[type=\"email\"]'\u001b[39m)\u001b[33m.\u001b[39mfirst()\u001b[33m;\u001b[39m\n \u001b[90m 103 |\u001b[39m   \u001b[36mawait\u001b[39m emailInput\u001b[33m.\u001b[39mfill(email)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                   ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 104 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'#password-login'\u001b[39m)\u001b[33m.\u001b[39mfill(password)\u001b[33m;\u001b[39m"},{"title":"Fill \"E2eTestPass1!\" locator('#password-login')","startTime":"2026-07-21T11:13:17.607Z","duration":96,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":104,"column":41},"count":1,"skipped":false,"snippet":" \u001b[90m 103 |\u001b[39m   \u001b[36mawait\u001b[39m emailInput\u001b[33m.\u001b[39mfill(email)\u001b[33m;\u001b[39m\n \u001b[90m 104 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'#password-login'\u001b[39m)\u001b[33m.\u001b[39mfill(password)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                                        ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 105 |\u001b[39m   \u001b[36mawait\u001b[39m page"},{"title":"Click locator('form').filter({ has: locator('#password-login') }).locator('button[type=\"submit\"]')","startTime":"2026-07-21T11:13:17.706Z","duration":1043,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":109,"column":6},"count":1,"skipped":false,"snippet":" \u001b[90m 108 |\u001b[39m     \u001b[33m.\u001b[39mlocator(\u001b[32m'button[type=\"submit\"]'\u001b[39m)\n \u001b[90m 109 |\u001b[39m     \u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 110 |\u001b[39m"},{"title":"Wait for navigation","startTime":"2026-07-21T11:13:18.752Z","duration":1767,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":112,"column":16},"count":1,"skipped":false,"snippet":" \u001b[90m 111 |\u001b[39m   \u001b[36mtry\u001b[39m {\n \u001b[90m 112 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForURL(\u001b[35m/\\/(dashboard|marketplace|account|admin)/\u001b[39m\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m               ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 113 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[33mE2E_TEST_CONFIG\u001b[39m\u001b[33m.\u001b[39mauthTimeout\u001b[33m,\u001b[39m"},{"title":"Evaluate","startTime":"2026-07-21T11:13:20.522Z","duration":25,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":28,"column":6},"count":1,"skipped":false,"snippet":" \u001b[90m  27 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  28 |\u001b[39m     \u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  29 |\u001b[39m       \u001b[36mtry\u001b[39m {"},{"title":"Wait for function","startTime":"2026-07-21T11:13:20.548Z","duration":8,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":47,"column":14},"count":1,"skipped":false,"snippet":" \u001b[90m  46 |\u001b[39m\n \u001b[90m  47 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForFunction(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  48 |\u001b[39m     () \u001b[33m=>\u001b[39m {"},{"title":"Wait for function","startTime":"2026-07-21T11:13:20.558Z","duration":5,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":56,"column":6},"count":1,"skipped":false,"snippet":" \u001b[90m  55 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  56 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(() \u001b[33m=>\u001b[39m \u001b[33m!\u001b[39mdocument\u001b[33m.\u001b[39mgetElementById(\u001b[32m'seo-fallback'\u001b[39m)\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  57 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[35m10\u001b[39m_000\u001b[33m,\u001b[39m"},{"title":"Evaluate","startTime":"2026-07-21T11:13:20.564Z","duration":3,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":28,"column":6},"count":1,"skipped":false,"snippet":" \u001b[90m  27 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  28 |\u001b[39m     \u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  29 |\u001b[39m       \u001b[36mtry\u001b[39m {"},{"title":"Wait for function","startTime":"2026-07-21T11:13:20.568Z","duration":4,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":47,"column":14},"count":1,"skipped":false,"snippet":" \u001b[90m  46 |\u001b[39m\n \u001b[90m  47 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForFunction(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  48 |\u001b[39m     () \u001b[33m=>\u001b[39m {"},{"title":"Wait for function","startTime":"2026-07-21T11:13:20.573Z","duration":4,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":56,"column":6},"count":1,"skipped":false,"snippet":" \u001b[90m  55 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  56 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(() \u001b[33m=>\u001b[39m \u001b[33m!\u001b[39mdocument\u001b[33m.\u001b[39mgetElementById(\u001b[32m'seo-fallback'\u001b[39m)\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  57 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[35m10\u001b[39m_000\u001b[33m,\u001b[39m"},{"title":"Wait for function","startTime":"2026-07-21T11:13:20.578Z","duration":20004,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":65,"column":6},"error":"TimeoutError: page.waitForFunction: Timeout 20000ms exceeded.","count":1,"skipped":false,"snippet":" \u001b[90m  64 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  65 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  66 |\u001b[39m       () \u001b[33m=>\u001b[39m {"},{"title":"Navigate to \"/service/8730ccf3-6e42-4c56-94c5-ef1e4cb03c39\"","startTime":"2026-07-21T11:13:40.583Z","duration":1612,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":83,"column":31},"count":1,"skipped":false,"snippet":" \u001b[90m  82 |\u001b[39m )\u001b[33m:\u001b[39m \u001b[33mPromise\u001b[39m\u001b[33m<\u001b[39m\u001b[36mimport\u001b[39m(\u001b[32m'@playwright/test'\u001b[39m)\u001b[33m.\u001b[39m\u001b[33mResponse\u001b[39m \u001b[33m|\u001b[39m \u001b[36mnull\u001b[39m\u001b[33m>\u001b[39m {\n \u001b[90m  83 |\u001b[39m   \u001b[36mconst\u001b[39m response \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(path\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                              ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  84 |\u001b[39m     waitUntil\u001b[33m:\u001b[39m \u001b[32m'domcontentloaded'\u001b[39m\u001b[33m,\u001b[39m"},{"title":"Evaluate","startTime":"2026-07-21T11:13:42.198Z","duration":182,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":28,"column":6},"count":1,"skipped":false,"snippet":" \u001b[90m  27 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  28 |\u001b[39m     \u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  29 |\u001b[39m       \u001b[36mtry\u001b[39m {"},{"title":"Wait for function","startTime":"2026-07-21T11:13:42.384Z","duration":253,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":47,"column":14},"count":1,"skipped":false,"snippet":" \u001b[90m  46 |\u001b[39m\n \u001b[90m  47 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForFunction(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  48 |\u001b[39m     () \u001b[33m=>\u001b[39m {"},{"title":"Wait for function","startTime":"2026-07-21T11:13:42.638Z","duration":115,"steps":[],"attachments":[],"location":{"file":"shared/e2e-test-config.ts","line":56,"column":6},"count":1,"skipped":false,"snippet":" \u001b[90m  55 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  56 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(() \u001b[33m=>\u001b[39m \u001b[33m!\u001b[39mdocument\u001b[33m.\u001b[39mgetElementById(\u001b[32m'seo-fallback'\u001b[39m)\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  57 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[35m10\u001b[39m_000\u001b[33m,\u001b[39m"},{"title":"Expect \"toHaveCount\" getByText(/Service non trouvé/i)","startTime":"2026-07-21T11:13:42.757Z","duration":87,"steps":[],"attachments":[],"location":{"file":"mixed-cart-book-pay-confirm.spec.ts","line":63,"column":59},"count":1,"skipped":false,"snippet":" \u001b[90m  62 |\u001b[39m\n \u001b[90m  63 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByText(\u001b[35m/Service non trouvé/i\u001b[39m))\u001b[33m.\u001b[39mtoHaveCount(\u001b[35m0\u001b[39m\u001b[33m,\u001b[39m { timeout\u001b[33m:\u001b[39m \u001b[35m5\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                                                          ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  64 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { level\u001b[33m:\u001b[39m \u001b[35m1\u001b[39m }))\u001b[33m.\u001b[39mtoContainText("},{"title":"Expect \"toContainText\" getByRole('heading', { level: 1 })","startTime":"2026-07-21T11:13:42.852Z","duration":2934,"steps":[],"attachments":[],"location":{"file":"mixed-cart-book-pay-confirm.spec.ts","line":64,"column":61},"count":1,"skipped":false,"snippet":" \u001b[90m  63 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByText(\u001b[35m/Service non trouvé/i\u001b[39m))\u001b[33m.\u001b[39mtoHaveCount(\u001b[35m0\u001b[39m\u001b[33m,\u001b[39m { timeout\u001b[33m:\u001b[39m \u001b[35m5\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m  64 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { level\u001b[33m:\u001b[39m \u001b[35m1\u001b[39m }))\u001b[33m.\u001b[39mtoContainText(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                                                            ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  65 |\u001b[39m         fixture\u001b[33m.\u001b[39mserviceProduct\u001b[33m.\u001b[39mname\u001b[33m,\u001b[39m"},{"title":"Evaluate","startTime":"2026-07-21T11:13:45.798Z","duration":8,"steps":[],"attachments":[],"location":{"file":"helpers/store-theme-helpers.ts","line":243,"column":14},"count":1,"skipped":false,"snippet":" \u001b[90m 242 |\u001b[39m \u001b[36mexport\u001b[39m \u001b[36masync\u001b[39m \u001b[36mfunction\u001b[39m dismissCookieBannerIfVisible(page\u001b[33m:\u001b[39m \u001b[33mPage\u001b[39m)\u001b[33m:\u001b[39m \u001b[33mPromise\u001b[39m\u001b[33m<\u001b[39m\u001b[36mvoid\u001b[39m\u001b[33m>\u001b[39m {\n \u001b[90m 243 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 244 |\u001b[39m     document\u001b[33m.\u001b[39mcookie \u001b[33m=\u001b[39m \u001b[32m'emarzona_consent=true; path=/; max-age=31536000; SameSite=Lax'\u001b[39m\u001b[33m;\u001b[39m"},{"title":"Expect \"toBeVisible\" getByTestId('service-quick-days')","startTime":"2026-07-21T11:13:45.816Z","duration":9,"steps":[],"attachments":[],"location":{"file":"helpers/service-booking-ui.ts","line":18,"column":27},"count":1,"skipped":false,"snippet":" \u001b[90m 17 |\u001b[39m   \u001b[36mconst\u001b[39m quickDays \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'service-quick-days'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 18 |\u001b[39m   \u001b[36mawait\u001b[39m expect(quickDays)\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m45\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m \u001b[31m\u001b[1m                          ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 19 |\u001b[39m"},{"title":"Click getByTestId('service-quick-day-2026-07-22')","startTime":"2026-07-21T11:13:45.837Z","duration":68,"steps":[],"attachments":[],"location":{"file":"helpers/service-booking-ui.ts","line":23,"column":22},"count":1,"skipped":false,"snippet":" \u001b[90m 22 |\u001b[39m     \u001b[36mif\u001b[39m (\u001b[36mawait\u001b[39m specific\u001b[33m.\u001b[39misVisible()\u001b[33m.\u001b[39m\u001b[36mcatch\u001b[39m(() \u001b[33m=>\u001b[39m \u001b[36mfalse\u001b[39m)) {\n \u001b[90m 23 |\u001b[39m       \u001b[36mawait\u001b[39m specific\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m \u001b[31m\u001b[1m                     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 24 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'[data-testid^=\"time-slot-\"]'\u001b[39m)\u001b[33m.\u001b[39mfirst())\u001b[33m.\u001b[39mtoBeVisible({"},{"title":"Expect \"toBeVisible\" locator('[data-testid^=\"time-slot-\"]').first()","startTime":"2026-07-21T11:13:45.907Z","duration":380,"steps":[],"attachments":[],"location":{"file":"helpers/service-booking-ui.ts","line":24,"column":73},"count":1,"skipped":false,"snippet":" \u001b[90m 23 |\u001b[39m       \u001b[36mawait\u001b[39m specific\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m 24 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'[data-testid^=\"time-slot-\"]'\u001b[39m)\u001b[33m.\u001b[39mfirst())\u001b[33m.\u001b[39mtoBeVisible({\n \u001b[90m    |\u001b[39m \u001b[31m\u001b[1m                                                                        ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 25 |\u001b[39m         timeout\u001b[33m:\u001b[39m \u001b[35m20\u001b[39m_000\u001b[33m,\u001b[39m"},{"title":"Evaluate","startTime":"2026-07-21T11:13:46.289Z","duration":9,"steps":[],"attachments":[],"location":{"file":"helpers/store-theme-helpers.ts","line":243,"column":14},"count":1,"skipped":false,"snippet":" \u001b[90m 242 |\u001b[39m \u001b[36mexport\u001b[39m \u001b[36masync\u001b[39m \u001b[36mfunction\u001b[39m dismissCookieBannerIfVisible(page\u001b[33m:\u001b[39m \u001b[33mPage\u001b[39m)\u001b[33m:\u001b[39m \u001b[33mPromise\u001b[39m\u001b[33m<\u001b[39m\u001b[36mvoid\u001b[39m\u001b[33m>\u001b[39m {\n \u001b[90m 243 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 244 |\u001b[39m     document\u001b[33m.\u001b[39mcookie \u001b[33m=\u001b[39m \u001b[32m'emarzona_consent=true; path=/; max-age=31536000; SameSite=Lax'\u001b[39m\u001b[33m;\u001b[39m"},{"title":"Expect \"toBeVisible\" locator('[data-testid^=\"time-slot-\"]').first()","startTime":"2026-07-21T11:13:46.317Z","duration":15,"steps":[],"attachments":[],"location":{"file":"helpers/service-booking-ui.ts","line":40,"column":22},"count":1,"skipped":false,"snippet":" \u001b[90m 39 |\u001b[39m   \u001b[36mconst\u001b[39m slot \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'[data-testid^=\"time-slot-\"]'\u001b[39m)\u001b[33m.\u001b[39mfirst()\u001b[33m;\u001b[39m\n \u001b[90m 40 |\u001b[39m   \u001b[36mawait\u001b[39m expect(slot)\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m15\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m \u001b[31m\u001b[1m                     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 41 |\u001b[39m   \u001b[36mawait\u001b[39m slot\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m"},{"title":"Click locator('[data-testid^=\"time-slot-\"]').first()","startTime":"2026-07-21T11:13:46.333Z","duration":86,"steps":[],"attachments":[],"location":{"file":"helpers/service-booking-ui.ts","line":41,"column":14},"count":1,"skipped":false,"snippet":" \u001b[90m 40 |\u001b[39m   \u001b[36mawait\u001b[39m expect(slot)\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m15\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m 41 |\u001b[39m   \u001b[36mawait\u001b[39m slot\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 42 |\u001b[39m }"},{"title":"Expect \"toBeVisible\" getByText(/Créneau disponible/i)","startTime":"2026-07-21T11:13:46.421Z","duration":28,"steps":[],"attachments":[],"location":{"file":"mixed-cart-book-pay-confirm.spec.ts","line":75,"column":59},"count":1,"skipped":false,"snippet":" \u001b[90m  74 |\u001b[39m\n \u001b[90m  75 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByText(\u001b[35m/Créneau disponible/i\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m20\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                                                          ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  76 |\u001b[39m"},{"title":"Expect \"toBeEnabled\" getByTestId('service-add-to-cart')","startTime":"2026-07-21T11:13:46.450Z","duration":20,"steps":[],"attachments":[],"location":{"file":"mixed-cart-book-pay-confirm.spec.ts","line":78,"column":31},"count":1,"skipped":false,"snippet":" \u001b[90m  77 |\u001b[39m       \u001b[36mconst\u001b[39m addToCart \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'service-add-to-cart'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m  78 |\u001b[39m       \u001b[36mawait\u001b[39m expect(addToCart)\u001b[33m.\u001b[39mtoBeEnabled({ timeout\u001b[33m:\u001b[39m \u001b[35m20\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                              ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  79 |\u001b[39m       \u001b[36mawait\u001b[39m dismissCookieBannerIfVisible(page)\u001b[33m;\u001b[39m"},{"title":"Evaluate","startTime":"2026-07-21T11:13:46.471Z","duration":15,"steps":[],"attachments":[],"location":{"file":"helpers/store-theme-helpers.ts","line":243,"column":14},"count":1,"skipped":false,"snippet":" \u001b[90m 242 |\u001b[39m \u001b[36mexport\u001b[39m \u001b[36masync\u001b[39m \u001b[36mfunction\u001b[39m dismissCookieBannerIfVisible(page\u001b[33m:\u001b[39m \u001b[33mPage\u001b[39m)\u001b[33m:\u001b[39m \u001b[33mPromise\u001b[39m\u001b[33m<\u001b[39m\u001b[36mvoid\u001b[39m\u001b[33m>\u001b[39m {\n \u001b[90m 243 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 244 |\u001b[39m     document\u001b[33m.\u001b[39mcookie \u001b[33m=\u001b[39m \u001b[32m'emarzona_consent=true; path=/; max-age=31536000; SameSite=Lax'\u001b[39m\u001b[33m;\u001b[39m"},{"title":"Wait for event \"response\"","startTime":"2026-07-21T11:13:46.502Z","duration":2025,"steps":[],"attachments":[],"location":{"file":"mixed-cart-book-pay-confirm.spec.ts","line":85,"column":31},"count":1,"skipped":false,"snippet":" \u001b[90m  84 |\u001b[39m\n \u001b[90m  85 |\u001b[39m       \u001b[36mconst\u001b[39m reserveRpc \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mwaitForResponse(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                              ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  86 |\u001b[39m         response \u001b[33m=>\u001b[39m"},{"title":"Wait for event \"response\"","startTime":"2026-07-21T11:13:46.503Z","duration":45002,"steps":[],"attachments":[],"location":{"file":"mixed-cart-book-pay-confirm.spec.ts","line":91,"column":31},"error":"TimeoutError: page.waitForResponse: Timeout 45000ms exceeded while waiting for event \"response\"","count":1,"skipped":false,"snippet":" \u001b[90m  90 |\u001b[39m       )\u001b[33m;\u001b[39m\n \u001b[90m  91 |\u001b[39m       \u001b[36mconst\u001b[39m cartInsert \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mwaitForResponse(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                              ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  92 |\u001b[39m         response \u001b[33m=>\u001b[39m"},{"title":"Click getByTestId('service-add-to-cart')","startTime":"2026-07-21T11:13:46.504Z","duration":98,"steps":[],"attachments":[],"location":{"file":"mixed-cart-book-pay-confirm.spec.ts","line":97,"column":23},"count":1,"skipped":false,"snippet":" \u001b[90m  96 |\u001b[39m\n \u001b[90m  97 |\u001b[39m       \u001b[36mawait\u001b[39m addToCart\u001b[33m.\u001b[39mclick({ timeout\u001b[33m:\u001b[39m \u001b[35m15\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                      ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  98 |\u001b[39m"},{"title":"Wait for navigation","startTime":"2026-07-21T11:14:31.507Z","duration":45000,"steps":[],"attachments":[],"location":{"file":"mixed-cart-book-pay-confirm.spec.ts","line":120,"column":10},"error":"TimeoutError: page.waitForURL: Timeout 45000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation until \"load\"\n============================================================","count":1,"skipped":false,"snippet":" \u001b[90m 119 |\u001b[39m       \u001b[36mconst\u001b[39m navigated \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\n \u001b[90m 120 |\u001b[39m         \u001b[33m.\u001b[39mwaitForURL(\u001b[35m/\\/cart/\u001b[39m\u001b[33m,\u001b[39m { timeout\u001b[33m:\u001b[39m \u001b[35m45\u001b[39m_000 })\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m         ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 121 |\u001b[39m         \u001b[33m.\u001b[39mthen(() \u001b[33m=>\u001b[39m \u001b[36mtrue\u001b[39m)"},{"title":"After Hooks","startTime":"2026-07-21T11:15:21.731Z","duration":1865,"steps":[{"title":"Fixture \"page\"","startTime":"2026-07-21T11:15:21.732Z","duration":0,"steps":[],"attachments":[],"count":1,"skipped":false},{"title":"Fixture \"context\"","startTime":"2026-07-21T11:15:21.732Z","duration":1857,"steps":[{"title":"Close context","startTime":"2026-07-21T11:15:23.577Z","duration":12,"steps":[],"attachments":[],"count":1,"skipped":false}],"attachments":[],"count":1,"skipped":false}],"attachments":[],"count":1,"skipped":false},{"title":"Worker Cleanup","startTime":"2026-07-21T11:15:23.596Z","duration":22,"steps":[{"title":"Fixture \"browser\"","startTime":"2026-07-21T11:15:23.597Z","duration":19,"steps":[],"attachments":[],"count":1,"skipped":false}],"attachments":[],"count":1,"skipped":false}],"errors":[{"message":"Error: Expected /cart after add-to-cart. toast=Ajouter au panier page=Aller au contenu principal\nRetour en haut\nRetour\nE2E Service 1784632390619-66ec594bf26ab\nDétails du service\n\nDurée\n\n60 minutes\n\nParticipants\n\nJusqu'à 5 personnes\n\nType\n\nGroupe\n\nDescription\nÉquipe\nAvis\nÀ propos de ce service\nService E2E panier mixte\nDétails du service\n\nDurée\n\n60 minutes\n\nParticipants\n\n1 - 5 personnes\n\nLieu\n\nSur site\n\nType\n\nappointment\n\nRéserver\n5,000 XOF\n\nPrix par personne\n\nStandard\nAchat unique\nPaiement complet\nNombre de participants\n-\n1\n+\nSélectionnez une date\nDisponibilités\nAujourd'hui\n\nProchains jours disponibles\n\nmar. 21 juil.\nmer. 22 juil.\njeu. 23 juil.\nven. 24 juil.\nsam. 25 juil.\ndim. 26 juil.\nlun. 27 juil.\nmar. 28 juil.\nAujourd'huiPrécédentSuivant\nJuly 20 – 26\nMoisSemaineJourAgenda\n20 Mon\n21 Tue\n22 Wed\n23 Thu\n24 Fri\n25 Sat\n26 Sun\n8:00 AM\n9:00 AM\n10:00 AM\n11:00 AM\n12\n\n  137 |               .catch(() => '')\n  138 |           ).slice(0, 800);\n> 139 |           throw new Error(\n      |                 ^\n  140 |             `Expected /cart after add-to-cart. toast=${errText || '(none)'} page=${bodySnippet}`\n  141 |           );\n  142 |         }\n    at /home/runner/work/emarzona/emarzona/tests/e2e/mixed-cart-book-pay-confirm.spec.ts:139:17","codeframe":"   39 |     if (process.env.CI) throw new Error(message);\n   40 |     test.skip(true, message);\n   41 |   });\n   42 |\n   43 |   test('service booking to cart, add physical, checkout and confirm booking', async ({\n   44 |     page,\n   45 |   }, testInfo) => {\n   46 |     const admin = createNodeSupabaseClient(supabaseUrl!, supabaseServiceKey!);\n   47 |     const runId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;\n   48 |     const fixture = await seedMixedCartFixture(admin, runId);\n   49 |     let bookingId: string | undefined;\n   50 |     let orderId: string | undefined;\n   51 |\n   52 |     try {\n   53 |       await loginAsSeededUser(\n   54 |         page,\n   55 |         admin,\n   56 |         fixture.buyer.email,\n   57 |         '/dashboard',\n   58 |         fixture.buyer.password\n   59 |       );\n   60 |       await waitForVendorStoreReady(page);\n   61 |       await gotoApp(page, `/service/${fixture.serviceProduct.id}`);\n   62 |\n   63 |       await expect(page.getByText(/Service non trouvé/i)).toHaveCount(0, { timeout: 5_000 });\n   64 |       await expect(page.getByRole('heading', { level: 1 })).toContainText(\n   65 |         fixture.serviceProduct.name,\n   66 |         {\n   67 |           timeout: 30_000,\n   68 |         }\n   69 |       );\n   70 |\n   71 |       const { date } = tomorrowAt10();\n   72 |       await selectServiceCalendarDay(page, date);\n   73 |       await selectFirstAvailableTimeSlot(page);\n   74 |\n   75 |       await expect(page.getByText(/Créneau disponible/i)).toBeVisible({ timeout: 20_000 });\n   76 |\n   77 |       const addToCart = page.getByTestId('service-add-to-cart');\n   78 |       await expect(addToCart).toBeEnabled({ timeout: 20_000 });\n   79 |       await dismissCookieBannerIfVisible(page);\n   80 |\n   81 |       const bookingError = page.getByText(\n   82 |         /Erreur de réservation|Réservation impossible|Authentification requise|Impossible de finaliser|Délai dépassé|Date invalide|Sélection incomplète|Compléments manquants|créneau n'est pas disponible|identifiant de créneau|ajouter au panier|Produit non trouvé/i\n   83 |       );\n   84 |\n   85 |       const reserveRpc = page.waitForResponse(\n   86 |         response =>\n   87 |           response.url().includes('/rest/v1/rpc/reserve_service_booking') &&\n   88 |           response.request().method() === 'POST',\n   89 |         { timeout: 45_000 }\n   90 |       );\n   91 |       const cartInsert = page.waitForResponse(\n   92 |         response =>\n   93 |           response.url().includes('/rest/v1/cart_items') && response.request().method() === 'POST',\n   94 |         { timeout: 45_000 }\n   95 |       );\n   96 |\n   97 |       await addToCart.click({ timeout: 15_000 });\n   98 |\n   99 |       const rpcResponse = await reserveRpc.catch(() => null);\n  100 |       if (rpcResponse && (rpcResponse.status() < 200 || rpcResponse.status() >= 300)) {\n  101 |         const body = await rpcResponse.text().catch(() => '');\n  102 |         throw new Error(\n  103 |           `reserve_service_booking failed (${rpcResponse.status()}): ${body.slice(0, 400)}`\n  104 |         );\n  105 |       }\n  106 |       if (!rpcResponse) {\n  107 |         const errText = (await bookingError.textContent().catch(() => null)) ?? '';\n  108 |         throw new Error(`reserve_service_booking RPC was not called. toast=${errText || '(none)'}`);\n  109 |       }\n  110 |\n  111 |       const cartResponse = await cartInsert.catch(() => null);\n  112 |       if (cartResponse && (cartResponse.status() < 200 || cartResponse.status() >= 300)) {\n  113 |         const body = await cartResponse.text().catch(() => '');\n  114 |         throw new Error(\n  115 |           `cart_items insert failed (${cartResponse.status()}): ${body.slice(0, 400)}`\n  116 |         );\n  117 |       }\n  118 |\n  119 |       const navigated = await page\n  120 |         .waitForURL(/\\/cart/, { timeout: 45_000 })\n  121 |         .then(() => true)\n  122 |         .catch(() => false);\n  123 |       if (!navigated) {\n  124 |         const errText = (await bookingError.textContent().catch(() => null)) ?? '';\n  125 |         const successToast = await page\n  126 |           .getByText(/Service ajouté au panier|Ajouté au panier/i)\n  127 |           .first()\n  128 |           .isVisible()\n  129 |           .catch(() => false);\n  130 |         if (successToast) {\n  131 |           await gotoApp(page, '/cart');\n  132 |         } else {\n  133 |           const bodySnippet = (\n  134 |             await page\n  135 |               .locator('body')\n  136 |               .innerText()\n  137 |               .catch(() => '')\n  138 |           ).slice(0, 800);\n> 139 |           throw new Error(\n      |                 ^ Error: Expected /cart after add-to-cart. toast=Ajouter au panier page=Aller au contenu principal\n  140 |             `Expected /cart after add-to-cart. toast=${errText || '(none)'} page=${bodySnippet}`\n  141 |           );\n  142 |         }\n  143 |       }\n  144 |       await expect(page.getByText(fixture.serviceProduct.name)).toBeVisible({ timeout: 10_000 });\n  145 |\n  146 |       await gotoApp(page, `/physical/${fixture.physicalProduct.id}`);\n  147 |       await expect(page.getByRole('heading', { level: 1 })).toContainText(\n  148 |         fixture.physicalProduct.name,\n  149 |         { timeout: 15_000 }\n  150 |       );\n  151 |\n  152 |       const addPhysical = page.getByRole('button', { name: /ajouter au panier/i });\n  153 |       await expect(addPhysical).toBeEnabled({ timeout: 10_000 });\n  154 |       await addPhysical.click();\n  155 |\n  156 |       await gotoApp(page, '/cart');\n  157 |       await expect(page.getByText(fixture.physicalProduct.name)).toBeVisible({ timeout: 10_000 });\n  158 |\n  159 |       await page\n  160 |         .getByRole('link', { name: /passer au paiement|checkout|commander/i })\n  161 |         .first()\n  162 |         .click();\n  163 |       await page.waitForURL(/\\/checkout/, { timeout: 30_000 });\n  164 |\n  165 |       const firstName = page\n  166 |         .locator('[data-testid=\"checkout-firstname\"], input[name=\"firstName\"]')\n  167 |         .first();\n  168 |       const lastName = page\n  169 |         .locator('[data-testid=\"checkout-lastname\"], input[name=\"lastName\"]')\n  170 |         .first();\n  171 |       const email = page.locator('[data-testid=\"checkout-email\"], input[name=\"email\"]').first();\n  172 |       const phone = page.locator('[data-testid=\"checkout-phone\"], input[name=\"phone\"]').first();\n  173 |\n  174 |       await firstName.fill('E2E');\n  175 |       await lastName.fill('Buyer');\n  176 |       await email.fill(fixture.buyer.email);\n  177 |       await phone.fill('+22670123456');\n  178 |\n  179 |       const address = page.locator('input[name=\"address\"]').first();\n  180 |       if (await address.isVisible().catch(() => false)) {\n  181 |         await address.fill('123 Rue Test');\n  182 |         await page.locator('input[name=\"city\"]').first().fill('Ouagadougou');\n  183 |         await page.locator('input[name=\"country\"]').first().fill('Burkina Faso');\n  184 |       }\n  185 |\n  186 |       const submit = page.locator('[data-testid=\"checkout-submit\"]').first();\n  187 |       await expect(submit).toBeVisible({ timeout: 10_000 });\n  188 |       await submit.click();\n  189 |\n  190 |       await page.waitForURL(/\\/checkout/, { timeout: 45_000 });\n  191 |\n  192 |       const { data: bookings } = await admin\n  193 |         .from('service_bookings')\n  194 |         .select('id, status')\n  195 |         .eq('product_id', fixture.serviceProduct.id)\n  196 |         .eq('user_id', fixture.buyer.id)\n  197 |         .order('created_at', { ascending: false })\n  198 |         .limit(1);\n  199 |\n  200 |       bookingId = bookings?.[0]?.id;\n  201 |       expect(bookingId).toBeTruthy();\n  202 |\n  203 |       const { data: orders } = await admin\n  204 |         .from('orders')\n  205 |         .select('id, status, payment_status')\n  206 |         .eq('store_id', fixture.store.id)\n  207 |         .order('created_at', { ascending: false })\n  208 |         .limit(1);\n  209 |\n  210 |       orderId = orders?.[0]?.id;\n  211 |       expect(orderId).toBeTruthy();\n  212 |\n  213 |       await simulateMixedCartPayment(admin, orderId!, bookingId!);\n  214 |       await assertServiceBookingStatus(admin, bookingId!, 'confirmed');\n  215 |     } finally {\n  216 |       try {\n  217 |         await Promise.race([\n  218 |           cleanupMixedCartFixture(admin, fixture),\n  219 |           new Promise((_, reject) =>\n  220 |             setTimeout(() => reject(new Error('cleanupMixedCartFixture timeout')), 30_000)\n  221 |           ),\n  222 |         ]);\n  223 |       } catch (e) {\n  224 |         testInfo.attach('cleanup-error', { body: String(e), contentType: 'text/plain' });\n  225 |       }\n  226 |     }\n  227 |   });\n  228 | });\n  229 |\n  230 | //"}],"status":"failed","annotations":[],"attachments":[{"name":"error-context","contentType":"text/markdown","path":"data/506f76bfb14e61e768f08e75c4b02eceb381ff32.md"},{"name":"trace","contentType":"application/zip","path":"data/a060816b678d4608c6c47f9a51704eb2cbac855a.zip"}]}],"ok":false}]}
+{
+  "fileId": "806bfd16ad72419c32f1",
+  "fileName": "mixed-cart-book-pay-confirm.spec.ts",
+  "tests": [
+    {
+      "testId": "806bfd16ad72419c32f1-22717e210cbf23ecfc6b",
+      "title": "service booking to cart, add physical, checkout and confirm booking",
+      "projectName": "chromium",
+      "location": { "file": "mixed-cart-book-pay-confirm.spec.ts", "line": 43, "column": 3 },
+      "duration": 261630,
+      "annotations": [],
+      "tags": [],
+      "outcome": "unexpected",
+      "path": ["Mixed cart book → pay → confirm (E2E)"],
+      "results": [
+        {
+          "duration": 128542,
+          "startTime": "2026-07-21T11:11:00.731Z",
+          "retry": 0,
+          "steps": [
+            {
+              "title": "Before Hooks",
+              "startTime": "2026-07-21T11:11:00.733Z",
+              "duration": 132,
+              "steps": [
+                {
+                  "title": "beforeAll hook",
+                  "startTime": "2026-07-21T11:11:00.733Z",
+                  "duration": 22,
+                  "steps": [],
+                  "attachments": [],
+                  "location": {
+                    "file": "mixed-cart-book-pay-confirm.spec.ts",
+                    "line": 32,
+                    "column": 8
+                  },
+                  "count": 1,
+                  "skipped": false,
+                  "snippet": " \u001b[90m  31 |\u001b[39m\n \u001b[90m  32 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeAll(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m       ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  33 |\u001b[39m     \u001b[36mif\u001b[39m (canRun) {"
+                },
+                {
+                  "title": "Fixture \"context\"",
+                  "startTime": "2026-07-21T11:11:00.762Z",
+                  "duration": 76,
+                  "steps": [
+                    {
+                      "title": "Create context",
+                      "startTime": "2026-07-21T11:11:00.776Z",
+                      "duration": 61,
+                      "steps": [],
+                      "attachments": [],
+                      "count": 1,
+                      "skipped": false
+                    }
+                  ],
+                  "attachments": [],
+                  "count": 1,
+                  "skipped": false
+                },
+                {
+                  "title": "Fixture \"page\"",
+                  "startTime": "2026-07-21T11:11:00.838Z",
+                  "duration": 27,
+                  "steps": [
+                    {
+                      "title": "Create page",
+                      "startTime": "2026-07-21T11:11:00.839Z",
+                      "duration": 26,
+                      "steps": [],
+                      "attachments": [],
+                      "count": 1,
+                      "skipped": false
+                    }
+                  ],
+                  "attachments": [],
+                  "count": 1,
+                  "skipped": false
+                }
+              ],
+              "attachments": [],
+              "count": 1,
+              "skipped": false
+            },
+            {
+              "title": "Navigate to \"/login\"",
+              "startTime": "2026-07-21T11:11:05.447Z",
+              "duration": 688,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 83, "column": 31 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  82 |\u001b[39m )\u001b[33m:\u001b[39m \u001b[33mPromise\u001b[39m\u001b[33m<\u001b[39m\u001b[36mimport\u001b[39m(\u001b[32m'@playwright/test'\u001b[39m)\u001b[33m.\u001b[39m\u001b[33mResponse\u001b[39m \u001b[33m|\u001b[39m \u001b[36mnull\u001b[39m\u001b[33m>\u001b[39m {\n \u001b[90m  83 |\u001b[39m   \u001b[36mconst\u001b[39m response \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(path\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                              ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  84 |\u001b[39m     waitUntil\u001b[33m:\u001b[39m \u001b[32m'domcontentloaded'\u001b[39m\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Evaluate",
+              "startTime": "2026-07-21T11:11:06.137Z",
+              "duration": 74,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 28, "column": 6 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  27 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  28 |\u001b[39m     \u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  29 |\u001b[39m       \u001b[36mtry\u001b[39m {"
+            },
+            {
+              "title": "Wait for function",
+              "startTime": "2026-07-21T11:11:06.212Z",
+              "duration": 64,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 47, "column": 14 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  46 |\u001b[39m\n \u001b[90m  47 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForFunction(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  48 |\u001b[39m     () \u001b[33m=>\u001b[39m {"
+            },
+            {
+              "title": "Wait for function",
+              "startTime": "2026-07-21T11:11:06.281Z",
+              "duration": 38,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 56, "column": 6 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  55 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  56 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(() \u001b[33m=>\u001b[39m \u001b[33m!\u001b[39mdocument\u001b[33m.\u001b[39mgetElementById(\u001b[32m'seo-fallback'\u001b[39m)\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  57 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[35m10\u001b[39m_000\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Fill \"e2e-mixed-buyer-1784632260868-dc5f914e36c3e@example.com\" locator('input[name=\"email-login\"], input[type=\"email\"]').first()",
+              "startTime": "2026-07-21T11:11:06.322Z",
+              "duration": 314,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 103, "column": 20 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 102 |\u001b[39m   \u001b[36mconst\u001b[39m emailInput \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'input[name=\"email-login\"], input[type=\"email\"]'\u001b[39m)\u001b[33m.\u001b[39mfirst()\u001b[33m;\u001b[39m\n \u001b[90m 103 |\u001b[39m   \u001b[36mawait\u001b[39m emailInput\u001b[33m.\u001b[39mfill(email)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                   ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 104 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'#password-login'\u001b[39m)\u001b[33m.\u001b[39mfill(password)\u001b[33m;\u001b[39m"
+            },
+            {
+              "title": "Fill \"E2eTestPass1!\" locator('#password-login')",
+              "startTime": "2026-07-21T11:11:06.638Z",
+              "duration": 119,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 104, "column": 41 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 103 |\u001b[39m   \u001b[36mawait\u001b[39m emailInput\u001b[33m.\u001b[39mfill(email)\u001b[33m;\u001b[39m\n \u001b[90m 104 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'#password-login'\u001b[39m)\u001b[33m.\u001b[39mfill(password)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                                        ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 105 |\u001b[39m   \u001b[36mawait\u001b[39m page"
+            },
+            {
+              "title": "Click locator('form').filter({ has: locator('#password-login') }).locator('button[type=\"submit\"]')",
+              "startTime": "2026-07-21T11:11:06.759Z",
+              "duration": 974,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 109, "column": 6 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 108 |\u001b[39m     \u001b[33m.\u001b[39mlocator(\u001b[32m'button[type=\"submit\"]'\u001b[39m)\n \u001b[90m 109 |\u001b[39m     \u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 110 |\u001b[39m"
+            },
+            {
+              "title": "Wait for navigation",
+              "startTime": "2026-07-21T11:11:07.735Z",
+              "duration": 1590,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 112, "column": 16 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 111 |\u001b[39m   \u001b[36mtry\u001b[39m {\n \u001b[90m 112 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForURL(\u001b[35m/\\/(dashboard|marketplace|account|admin)/\u001b[39m\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m               ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 113 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[33mE2E_TEST_CONFIG\u001b[39m\u001b[33m.\u001b[39mauthTimeout\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Evaluate",
+              "startTime": "2026-07-21T11:11:09.326Z",
+              "duration": 4,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 28, "column": 6 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  27 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  28 |\u001b[39m     \u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  29 |\u001b[39m       \u001b[36mtry\u001b[39m {"
+            },
+            {
+              "title": "Wait for function",
+              "startTime": "2026-07-21T11:11:09.332Z",
+              "duration": 7,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 47, "column": 14 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  46 |\u001b[39m\n \u001b[90m  47 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForFunction(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  48 |\u001b[39m     () \u001b[33m=>\u001b[39m {"
+            },
+            {
+              "title": "Wait for function",
+              "startTime": "2026-07-21T11:11:09.340Z",
+              "duration": 2,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 56, "column": 6 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  55 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  56 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(() \u001b[33m=>\u001b[39m \u001b[33m!\u001b[39mdocument\u001b[33m.\u001b[39mgetElementById(\u001b[32m'seo-fallback'\u001b[39m)\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  57 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[35m10\u001b[39m_000\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Evaluate",
+              "startTime": "2026-07-21T11:11:09.342Z",
+              "duration": 1,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 28, "column": 6 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  27 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  28 |\u001b[39m     \u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  29 |\u001b[39m       \u001b[36mtry\u001b[39m {"
+            },
+            {
+              "title": "Wait for function",
+              "startTime": "2026-07-21T11:11:09.344Z",
+              "duration": 3,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 47, "column": 14 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  46 |\u001b[39m\n \u001b[90m  47 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForFunction(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  48 |\u001b[39m     () \u001b[33m=>\u001b[39m {"
+            },
+            {
+              "title": "Wait for function",
+              "startTime": "2026-07-21T11:11:09.348Z",
+              "duration": 1,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 56, "column": 6 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  55 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  56 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(() \u001b[33m=>\u001b[39m \u001b[33m!\u001b[39mdocument\u001b[33m.\u001b[39mgetElementById(\u001b[32m'seo-fallback'\u001b[39m)\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  57 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[35m10\u001b[39m_000\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Wait for function",
+              "startTime": "2026-07-21T11:11:09.351Z",
+              "duration": 20000,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 65, "column": 6 },
+              "error": "TimeoutError: page.waitForFunction: Timeout 20000ms exceeded.",
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  64 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  65 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  66 |\u001b[39m       () \u001b[33m=>\u001b[39m {"
+            },
+            {
+              "title": "Navigate to \"/service/b2303b43-b6a2-4fcb-b6a1-3711012acd99\"",
+              "startTime": "2026-07-21T11:11:29.353Z",
+              "duration": 798,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 83, "column": 31 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  82 |\u001b[39m )\u001b[33m:\u001b[39m \u001b[33mPromise\u001b[39m\u001b[33m<\u001b[39m\u001b[36mimport\u001b[39m(\u001b[32m'@playwright/test'\u001b[39m)\u001b[33m.\u001b[39m\u001b[33mResponse\u001b[39m \u001b[33m|\u001b[39m \u001b[36mnull\u001b[39m\u001b[33m>\u001b[39m {\n \u001b[90m  83 |\u001b[39m   \u001b[36mconst\u001b[39m response \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(path\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                              ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  84 |\u001b[39m     waitUntil\u001b[33m:\u001b[39m \u001b[32m'domcontentloaded'\u001b[39m\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Evaluate",
+              "startTime": "2026-07-21T11:11:30.152Z",
+              "duration": 88,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 28, "column": 6 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  27 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  28 |\u001b[39m     \u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  29 |\u001b[39m       \u001b[36mtry\u001b[39m {"
+            },
+            {
+              "title": "Wait for function",
+              "startTime": "2026-07-21T11:11:30.241Z",
+              "duration": 67,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 47, "column": 14 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  46 |\u001b[39m\n \u001b[90m  47 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForFunction(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  48 |\u001b[39m     () \u001b[33m=>\u001b[39m {"
+            },
+            {
+              "title": "Wait for function",
+              "startTime": "2026-07-21T11:11:30.310Z",
+              "duration": 45,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 56, "column": 6 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  55 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  56 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(() \u001b[33m=>\u001b[39m \u001b[33m!\u001b[39mdocument\u001b[33m.\u001b[39mgetElementById(\u001b[32m'seo-fallback'\u001b[39m)\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  57 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[35m10\u001b[39m_000\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Expect \"toHaveCount\" getByText(/Service non trouvé/i)",
+              "startTime": "2026-07-21T11:11:30.358Z",
+              "duration": 78,
+              "steps": [],
+              "attachments": [],
+              "location": {
+                "file": "mixed-cart-book-pay-confirm.spec.ts",
+                "line": 63,
+                "column": 59
+              },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  62 |\u001b[39m\n \u001b[90m  63 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByText(\u001b[35m/Service non trouvé/i\u001b[39m))\u001b[33m.\u001b[39mtoHaveCount(\u001b[35m0\u001b[39m\u001b[33m,\u001b[39m { timeout\u001b[33m:\u001b[39m \u001b[35m5\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                                                          ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  64 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { level\u001b[33m:\u001b[39m \u001b[35m1\u001b[39m }))\u001b[33m.\u001b[39mtoContainText("
+            },
+            {
+              "title": "Expect \"toContainText\" getByRole('heading', { level: 1 })",
+              "startTime": "2026-07-21T11:11:30.438Z",
+              "duration": 1916,
+              "steps": [],
+              "attachments": [],
+              "location": {
+                "file": "mixed-cart-book-pay-confirm.spec.ts",
+                "line": 64,
+                "column": 61
+              },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  63 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByText(\u001b[35m/Service non trouvé/i\u001b[39m))\u001b[33m.\u001b[39mtoHaveCount(\u001b[35m0\u001b[39m\u001b[33m,\u001b[39m { timeout\u001b[33m:\u001b[39m \u001b[35m5\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m  64 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { level\u001b[33m:\u001b[39m \u001b[35m1\u001b[39m }))\u001b[33m.\u001b[39mtoContainText(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                                                            ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  65 |\u001b[39m         fixture\u001b[33m.\u001b[39mserviceProduct\u001b[33m.\u001b[39mname\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Evaluate",
+              "startTime": "2026-07-21T11:11:32.364Z",
+              "duration": 22,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "helpers/store-theme-helpers.ts", "line": 243, "column": 14 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 242 |\u001b[39m \u001b[36mexport\u001b[39m \u001b[36masync\u001b[39m \u001b[36mfunction\u001b[39m dismissCookieBannerIfVisible(page\u001b[33m:\u001b[39m \u001b[33mPage\u001b[39m)\u001b[33m:\u001b[39m \u001b[33mPromise\u001b[39m\u001b[33m<\u001b[39m\u001b[36mvoid\u001b[39m\u001b[33m>\u001b[39m {\n \u001b[90m 243 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 244 |\u001b[39m     document\u001b[33m.\u001b[39mcookie \u001b[33m=\u001b[39m \u001b[32m'emarzona_consent=true; path=/; max-age=31536000; SameSite=Lax'\u001b[39m\u001b[33m;\u001b[39m"
+            },
+            {
+              "title": "Expect \"toBeVisible\" getByTestId('service-quick-days')",
+              "startTime": "2026-07-21T11:11:32.402Z",
+              "duration": 860,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "helpers/service-booking-ui.ts", "line": 18, "column": 27 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 17 |\u001b[39m   \u001b[36mconst\u001b[39m quickDays \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'service-quick-days'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 18 |\u001b[39m   \u001b[36mawait\u001b[39m expect(quickDays)\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m45\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m \u001b[31m\u001b[1m                          ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 19 |\u001b[39m"
+            },
+            {
+              "title": "Click getByTestId('service-quick-day-2026-07-22')",
+              "startTime": "2026-07-21T11:11:33.264Z",
+              "duration": 67,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "helpers/service-booking-ui.ts", "line": 23, "column": 22 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 22 |\u001b[39m     \u001b[36mif\u001b[39m (\u001b[36mawait\u001b[39m specific\u001b[33m.\u001b[39misVisible()\u001b[33m.\u001b[39m\u001b[36mcatch\u001b[39m(() \u001b[33m=>\u001b[39m \u001b[36mfalse\u001b[39m)) {\n \u001b[90m 23 |\u001b[39m       \u001b[36mawait\u001b[39m specific\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m \u001b[31m\u001b[1m                     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 24 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'[data-testid^=\"time-slot-\"]'\u001b[39m)\u001b[33m.\u001b[39mfirst())\u001b[33m.\u001b[39mtoBeVisible({"
+            },
+            {
+              "title": "Expect \"toBeVisible\" locator('[data-testid^=\"time-slot-\"]').first()",
+              "startTime": "2026-07-21T11:11:33.331Z",
+              "duration": 357,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "helpers/service-booking-ui.ts", "line": 24, "column": 73 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 23 |\u001b[39m       \u001b[36mawait\u001b[39m specific\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m 24 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'[data-testid^=\"time-slot-\"]'\u001b[39m)\u001b[33m.\u001b[39mfirst())\u001b[33m.\u001b[39mtoBeVisible({\n \u001b[90m    |\u001b[39m \u001b[31m\u001b[1m                                                                        ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 25 |\u001b[39m         timeout\u001b[33m:\u001b[39m \u001b[35m20\u001b[39m_000\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Evaluate",
+              "startTime": "2026-07-21T11:11:33.689Z",
+              "duration": 1,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "helpers/store-theme-helpers.ts", "line": 243, "column": 14 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 242 |\u001b[39m \u001b[36mexport\u001b[39m \u001b[36masync\u001b[39m \u001b[36mfunction\u001b[39m dismissCookieBannerIfVisible(page\u001b[33m:\u001b[39m \u001b[33mPage\u001b[39m)\u001b[33m:\u001b[39m \u001b[33mPromise\u001b[39m\u001b[33m<\u001b[39m\u001b[36mvoid\u001b[39m\u001b[33m>\u001b[39m {\n \u001b[90m 243 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 244 |\u001b[39m     document\u001b[33m.\u001b[39mcookie \u001b[33m=\u001b[39m \u001b[32m'emarzona_consent=true; path=/; max-age=31536000; SameSite=Lax'\u001b[39m\u001b[33m;\u001b[39m"
+            },
+            {
+              "title": "Expect \"toBeVisible\" locator('[data-testid^=\"time-slot-\"]').first()",
+              "startTime": "2026-07-21T11:11:33.694Z",
+              "duration": 3,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "helpers/service-booking-ui.ts", "line": 40, "column": 22 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 39 |\u001b[39m   \u001b[36mconst\u001b[39m slot \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'[data-testid^=\"time-slot-\"]'\u001b[39m)\u001b[33m.\u001b[39mfirst()\u001b[33m;\u001b[39m\n \u001b[90m 40 |\u001b[39m   \u001b[36mawait\u001b[39m expect(slot)\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m15\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m \u001b[31m\u001b[1m                     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 41 |\u001b[39m   \u001b[36mawait\u001b[39m slot\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m"
+            },
+            {
+              "title": "Click locator('[data-testid^=\"time-slot-\"]').first()",
+              "startTime": "2026-07-21T11:11:33.697Z",
+              "duration": 59,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "helpers/service-booking-ui.ts", "line": 41, "column": 14 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 40 |\u001b[39m   \u001b[36mawait\u001b[39m expect(slot)\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m15\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m 41 |\u001b[39m   \u001b[36mawait\u001b[39m slot\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 42 |\u001b[39m }"
+            },
+            {
+              "title": "Expect \"toBeVisible\" getByText(/Créneau disponible/i)",
+              "startTime": "2026-07-21T11:11:33.757Z",
+              "duration": 6,
+              "steps": [],
+              "attachments": [],
+              "location": {
+                "file": "mixed-cart-book-pay-confirm.spec.ts",
+                "line": 75,
+                "column": 59
+              },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  74 |\u001b[39m\n \u001b[90m  75 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByText(\u001b[35m/Créneau disponible/i\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m20\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                                                          ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  76 |\u001b[39m"
+            },
+            {
+              "title": "Expect \"toBeEnabled\" getByTestId('service-add-to-cart')",
+              "startTime": "2026-07-21T11:11:33.764Z",
+              "duration": 6,
+              "steps": [],
+              "attachments": [],
+              "location": {
+                "file": "mixed-cart-book-pay-confirm.spec.ts",
+                "line": 78,
+                "column": 31
+              },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  77 |\u001b[39m       \u001b[36mconst\u001b[39m addToCart \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'service-add-to-cart'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m  78 |\u001b[39m       \u001b[36mawait\u001b[39m expect(addToCart)\u001b[33m.\u001b[39mtoBeEnabled({ timeout\u001b[33m:\u001b[39m \u001b[35m20\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                              ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  79 |\u001b[39m       \u001b[36mawait\u001b[39m dismissCookieBannerIfVisible(page)\u001b[33m;\u001b[39m"
+            },
+            {
+              "title": "Evaluate",
+              "startTime": "2026-07-21T11:11:33.771Z",
+              "duration": 1,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "helpers/store-theme-helpers.ts", "line": 243, "column": 14 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 242 |\u001b[39m \u001b[36mexport\u001b[39m \u001b[36masync\u001b[39m \u001b[36mfunction\u001b[39m dismissCookieBannerIfVisible(page\u001b[33m:\u001b[39m \u001b[33mPage\u001b[39m)\u001b[33m:\u001b[39m \u001b[33mPromise\u001b[39m\u001b[33m<\u001b[39m\u001b[36mvoid\u001b[39m\u001b[33m>\u001b[39m {\n \u001b[90m 243 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 244 |\u001b[39m     document\u001b[33m.\u001b[39mcookie \u001b[33m=\u001b[39m \u001b[32m'emarzona_consent=true; path=/; max-age=31536000; SameSite=Lax'\u001b[39m\u001b[33m;\u001b[39m"
+            },
+            {
+              "title": "Wait for event \"response\"",
+              "startTime": "2026-07-21T11:11:33.779Z",
+              "duration": 1796,
+              "steps": [],
+              "attachments": [],
+              "location": {
+                "file": "mixed-cart-book-pay-confirm.spec.ts",
+                "line": 85,
+                "column": 31
+              },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  84 |\u001b[39m\n \u001b[90m  85 |\u001b[39m       \u001b[36mconst\u001b[39m reserveRpc \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mwaitForResponse(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                              ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  86 |\u001b[39m         response \u001b[33m=>\u001b[39m"
+            },
+            {
+              "title": "Wait for event \"response\"",
+              "startTime": "2026-07-21T11:11:33.780Z",
+              "duration": 45001,
+              "steps": [],
+              "attachments": [],
+              "location": {
+                "file": "mixed-cart-book-pay-confirm.spec.ts",
+                "line": 91,
+                "column": 31
+              },
+              "error": "TimeoutError: page.waitForResponse: Timeout 45000ms exceeded while waiting for event \"response\"",
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  90 |\u001b[39m       )\u001b[33m;\u001b[39m\n \u001b[90m  91 |\u001b[39m       \u001b[36mconst\u001b[39m cartInsert \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mwaitForResponse(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                              ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  92 |\u001b[39m         response \u001b[33m=>\u001b[39m"
+            },
+            {
+              "title": "Click getByTestId('service-add-to-cart')",
+              "startTime": "2026-07-21T11:11:33.780Z",
+              "duration": 78,
+              "steps": [],
+              "attachments": [],
+              "location": {
+                "file": "mixed-cart-book-pay-confirm.spec.ts",
+                "line": 97,
+                "column": 23
+              },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  96 |\u001b[39m\n \u001b[90m  97 |\u001b[39m       \u001b[36mawait\u001b[39m addToCart\u001b[33m.\u001b[39mclick({ timeout\u001b[33m:\u001b[39m \u001b[35m15\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                      ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  98 |\u001b[39m"
+            },
+            {
+              "title": "Wait for navigation",
+              "startTime": "2026-07-21T11:12:18.783Z",
+              "duration": 45000,
+              "steps": [],
+              "attachments": [],
+              "location": {
+                "file": "mixed-cart-book-pay-confirm.spec.ts",
+                "line": 120,
+                "column": 10
+              },
+              "error": "TimeoutError: page.waitForURL: Timeout 45000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation until \"load\"\n============================================================",
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 119 |\u001b[39m       \u001b[36mconst\u001b[39m navigated \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\n \u001b[90m 120 |\u001b[39m         \u001b[33m.\u001b[39mwaitForURL(\u001b[35m/\\/cart/\u001b[39m\u001b[33m,\u001b[39m { timeout\u001b[33m:\u001b[39m \u001b[35m45\u001b[39m_000 })\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m         ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 121 |\u001b[39m         \u001b[33m.\u001b[39mthen(() \u001b[33m=>\u001b[39m \u001b[36mtrue\u001b[39m)"
+            },
+            {
+              "title": "After Hooks",
+              "startTime": "2026-07-21T11:13:09.251Z",
+              "duration": 64,
+              "steps": [
+                {
+                  "title": "Fixture \"page\"",
+                  "startTime": "2026-07-21T11:13:09.252Z",
+                  "duration": 0,
+                  "steps": [],
+                  "attachments": [],
+                  "count": 1,
+                  "skipped": false
+                },
+                {
+                  "title": "Fixture \"context\"",
+                  "startTime": "2026-07-21T11:13:09.252Z",
+                  "duration": 53,
+                  "steps": [
+                    {
+                      "title": "Close context",
+                      "startTime": "2026-07-21T11:13:09.293Z",
+                      "duration": 12,
+                      "steps": [],
+                      "attachments": [],
+                      "count": 1,
+                      "skipped": false
+                    }
+                  ],
+                  "attachments": [],
+                  "count": 1,
+                  "skipped": false
+                }
+              ],
+              "attachments": [],
+              "count": 1,
+              "skipped": false
+            },
+            {
+              "title": "Worker Cleanup",
+              "startTime": "2026-07-21T11:13:09.315Z",
+              "duration": 32,
+              "steps": [
+                {
+                  "title": "Fixture \"browser\"",
+                  "startTime": "2026-07-21T11:13:09.317Z",
+                  "duration": 27,
+                  "steps": [],
+                  "attachments": [],
+                  "count": 1,
+                  "skipped": false
+                }
+              ],
+              "attachments": [],
+              "count": 1,
+              "skipped": false
+            }
+          ],
+          "errors": [
+            {
+              "message": "Error: Expected /cart after add-to-cart. toast=Ajouter au panier page=Aller au contenu principal\nRetour en haut\nRetour\nE2E Service 1784632260868-dc5f914e36c3e\nDétails du service\n\nDurée\n\n60 minutes\n\nParticipants\n\nJusqu'à 5 personnes\n\nType\n\nGroupe\n\nDescription\nÉquipe\nAvis\nÀ propos de ce service\nService E2E panier mixte\nDétails du service\n\nDurée\n\n60 minutes\n\nParticipants\n\n1 - 5 personnes\n\nLieu\n\nSur site\n\nType\n\nappointment\n\nRéserver\n5,000 XOF\n\nPrix par personne\n\nStandard\nAchat unique\nPaiement complet\nNombre de participants\n-\n1\n+\nSélectionnez une date\nDisponibilités\nAujourd'hui\n\nProchains jours disponibles\n\nmar. 21 juil.\nmer. 22 juil.\njeu. 23 juil.\nven. 24 juil.\nsam. 25 juil.\ndim. 26 juil.\nlun. 27 juil.\nmar. 28 juil.\nAujourd'huiPrécédentSuivant\nJuly 20 – 26\nMoisSemaineJourAgenda\n20 Mon\n21 Tue\n22 Wed\n23 Thu\n24 Fri\n25 Sat\n26 Sun\n8:00 AM\n9:00 AM\n10:00 AM\n11:00 AM\n12\n\n  137 |               .catch(() => '')\n  138 |           ).slice(0, 800);\n> 139 |           throw new Error(\n      |                 ^\n  140 |             `Expected /cart after add-to-cart. toast=${errText || '(none)'} page=${bodySnippet}`\n  141 |           );\n  142 |         }\n    at /home/runner/work/emarzona/emarzona/tests/e2e/mixed-cart-book-pay-confirm.spec.ts:139:17",
+              "codeframe": "   39 |     if (process.env.CI) throw new Error(message);\n   40 |     test.skip(true, message);\n   41 |   });\n   42 |\n   43 |   test('service booking to cart, add physical, checkout and confirm booking', async ({\n   44 |     page,\n   45 |   }, testInfo) => {\n   46 |     const admin = createNodeSupabaseClient(supabaseUrl!, supabaseServiceKey!);\n   47 |     const runId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;\n   48 |     const fixture = await seedMixedCartFixture(admin, runId);\n   49 |     let bookingId: string | undefined;\n   50 |     let orderId: string | undefined;\n   51 |\n   52 |     try {\n   53 |       await loginAsSeededUser(\n   54 |         page,\n   55 |         admin,\n   56 |         fixture.buyer.email,\n   57 |         '/dashboard',\n   58 |         fixture.buyer.password\n   59 |       );\n   60 |       await waitForVendorStoreReady(page);\n   61 |       await gotoApp(page, `/service/${fixture.serviceProduct.id}`);\n   62 |\n   63 |       await expect(page.getByText(/Service non trouvé/i)).toHaveCount(0, { timeout: 5_000 });\n   64 |       await expect(page.getByRole('heading', { level: 1 })).toContainText(\n   65 |         fixture.serviceProduct.name,\n   66 |         {\n   67 |           timeout: 30_000,\n   68 |         }\n   69 |       );\n   70 |\n   71 |       const { date } = tomorrowAt10();\n   72 |       await selectServiceCalendarDay(page, date);\n   73 |       await selectFirstAvailableTimeSlot(page);\n   74 |\n   75 |       await expect(page.getByText(/Créneau disponible/i)).toBeVisible({ timeout: 20_000 });\n   76 |\n   77 |       const addToCart = page.getByTestId('service-add-to-cart');\n   78 |       await expect(addToCart).toBeEnabled({ timeout: 20_000 });\n   79 |       await dismissCookieBannerIfVisible(page);\n   80 |\n   81 |       const bookingError = page.getByText(\n   82 |         /Erreur de réservation|Réservation impossible|Authentification requise|Impossible de finaliser|Délai dépassé|Date invalide|Sélection incomplète|Compléments manquants|créneau n'est pas disponible|identifiant de créneau|ajouter au panier|Produit non trouvé/i\n   83 |       );\n   84 |\n   85 |       const reserveRpc = page.waitForResponse(\n   86 |         response =>\n   87 |           response.url().includes('/rest/v1/rpc/reserve_service_booking') &&\n   88 |           response.request().method() === 'POST',\n   89 |         { timeout: 45_000 }\n   90 |       );\n   91 |       const cartInsert = page.waitForResponse(\n   92 |         response =>\n   93 |           response.url().includes('/rest/v1/cart_items') && response.request().method() === 'POST',\n   94 |         { timeout: 45_000 }\n   95 |       );\n   96 |\n   97 |       await addToCart.click({ timeout: 15_000 });\n   98 |\n   99 |       const rpcResponse = await reserveRpc.catch(() => null);\n  100 |       if (rpcResponse && (rpcResponse.status() < 200 || rpcResponse.status() >= 300)) {\n  101 |         const body = await rpcResponse.text().catch(() => '');\n  102 |         throw new Error(\n  103 |           `reserve_service_booking failed (${rpcResponse.status()}): ${body.slice(0, 400)}`\n  104 |         );\n  105 |       }\n  106 |       if (!rpcResponse) {\n  107 |         const errText = (await bookingError.textContent().catch(() => null)) ?? '';\n  108 |         throw new Error(`reserve_service_booking RPC was not called. toast=${errText || '(none)'}`);\n  109 |       }\n  110 |\n  111 |       const cartResponse = await cartInsert.catch(() => null);\n  112 |       if (cartResponse && (cartResponse.status() < 200 || cartResponse.status() >= 300)) {\n  113 |         const body = await cartResponse.text().catch(() => '');\n  114 |         throw new Error(\n  115 |           `cart_items insert failed (${cartResponse.status()}): ${body.slice(0, 400)}`\n  116 |         );\n  117 |       }\n  118 |\n  119 |       const navigated = await page\n  120 |         .waitForURL(/\\/cart/, { timeout: 45_000 })\n  121 |         .then(() => true)\n  122 |         .catch(() => false);\n  123 |       if (!navigated) {\n  124 |         const errText = (await bookingError.textContent().catch(() => null)) ?? '';\n  125 |         const successToast = await page\n  126 |           .getByText(/Service ajouté au panier|Ajouté au panier/i)\n  127 |           .first()\n  128 |           .isVisible()\n  129 |           .catch(() => false);\n  130 |         if (successToast) {\n  131 |           await gotoApp(page, '/cart');\n  132 |         } else {\n  133 |           const bodySnippet = (\n  134 |             await page\n  135 |               .locator('body')\n  136 |               .innerText()\n  137 |               .catch(() => '')\n  138 |           ).slice(0, 800);\n> 139 |           throw new Error(\n      |                 ^ Error: Expected /cart after add-to-cart. toast=Ajouter au panier page=Aller au contenu principal\n  140 |             `Expected /cart after add-to-cart. toast=${errText || '(none)'} page=${bodySnippet}`\n  141 |           );\n  142 |         }\n  143 |       }\n  144 |       await expect(page.getByText(fixture.serviceProduct.name)).toBeVisible({ timeout: 10_000 });\n  145 |\n  146 |       await gotoApp(page, `/physical/${fixture.physicalProduct.id}`);\n  147 |       await expect(page.getByRole('heading', { level: 1 })).toContainText(\n  148 |         fixture.physicalProduct.name,\n  149 |         { timeout: 15_000 }\n  150 |       );\n  151 |\n  152 |       const addPhysical = page.getByRole('button', { name: /ajouter au panier/i });\n  153 |       await expect(addPhysical).toBeEnabled({ timeout: 10_000 });\n  154 |       await addPhysical.click();\n  155 |\n  156 |       await gotoApp(page, '/cart');\n  157 |       await expect(page.getByText(fixture.physicalProduct.name)).toBeVisible({ timeout: 10_000 });\n  158 |\n  159 |       await page\n  160 |         .getByRole('link', { name: /passer au paiement|checkout|commander/i })\n  161 |         .first()\n  162 |         .click();\n  163 |       await page.waitForURL(/\\/checkout/, { timeout: 30_000 });\n  164 |\n  165 |       const firstName = page\n  166 |         .locator('[data-testid=\"checkout-firstname\"], input[name=\"firstName\"]')\n  167 |         .first();\n  168 |       const lastName = page\n  169 |         .locator('[data-testid=\"checkout-lastname\"], input[name=\"lastName\"]')\n  170 |         .first();\n  171 |       const email = page.locator('[data-testid=\"checkout-email\"], input[name=\"email\"]').first();\n  172 |       const phone = page.locator('[data-testid=\"checkout-phone\"], input[name=\"phone\"]').first();\n  173 |\n  174 |       await firstName.fill('E2E');\n  175 |       await lastName.fill('Buyer');\n  176 |       await email.fill(fixture.buyer.email);\n  177 |       await phone.fill('+22670123456');\n  178 |\n  179 |       const address = page.locator('input[name=\"address\"]').first();\n  180 |       if (await address.isVisible().catch(() => false)) {\n  181 |         await address.fill('123 Rue Test');\n  182 |         await page.locator('input[name=\"city\"]').first().fill('Ouagadougou');\n  183 |         await page.locator('input[name=\"country\"]').first().fill('Burkina Faso');\n  184 |       }\n  185 |\n  186 |       const submit = page.locator('[data-testid=\"checkout-submit\"]').first();\n  187 |       await expect(submit).toBeVisible({ timeout: 10_000 });\n  188 |       await submit.click();\n  189 |\n  190 |       await page.waitForURL(/\\/checkout/, { timeout: 45_000 });\n  191 |\n  192 |       const { data: bookings } = await admin\n  193 |         .from('service_bookings')\n  194 |         .select('id, status')\n  195 |         .eq('product_id', fixture.serviceProduct.id)\n  196 |         .eq('user_id', fixture.buyer.id)\n  197 |         .order('created_at', { ascending: false })\n  198 |         .limit(1);\n  199 |\n  200 |       bookingId = bookings?.[0]?.id;\n  201 |       expect(bookingId).toBeTruthy();\n  202 |\n  203 |       const { data: orders } = await admin\n  204 |         .from('orders')\n  205 |         .select('id, status, payment_status')\n  206 |         .eq('store_id', fixture.store.id)\n  207 |         .order('created_at', { ascending: false })\n  208 |         .limit(1);\n  209 |\n  210 |       orderId = orders?.[0]?.id;\n  211 |       expect(orderId).toBeTruthy();\n  212 |\n  213 |       await simulateMixedCartPayment(admin, orderId!, bookingId!);\n  214 |       await assertServiceBookingStatus(admin, bookingId!, 'confirmed');\n  215 |     } finally {\n  216 |       try {\n  217 |         await Promise.race([\n  218 |           cleanupMixedCartFixture(admin, fixture),\n  219 |           new Promise((_, reject) =>\n  220 |             setTimeout(() => reject(new Error('cleanupMixedCartFixture timeout')), 30_000)\n  221 |           ),\n  222 |         ]);\n  223 |       } catch (e) {\n  224 |         testInfo.attach('cleanup-error', { body: String(e), contentType: 'text/plain' });\n  225 |       }\n  226 |     }\n  227 |   });\n  228 | });\n  229 |\n  230 | //"
+            }
+          ],
+          "status": "failed",
+          "annotations": [],
+          "attachments": [
+            {
+              "name": "error-context",
+              "contentType": "text/markdown",
+              "path": "data/901837a2006087b53a247ecff6635df284ab4e27.md"
+            }
+          ]
+        },
+        {
+          "duration": 133088,
+          "startTime": "2026-07-21T11:13:10.391Z",
+          "retry": 1,
+          "steps": [
+            {
+              "title": "Before Hooks",
+              "startTime": "2026-07-21T11:13:10.395Z",
+              "duration": 220,
+              "steps": [
+                {
+                  "title": "beforeAll hook",
+                  "startTime": "2026-07-21T11:13:10.396Z",
+                  "duration": 18,
+                  "steps": [],
+                  "attachments": [],
+                  "location": {
+                    "file": "mixed-cart-book-pay-confirm.spec.ts",
+                    "line": 32,
+                    "column": 8
+                  },
+                  "count": 1,
+                  "skipped": false,
+                  "snippet": " \u001b[90m  31 |\u001b[39m\n \u001b[90m  32 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeAll(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m       ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  33 |\u001b[39m     \u001b[36mif\u001b[39m (canRun) {"
+                },
+                {
+                  "title": "Fixture \"browser\"",
+                  "startTime": "2026-07-21T11:13:10.420Z",
+                  "duration": 78,
+                  "steps": [
+                    {
+                      "title": "Launch browser",
+                      "startTime": "2026-07-21T11:13:10.427Z",
+                      "duration": 71,
+                      "steps": [],
+                      "attachments": [],
+                      "count": 1,
+                      "skipped": false
+                    }
+                  ],
+                  "attachments": [],
+                  "count": 1,
+                  "skipped": false
+                },
+                {
+                  "title": "Fixture \"context\"",
+                  "startTime": "2026-07-21T11:13:10.501Z",
+                  "duration": 78,
+                  "steps": [
+                    {
+                      "title": "Create context",
+                      "startTime": "2026-07-21T11:13:10.506Z",
+                      "duration": 69,
+                      "steps": [],
+                      "attachments": [],
+                      "count": 1,
+                      "skipped": false
+                    }
+                  ],
+                  "attachments": [],
+                  "count": 1,
+                  "skipped": false
+                },
+                {
+                  "title": "Fixture \"page\"",
+                  "startTime": "2026-07-21T11:13:10.580Z",
+                  "duration": 35,
+                  "steps": [
+                    {
+                      "title": "Create page",
+                      "startTime": "2026-07-21T11:13:10.581Z",
+                      "duration": 34,
+                      "steps": [],
+                      "attachments": [],
+                      "count": 1,
+                      "skipped": false
+                    }
+                  ],
+                  "attachments": [],
+                  "count": 1,
+                  "skipped": false
+                }
+              ],
+              "attachments": [],
+              "count": 1,
+              "skipped": false
+            },
+            {
+              "title": "Navigate to \"/login\"",
+              "startTime": "2026-07-21T11:13:15.989Z",
+              "duration": 1007,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 83, "column": 31 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  82 |\u001b[39m )\u001b[33m:\u001b[39m \u001b[33mPromise\u001b[39m\u001b[33m<\u001b[39m\u001b[36mimport\u001b[39m(\u001b[32m'@playwright/test'\u001b[39m)\u001b[33m.\u001b[39m\u001b[33mResponse\u001b[39m \u001b[33m|\u001b[39m \u001b[36mnull\u001b[39m\u001b[33m>\u001b[39m {\n \u001b[90m  83 |\u001b[39m   \u001b[36mconst\u001b[39m response \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(path\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                              ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  84 |\u001b[39m     waitUntil\u001b[33m:\u001b[39m \u001b[32m'domcontentloaded'\u001b[39m\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Evaluate",
+              "startTime": "2026-07-21T11:13:16.999Z",
+              "duration": 140,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 28, "column": 6 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  27 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  28 |\u001b[39m     \u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  29 |\u001b[39m       \u001b[36mtry\u001b[39m {"
+            },
+            {
+              "title": "Wait for function",
+              "startTime": "2026-07-21T11:13:17.143Z",
+              "duration": 162,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 47, "column": 14 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  46 |\u001b[39m\n \u001b[90m  47 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForFunction(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  48 |\u001b[39m     () \u001b[33m=>\u001b[39m {"
+            },
+            {
+              "title": "Wait for function",
+              "startTime": "2026-07-21T11:13:17.307Z",
+              "duration": 69,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 56, "column": 6 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  55 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  56 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(() \u001b[33m=>\u001b[39m \u001b[33m!\u001b[39mdocument\u001b[33m.\u001b[39mgetElementById(\u001b[32m'seo-fallback'\u001b[39m)\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  57 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[35m10\u001b[39m_000\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Fill \"e2e-mixed-buyer-1784632390619-66ec594bf26ab@example.com\" locator('input[name=\"email-login\"], input[type=\"email\"]').first()",
+              "startTime": "2026-07-21T11:13:17.384Z",
+              "duration": 218,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 103, "column": 20 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 102 |\u001b[39m   \u001b[36mconst\u001b[39m emailInput \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'input[name=\"email-login\"], input[type=\"email\"]'\u001b[39m)\u001b[33m.\u001b[39mfirst()\u001b[33m;\u001b[39m\n \u001b[90m 103 |\u001b[39m   \u001b[36mawait\u001b[39m emailInput\u001b[33m.\u001b[39mfill(email)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                   ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 104 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'#password-login'\u001b[39m)\u001b[33m.\u001b[39mfill(password)\u001b[33m;\u001b[39m"
+            },
+            {
+              "title": "Fill \"E2eTestPass1!\" locator('#password-login')",
+              "startTime": "2026-07-21T11:13:17.607Z",
+              "duration": 96,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 104, "column": 41 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 103 |\u001b[39m   \u001b[36mawait\u001b[39m emailInput\u001b[33m.\u001b[39mfill(email)\u001b[33m;\u001b[39m\n \u001b[90m 104 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'#password-login'\u001b[39m)\u001b[33m.\u001b[39mfill(password)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                                        ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 105 |\u001b[39m   \u001b[36mawait\u001b[39m page"
+            },
+            {
+              "title": "Click locator('form').filter({ has: locator('#password-login') }).locator('button[type=\"submit\"]')",
+              "startTime": "2026-07-21T11:13:17.706Z",
+              "duration": 1043,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 109, "column": 6 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 108 |\u001b[39m     \u001b[33m.\u001b[39mlocator(\u001b[32m'button[type=\"submit\"]'\u001b[39m)\n \u001b[90m 109 |\u001b[39m     \u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 110 |\u001b[39m"
+            },
+            {
+              "title": "Wait for navigation",
+              "startTime": "2026-07-21T11:13:18.752Z",
+              "duration": 1767,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 112, "column": 16 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 111 |\u001b[39m   \u001b[36mtry\u001b[39m {\n \u001b[90m 112 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForURL(\u001b[35m/\\/(dashboard|marketplace|account|admin)/\u001b[39m\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m               ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 113 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[33mE2E_TEST_CONFIG\u001b[39m\u001b[33m.\u001b[39mauthTimeout\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Evaluate",
+              "startTime": "2026-07-21T11:13:20.522Z",
+              "duration": 25,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 28, "column": 6 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  27 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  28 |\u001b[39m     \u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  29 |\u001b[39m       \u001b[36mtry\u001b[39m {"
+            },
+            {
+              "title": "Wait for function",
+              "startTime": "2026-07-21T11:13:20.548Z",
+              "duration": 8,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 47, "column": 14 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  46 |\u001b[39m\n \u001b[90m  47 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForFunction(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  48 |\u001b[39m     () \u001b[33m=>\u001b[39m {"
+            },
+            {
+              "title": "Wait for function",
+              "startTime": "2026-07-21T11:13:20.558Z",
+              "duration": 5,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 56, "column": 6 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  55 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  56 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(() \u001b[33m=>\u001b[39m \u001b[33m!\u001b[39mdocument\u001b[33m.\u001b[39mgetElementById(\u001b[32m'seo-fallback'\u001b[39m)\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  57 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[35m10\u001b[39m_000\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Evaluate",
+              "startTime": "2026-07-21T11:13:20.564Z",
+              "duration": 3,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 28, "column": 6 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  27 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  28 |\u001b[39m     \u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  29 |\u001b[39m       \u001b[36mtry\u001b[39m {"
+            },
+            {
+              "title": "Wait for function",
+              "startTime": "2026-07-21T11:13:20.568Z",
+              "duration": 4,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 47, "column": 14 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  46 |\u001b[39m\n \u001b[90m  47 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForFunction(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  48 |\u001b[39m     () \u001b[33m=>\u001b[39m {"
+            },
+            {
+              "title": "Wait for function",
+              "startTime": "2026-07-21T11:13:20.573Z",
+              "duration": 4,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 56, "column": 6 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  55 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  56 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(() \u001b[33m=>\u001b[39m \u001b[33m!\u001b[39mdocument\u001b[33m.\u001b[39mgetElementById(\u001b[32m'seo-fallback'\u001b[39m)\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  57 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[35m10\u001b[39m_000\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Wait for function",
+              "startTime": "2026-07-21T11:13:20.578Z",
+              "duration": 20004,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 65, "column": 6 },
+              "error": "TimeoutError: page.waitForFunction: Timeout 20000ms exceeded.",
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  64 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  65 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  66 |\u001b[39m       () \u001b[33m=>\u001b[39m {"
+            },
+            {
+              "title": "Navigate to \"/service/8730ccf3-6e42-4c56-94c5-ef1e4cb03c39\"",
+              "startTime": "2026-07-21T11:13:40.583Z",
+              "duration": 1612,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 83, "column": 31 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  82 |\u001b[39m )\u001b[33m:\u001b[39m \u001b[33mPromise\u001b[39m\u001b[33m<\u001b[39m\u001b[36mimport\u001b[39m(\u001b[32m'@playwright/test'\u001b[39m)\u001b[33m.\u001b[39m\u001b[33mResponse\u001b[39m \u001b[33m|\u001b[39m \u001b[36mnull\u001b[39m\u001b[33m>\u001b[39m {\n \u001b[90m  83 |\u001b[39m   \u001b[36mconst\u001b[39m response \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(path\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                              ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  84 |\u001b[39m     waitUntil\u001b[33m:\u001b[39m \u001b[32m'domcontentloaded'\u001b[39m\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Evaluate",
+              "startTime": "2026-07-21T11:13:42.198Z",
+              "duration": 182,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 28, "column": 6 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  27 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  28 |\u001b[39m     \u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  29 |\u001b[39m       \u001b[36mtry\u001b[39m {"
+            },
+            {
+              "title": "Wait for function",
+              "startTime": "2026-07-21T11:13:42.384Z",
+              "duration": 253,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 47, "column": 14 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  46 |\u001b[39m\n \u001b[90m  47 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForFunction(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  48 |\u001b[39m     () \u001b[33m=>\u001b[39m {"
+            },
+            {
+              "title": "Wait for function",
+              "startTime": "2026-07-21T11:13:42.638Z",
+              "duration": 115,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "shared/e2e-test-config.ts", "line": 56, "column": 6 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  55 |\u001b[39m   \u001b[36mawait\u001b[39m page\n \u001b[90m  56 |\u001b[39m     \u001b[33m.\u001b[39mwaitForFunction(() \u001b[33m=>\u001b[39m \u001b[33m!\u001b[39mdocument\u001b[33m.\u001b[39mgetElementById(\u001b[32m'seo-fallback'\u001b[39m)\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  57 |\u001b[39m       timeout\u001b[33m:\u001b[39m \u001b[35m10\u001b[39m_000\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Expect \"toHaveCount\" getByText(/Service non trouvé/i)",
+              "startTime": "2026-07-21T11:13:42.757Z",
+              "duration": 87,
+              "steps": [],
+              "attachments": [],
+              "location": {
+                "file": "mixed-cart-book-pay-confirm.spec.ts",
+                "line": 63,
+                "column": 59
+              },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  62 |\u001b[39m\n \u001b[90m  63 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByText(\u001b[35m/Service non trouvé/i\u001b[39m))\u001b[33m.\u001b[39mtoHaveCount(\u001b[35m0\u001b[39m\u001b[33m,\u001b[39m { timeout\u001b[33m:\u001b[39m \u001b[35m5\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                                                          ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  64 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { level\u001b[33m:\u001b[39m \u001b[35m1\u001b[39m }))\u001b[33m.\u001b[39mtoContainText("
+            },
+            {
+              "title": "Expect \"toContainText\" getByRole('heading', { level: 1 })",
+              "startTime": "2026-07-21T11:13:42.852Z",
+              "duration": 2934,
+              "steps": [],
+              "attachments": [],
+              "location": {
+                "file": "mixed-cart-book-pay-confirm.spec.ts",
+                "line": 64,
+                "column": 61
+              },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  63 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByText(\u001b[35m/Service non trouvé/i\u001b[39m))\u001b[33m.\u001b[39mtoHaveCount(\u001b[35m0\u001b[39m\u001b[33m,\u001b[39m { timeout\u001b[33m:\u001b[39m \u001b[35m5\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m  64 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { level\u001b[33m:\u001b[39m \u001b[35m1\u001b[39m }))\u001b[33m.\u001b[39mtoContainText(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                                                            ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  65 |\u001b[39m         fixture\u001b[33m.\u001b[39mserviceProduct\u001b[33m.\u001b[39mname\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Evaluate",
+              "startTime": "2026-07-21T11:13:45.798Z",
+              "duration": 8,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "helpers/store-theme-helpers.ts", "line": 243, "column": 14 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 242 |\u001b[39m \u001b[36mexport\u001b[39m \u001b[36masync\u001b[39m \u001b[36mfunction\u001b[39m dismissCookieBannerIfVisible(page\u001b[33m:\u001b[39m \u001b[33mPage\u001b[39m)\u001b[33m:\u001b[39m \u001b[33mPromise\u001b[39m\u001b[33m<\u001b[39m\u001b[36mvoid\u001b[39m\u001b[33m>\u001b[39m {\n \u001b[90m 243 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 244 |\u001b[39m     document\u001b[33m.\u001b[39mcookie \u001b[33m=\u001b[39m \u001b[32m'emarzona_consent=true; path=/; max-age=31536000; SameSite=Lax'\u001b[39m\u001b[33m;\u001b[39m"
+            },
+            {
+              "title": "Expect \"toBeVisible\" getByTestId('service-quick-days')",
+              "startTime": "2026-07-21T11:13:45.816Z",
+              "duration": 9,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "helpers/service-booking-ui.ts", "line": 18, "column": 27 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 17 |\u001b[39m   \u001b[36mconst\u001b[39m quickDays \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'service-quick-days'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 18 |\u001b[39m   \u001b[36mawait\u001b[39m expect(quickDays)\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m45\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m \u001b[31m\u001b[1m                          ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 19 |\u001b[39m"
+            },
+            {
+              "title": "Click getByTestId('service-quick-day-2026-07-22')",
+              "startTime": "2026-07-21T11:13:45.837Z",
+              "duration": 68,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "helpers/service-booking-ui.ts", "line": 23, "column": 22 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 22 |\u001b[39m     \u001b[36mif\u001b[39m (\u001b[36mawait\u001b[39m specific\u001b[33m.\u001b[39misVisible()\u001b[33m.\u001b[39m\u001b[36mcatch\u001b[39m(() \u001b[33m=>\u001b[39m \u001b[36mfalse\u001b[39m)) {\n \u001b[90m 23 |\u001b[39m       \u001b[36mawait\u001b[39m specific\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m \u001b[31m\u001b[1m                     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 24 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'[data-testid^=\"time-slot-\"]'\u001b[39m)\u001b[33m.\u001b[39mfirst())\u001b[33m.\u001b[39mtoBeVisible({"
+            },
+            {
+              "title": "Expect \"toBeVisible\" locator('[data-testid^=\"time-slot-\"]').first()",
+              "startTime": "2026-07-21T11:13:45.907Z",
+              "duration": 380,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "helpers/service-booking-ui.ts", "line": 24, "column": 73 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 23 |\u001b[39m       \u001b[36mawait\u001b[39m specific\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m 24 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'[data-testid^=\"time-slot-\"]'\u001b[39m)\u001b[33m.\u001b[39mfirst())\u001b[33m.\u001b[39mtoBeVisible({\n \u001b[90m    |\u001b[39m \u001b[31m\u001b[1m                                                                        ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 25 |\u001b[39m         timeout\u001b[33m:\u001b[39m \u001b[35m20\u001b[39m_000\u001b[33m,\u001b[39m"
+            },
+            {
+              "title": "Evaluate",
+              "startTime": "2026-07-21T11:13:46.289Z",
+              "duration": 9,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "helpers/store-theme-helpers.ts", "line": 243, "column": 14 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 242 |\u001b[39m \u001b[36mexport\u001b[39m \u001b[36masync\u001b[39m \u001b[36mfunction\u001b[39m dismissCookieBannerIfVisible(page\u001b[33m:\u001b[39m \u001b[33mPage\u001b[39m)\u001b[33m:\u001b[39m \u001b[33mPromise\u001b[39m\u001b[33m<\u001b[39m\u001b[36mvoid\u001b[39m\u001b[33m>\u001b[39m {\n \u001b[90m 243 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 244 |\u001b[39m     document\u001b[33m.\u001b[39mcookie \u001b[33m=\u001b[39m \u001b[32m'emarzona_consent=true; path=/; max-age=31536000; SameSite=Lax'\u001b[39m\u001b[33m;\u001b[39m"
+            },
+            {
+              "title": "Expect \"toBeVisible\" locator('[data-testid^=\"time-slot-\"]').first()",
+              "startTime": "2026-07-21T11:13:46.317Z",
+              "duration": 15,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "helpers/service-booking-ui.ts", "line": 40, "column": 22 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 39 |\u001b[39m   \u001b[36mconst\u001b[39m slot \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'[data-testid^=\"time-slot-\"]'\u001b[39m)\u001b[33m.\u001b[39mfirst()\u001b[33m;\u001b[39m\n \u001b[90m 40 |\u001b[39m   \u001b[36mawait\u001b[39m expect(slot)\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m15\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m \u001b[31m\u001b[1m                     ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 41 |\u001b[39m   \u001b[36mawait\u001b[39m slot\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m"
+            },
+            {
+              "title": "Click locator('[data-testid^=\"time-slot-\"]').first()",
+              "startTime": "2026-07-21T11:13:46.333Z",
+              "duration": 86,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "helpers/service-booking-ui.ts", "line": 41, "column": 14 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 40 |\u001b[39m   \u001b[36mawait\u001b[39m expect(slot)\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m15\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m 41 |\u001b[39m   \u001b[36mawait\u001b[39m slot\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 42 |\u001b[39m }"
+            },
+            {
+              "title": "Expect \"toBeVisible\" getByText(/Créneau disponible/i)",
+              "startTime": "2026-07-21T11:13:46.421Z",
+              "duration": 28,
+              "steps": [],
+              "attachments": [],
+              "location": {
+                "file": "mixed-cart-book-pay-confirm.spec.ts",
+                "line": 75,
+                "column": 59
+              },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  74 |\u001b[39m\n \u001b[90m  75 |\u001b[39m       \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByText(\u001b[35m/Créneau disponible/i\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m20\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                                                          ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  76 |\u001b[39m"
+            },
+            {
+              "title": "Expect \"toBeEnabled\" getByTestId('service-add-to-cart')",
+              "startTime": "2026-07-21T11:13:46.450Z",
+              "duration": 20,
+              "steps": [],
+              "attachments": [],
+              "location": {
+                "file": "mixed-cart-book-pay-confirm.spec.ts",
+                "line": 78,
+                "column": 31
+              },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  77 |\u001b[39m       \u001b[36mconst\u001b[39m addToCart \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'service-add-to-cart'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m  78 |\u001b[39m       \u001b[36mawait\u001b[39m expect(addToCart)\u001b[33m.\u001b[39mtoBeEnabled({ timeout\u001b[33m:\u001b[39m \u001b[35m20\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                              ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  79 |\u001b[39m       \u001b[36mawait\u001b[39m dismissCookieBannerIfVisible(page)\u001b[33m;\u001b[39m"
+            },
+            {
+              "title": "Evaluate",
+              "startTime": "2026-07-21T11:13:46.471Z",
+              "duration": 15,
+              "steps": [],
+              "attachments": [],
+              "location": { "file": "helpers/store-theme-helpers.ts", "line": 243, "column": 14 },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 242 |\u001b[39m \u001b[36mexport\u001b[39m \u001b[36masync\u001b[39m \u001b[36mfunction\u001b[39m dismissCookieBannerIfVisible(page\u001b[33m:\u001b[39m \u001b[33mPage\u001b[39m)\u001b[33m:\u001b[39m \u001b[33mPromise\u001b[39m\u001b[33m<\u001b[39m\u001b[36mvoid\u001b[39m\u001b[33m>\u001b[39m {\n \u001b[90m 243 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mevaluate(() \u001b[33m=>\u001b[39m {\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m             ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 244 |\u001b[39m     document\u001b[33m.\u001b[39mcookie \u001b[33m=\u001b[39m \u001b[32m'emarzona_consent=true; path=/; max-age=31536000; SameSite=Lax'\u001b[39m\u001b[33m;\u001b[39m"
+            },
+            {
+              "title": "Wait for event \"response\"",
+              "startTime": "2026-07-21T11:13:46.502Z",
+              "duration": 2025,
+              "steps": [],
+              "attachments": [],
+              "location": {
+                "file": "mixed-cart-book-pay-confirm.spec.ts",
+                "line": 85,
+                "column": 31
+              },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  84 |\u001b[39m\n \u001b[90m  85 |\u001b[39m       \u001b[36mconst\u001b[39m reserveRpc \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mwaitForResponse(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                              ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  86 |\u001b[39m         response \u001b[33m=>\u001b[39m"
+            },
+            {
+              "title": "Wait for event \"response\"",
+              "startTime": "2026-07-21T11:13:46.503Z",
+              "duration": 45002,
+              "steps": [],
+              "attachments": [],
+              "location": {
+                "file": "mixed-cart-book-pay-confirm.spec.ts",
+                "line": 91,
+                "column": 31
+              },
+              "error": "TimeoutError: page.waitForResponse: Timeout 45000ms exceeded while waiting for event \"response\"",
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  90 |\u001b[39m       )\u001b[33m;\u001b[39m\n \u001b[90m  91 |\u001b[39m       \u001b[36mconst\u001b[39m cartInsert \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mwaitForResponse(\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                              ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  92 |\u001b[39m         response \u001b[33m=>\u001b[39m"
+            },
+            {
+              "title": "Click getByTestId('service-add-to-cart')",
+              "startTime": "2026-07-21T11:13:46.504Z",
+              "duration": 98,
+              "steps": [],
+              "attachments": [],
+              "location": {
+                "file": "mixed-cart-book-pay-confirm.spec.ts",
+                "line": 97,
+                "column": 23
+              },
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m  96 |\u001b[39m\n \u001b[90m  97 |\u001b[39m       \u001b[36mawait\u001b[39m addToCart\u001b[33m.\u001b[39mclick({ timeout\u001b[33m:\u001b[39m \u001b[35m15\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m                      ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m  98 |\u001b[39m"
+            },
+            {
+              "title": "Wait for navigation",
+              "startTime": "2026-07-21T11:14:31.507Z",
+              "duration": 45000,
+              "steps": [],
+              "attachments": [],
+              "location": {
+                "file": "mixed-cart-book-pay-confirm.spec.ts",
+                "line": 120,
+                "column": 10
+              },
+              "error": "TimeoutError: page.waitForURL: Timeout 45000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation until \"load\"\n============================================================",
+              "count": 1,
+              "skipped": false,
+              "snippet": " \u001b[90m 119 |\u001b[39m       \u001b[36mconst\u001b[39m navigated \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\n \u001b[90m 120 |\u001b[39m         \u001b[33m.\u001b[39mwaitForURL(\u001b[35m/\\/cart/\u001b[39m\u001b[33m,\u001b[39m { timeout\u001b[33m:\u001b[39m \u001b[35m45\u001b[39m_000 })\n \u001b[90m     |\u001b[39m \u001b[31m\u001b[1m         ^\u001b[22m\u001b[39m\u001b[0m\n \u001b[90m 121 |\u001b[39m         \u001b[33m.\u001b[39mthen(() \u001b[33m=>\u001b[39m \u001b[36mtrue\u001b[39m)"
+            },
+            {
+              "title": "After Hooks",
+              "startTime": "2026-07-21T11:15:21.731Z",
+              "duration": 1865,
+              "steps": [
+                {
+                  "title": "Fixture \"page\"",
+                  "startTime": "2026-07-21T11:15:21.732Z",
+                  "duration": 0,
+                  "steps": [],
+                  "attachments": [],
+                  "count": 1,
+                  "skipped": false
+                },
+                {
+                  "title": "Fixture \"context\"",
+                  "startTime": "2026-07-21T11:15:21.732Z",
+                  "duration": 1857,
+                  "steps": [
+                    {
+                      "title": "Close context",
+                      "startTime": "2026-07-21T11:15:23.577Z",
+                      "duration": 12,
+                      "steps": [],
+                      "attachments": [],
+                      "count": 1,
+                      "skipped": false
+                    }
+                  ],
+                  "attachments": [],
+                  "count": 1,
+                  "skipped": false
+                }
+              ],
+              "attachments": [],
+              "count": 1,
+              "skipped": false
+            },
+            {
+              "title": "Worker Cleanup",
+              "startTime": "2026-07-21T11:15:23.596Z",
+              "duration": 22,
+              "steps": [
+                {
+                  "title": "Fixture \"browser\"",
+                  "startTime": "2026-07-21T11:15:23.597Z",
+                  "duration": 19,
+                  "steps": [],
+                  "attachments": [],
+                  "count": 1,
+                  "skipped": false
+                }
+              ],
+              "attachments": [],
+              "count": 1,
+              "skipped": false
+            }
+          ],
+          "errors": [
+            {
+              "message": "Error: Expected /cart after add-to-cart. toast=Ajouter au panier page=Aller au contenu principal\nRetour en haut\nRetour\nE2E Service 1784632390619-66ec594bf26ab\nDétails du service\n\nDurée\n\n60 minutes\n\nParticipants\n\nJusqu'à 5 personnes\n\nType\n\nGroupe\n\nDescription\nÉquipe\nAvis\nÀ propos de ce service\nService E2E panier mixte\nDétails du service\n\nDurée\n\n60 minutes\n\nParticipants\n\n1 - 5 personnes\n\nLieu\n\nSur site\n\nType\n\nappointment\n\nRéserver\n5,000 XOF\n\nPrix par personne\n\nStandard\nAchat unique\nPaiement complet\nNombre de participants\n-\n1\n+\nSélectionnez une date\nDisponibilités\nAujourd'hui\n\nProchains jours disponibles\n\nmar. 21 juil.\nmer. 22 juil.\njeu. 23 juil.\nven. 24 juil.\nsam. 25 juil.\ndim. 26 juil.\nlun. 27 juil.\nmar. 28 juil.\nAujourd'huiPrécédentSuivant\nJuly 20 – 26\nMoisSemaineJourAgenda\n20 Mon\n21 Tue\n22 Wed\n23 Thu\n24 Fri\n25 Sat\n26 Sun\n8:00 AM\n9:00 AM\n10:00 AM\n11:00 AM\n12\n\n  137 |               .catch(() => '')\n  138 |           ).slice(0, 800);\n> 139 |           throw new Error(\n      |                 ^\n  140 |             `Expected /cart after add-to-cart. toast=${errText || '(none)'} page=${bodySnippet}`\n  141 |           );\n  142 |         }\n    at /home/runner/work/emarzona/emarzona/tests/e2e/mixed-cart-book-pay-confirm.spec.ts:139:17",
+              "codeframe": "   39 |     if (process.env.CI) throw new Error(message);\n   40 |     test.skip(true, message);\n   41 |   });\n   42 |\n   43 |   test('service booking to cart, add physical, checkout and confirm booking', async ({\n   44 |     page,\n   45 |   }, testInfo) => {\n   46 |     const admin = createNodeSupabaseClient(supabaseUrl!, supabaseServiceKey!);\n   47 |     const runId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;\n   48 |     const fixture = await seedMixedCartFixture(admin, runId);\n   49 |     let bookingId: string | undefined;\n   50 |     let orderId: string | undefined;\n   51 |\n   52 |     try {\n   53 |       await loginAsSeededUser(\n   54 |         page,\n   55 |         admin,\n   56 |         fixture.buyer.email,\n   57 |         '/dashboard',\n   58 |         fixture.buyer.password\n   59 |       );\n   60 |       await waitForVendorStoreReady(page);\n   61 |       await gotoApp(page, `/service/${fixture.serviceProduct.id}`);\n   62 |\n   63 |       await expect(page.getByText(/Service non trouvé/i)).toHaveCount(0, { timeout: 5_000 });\n   64 |       await expect(page.getByRole('heading', { level: 1 })).toContainText(\n   65 |         fixture.serviceProduct.name,\n   66 |         {\n   67 |           timeout: 30_000,\n   68 |         }\n   69 |       );\n   70 |\n   71 |       const { date } = tomorrowAt10();\n   72 |       await selectServiceCalendarDay(page, date);\n   73 |       await selectFirstAvailableTimeSlot(page);\n   74 |\n   75 |       await expect(page.getByText(/Créneau disponible/i)).toBeVisible({ timeout: 20_000 });\n   76 |\n   77 |       const addToCart = page.getByTestId('service-add-to-cart');\n   78 |       await expect(addToCart).toBeEnabled({ timeout: 20_000 });\n   79 |       await dismissCookieBannerIfVisible(page);\n   80 |\n   81 |       const bookingError = page.getByText(\n   82 |         /Erreur de réservation|Réservation impossible|Authentification requise|Impossible de finaliser|Délai dépassé|Date invalide|Sélection incomplète|Compléments manquants|créneau n'est pas disponible|identifiant de créneau|ajouter au panier|Produit non trouvé/i\n   83 |       );\n   84 |\n   85 |       const reserveRpc = page.waitForResponse(\n   86 |         response =>\n   87 |           response.url().includes('/rest/v1/rpc/reserve_service_booking') &&\n   88 |           response.request().method() === 'POST',\n   89 |         { timeout: 45_000 }\n   90 |       );\n   91 |       const cartInsert = page.waitForResponse(\n   92 |         response =>\n   93 |           response.url().includes('/rest/v1/cart_items') && response.request().method() === 'POST',\n   94 |         { timeout: 45_000 }\n   95 |       );\n   96 |\n   97 |       await addToCart.click({ timeout: 15_000 });\n   98 |\n   99 |       const rpcResponse = await reserveRpc.catch(() => null);\n  100 |       if (rpcResponse && (rpcResponse.status() < 200 || rpcResponse.status() >= 300)) {\n  101 |         const body = await rpcResponse.text().catch(() => '');\n  102 |         throw new Error(\n  103 |           `reserve_service_booking failed (${rpcResponse.status()}): ${body.slice(0, 400)}`\n  104 |         );\n  105 |       }\n  106 |       if (!rpcResponse) {\n  107 |         const errText = (await bookingError.textContent().catch(() => null)) ?? '';\n  108 |         throw new Error(`reserve_service_booking RPC was not called. toast=${errText || '(none)'}`);\n  109 |       }\n  110 |\n  111 |       const cartResponse = await cartInsert.catch(() => null);\n  112 |       if (cartResponse && (cartResponse.status() < 200 || cartResponse.status() >= 300)) {\n  113 |         const body = await cartResponse.text().catch(() => '');\n  114 |         throw new Error(\n  115 |           `cart_items insert failed (${cartResponse.status()}): ${body.slice(0, 400)}`\n  116 |         );\n  117 |       }\n  118 |\n  119 |       const navigated = await page\n  120 |         .waitForURL(/\\/cart/, { timeout: 45_000 })\n  121 |         .then(() => true)\n  122 |         .catch(() => false);\n  123 |       if (!navigated) {\n  124 |         const errText = (await bookingError.textContent().catch(() => null)) ?? '';\n  125 |         const successToast = await page\n  126 |           .getByText(/Service ajouté au panier|Ajouté au panier/i)\n  127 |           .first()\n  128 |           .isVisible()\n  129 |           .catch(() => false);\n  130 |         if (successToast) {\n  131 |           await gotoApp(page, '/cart');\n  132 |         } else {\n  133 |           const bodySnippet = (\n  134 |             await page\n  135 |               .locator('body')\n  136 |               .innerText()\n  137 |               .catch(() => '')\n  138 |           ).slice(0, 800);\n> 139 |           throw new Error(\n      |                 ^ Error: Expected /cart after add-to-cart. toast=Ajouter au panier page=Aller au contenu principal\n  140 |             `Expected /cart after add-to-cart. toast=${errText || '(none)'} page=${bodySnippet}`\n  141 |           );\n  142 |         }\n  143 |       }\n  144 |       await expect(page.getByText(fixture.serviceProduct.name)).toBeVisible({ timeout: 10_000 });\n  145 |\n  146 |       await gotoApp(page, `/physical/${fixture.physicalProduct.id}`);\n  147 |       await expect(page.getByRole('heading', { level: 1 })).toContainText(\n  148 |         fixture.physicalProduct.name,\n  149 |         { timeout: 15_000 }\n  150 |       );\n  151 |\n  152 |       const addPhysical = page.getByRole('button', { name: /ajouter au panier/i });\n  153 |       await expect(addPhysical).toBeEnabled({ timeout: 10_000 });\n  154 |       await addPhysical.click();\n  155 |\n  156 |       await gotoApp(page, '/cart');\n  157 |       await expect(page.getByText(fixture.physicalProduct.name)).toBeVisible({ timeout: 10_000 });\n  158 |\n  159 |       await page\n  160 |         .getByRole('link', { name: /passer au paiement|checkout|commander/i })\n  161 |         .first()\n  162 |         .click();\n  163 |       await page.waitForURL(/\\/checkout/, { timeout: 30_000 });\n  164 |\n  165 |       const firstName = page\n  166 |         .locator('[data-testid=\"checkout-firstname\"], input[name=\"firstName\"]')\n  167 |         .first();\n  168 |       const lastName = page\n  169 |         .locator('[data-testid=\"checkout-lastname\"], input[name=\"lastName\"]')\n  170 |         .first();\n  171 |       const email = page.locator('[data-testid=\"checkout-email\"], input[name=\"email\"]').first();\n  172 |       const phone = page.locator('[data-testid=\"checkout-phone\"], input[name=\"phone\"]').first();\n  173 |\n  174 |       await firstName.fill('E2E');\n  175 |       await lastName.fill('Buyer');\n  176 |       await email.fill(fixture.buyer.email);\n  177 |       await phone.fill('+22670123456');\n  178 |\n  179 |       const address = page.locator('input[name=\"address\"]').first();\n  180 |       if (await address.isVisible().catch(() => false)) {\n  181 |         await address.fill('123 Rue Test');\n  182 |         await page.locator('input[name=\"city\"]').first().fill('Ouagadougou');\n  183 |         await page.locator('input[name=\"country\"]').first().fill('Burkina Faso');\n  184 |       }\n  185 |\n  186 |       const submit = page.locator('[data-testid=\"checkout-submit\"]').first();\n  187 |       await expect(submit).toBeVisible({ timeout: 10_000 });\n  188 |       await submit.click();\n  189 |\n  190 |       await page.waitForURL(/\\/checkout/, { timeout: 45_000 });\n  191 |\n  192 |       const { data: bookings } = await admin\n  193 |         .from('service_bookings')\n  194 |         .select('id, status')\n  195 |         .eq('product_id', fixture.serviceProduct.id)\n  196 |         .eq('user_id', fixture.buyer.id)\n  197 |         .order('created_at', { ascending: false })\n  198 |         .limit(1);\n  199 |\n  200 |       bookingId = bookings?.[0]?.id;\n  201 |       expect(bookingId).toBeTruthy();\n  202 |\n  203 |       const { data: orders } = await admin\n  204 |         .from('orders')\n  205 |         .select('id, status, payment_status')\n  206 |         .eq('store_id', fixture.store.id)\n  207 |         .order('created_at', { ascending: false })\n  208 |         .limit(1);\n  209 |\n  210 |       orderId = orders?.[0]?.id;\n  211 |       expect(orderId).toBeTruthy();\n  212 |\n  213 |       await simulateMixedCartPayment(admin, orderId!, bookingId!);\n  214 |       await assertServiceBookingStatus(admin, bookingId!, 'confirmed');\n  215 |     } finally {\n  216 |       try {\n  217 |         await Promise.race([\n  218 |           cleanupMixedCartFixture(admin, fixture),\n  219 |           new Promise((_, reject) =>\n  220 |             setTimeout(() => reject(new Error('cleanupMixedCartFixture timeout')), 30_000)\n  221 |           ),\n  222 |         ]);\n  223 |       } catch (e) {\n  224 |         testInfo.attach('cleanup-error', { body: String(e), contentType: 'text/plain' });\n  225 |       }\n  226 |     }\n  227 |   });\n  228 | });\n  229 |\n  230 | //"
+            }
+          ],
+          "status": "failed",
+          "annotations": [],
+          "attachments": [
+            {
+              "name": "error-context",
+              "contentType": "text/markdown",
+              "path": "data/506f76bfb14e61e768f08e75c4b02eceb381ff32.md"
+            },
+            {
+              "name": "trace",
+              "contentType": "application/zip",
+              "path": "data/a060816b678d4608c6c47f9a51704eb2cbac855a.zip"
+            }
+          ]
+        }
+      ],
+      "ok": false
+    }
+  ]
+}

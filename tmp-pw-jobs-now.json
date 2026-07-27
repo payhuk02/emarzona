@@ -1,1 +1,855 @@
-﻿{"jobs":[{"completedAt":"2026-07-21T14:25:24Z","conclusion":"failure","databaseId":88661914196,"name":"test-auth","startedAt":"2026-07-21T14:22:21Z","status":"completed","steps":[{"completedAt":"2026-07-21T14:22:23Z","conclusion":"success","name":"Set up job","number":1,"startedAt":"2026-07-21T14:22:22Z","status":"completed"},{"completedAt":"2026-07-21T14:22:25Z","conclusion":"success","name":"Checkout code","number":2,"startedAt":"2026-07-21T14:22:23Z","status":"completed"},{"completedAt":"2026-07-21T14:22:33Z","conclusion":"success","name":"Setup Node.js","number":3,"startedAt":"2026-07-21T14:22:25Z","status":"completed"},{"completedAt":"2026-07-21T14:22:48Z","conclusion":"success","name":"Install dependencies","number":4,"startedAt":"2026-07-21T14:22:33Z","status":"completed"},{"completedAt":"2026-07-21T14:24:33Z","conclusion":"success","name":"Install Playwright","number":5,"startedAt":"2026-07-21T14:22:48Z","status":"completed"},{"completedAt":"2026-07-21T14:24:33Z","conclusion":"success","name":"Setup environment variables","number":6,"startedAt":"2026-07-21T14:24:33Z","status":"completed"},{"completedAt":"2026-07-21T14:25:21Z","conclusion":"failure","name":"Run Auth Tests","number":7,"startedAt":"2026-07-21T14:24:33Z","status":"completed"},{"completedAt":"2026-07-21T14:25:21Z","conclusion":"skipped","name":"Post Setup Node.js","number":13,"startedAt":"2026-07-21T14:25:21Z","status":"completed"},{"completedAt":"2026-07-21T14:25:21Z","conclusion":"success","name":"Post Checkout code","number":14,"startedAt":"2026-07-21T14:25:21Z","status":"completed"},{"completedAt":"2026-07-21T14:25:21Z","conclusion":"success","name":"Complete job","number":15,"startedAt":"2026-07-21T14:25:21Z","status":"completed"}],"url":"https://github.com/payhuk02/emarzona/actions/runs/29838775414/job/88661914196"},{"completedAt":"2026-07-21T14:24:43Z","conclusion":"success","databaseId":88661914218,"name":"test-products","startedAt":"2026-07-21T14:22:22Z","status":"completed","steps":[{"completedAt":"2026-07-21T14:22:24Z","conclusion":"success","name":"Set up job","number":1,"startedAt":"2026-07-21T14:22:23Z","status":"completed"},{"completedAt":"2026-07-21T14:22:26Z","conclusion":"success","name":"Checkout code","number":2,"startedAt":"2026-07-21T14:22:24Z","status":"completed"},{"completedAt":"2026-07-21T14:22:34Z","conclusion":"success","name":"Setup Node.js","number":3,"startedAt":"2026-07-21T14:22:26Z","status":"completed"},{"completedAt":"2026-07-21T14:22:49Z","conclusion":"success","name":"Install dependencies","number":4,"startedAt":"2026-07-21T14:22:34Z","status":"completed"},{"completedAt":"2026-07-21T14:24:34Z","conclusion":"success","name":"Install Playwright","number":5,"startedAt":"2026-07-21T14:22:49Z","status":"completed"},{"completedAt":"2026-07-21T14:24:34Z","conclusion":"success","name":"Setup environment variables","number":6,"startedAt":"2026-07-21T14:24:34Z","status":"completed"},{"completedAt":"2026-07-21T14:24:40Z","conclusion":"success","name":"Run Product Tests","number":7,"startedAt":"2026-07-21T14:24:34Z","status":"completed"},{"completedAt":"2026-07-21T14:24:40Z","conclusion":"success","name":"Post Setup Node.js","number":13,"startedAt":"2026-07-21T14:24:40Z","status":"completed"},{"completedAt":"2026-07-21T14:24:40Z","conclusion":"success","name":"Post Checkout code","number":14,"startedAt":"2026-07-21T14:24:40Z","status":"completed"},{"completedAt":"2026-07-21T14:24:40Z","conclusion":"success","name":"Complete job","number":15,"startedAt":"2026-07-21T14:24:40Z","status":"completed"}],"url":"https://github.com/payhuk02/emarzona/actions/runs/29838775414/job/88661914218"},{"completedAt":"2026-07-21T14:25:28Z","conclusion":"success","databaseId":88661914246,"name":"test","startedAt":"2026-07-21T14:22:22Z","status":"completed","steps":[{"completedAt":"2026-07-21T14:22:25Z","conclusion":"success","name":"Set up job","number":1,"startedAt":"2026-07-21T14:22:23Z","status":"completed"},{"completedAt":"2026-07-21T14:22:28Z","conclusion":"success","name":"Checkout code","number":2,"startedAt":"2026-07-21T14:22:25Z","status":"completed"},{"completedAt":"2026-07-21T14:22:54Z","conclusion":"success","name":"Setup Node.js","number":3,"startedAt":"2026-07-21T14:22:28Z","status":"completed"},{"completedAt":"2026-07-21T14:23:07Z","conclusion":"success","name":"Install dependencies","number":4,"startedAt":"2026-07-21T14:22:54Z","status":"completed"},{"completedAt":"2026-07-21T14:24:01Z","conclusion":"success","name":"Install Playwright Browsers","number":5,"startedAt":"2026-07-21T14:23:07Z","status":"completed"},{"completedAt":"2026-07-21T14:24:01Z","conclusion":"success","name":"Setup environment variables","number":6,"startedAt":"2026-07-21T14:24:01Z","status":"completed"},{"completedAt":"2026-07-21T14:24:01Z","conclusion":"success","name":"Verify Supabase publishable key format","number":7,"startedAt":"2026-07-21T14:24:01Z","status":"completed"},{"completedAt":"2026-07-21T14:25:24Z","conclusion":"success","name":"Run Playwright tests","number":8,"startedAt":"2026-07-21T14:24:01Z","status":"completed"},{"completedAt":"2026-07-21T14:25:25Z","conclusion":"success","name":"Upload test results","number":9,"startedAt":"2026-07-21T14:25:24Z","status":"completed"},{"completedAt":"2026-07-21T14:25:25Z","conclusion":"skipped","name":"Upload test videos","number":10,"startedAt":"2026-07-21T14:25:25Z","status":"completed"},{"completedAt":"2026-07-21T14:25:25Z","conclusion":"success","name":"Post Setup Node.js","number":19,"startedAt":"2026-07-21T14:25:25Z","status":"completed"},{"completedAt":"2026-07-21T14:25:25Z","conclusion":"success","name":"Post Checkout code","number":20,"startedAt":"2026-07-21T14:25:25Z","status":"completed"},{"completedAt":"2026-07-21T14:25:25Z","conclusion":"success","name":"Complete job","number":21,"startedAt":"2026-07-21T14:25:25Z","status":"completed"}],"url":"https://github.com/payhuk02/emarzona/actions/runs/29838775414/job/88661914246"},{"completedAt":"2026-07-21T14:22:43Z","conclusion":"success","databaseId":88661914390,"name":"Prepare shared E2E schema","startedAt":"2026-07-21T14:22:21Z","status":"completed","steps":[{"completedAt":"2026-07-21T14:22:22Z","conclusion":"success","name":"Set up job","number":1,"startedAt":"2026-07-21T14:22:21Z","status":"completed"},{"completedAt":"2026-07-21T14:22:24Z","conclusion":"success","name":"Checkout code","number":2,"startedAt":"2026-07-21T14:22:22Z","status":"completed"},{"completedAt":"2026-07-21T14:22:41Z","conclusion":"success","name":"Apply E2E schema patches (idempotent)","number":3,"startedAt":"2026-07-21T14:22:24Z","status":"completed"},{"completedAt":"2026-07-21T14:22:42Z","conclusion":"success","name":"Post Checkout code","number":6,"startedAt":"2026-07-21T14:22:41Z","status":"completed"},{"completedAt":"2026-07-21T14:22:42Z","conclusion":"success","name":"Complete job","number":7,"startedAt":"2026-07-21T14:22:42Z","status":"completed"}],"url":"https://github.com/payhuk02/emarzona/actions/runs/29838775414/job/88661914390"},{"completedAt":"2026-07-21T14:23:59Z","conclusion":"success","databaseId":88661914459,"name":"Checkout multi-PSP E2E","startedAt":"2026-07-21T14:22:21Z","status":"completed","steps":[{"completedAt":"2026-07-21T14:22:23Z","conclusion":"success","name":"Set up job","number":1,"startedAt":"2026-07-21T14:22:22Z","status":"completed"},{"completedAt":"2026-07-21T14:22:25Z","conclusion":"success","name":"Checkout code","number":2,"startedAt":"2026-07-21T14:22:23Z","status":"completed"},{"completedAt":"2026-07-21T14:22:34Z","conclusion":"success","name":"Setup Node.js","number":3,"startedAt":"2026-07-21T14:22:25Z","status":"completed"},{"completedAt":"2026-07-21T14:22:49Z","conclusion":"success","name":"Install dependencies","number":4,"startedAt":"2026-07-21T14:22:34Z","status":"completed"},{"completedAt":"2026-07-21T14:23:11Z","conclusion":"success","name":"Install Playwright Browsers","number":5,"startedAt":"2026-07-21T14:22:49Z","status":"completed"},{"completedAt":"2026-07-21T14:23:54Z","conclusion":"success","name":"Run checkout multi-PSP E2E","number":6,"startedAt":"2026-07-21T14:23:11Z","status":"completed"},{"completedAt":"2026-07-21T14:23:55Z","conclusion":"success","name":"Upload checkout E2E report","number":7,"startedAt":"2026-07-21T14:23:54Z","status":"completed"},{"completedAt":"2026-07-21T14:23:55Z","conclusion":"success","name":"Post Setup Node.js","number":13,"startedAt":"2026-07-21T14:23:55Z","status":"completed"},{"completedAt":"2026-07-21T14:23:56Z","conclusion":"success","name":"Post Checkout code","number":14,"startedAt":"2026-07-21T14:23:55Z","status":"completed"},{"completedAt":"2026-07-21T14:23:56Z","conclusion":"success","name":"Complete job","number":15,"startedAt":"2026-07-21T14:23:56Z","status":"completed"}],"url":"https://github.com/payhuk02/emarzona/actions/runs/29838775414/job/88661914459"},{"completedAt":"2026-07-21T14:27:57Z","conclusion":"success","databaseId":88662032186,"name":"Commerce type gating E2E (5 types)","startedAt":"2026-07-21T14:22:47Z","status":"completed","steps":[{"completedAt":"2026-07-21T14:22:49Z","conclusion":"success","name":"Set up job","number":1,"startedAt":"2026-07-21T14:22:48Z","status":"completed"},{"completedAt":"2026-07-21T14:22:52Z","conclusion":"success","name":"Checkout code","number":2,"startedAt":"2026-07-21T14:22:49Z","status":"completed"},{"completedAt":"2026-07-21T14:23:00Z","conclusion":"success","name":"Setup Node.js","number":3,"startedAt":"2026-07-21T14:22:52Z","status":"completed"},{"completedAt":"2026-07-21T14:23:15Z","conclusion":"success","name":"Install dependencies","number":4,"startedAt":"2026-07-21T14:23:00Z","status":"completed"},{"completedAt":"2026-07-21T14:23:18Z","conclusion":"success","name":"Validate commerce E2E secrets","number":5,"startedAt":"2026-07-21T14:23:15Z","status":"completed"},{"completedAt":"2026-07-21T14:23:45Z","conclusion":"success","name":"Install Playwright Browsers","number":6,"startedAt":"2026-07-21T14:23:18Z","status":"completed"},{"completedAt":"2026-07-21T14:27:53Z","conclusion":"success","name":"Run commerce type gating E2E","number":7,"startedAt":"2026-07-21T14:23:45Z","status":"completed"},{"completedAt":"2026-07-21T14:27:53Z","conclusion":"skipped","name":"Run commerce gating contract tests (E2E skipped)","number":8,"startedAt":"2026-07-21T14:27:53Z","status":"completed"},{"completedAt":"2026-07-21T14:27:54Z","conclusion":"success","name":"Upload commerce gating report","number":9,"startedAt":"2026-07-21T14:27:53Z","status":"completed"},{"completedAt":"2026-07-21T14:27:54Z","conclusion":"success","name":"Post Setup Node.js","number":17,"startedAt":"2026-07-21T14:27:54Z","status":"completed"},{"completedAt":"2026-07-21T14:27:55Z","conclusion":"success","name":"Post Checkout code","number":18,"startedAt":"2026-07-21T14:27:54Z","status":"completed"},{"completedAt":"2026-07-21T14:27:55Z","conclusion":"success","name":"Complete job","number":19,"startedAt":"2026-07-21T14:27:55Z","status":"completed"}],"url":"https://github.com/payhuk02/emarzona/actions/runs/29838775414/job/88662032186"},{"completedAt":"2026-07-21T14:34:10Z","conclusion":"failure","databaseId":88662032305,"name":"Store create & theme E2E","startedAt":"2026-07-21T14:22:47Z","status":"completed","steps":[{"completedAt":"2026-07-21T14:22:49Z","conclusion":"success","name":"Set up job","number":1,"startedAt":"2026-07-21T14:22:48Z","status":"completed"},{"completedAt":"2026-07-21T14:22:51Z","conclusion":"success","name":"Checkout code","number":2,"startedAt":"2026-07-21T14:22:49Z","status":"completed"},{"completedAt":"2026-07-21T14:22:58Z","conclusion":"success","name":"Setup Node.js","number":3,"startedAt":"2026-07-21T14:22:51Z","status":"completed"},{"completedAt":"2026-07-21T14:23:11Z","conclusion":"success","name":"Install dependencies","number":4,"startedAt":"2026-07-21T14:22:58Z","status":"completed"},{"completedAt":"2026-07-21T14:23:13Z","conclusion":"success","name":"Validate commerce E2E secrets","number":5,"startedAt":"2026-07-21T14:23:11Z","status":"completed"},{"completedAt":"2026-07-21T14:23:35Z","conclusion":"success","name":"Install Playwright Browsers","number":6,"startedAt":"2026-07-21T14:23:13Z","status":"completed"},{"completedAt":"2026-07-21T14:34:06Z","conclusion":"failure","name":"Run store theme E2E","number":7,"startedAt":"2026-07-21T14:23:35Z","status":"completed"},{"completedAt":"2026-07-21T14:34:08Z","conclusion":"success","name":"Upload store theme report","number":8,"startedAt":"2026-07-21T14:34:06Z","status":"completed"},{"completedAt":"2026-07-21T14:34:08Z","conclusion":"skipped","name":"Post Setup Node.js","number":15,"startedAt":"2026-07-21T14:34:08Z","status":"completed"},{"completedAt":"2026-07-21T14:34:08Z","conclusion":"success","name":"Post Checkout code","number":16,"startedAt":"2026-07-21T14:34:08Z","status":"completed"},{"completedAt":"2026-07-21T14:34:08Z","conclusion":"success","name":"Complete job","number":17,"startedAt":"2026-07-21T14:34:08Z","status":"completed"}],"url":"https://github.com/payhuk02/emarzona/actions/runs/29838775414/job/88662032305"},{"completedAt":"2026-07-21T14:28:08Z","conclusion":"success","databaseId":88662032327,"name":"Vertical paid E2E (course + artist)","startedAt":"2026-07-21T14:22:46Z","status":"completed","steps":[{"completedAt":"2026-07-21T14:22:48Z","conclusion":"success","name":"Set up job","number":1,"startedAt":"2026-07-21T14:22:47Z","status":"completed"},{"completedAt":"2026-07-21T14:22:50Z","conclusion":"success","name":"Checkout code","number":2,"startedAt":"2026-07-21T14:22:48Z","status":"completed"},{"completedAt":"2026-07-21T14:22:56Z","conclusion":"success","name":"Setup Node.js","number":3,"startedAt":"2026-07-21T14:22:50Z","status":"completed"},{"completedAt":"2026-07-21T14:23:09Z","conclusion":"success","name":"Install dependencies","number":4,"startedAt":"2026-07-21T14:22:56Z","status":"completed"},{"completedAt":"2026-07-21T14:23:13Z","conclusion":"success","name":"Validate commerce E2E secrets","number":5,"startedAt":"2026-07-21T14:23:09Z","status":"completed"},{"completedAt":"2026-07-21T14:23:34Z","conclusion":"success","name":"Install Playwright Browsers","number":6,"startedAt":"2026-07-21T14:23:13Z","status":"completed"},{"completedAt":"2026-07-21T14:28:04Z","conclusion":"success","name":"Run vertical paid E2E","number":7,"startedAt":"2026-07-21T14:23:34Z","status":"completed"},{"completedAt":"2026-07-21T14:28:04Z","conclusion":"skipped","name":"Run vertical paid contract tests (E2E skipped)","number":8,"startedAt":"2026-07-21T14:28:04Z","status":"completed"},{"completedAt":"2026-07-21T14:28:06Z","conclusion":"success","name":"Upload vertical paid report","number":9,"startedAt":"2026-07-21T14:28:04Z","status":"completed"},{"completedAt":"2026-07-21T14:28:06Z","conclusion":"success","name":"Post Setup Node.js","number":17,"startedAt":"2026-07-21T14:28:06Z","status":"completed"},{"completedAt":"2026-07-21T14:28:06Z","conclusion":"success","name":"Post Checkout code","number":18,"startedAt":"2026-07-21T14:28:06Z","status":"completed"},{"completedAt":"2026-07-21T14:28:06Z","conclusion":"success","name":"Complete job","number":19,"startedAt":"2026-07-21T14:28:06Z","status":"completed"}],"url":"https://github.com/payhuk02/emarzona/actions/runs/29838775414/job/88662032327"},{"completedAt":"2026-07-21T14:26:34Z","conclusion":"failure","databaseId":88662032333,"name":"Product wizards publish E2E","startedAt":"2026-07-21T14:22:46Z","status":"completed","steps":[{"completedAt":"2026-07-21T14:22:50Z","conclusion":"success","name":"Set up job","number":1,"startedAt":"2026-07-21T14:22:47Z","status":"completed"},{"completedAt":"2026-07-21T14:22:52Z","conclusion":"success","name":"Checkout code","number":2,"startedAt":"2026-07-21T14:22:50Z","status":"completed"},{"completedAt":"2026-07-21T14:23:01Z","conclusion":"success","name":"Setup Node.js","number":3,"startedAt":"2026-07-21T14:22:52Z","status":"completed"},{"completedAt":"2026-07-21T14:23:11Z","conclusion":"success","name":"Install dependencies","number":4,"startedAt":"2026-07-21T14:23:01Z","status":"completed"},{"completedAt":"2026-07-21T14:23:14Z","conclusion":"success","name":"Validate commerce E2E secrets","number":5,"startedAt":"2026-07-21T14:23:11Z","status":"completed"},{"completedAt":"2026-07-21T14:23:52Z","conclusion":"success","name":"Install Playwright Browsers","number":6,"startedAt":"2026-07-21T14:23:14Z","status":"completed"},{"completedAt":"2026-07-21T14:26:30Z","conclusion":"failure","name":"Run product wizards E2E","number":7,"startedAt":"2026-07-21T14:23:52Z","status":"completed"},{"completedAt":"2026-07-21T14:26:32Z","conclusion":"success","name":"Upload artist wizard report","number":8,"startedAt":"2026-07-21T14:26:30Z","status":"completed"},{"completedAt":"2026-07-21T14:26:32Z","conclusion":"skipped","name":"Post Setup Node.js","number":15,"startedAt":"2026-07-21T14:26:32Z","status":"completed"},{"completedAt":"2026-07-21T14:26:32Z","conclusion":"success","name":"Post Checkout code","number":16,"startedAt":"2026-07-21T14:26:32Z","status":"completed"},{"completedAt":"2026-07-21T14:26:32Z","conclusion":"success","name":"Complete job","number":17,"startedAt":"2026-07-21T14:26:32Z","status":"completed"}],"url":"https://github.com/payhuk02/emarzona/actions/runs/29838775414/job/88662032333"}]}
+﻿{
+  "jobs": [
+    {
+      "completedAt": "2026-07-21T14:25:24Z",
+      "conclusion": "failure",
+      "databaseId": 88661914196,
+      "name": "test-auth",
+      "startedAt": "2026-07-21T14:22:21Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-07-21T14:22:23Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-07-21T14:22:22Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:22:25Z",
+          "conclusion": "success",
+          "name": "Checkout code",
+          "number": 2,
+          "startedAt": "2026-07-21T14:22:23Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:22:33Z",
+          "conclusion": "success",
+          "name": "Setup Node.js",
+          "number": 3,
+          "startedAt": "2026-07-21T14:22:25Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:22:48Z",
+          "conclusion": "success",
+          "name": "Install dependencies",
+          "number": 4,
+          "startedAt": "2026-07-21T14:22:33Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:24:33Z",
+          "conclusion": "success",
+          "name": "Install Playwright",
+          "number": 5,
+          "startedAt": "2026-07-21T14:22:48Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:24:33Z",
+          "conclusion": "success",
+          "name": "Setup environment variables",
+          "number": 6,
+          "startedAt": "2026-07-21T14:24:33Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:25:21Z",
+          "conclusion": "failure",
+          "name": "Run Auth Tests",
+          "number": 7,
+          "startedAt": "2026-07-21T14:24:33Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:25:21Z",
+          "conclusion": "skipped",
+          "name": "Post Setup Node.js",
+          "number": 13,
+          "startedAt": "2026-07-21T14:25:21Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:25:21Z",
+          "conclusion": "success",
+          "name": "Post Checkout code",
+          "number": 14,
+          "startedAt": "2026-07-21T14:25:21Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:25:21Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 15,
+          "startedAt": "2026-07-21T14:25:21Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/payhuk02/emarzona/actions/runs/29838775414/job/88661914196"
+    },
+    {
+      "completedAt": "2026-07-21T14:24:43Z",
+      "conclusion": "success",
+      "databaseId": 88661914218,
+      "name": "test-products",
+      "startedAt": "2026-07-21T14:22:22Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-07-21T14:22:24Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-07-21T14:22:23Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:22:26Z",
+          "conclusion": "success",
+          "name": "Checkout code",
+          "number": 2,
+          "startedAt": "2026-07-21T14:22:24Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:22:34Z",
+          "conclusion": "success",
+          "name": "Setup Node.js",
+          "number": 3,
+          "startedAt": "2026-07-21T14:22:26Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:22:49Z",
+          "conclusion": "success",
+          "name": "Install dependencies",
+          "number": 4,
+          "startedAt": "2026-07-21T14:22:34Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:24:34Z",
+          "conclusion": "success",
+          "name": "Install Playwright",
+          "number": 5,
+          "startedAt": "2026-07-21T14:22:49Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:24:34Z",
+          "conclusion": "success",
+          "name": "Setup environment variables",
+          "number": 6,
+          "startedAt": "2026-07-21T14:24:34Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:24:40Z",
+          "conclusion": "success",
+          "name": "Run Product Tests",
+          "number": 7,
+          "startedAt": "2026-07-21T14:24:34Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:24:40Z",
+          "conclusion": "success",
+          "name": "Post Setup Node.js",
+          "number": 13,
+          "startedAt": "2026-07-21T14:24:40Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:24:40Z",
+          "conclusion": "success",
+          "name": "Post Checkout code",
+          "number": 14,
+          "startedAt": "2026-07-21T14:24:40Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:24:40Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 15,
+          "startedAt": "2026-07-21T14:24:40Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/payhuk02/emarzona/actions/runs/29838775414/job/88661914218"
+    },
+    {
+      "completedAt": "2026-07-21T14:25:28Z",
+      "conclusion": "success",
+      "databaseId": 88661914246,
+      "name": "test",
+      "startedAt": "2026-07-21T14:22:22Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-07-21T14:22:25Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-07-21T14:22:23Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:22:28Z",
+          "conclusion": "success",
+          "name": "Checkout code",
+          "number": 2,
+          "startedAt": "2026-07-21T14:22:25Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:22:54Z",
+          "conclusion": "success",
+          "name": "Setup Node.js",
+          "number": 3,
+          "startedAt": "2026-07-21T14:22:28Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:23:07Z",
+          "conclusion": "success",
+          "name": "Install dependencies",
+          "number": 4,
+          "startedAt": "2026-07-21T14:22:54Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:24:01Z",
+          "conclusion": "success",
+          "name": "Install Playwright Browsers",
+          "number": 5,
+          "startedAt": "2026-07-21T14:23:07Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:24:01Z",
+          "conclusion": "success",
+          "name": "Setup environment variables",
+          "number": 6,
+          "startedAt": "2026-07-21T14:24:01Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:24:01Z",
+          "conclusion": "success",
+          "name": "Verify Supabase publishable key format",
+          "number": 7,
+          "startedAt": "2026-07-21T14:24:01Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:25:24Z",
+          "conclusion": "success",
+          "name": "Run Playwright tests",
+          "number": 8,
+          "startedAt": "2026-07-21T14:24:01Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:25:25Z",
+          "conclusion": "success",
+          "name": "Upload test results",
+          "number": 9,
+          "startedAt": "2026-07-21T14:25:24Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:25:25Z",
+          "conclusion": "skipped",
+          "name": "Upload test videos",
+          "number": 10,
+          "startedAt": "2026-07-21T14:25:25Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:25:25Z",
+          "conclusion": "success",
+          "name": "Post Setup Node.js",
+          "number": 19,
+          "startedAt": "2026-07-21T14:25:25Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:25:25Z",
+          "conclusion": "success",
+          "name": "Post Checkout code",
+          "number": 20,
+          "startedAt": "2026-07-21T14:25:25Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:25:25Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 21,
+          "startedAt": "2026-07-21T14:25:25Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/payhuk02/emarzona/actions/runs/29838775414/job/88661914246"
+    },
+    {
+      "completedAt": "2026-07-21T14:22:43Z",
+      "conclusion": "success",
+      "databaseId": 88661914390,
+      "name": "Prepare shared E2E schema",
+      "startedAt": "2026-07-21T14:22:21Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-07-21T14:22:22Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-07-21T14:22:21Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:22:24Z",
+          "conclusion": "success",
+          "name": "Checkout code",
+          "number": 2,
+          "startedAt": "2026-07-21T14:22:22Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:22:41Z",
+          "conclusion": "success",
+          "name": "Apply E2E schema patches (idempotent)",
+          "number": 3,
+          "startedAt": "2026-07-21T14:22:24Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:22:42Z",
+          "conclusion": "success",
+          "name": "Post Checkout code",
+          "number": 6,
+          "startedAt": "2026-07-21T14:22:41Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:22:42Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 7,
+          "startedAt": "2026-07-21T14:22:42Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/payhuk02/emarzona/actions/runs/29838775414/job/88661914390"
+    },
+    {
+      "completedAt": "2026-07-21T14:23:59Z",
+      "conclusion": "success",
+      "databaseId": 88661914459,
+      "name": "Checkout multi-PSP E2E",
+      "startedAt": "2026-07-21T14:22:21Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-07-21T14:22:23Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-07-21T14:22:22Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:22:25Z",
+          "conclusion": "success",
+          "name": "Checkout code",
+          "number": 2,
+          "startedAt": "2026-07-21T14:22:23Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:22:34Z",
+          "conclusion": "success",
+          "name": "Setup Node.js",
+          "number": 3,
+          "startedAt": "2026-07-21T14:22:25Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:22:49Z",
+          "conclusion": "success",
+          "name": "Install dependencies",
+          "number": 4,
+          "startedAt": "2026-07-21T14:22:34Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:23:11Z",
+          "conclusion": "success",
+          "name": "Install Playwright Browsers",
+          "number": 5,
+          "startedAt": "2026-07-21T14:22:49Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:23:54Z",
+          "conclusion": "success",
+          "name": "Run checkout multi-PSP E2E",
+          "number": 6,
+          "startedAt": "2026-07-21T14:23:11Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:23:55Z",
+          "conclusion": "success",
+          "name": "Upload checkout E2E report",
+          "number": 7,
+          "startedAt": "2026-07-21T14:23:54Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:23:55Z",
+          "conclusion": "success",
+          "name": "Post Setup Node.js",
+          "number": 13,
+          "startedAt": "2026-07-21T14:23:55Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:23:56Z",
+          "conclusion": "success",
+          "name": "Post Checkout code",
+          "number": 14,
+          "startedAt": "2026-07-21T14:23:55Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:23:56Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 15,
+          "startedAt": "2026-07-21T14:23:56Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/payhuk02/emarzona/actions/runs/29838775414/job/88661914459"
+    },
+    {
+      "completedAt": "2026-07-21T14:27:57Z",
+      "conclusion": "success",
+      "databaseId": 88662032186,
+      "name": "Commerce type gating E2E (5 types)",
+      "startedAt": "2026-07-21T14:22:47Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-07-21T14:22:49Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-07-21T14:22:48Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:22:52Z",
+          "conclusion": "success",
+          "name": "Checkout code",
+          "number": 2,
+          "startedAt": "2026-07-21T14:22:49Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:23:00Z",
+          "conclusion": "success",
+          "name": "Setup Node.js",
+          "number": 3,
+          "startedAt": "2026-07-21T14:22:52Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:23:15Z",
+          "conclusion": "success",
+          "name": "Install dependencies",
+          "number": 4,
+          "startedAt": "2026-07-21T14:23:00Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:23:18Z",
+          "conclusion": "success",
+          "name": "Validate commerce E2E secrets",
+          "number": 5,
+          "startedAt": "2026-07-21T14:23:15Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:23:45Z",
+          "conclusion": "success",
+          "name": "Install Playwright Browsers",
+          "number": 6,
+          "startedAt": "2026-07-21T14:23:18Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:27:53Z",
+          "conclusion": "success",
+          "name": "Run commerce type gating E2E",
+          "number": 7,
+          "startedAt": "2026-07-21T14:23:45Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:27:53Z",
+          "conclusion": "skipped",
+          "name": "Run commerce gating contract tests (E2E skipped)",
+          "number": 8,
+          "startedAt": "2026-07-21T14:27:53Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:27:54Z",
+          "conclusion": "success",
+          "name": "Upload commerce gating report",
+          "number": 9,
+          "startedAt": "2026-07-21T14:27:53Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:27:54Z",
+          "conclusion": "success",
+          "name": "Post Setup Node.js",
+          "number": 17,
+          "startedAt": "2026-07-21T14:27:54Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:27:55Z",
+          "conclusion": "success",
+          "name": "Post Checkout code",
+          "number": 18,
+          "startedAt": "2026-07-21T14:27:54Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:27:55Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 19,
+          "startedAt": "2026-07-21T14:27:55Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/payhuk02/emarzona/actions/runs/29838775414/job/88662032186"
+    },
+    {
+      "completedAt": "2026-07-21T14:34:10Z",
+      "conclusion": "failure",
+      "databaseId": 88662032305,
+      "name": "Store create & theme E2E",
+      "startedAt": "2026-07-21T14:22:47Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-07-21T14:22:49Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-07-21T14:22:48Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:22:51Z",
+          "conclusion": "success",
+          "name": "Checkout code",
+          "number": 2,
+          "startedAt": "2026-07-21T14:22:49Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:22:58Z",
+          "conclusion": "success",
+          "name": "Setup Node.js",
+          "number": 3,
+          "startedAt": "2026-07-21T14:22:51Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:23:11Z",
+          "conclusion": "success",
+          "name": "Install dependencies",
+          "number": 4,
+          "startedAt": "2026-07-21T14:22:58Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:23:13Z",
+          "conclusion": "success",
+          "name": "Validate commerce E2E secrets",
+          "number": 5,
+          "startedAt": "2026-07-21T14:23:11Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:23:35Z",
+          "conclusion": "success",
+          "name": "Install Playwright Browsers",
+          "number": 6,
+          "startedAt": "2026-07-21T14:23:13Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:34:06Z",
+          "conclusion": "failure",
+          "name": "Run store theme E2E",
+          "number": 7,
+          "startedAt": "2026-07-21T14:23:35Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:34:08Z",
+          "conclusion": "success",
+          "name": "Upload store theme report",
+          "number": 8,
+          "startedAt": "2026-07-21T14:34:06Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:34:08Z",
+          "conclusion": "skipped",
+          "name": "Post Setup Node.js",
+          "number": 15,
+          "startedAt": "2026-07-21T14:34:08Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:34:08Z",
+          "conclusion": "success",
+          "name": "Post Checkout code",
+          "number": 16,
+          "startedAt": "2026-07-21T14:34:08Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:34:08Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 17,
+          "startedAt": "2026-07-21T14:34:08Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/payhuk02/emarzona/actions/runs/29838775414/job/88662032305"
+    },
+    {
+      "completedAt": "2026-07-21T14:28:08Z",
+      "conclusion": "success",
+      "databaseId": 88662032327,
+      "name": "Vertical paid E2E (course + artist)",
+      "startedAt": "2026-07-21T14:22:46Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-07-21T14:22:48Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-07-21T14:22:47Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:22:50Z",
+          "conclusion": "success",
+          "name": "Checkout code",
+          "number": 2,
+          "startedAt": "2026-07-21T14:22:48Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:22:56Z",
+          "conclusion": "success",
+          "name": "Setup Node.js",
+          "number": 3,
+          "startedAt": "2026-07-21T14:22:50Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:23:09Z",
+          "conclusion": "success",
+          "name": "Install dependencies",
+          "number": 4,
+          "startedAt": "2026-07-21T14:22:56Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:23:13Z",
+          "conclusion": "success",
+          "name": "Validate commerce E2E secrets",
+          "number": 5,
+          "startedAt": "2026-07-21T14:23:09Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:23:34Z",
+          "conclusion": "success",
+          "name": "Install Playwright Browsers",
+          "number": 6,
+          "startedAt": "2026-07-21T14:23:13Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:28:04Z",
+          "conclusion": "success",
+          "name": "Run vertical paid E2E",
+          "number": 7,
+          "startedAt": "2026-07-21T14:23:34Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:28:04Z",
+          "conclusion": "skipped",
+          "name": "Run vertical paid contract tests (E2E skipped)",
+          "number": 8,
+          "startedAt": "2026-07-21T14:28:04Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:28:06Z",
+          "conclusion": "success",
+          "name": "Upload vertical paid report",
+          "number": 9,
+          "startedAt": "2026-07-21T14:28:04Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:28:06Z",
+          "conclusion": "success",
+          "name": "Post Setup Node.js",
+          "number": 17,
+          "startedAt": "2026-07-21T14:28:06Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:28:06Z",
+          "conclusion": "success",
+          "name": "Post Checkout code",
+          "number": 18,
+          "startedAt": "2026-07-21T14:28:06Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:28:06Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 19,
+          "startedAt": "2026-07-21T14:28:06Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/payhuk02/emarzona/actions/runs/29838775414/job/88662032327"
+    },
+    {
+      "completedAt": "2026-07-21T14:26:34Z",
+      "conclusion": "failure",
+      "databaseId": 88662032333,
+      "name": "Product wizards publish E2E",
+      "startedAt": "2026-07-21T14:22:46Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-07-21T14:22:50Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-07-21T14:22:47Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:22:52Z",
+          "conclusion": "success",
+          "name": "Checkout code",
+          "number": 2,
+          "startedAt": "2026-07-21T14:22:50Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:23:01Z",
+          "conclusion": "success",
+          "name": "Setup Node.js",
+          "number": 3,
+          "startedAt": "2026-07-21T14:22:52Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:23:11Z",
+          "conclusion": "success",
+          "name": "Install dependencies",
+          "number": 4,
+          "startedAt": "2026-07-21T14:23:01Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:23:14Z",
+          "conclusion": "success",
+          "name": "Validate commerce E2E secrets",
+          "number": 5,
+          "startedAt": "2026-07-21T14:23:11Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:23:52Z",
+          "conclusion": "success",
+          "name": "Install Playwright Browsers",
+          "number": 6,
+          "startedAt": "2026-07-21T14:23:14Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:26:30Z",
+          "conclusion": "failure",
+          "name": "Run product wizards E2E",
+          "number": 7,
+          "startedAt": "2026-07-21T14:23:52Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:26:32Z",
+          "conclusion": "success",
+          "name": "Upload artist wizard report",
+          "number": 8,
+          "startedAt": "2026-07-21T14:26:30Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:26:32Z",
+          "conclusion": "skipped",
+          "name": "Post Setup Node.js",
+          "number": 15,
+          "startedAt": "2026-07-21T14:26:32Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:26:32Z",
+          "conclusion": "success",
+          "name": "Post Checkout code",
+          "number": 16,
+          "startedAt": "2026-07-21T14:26:32Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-07-21T14:26:32Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 17,
+          "startedAt": "2026-07-21T14:26:32Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/payhuk02/emarzona/actions/runs/29838775414/job/88662032333"
+    }
+  ]
+}

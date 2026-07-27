@@ -1,1 +1,12 @@
-{"p_product_id":"8730ccf3-6e42-4c56-94c5-ef1e4cb03c39","p_user_id":"1c22f28c-b367-4806-844b-1cfb3f991c87","p_staff_member_id":null,"p_scheduled_date":"2026-07-22","p_scheduled_start_time":"09:00:00","p_scheduled_end_time":"10:00:00","p_timezone":"UTC","p_duration_minutes":60,"p_participants_count":1,"p_customer_notes":"Réservation via ServiceDetail - 22/07/2026"}
+{
+  "p_product_id": "8730ccf3-6e42-4c56-94c5-ef1e4cb03c39",
+  "p_user_id": "1c22f28c-b367-4806-844b-1cfb3f991c87",
+  "p_staff_member_id": null,
+  "p_scheduled_date": "2026-07-22",
+  "p_scheduled_start_time": "09:00:00",
+  "p_scheduled_end_time": "10:00:00",
+  "p_timezone": "UTC",
+  "p_duration_minutes": 60,
+  "p_participants_count": 1,
+  "p_customer_notes": "Réservation via ServiceDetail - 22/07/2026"
+}

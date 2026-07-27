@@ -1,1 +1,953 @@
-﻿{"total_count":10,"jobs":[{"id":88825749006,"run_id":29889088006,"workflow_name":"Tests","head_branch":"main","run_url":"https://api.github.com/repos/payhuk02/emarzona/actions/runs/29889088006","run_attempt":1,"node_id":"CR_kwDOQGi5Oc8AAAAUrm1eDg","head_sha":"1c8d300e0366f49db7ac8e96d815e8ba525f04e4","url":"https://api.github.com/repos/payhuk02/emarzona/actions/jobs/88825749006","html_url":"https://github.com/payhuk02/emarzona/actions/runs/29889088006/job/88825749006","status":"completed","conclusion":"success","created_at":"2026-07-22T03:41:24Z","started_at":"2026-07-22T03:41:27Z","completed_at":"2026-07-22T03:42:01Z","name":"Lint","steps":[{"name":"Set up job","status":"completed","conclusion":"success","number":1,"started_at":"2026-07-22T03:41:28Z","completed_at":"2026-07-22T03:41:29Z"},{"name":"Checkout code","status":"completed","conclusion":"success","number":2,"started_at":"2026-07-22T03:41:29Z","completed_at":"2026-07-22T03:41:32Z"},{"name":"Setup Node.js","status":"completed","conclusion":"success","number":3,"started_at":"2026-07-22T03:41:32Z","completed_at":"2026-07-22T03:41:40Z"},{"name":"Install dependencies","status":"completed","conclusion":"success","number":4,"started_at":"2026-07-22T03:41:40Z","completed_at":"2026-07-22T03:41:56Z"},{"name":"Run linter (phase 3 budget)","status":"completed","conclusion":"success","number":5,"started_at":"2026-07-22T03:41:56Z","completed_at":"2026-07-22T03:41:58Z"},{"name":"Check shell heavy imports","status":"completed","conclusion":"success","number":6,"started_at":"2026-07-22T03:41:58Z","completed_at":"2026-07-22T03:41:58Z"},{"name":"Post Setup Node.js","status":"completed","conclusion":"success","number":11,"started_at":"2026-07-22T03:41:58Z","completed_at":"2026-07-22T03:41:58Z"},{"name":"Post Checkout code","status":"completed","conclusion":"success","number":12,"started_at":"2026-07-22T03:41:58Z","completed_at":"2026-07-22T03:41:58Z"},{"name":"Complete job","status":"completed","conclusion":"success","number":13,"started_at":"2026-07-22T03:41:58Z","completed_at":"2026-07-22T03:41:58Z"}],"check_run_url":"https://api.github.com/repos/payhuk02/emarzona/check-runs/88825749006","labels":["ubuntu-latest"],"runner_id":1000020293,"runner_name":"GitHub Actions 1000020293","runner_group_id":0,"runner_group_name":"GitHub Actions"},{"id":88825749008,"run_id":29889088006,"workflow_name":"Tests","head_branch":"main","run_url":"https://api.github.com/repos/payhuk02/emarzona/actions/runs/29889088006","run_attempt":1,"node_id":"CR_kwDOQGi5Oc8AAAAUrm1eEA","head_sha":"1c8d300e0366f49db7ac8e96d815e8ba525f04e4","url":"https://api.github.com/repos/payhuk02/emarzona/actions/jobs/88825749008","html_url":"https://github.com/payhuk02/emarzona/actions/runs/29889088006/job/88825749008","status":"completed","conclusion":"success","created_at":"2026-07-22T03:41:24Z","started_at":"2026-07-22T03:41:27Z","completed_at":"2026-07-22T03:42:44Z","name":"Build","steps":[{"name":"Set up job","status":"completed","conclusion":"success","number":1,"started_at":"2026-07-22T03:41:27Z","completed_at":"2026-07-22T03:41:28Z"},{"name":"Checkout code","status":"completed","conclusion":"success","number":2,"started_at":"2026-07-22T03:41:28Z","completed_at":"2026-07-22T03:41:31Z"},{"name":"Setup Node.js","status":"completed","conclusion":"success","number":3,"started_at":"2026-07-22T03:41:31Z","completed_at":"2026-07-22T03:41:36Z"},{"name":"Install dependencies","status":"completed","conclusion":"success","number":4,"started_at":"2026-07-22T03:41:36Z","completed_at":"2026-07-22T03:41:50Z"},{"name":"Build and enforce bundle budgets","status":"completed","conclusion":"success","number":5,"started_at":"2026-07-22T03:41:50Z","completed_at":"2026-07-22T03:42:42Z"},{"name":"Post Setup Node.js","status":"completed","conclusion":"success","number":9,"started_at":"2026-07-22T03:42:42Z","completed_at":"2026-07-22T03:42:42Z"},{"name":"Post Checkout code","status":"completed","conclusion":"success","number":10,"started_at":"2026-07-22T03:42:42Z","completed_at":"2026-07-22T03:42:43Z"},{"name":"Complete job","status":"completed","conclusion":"success","number":11,"started_at":"2026-07-22T03:42:43Z","completed_at":"2026-07-22T03:42:43Z"}],"check_run_url":"https://api.github.com/repos/payhuk02/emarzona/check-runs/88825749008","labels":["ubuntu-latest"],"runner_id":1000020292,"runner_name":"GitHub Actions 1000020292","runner_group_id":0,"runner_group_name":"GitHub Actions"},{"id":88825749035,"run_id":29889088006,"workflow_name":"Tests","head_branch":"main","run_url":"https://api.github.com/repos/payhuk02/emarzona/actions/runs/29889088006","run_attempt":1,"node_id":"CR_kwDOQGi5Oc8AAAAUrm1eKw","head_sha":"1c8d300e0366f49db7ac8e96d815e8ba525f04e4","url":"https://api.github.com/repos/payhuk02/emarzona/actions/jobs/88825749035","html_url":"https://github.com/payhuk02/emarzona/actions/runs/29889088006/job/88825749035","status":"completed","conclusion":"success","created_at":"2026-07-22T03:41:24Z","started_at":"2026-07-22T03:41:27Z","completed_at":"2026-07-22T03:42:04Z","name":"Security & Architecture Gates","steps":[{"name":"Set up job","status":"completed","conclusion":"success","number":1,"started_at":"2026-07-22T03:41:27Z","completed_at":"2026-07-22T03:41:28Z"},{"name":"Checkout code","status":"completed","conclusion":"success","number":2,"started_at":"2026-07-22T03:41:28Z","completed_at":"2026-07-22T03:41:30Z"},{"name":"Setup Node.js","status":"completed","conclusion":"success","number":3,"started_at":"2026-07-22T03:41:30Z","completed_at":"2026-07-22T03:41:35Z"},{"name":"Install dependencies","status":"completed","conclusion":"success","number":4,"started_at":"2026-07-22T03:41:35Z","completed_at":"2026-07-22T03:41:48Z"},{"name":"Security & architecture gates (CI offline)","status":"completed","conclusion":"success","number":5,"started_at":"2026-07-22T03:41:48Z","completed_at":"2026-07-22T03:42:03Z"},{"name":"Post Setup Node.js","status":"completed","conclusion":"success","number":9,"started_at":"2026-07-22T03:42:03Z","completed_at":"2026-07-22T03:42:03Z"},{"name":"Post Checkout code","status":"completed","conclusion":"success","number":10,"started_at":"2026-07-22T03:42:03Z","completed_at":"2026-07-22T03:42:03Z"},{"name":"Complete job","status":"completed","conclusion":"success","number":11,"started_at":"2026-07-22T03:42:03Z","completed_at":"2026-07-22T03:42:03Z"}],"check_run_url":"https://api.github.com/repos/payhuk02/emarzona/check-runs/88825749035","labels":["ubuntu-latest"],"runner_id":1000020294,"runner_name":"GitHub Actions 1000020294","runner_group_id":0,"runner_group_name":"GitHub Actions"},{"id":88825749040,"run_id":29889088006,"workflow_name":"Tests","head_branch":"main","run_url":"https://api.github.com/repos/payhuk02/emarzona/actions/runs/29889088006","run_attempt":1,"node_id":"CR_kwDOQGi5Oc8AAAAUrm1eMA","head_sha":"1c8d300e0366f49db7ac8e96d815e8ba525f04e4","url":"https://api.github.com/repos/payhuk02/emarzona/actions/jobs/88825749040","html_url":"https://github.com/payhuk02/emarzona/actions/runs/29889088006/job/88825749040","status":"completed","conclusion":"success","created_at":"2026-07-22T03:41:24Z","started_at":"2026-07-22T03:41:27Z","completed_at":"2026-07-22T03:42:00Z","name":"Typecheck (Marketplace Core)","steps":[{"name":"Set up job","status":"completed","conclusion":"success","number":1,"started_at":"2026-07-22T03:41:28Z","completed_at":"2026-07-22T03:41:29Z"},{"name":"Checkout code","status":"completed","conclusion":"success","number":2,"started_at":"2026-07-22T03:41:29Z","completed_at":"2026-07-22T03:41:32Z"},{"name":"Setup Node.js","status":"completed","conclusion":"success","number":3,"started_at":"2026-07-22T03:41:32Z","completed_at":"2026-07-22T03:41:40Z"},{"name":"Install dependencies","status":"completed","conclusion":"success","number":4,"started_at":"2026-07-22T03:41:40Z","completed_at":"2026-07-22T03:41:52Z"},{"name":"Run typecheck target","status":"completed","conclusion":"success","number":5,"started_at":"2026-07-22T03:41:52Z","completed_at":"2026-07-22T03:41:57Z"},{"name":"Post Setup Node.js","status":"completed","conclusion":"success","number":9,"started_at":"2026-07-22T03:41:57Z","completed_at":"2026-07-22T03:41:57Z"},{"name":"Post Checkout code","status":"completed","conclusion":"success","number":10,"started_at":"2026-07-22T03:41:57Z","completed_at":"2026-07-22T03:41:57Z"},{"name":"Complete job","status":"completed","conclusion":"success","number":11,"started_at":"2026-07-22T03:41:57Z","completed_at":"2026-07-22T03:41:57Z"}],"check_run_url":"https://api.github.com/repos/payhuk02/emarzona/check-runs/88825749040","labels":["ubuntu-latest"],"runner_id":1000020299,"runner_name":"GitHub Actions 1000020299","runner_group_id":0,"runner_group_name":"GitHub Actions"},{"id":88825749042,"run_id":29889088006,"workflow_name":"Tests","head_branch":"main","run_url":"https://api.github.com/repos/payhuk02/emarzona/actions/runs/29889088006","run_attempt":1,"node_id":"CR_kwDOQGi5Oc8AAAAUrm1eMg","head_sha":"1c8d300e0366f49db7ac8e96d815e8ba525f04e4","url":"https://api.github.com/repos/payhuk02/emarzona/actions/jobs/88825749042","html_url":"https://github.com/payhuk02/emarzona/actions/runs/29889088006/job/88825749042","status":"completed","conclusion":"success","created_at":"2026-07-22T03:41:24Z","started_at":"2026-07-22T03:41:27Z","completed_at":"2026-07-22T03:41:55Z","name":"Edge Functions Check","steps":[{"name":"Set up job","status":"completed","conclusion":"success","number":1,"started_at":"2026-07-22T03:41:27Z","completed_at":"2026-07-22T03:41:28Z"},{"name":"Checkout code","status":"completed","conclusion":"success","number":2,"started_at":"2026-07-22T03:41:28Z","completed_at":"2026-07-22T03:41:31Z"},{"name":"Setup Deno","status":"completed","conclusion":"success","number":3,"started_at":"2026-07-22T03:41:31Z","completed_at":"2026-07-22T03:41:32Z"},{"name":"Format check (Stripe / Payment V2 Edge Functions)","status":"completed","conclusion":"success","number":4,"started_at":"2026-07-22T03:41:32Z","completed_at":"2026-07-22T03:41:32Z"},{"name":"Type check email workflow Edge Functions","status":"completed","conclusion":"success","number":5,"started_at":"2026-07-22T03:41:32Z","completed_at":"2026-07-22T03:41:44Z"},{"name":"Type check Payment V2 / Stripe Tax Edge Functions","status":"completed","conclusion":"success","number":6,"started_at":"2026-07-22T03:41:44Z","completed_at":"2026-07-22T03:41:47Z"},{"name":"Run Edge Functions Contract Tests","status":"completed","conclusion":"success","number":7,"started_at":"2026-07-22T03:41:47Z","completed_at":"2026-07-22T03:41:54Z"},{"name":"Post Setup Deno","status":"completed","conclusion":"success","number":13,"started_at":"2026-07-22T03:41:54Z","completed_at":"2026-07-22T03:41:54Z"},{"name":"Post Checkout code","status":"completed","conclusion":"success","number":14,"started_at":"2026-07-22T03:41:54Z","completed_at":"2026-07-22T03:41:54Z"},{"name":"Complete job","status":"completed","conclusion":"success","number":15,"started_at":"2026-07-22T03:41:54Z","completed_at":"2026-07-22T03:41:54Z"}],"check_run_url":"https://api.github.com/repos/payhuk02/emarzona/check-runs/88825749042","labels":["ubuntu-latest"],"runner_id":1000020295,"runner_name":"GitHub Actions 1000020295","runner_group_id":0,"runner_group_name":"GitHub Actions"},{"id":88825749043,"run_id":29889088006,"workflow_name":"Tests","head_branch":"main","run_url":"https://api.github.com/repos/payhuk02/emarzona/actions/runs/29889088006","run_attempt":1,"node_id":"CR_kwDOQGi5Oc8AAAAUrm1eMw","head_sha":"1c8d300e0366f49db7ac8e96d815e8ba525f04e4","url":"https://api.github.com/repos/payhuk02/emarzona/actions/jobs/88825749043","html_url":"https://github.com/payhuk02/emarzona/actions/runs/29889088006/job/88825749043","status":"completed","conclusion":"success","created_at":"2026-07-22T03:41:24Z","started_at":"2026-07-22T03:41:27Z","completed_at":"2026-07-22T03:41:55Z","name":"Typecheck (Auth Admin)","steps":[{"name":"Set up job","status":"completed","conclusion":"success","number":1,"started_at":"2026-07-22T03:41:27Z","completed_at":"2026-07-22T03:41:28Z"},{"name":"Checkout code","status":"completed","conclusion":"success","number":2,"started_at":"2026-07-22T03:41:28Z","completed_at":"2026-07-22T03:41:30Z"},{"name":"Setup Node.js","status":"completed","conclusion":"success","number":3,"started_at":"2026-07-22T03:41:30Z","completed_at":"2026-07-22T03:41:36Z"},{"name":"Install dependencies","status":"completed","conclusion":"success","number":4,"started_at":"2026-07-22T03:41:36Z","completed_at":"2026-07-22T03:41:50Z"},{"name":"Run typecheck target","status":"completed","conclusion":"success","number":5,"started_at":"2026-07-22T03:41:50Z","completed_at":"2026-07-22T03:41:53Z"},{"name":"Post Setup Node.js","status":"completed","conclusion":"success","number":9,"started_at":"2026-07-22T03:41:53Z","completed_at":"2026-07-22T03:41:53Z"},{"name":"Post Checkout code","status":"completed","conclusion":"success","number":10,"started_at":"2026-07-22T03:41:53Z","completed_at":"2026-07-22T03:41:53Z"},{"name":"Complete job","status":"completed","conclusion":"success","number":11,"started_at":"2026-07-22T03:41:53Z","completed_at":"2026-07-22T03:41:53Z"}],"check_run_url":"https://api.github.com/repos/payhuk02/emarzona/check-runs/88825749043","labels":["ubuntu-latest"],"runner_id":1000020296,"runner_name":"GitHub Actions 1000020296","runner_group_id":0,"runner_group_name":"GitHub Actions"},{"id":88825749046,"run_id":29889088006,"workflow_name":"Tests","head_branch":"main","run_url":"https://api.github.com/repos/payhuk02/emarzona/actions/runs/29889088006","run_attempt":1,"node_id":"CR_kwDOQGi5Oc8AAAAUrm1eNg","head_sha":"1c8d300e0366f49db7ac8e96d815e8ba525f04e4","url":"https://api.github.com/repos/payhuk02/emarzona/actions/jobs/88825749046","html_url":"https://github.com/payhuk02/emarzona/actions/runs/29889088006/job/88825749046","status":"completed","conclusion":"success","created_at":"2026-07-22T03:41:24Z","started_at":"2026-07-22T03:41:27Z","completed_at":"2026-07-22T03:43:02Z","name":"Unit Tests","steps":[{"name":"Set up job","status":"completed","conclusion":"success","number":1,"started_at":"2026-07-22T03:41:28Z","completed_at":"2026-07-22T03:41:30Z"},{"name":"Checkout code","status":"completed","conclusion":"success","number":2,"started_at":"2026-07-22T03:41:30Z","completed_at":"2026-07-22T03:41:32Z"},{"name":"Setup Node.js","status":"completed","conclusion":"success","number":3,"started_at":"2026-07-22T03:41:32Z","completed_at":"2026-07-22T03:41:40Z"},{"name":"Install dependencies","status":"completed","conclusion":"success","number":4,"started_at":"2026-07-22T03:41:40Z","completed_at":"2026-07-22T03:41:53Z"},{"name":"Run unit tests with coverage","status":"completed","conclusion":"success","number":5,"started_at":"2026-07-22T03:41:53Z","completed_at":"2026-07-22T03:42:49Z"},{"name":"Run navigation tests","status":"completed","conclusion":"success","number":6,"started_at":"2026-07-22T03:42:49Z","completed_at":"2026-07-22T03:42:55Z"},{"name":"Check coverage thresholds","status":"completed","conclusion":"success","number":7,"started_at":"2026-07-22T03:42:55Z","completed_at":"2026-07-22T03:42:55Z"},{"name":"Upload coverage","status":"completed","conclusion":"success","number":8,"started_at":"2026-07-22T03:42:55Z","completed_at":"2026-07-22T03:42:59Z"},{"name":"Post Setup Node.js","status":"completed","conclusion":"success","number":15,"started_at":"2026-07-22T03:42:59Z","completed_at":"2026-07-22T03:42:59Z"},{"name":"Post Checkout code","status":"completed","conclusion":"success","number":16,"started_at":"2026-07-22T03:42:59Z","completed_at":"2026-07-22T03:42:59Z"},{"name":"Complete job","status":"completed","conclusion":"success","number":17,"started_at":"2026-07-22T03:42:59Z","completed_at":"2026-07-22T03:42:59Z"}],"check_run_url":"https://api.github.com/repos/payhuk02/emarzona/check-runs/88825749046","labels":["ubuntu-latest"],"runner_id":1000020298,"runner_name":"GitHub Actions 1000020298","runner_group_id":0,"runner_group_name":"GitHub Actions"},{"id":88825749069,"run_id":29889088006,"workflow_name":"Tests","head_branch":"main","run_url":"https://api.github.com/repos/payhuk02/emarzona/actions/runs/29889088006","run_attempt":1,"node_id":"CR_kwDOQGi5Oc8AAAAUrm1eTQ","head_sha":"1c8d300e0366f49db7ac8e96d815e8ba525f04e4","url":"https://api.github.com/repos/payhuk02/emarzona/actions/jobs/88825749069","html_url":"https://github.com/payhuk02/emarzona/actions/runs/29889088006/job/88825749069","status":"completed","conclusion":"success","created_at":"2026-07-22T03:41:24Z","started_at":"2026-07-22T03:41:27Z","completed_at":"2026-07-22T03:41:59Z","name":"Typecheck (Critical)","steps":[{"name":"Set up job","status":"completed","conclusion":"success","number":1,"started_at":"2026-07-22T03:41:28Z","completed_at":"2026-07-22T03:41:29Z"},{"name":"Checkout code","status":"completed","conclusion":"success","number":2,"started_at":"2026-07-22T03:41:29Z","completed_at":"2026-07-22T03:41:32Z"},{"name":"Setup Node.js","status":"completed","conclusion":"success","number":3,"started_at":"2026-07-22T03:41:32Z","completed_at":"2026-07-22T03:41:40Z"},{"name":"Install dependencies","status":"completed","conclusion":"success","number":4,"started_at":"2026-07-22T03:41:40Z","completed_at":"2026-07-22T03:41:53Z"},{"name":"Run typecheck target","status":"completed","conclusion":"success","number":5,"started_at":"2026-07-22T03:41:53Z","completed_at":"2026-07-22T03:41:56Z"},{"name":"Post Setup Node.js","status":"completed","conclusion":"success","number":9,"started_at":"2026-07-22T03:41:56Z","completed_at":"2026-07-22T03:41:57Z"},{"name":"Post Checkout code","status":"completed","conclusion":"success","number":10,"started_at":"2026-07-22T03:41:57Z","completed_at":"2026-07-22T03:41:57Z"},{"name":"Complete job","status":"completed","conclusion":"success","number":11,"started_at":"2026-07-22T03:41:57Z","completed_at":"2026-07-22T03:41:57Z"}],"check_run_url":"https://api.github.com/repos/payhuk02/emarzona/check-runs/88825749069","labels":["ubuntu-latest"],"runner_id":1000020297,"runner_name":"GitHub Actions 1000020297","runner_group_id":0,"runner_group_name":"GitHub Actions"},{"id":88825749091,"run_id":29889088006,"workflow_name":"Tests","head_branch":"main","run_url":"https://api.github.com/repos/payhuk02/emarzona/actions/runs/29889088006","run_attempt":1,"node_id":"CR_kwDOQGi5Oc8AAAAUrm1eYw","head_sha":"1c8d300e0366f49db7ac8e96d815e8ba525f04e4","url":"https://api.github.com/repos/payhuk02/emarzona/actions/jobs/88825749091","html_url":"https://github.com/payhuk02/emarzona/actions/runs/29889088006/job/88825749091","status":"completed","conclusion":"success","created_at":"2026-07-22T03:41:24Z","started_at":"2026-07-22T03:41:27Z","completed_at":"2026-07-22T03:42:11Z","name":"Typecheck (Commerce Core)","steps":[{"name":"Set up job","status":"completed","conclusion":"success","number":1,"started_at":"2026-07-22T03:41:28Z","completed_at":"2026-07-22T03:41:29Z"},{"name":"Checkout code","status":"completed","conclusion":"success","number":2,"started_at":"2026-07-22T03:41:29Z","completed_at":"2026-07-22T03:41:32Z"},{"name":"Setup Node.js","status":"completed","conclusion":"success","number":3,"started_at":"2026-07-22T03:41:32Z","completed_at":"2026-07-22T03:41:40Z"},{"name":"Install dependencies","status":"completed","conclusion":"success","number":4,"started_at":"2026-07-22T03:41:40Z","completed_at":"2026-07-22T03:41:55Z"},{"name":"Run typecheck target","status":"completed","conclusion":"success","number":5,"started_at":"2026-07-22T03:41:55Z","completed_at":"2026-07-22T03:42:08Z"},{"name":"Post Setup Node.js","status":"completed","conclusion":"success","number":9,"started_at":"2026-07-22T03:42:08Z","completed_at":"2026-07-22T03:42:08Z"},{"name":"Post Checkout code","status":"completed","conclusion":"success","number":10,"started_at":"2026-07-22T03:42:08Z","completed_at":"2026-07-22T03:42:08Z"},{"name":"Complete job","status":"completed","conclusion":"success","number":11,"started_at":"2026-07-22T03:42:08Z","completed_at":"2026-07-22T03:42:08Z"}],"check_run_url":"https://api.github.com/repos/payhuk02/emarzona/check-runs/88825749091","labels":["ubuntu-latest"],"runner_id":1000020300,"runner_name":"GitHub Actions 1000020300","runner_group_id":0,"runner_group_name":"GitHub Actions"},{"id":88825749122,"run_id":29889088006,"workflow_name":"Tests","head_branch":"main","run_url":"https://api.github.com/repos/payhuk02/emarzona/actions/runs/29889088006","run_attempt":1,"node_id":"CR_kwDOQGi5Oc8AAAAUrm1egg","head_sha":"1c8d300e0366f49db7ac8e96d815e8ba525f04e4","url":"https://api.github.com/repos/payhuk02/emarzona/actions/jobs/88825749122","html_url":"https://github.com/payhuk02/emarzona/actions/runs/29889088006/job/88825749122","status":"completed","conclusion":"failure","created_at":"2026-07-22T03:41:24Z","started_at":"2026-07-22T03:41:27Z","completed_at":"2026-07-22T03:42:07Z","name":"Typecheck (Ops Core)","steps":[{"name":"Set up job","status":"completed","conclusion":"success","number":1,"started_at":"2026-07-22T03:41:28Z","completed_at":"2026-07-22T03:41:29Z"},{"name":"Checkout code","status":"completed","conclusion":"success","number":2,"started_at":"2026-07-22T03:41:29Z","completed_at":"2026-07-22T03:41:31Z"},{"name":"Setup Node.js","status":"completed","conclusion":"success","number":3,"started_at":"2026-07-22T03:41:31Z","completed_at":"2026-07-22T03:41:39Z"},{"name":"Install dependencies","status":"completed","conclusion":"success","number":4,"started_at":"2026-07-22T03:41:39Z","completed_at":"2026-07-22T03:41:54Z"},{"name":"Run typecheck target","status":"completed","conclusion":"failure","number":5,"started_at":"2026-07-22T03:41:54Z","completed_at":"2026-07-22T03:42:04Z"},{"name":"Post Setup Node.js","status":"completed","conclusion":"skipped","number":9,"started_at":"2026-07-22T03:42:04Z","completed_at":"2026-07-22T03:42:04Z"},{"name":"Post Checkout code","status":"completed","conclusion":"success","number":10,"started_at":"2026-07-22T03:42:04Z","completed_at":"2026-07-22T03:42:04Z"},{"name":"Complete job","status":"completed","conclusion":"success","number":11,"started_at":"2026-07-22T03:42:04Z","completed_at":"2026-07-22T03:42:04Z"}],"check_run_url":"https://api.github.com/repos/payhuk02/emarzona/check-runs/88825749122","labels":["ubuntu-latest"],"runner_id":1000020301,"runner_name":"GitHub Actions 1000020301","runner_group_id":0,"runner_group_name":"GitHub Actions"}]}
+﻿{
+  "total_count": 10,
+  "jobs": [
+    {
+      "id": 88825749006,
+      "run_id": 29889088006,
+      "workflow_name": "Tests",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/payhuk02/emarzona/actions/runs/29889088006",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOQGi5Oc8AAAAUrm1eDg",
+      "head_sha": "1c8d300e0366f49db7ac8e96d815e8ba525f04e4",
+      "url": "https://api.github.com/repos/payhuk02/emarzona/actions/jobs/88825749006",
+      "html_url": "https://github.com/payhuk02/emarzona/actions/runs/29889088006/job/88825749006",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-07-22T03:41:24Z",
+      "started_at": "2026-07-22T03:41:27Z",
+      "completed_at": "2026-07-22T03:42:01Z",
+      "name": "Lint",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-07-22T03:41:28Z",
+          "completed_at": "2026-07-22T03:41:29Z"
+        },
+        {
+          "name": "Checkout code",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-07-22T03:41:29Z",
+          "completed_at": "2026-07-22T03:41:32Z"
+        },
+        {
+          "name": "Setup Node.js",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-07-22T03:41:32Z",
+          "completed_at": "2026-07-22T03:41:40Z"
+        },
+        {
+          "name": "Install dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-07-22T03:41:40Z",
+          "completed_at": "2026-07-22T03:41:56Z"
+        },
+        {
+          "name": "Run linter (phase 3 budget)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-07-22T03:41:56Z",
+          "completed_at": "2026-07-22T03:41:58Z"
+        },
+        {
+          "name": "Check shell heavy imports",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-07-22T03:41:58Z",
+          "completed_at": "2026-07-22T03:41:58Z"
+        },
+        {
+          "name": "Post Setup Node.js",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-07-22T03:41:58Z",
+          "completed_at": "2026-07-22T03:41:58Z"
+        },
+        {
+          "name": "Post Checkout code",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-07-22T03:41:58Z",
+          "completed_at": "2026-07-22T03:41:58Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-07-22T03:41:58Z",
+          "completed_at": "2026-07-22T03:41:58Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/payhuk02/emarzona/check-runs/88825749006",
+      "labels": ["ubuntu-latest"],
+      "runner_id": 1000020293,
+      "runner_name": "GitHub Actions 1000020293",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 88825749008,
+      "run_id": 29889088006,
+      "workflow_name": "Tests",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/payhuk02/emarzona/actions/runs/29889088006",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOQGi5Oc8AAAAUrm1eEA",
+      "head_sha": "1c8d300e0366f49db7ac8e96d815e8ba525f04e4",
+      "url": "https://api.github.com/repos/payhuk02/emarzona/actions/jobs/88825749008",
+      "html_url": "https://github.com/payhuk02/emarzona/actions/runs/29889088006/job/88825749008",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-07-22T03:41:24Z",
+      "started_at": "2026-07-22T03:41:27Z",
+      "completed_at": "2026-07-22T03:42:44Z",
+      "name": "Build",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-07-22T03:41:27Z",
+          "completed_at": "2026-07-22T03:41:28Z"
+        },
+        {
+          "name": "Checkout code",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-07-22T03:41:28Z",
+          "completed_at": "2026-07-22T03:41:31Z"
+        },
+        {
+          "name": "Setup Node.js",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-07-22T03:41:31Z",
+          "completed_at": "2026-07-22T03:41:36Z"
+        },
+        {
+          "name": "Install dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-07-22T03:41:36Z",
+          "completed_at": "2026-07-22T03:41:50Z"
+        },
+        {
+          "name": "Build and enforce bundle budgets",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-07-22T03:41:50Z",
+          "completed_at": "2026-07-22T03:42:42Z"
+        },
+        {
+          "name": "Post Setup Node.js",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-07-22T03:42:42Z",
+          "completed_at": "2026-07-22T03:42:42Z"
+        },
+        {
+          "name": "Post Checkout code",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-07-22T03:42:42Z",
+          "completed_at": "2026-07-22T03:42:43Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-07-22T03:42:43Z",
+          "completed_at": "2026-07-22T03:42:43Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/payhuk02/emarzona/check-runs/88825749008",
+      "labels": ["ubuntu-latest"],
+      "runner_id": 1000020292,
+      "runner_name": "GitHub Actions 1000020292",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 88825749035,
+      "run_id": 29889088006,
+      "workflow_name": "Tests",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/payhuk02/emarzona/actions/runs/29889088006",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOQGi5Oc8AAAAUrm1eKw",
+      "head_sha": "1c8d300e0366f49db7ac8e96d815e8ba525f04e4",
+      "url": "https://api.github.com/repos/payhuk02/emarzona/actions/jobs/88825749035",
+      "html_url": "https://github.com/payhuk02/emarzona/actions/runs/29889088006/job/88825749035",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-07-22T03:41:24Z",
+      "started_at": "2026-07-22T03:41:27Z",
+      "completed_at": "2026-07-22T03:42:04Z",
+      "name": "Security & Architecture Gates",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-07-22T03:41:27Z",
+          "completed_at": "2026-07-22T03:41:28Z"
+        },
+        {
+          "name": "Checkout code",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-07-22T03:41:28Z",
+          "completed_at": "2026-07-22T03:41:30Z"
+        },
+        {
+          "name": "Setup Node.js",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-07-22T03:41:30Z",
+          "completed_at": "2026-07-22T03:41:35Z"
+        },
+        {
+          "name": "Install dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-07-22T03:41:35Z",
+          "completed_at": "2026-07-22T03:41:48Z"
+        },
+        {
+          "name": "Security & architecture gates (CI offline)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-07-22T03:41:48Z",
+          "completed_at": "2026-07-22T03:42:03Z"
+        },
+        {
+          "name": "Post Setup Node.js",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-07-22T03:42:03Z",
+          "completed_at": "2026-07-22T03:42:03Z"
+        },
+        {
+          "name": "Post Checkout code",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-07-22T03:42:03Z",
+          "completed_at": "2026-07-22T03:42:03Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-07-22T03:42:03Z",
+          "completed_at": "2026-07-22T03:42:03Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/payhuk02/emarzona/check-runs/88825749035",
+      "labels": ["ubuntu-latest"],
+      "runner_id": 1000020294,
+      "runner_name": "GitHub Actions 1000020294",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 88825749040,
+      "run_id": 29889088006,
+      "workflow_name": "Tests",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/payhuk02/emarzona/actions/runs/29889088006",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOQGi5Oc8AAAAUrm1eMA",
+      "head_sha": "1c8d300e0366f49db7ac8e96d815e8ba525f04e4",
+      "url": "https://api.github.com/repos/payhuk02/emarzona/actions/jobs/88825749040",
+      "html_url": "https://github.com/payhuk02/emarzona/actions/runs/29889088006/job/88825749040",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-07-22T03:41:24Z",
+      "started_at": "2026-07-22T03:41:27Z",
+      "completed_at": "2026-07-22T03:42:00Z",
+      "name": "Typecheck (Marketplace Core)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-07-22T03:41:28Z",
+          "completed_at": "2026-07-22T03:41:29Z"
+        },
+        {
+          "name": "Checkout code",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-07-22T03:41:29Z",
+          "completed_at": "2026-07-22T03:41:32Z"
+        },
+        {
+          "name": "Setup Node.js",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-07-22T03:41:32Z",
+          "completed_at": "2026-07-22T03:41:40Z"
+        },
+        {
+          "name": "Install dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-07-22T03:41:40Z",
+          "completed_at": "2026-07-22T03:41:52Z"
+        },
+        {
+          "name": "Run typecheck target",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-07-22T03:41:52Z",
+          "completed_at": "2026-07-22T03:41:57Z"
+        },
+        {
+          "name": "Post Setup Node.js",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-07-22T03:41:57Z",
+          "completed_at": "2026-07-22T03:41:57Z"
+        },
+        {
+          "name": "Post Checkout code",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-07-22T03:41:57Z",
+          "completed_at": "2026-07-22T03:41:57Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-07-22T03:41:57Z",
+          "completed_at": "2026-07-22T03:41:57Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/payhuk02/emarzona/check-runs/88825749040",
+      "labels": ["ubuntu-latest"],
+      "runner_id": 1000020299,
+      "runner_name": "GitHub Actions 1000020299",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 88825749042,
+      "run_id": 29889088006,
+      "workflow_name": "Tests",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/payhuk02/emarzona/actions/runs/29889088006",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOQGi5Oc8AAAAUrm1eMg",
+      "head_sha": "1c8d300e0366f49db7ac8e96d815e8ba525f04e4",
+      "url": "https://api.github.com/repos/payhuk02/emarzona/actions/jobs/88825749042",
+      "html_url": "https://github.com/payhuk02/emarzona/actions/runs/29889088006/job/88825749042",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-07-22T03:41:24Z",
+      "started_at": "2026-07-22T03:41:27Z",
+      "completed_at": "2026-07-22T03:41:55Z",
+      "name": "Edge Functions Check",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-07-22T03:41:27Z",
+          "completed_at": "2026-07-22T03:41:28Z"
+        },
+        {
+          "name": "Checkout code",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-07-22T03:41:28Z",
+          "completed_at": "2026-07-22T03:41:31Z"
+        },
+        {
+          "name": "Setup Deno",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-07-22T03:41:31Z",
+          "completed_at": "2026-07-22T03:41:32Z"
+        },
+        {
+          "name": "Format check (Stripe / Payment V2 Edge Functions)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-07-22T03:41:32Z",
+          "completed_at": "2026-07-22T03:41:32Z"
+        },
+        {
+          "name": "Type check email workflow Edge Functions",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-07-22T03:41:32Z",
+          "completed_at": "2026-07-22T03:41:44Z"
+        },
+        {
+          "name": "Type check Payment V2 / Stripe Tax Edge Functions",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-07-22T03:41:44Z",
+          "completed_at": "2026-07-22T03:41:47Z"
+        },
+        {
+          "name": "Run Edge Functions Contract Tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-07-22T03:41:47Z",
+          "completed_at": "2026-07-22T03:41:54Z"
+        },
+        {
+          "name": "Post Setup Deno",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-07-22T03:41:54Z",
+          "completed_at": "2026-07-22T03:41:54Z"
+        },
+        {
+          "name": "Post Checkout code",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14,
+          "started_at": "2026-07-22T03:41:54Z",
+          "completed_at": "2026-07-22T03:41:54Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-07-22T03:41:54Z",
+          "completed_at": "2026-07-22T03:41:54Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/payhuk02/emarzona/check-runs/88825749042",
+      "labels": ["ubuntu-latest"],
+      "runner_id": 1000020295,
+      "runner_name": "GitHub Actions 1000020295",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 88825749043,
+      "run_id": 29889088006,
+      "workflow_name": "Tests",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/payhuk02/emarzona/actions/runs/29889088006",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOQGi5Oc8AAAAUrm1eMw",
+      "head_sha": "1c8d300e0366f49db7ac8e96d815e8ba525f04e4",
+      "url": "https://api.github.com/repos/payhuk02/emarzona/actions/jobs/88825749043",
+      "html_url": "https://github.com/payhuk02/emarzona/actions/runs/29889088006/job/88825749043",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-07-22T03:41:24Z",
+      "started_at": "2026-07-22T03:41:27Z",
+      "completed_at": "2026-07-22T03:41:55Z",
+      "name": "Typecheck (Auth Admin)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-07-22T03:41:27Z",
+          "completed_at": "2026-07-22T03:41:28Z"
+        },
+        {
+          "name": "Checkout code",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-07-22T03:41:28Z",
+          "completed_at": "2026-07-22T03:41:30Z"
+        },
+        {
+          "name": "Setup Node.js",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-07-22T03:41:30Z",
+          "completed_at": "2026-07-22T03:41:36Z"
+        },
+        {
+          "name": "Install dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-07-22T03:41:36Z",
+          "completed_at": "2026-07-22T03:41:50Z"
+        },
+        {
+          "name": "Run typecheck target",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-07-22T03:41:50Z",
+          "completed_at": "2026-07-22T03:41:53Z"
+        },
+        {
+          "name": "Post Setup Node.js",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-07-22T03:41:53Z",
+          "completed_at": "2026-07-22T03:41:53Z"
+        },
+        {
+          "name": "Post Checkout code",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-07-22T03:41:53Z",
+          "completed_at": "2026-07-22T03:41:53Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-07-22T03:41:53Z",
+          "completed_at": "2026-07-22T03:41:53Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/payhuk02/emarzona/check-runs/88825749043",
+      "labels": ["ubuntu-latest"],
+      "runner_id": 1000020296,
+      "runner_name": "GitHub Actions 1000020296",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 88825749046,
+      "run_id": 29889088006,
+      "workflow_name": "Tests",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/payhuk02/emarzona/actions/runs/29889088006",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOQGi5Oc8AAAAUrm1eNg",
+      "head_sha": "1c8d300e0366f49db7ac8e96d815e8ba525f04e4",
+      "url": "https://api.github.com/repos/payhuk02/emarzona/actions/jobs/88825749046",
+      "html_url": "https://github.com/payhuk02/emarzona/actions/runs/29889088006/job/88825749046",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-07-22T03:41:24Z",
+      "started_at": "2026-07-22T03:41:27Z",
+      "completed_at": "2026-07-22T03:43:02Z",
+      "name": "Unit Tests",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-07-22T03:41:28Z",
+          "completed_at": "2026-07-22T03:41:30Z"
+        },
+        {
+          "name": "Checkout code",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-07-22T03:41:30Z",
+          "completed_at": "2026-07-22T03:41:32Z"
+        },
+        {
+          "name": "Setup Node.js",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-07-22T03:41:32Z",
+          "completed_at": "2026-07-22T03:41:40Z"
+        },
+        {
+          "name": "Install dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-07-22T03:41:40Z",
+          "completed_at": "2026-07-22T03:41:53Z"
+        },
+        {
+          "name": "Run unit tests with coverage",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-07-22T03:41:53Z",
+          "completed_at": "2026-07-22T03:42:49Z"
+        },
+        {
+          "name": "Run navigation tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-07-22T03:42:49Z",
+          "completed_at": "2026-07-22T03:42:55Z"
+        },
+        {
+          "name": "Check coverage thresholds",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-07-22T03:42:55Z",
+          "completed_at": "2026-07-22T03:42:55Z"
+        },
+        {
+          "name": "Upload coverage",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-07-22T03:42:55Z",
+          "completed_at": "2026-07-22T03:42:59Z"
+        },
+        {
+          "name": "Post Setup Node.js",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-07-22T03:42:59Z",
+          "completed_at": "2026-07-22T03:42:59Z"
+        },
+        {
+          "name": "Post Checkout code",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-07-22T03:42:59Z",
+          "completed_at": "2026-07-22T03:42:59Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-07-22T03:42:59Z",
+          "completed_at": "2026-07-22T03:42:59Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/payhuk02/emarzona/check-runs/88825749046",
+      "labels": ["ubuntu-latest"],
+      "runner_id": 1000020298,
+      "runner_name": "GitHub Actions 1000020298",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 88825749069,
+      "run_id": 29889088006,
+      "workflow_name": "Tests",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/payhuk02/emarzona/actions/runs/29889088006",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOQGi5Oc8AAAAUrm1eTQ",
+      "head_sha": "1c8d300e0366f49db7ac8e96d815e8ba525f04e4",
+      "url": "https://api.github.com/repos/payhuk02/emarzona/actions/jobs/88825749069",
+      "html_url": "https://github.com/payhuk02/emarzona/actions/runs/29889088006/job/88825749069",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-07-22T03:41:24Z",
+      "started_at": "2026-07-22T03:41:27Z",
+      "completed_at": "2026-07-22T03:41:59Z",
+      "name": "Typecheck (Critical)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-07-22T03:41:28Z",
+          "completed_at": "2026-07-22T03:41:29Z"
+        },
+        {
+          "name": "Checkout code",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-07-22T03:41:29Z",
+          "completed_at": "2026-07-22T03:41:32Z"
+        },
+        {
+          "name": "Setup Node.js",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-07-22T03:41:32Z",
+          "completed_at": "2026-07-22T03:41:40Z"
+        },
+        {
+          "name": "Install dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-07-22T03:41:40Z",
+          "completed_at": "2026-07-22T03:41:53Z"
+        },
+        {
+          "name": "Run typecheck target",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-07-22T03:41:53Z",
+          "completed_at": "2026-07-22T03:41:56Z"
+        },
+        {
+          "name": "Post Setup Node.js",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-07-22T03:41:56Z",
+          "completed_at": "2026-07-22T03:41:57Z"
+        },
+        {
+          "name": "Post Checkout code",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-07-22T03:41:57Z",
+          "completed_at": "2026-07-22T03:41:57Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-07-22T03:41:57Z",
+          "completed_at": "2026-07-22T03:41:57Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/payhuk02/emarzona/check-runs/88825749069",
+      "labels": ["ubuntu-latest"],
+      "runner_id": 1000020297,
+      "runner_name": "GitHub Actions 1000020297",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 88825749091,
+      "run_id": 29889088006,
+      "workflow_name": "Tests",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/payhuk02/emarzona/actions/runs/29889088006",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOQGi5Oc8AAAAUrm1eYw",
+      "head_sha": "1c8d300e0366f49db7ac8e96d815e8ba525f04e4",
+      "url": "https://api.github.com/repos/payhuk02/emarzona/actions/jobs/88825749091",
+      "html_url": "https://github.com/payhuk02/emarzona/actions/runs/29889088006/job/88825749091",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-07-22T03:41:24Z",
+      "started_at": "2026-07-22T03:41:27Z",
+      "completed_at": "2026-07-22T03:42:11Z",
+      "name": "Typecheck (Commerce Core)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-07-22T03:41:28Z",
+          "completed_at": "2026-07-22T03:41:29Z"
+        },
+        {
+          "name": "Checkout code",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-07-22T03:41:29Z",
+          "completed_at": "2026-07-22T03:41:32Z"
+        },
+        {
+          "name": "Setup Node.js",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-07-22T03:41:32Z",
+          "completed_at": "2026-07-22T03:41:40Z"
+        },
+        {
+          "name": "Install dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-07-22T03:41:40Z",
+          "completed_at": "2026-07-22T03:41:55Z"
+        },
+        {
+          "name": "Run typecheck target",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-07-22T03:41:55Z",
+          "completed_at": "2026-07-22T03:42:08Z"
+        },
+        {
+          "name": "Post Setup Node.js",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-07-22T03:42:08Z",
+          "completed_at": "2026-07-22T03:42:08Z"
+        },
+        {
+          "name": "Post Checkout code",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-07-22T03:42:08Z",
+          "completed_at": "2026-07-22T03:42:08Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-07-22T03:42:08Z",
+          "completed_at": "2026-07-22T03:42:08Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/payhuk02/emarzona/check-runs/88825749091",
+      "labels": ["ubuntu-latest"],
+      "runner_id": 1000020300,
+      "runner_name": "GitHub Actions 1000020300",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 88825749122,
+      "run_id": 29889088006,
+      "workflow_name": "Tests",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/payhuk02/emarzona/actions/runs/29889088006",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOQGi5Oc8AAAAUrm1egg",
+      "head_sha": "1c8d300e0366f49db7ac8e96d815e8ba525f04e4",
+      "url": "https://api.github.com/repos/payhuk02/emarzona/actions/jobs/88825749122",
+      "html_url": "https://github.com/payhuk02/emarzona/actions/runs/29889088006/job/88825749122",
+      "status": "completed",
+      "conclusion": "failure",
+      "created_at": "2026-07-22T03:41:24Z",
+      "started_at": "2026-07-22T03:41:27Z",
+      "completed_at": "2026-07-22T03:42:07Z",
+      "name": "Typecheck (Ops Core)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-07-22T03:41:28Z",
+          "completed_at": "2026-07-22T03:41:29Z"
+        },
+        {
+          "name": "Checkout code",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-07-22T03:41:29Z",
+          "completed_at": "2026-07-22T03:41:31Z"
+        },
+        {
+          "name": "Setup Node.js",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-07-22T03:41:31Z",
+          "completed_at": "2026-07-22T03:41:39Z"
+        },
+        {
+          "name": "Install dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-07-22T03:41:39Z",
+          "completed_at": "2026-07-22T03:41:54Z"
+        },
+        {
+          "name": "Run typecheck target",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 5,
+          "started_at": "2026-07-22T03:41:54Z",
+          "completed_at": "2026-07-22T03:42:04Z"
+        },
+        {
+          "name": "Post Setup Node.js",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 9,
+          "started_at": "2026-07-22T03:42:04Z",
+          "completed_at": "2026-07-22T03:42:04Z"
+        },
+        {
+          "name": "Post Checkout code",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-07-22T03:42:04Z",
+          "completed_at": "2026-07-22T03:42:04Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-07-22T03:42:04Z",
+          "completed_at": "2026-07-22T03:42:04Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/payhuk02/emarzona/check-runs/88825749122",
+      "labels": ["ubuntu-latest"],
+      "runner_id": 1000020301,
+      "runner_name": "GitHub Actions 1000020301",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    }
+  ]
+}
