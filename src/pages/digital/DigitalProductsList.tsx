@@ -1055,7 +1055,23 @@ export const DigitalProductsList = () => {
                                           {t('digitalProducts.downloads', 'téléchargements')}
                                         </Badge>
                                         <Badge variant="outline" className="font-semibold">
-                                          {product.price?.toLocaleString() || 0} XOF
+                                          {(product.promotional_price || product.promo_price) &&
+                                          (product.promotional_price || product.promo_price) <
+                                            product.price ? (
+                                            <div className="flex items-center gap-1.5">
+                                              <span className="line-through text-muted-foreground/70 text-xs font-normal">
+                                                {product.price?.toLocaleString()}
+                                              </span>
+                                              <span className="text-blue-500 dark:text-blue-400">
+                                                {(
+                                                  product.promotional_price || product.promo_price
+                                                ).toLocaleString()}{' '}
+                                                XOF
+                                              </span>
+                                            </div>
+                                          ) : (
+                                            `${product.price?.toLocaleString() || 0} XOF`
+                                          )}
                                         </Badge>
                                       </div>
                                     </div>
