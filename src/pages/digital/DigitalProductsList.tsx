@@ -9,7 +9,7 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useNavigate } from 'react-router-dom';
-import { generateProductUrl } from '@/lib/store-utils';
+import { generateProductUrl, generateStoreUrl } from '@/lib/store-utils';
 import { useTranslation } from 'react-i18next';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
@@ -1093,19 +1093,22 @@ export const DigitalProductsList = () => {
                                                   store.subdomain
                                                 )
                                               : '';
+                                          const storeBaseUrl = store
+                                            ? generateStoreUrl(store.slug, store.subdomain)
+                                            : '';
+                                          const paymentUrl =
+                                            storeBaseUrl && product?.id
+                                              ? `${storeBaseUrl}/checkout?productId=${product.id}&storeId=${store.id}`
+                                              : '';
 
                                           if (action === 'copy-link' && url) {
-                                            navigator.clipboard.writeText(
-                                              window.location.origin + url
-                                            );
+                                            navigator.clipboard.writeText(url);
                                             toast({
                                               title: 'Succès',
                                               description: 'Le lien du produit a été copié',
                                             });
-                                          } else if (action === 'copy-payment' && url) {
-                                            navigator.clipboard.writeText(
-                                              window.location.origin + url + '?buy=true'
-                                            );
+                                          } else if (action === 'copy-payment' && paymentUrl) {
+                                            navigator.clipboard.writeText(paymentUrl);
                                             toast({
                                               title: 'Succès',
                                               description: 'Le lien de paiement a été copié',
@@ -1113,7 +1116,7 @@ export const DigitalProductsList = () => {
                                           } else if (action === 'share' && navigator.share && url) {
                                             navigator.share({
                                               title: product.name,
-                                              url: window.location.origin + url,
+                                              url: url,
                                             });
                                           } else if (action === 'duplicate') {
                                             toast({
