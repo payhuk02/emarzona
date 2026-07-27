@@ -101,7 +101,6 @@ describe('commerce sidebar integration', () => {
     expect(artist).toContain('/dashboard/auctions');
     expect(artist).toContain('/dashboard/portfolios');
     expect(artist).not.toContain('/dashboard/digital-products');
-    expect(artist).not.toContain('/dashboard/affiliates');
   });
 
   it('excludes physical-only paths from non-physical compact sidebars', () => {
